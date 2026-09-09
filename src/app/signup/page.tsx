@@ -4,7 +4,7 @@ import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
 export const metadata: Metadata = {
-  title: "Sign up — Dreamari",
+  title: "Sign up · Dreamari",
   description: "Join Dreamari as a student, parent, or teacher.",
 };
 

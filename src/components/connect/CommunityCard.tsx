@@ -23,24 +23,26 @@ export function communityAccent(community: Pick<Community, "world">): string {
 // mode at low opacity.
 export const POSTER_GRAIN = "/images/connect/covers/grain.png";
 
-// The CEO's own reference photography (people-free), cropped for the cards.
+// The CEO's own reference photography, cropped for the cards. 9 Sept 2026:
+// swapped for a newer set with people visible in the scene (direct
+// feedback: "there are people in the images ... lets try and use those").
 export const PHOTO_COVER: Record<string, string> = {
-  "teaching-education": "/images/connect/covers/photo4-teaching-education.webp",
-  "business-money": "/images/connect/covers/photo4-business-money.webp",
-  "tech-engineering": "/images/connect/covers/photo4-tech-engineering.webp",
-  "health-medicine": "/images/connect/covers/photo4-health-medicine.webp",
-  "arts-media": "/images/connect/covers/photo4-arts-media.webp",
+  "teaching-education": "/images/connect/covers/photo6-teaching-education.png",
+  "business-money": "/images/connect/covers/photo6-business-money.png",
+  "tech-engineering": "/images/connect/covers/photo6-tech-engineering.png",
+  "health-medicine": "/images/connect/covers/photo6-health-medicine.png",
+  "arts-media": "/images/connect/covers/photo6-arts-media.png",
 };
 
 // Focal point per scene so the card strip frames the SUBJECT (the laptop,
 // the towers, the monitors, the stethoscope, the studio desk), never an
 // empty stretch of room.
 export const PHOTO_FOCUS: Record<string, string> = {
-  "teaching-education": "58% 42%",
-  "business-money": "68% 42%",
-  "tech-engineering": "50% 48%",
-  "health-medicine": "48% 38%",
-  "arts-media": "48% 45%",
+  "teaching-education": "50% 60%",
+  "business-money": "58% 55%",
+  "tech-engineering": "50% 45%",
+  "health-medicine": "55% 55%",
+  "arts-media": "50% 55%",
 };
 
 function StatTile({ value, label }: { value: number | string; label: string }) {
@@ -95,10 +97,37 @@ function MoreMarks({ className, missing, names, open, onToggle, onClose }: { cla
   );
 }
 
-export function CommunityCard({ community, joined, onOpen, onJoin, featured }: { community: Community; joined: boolean; onOpen: () => void; onJoin: () => void; featured?: boolean }) {
+/** `compact`: the flat reference row a professional profile shows (direct
+ *  feedback, 8 Sept 2026: shrinking the same hero card's min-height still
+ *  read as loud -- the full-bleed photo, 24px title and three stat tiles
+ *  demanded the same attention regardless of the box it sat in). No photo
+ *  hero, no stat tiles, no company row: a thumbnail, the name, the topic
+ *  line, Open -- the board reads as a fact about the person, not a second
+ *  headline competing with them. Same component everywhere a community is
+ *  shown (direct feedback, 5 Sept 2026), just a genuinely quieter mode. */
+function CompactCommunityRow({ community, onOpen }: { community: Community; onOpen: () => void }) {
+  const accent = communityAccent(community);
+  return (
+    <button type="button" onClick={onOpen} className="dm-quiet group flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-3)] text-left" style={{ background: "var(--glass-surface-1)" }}>
+      <span className="relative size-[52px] flex-none overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, transparent)` }}>
+        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="52px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name.replace(/ Careers$/, "")}</span>
+        <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{community.topics.join(" · ")}</span>
+      </span>
+      <span className="flex flex-none items-center gap-[3px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+        Open <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
+      </span>
+    </button>
+  );
+}
+
+export function CommunityCard({ community, joined, onOpen, onJoin, featured, compact = false }: { community: Community; joined: boolean; onOpen: () => void; onJoin: () => void; featured?: boolean; compact?: boolean }) {
   // which "+N" chip is open (2 or 3, by how many marks precede it); 0 = none
   const [moreOpen, setMoreOpen] = useState(0);
   const accent = communityAccent(community);
+  if (compact) return <CompactCommunityRow community={community} onOpen={joined ? onOpen : onJoin} />;
   return (
     <div
       className="dm-tap group @container relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
@@ -110,16 +139,13 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured }: {
          vignette sits under the tiles and rows, a light top scrim under the
          title, then the accent tint and grain. */}
       <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%", filter: "brightness(0.78) saturate(0.92)" }} />
-        <CardProgressiveBlur size="74%" />
+        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+        <CardProgressiveBlur size="40%" />
         <span
           className="absolute inset-0"
-          style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.8) 30%, rgba(12,16,35,0.42) 56%, rgba(12,16,35,0.08) 80%, transparent 100%), ${cardTopScrim()}, linear-gradient(90deg, color-mix(in srgb, ${accent} 12%, transparent), color-mix(in srgb, ${accent} 12%, transparent))` }}
+          style={{ background: `linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.84) 26%, rgba(12,16,35,0.4) 52%, rgba(12,16,35,0.08) 72%, transparent 100%), ${cardTopScrim()}` }}
         />
-        <span className="absolute inset-0" style={{ backgroundImage: `url(${POSTER_GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.2 }} />
       </span>
-      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: accent }} />
-
       {/* the whole card is the tap target (direct feedback) */}
       <button type="button" onClick={joined ? onOpen : onJoin} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {community.name}</span>
@@ -148,7 +174,9 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured }: {
           <StatTile value={community.professionalsFrom.length} label="Companies" />
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
-        <div className="pointer-events-auto mt-[10px] flex min-w-0 items-center justify-between gap-[var(--space-3)]" style={{ textShadow: "none" }}>
+        {/* wraps when the column is narrow (two columns on a 768px tablet), so
+           the company chips never run under the Open button */}
+        <div className="pointer-events-auto mt-[10px] flex min-w-0 flex-wrap items-center justify-between gap-x-[var(--space-3)] gap-y-[8px]" style={{ textShadow: "none" }}>
           {/* two marks always (phones included), a third once the card is
              460px wide. The count chip says how many are missing; on hover it
              previews them, on tap it opens a small sheet with the rest that

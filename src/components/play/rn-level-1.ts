@@ -39,13 +39,13 @@ export const RN_LEVEL_1: Level = {
     Tyler: `${ART}/face-tyler.jpg`,
     Yvonne: `${ART}/face-yvonne.jpg`,
   },
-  // Express mode, mirroring the Investment Banker level's own cut list
-  // (direct feedback, 9 Sept 2026: "Please repeat this for Nursing"): the
-  // teaching screens go -- what-a-nurse-does + its example, the drag check
-  // on it, the skill-chips reveal, the score spotlight, and the typed
-  // 85-threshold check -- plus the stakes card and Rosa's ladder power
-  // card, same as IB's L1-02/L1-06. All ten scored beats, both story cards,
-  // every character card and the vocabulary flips card survive.
+  // Express mode, extended to also mirror IB Level 1's stakes-card and
+  // ladder-card cuts (direct feedback, 9 Sept 2026: "Please repeat this for
+  // Nursing" -- IB's own L1-02/L1-06), on top of the base teaching cut
+  // already in place (Chandu, 7 Sept 2026). All ten scored beats, both
+  // story cards, every character card and the vocabulary flips card
+  // survive. The cut teaching becomes tappable in the player (score panel,
+  // term meanings, character cards).
   expressCut: ["RN1-03", "RN1-04", "RN1-04b", "RN1-05", "RN1-07", "RN1-08", "RN1-10", "RN1-11"],
   beats: [
     // ---- arrival: one idea per screen ----
@@ -58,7 +58,8 @@ export const RN_LEVEL_1: Level = {
       id: "RN1-01",
       speaker: "Narrator",
       setup: "New Grad RN • Year 1",
-      title: "Welcome to Riverbend Medical Center. Your first day starts now.",
+      // Same arrival moment as Cobalt Capital (direct feedback, 6 Sept 2026)
+      title: "Welcome to Riverbend Medical Center. Your first shift starts now.",
       celebrate: true,
       cta: "Continue",
     },
@@ -133,7 +134,8 @@ export const RN_LEVEL_1: Level = {
       speaker: "Narrator",
       castMember: "Rosa",
       setup: "Rosa • Staff Nurse",
-      title: "She started here as a nursing assistant, helping patients wash and eat, while she was still at school.",
+      // Useful about her role, mirroring Christina's card (direct feedback, 6 Sept 2026)
+      title: "Rosa is a Staff Nurse, the nurse you work beside all year, and she’ll be giving you direction on every shift.",
       cta: "Continue",
     },
     {
@@ -272,10 +274,10 @@ export const RN_LEVEL_1: Level = {
       timer: 45,
       speaker: "Rosa",
       setup: '"Quick one. Every nurse needs these habits cold."',
-      question: "Four quick questions on one shared timer.",
       // Blank, not omitted (same reasoning as the IB level): Rosa's setup
       // line already said this; the default prompt for this beat kind
       // would just repeat it again.
+      question: "",
       prompt: "",
       items: [
         {

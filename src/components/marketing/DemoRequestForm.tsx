@@ -4,25 +4,27 @@ import { Check } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { MarketingButton } from "./Button";
 
-// PLACEHOLDER ADDRESS. There is no backend in this prototype (one client-error
-// endpoint, nothing else), so the form composes a mailto: with the fields and
-// hands off to the visitor's mail client. Swap this for the real inbox (or a
-// form endpoint) before launch.
-export const DEMO_REQUEST_TO = "hello@dreamopportunity.org";
+// Demo requests go to Chandu's inbox (direct instruction, 7 Sept 2026). There
+// is no backend in this prototype (one client-error endpoint, nothing else),
+// so the form composes a mailto: with the fields and hands off to the
+// visitor's mail client.
+export const DEMO_REQUEST_TO = "chandu.mp.14@gmail.com";
 
-const ORG_TYPES = ["School", "School District", "Nonprofit", "Educational Institution"] as const;
+// Field set and option labels are the reference site's (dreamari-educator-website.replit.app).
+const ORG_TYPES = ["School", "School District", "Nonprofit", "Educational Organization / Institution"] as const;
 const STUDENT_BANDS = ["Under 500", "500 to 2,000", "2,000 to 10,000", "More than 10,000"] as const;
 
 type Fields = {
-  organization: string;
-  contact: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  organization: string;
   role: string;
   orgType: string;
   students: string;
 };
 
-const EMPTY: Fields = { organization: "", contact: "", email: "", role: "", orgType: "", students: "" };
+const EMPTY: Fields = { firstName: "", lastName: "", email: "", organization: "", role: "", orgType: "", students: "" };
 
 const FIELD =
   "w-full rounded-xl border px-4 py-3 text-[15px] leading-snug outline-none transition-[box-shadow,border-color] duration-150 focus:[border-color:var(--primary)] focus:[box-shadow:0_0_0_3px_color-mix(in_srgb,var(--primary)_22%,transparent)]";
@@ -63,7 +65,7 @@ export function DemoRequestForm() {
       `Organization: ${fields.organization}`,
       `Organization type: ${fields.orgType}`,
       `Students served: ${fields.students}`,
-      `Contact: ${fields.contact}`,
+      `Contact: ${fields.firstName} ${fields.lastName}`,
       `Role: ${fields.role}`,
       `Work email: ${fields.email}`,
       "",
@@ -88,7 +90,7 @@ export function DemoRequestForm() {
         </span>
         <div>
           <h3 className="text-[20px] font-extrabold tracking-tight" style={{ color: "var(--foreground)" }}>
-            Thanks, {fields.contact.split(" ")[0] || "there"}.
+            Thanks, {fields.firstName.trim() || "there"}.
           </h3>
           <p className="mt-2 max-w-[52ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
             Your mail app should have opened with the request for {fields.organization} addressed to {DEMO_REQUEST_TO}. If it did not,
@@ -116,17 +118,21 @@ export function DemoRequestForm() {
       className="grid grid-cols-1 gap-4 rounded-2xl border p-5 sm:grid-cols-2 sm:gap-5 sm:p-7"
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--border)" }}
     >
-      <div className="sm:col-span-2">
-        <Label htmlFor="demo-org">Organization name</Label>
-        <input id="demo-org" name="organization" required autoComplete="organization" className={FIELD} style={FIELD_STYLE} value={fields.organization} onChange={set("organization")} />
+      <div>
+        <Label htmlFor="demo-first">First name</Label>
+        <input id="demo-first" name="firstName" required autoComplete="given-name" className={FIELD} style={FIELD_STYLE} value={fields.firstName} onChange={set("firstName")} />
       </div>
       <div>
-        <Label htmlFor="demo-contact">Your name</Label>
-        <input id="demo-contact" name="contact" required autoComplete="name" className={FIELD} style={FIELD_STYLE} value={fields.contact} onChange={set("contact")} />
+        <Label htmlFor="demo-last">Last name</Label>
+        <input id="demo-last" name="lastName" required autoComplete="family-name" className={FIELD} style={FIELD_STYLE} value={fields.lastName} onChange={set("lastName")} />
       </div>
       <div>
         <Label htmlFor="demo-email">Work email</Label>
         <input id="demo-email" name="email" type="email" required autoComplete="email" className={FIELD} style={FIELD_STYLE} value={fields.email} onChange={set("email")} />
+      </div>
+      <div>
+        <Label htmlFor="demo-org">Organization name</Label>
+        <input id="demo-org" name="organization" required autoComplete="organization" className={FIELD} style={FIELD_STYLE} value={fields.organization} onChange={set("organization")} />
       </div>
       <div>
         <Label htmlFor="demo-role">Your role</Label>
@@ -146,7 +152,7 @@ export function DemoRequestForm() {
         </select>
       </div>
       <div className="sm:col-span-2">
-        <Label htmlFor="demo-students">Students served</Label>
+        <Label htmlFor="demo-students">Number of students served</Label>
         <select id="demo-students" name="students" required className={SELECT} style={SELECT_STYLE} value={fields.students} onChange={set("students")}>
           <option value="" disabled>
             Choose a range

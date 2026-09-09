@@ -219,10 +219,10 @@ export function isVideoReel(item: ReelItem): item is VideoReel {
 
 const FOR_YOU_VIDEOS: VideoReel[] = [
   { title: "Kellanova · Talent Director", video: "/videos/app/reel-kellanova-talent-director.mp4" },
-  { title: "JPMorgan Chase, London — Office Tour", video: "/videos/app/reel-jpmc-london-office-tour-odein.mp4" },
-  { title: "Kellogg's — Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4" },
+  { title: "JPMorgan Chase, London: Office Tour", video: "/videos/app/reel-jpmc-london-office-tour-odein.mp4" },
+  { title: "Kellogg's: Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4" },
   { title: "A Day at JPMorgan Chase, Ohio", video: "/videos/app/reel-povywa-jpmc-ohio.mp4" },
-  { title: "AT&T — Office Tour", video: "/videos/app/reel-att-office-tour.mp4" },
+  { title: "AT&T: Office Tour", video: "/videos/app/reel-att-office-tour.mp4" },
   // Aviation maintenance technician clips (the "DCAI - AMT" files). Real
   // footage from a maintenance hangar; the company is not named in the
   // clips, so they live here as career clips rather than in the company rail.

@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Quote } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
 import { Disclosure } from "./Disclosure";
+import { DO_COPY } from "./DreamOpportunity";
+import { PartnerLogoGrid } from "./PartnerTicker";
+import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, HeroVisual, ImmerseArt, MatchArt, OrganizationBand, ProgressArt } from "./SchoolsVisuals";
+import { useRevealOnScroll, useScrollActiveStage } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
-import { DO_COPY, DOMark, PartnerLogoWall } from "./DreamOpportunity";
-import { BuildScreen, ConnectScreen, ExploreScreen, HeroLaptop, ImmerseScreen, LadderScreen, MatchScreen, ProgressScreen, Tile } from "./SchoolsVisuals";
-import { useRevealOnScroll } from "./scrollHooks";
 
 type SchoolsViewProps = {
   view: "student" | "schools";
@@ -18,19 +19,16 @@ type SchoolsViewProps = {
 };
 
 // ---------------------------------------------------------------------------
-// Content. Every visual below is a composition of the product's own pieces
-// (SchoolsVisuals.tsx): whole components set in a frame with deliberate
-// padding, never a cropped screenshot (rule since 7 Sept 2026). The copy in
-// each composition is the app's real copy and data. Where a screen does not
-// exist yet (the educator dashboard) the caption says so.
+// Content. Every visual below is a composition of the product's own
+// components (SchoolsVisuals.tsx) filling its frame, never a cropped
+// screenshot (rule since 7 Sept 2026). The copy in each composition is the
+// app's real copy and data. Where a screen does not exist yet (the educator
+// dashboard) the caption says so.
 // ---------------------------------------------------------------------------
 
-const AUDIENCES = [
-  { title: "Schools", body: "Structured career planning for every student, not only the ones who ask." },
-  { title: "School Districts", body: "One programme across many buildings, with reporting that rolls up." },
-  { title: "Nonprofits", body: "Deliver career programming and show funders what changed." },
-  { title: "Educational Institutions", body: "Bring career-connected learning to the students you already serve." },
-];
+// Copy is the reference site's, verbatim (dreamari-educator-website.replit.app,
+// named as the copy source, 6 Sept 2026). The tabs carry titles only there.
+const AUDIENCES = ["Schools", "School Districts", "Nonprofits", "Educational Institutions"];
 
 type Stage = {
   n: string;
@@ -39,17 +37,19 @@ type Stage = {
   detail: string[];
   href: string;
   linkLabel: string;
-  // The stage's colour (a world token), used only as the faint wash behind
-  // its composition, and the composition itself.
-  accent: string;
-  graphic: ReactNode;
+  // The stage's composition: a full-frame piece with its own colour wash,
+  // unless `bare` -- Connect's is its own self-sized photo-plus-card, like
+  // HeroVisual/ProgressArt, and wrapping it in the dark Frame bezel again
+  // would recreate the exact "frame around the photo" nesting this avoids.
+  art: ReactNode;
+  bare?: boolean;
 };
 
 const STAGES: Stage[] = [
   {
     n: "01",
     title: "Build",
-    line: "A short interest profile. Students pick the career worlds that sound like them and answer a handful of questions.",
+    line: "Students build their profile through a short academic and personality assessment.",
     detail: [
       "Fifteen career worlds, from Health & Medicine to Driving, Flying & Shipping, chosen with a tap.",
       "Grounded in the Harvard FAS Mignone and O*NET Interest Profiler.",
@@ -57,13 +57,12 @@ const STAGES: Stage[] = [
     ],
     href: "/flow",
     linkLabel: "See Build in the app",
-    accent: "var(--world-tech-engineering-design)",
-    graphic: <BuildScreen />,
+    art: <BuildArt />,
   },
   {
     n: "02",
     title: "Match",
-    line: "A deck of careers that fit the profile. Students swipe, read the card, and save a Top 3.",
+    line: "Discover college majors, schools, and careers aligned with each student's profile.",
     detail: [
       "Each card carries the employers who hire for it and the median salary.",
       "The back of the card shows the college major and pay, so a swipe is an informed one.",
@@ -71,13 +70,12 @@ const STAGES: Stage[] = [
     ],
     href: "/match-lab",
     linkLabel: "See Match in the app",
-    accent: "var(--world-business-money-office)",
-    graphic: <MatchScreen />,
+    art: <MatchArt />,
   },
   {
     n: "03",
     title: "Explore",
-    line: "Real pay, real pathways. Every career has typical degree and pay, pay by state, a career ladder, and the skills it takes.",
+    line: "Expand students' horizons with careers they may never have considered.",
     detail: [
       "Career worlds and poster cards a student actually wants to open.",
       "Pay and growth from the U.S. Bureau of Labor Statistics; tasks and skills from O*NET.",
@@ -85,13 +83,12 @@ const STAGES: Stage[] = [
     ],
     href: "/explore",
     linkLabel: "See Explore in the app",
-    accent: "var(--world-food-farming-nature)",
-    graphic: <ExploreScreen />,
+    art: <ExploreArt />,
   },
   {
     n: "04",
     title: "Immerse",
-    line: "A day in the job before choosing it. Students work through a simulation with real decisions and real consequences.",
+    line: "Experience a day on the job while practicing skills for postsecondary education and the workforce.",
     detail: [
       "Investment Banking is the first simulation; more careers follow.",
       "Students start as an intern and earn their way up through levels.",
@@ -99,13 +96,12 @@ const STAGES: Stage[] = [
     ],
     href: "/play/investment-banking",
     linkLabel: "See the simulation in the app",
-    accent: "var(--world-driving-flying-shipping)",
-    graphic: <ImmerseScreen />,
+    art: <ImmerseArt />,
   },
   {
     n: "05",
     title: "Connect",
-    line: "People who do the work. Industry communities with professionals from partner firms, and events students can attend.",
+    line: "Connect directly with professionals at some of the world's leading companies.",
     detail: [
       "Communities by industry, each with students, professionals and companies.",
       "Verified professionals from firms such as JPMorgan Chase, Goldman Sachs and EY.",
@@ -113,16 +109,16 @@ const STAGES: Stage[] = [
     ],
     href: "/connect",
     linkLabel: "See Connect in the app",
-    accent: "var(--world-science-research)",
-    graphic: <ConnectScreen />,
+    art: <ConnectArt />,
+    bare: true,
   },
 ];
 
 const EDUCATOR_FEATURES = [
-  { title: "Student progress", body: "Milestones, submissions and completion for each student." },
-  { title: "Counselor dashboard", body: "One view of a caseload across grades and pathways." },
-  { title: "Communication", body: "Announcements and messages to students, in the app they already use." },
-  { title: "Reporting", body: "School, district and nonprofit reports for the people who ask for them." },
+  { title: "Understand their direction", body: "See the careers and pathways students are exploring." },
+  { title: "Follow their progress", body: "Track milestones, submissions, and completed activities." },
+  { title: "Keep students moving", body: "Share announcements and communicate about next steps." },
+  { title: "Show your progress", body: "Report on engagement, career exploration, and planning milestones." },
 ];
 
 const OUTCOMES = ["Career readiness", "College readiness", "Student engagement", "Postsecondary planning", "Resume completion", "Career exploration", "Professional networking"];
@@ -205,46 +201,92 @@ function Caption({ children }: { children: ReactNode }) {
   );
 }
 
-function StageRow({ stage, flip, open, onToggle }: { stage: Stage; flip: boolean; open: boolean; onToggle: () => void }) {
+function StageCopy({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
   return (
-    <Reveal>
-      <li className="grid grid-cols-1 items-center gap-8 py-10 sm:py-12 lg:grid-cols-12 lg:gap-14 lg:py-14">
-        <div className={`lg:col-span-5 ${flip ? "lg:order-2" : ""}`}>
-          {/* The one eyebrow on the page. Sequence is information here: the
-             five stages happen in this order, and the number says so. */}
-          <div className="text-[12px] font-bold tracking-[0.16em] tabular-nums" style={{ color: "var(--primary)" }}>
-            STAGE {stage.n}
-          </div>
-          <h3 className="mt-2 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
-            {stage.title}
-          </h3>
-          <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-            {stage.line}
-          </p>
-          <div className="mt-5 max-w-[520px]">
-            <Disclosure id={`stage-${stage.n}`} title="What students do" size="sm" open={open} onToggle={onToggle}>
-              <ul className="flex flex-col gap-2.5">
-                {stage.detail.map((d) => (
-                  <li key={d} className="flex gap-3 text-[14px] leading-relaxed" style={{ color: "var(--foreground)" }}>
-                    <span aria-hidden className="mt-[9px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--primary)" }} />
-                    <span>{d}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href={stage.href} className="mt-4 inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
-                {stage.linkLabel}
-                <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-              </Link>
-            </Disclosure>
-          </div>
+    <div>
+      {/* The number and the name carry equal weight, one line, both caps
+         (direct feedback, 7 Sept 2026): sequence is information, so it reads
+         as part of the name, not a small label above it. */}
+      <h3 className="flex items-baseline gap-3 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.01em] uppercase" style={{ color: "var(--foreground)" }}>
+        <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
+        {stage.title}
+      </h3>
+      <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+        {stage.line}
+      </p>
+      <div className="mt-5 max-w-[520px]">
+        <Disclosure id={`stage-${stage.n}`} title="What students do" size="sm" open={open} onToggle={onToggle}>
+          <ul className="flex flex-col gap-2.5">
+            {stage.detail.map((d) => (
+              <li key={d} className="flex gap-3 text-[14px] leading-relaxed" style={{ color: "var(--foreground)" }}>
+                <span aria-hidden className="mt-[9px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                <span>{d}</span>
+              </li>
+            ))}
+          </ul>
+          <Link href={stage.href} className="mt-4 inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
+            {stage.linkLabel}
+            <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+          </Link>
+        </Disclosure>
+      </div>
+    </div>
+  );
+}
+
+// Mobile/tablet: one stage, one normal-flow row, copy stacked above its own
+// card. Below lg the sticky column (StickyStages, below) isn't shown at all --
+// a pinned side-by-side layout needs the width to read as two columns, and
+// forcing it onto a narrow screen is exactly the kind of "ugly" a zig-zag
+// was trying (and failing) to avoid. A plain stack can't desync from itself
+// either way, so it stays the simple, safe fallback.
+function StageRowMobile({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
+  return (
+    <li className="flex flex-col items-center gap-8 py-10 sm:py-12">
+      <Reveal className="w-full">
+        <StageCopy stage={stage} open={open} onToggle={onToggle} />
+      </Reveal>
+      <Reveal className="flex w-full justify-center">
+        {stage.bare ? stage.art : <Frame className="aspect-[4/5] w-full max-w-[420px] sm:aspect-[5/4]">{stage.art}</Frame>}
+      </Reveal>
+    </li>
+  );
+}
+
+// Desktop: the sticky column back, done right this time. A single
+// IntersectionObserver-driven "active" index (useScrollActiveStage) tracks
+// which stage's copy is centered in the viewport as the reader scrolls --
+// not a timer, so the graphic literally cannot show a stage the reader isn't
+// reading (the bug that got this pattern pulled on 7 Sept 2026). The right
+// column stacks all five cards in one sticky box and crossfades opacity
+// between them; the left column is plain document flow, one generous row per
+// stage so each graphic gets a real dwell instead of flashing past.
+function StickyStages({ openStages, toggleStage }: { openStages: Set<string>; toggleStage: (n: string) => void }) {
+  const [setRef, active] = useScrollActiveStage(STAGES.length);
+  return (
+    <div className="hidden lg:grid lg:grid-cols-12 lg:gap-14">
+      <ol className="lg:col-span-5">
+        {STAGES.map((stage, i) => (
+          <li key={stage.n} ref={setRef(i)} className="flex min-h-[62vh] flex-col justify-center py-12">
+            <StageCopy stage={stage} open={openStages.has(stage.n)} onToggle={() => toggleStage(stage.n)} />
+          </li>
+        ))}
+      </ol>
+      <div className="lg:col-span-7">
+        <div className="sticky top-24 flex h-[min(560px,70vh)] items-center justify-center">
+          {STAGES.map((stage, i) => (
+            <div
+              key={stage.n}
+              aria-hidden={active !== i}
+              className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out"
+              style={{ opacity: active === i ? 1 : 0, pointerEvents: active === i ? "auto" : "none" }}
+            >
+              {stage.bare ? stage.art : <Frame className="aspect-[4/5] h-full sm:aspect-[5/4] lg:aspect-[4/5]">{stage.art}</Frame>}
+            </div>
+          ))}
         </div>
-        <div className={`lg:col-span-7 ${flip ? "lg:order-1" : ""}`}>
-          {/* Same tile, same padding, same 5:4 focal card for all five stages,
-             so the set reads as one. */}
-          <Tile accent={stage.accent}>{stage.graphic}</Tile>
-        </div>
-      </li>
-    </Reveal>
+      </div>
+    </div>
   );
 }
 
@@ -280,36 +322,32 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           <div className="mb-10 flex justify-center sm:mb-14">
             <AudienceToggle view={view} onChange={onChangeView} />
           </div>
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-6">
               <h1
                 className="text-[clamp(40px,4.6vw,64px)] leading-[1.02] font-extrabold tracking-[-0.02em]"
                 style={{ color: "var(--foreground)", textWrap: "balance" }}
               >
-                Prepare every student for what&apos;s <span style={{ color: "var(--primary)" }}>next</span>.
+                Help students discover their direction, and build the skills to pursue it.
               </h1>
               <p className="mt-5 max-w-[540px] text-[clamp(17px,0.7vw+13px,20px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-                Dreamari gives schools, districts and nonprofits one platform for career exploration, college and career readiness,
-                and outcomes you can measure.
+                Bring personalized career exploration, day-in-the-life simulations, and professional connections to your students.
+                Give educators the insights to guide their next steps.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <MarketingButton variant="primary" size="lg" href="#demo">
                   Request a demo
                 </MarketingButton>
                 <MarketingButton variant="ghost" size="lg" href="#student-experience">
-                  See the student experience
+                  Explore the platform
                 </MarketingButton>
               </div>
               <p className="mt-8 text-[13.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                Built by{" "}
-                <Link href="#organization" className="font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
-                  Dream Opportunity
-                </Link>
-                : more than 100 schools, eight countries, 12 years of impact.
+                For schools, districts, nonprofits, and educational institutions.
               </p>
             </div>
-            <div className="lg:col-span-6 lg:pl-4">
-              <HeroLaptop />
+            <div className="lg:col-span-6 lg:pl-8">
+              <HeroVisual />
               <Caption>Career Detail for Investment Banking, as it ships in the app today.</Caption>
             </div>
           </div>
@@ -317,41 +355,49 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       </section>
 
       {/* ---- Audience strip ------------------------------------------------- */}
-      <section aria-label="Who Dreamari is for" className="px-6">
-        <div className="mx-auto max-w-[1200px] border-y" style={{ borderColor: "var(--border)" }}>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-labelledby="audience-heading" className="px-6 pt-4 sm:pt-8">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <SectionHead id="audience-heading" align="center" title="Built for the students you serve." />
+          </Reveal>
+          <ul className="mx-auto mt-8 grid max-w-[960px] grid-cols-2 border-y sm:mt-10 lg:grid-cols-4" style={{ borderColor: "var(--border)" }}>
             {AUDIENCES.map((a, i) => (
               <li
-                key={a.title}
-                className={`py-6 sm:px-6 sm:py-7 ${i > 0 ? "border-t sm:border-t-0" : ""} ${i % 2 === 1 ? "sm:border-l" : ""} ${i > 0 ? "lg:border-l" : ""} ${i >= 2 ? "sm:border-t lg:border-t-0" : ""} ${i === 0 ? "sm:pl-0" : ""} ${i === 3 ? "sm:pr-0" : ""}`}
-                style={{ borderColor: "var(--border)" }}
+                key={a}
+                className={`py-5 text-center text-[16px] font-bold sm:py-6 sm:text-[17px] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t lg:border-t-0" : ""} ${i === 2 ? "lg:border-l" : ""}`}
+                style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
               >
-                <h3 className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>
-                  {a.title}
-                </h3>
-                <p className="mt-1.5 text-[14px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                  {a.body}
-                </p>
+                {a}
               </li>
             ))}
           </ul>
+          <Reveal>
+            <div className="mx-auto mt-10 max-w-[720px] text-center sm:mt-12">
+              <h3 className="text-[clamp(22px,2vw,28px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+                Give every student a clearer path forward.
+              </h3>
+              <p className="mt-3 text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+                Help students explore their options, connect learning to careers, and plan their next steps, with visibility for the educators guiding them.
+              </p>
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* ---- Five stages ---------------------------------------------------- */}
-      <section id="student-experience" className="scroll-mt-24 px-6 pt-20 pb-6 sm:pt-28">
+      <section id="student-experience" className="scroll-mt-24 px-6 pt-20 pb-6 sm:pt-28 lg:pb-16">
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <SectionHead
-              title="Five steps toward a clearer future."
-              lede="The student experience is one path, not five tools. Each step feeds the next, and every screen below is the real product."
-            />
+            <SectionHead title="Five steps toward a clearer future." />
           </Reveal>
-          <ol className="mt-4 divide-y sm:mt-8" style={{ borderColor: "var(--border)" }}>
-            {STAGES.map((s, i) => (
-              <StageRow key={s.n} stage={s} flip={i % 2 === 1} open={openStages.has(s.n)} onToggle={() => toggleStage(s.n)} />
+          <ol className="mt-4 divide-y sm:mt-8 lg:hidden" style={{ borderColor: "var(--border)" }}>
+            {STAGES.map((stage) => (
+              <StageRowMobile key={stage.n} stage={stage} open={openStages.has(stage.n)} onToggle={() => toggleStage(stage.n)} />
             ))}
           </ol>
+          <div className="mt-4">
+            <StickyStages openStages={openStages} toggleStage={toggleStage} />
+          </div>
         </div>
       </section>
 
@@ -359,10 +405,10 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section className="px-6 py-20 sm:py-28" style={{ background: "var(--hero-mid)" }}>
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <SectionHead title="Everything counselors need." lede="One view of every student's readiness, from grade 9 to graduation, without stitching together five tools." />
+            <SectionHead title="Know where students are. See where to help." lede="Bring student interests, activity, and progress into one dashboard to support more informed guidance." />
           </Reveal>
           <Reveal>
-            <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
+            <div className="mt-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14">
               <ul className="lg:col-span-5">
                 {EDUCATOR_FEATURES.map((f, i) => (
                   <li key={f.title} className={`py-5 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "color-mix(in srgb, var(--foreground) 14%, transparent)" }}>
@@ -387,9 +433,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </li>
               </ul>
               <div className="lg:col-span-7">
-                <Tile accent="var(--primary)">
-                  <ProgressScreen />
-                </Tile>
+                <ProgressArt />
                 <Caption>
                   Shown: a student&apos;s own progress (Top 3, plan, Career Report) as it ships today. The educator dashboard that reads this across a caseload is in development.
                 </Caption>
@@ -403,11 +447,11 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section className="px-6 py-20 sm:py-28">
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-14">
+            <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14">
               <div className="lg:col-span-6">
                 <SectionHead
                   title="Grounded in career research. Connected to industry."
-                  lede="Nothing a student reads in Dreamari is invented. Pay, growth, tasks and skills come from public labour data, and every Career Report lists its sources with the year and the date we last checked them."
+                  lede="Career exploration informed by established resources, public occupational data, and insights from professionals at leading companies."
                 />
                 <ul className="mt-8 max-w-[560px]">
                   {SOURCES.map((s, i) => (
@@ -426,10 +470,8 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </p>
               </div>
               <div className="lg:col-span-6">
-                <Tile accent="var(--world-business-money-office)">
-                  <LadderScreen />
-                </Tile>
-                <Caption>Career ladder from the Investment Banking detail page.</Caption>
+                <DataArt />
+                <Caption>Pay by state and career ladder, from the Investment Banking detail page.</Caption>
               </div>
             </div>
           </Reveal>
@@ -440,13 +482,20 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section id="organization" className="scroll-mt-24 border-t px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)" }}>
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <div className="mb-6 flex justify-center sm:mb-8">
-              <DOMark className="h-16 w-16 sm:h-20 sm:w-20" />
+            <OrganizationBand />
+            <div className="mt-8 sm:mt-10">
+              <SectionHead align="center" title={DO_COPY.heading} lede={DO_COPY.lead} />
             </div>
-            <SectionHead align="center" title={DO_COPY.heading} lede={DO_COPY.lead} />
           </Reveal>
           <Reveal>
-            <PartnerLogoWall size="full" className="mx-auto mt-10 max-w-[960px] sm:mt-12" />
+            {/* All the marks at once, wrapped into a grid instead of
+               scrolling (direct feedback, 8 Sept 2026: "all at once... way
+               more bombastic and impressive" -- dreamopportunity.org's own
+               reference), built from our own individual marks in full
+               brand colour, on a white card the way the reference has it. */}
+            <div className="mx-auto mt-10 max-w-[1100px] rounded-[24px] border bg-white p-6 sm:mt-12 sm:p-10 lg:p-12" style={{ borderColor: "color-mix(in srgb, var(--foreground) 10%, transparent)", boxShadow: "0 32px 70px -34px rgba(5,7,15,0.35), 0 2px 6px -2px rgba(5,7,15,0.12)" }}>
+              <PartnerLogoGrid tone="light" />
+            </div>
           </Reveal>
           <Reveal>
             <p className="mx-auto mt-10 max-w-[720px] text-center text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed sm:mt-12" style={{ color: "var(--foreground)", textWrap: "pretty" }}>
@@ -488,36 +537,59 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           </Reveal>
           <Reveal>
             <div
-              className="mt-10 flex flex-col items-start gap-2 rounded-2xl border border-dashed p-8 sm:p-10"
-              style={{ borderColor: "var(--border)", background: "var(--glass-surface-1)" }}
+              className="mt-10 flex flex-col items-start gap-5 rounded-[24px] border p-8 sm:flex-row sm:items-center sm:gap-8 sm:p-10"
+              style={{ borderColor: "var(--border)", background: "#ffffff", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}
             >
-              <h3 className="text-[19px] font-bold" style={{ color: "var(--foreground)" }}>
-                Case studies coming soon.
-              </h3>
-              <p className="max-w-[52ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                Ask for references when you request a demo.
-              </p>
+              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--primary)" }}>
+                <Quote className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+              </span>
+              <div>
+                <h3 className="text-[19px] font-bold" style={{ color: "var(--foreground)" }}>
+                  Case studies coming soon.
+                </h3>
+                <p className="mt-1 max-w-[52ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                  Ask for references when you request a demo.
+                </p>
+              </div>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* credibility lines before the closing CTA (Joshua Pierce, Slack, 6 Sept 2026) */}
-      <TrustLine />
-
       {/* ---- Demo request --------------------------------------------------- */}
+      {/* Credibility lines before the closing CTA, with the partner logo row
+         under them, as asked (Joshua Pierce, Slack, 6 Sept 2026). The row was
+         held until the partner list was confirmed; it is now the real set. */}
+      <TrustLine />
+      <div className="px-6 pb-8 sm:pb-10">
+      </div>
+
       <section id="demo" className="scroll-mt-24 border-t px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)" }}>
         <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
           <div className="lg:col-span-5">
             <Reveal>
               <SectionHead
-                title="Request a demo."
-                lede="Tell us about your organization and we will set up a walkthrough with our team: the student experience end to end, then what your staff will see."
+                title="A clearer direction. Skills for what comes next."
+                lede="See how Dreamari can support career exploration, skill development, and student guidance in your school or organization."
               />
+              <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+                {["Quick setup", "Custom onboarding"].map((item) => (
+                  <li key={item} className="flex items-center gap-2.5 text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+                    <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "var(--primary)" }} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </Reveal>
           </div>
           <div className="lg:col-span-7">
             <Reveal>
+              <h3 className="text-[clamp(22px,2vw,28px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
+                See Dreamari in action.
+              </h3>
+              <p className="mt-2 mb-6 text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                Tell us a little about your organization so we can tailor your demo.
+              </p>
               <DemoRequestForm />
             </Reveal>
           </div>

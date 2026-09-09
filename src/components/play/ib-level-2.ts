@@ -61,7 +61,7 @@ export const IB_LEVEL_2: Level = {
       facts: [
         { label: "Position", value: "Analyst · Year 1" },
         { label: "Salary", value: "$110,000 + bonus" },
-        { label: "Hours", value: "80–90 / week" },
+        { label: "Hours", value: "80-90 / week" },
       ],
       body: "Standard for the industry. Long days early on, and the hours ease as you move up.",
       cta: "Accept Offer",

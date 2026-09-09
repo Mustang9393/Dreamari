@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 import { Bookmark, GraduationCap, Landmark } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
+import { OpenCue } from "@/components/app/PosterCard";
 import { SMALL } from "@/components/career/CareerDetailExperience";
-import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, money, type College } from "./data";
+import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, money, type College } from "./data";
 
 // One accent for the whole feature: colleges have no world, so they borrow
 // the app's primary blue. Cards for tribal colleges, trade schools etc. do
@@ -95,29 +96,45 @@ export function MarkBadge({ c, size = 44 }: { c: College; size?: number }) {
 /** The result card: the community card's full-bleed frosted cover, the
  *  college's mark as a profile picture beside its name at the top (never
  *  under the words), two sentences low on the frost, three words, Compare.
- *  The whole card opens the college. */
-const GRAIN = "/images/connect/covers/grain.png";
+ *  The whole card opens the college. Photo stays at full brightness and
+ *  colour (direct feedback, 8 Sept 2026: next to Explore's vivid poster
+ *  cards, a constant brightness/saturation cut plus a heavy blur and a
+ *  double gradient wash made Explore Schools read as the diluted,
+ *  placeholder version of the same idea) -- only a bottom scrim earns its
+ *  keep, the same restraint PosterCard's own photo treatment uses. */
 export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void }) {
   const img = collegeImage(c);
   return (
+    // `poster-card`/`poster-photo` are the exact same hover classes Explore's
+    // PosterCard uses (globals.css) -- direct feedback, 9 Sept 2026: college
+    // results should lift and pop the same way career posters do, not the
+    // much quieter image-only zoom this had before. Reusing the shared
+    // classes (rather than a second hand-tuned hover) keeps the two card
+    // families feeling like one interaction language.
     <article
-      className="dm-tap group relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+      className="dm-tap poster-card relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
       style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${ACCENT} ${compared ? 70 : 40}%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
     >
-      <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+      <span aria-hidden className="poster-photo absolute inset-0">
         {img ? (
-          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" style={{ filter: "brightness(0.72) saturate(0.9)" }} />
+          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" />
         ) : (
           <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }} />
         )}
-        <CardProgressiveBlur size="74%" />
-        {/* a real band behind the title, not just the folio scrim: bright
-           campus photos (Princeton) otherwise swallow the name */}
-        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.8) 30%, rgba(12,16,35,0.42) 56%, rgba(12,16,35,0.08) 80%, transparent 100%), linear-gradient(to bottom, rgba(12,16,35,0.82) 0%, rgba(12,16,35,0.55) 34%, rgba(12,16,35,0.12) 58%, transparent 72%), ${cardTopScrim()}, linear-gradient(90deg, color-mix(in srgb, ${ACCENT} 12%, transparent), transparent 60%)` }} />
-        <span className="absolute inset-0" style={{ backgroundImage: `url(${GRAIN})`, backgroundSize: "128px 128px", backgroundRepeat: "repeat", mixBlendMode: "overlay", opacity: 0.2 }} />
+        <CardProgressiveBlur size="40%" />
+        {/* one bottom scrim for the name and stats, not a top-and-bottom
+           double wash -- the photo above it stays as vivid as Explore's */}
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.84) 26%, rgba(12,16,35,0.4) 52%, rgba(12,16,35,0.08) 72%, transparent 100%)" }} />
+        <span className="absolute inset-x-0 top-0 h-[80px]" style={{ background: cardTopScrim() }} />
       </span>
-      <span aria-hidden className="absolute top-0 left-1/2 z-20 h-[6px] w-[44px] -translate-x-1/2 rounded-b-[6px] opacity-90" style={{ background: ACCENT }} />
-
+      {/* Same centered "this opens" cue PosterCard uses, at OpenCue's own
+         (low) z-index -- below the text content's z-20, not above it,
+         so the dim and the icon only ever show over the photo, never
+         additionally darkening the always-visible name/stats text (direct
+         feedback, 9 Sept 2026). The icon still reads fine: it lands in the
+         card's own vertical gap between the profile row and the stats
+         paragraph, where that content layer has nothing opaque painted. */}
+      <OpenCue />
       <Link href={`/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
 
@@ -132,8 +149,8 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: Coll
         </div>
 
         <p className="mt-auto pt-[var(--space-6)] text-[15px] leading-[21px] font-semibold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>
-          {c.netPrice === null ? "Yearly cost not published." : `About ${money(Math.round(c.netPrice / 100) * 100)} a year after grants.`}
-          {c.finish !== null && <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>{c.finish}% of students finish their degree.</span>}
+          Acceptance rate: {c.admitRate === null ? "Everyone gets in" : `${c.admitRate}%`}
+          <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>Undergraduate enrollment: {compact(c.undergrads)}</span>
         </p>
         <div className="pointer-events-auto mt-[10px] flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none", fontFamily: "var(--font-body)" }}>
           <ul className="flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college">

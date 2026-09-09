@@ -23,7 +23,7 @@ type Scope = "all" | "careers" | "colleges" | "people" | "companies" | "communit
 const SCOPES: { key: Scope; label: string }[] = [
   { key: "all", label: "Everything" },
   { key: "careers", label: "Careers" },
-  { key: "colleges", label: "Colleges" },
+  { key: "colleges", label: "Schools" },
   { key: "people", label: "People" },
   { key: "companies", label: "Companies" },
   { key: "communities", label: "Communities" },
@@ -39,7 +39,7 @@ function search(q: string) {
   if (!words.length) return null;
   const careers: Hit[] = ALL_CATALOG_CAREERS.filter((c) => hit(`${c.title} ${c.world}`, words)).map((c) => ({ key: c.title, href: `/career/${careerSlug(c.title)}`, title: c.title, sub: c.world }));
   const colleges: Hit[] = COLLEGES.filter((c) => hit(`${c.name} ${c.city} ${c.stateName} ${c.state}`, words)).map((c) => ({ key: c.slug, href: `/colleges/${c.slug}`, title: c.name, sub: `${c.city}, ${c.stateName}${c.netPrice !== null ? ` · about ${money(Math.round(c.netPrice / 100) * 100)} a year` : ""}` }));
-  const people: Hit[] = PROS.filter((p) => hit(`${p.name} ${p.role} ${p.org} ${p.field} ${(p.topics ?? []).join(" ")}`, words)).map((p) => ({ key: p.id, href: `/connect?pro=${p.id}`, title: p.name, sub: `${p.role} · ${p.org}`, media: <Avatar name={p.name} verified size={36} /> }));
+  const people: Hit[] = PROS.filter((p) => hit(`${p.name} ${p.role} ${p.org} ${p.field} ${(p.topics ?? []).join(" ")}`, words)).map((p) => ({ key: p.id, href: `/connect?pro=${p.id}`, title: p.name, sub: `${p.role} · ${p.org}`, media: <Avatar name={p.name} size={36} /> }));
   const companyNames = [...new Set(PROS.map((p) => p.org))].filter((o) => hit(o, words));
   const companies: Hit[] = companyNames.map((o) => {
     const pros = PROS.filter((p) => p.org === o);
@@ -54,7 +54,7 @@ function search(q: string) {
 
 const GROUPS: { key: Exclude<Scope, "all">; label: string; icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>; seeAll: (q: string) => string; seeAllLabel: string }[] = [
   { key: "careers", label: "Careers", icon: Briefcase, seeAll: (q) => `/explore?tab=browse&q=${encodeURIComponent(q)}`, seeAllLabel: "Explore" },
-  { key: "colleges", label: "Colleges", icon: GraduationCap, seeAll: (q) => `/colleges?q=${encodeURIComponent(q)}`, seeAllLabel: "Find a college" },
+  { key: "colleges", label: "Schools", icon: GraduationCap, seeAll: (q) => `/colleges?q=${encodeURIComponent(q)}`, seeAllLabel: "Find a school" },
   { key: "people", label: "People", icon: Users, seeAll: () => "/connect", seeAllLabel: "Connect" },
   { key: "companies", label: "Companies", icon: Building2, seeAll: () => "/connect", seeAllLabel: "Connect" },
   { key: "communities", label: "Communities and events", icon: MessagesSquare, seeAll: () => "/connect", seeAllLabel: "Connect" },
@@ -62,7 +62,7 @@ const GROUPS: { key: Exclude<Scope, "all">; label: string; icon: React.Component
 
 const DOORS = [
   { href: "/explore?tab=browse", icon: Briefcase, title: "Careers", sub: "Every career world, with pay and a day in the life" },
-  { href: "/colleges", icon: GraduationCap, title: "Colleges", sub: "What a year costs, who gets in, who finishes" },
+  { href: "/colleges", icon: GraduationCap, title: "Schools", sub: "What a year costs, who gets in, who finishes" },
   { href: "/connect", icon: Users, title: "People", sub: "Verified professionals who answer questions" },
 ];
 const TRY = ["Nursing", "Rutgers", "Goldman Sachs", "Investment banking", "Sioux Falls", "Software engineer"];

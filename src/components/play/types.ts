@@ -129,9 +129,9 @@ export type CardBeat = BeatBase & {
    *  student can tell the game talking from the job talking (Interaction
    *  Rules, System Card). */
   system?: boolean;
-  /** A milestone moment (first day, promotion) -- the gold accent border
-   *  otherwise reserved for a boss layout, so the card itself reads as a
-   *  bigger deal than a routine "Continue" screen. */
+  /** The arrival moment: a burst, a sweep and shimmering ink on the title,
+   *  so the first day reads as an event (Joshua Pierce, Slack, 6 Sept 2026:
+   *  "the student is genuinely arriving for the first day of their new job"). */
   celebrate?: boolean;
   cta: string;
 };

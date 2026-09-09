@@ -3,7 +3,7 @@ import { HomeExperience } from "@/components/app/HomeExperience";
 import "@/components/marketing/tokens.css";
 
 export const metadata: Metadata = {
-  title: "Home — Dreamari",
+  title: "Home · Dreamari",
   description: "Continue your Dreamari journey, discover careers and build career-ready skills.",
 };
 

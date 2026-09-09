@@ -7,8 +7,9 @@
 
 import Image from "next/image";
 import { createContext, useContext, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+import { studentAvatarSrc } from "@/lib/avatar";
 import { PROS, type Thread } from "./data";
 
 /** In-page navigation for anything rendered inside Connect: lets a pro's
@@ -20,6 +21,8 @@ export const ConnectNav = createContext<{
   openInsight: (id: string) => void;
   openBoard: (id: string) => void;
   openSaved: () => void;
+  /** every post/answer from everyone the student follows, newest first */
+  openFollowingFeed: () => void;
   /** a question was posted from any composer: lands in "Your questions" */
   noteAsked: (title: string, boardId: string) => void;
   /** opens the report sheet for a thread, answer, post or comment id */
@@ -61,9 +64,20 @@ export const STATE_COLOR: Record<Thread["state"], string> = {
 };
 
 // Avatar photos are PARKED for the pitch (direct feedback: mixed cartoons
-// and photos read as random) -- every avatar renders as initials until
-// USE_PHOTO_AVATARS flips back on. The portrait set and mapping stay.
+// and photos read as random) -- pros keep their verified portrait, and
+// students fall through to a generated avatar until USE_PHOTO_AVATARS flips
+// back on. The portrait set and mapping stay. Students staying generated
+// rather than photographed is deliberate now (direct feedback, 8 Sept 2026:
+// a safety/privacy decision -- no student photo is ever stored) and reads as
+// the intended contrast, not the "mixed cartoons and photos" problem this
+// comment originally warned about: a generated avatar signals "this
+// identity is protected," a photo signals "this is a verified real person,"
+// and a feed with both is teaching the difference on purpose.
 const USE_PHOTO_AVATARS = false;
+
+// Generated avatars now live in src/lib/avatar.ts, shared app-wide (direct
+// feedback, 8 Sept 2026: "should trickle down into everything... wherever a
+// student's avatar is used") -- not just this one component.
 
 // Photo avatars (behind the flag above), initials only as the fallback
 // for a name with no portrait. The pool is a committed set of demo portraits
@@ -72,8 +86,11 @@ const USE_PHOTO_AVATARS = false;
 // student) wears their real profile photo.
 const AV = "/images/connect/avatars";
 const AVATAR_PHOTO: Record<string, string> = {
-  "Jordan Rivera": "/images/avatar-jordan.jpg",
-  Jordan: "/images/avatar-jordan.jpg",
+  // Jordan is pinned in studentAvatarSrc (src/lib/avatar.ts) now, the one
+  // function every avatar call site funnels through -- not here, which is
+  // how this drifted out of sync with chrome.tsx's and ProfileExperience's
+  // own avatar calls the first time (direct feedback, 8 Sept 2026: "did we
+  // update Jordan's photo everywhere").
   // Verified professionals: the new volunteer headshots (Joshua Pierce, 5
   // Sept 2026), one per person, the previous photo set removed entirely.
   "David Chen": `${AV}/pro-chen.jpg`,
@@ -83,7 +100,7 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Jasmine Cole": `${AV}/pro-cole.jpg`,
   "Nadia Osei": `${AV}/pro-osei.jpg`,
   "Wei Zhang": `${AV}/pro-zhang.jpg`,
-  "Tom Gallagher": `${AV}/pro-gallagher.jpg`,
+  "Ryan Kessler": `${AV}/pro-gallagher.jpg`,
   "Sofia Grant": `${AV}/pro-grant.jpg`,
   "Andre Whitfield": `${AV}/pro-whitfield.jpg`,
   "Keiko Tanaka": `${AV}/pro-tanaka.jpg`,
@@ -100,59 +117,79 @@ const AVATAR_PHOTO: Record<string, string> = {
   "Hannah Weiss": `${AV}/pro-weiss.jpg`,
   "Daniel Kim": `${AV}/pro-kim.jpg`,
   "Lena Novak": `${AV}/pro-novak.jpg`,
-  // Students wear friendly illustrated avatars (micah, generated per
-  // handle), never real photos -- on-brand for a teen product and no real
+  "Tiana Freeman": `${AV}/pro-freeman.png`,
+  // Nine new volunteers (9 Sept 2026), each with their own real portrait --
+  // .png since these came in as png, unlike the rest of this jpg set.
+  "Xavier Brennan": `${AV}/pro-brennan.png`,
+  "Kevin Park": `${AV}/pro-park.png`,
+  "Daniela Cruz": `${AV}/pro-cruz-3.png`,
+  "Catherine Walsh": `${AV}/pro-walsh.png`,
+  "Anika Desai": `${AV}/pro-desai.png`,
+  "Richard Hartley": `${AV}/pro-hartley.png`,
+  "Trevor Johnson": `${AV}/pro-johnson.png`,
+  "Jack Sullivan": `${AV}/pro-sullivan.png`,
+  "Elijah Turner": `${AV}/pro-turner.png`,
+  "Ananya Sharma": `${AV}/pro-sharma.png`,
+  "Nathaniel Reid": `${AV}/pro-new-01.png`,
+  "Naomi Wong": `${AV}/pro-wong.png`,
+  "Gregory Ashford": `${AV}/pro-ashford.png`,
+  "Ryan Koval": `${AV}/pro-koval.png`,
+  "Camila Torres": `${AV}/pro-torres.png`,
+  // Students wear friendly illustrated avatars (studentAvatarSrc, src/lib/
+  // avatar.ts), never real photos -- on-brand for a teen product and no real
   // minor's face is ever implied. Professionals keep realistic portraits:
-  // credibility is their whole job here.
-  Ethan: `${AV}/c-Ethan.png`,
-  Priya: `${AV}/c-Priya.png`,
-  Maya: `${AV}/c-Maya.png`,
-  Zoe: `${AV}/c-Zoe.png`,
-  Sam: `${AV}/c-Sam.png`,
-  Lena: `${AV}/c-Lena.png`,
-  Ava: `${AV}/c-Ava.png`,
-  Diego: `${AV}/c-Diego.png`,
-  Sana: `${AV}/c-Sana.png`,
-  Ruby: `${AV}/c-Ruby.png`,
-  Theo: `${AV}/c-Theo.png`,
-  Jo: `${AV}/c-Jo.png`,
-  Amir: `${AV}/c-Amir.png`,
-  Devon: `${AV}/c-Devon.png`,
-  Riley: `${AV}/c-Riley.png`,
-  Noah: `${AV}/c-Noah.png`,
-  Marcus: `${AV}/c-Riley.png`,
+  // credibility is their whole job here. A dead legacy map of "c-Name.png"
+  // real-photo entries for students used to live here (Ethan/Priya/Maya/etc.,
+  // Marcus of all people pointed at Riley's photo) -- USE_PHOTO_AVATARS has
+  // been false the whole time so it never actually rendered, but it flatly
+  // contradicted the policy stated in this very comment and was a landmine
+  // waiting for that flag to flip. Removed 8 Sept 2026; the files themselves
+  // are left on disk untouched in case anything else references them.
 };
 
-// A verified badge overlaps the corner exactly like the app's other verified
-// affordances — a small ShieldCheck on a solid chip, never color alone.
-export function Avatar({ name, size = 34, verified }: { name: string; size?: number; verified?: boolean }) {
-  // Professionals always wear their portrait; students stay behind the flag.
+// The verified mark used to overlap the avatar's corner; direct feedback, 8
+// Sept 2026: "just like Instagram and Twitter, not on the pfp but after the
+// name" -- moved to VerifiedBadge below, rendered by each caller next to the
+// person's name text instead. Avatar itself no longer knows about verification.
+export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
+  // Professionals always wear their portrait; students stay behind the flag
+  // (Jordan included -- their pin lives in studentAvatarSrc, the fallback
+  // below, not here).
   const isPro = PROS.some((p) => p.name === name);
   const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
-  const initials = name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  // The seed is the FIRST word only, so "Jordan Rivera" (a full name, shown
+  // on the student's own profile) and "Jordan" (the community handle, per
+  // the app's first-name-only identity rule) generate the identical
+  // avatar -- one consistent face per person, not one per string variant.
+  const seed = name.split(" ")[0] || name;
   return (
     <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
       {photo ? (
         <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
       ) : (
-        <span
-          className="flex h-full w-full items-center justify-center rounded-full font-bold"
-          style={{
-            background: verified ? "var(--primary)" : "var(--secondary)",
-            color: verified ? "#FFFFFF" : "var(--foreground)",
-            fontSize: Math.max(11, size * 0.4),
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          {initials}
-        </span>
-      )}
-      {verified && (
-        <span role="img" aria-label="Verified" className="absolute right-[-2px] bottom-[-2px] flex items-center justify-center rounded-full border-2" style={{ width: size * 0.46, height: size * 0.46, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-surface-3)" }}>
-          <ShieldCheck aria-hidden style={{ width: size * 0.34, height: size * 0.34, color: "var(--accent-subtle)" }} />
-        </span>
+        <Image src={studentAvatarSrc(seed)} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
       )}
     </span>
+  );
+}
+
+/** The Instagram/Twitter-style mark: a scalloped/wavy badge outline, filled
+ *  solid, with a white checkmark inside -- sitting right after a verified
+ *  person's name, never on their avatar. One shape, reused everywhere a
+ *  pro's name renders. Direct feedback, 9 Sept 2026: the earlier version
+ *  was a plain circle (a CSS border-radius, not an actual badge shape);
+ *  this is lucide's own `badge-check` outline (the real scalloped mark),
+ *  hand-split into its two paths so the outline can be filled solid while
+ *  the checkmark stays a separate white stroke on top -- lucide's
+ *  pre-built <BadgeCheck> only exposes one uniform stroke/fill color for
+ *  the whole icon, which can't produce a filled badge with a
+ *  contrasting mark inside it. */
+export function VerifiedBadge({ size = 15 }: { size?: number }) {
+  return (
+    <svg role="img" aria-label="Verified" viewBox="0 0 24 24" width={size} height={size} className="relative inline-flex flex-none">
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" fill="var(--primary)" />
+      <path d="m9 12 2 2 4-4" stroke="#FFFFFF" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
   );
 }
 
@@ -163,12 +200,17 @@ export function Avatar({ name, size = 34, verified }: { name: string; size?: num
  *  whatever card it sits on. */
 /** How recently a professional has helped, in the tiers the admin dashboard
  *  already reports (daily, weekly, monthly). Earned, not given: a pro who has
- *  gone quiet has no tier, so not everyone wears gold. */
+ *  gone quiet has no tier, so not everyone wears gold. One colour for all
+ *  three (direct feedback, 8 Sept 2026): Gold's badge used to read literal
+ *  gold/yellow, Silver literal grey -- coding the badge itself by tier drew
+ *  attention the tier name doesn't need; the reference keeps every badge the
+ *  same blue and lets the label do the talking. */
 export type VolunteerTier = { name: "Diamond" | "Gold" | "Silver"; color: string; note: string };
+const TIER_COLOR = "#7dd3fc";
 export function volunteerTier(pro: { activeDaysAgo: number }): VolunteerTier | null {
-  if (pro.activeDaysAgo <= 1) return { name: "Diamond", color: "#7dd3fc", note: "Helps every day" };
-  if (pro.activeDaysAgo <= 7) return { name: "Gold", color: "#f5c04e", note: "Helps every week" };
-  if (pro.activeDaysAgo <= 30) return { name: "Silver", color: "#c0c4cc", note: "Helps every month" };
+  if (pro.activeDaysAgo <= 1) return { name: "Diamond", color: TIER_COLOR, note: "Helps every day" };
+  if (pro.activeDaysAgo <= 7) return { name: "Gold", color: TIER_COLOR, note: "Helps every week" };
+  if (pro.activeDaysAgo <= 30) return { name: "Silver", color: TIER_COLOR, note: "Helps every month" };
   return null;
 }
 
@@ -181,7 +223,7 @@ export function ProAvatar({ proId, name, size = 34, className = "" }: { proId: s
       className={`dm-quiet relative z-20 flex-none cursor-pointer rounded-full ${className}`}
       aria-label={`Open ${name}'s profile`}
     >
-      <Avatar name={name} verified size={size} />
+      <Avatar name={name} size={size} />
     </button>
   );
 }
@@ -251,12 +293,6 @@ export function InlineAsk({
         <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           Posting as Jordan · Junior
         </span>
-        <button type="button" onClick={() => setText((t) => t || "What does a typical week actually look like in this career?")} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
-          <Sparkles className="h-[13px] w-[13px]" aria-hidden /> AI Ideas
-        </button>
-        <button type="button" onClick={() => setText((t) => t.trim() ? t.trim().replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase()).replace(/([^?.!])$/, "$1?") : t)} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          Polish
-        </button>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
@@ -314,6 +350,9 @@ export function Card({ children, className = "", accent }: { children: React.Rea
 const CTA_SIZE = {
   md: "min-h-[44px] px-[var(--space-5)] text-[15px] leading-[20px] rounded-[var(--radius-md)]",
   sm: "min-h-[32px] px-[14px] text-[13px] leading-[18px] rounded-[var(--radius-sm)]",
+  // A crowded row of chips/badges next to a name (direct feedback: "the
+  // follow buttons can be smaller") -- FollowButton's own `dense` prop.
+  xs: "min-h-[26px] px-[10px] text-[11.5px] leading-[15px] rounded-[var(--radius-sm)]",
 } as const;
 export type CtaSize = keyof typeof CTA_SIZE;
 
@@ -359,6 +398,23 @@ export function SectionHead({ children, id }: { children: React.ReactNode; id?: 
     <h2 id={id} className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
       {children}
     </h2>
+  );
+}
+
+/** A grounded container for a whole section (direct feedback: too much of
+ *  Connect read as components floating on the page background with no
+ *  surface telling the eye where one section ends and the next begins --
+ *  this audience spans students to volunteers to older teacher/moderator
+ *  staff, closer to LinkedIn/Facebook's comfort zone than a young social
+ *  app's). `--card` is a real opaque surface, not another translucent
+ *  layer, so it reads as solid ground; items inside it (a follow card, a
+ *  world tile) keep using glass-surface-1/2, which now sits one visible
+ *  step lighter than this floor instead of floating on the page itself. */
+export function SectionSurface({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:p-[var(--space-6)] ${className}`} style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      {children}
+    </div>
   );
 }
 
@@ -593,7 +649,21 @@ export const COMPANY_BRAND: Record<string, { bg: string; ink: string }> = {
   Adobe: { bg: "#FA0F00", ink: "#FFFFFF" },
   "Goldman Sachs": { bg: "#7399C6", ink: "#FFFFFF" },
   "Junior Achievement": { bg: "#1aa7b5", ink: "#FFFFFF" },
-  Blackstone: { bg: "#000000", ink: "#FFFFFF" },
+  // Blackstone's own mark is black-on-white, which is exactly the case
+  // partnerAccent() rejects (a literal #000000 reads as "no color" against
+  // this app's dark surfaces, not as Blackstone's brand) -- this is their
+  // own deep-navy secondary tone from investor materials, dark enough to
+  // stay dignified but distinct from flat black.
+  Blackstone: { bg: "#14213D", ink: "#FFFFFF" },
+  // Same red already recorded for its own logo mark's accent glyph below
+  // (COMPANY_MARKS["SEO Scholars"].accent) -- not a new guess, just reused
+  // here so partnerAccent() can find it too.
+  "SEO Scholars": { bg: "#EA0029", ink: "#FFFFFF" },
+  // Best-effort, not verified against JAG's official brand guidelines --
+  // their public materials lean red/maroon, distinct from every other
+  // accent already registered here. Worth swapping if you have the real
+  // hex on hand.
+  JAG: { bg: "#8B1E2F", ink: "#FFFFFF" },
 };
 
 /** A mark sized by its LETTERS: the container is exactly `letterHeight` tall,

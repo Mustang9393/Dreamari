@@ -4,6 +4,7 @@
 // Match experience. Replit's "Skip" buttons are demo chrome and intentionally absent.
 
 export type StageId =
+  | "welcome"
   | "interests"
   | "subjects"
   | "workVibe"
@@ -18,6 +19,11 @@ export type StageId =
 // The HUD labels the chapter ("BUILD") rather than the stage — see PhaseProgress —
 // so no per-stage label lives here; counters would make the flow feel long.
 export const STAGES: { id: StageId; percent: number; almostDone?: boolean }[] = [
+  // A welcome beat before the first real question (direct feedback, 8 Sept
+  // 2026): landing straight on "what interests you" with zero warm-up felt
+  // abrupt coming out of signup. 0%, not 13% -- the HUD shouldn't look
+  // already-underway before a single answer is given.
+  { id: "welcome", percent: 0 },
   { id: "interests", percent: 13 },
   { id: "subjects", percent: 25 },
   { id: "workVibe", percent: 38 },
@@ -72,7 +78,7 @@ export const TEAM_OPTIONS = ["Solo", "Small team", "Big team"];
 
 export const EDUCATION_OPTIONS: { title: string }[] = [
   { title: "Work after high school" },
-  { title: "1–2 years" },
+  { title: "1-2 years" },
   { title: "4 years" },
   { title: "5 years+" },
   { title: "Not sure yet" },
@@ -150,6 +156,7 @@ export const INITIAL_BUILD_STATE: BuildState = {
 // through the whole palette. Values are the linear interpolation at 13/25/38/50/
 // 63/75/88/100 percent.
 export const STAGE_ACCENTS: Record<StageId, string> = {
+  welcome: "#2f6bf2",
   interests: "#4767f3",
   subjects: "#5d64f4",
   workVibe: "#7560f5",
@@ -163,7 +170,7 @@ export const STAGE_ACCENTS: Record<StageId, string> = {
 
 // Dreamy's coaching line + expression sprite per stage (sprites in
 // public/images/dreamy/, catalogued from the supplied expression packs).
-export const STAGE_DREAMY: Record<Exclude<StageId, "milestone" | "complete">, { line: string; sprite: string }> = {
+export const STAGE_DREAMY: Record<Exclude<StageId, "welcome" | "milestone" | "complete">, { line: string; sprite: string }> = {
   interests: { line: "Start with what pulls your attention. ✨", sprite: "/images/dreamy/v2/dreamy-happy.png" },
   subjects: { line: "Pick the subjects you enjoy most. ✨", sprite: "/images/dreamy/v2/dreamy-glasses.png" },
   workVibe: { line: "There is no right answer. Just choose what feels like you. ✨", sprite: "/images/dreamy/v2/dreamy-idea.png" },

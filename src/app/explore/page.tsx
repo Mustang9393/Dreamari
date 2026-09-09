@@ -3,8 +3,8 @@ import { ExploreExperience } from "@/components/app/ExploreExperience";
 import "@/components/marketing/tokens.css";
 
 export const metadata: Metadata = {
-  title: "Explore — Dreamari",
-  description: "Discover careers made for you — swipe the For You reel or browse every career world.",
+  title: "Explore · Dreamari",
+  description: "Discover careers made for you: swipe the For You reel or browse every career world.",
 };
 
 // Explore — For You (Figma 2288:16179 + Mobile Reel 2530:46431) and

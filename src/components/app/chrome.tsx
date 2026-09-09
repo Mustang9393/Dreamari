@@ -1,14 +1,24 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
 import { useGlobalTheme } from "./theme";
 import { useDreamScore } from "@/lib/dreamScore";
+import { DreamScoreTip } from "@/components/app/DreamScoreTip";
+import { studentAvatarSrc } from "@/lib/avatar";
+import { STUDENT } from "@/components/profile/data";
 
-// The student's avatar photo doubles as the Profile entry point in both navs.
-const AVATAR_SRC = "/images/avatar-jordan.jpg";
+// The student's generated avatar doubles as the Profile entry point in both
+// navs (direct feedback, 8 Sept 2026: "the avatar in the top navbar is still
+// wrong" -- this file had its own hardcoded photo constant, a third place
+// carrying the old real-photo path that the Connect/Profile pass missed).
+// Same seed (first name only) as everywhere else the student appears, so
+// the nav avatar is never a different face than the one on their own
+// profile or their own posts.
+const AVATAR_SEED = STUDENT.name.split(" ")[0] || STUDENT.name;
 
 // Brand wordmark (Figma "Logo Identity": 21x12 mark + DREAMARI in
 // UI/Dreamari Logo). The mark renders via CSS mask so it follows
@@ -18,6 +28,63 @@ const AVATAR_SRC = "/images/avatar-jordan.jpg";
  *  4 Sept 2026: uniform across screens. */
 export const PAGE_TITLE_CLASS = "text-[32px] leading-[1.05] font-extrabold uppercase sm:text-[44px]";
 export const PAGE_TITLE_STYLE = { fontFamily: "var(--font-display)", color: "var(--foreground)" } as const;
+
+// Careers and Schools (colleges + trade schools) both live conceptually
+// inside Explore but are separate routes/pages (each with its own search and
+// filters), so switching sections is a real navigation, not a client-side
+// tab -- this sits in both ExploreExperience's and CollegesExperience's
+// headers, under the page title. Direct feedback, 8 Sept 2026: the earlier
+// "Careers / Colleges" breadcrumb read as awkward slash-separated text, so
+// it became a single chip labeled with the destination -- but that chip sat
+// RIGHT NEXT TO the page's own H1 ("Explore" + a chip reading "Schools"),
+// which read as one phrase describing the current page ("Explore Schools")
+// instead of a link elsewhere. Fixed 9 Sept 2026 by making it a real
+// two-option tab strip (both names always visible, the active one
+// underlined) placed on its OWN line under the H1, never beside it -- a
+// pill-shaped control here would also compete for the same visual language
+// as Explore's own For You/Browse All toggle, so these render as plain text
+// tabs instead, reserving the pill shape for that local, same-page control.
+// Labeled "Schools", not "Colleges" (direct feedback, 8 Sept 2026: the page
+// covers trade schools too, and "Colleges" as the visible label makes
+// clients ask whether trade schools are supported) -- the route/internal
+// key stays "colleges", only the copy changed.
+const EXPLORE_SECTIONS = [
+  { key: "careers" as const, label: "Careers", href: "/explore" },
+  { key: "colleges" as const, label: "Schools", href: "/colleges" },
+];
+export function ExploreSectionTabs({ active }: { active: "careers" | "colleges" }) {
+  const router = useRouter();
+  return (
+    <div role="tablist" aria-label="Explore section" className="flex items-center gap-[var(--space-4)]">
+      {EXPLORE_SECTIONS.map((section, i) => {
+        const isActive = section.key === active;
+        return (
+          <span key={section.key} className="flex items-center gap-[var(--space-4)]">
+            {i > 0 && <span aria-hidden style={{ color: "var(--glass-border)" }}>/</span>}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-current={isActive ? "page" : undefined}
+              onClick={() => { if (!isActive) router.push(section.href); }}
+              className={`-mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"}`}
+              style={{
+                fontFamily: "var(--font-body)",
+                color: isActive ? "var(--foreground)" : "var(--muted-foreground)",
+                textDecoration: isActive ? "underline" : "none",
+                textUnderlineOffset: "5px",
+                textDecorationThickness: "2px",
+                textDecorationColor: "var(--accent)",
+              }}
+            >
+              {section.label}
+            </button>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 export function Wordmark({ href = "/" }: { href?: string }) {
   return (
@@ -62,7 +129,7 @@ const QUICK_LINKS = [
   { label: "Match", href: "/match-lab" },
   { label: "Play", href: "/play" },
   { label: "My Profile", href: "/profile" },
-  { label: "Find a college", href: "/colleges" },
+  { label: "Find a school", href: "/colleges" },
   { label: "Connect", href: "/connect" },
   { label: "Sign Up", href: "/signup" },
 ] as const;
@@ -212,9 +279,10 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
       </nav>
 
       <div className="flex items-center gap-[var(--space-5)]">
-        {/* On the Profile page the hero card carries these stats, so the nav
-           drops them (the way Duolingo's profile hides its top counters). */}
-        {active !== "Profile" && (
+        {/* Streak and Dream Score on every page, Profile included: the score
+           stays at the top of the app the way it lands there after Build
+           (Joshua Pierce, Slack, 6 Sept 2026). */}
+        {(
           <>
             {/* Streak/XP yield below lg so the dead-centered nav pill never
                collides with them on narrow desktop widths. */}
@@ -227,17 +295,18 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
             {/* Dream Score, live: the student's own XP once they have earned any
                the same figure Build and Match show. Shown from md so the
                score follows them from Build and Match into the app. */}
-            <span key={xp} className="hidden items-center gap-[6px] md:flex motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
-              <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
-              <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-                {xp.toLocaleString("en-US")} XP
+            <DreamScoreTip className="hidden md:flex">
+              <span key={xp} className="flex items-center gap-[6px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
+                <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
+                <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+                  {xp.toLocaleString("en-US")} XP
+                </span>
               </span>
-            </span>
+            </DreamScoreTip>
           </>
         )}
         <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={AVATAR_SRC} alt="" className="h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
+          <Image src={studentAvatarSrc(AVATAR_SEED)} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
         </Link>
         <QuickLinksMenu />
       </div>
@@ -279,11 +348,12 @@ export function MobileNav({ active }: { active: string }) {
         aria-current={active === "Profile" ? "page" : undefined}
         className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={AVATAR_SRC}
+        <Image
+          src={studentAvatarSrc(AVATAR_SEED)}
           alt=""
-          className="size-7 rounded-full border-[1.5px] object-cover"
+          width={56}
+          height={56}
+          className="block size-7 rounded-full border-[1.5px] object-cover"
           style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
         />
       </Link>

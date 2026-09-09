@@ -3,12 +3,12 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
+import { studentAvatarSrc } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
-import { useDreamScore } from "@/lib/dreamScore";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import {
   ArrowLeftRight,
@@ -30,7 +30,6 @@ import {
   GraduationCap,
   MoreVertical,
   Plane,
-  Pencil,
   Plus,
   Printer,
   Settings,
@@ -155,7 +154,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
-  const dreamScore = useDreamScore();
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
@@ -253,7 +251,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const [savedMajors, setSavedMajors] = useState<Set<string>>(new Set(["Finance"]));
   const [confirmedEvidence, setConfirmedEvidence] = useState<Set<string>>(() => new Set(EVIDENCE.filter((item) => item.confirmed).map((item) => item.id)));
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
-  const [avatarUrl, setAvatarUrl] = useState(STUDENT.avatar);
   // Covers are curated backgrounds only (CEO, 4 Sept): no career-poster
   // switch, no uploads (inappropriate-content risk). The real app should
   // carry about 40 strong options; the prototype ships six.
@@ -497,13 +494,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               </span>
             </div>
             <div className="flex items-end gap-[var(--space-4)]">
-              <label className="group relative size-[72px] flex-none cursor-pointer" aria-label="Change profile photo">
-                <img src={avatarUrl} alt={`${STUDENT.name}'s profile photo`} className="size-[72px] rounded-full border-2 object-cover" style={{ borderColor: "rgba(255,255,255,0.9)" }} />
-                <span className="absolute right-0 bottom-0 flex size-[22px] items-center justify-center rounded-full border transition-transform group-hover:scale-110" style={{ background: "var(--glass-surface-3)", borderColor: "#0e0c20", color: "var(--foreground)", textShadow: "none" }}>
-                  <Pencil className="h-[11px] w-[11px]" />
-                </span>
-                <input type="file" accept="image/*" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarUrl(URL.createObjectURL(file)); }} />
-              </label>
+              {/* Generated, not photographed (direct feedback, 8 Sept 2026:
+                 no student photo is ever stored, and the avatar system
+                 should reach every place a student's own picture shows up,
+                 not just Connect) -- same seed, same face as everywhere
+                 else the student appears; no upload control, since there is
+                 no photo to upload anymore. */}
+              <Image
+                src={studentAvatarSrc(STUDENT.name.split(" ")[0] || STUDENT.name)}
+                alt=""
+                width={144}
+                height={144}
+                className="size-[72px] flex-none rounded-full border-2 object-cover"
+                style={{ borderColor: "rgba(255,255,255,0.9)" }}
+              />
               <span className="flex min-w-0 flex-1 flex-col gap-[2px] pb-[4px]">
                 <h2 className="text-[28px] leading-[32px] font-extrabold tracking-[-0.02em] text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
                 <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{STUDENT.school}</span>
@@ -515,16 +519,17 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                left, on one row at every width: icon, label, value. On phones
                the type steps down and the streak's extras drop so all three
                still fit side by side (direct feedback, 5 Sept 2026). */}
-            <dl className="grid grid-cols-2 gap-[6px] sm:flex sm:flex-wrap sm:gap-[8px]" style={{ textShadow: "none" }}>
+            {/* Three tiles, as before the Dream Score tile (Joshua Pierce,
+               Slack, 6 Sept 2026: "have the profile header look like it did
+               before"); the score lives in the app header instead. */}
+            <dl className="flex flex-wrap gap-[6px] sm:gap-[8px]" style={{ textShadow: "none" }}>
               {[
-                // Dream Score leads: the stat that grows (live once earned; the
-                // design's 15,980 stands in until then)
-                { Icon: Sparkles, value: `${(dreamScore > 0 ? dreamScore : 15980).toLocaleString("en-US")} XP`, label: "Dream Score", short: "Score", verified: false, sub: null as string | null, valueFirst: false },
-                { Icon: Flame, value: `${STUDENT.streakDays}`, label: "day streak", short: null as string | null, verified: false, sub: "Active 142 of 190 days" as string | null, valueFirst: true },
                 { Icon: GraduationCap, value: STUDENT.grade.replace("Grade ", ""), label: "Grade", short: null as string | null, verified: false, sub: null as string | null, valueFirst: false },
                 { Icon: BadgeCheck, value: ACADEMIC_RECORD.gpa, label: "GPA", short: null as string | null, verified: ACADEMIC_RECORD.verified, sub: null as string | null, valueFirst: false },
+                // "12 day streak · Active 142 of 190 days" (direct feedback, 5 Sept 2026)
+                { Icon: Flame, value: `${STUDENT.streakDays}`, label: "day streak", short: null as string | null, verified: false, sub: "Active 142 of 190 days" as string | null, valueFirst: true },
               ].map((fact) => (
-                <div key={fact.label} className="flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[9px] py-[8px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px]" style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
+                <div key={fact.label} className={`flex min-w-0 items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] py-[7px] sm:flex-none sm:gap-[8px] sm:px-[14px] sm:py-[9px] ${fact.valueFirst ? "flex-[1.5]" : "flex-1"}`} style={{ background: "rgba(12,16,35,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${heroAccent} 28%, rgba(255,255,255,0.1))` }}>
                   <fact.Icon className="h-[13px] w-[13px] flex-none sm:h-[15px] sm:w-[15px]" aria-hidden style={{ color: heroAccent }} />
                   <dt className={`flex min-w-0 items-center gap-[4px] truncate text-[10.5px] leading-[14px] font-semibold sm:text-[12.5px] sm:leading-[16px] ${fact.valueFirst ? "order-3" : ""}`} style={{ color: "rgba(255,255,255,0.7)" }}>
                     {fact.short ? <><span className="sm:hidden">{fact.short}</span><span className="hidden sm:inline">{fact.label}</span></> : fact.label}
@@ -661,8 +666,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           </div>
         )}
         {tab === "resume" && (
-          <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume">
+          <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume" className="flex flex-col gap-[var(--space-4)]">
             <ResumeView />
+            {/* Same bridge-between-features banner as Top Three -> Play
+               (direct feedback, 8 Sept 2026): a resume is a dead end on its
+               own, so the obvious next step points at Connect. */}
+            <NextStepBanner
+              eyebrow="Your next step"
+              text="Ask a question or follow a Dream Volunteer on CONNECT to grow your knowledge and network."
+              ctaLabel="Connect"
+              href="/connect?tab=people"
+              Icon={Users}
+              storageKey="dreamari:resume-connect-next-step-dismissed"
+            />
           </div>
         )}
           </div>
@@ -1057,10 +1073,11 @@ function Top3Tab({
          simulation for now; the dynamic #1 routing is a later step. */}
       {top3.length > 0 && (
         <NextStepBanner
-          eyebrow="Next step"
+          emphasis="priority"
+          eyebrow="Your next step"
           text="Play your #1 Career Simulation to see if it’s really your #1."
           ctaLabel="Play"
-          href="/play/investment-banking"
+          href="/play?focus=investment-banking"
           Icon={Gamepad2}
           storageKey="dreamari:top3-next-step-dismissed"
         />
@@ -1113,7 +1130,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // Deliberately thin. Its job is orientation in about five seconds, then it
 // hands off. Streaks and totals live at the bottom, not in the identity.
 
-function OverviewTab({
+export function OverviewTab({
   focus, planProgress, top3Count,
   onGoTop3, onGoPlan, onGoReport, onGoLocker,
 }: {
@@ -1627,17 +1644,6 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
         <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </section>
 
-      {/* the same next step as Top Three, so the answer to "what now" is the
-         same on both tabs (Joshua Pierce, Slack, 5 Sept 2026) */}
-      <NextStepBanner
-        eyebrow="Next step"
-        text="Play your #1 Career Simulation to see if it’s really your #1."
-        ctaLabel="Play"
-        href="/play/investment-banking"
-        Icon={Gamepad2}
-        storageKey="dreamari:top3-next-step-dismissed"
-      />
-
       {focus.plan.map((horizon, index) => {
         const unlocked = horizonUnlocked(focus, index);
         const stats = horizonProgress(focus, index);
@@ -1739,6 +1745,19 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
           </section>
         );
       })}
+
+      {/* the same next step as Top Three, at the foot of the plan under the
+         last level so it does not interrupt the plan's order (Joshua Pierce,
+         Slack, 5 and 6 Sept 2026) */}
+      <NextStepBanner
+        emphasis="priority"
+        eyebrow="Your next step"
+        text="Play your #1 Career Simulation to see if it’s really your #1."
+        ctaLabel="Play"
+        href="/play/investment-banking"
+        Icon={Gamepad2}
+        storageKey="dreamari:top3-next-step-dismissed"
+      />
     </div>
   );
 }
@@ -1990,7 +2009,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
           <span className="min-w-0 truncate">Next: {route.nextStep}</span>
           {/program|college|school|transfer/i.test(route.nextStep) && (
             <Link href="/colleges" className="flex flex-none items-center gap-[3px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-              College lookup <ChevronRight className="h-3 w-3" />
+              School lookup <ChevronRight className="h-3 w-3" />
             </Link>
           )}
         </div>
@@ -2129,8 +2148,8 @@ function SettingsView({ onClose }: { onClose: () => void }) {
       </div>
       <div className="flex max-w-[560px] flex-col gap-[var(--space-2)]">
         <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-          <span className="text-[15px] font-bold">Profile photo</span>
-          <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>Tap your avatar to change it</span>
+          <span className="text-[15px] font-bold">Profile avatar</span>
+          <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>Generated for privacy, never a photo</span>
         </div>
         {["Notifications", "Privacy and sharing", "Talent Pipeline opt-in", "Linked school account"].map((item) => (
           <div key={item} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>

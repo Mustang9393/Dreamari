@@ -8,7 +8,7 @@ import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { playMilestoneChime, playXpRise } from "./sound";
-import { awardDreamScore } from "@/lib/dreamScore";
+import { awardDreamScore, peekDreamScoreAfter } from "@/lib/dreamScore";
 import {
   EDUCATION_OPTIONS,
   ENERGY_OPTIONS,
@@ -342,7 +342,10 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
 // full name?" on a form where the answer is obvious, and four questions in a
 // row was the flow's densest block of reading.
 export function ProfileStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite, onSkip }: StepProps) {
-  const valid = state.fullName.trim().length > 0 && state.email.trim().length > 3 && state.grade !== "" && state.gpa !== "";
+  // Name and email come from sign-up, so they are not asked again here
+  // (Joshua Pierce and Usman, Slack, 6 Sept 2026). Zip code stays (cleared;
+  // a street address never is).
+  const valid = state.grade !== "" && state.gpa !== "";
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
@@ -350,28 +353,6 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">
-          <input
-            className={UNDERLINE_INPUT}
-            style={{ borderBottomColor: "var(--color-glass-stroke)" }}
-            placeholder="Full Name"
-            aria-label="Full name"
-            value={state.fullName}
-            onChange={(e) => patch({ fullName: e.target.value })}
-            autoComplete="name"
-          />
-          <div>
-            <input
-              type="email"
-              className={UNDERLINE_INPUT}
-              style={{ borderBottomColor: "var(--color-glass-stroke)" }}
-              placeholder="School Email"
-              aria-label="School email"
-              value={state.email}
-              onChange={(e) => patch({ email: e.target.value })}
-              autoComplete="email"
-            />
-            <p className="mt-1 text-[11px] font-medium text-[var(--color-night-muted-foreground)] opacity-80">Use your school one if you have it.</p>
-          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField label="Grade" options={GRADE_OPTIONS} value={state.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
             <SelectField label="GPA" options={GPA_OPTIONS} value={state.gpa} placeholder="Select" onChange={(gpa) => { react(); patch({ gpa }); }} />
@@ -403,6 +384,34 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
       </GlassCard>
       </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} onSkip={onSkip} />
+    </div>
+  );
+}
+
+// The very first thing a student sees arriving from signup (direct
+// feedback, 8 Sept 2026: "a screen introducing students to the build flow
+// ... seamless and interesting and welcoming and delightful"). Same
+// three-part skeleton as every other step, at 0% -- Dreamy pops in
+// (dreamy-pop, the same entrance every expression-swap uses) then settles
+// into a gentle ambient float, calmer than the celebration bounce reserved
+// for the 50% milestone. No Back (nothing to go back to); Skip stays
+// available for demo runs, same as every real step.
+export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?: () => void }) {
+  return (
+    <div className="flex h-full w-full flex-col">
+      <CardHud percent={0} />
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="mx-auto w-full max-w-[560px]">
+      <GlassCard className="text-center">
+        <div data-dreamy-anchor className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1),cloud-float_4s_ease-in-out_0.5s_infinite] sm:h-32 sm:w-32">
+          <Image src="/images/dreamy/v2/dreamy-happy.png" alt="Dreamy waving hello" fill sizes="128px" className="object-contain" />
+        </div>
+        <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="Welcome to BUILD" /></h1>
+        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">Tell us about you, so we can personalize your experience and help you find your dream career.</p>
+      </GlassCard>
+      </div>
+      </div>
+      <StepFooter onNext={onNext} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Let’s go<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} onSkip={onSkip} />
     </div>
   );
 }
@@ -553,10 +562,29 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       const el = xpRef.current;
       if (!el || reduce) { setFlown(true); bank(); return; }
       const from = el.getBoundingClientRect();
-      // where the header chip will sit: just left of the menu button
+      // Where the header chip will sit: just left of the menu button, at
+      // the chip's own width -- a hardcoded half-width guess (42px, "100 XP"
+      // sized) only ever slotted in cleanly for a first-ever 3-digit score;
+      // any other total sat off-center, and a wide one on a narrow viewport
+      // could push the guess past the screen edge entirely (direct
+      // feedback, 7 Sept 2026). An invisible probe with the chip's own
+      // classes and the score it will actually show measures the real width.
       const menu = document.querySelector("header button") as HTMLElement | null;
       const m = menu?.getBoundingClientRect();
-      const targetCx = m ? m.left - 10 - 42 : window.innerWidth - 120;
+      let chipHalfWidth = 42;
+      if (m) {
+        const finalScore = peekDreamScoreAfter("build-complete", BUILD_XP);
+        const probe = document.createElement("span");
+        probe.setAttribute("aria-hidden", "true");
+        probe.className = "flex h-9 items-center gap-[5px] px-[10px] text-[12.5px] leading-[16px] font-bold tabular-nums";
+        probe.style.cssText = "position:fixed; left:-9999px; top:-9999px; visibility:hidden; white-space:nowrap;";
+        probe.style.fontFamily = "var(--font-body)";
+        probe.innerHTML = `<span style="display:inline-block;width:14px;height:14px;flex:none"></span>${finalScore.toLocaleString("en-US")} XP`;
+        (el.closest(".marketing-v2") ?? document.body).appendChild(probe);
+        chipHalfWidth = probe.getBoundingClientRect().width / 2;
+        probe.remove();
+      }
+      const targetCx = m ? m.left - 10 - chipHalfWidth : window.innerWidth - 120;
       const targetCy = m ? m.top + m.height / 2 : 38;
       clone = el.cloneNode(true) as HTMLElement;
       Object.assign(clone.style, { position: "fixed", left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px`, margin: "0", zIndex: "70", pointerEvents: "none", animation: "none", visibility: "visible", willChange: "transform, opacity", filter: "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))" });

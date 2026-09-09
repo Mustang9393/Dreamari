@@ -38,6 +38,393 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-07 (later still) Schools view: replaced the sticky stage story with plain rows, rebuilt Connect, dropped pill CTAs
+
+Several rounds of direct feedback in quick succession:
+
+1. "Doesn't work properly when scrolling" -- the five-stage section used a
+   sticky right column whose composition crossfaded on an IntersectionObserver
+   timer while the copy scrolled past on the left. A stage's copy could sit
+   far from the frame showing a DIFFERENT stage, and each copy block's tall
+   min-height left large dead gaps between consecutive stage headers.
+   Replaced with plain, non-sticky alternating rows (`StageRow`): each
+   stage's copy and its own card sit side by side in normal document flow,
+   so they can never desync -- removed the IntersectionObserver, the
+   `active` state, and the sticky column entirely. (Introduced and fixed a
+   bug in the same edit: `Reveal`, a `<div>`, was wrapping each `<li>`
+   instead of sitting inside it, producing invalid `ol > div > li` markup
+   that also broke `divide-y` and any `ol > li` query -- moved `Reveal`
+   inside `<li>`, one per column, verified `ol > li` count is 5 again.)
+
+2. Connect's card: rebuilt as a photo-plus-solid-modal composition (like
+   HeroVisual/ProgressArt) per direct instruction, dropping the `Frame`/
+   `Product`/`zoom` machinery entirely for this one -- `CommunityCard` is a
+   real `@container`-responsive component that sizes itself, not a fixed-px
+   screen needing a scaling hack. Three follow-on bugs from that rebuild,
+   each reported immediately and fixed in turn: (a) proportions were off --
+   capped at max-w-300px while every other stage's card rendered near
+   500px, made them match; (b) the backing plate behind the overlapping
+   thread card was missing the `marketing-v2` class, so `var(--background)`
+   resolved to the LIGHT page's background instead of dark -- white text on
+   a white plate, unreadable (the same scoping bug fixed once already this
+   session in `Frame`, recurred in a new spot; fixed the same way); (c)
+   confirmed live that dropping `zoom` also fixed `CommunityCard`'s stat
+   tiles, which were rendering as flat solid boxes instead of blurred glass
+   -- `backdrop-filter` and `zoom` do not reliably compose, and removing the
+   now-unnecessary scaling fixed it as a side effect.
+
+3. "No pill-shaped CTAs... even on the landing page" -- `MarketingButton`
+   (Button.tsx), Nav's CTA link, and `AudienceToggle`'s toggle track/buttons
+   were all `rounded-full`. These are shared with the student-facing landing
+   page, which `docs/handoff/specs/landing.md` locks -- asked the user
+   directly rather than guessing; told to change the shared components (so
+   both audiences get the new radius), NOT to fork a schools-only variant.
+   Changed to `rounded-xl`/`rounded-lg`. Confirmed `git diff --quiet
+   origin/main` is still clean for every locked file (Hero.tsx,
+   HowItWorks.tsx, chapters/*, ChapterShell.tsx, Footer.tsx) -- only
+   Button.tsx, Nav.tsx and AudienceToggle.tsx changed, none of them locked.
+   Circular icon buttons and avatar/dot marks were left alone -- the
+   complaint was about elongated pill CTAs and inputs, not circles.
+
+Verified live via a dev server (port 3115) using DOM geometry and computed
+style rather than screenshots -- the Browser pane's screenshot capture was
+unreliable again this session (documented earlier too): confirmed 5 real
+`<li>` direct children, no horizontal overflow, Connect's card width now
+within ~5% of the other stages', the backing plate's computed
+`background-color` is `rgb(5,7,15)` (dark, correct) with card text at
+`rgb(244,247,255)` (light, correct, readable), and the stat tiles' computed
+`backdrop-filter` is `blur(14px)` (real blur, not a flat box). `npx tsc
+--noEmit`, `eslint --max-warnings 0` on every changed file, and
+`npm run tokens:check` all clean.
+
+Not done: the user separately felt the new alternating-row layout "just
+copied the student version" (the student site's chapters use a similar
+side-by-side alternating grid). Flagged back honestly rather than guessed
+at a fix -- a concrete differentiator (rail styling, numbering treatment,
+spacing rhythm) needs the user's steer on what specifically should feel
+distinct, now that the underlying scroll bug is gone.
+
+### 2026-09-07 (later still) Schools view: reverted "drop the dark device frame entirely"
+
+Direct feedback right after that round shipped: "what ever you did now is a
+hundred times worse. Please fix and revert." Reverted commit 5c92a1a
+(`git revert`, clean, no conflicts) rather than trying to patch forward
+blind with no screenshot of what specifically broke. This restores the
+prior, already-verified state: one de-nested frame per stage (the dark
+"device screen" bezel from `Frame`, no second box from `Product` nested
+inside it) -- NOT the fully frame-less, card-floats-on-white-page version.
+
+Lesson for whoever picks this up next: the user's own instruction ("drop
+the frame entirely, no photo backdrop, unless cropping needs it") was
+implemented literally and verified clean in isolation (tsc/eslint/tokens,
+screenshots at two widths), but reads badly in the full page context this
+session did not check closely enough before shipping -- likely the plain
+real components (built for a dark in-app surface) sitting directly on the
+light marketing page loses cohesion across five back-to-back stages, even
+though any single one looked fine alone. Before trying this direction
+again: get a live screenshot of the FULL section (not one stage at a time)
+and a specific description of what reads badly, rather than re-guessing.
+
+### 2026-09-07 (later still) Schools view: de-nested the stage frames, minimized Build's questionnaire, fixed the copy/frame misalignment, made the Connect overlap real
+
+Four rounds of direct feedback, same session, on the five-stage "Five steps
+toward a clearer future" section and its composed visuals:
+
+1. "Frame inside frame inside frame" on Build/Match/Explore/the data section.
+   Root cause: `SchoolsVisuals.tsx`'s `Product` component painted its own
+   bordered, shadowed, rounded-corner dark box, nested inside the outer
+   `Frame` that already draws that exact chrome one level out -- two visible
+   boxes where one was intended. `ProgressArt` and `HeroVisual` never had
+   this problem because their `Product` floats over a plain photo with no
+   enclosing `Frame`. Fix: `Product` takes a new `bare` prop that drops its
+   border/shadow/rounded-corner/background, used everywhere a `Product`
+   already sits inside a `Frame` (Build, Match, Explore, the data section);
+   `ProgressArt`/`HeroVisual` keep the default chrome, unchanged.
+2. Build's card was "such a tall graphic," "everything visible at once":
+   `BuildArt` passed all 15 `INTEREST_WORLDS` to the real `ChipGrid`, an
+   8-row grid at near-full design scale. Fixed by showing a 6-option preview
+   (both of the two "selected" worlds included) -- the same "6 visible, more
+   below" convention the app's own `ChipGrid` already uses for phones
+   (build/ui.tsx, PREVIEW=6), just applied here so the composed snapshot
+   reads as a glimpse, not a rendered-out list.
+3. "Alignments are off, badly designed": the section heading sat right above
+   the sticky frame's top edge, but each stage's copy was vertically
+   *centered* inside a 76vh-tall block (`lg:justify-center`), so "01 BUILD"
+   rendered roughly 38vh (well over 300px on a typical laptop) below the
+   heading while the frame started right under it -- two starting points a
+   half-screen apart. Changed to `lg:justify-start` with a short top pad and
+   a shorter 62vh block, so each stage's copy anchors near the top of its
+   slot, close to the sticky frame at every stage, not just visually
+   accidental for whichever one happened to scroll into the "active" band.
+4. Connect's two cards: earlier this session they went from overlapping-and-
+   illegible (bug, fixed to a flex-column with a real gap) to fully
+   separated with no overlap at all. Direct feedback: the overlap itself was
+   wanted back -- "liked the overlapping components... just don't make them
+   so transparent that they overlap and get mixed." `Card` is the app's real
+   frosted-glass surface (backdrop-blur, ~90% opacity) -- correct where it
+   sits over a plain background, but stacked over ANOTHER card that blur
+   reveals and blends the card underneath into it. Fixed by reintroducing a
+   real overlap (negative margin, not independent absolute boxes) with an
+   opaque backing plate the exact shape of `Card` sitting behind it and in
+   front of the community card, so the blur terminates on solid colour and
+   nothing shows through.
+
+Verified live (own dev server, port 3112, this checkout's dev server was
+already running another session's session so a separate port was used):
+screenshots of all five stages at 1456px and 390px confirm a single frame
+per stage, the minimized Build grid, "01 BUILD" sitting directly under the
+section heading at the same height as the frame's top edge, and the Connect
+overlap now genuinely covering the community card's stat row with no text
+bleed-through. `npx tsc --noEmit`, `eslint` on both changed files, and
+`npm run tokens:check` all clean.
+
+Not done, flagged directly to the user rather than guessed at: whether the
+outer `Frame` (the dark "device screen" bezel) should be removed entirely in
+favor of a real-photo backdrop for every stage, the way `ProgressArt`
+already does. That needs new photography for Build/Match/Explore/Connect
+that does not exist in this repo yet -- a content decision, not a CSS one.
+
+### 2026-09-07 (later still) Schools view: Connect stage's two cards were overlapping
+
+Direct report with a screenshot: the community-stats card ("312 Students / 61
+Pros / 5 Companies") and the thread card sat on top of each other -- the
+"Open" button landed directly on the question text. Root cause:
+`ConnectArt` positioned both cards independently with `absolute` +
+percentage `left/top` and `right/bottom` insets, eyeballed to just miss each
+other -- left card spanned x:[6%,70%], right card spanned x:[36%,102%], a
+34%-wide overlap zone regardless of either card's real content height.
+
+Fixed by replacing the two independent `absolute` boxes with one `flex
+flex-col` wrapper (`self-start` / `self-end` for the diagonal stagger,
+`gap-[26px]` between them) -- a flex column cannot overlap by construction,
+whatever either card's real rendered height turns out to be.
+
+Verified by geometry, not a screenshot (the Browser pane's capture was
+unreliable again this session -- stale/black frames, third time this has
+been flagged): confirmed via `getBoundingClientRect()` on the two real card
+elements that they no longer intersect, at both a 1440px and a 390px
+viewport, with `document.documentElement.scrollWidth <= innerWidth` (no
+horizontal overflow) at 390px. `npx tsc --noEmit`, `eslint`, and
+`npm run tokens:check` all clean.
+
+Not yet done: the user separately flagged that the stage-story's two-column
+layout (copy left, sticky graphic right) reads as too far apart at very wide
+desktop widths, and asked for a full responsive QA + polish pass across the
+whole Enterprise view -- that is a larger, separate pass, not part of this
+fix.
+
+### 2026-09-07 (later) Schools view: the five-stage frame and the data-credibility frame were light windows, not the product's own stage
+
+Direct report: "why are there inside their own windows... use the graphics
+themselves without outer frames... some things are overlapping transparently
+and causing confusion." Root cause, confirmed in the DOM (computed
+background-color): `Frame` in `SchoolsVisuals.tsx` painted a pale
+`var(--hero-mid)`-based gradient card with a hairline border behind every
+composition. Build/Match/Explore's own `Product` surface (and `DataArt`'s)
+only covers part of that card by design (`top/right/bottom/left` percentage
+insets, meant to let the surface run off an edge) -- so the gap showed as a
+light mat visible around a dark screen, and every atmospheric glow blur in
+those three (aurora colour, meant to read as light spilling off a dark
+screen) sat against that pale ground instead, reading as a muddy smear.
+Connect/Immerse were unaffected (they already fill their frame edge to
+edge), which is why only some stages showed the problem.
+
+Fix: `Frame` no longer paints a card. It renders `SpaceGround` (the same
+dark, textured backdrop every art piece already sits on) as its own base and
+nothing else -- `marketing-v2 relative isolate overflow-hidden rounded-[28px]`,
+`background: var(--background)` (now correctly dark, see below), one shadow
+for lift. Any gap around a surface now reads as more of the same dark stage,
+never a separate box. `DataArt` moved its `<Wash>` from the old `accent` prop
+on `Frame` (removed) to calling `<Wash accent={accent} />` itself, matching
+how Build/Match/Explore already do it.
+
+One real bug caught in the fix itself, worth flagging for the next person
+touching this file: `Frame` sits in the Schools page's OWN light
+`theme-light` scope, so `var(--background)` inside it resolved to the page's
+`#f4f7ff`, not the app's dark `#05070f` -- the exact light-window symptom,
+from a different cause than the one just fixed. `Product` already re-enters
+dark scope via a `marketing-v2` class; `Frame` needed the same class, and now
+has it. Verified via computed style: the visible desktop stage frame's
+`background-color` reads `rgb(5, 7, 15)` after the fix (was `rgb(244, 247,
+255)` before).
+
+Verification: `npx tsc --noEmit`, `eslint` on SchoolsVisuals.tsx,
+`npm run tokens:check` all clean. Confirmed via computed styles in a live
+worktree (localhost:3109) that every stage frame and the data-credibility
+frame now resolve to the dark background, at both the mobile-stacked and
+desktop-sticky breakpoints. Not confirmed with an actual screenshot this
+round -- the Browser pane was hidden/its screenshot capture returned stale
+black frames for the whole session, a known tooling issue flagged by the
+previous pass too, not a rendering problem in the app. Worth one visual
+screenshot pass next time the pane is available.
+
+### 2026-09-07 Schools landing, visual QA pass finished and landed (branch `schools-visual-qa`, picked up from an interrupted session): full-bleed real-component compositions, real photography, reconciled with the concurrent partner-ticker work
+
+Picked up uncommitted work sitting in a worktree from a session interrupted
+twice (once by the user mid-QA, once by an API rate limit). Nothing from that
+session was discarded; this entry finishes the QA pass it was mid-way
+through and lands it. Brief being answered: "I don't like how the images are
+inside containers that have more blank space etc. Also use real components...
+Do a full Visual QA, use placeholder stock images or photos wherever you feel
+we can. Make it sexy and engaging and informative."
+
+- **Every composition now fills its frame** (no padded object floating in a
+  box): `SchoolsVisuals.tsx` was rewritten so each of the five stage tiles,
+  the hero, the educator panel, the data-credibility panel and the Dream
+  Opportunity band bleed to their tile's edge, with layered depth (a card
+  peeking behind the Match card, the Career Detail header hanging off the
+  hero photo's corner) instead of a screenshot centered in whitespace.
+- **Real product components, minimalised, not recreated**: `PosterCard` /
+  `RankedPosterCard` (Explore), MatchLab's `CardBody` (Match — now exported,
+  no behavior change to the real Match Lab), the Build flow's `CardHud` /
+  `QuestionHeading` / `ChipGrid` / `Citation` (Build), Connect's
+  `CommunityCard` + `Card` + `Avatar` + `CompanyChip` (Connect), the career
+  page's `PayMap` / `Figure` / `Section` (data credibility), and Profile's
+  `OverviewTab` (educators — now exported, no behavior change to the real
+  Profile page). The Play stage (`ImmerseArt`) and the Career Detail header
+  inside the hero remain faithful recreations since their real components
+  live inside routed pages, not ones you can drop into a marketing frame.
+- **Real photography**, Unsplash License (free commercial use), colour-graded
+  only by the existing card scrims — no new colours:
+  `students-laptop.webp` (hero, Vitaly Gariev), `counselor-guidance.webp`
+  ("Know where students are" panel, Monica Melton), `students-audience.webp`
+  (Dream Opportunity band, Sam Balye). Full attribution in
+  `public/images/marketing/ATTRIBUTION.md`. All three re-encoded to 1800px
+  wide; checked against their rendered width at both 1440 and 390 — none
+  renders past native resolution at either width, so nothing is an upscaled
+  raster (the Dream Opportunity band's `object-cover` crop on very wide
+  desktop screens sits closest to the ceiling; still native, not upscaled,
+  at 1440).
+- **Five stages**: replaced the old alternating-row layout with a
+  Linear/Stripe-style scrollytelling rail (`StageStory`) — desktop: the copy
+  for each stage scrolls down the left while one sticky frame on the right
+  crossfades its composition as an `IntersectionObserver` reports which
+  stage is being read; phones/tablets: each stage's copy sits directly over
+  its own frame, same order, same copy. Verified the static layout and the
+  first stage's composition at both widths; the live crossfade for stages 2-5
+  is verified by code read (the same `IntersectionObserver`/`rootMargin`
+  pattern, `active` index driving `opacity`/`transform` on absolutely
+  stacked panels) but NOT re-confirmed by watching a real scroll gesture in
+  this session — see the tooling note below for why.
+- **Reconciling with the concurrent partner-ticker work**: `origin/main` had
+  moved on since this branch's base (`aa80647` → `89c1e85`, three sessions'
+  worth of commits) including "landing: one partner ticker per page inside
+  the Dream Opportunity section" (`PartnerTicker.tsx`, new), which touches
+  the exact section this pass was rebuilding. Read the full diff before
+  touching anything. Rebased `schools-visual-qa` onto `origin/main`; git
+  auto-merged everything except the `SchoolsView.tsx` import line (both
+  sides edited it). Resolved by hand, taking `origin/main`'s side on the
+  partner display specifically (it is the more recent, confirmed decision —
+  "one partner ticker per page") while keeping this branch's own
+  `OrganizationBand` composition and every other section as rebuilt here:
+  the "Built by Dream Opportunity" section now shows `<OrganizationBand />`
+  (this branch's photo + DO mark composition) followed by
+  `<PartnerTicker tone="light" .../>` (`origin/main`'s ticker, swapped in for
+  the old `PartnerLogoWall size="full"`), and the second, duplicate
+  `PartnerLogoWall size="compact"` block that used to sit under `TrustLine`
+  is gone (matching `origin/main`'s "one ticker per page" decision) rather
+  than left as a second, now-inconsistent wall. Verified live, isolated by
+  temporarily hiding the sections around it (see tooling note): one ticker,
+  legible marks, even padding, at both widths; nothing else duplicated.
+- **Verification observed**: `npx tsc --noEmit` clean before AND after the
+  rebase; `npx eslint` clean on every touched file
+  (`SchoolsView.tsx`, `SchoolsVisuals.tsx`, `MatchLab.tsx`,
+  `ProfileExperience.tsx`, `PartnerTicker.tsx`, `DreamOpportunity.tsx`,
+  `TrustLine.tsx`); `npm run tokens:check` passes (464 tokens, artifacts
+  current) both before and after. Student landing
+  (`Hero.tsx`, `HowItWorks.tsx`, `chapters/`, `ChapterShell.tsx`,
+  `Footer.tsx`) confirmed byte-identical to `origin/main` post-rebase via
+  `git diff --quiet`. `SchoolsView.tsx` copy diffed against the reference
+  site (dreamari-educator-website.replit.app): no heading, lede, stage line,
+  form label/option, FAQ, or Dream Opportunity copy changed; section order
+  unchanged; FAQ, testimonials shell, TrustLine + one partner display, and
+  the Dream Opportunity block all still present before the closing CTA.
+  Live in the worktree on :3108 (dev server killed at the end of the
+  session): every section inspected at both 1440 and 390 — no horizontal
+  overflow at either width (`document.documentElement.scrollWidth ===
+  window.innerWidth` at 390), no clipped content, Nav/AudienceToggle/anchors
+  intact, no console errors beyond the dev-mode HMR websocket noise every
+  page in this dev server shows.
+- **Tooling note for whoever picks this up next**: the Browser pane's
+  screenshot capture was unreliable specifically at a nonzero scroll
+  position in this session — a scrolled screenshot came back solid black
+  while `getComputedStyle`/`elementFromPoint` at the same instant confirmed
+  correct, fully-painted light content underneath (reproduced identically
+  across mouse-wheel scroll, `window.scrollTo`, and a post-scroll resize, so
+  it is the capture path, not the app). Screenshots at `scrollY === 0`
+  always rendered correctly regardless of viewport height. Worked around it
+  by never scrolling: either grew the viewport tall enough to bring a
+  section into the top-anchored view, or (for sections deep in the
+  document) temporarily set `display: none` on the preceding sibling
+  `<section>`s via `javascript_exec` so the target section landed at
+  `scrollY === 0`, screenshotted, then moved on — nothing was ever exported
+  as a diff or committed from that hack, it only drove screenshots. Side
+  effect: hiding/restoring siblings churns layout enough that the
+  `StageStory` `IntersectionObserver` occasionally locked onto the wrong
+  stage's frame as "active" mid-hack; a real, un-hacked scroll (confirmed at
+  full page height with no sections hidden) showed stage 1 correctly. If a
+  future session needs to see the live crossfade for stages 2-5, that
+  needs an environment where the Browser pane is actually being watched (a
+  real scroll gesture), not a background/unattended one like this.
+- Recommended next: an iPhone/Safari touch pass (not done, same as the prior
+  visuals-pass entry below); the Dream Opportunity band photo could use a
+  touch more headroom above the DO mark on ultra-wide desktop (1920px+,
+  not checked this session).
+
+Commits: `4e6dfa6` → rebased to `c422a39` on `schools-visual-qa`; pushed;
+rebased onto `origin/main`, merged to `main`, pushed. See `git log` for the
+merge commit hash.
+
+### 2026-09-07 Schools landing on `main`: reference copy restored verbatim; Joshua's credibility lines get their logo row
+
+- Merged `schools-landing` into `main` (merge `df7fd45`, pushed; production
+  redeployed and confirmed live). The one conflict was `SchoolsView.tsx`: the
+  other session had added Joshua's two-line `TrustLine` before the OLD view's
+  closing CTA; the merge keeps the full rebuild and places `<TrustLine />`
+  before the new closing CTA (the `#demo` request section).
+- Where Joshua asked for what (Slack, 6 Sept; recorded in `specs/landing.md`
+  and `TrustLine.tsx`): the two lines "Powered by insights from Dream
+  Opportunity and leading corporate partners." / "Informed by Dream
+  Opportunity's work with 100+ schools." plus a partner-logo row under them,
+  before "Start Journey" on the student landing. Held pending the partner list;
+  per Chandu (6 Sept) the student landing does not carry them, so they sit on
+  the Schools view before its closing CTA. Partner list now confirmed
+  (IMG_8794), so the logo row is added directly under the lines
+  (`PartnerLogoWall size="compact"`, 720px column). Decision on 7 Sept: Schools
+  only; the student page keeps the separate `BuiltByStamp` under its CTA.
+- Copy audit against the named copy source (dreamari-educator-website.replit.app):
+  the rebuild had rewritten nearly every line. Restored verbatim: hero h1
+  ("Help students discover their direction—and build the skills to pursue
+  it."), hero lede, CTAs "Request a demo" / "Explore the platform", the "For
+  schools, districts, nonprofits, and educational institutions." line; the
+  audience section ("Built for the students you serve." + four titles-only
+  tabs + "Give every student a clearer path forward." with its lede); all five
+  stage descriptions; the educators section ("Know where students are. See
+  where to help." + the four Understand / Follow / Keep / Show items); the
+  research lede; the closing ("A clearer direction. Skills for what comes
+  next." + lede + Quick setup / Custom onboarding) and the form intro ("See
+  Dreamari in action." / "Tell us a little about your organization so we can
+  tailor your demo."). Form fields now match the reference: First name, Last
+  name, Work email, Organization name, Your role, Organization type (School /
+  School District / Nonprofit / Educational Organization / Institution),
+  Number of students served.
+- Deliberately NOT from the reference, by instruction: no eyebrows (its
+  "College & career readiness", "For educators", "BUILD. MATCH..." labels are
+  omitted; STAGE 01–05 stays as the one justified label); the Dream
+  Opportunity block uses the user's own contractual copy; FAQ and the
+  testimonials shell are additions; the "Explore our sources" link is dropped
+  because the sources list sits inline under the lede. The "What students do"
+  disclosures keep the app's real product detail for depth.
+- Validation: `npx tsc --noEmit` clean; `npx eslint` clean on SchoolsView and
+  DemoRequestForm; `npm run tokens:check` passes. Live (worktree, :3107): all
+  reference lines present in the rendered Schools view; TrustLine → logo wall →
+  `#demo` in that order; at 390px no horizontal overflow, both walls render
+  (292/308px), First/Last name fields present. Desktop pixel measurements were
+  not captured (the Browser pane was hidden at that instant); DOM order was.
+- `DEMO_REQUEST_TO` is now chandu.mp.14@gmail.com (direct instruction, 7 Sept;
+  the earlier hello@ address was an invented placeholder). Still open: real
+  iPhone/Safari pass not done.
+
 ### 2026-09-07 Schools landing, visuals pass (branch `schools-landing`): composed product visuals replace every screenshot crop
 
 Rule for this project from today: marketing imagery is never a cropped
@@ -5726,3 +6113,19 @@ Direct feedback: "not thorough enough, just words and boxes; evaluate everything
 - DEMO_ALWAYS_SHOW_GUIDE in MatchLab flipped back to false on 5 Sept (gesture hint first-visit-only). Chrome extension for the user's Gmail was not connected at session end; the requested summary email was not sent by the agent.
 - Roadmap (My Plan) rebuilt per Joshua's Slack spec: `PlanTask` is `{ id, label, action: PlanAction, href?, outOfApp?, custom? }` (no minutes); `FINANCE_PLAN(prefix)` in profile/data.ts is shared by IB and PE; rows group In app / Out of app; in-app rows are Links to the feature; `/profile?tab=…` links work from inside Profile via the render-time `seenInitialTab` adjustment in ProfileExperience. Landing zig-zag: `flip` lives on Match and Explore only.
 - 5 Sept, late: Build has no loading/ready phases (MatchLoadingScreen and MatchReadyScreen deleted); CompletionScreen owns confetti (flow/aurora/Confetti in a z-60 fixed wrapper). Pro profile rebuilt in ProProfile.tsx (PRO_COVERS from the student cover set, shortCount, PRO_ACCENT blue); CommunityCard.tsx is the single community card (also exports communityAccent, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN). Volunteer role opens the pro profile (view kind "pro") with onOpenDashboard. Career Report section order changed in CareerReport.tsx; finance colleges are six (NJ/NY). Top Three NextStepCta and Overview "Do this next" are static official copy pointing at /play/investment-banking.
+
+## 8 Sept 2026: partner-wall vector sourcing pass, worktree `.worktrees/landing` (NOT committed, left staged for review)
+- Went through the flattened partner wall (`public/images/marketing/partner-logos.webp`) brand by brand against what already had a hosted mark in `public/images/marketing/partners/`, and sourced 9 more from Wikimedia Commons Special:FilePath: Kroll, Brookfield, Akamai, Paramount, WildBrain, Bleacher Report, Cartoon Network, GDC, Peloton, Jimmy Choo (10 named, Jimmy Choo included) plus one raster (Pop-Tarts, no vector exists, used like the `att.png` precedent). Each SVG's viewBox was trimmed to its actual ink bounding box using the browser's own `getBBox()` (no local rasterizer in this environment, so verification of both the flat-white and luminance-invert treatments was done by literally rendering each candidate in the Browser pane with the ticker's real CSS filters before deciding `emblem`/`faint`).
+- Two mid-stream corrections worth knowing about if you touch this again: (1) Bleacher Report and Cartoon Network's Commons SVGs both carry an opaque background rect baked into the design (the black badge square), so the flat-white treatment collapses them to a blank block -- both need `emblem: true` (luminance-invert), same reasoning as HSBC/WBD. (2) Pop-Tarts' only Commons asset is a raster with a painted (not transparent) outline that also collapses to a blob under flat-white -- it needed the same `emblem: true` luminance-invert treatment, verified by literally rendering both filters side by side before deciding.
+- Cartoon Network note: the wall shows the mark as a rotated diamond badge; the only Commons vector (`File:Cartoon Network 2010 logo.svg`) is the unrotated square presentation of the same real logo. Used as-is rather than adding a rotation not present in the source file -- flag this if the visual mismatch bothers anyone.
+- Not sourced, with reasons, in `ATTRIBUTION.md`: all the trade-show/B2B-only brands (MRO, BioProcess International, SupplySide Global, Natural Products Expo West, Brand Licensing Europe, IWCE, MAGIC, MD&M, enterprise CONNECT, The AI Summit London, NCSolutions -- no Commons page found for any), Taylor & Francis (Commons only has a historic oil-lamp emblem, not the current ship-in-circle mark), McDermott Will & Schulte (the wall's name doesn't match the real firm, McDermott Will & Emery -- skipped rather than misattribute), and the unlabeled "[A/B]" bracket mark plus the mustache-face mark (can't be confidently identified to a real trademark from the image alone).
+- `npx tsc --noEmit -p .` is clean. Nothing committed; `MARKS` in `src/components/marketing/PartnerTicker.tsx` and the 10 new files in `public/images/marketing/partners/` are staged/unstaged for the primary session to review.
+
+## 8 Sept 2026: real school logos on Connect pro profiles, worktree `.worktrees/landing` (NOT committed, left staged for review)
+- Task: `pro.education` on a professional's profile (`src/components/connect/ProProfile.tsx`, About card) showed a bare GraduationCap icon next to the text; swap in the actual school seal/wordmark where one can be sourced. New module `src/components/connect/schoolMarks.ts` exports `SCHOOL_MARKS` (keyed by the exact substring that appears in an `education` string, e.g. `"Johns Hopkins"` and `"NYU Stern"`, not the schools' full formal names, since the data abbreviates a few) and `schoolsIn(education)` (splits on `"; "`, matches per segment, dedupes, returns in on-page order).
+- Sourced 30 schools the same way as the corporate partner marks: Wikimedia Commons via its `imageinfo` API (Special:FilePath's underlying source) for the free ones, falling back to English Wikipedia's own file host for the many university seals that are non-free/trademarked and only live there (not on Commons) -- confirmed by querying each school's own Wikipedia infobox (`image`/`logo` field) via the API rather than guessing filenames. Files live in `public/images/connect/schools/<slug>.{svg,png}`; sources and reasoning in that folder's own `ATTRIBUTION.md`.
+- No local SVG rasterizer existed in this environment either; installed `librsvg` via `brew install librsvg` (gives `rsvg-convert`) plus `pip3 install --user pillow`, then rendered each SVG at 1000px and read back the alpha bounding box to rewrite its viewBox to the true ink bounds (most university seal SVGs on Commons/enwiki already render edge-to-edge in their own viewBox, so most trims were a few px of no-op; Wharton/NYU Stern's wordmarks and Johns Hopkins' shield needed a real crop). Three raster logos (Baruch, SCAD, NYU Stern) already carried real alpha backgrounds and were just cropped to bbox; Mayo Clinic's only source was a JPG on solid white, chroma-keyed to transparent (white > 245,245,245 -> alpha 0) before cropping.
+- Skipped two, both explained in `ATTRIBUTION.md` rather than silently dropped: **School of Motion** (online design-ed brand, not an accredited university, no seal exists to source) and **Art Center College of Design** (Commons' only asset, `ArtCenter dot large RGB.png`, is an abstract solid-orange circle with no wordmark -- doesn't read as identifying the school at icon size, so not used). Both professionals (`pro-fontaine`, `pro-johnson`) keep the plain GraduationCap tile for that line; verified in the browser that this shows no missing-image icon and no console error.
+- Wired into `ProProfile.tsx`: each `"; "`-separated clause in `pro.education` is its own row now (previously one single-line row assumed exactly one school); a clause with a sourced mark gets that school's own tile (44px tall, width follows the mark's own ink ratio via a new `eduMarkSize()` next to `PRO_ACCENT`, so a seal stays square and a wordmark like Wharton or NYU Stern widens the tile instead of being squashed into one); a clause with no match keeps the original 44x44 GraduationCap tile. The "Education" label shows once, on the first row, same as before.
+- Verified in the Browser pane (dev server on :3004) via `?pro=<id>` query nav: `pro-okafor` (single match, University of Michigan), `pro-reyes` (two schools, Austin Community College + Texas State University, both matched, stack as two rows), `pro-grant` (seal + Wharton wordmark side by side, tile widths differ correctly), `pro-hartley` (Boston College seal + NYU Stern wordmark), `pro-fontaine` and `pro-johnson` (both segments unmatched, GraduationCap fallback, no console errors). `npx tsc --noEmit -p .` is clean.
+- Nothing committed; `src/components/connect/schoolMarks.ts`, the edit to `ProProfile.tsx`, and `public/images/connect/schools/` (30 marks + `ATTRIBUTION.md`) are staged/unstaged for the primary session to review. Did not touch `PartnerTicker.tsx` / `public/images/marketing/partners/` / that `ATTRIBUTION.md` -- those were a concurrent session's unrelated work in this same worktree.

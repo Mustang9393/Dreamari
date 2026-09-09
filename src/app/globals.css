@@ -320,15 +320,30 @@ body {
     transform: translateX(0) rotate(0deg);
   }
 }
+/* Applied to the card's own INNER scroller (data-card-scroller), not the
+   outer card -- direct feedback: "don't make the card lift up when the
+   nudge is showing, show what actually happens when you scroll." Scrolling
+   this card doesn't move the card; it reveals more of the content inside
+   it. The outer card keeps overflow-hidden, so this peek clips exactly the
+   way a real scroll would -- the frame stays put, the content moves.
+   Travels far enough to bring the NEXT section's own heading into view
+   and holds there for a beat -- a peek that proves scrolling reveals more
+   (direct feedback: "scroll up until the following content is visible,
+   otherwise nobody sees the scroll doing anything meaningful"), not the
+   whole section's body copy dumped at once (direct feedback right after:
+   "don't show the entire copy, just a peek"). */
 @keyframes guide-nudge-up {
   0%,
   9% {
     transform: translateY(0);
   }
-  32% {
-    transform: translateY(-14px);
+  30% {
+    transform: translateY(-52px);
   }
-  46%,
+  46% {
+    transform: translateY(-52px);
+  }
+  62%,
   100% {
     transform: translateY(0);
   }
@@ -352,6 +367,31 @@ body {
   }
   46%,
   100% {
+    opacity: 0;
+  }
+}
+
+/* The "up" direction's own motion: a mouse scroll-wheel notch sliding down
+   inside a mouse-body outline, not a dot traveling a path -- direct
+   feedback: "make the nudge look more like a mouse scroll than a grab and
+   drag" (the traveling-dot metaphor reads as a finger press-and-drag,
+   which is the wrong gesture to teach for a wheel-scroll). Same phase
+   timing as gesture-hint-move so both stay on the shared 2.6s cycle. */
+@keyframes gesture-hint-wheel {
+  0%,
+  6% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  9% {
+    opacity: 0.95;
+  }
+  32% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
     opacity: 0;
   }
 }
@@ -1123,6 +1163,14 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   50% { opacity: 1; }
 }
 
+/* Priority next-step banner: same dark surface as the quiet banner (no more
+   off-palette gradient fill) -- attention comes from a shorter, more
+   insistent border-glow flash instead (direct feedback, 7 Sept 2026). */
+@keyframes next-step-priority-flash {
+  0%, 100% { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent), 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--primary) 95%, transparent), 0 0 36px 2px color-mix(in srgb, var(--primary) 55%, transparent); }
+}
+
 /* Desktop: every chapter, compact ones included, is exactly the visible
    height under the nav (a chapter lands 96px down via scroll-mt-24), with
    its row centred in that space. One size for all six sections, so each
@@ -1143,6 +1191,10 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 @keyframes next-step-cta-pulse {
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
   70%, 100% { box-shadow: 0 0 0 10px transparent; }
+}
+@keyframes next-step-dot {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3); opacity: 0; }
 }
 
 /* Dream Score count-up: gradient ink with a light travelling through it */
@@ -1219,3 +1271,97 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   0% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-6px); }
 }
+
+/* Partner ticker: one slow marquee of partner marks under the credibility
+   lines (landing and Schools). Two copies of the row slide by half their
+   width for a seamless loop; edges fade; hover pauses. */
+.mkt-ticker {
+  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+.mkt-ticker-track {
+  animation: mkt-ticker 48s linear infinite;
+  will-change: transform;
+}
+.mkt-ticker:hover .mkt-ticker-track { animation-play-state: paused; }
+@keyframes mkt-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mkt-ticker { mask-image: none; -webkit-mask-image: none; }
+  .mkt-ticker-track { animation: none; flex-wrap: wrap; justify-content: center; width: 100%; }
+  .mkt-ticker-track .mkt-ticker-row[aria-hidden="true"] { display: none; }
+  .mkt-ticker-track .mkt-ticker-row { flex-wrap: wrap; justify-content: center; row-gap: 20px; padding-right: 0; }
+}
+
+/* Landing demo hints (Joshua Pierce, Slack, 7 Sept 2026): the one control
+   each chapter wants tapped next carries a hint so the interactive pieces
+   stop reading as static pictures. Never scales.
+   Rebuilt three times now (direct feedback, 8 Sept 2026):
+   1. "the flash updates demand way too much attention" -- the original
+      ring+shimmer ran continuously at full strength, no rest.
+   2. "drop the shimmer, use a thin pulse, better color, no fake-looking
+      sparks" -- a generic white gradient band reads as a stock SaaS
+      "shine" effect; the two drifting dots added motion without meaning
+      ("they don't tell me to click anything, just visual fluff").
+   3. "a subtle PERSISTENT pulse instead" -- a rare pulse with a long
+      silent gap (previous pass: once every 5s) means a reader who spends
+      a few seconds on the copy above the graphic can arrive right after
+      it fired and read the card as static for a while. A continuous,
+      gentle breathing glow -- smoothly growing and fading, never fully at
+      rest -- stays truthfully "alive" no matter when someone looks,
+      without ever spiking to something that shouts. Colored per chapter
+      (--c from ChapterShell; --glow on Match's cards) instead of plain
+      white, so it reads as this product's own hint. */
+.mkt-pulse {
+  position: relative;
+  /* 2.6s read as distracting at normal reading pace (direct feedback, 8
+     Sept 2026) -- slowed to a calmer breathing rate. */
+  animation: mkt-pulse-ring 4.2s ease-in-out infinite;
+  --mkt-hint-color: var(--c, var(--glow, var(--primary)));
+}
+/* A ring that grows FROM the element's own edge (spread starting at 0)
+   visually fuses with a solidly-colored button in that same hue -- no gap
+   to read as a separate ring (direct feedback: "Enter Community is the
+   weakest nudge" -- it's a solid-color button, so the ring blended into
+   the fill). Starting the spread at 3px instead of 0 keeps a constant
+   thin gap of page background between the button and the ring at every
+   point in the cycle, so it reads as a ring around the control, not a
+   glow bleeding out of it -- on any button, any color. */
+@keyframes mkt-pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--mkt-hint-color) 65%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--mkt-hint-color) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .mkt-pulse { animation: none; } }
+
+/* Explore poster cards answer the pointer (Joshua Pierce, Slack, 7 Sept 2026;
+   streaming-style per Chandu): on hover the card lifts off and grows, above
+   its neighbours, after a short intent delay so a pointer crossing the row
+   does not make every card jump; the photo eases in and a solid white
+   open-arrow button appears at the top right. Hover-only: a touch-device
+   sweep hint was tried and removed (Chandu, 7 Sept 2026) as unjustified
+   noise -- the original usability finding was specific to desktop's lack of
+   a hover-equivalent affordance signal, never evidenced on touch, where a
+   poster tile already reads as tappable by convention. Rows carry vertical
+   padding so the grown card is not clipped by the scroller. */
+/* A scrolling row clips on both axes, so the grown card (9% of 297px plus the
+   10px lift is about 24px) AND its shadow (about 46px below) need real headroom. Doubled class to outrank the
+   row's own padding utilities; the negative margins give the room back so the
+   layout does not move (direct feedback, 7 Sept 2026: cards clipped at the top). */
+.poster-row.poster-row { padding-top: 44px; padding-bottom: 80px; margin-top: -24px; margin-bottom: -60px; }
+.poster-card { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, box-shadow 0.26s ease 0s; transform-origin: center; will-change: transform; }
+.poster-card .poster-photo { transition: transform 0.6s ease; }
+/* Dead center, always -- the pop-in only ever animates opacity/scale, never
+   position, so the icon can't drift off its anchor (Chandu, 7 Sept 2026). */
+.poster-dim { opacity: 0; transition: opacity 0.22s ease 0s; }
+.poster-cue { opacity: 0; transform: translate(-50%, -50%) scale(0.6); transition: opacity 0.2s ease 0s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0s; }
+@media (hover: hover) {
+  /* doubled class: outranks the shared dm-tap hover lift (a 1px translate)
+     that otherwise wins the transform on pages that load it */
+  .poster-card.poster-card:hover, .poster-card.poster-card:focus-visible { transform: translateY(-10px) scale(1.09); z-index: 5; transition-delay: 0.12s; box-shadow: 0 22px 40px -16px rgba(0,0,0,0.75), 0 0 0 1px color-mix(in srgb, var(--accent-subtle) 70%, transparent); }
+  .poster-card:hover .poster-photo { transform: scale(1.06); }
+  .poster-card:hover .poster-dim, .poster-card:focus-visible .poster-dim { opacity: 1; transition-delay: 0.1s; }
+  .poster-card:hover .poster-cue, .poster-card:focus-visible .poster-cue { opacity: 1; transform: translate(-50%, -50%) scale(1); transition-delay: 0.16s; }
+}
+@media (prefers-reduced-motion: reduce) { .poster-card, .poster-card .poster-photo, .poster-cue, .poster-dim { transition: none; } }

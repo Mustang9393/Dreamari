@@ -1138,14 +1138,18 @@ function BeatStage({
           }`}
         >
           {beat.kind === "choice" && beat.layout === "boss" ? (
-            <DialogueBox speaker={speaker} portrait={portrait} setup={beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
+            <DialogueBox speaker={speaker} portrait={portrait} setup={stageable && revealed ? undefined : beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
             </DialogueBox>
           ) : (
             <DialogueBox
               speaker={speaker}
               portrait={portrait}
-              setup={beat.setup}
+              // The general rule (Joshua Pierce, Slack, 6 Sept 2026): once a
+              // character has said the line in the scene, the activity screen
+              // does not repeat it. Cards keep their eyebrow; a staged beat
+              // drops its spoken line the moment the interaction is revealed.
+              setup={stageable && revealed ? undefined : beat.setup}
               accent={accent}
               tone={"tone" in beat ? beat.tone : undefined}
               gold={beat.kind === "card" && beat.celebrate}
@@ -1326,7 +1330,7 @@ function useCountUp(value: number) {
  *  count-up/down between values, a pop when it changes, and the floating
  *  +5/-3 delta. The same ring language as the countdown clock, so the
  *  HUD's two dials read as one family. */
-function ScoreGauge({ reputation, band, delta, demo = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; demo?: boolean }) {
+function ScoreGauge({ reputation, band, delta, accent, demo = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean }) {
   // Spotlight demo (direct feedback): while a beat is EXPLAINING the score,
   // the gauge acts out a worked example -- nudging up 5, back, down 3,
   // back -- with an arrow calling the eye to it, so "that number in the
@@ -1370,7 +1374,9 @@ function ScoreGauge({ reputation, band, delta, demo = false }: { reputation: num
   }, [demo, docked, DEMO_STEPS]);
   const demoDelta = demo && docked ? DEMO_STEPS[demoStep] : 0;
   const shown = useCountUp(clamp(reputation + demoDelta));
-  const color = BAND_COLOR[band];
+  // The gauge wears the career's own world color, not a generic tier color --
+  // every simulation's HUD reads as that career's world (Chandu, 7 Sept 2026).
+  const color = accent;
   const radius = 15.5;
   const circumference = 2 * Math.PI * radius;
   return (
@@ -1509,6 +1515,11 @@ const VOICE_PITCH: Record<string, number> = {
   Marcus: 360,
   Lamisa: 560,
   "Cobalt HR": 600,
+  // Nursing cast (Chandu, 7 Sept 2026: parity fix -- these three spoke through
+  // the shared 500 fallback, so every RN voice sounded identical).
+  Rosa: 615,
+  Denise: 395,
+  Tyler: 505,
 };
 
 // One tappable meaning, in Express mode: an industry term's plain meaning, or
@@ -1825,7 +1836,7 @@ function TappableScore({ reputation, band, delta, accent }: { reputation: number
   const [open, setOpen] = useState(false);
   const OUTCOMES = [
     { label: "Promoted", range: "85+", active: reputation >= 85 },
-    { label: "No return offer, start over", range: "40–84", active: reputation >= 40 && reputation < 85 },
+    { label: "No return offer, start over", range: "40-84", active: reputation >= 40 && reputation < 85 },
     { label: "The run ends", range: "Under 40", active: reputation < 40 },
   ];
   return (
@@ -1841,7 +1852,7 @@ function TappableScore({ reputation, band, delta, accent }: { reputation: number
         }}
         className="dm-quiet cursor-pointer rounded-[var(--radius-md)]"
       >
-        <ScoreGauge reputation={reputation} band={band} delta={delta} />
+        <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} />
       </button>
       {open && (
         <div
@@ -1958,20 +1969,14 @@ function Hud({
            it opens the three outcomes (the cut "That number in the corner
            just moved" screen, pull instead of push). Full mode keeps the
            gauge inert; its spotlight beat does this job. */}
-        {level.express ? <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} /> : <ScoreGauge reputation={reputation} band={band} delta={delta} demo={spotlightScore} />}
+        {level.express ? <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} /> : <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} demo={spotlightScore} />}
       </div>
       <div className="flex items-center gap-[7px]">
         {/* Same spark/flicker language as the Build flow's bar (SparkBar): the
-           reputation gaining ground is the run's core reward, and a bare width
-           change gave it nothing. Glow matches the leading-edge band color. */}
-        <SparkBar
-          className="flex-1"
-          percent={reputation}
-          height={6}
-          track="var(--color-glass-border-raised)"
-          fill={`linear-gradient(90deg, ${accent}, ${BAND_COLOR[band]})`}
-          glow={BAND_COLOR[band]}
-        />
+           reputation gaining ground is the run's core reward. Solid in the
+           career's own world color -- the HUD reads as that career's world,
+           not a generic tier color (Chandu, 7 Sept 2026). */}
+        <SparkBar className="flex-1" percent={reputation} height={6} track="var(--color-glass-border-raised)" fill={accent} glow={accent} />
         <span className="flex flex-none items-center gap-[3px]" aria-label={`${scored} of ${SCORED_BEATS} decisions made`}>
           {/* Every third dot is a checkpoint: the run is saved at each beat, and
              marking them makes that visible instead of hoping the player trusts

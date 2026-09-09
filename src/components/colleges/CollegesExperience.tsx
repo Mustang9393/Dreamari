@@ -5,15 +5,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeftRight, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 
-// Find a college. One search box, six quick picks, everything else in a
-// tray over the results (NN/g mobile facets), applied filters as removable
-// chips (Baymard). Results update as you type; nothing is submitted.
-// Design notes: docs/COLLEGE_LOOKUP_AUDIT.md.
+// Find a school -- colleges and trade schools both live here, so the page
+// (and its nav chip) says "Schools," never "Colleges" (direct feedback,
+// 8 Sept 2026: "Colleges" as the visible label makes clients ask whether
+// trade schools are supported). One search box, six quick picks, everything
+// else in a tray over the results (NN/g mobile facets), applied filters as
+// removable chips (Baymard). Results update as you type; nothing is
+// submitted. Design notes: docs/COLLEGE_LOOKUP_AUDIT.md.
 
 const HOME_STATE = "NJ"; // Jordan's build answers (Westfield High School, NJ)
 
@@ -117,18 +120,26 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
       </div>
       <DesktopNavigation active="Explore" />
       <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
-        <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/explore" /><Wordmark /></span>
+        {/* Reachable from many places (nav, quick links, Profile, Career
+           Report, global search) with no single correct parent, so this is
+           an honest "nowhere to go" default (direct feedback, 9 Sept 2026:
+           back should never guess a wrong parent) -- router.back() above it
+           in BackButton already returns to the real previous page whenever
+           real navigation history exists, which is true for every one of
+           those entries; this only fires with none at all. */}
+        <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/home" /><Wordmark /></span>
         <QuickLinksMenu />
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[140px] sm:px-[var(--space-14)] md:pt-[96px]">
-        <div className="hidden md:block"><BackButton fallback="/explore" /></div>
-
+      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
+        {/* Desktop back button removed 9 Sept 2026: the Careers/Schools tab
+           strip right under the H1 below already gets you back to Explore,
+           so a separate Back control here was a redundant second way to do
+           the same thing. Mobile keeps its own Back (above, in the mobile
+           header) since mobile doesn't render the tab strip. */}
         <div className="flex flex-col gap-[var(--space-2)]">
-          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a college</h1>
-          <p className={SMALL} style={{ color: "var(--muted-foreground)" }} aria-live="polite">
-            {results.length} {results.length === 1 ? "college" : "colleges"}{activeCount ? " match" : ""}. New Jersey first. We do not rank colleges.
-          </p>
+          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a school</h1>
+          <ExploreSectionTabs active="colleges" />
         </div>
 
         {/* the search: one box, results change as you type, and the door to

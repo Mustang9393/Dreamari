@@ -8,6 +8,7 @@ import { GestureSpotlight, useFirstUseHint } from "@/components/flow/GestureSpot
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
 import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
+import { LocalBurst } from "@/components/build/ui";
 import type {
   BucketBeat,
   CardBeat,
@@ -226,8 +227,15 @@ export function Question({ children }: { children: React.ReactNode }) {
 // ------------------------------------------------------------------ the card
 
 export function CardBody({ beat, onNext, accent = "var(--world-business-money-office)" }: { beat: CardBeat; onNext: () => void; accent?: string }) {
+  // The arrival card celebrates: one burst and the level-up sweep as it
+  // lands, the title a step larger. Everything else on the card is the same,
+  // so the moment is the only thing that changed.
+  useEffect(() => {
+    if (beat.celebrate) playSweep();
+  }, [beat.celebrate]);
   return (
-    <div className="flex flex-col gap-[var(--space-3)]">
+    <div className="relative flex flex-col gap-[var(--space-3)]">
+      {beat.celebrate && <LocalBurst nonce={1} />}
       {beat.step && (
         <span className="flex items-center gap-[7px] text-[11.5px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>
           Step {beat.step.at} of {beat.step.of}
@@ -242,7 +250,13 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
           </span>
         </span>
       )}
-      <Question>{beat.title}</Question>
+      {/* the arrival title is a step larger, plain ink (no gradient: direct
+         feedback, 6 Sept 2026); the burst and the sweep carry the moment */}
+      {beat.celebrate ? (
+        <p className="text-[24px] leading-[1.15] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{beat.title}</p>
+      ) : (
+        <Question>{beat.title}</Question>
+      )}
       {beat.body && (
         <p className="text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
           {beat.body}

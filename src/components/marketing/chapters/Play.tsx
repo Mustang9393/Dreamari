@@ -132,7 +132,12 @@ function PlayDemo() {
 
   return (
     <div className="flex h-full max-w-full flex-col" style={{ width: "clamp(300px, 100cqw, 480px)", gap: "calc(var(--mu) * 8px)" }}>
-      <p className="text-[14px] leading-[18px] font-bold tracking-[0.1em] uppercase" style={{ color: "#5b9bff" }}>Day in the Life: Investment Banker</p>
+      {/* the level line sits under the title, off the art, so the scene stays
+         immersive (Joshua Pierce, Slack, 7 Sept 2026) */}
+      <div className="flex flex-col gap-[3px]">
+        <p className="text-[14px] leading-[18px] font-bold tracking-[0.1em] uppercase" style={{ color: "#5b9bff" }}>Day in the Life: Investment Banker</p>
+        <p className="text-[11px] leading-[15px] font-bold tracking-[0.1em] uppercase" style={{ color: GOLD }}>Level 1 · Intern</p>
+      </div>
 
       <div className="relative" style={{ perspective: 1100 }} onMouseMove={onMove} onMouseLeave={onLeave}>
         <div
@@ -182,7 +187,6 @@ function PlayDemo() {
 
             {/* HUD: the level chip, and the XP pop beside it when the answer lands */}
             <div className="absolute top-[14px] left-[12px] z-[3] flex items-center gap-[8px]">
-              <span className="rounded-[6px] px-[9px] py-[4px] text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ background: "rgba(8,10,22,0.72)", color: GOLD, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>Level 1 · Intern</span>
               {answered && (
                 <span aria-hidden className="mkt-xp-pop text-[11.5px] font-extrabold tracking-[0.04em] whitespace-nowrap" style={{ color: GOLD, textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>+25 XP</span>
               )}
@@ -262,7 +266,9 @@ const BURST = Array.from({ length: 10 }, (_, i) => {
  *  faint wash. The cursor rests on the right answer with the bar half lit and
  *  a slow breath; when the answer lands the row confirms with the Build
  *  flow's lift and one light sweep. The other rows are not buttons at all:
- *  the preview cannot be got wrong (direct feedback). */
+ *  the preview cannot be got wrong (direct feedback). The right answer also
+ *  carries the quiet ring pulse (Joshua Pierce, 7 Sept 2026: reviewers read
+ *  the console as a static picture). */
 function ConsoleOption({ label, index, best, answered, onConfirm }: { label: string; index: number; best: boolean; answered: boolean; onConfirm: () => void }) {
   const done = best && answered;
   const paint = "var(--color-feedback-success)";
@@ -271,7 +277,7 @@ function ConsoleOption({ label, index, best, answered, onConfirm }: { label: str
     <Tag
       {...(best ? { type: "button" as const, onClick: onConfirm, disabled: answered, "aria-label": `Answer: ${label}` } : {})}
       className={`group relative flex w-full items-center gap-[10px] rounded-[8px] px-[12px] py-[8px] text-left text-[14px] leading-snug font-semibold transition-[background,opacity,transform] duration-200 motion-safe:animate-[fade-slide-up_0.36s_cubic-bezier(0.16,1,0.3,1)_both] ${
-        best && !answered ? "cursor-pointer hover:bg-[rgba(255,255,255,0.08)]" : ""
+        best && !answered ? "mkt-pulse cursor-pointer hover:bg-[rgba(255,255,255,0.08)]" : ""
       } ${done ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
       style={{
         animationDelay: `${index * 70}ms`,

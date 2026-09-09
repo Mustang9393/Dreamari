@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { MatchRing } from "@/components/app/MatchRing";
 import { posterTitleFont } from "@/components/app/worlds";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll } from "../scrollHooks";
@@ -22,9 +21,10 @@ const WORLD_COLOR = "var(--world-building-construction)";
 // box, right under it, not as a descriptive sentence competing with the
 // mock inside (direct feedback, 9 Sept 2026: "users have to read the full
 // content inside each box to understand what is happening ... the new
-// explanation underneath will communicate the same thing more clearly").
-// Hire-Ready keeps its own inside line -- only Top 3/Plan/Resume had one
-// specified to remove.
+// explanation underneath will communicate the same thing more clearly" --
+// supersedes the shorter inside-the-box line from 6 Sept 2026). Hire-Ready
+// keeps its own inside line -- only Top 3/Plan/Resume had one specified to
+// remove.
 const STAGES: { id: string; label: string; line?: string; outcome?: string }[] = [
   { id: "top3", label: "My Top 3", outcome: "Choose your Top 3 careers." },
   { id: "plan", label: "My Plan", outcome: "Follow a month-by-month plan toward your #1 career." },
@@ -41,14 +41,15 @@ const TOP3 = [
   { title: "Video Game Designer", world: "Tech & Engineering", duration: "4 yrs", cost: "$130K+", salary: "$98K/year" },
 ];
 
-// Founder-simplified plan copy, verbatim. Mixed like the product's real
-// plans: in-app reps AND real-world moves (the DECA step completed here is
-// the DECA line on the resume one stage later — the loop inside the loop).
+// Founder-supplied plan copy, verbatim (Joshua Pierce, Slack, 6 Sept 2026).
+// The four steps are the product's own loop: Explore, Play, Connect, then a
+// real-world conversation. No career eyebrow, no percentage ring, no
+// where-it-happens chips: header, subheader, body, nothing else.
 const PLAN_TASKS = [
-  { label: "Complete Finance Glossary Game", meta: "In app", done: true },
-  { label: "Join your school's DECA chapter", meta: "Real world", done: true },
-  { label: "Contact a local bank about job shadowing", meta: "Real world", done: false },
-  { label: "Connect with an investment banker", meta: "Dreamari Connect", done: false },
+  { label: "Explore careers and save your Top 3", done: true },
+  { label: "Play a career simulation", done: true },
+  { label: "Ask a professional a career question", done: false },
+  { label: "Meet with your counselor", done: false },
 ];
 
 export function GetHiredChapter() {
@@ -122,9 +123,11 @@ export function GetHiredChapter() {
                    before (direct feedback, 9 Sept 2026: "the 2 behind dont
                    need to stick out so much"), scaled down further on
                    phones so the peeking cards stay on-screen. Solid, not
-                   translucent (direct feedback: "too transparent... should
-                   be solid") -- these are real comparison cards, not a
-                   background decoration. */
+                   translucent (direct feedback, 9 Sept 2026: "too
+                   transparent... should be solid") -- these are real
+                   comparison cards, not a background decoration. Scales
+                   from its top edge, so all three tops line up and the two
+                   behind simply end higher (direct feedback, 7 Sept 2026). */
                 const pose = [
                   { x: "0px", scale: 1, z: 3, o: 1 },
                   { x: "calc(-1 * min(100px, 20vw))", scale: 0.86, z: 1, o: 1 },
@@ -142,6 +145,7 @@ export function GetHiredChapter() {
                          fully occludes the cards tucked behind it */
                       background: "linear-gradient(var(--glass-surface-1), var(--glass-surface-1)), var(--background)",
                       transform: `translateX(${pose.x}) scale(${pose.scale})`,
+                      transformOrigin: "top center",
                       zIndex: pose.z,
                       opacity: pose.o,
                     }}
@@ -196,26 +200,19 @@ export function GetHiredChapter() {
 
           {stage === 1 && (
             <div className="flex h-full flex-col justify-center">
-              {/* Editorial level header: caption, display title, progress ring.
-                 Everything sized to FILL the window — same content, no voids. */}
-              <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="flex flex-col gap-[3px]">
-                  <span className="text-[10px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Investment Banking</span>
-                  <span className="text-[23px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Next 3 Months</span>
-                  <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>2 of 4 complete</span>
-                </span>
-                <MatchRing score={50} size={46} />
+              {/* Subheader and its one line of body, then the list. Three
+                 sizes on the whole panel: the stage title above, this
+                 subheader, and body text (direct feedback, 6 Sept 2026:
+                 too many changes of size, weight and colour). */}
+              <div className="flex flex-col gap-[2px] border-b pb-3" style={{ borderColor: "var(--glass-border)" }}>
+                <span className="text-[17px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Next 3 Months</span>
+                <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>2 of 4 complete</span>
               </div>
-              {/* Hairline task list: check circles, quiet strikeouts, and a
-                 where-it-happens chip under each task (In app / Real world /
-                 Dreamari Connect) */}
+              {/* Hairline task list: check circles and quiet strikeouts */}
               {PLAN_TASKS.map((task, index) => (
                 <div key={task.label} className={`flex flex-1 items-center gap-3 ${index < PLAN_TASKS.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
                   <span className="flex size-[20px] flex-none items-center justify-center rounded-full text-[11px] font-bold" style={task.done ? { background: "var(--color-feedback-success, #33c78c)", color: "#05070f" } : { border: "1.5px solid var(--border)", color: "transparent" }}>{task.done ? "✓" : ""}</span>
-                  <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px]">
-                    <span className={`text-[13px] leading-[16px] font-semibold line-clamp-1 ${task.done ? "line-through" : ""}`} style={{ color: task.done ? "var(--muted-foreground)" : "var(--foreground)", textDecorationColor: "color-mix(in srgb, var(--muted-foreground) 60%, transparent)" }}>{task.label}</span>
-                    <span className="rounded-[5px] px-[6px] py-[1.5px] text-[8.5px] font-bold tracking-[0.08em] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>{task.meta}</span>
-                  </span>
+                  <span className={`min-w-0 flex-1 text-[13px] leading-[18px] font-semibold line-clamp-1 ${task.done ? "line-through" : ""}`} style={{ color: task.done ? "var(--muted-foreground)" : "var(--foreground)", textDecorationColor: "color-mix(in srgb, var(--muted-foreground) 60%, transparent)" }}>{task.label}</span>
                 </div>
               ))}
             </div>
@@ -232,22 +229,14 @@ export function GetHiredChapter() {
                 </div>
                 <div className="flex flex-col gap-[5px] border-b py-2.5" style={{ borderColor: "var(--glass-border)" }}>
                   <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Experience</span>
-                  <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
-                    <span className="font-semibold" style={{ color: "var(--foreground)" }}>Volunteer tutor · City Library</span>
-                    <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>120 hrs</span>
-                  </span>
-                  <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
-                    <span className="font-semibold" style={{ color: "var(--foreground)" }}>Camp counselor · YMCA</span>
-                    <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>Summer</span>
-                  </span>
+                  {/* Two lines, no hours or seasons (direct feedback, 6 Sept 2026):
+                     the section reads at a glance */}
+                  <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--foreground)" }}>Volunteer Tutor · City Library</span>
+                  <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--foreground)" }}>Camp Counselor · YMCA</span>
                 </div>
                 <div className="flex flex-col gap-[5px] py-2.5">
-                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Clubs and leadership</span>
-                  <span className="flex items-baseline justify-between gap-2 text-[11px] leading-[14px]">
-                    <span className="font-semibold" style={{ color: "var(--foreground)" }}>DECA · Treasurer</span>
-                    <span className="flex-none font-bold" style={{ color: "var(--muted-foreground)" }}>2 yrs</span>
-                  </span>
-                  <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--foreground)" }}>Robotics Club</span>
+                  <span className="text-[8.5px] font-bold tracking-[0.1em] uppercase" style={{ color: WORLD_COLOR }}>Leadership</span>
+                  <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--foreground)" }}>DECA · Treasurer</span>
                 </div>
                 {/* The trailing edge: hinted, half-faded structure — reads as
                    "there's more of you on this page," never as a finished template */}
@@ -266,8 +255,9 @@ export function GetHiredChapter() {
               <Image src="/images/app/stage-hire-ready.png" alt="" fill sizes="480px" className="object-cover object-[center_30%]" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(transparent 30%, rgba(5,7,15,0.9))" }} />
               <div className="mkt-offer absolute inset-x-3 bottom-3 rounded-[14px] border p-3" style={{ background: "rgba(5,7,15,0.82)", borderColor: WORLD_COLOR }}>
-                <div className="text-[9.5px] font-bold tracking-[0.14em] uppercase" style={{ color: WORLD_COLOR }}>Hire-ready</div>
-                <div className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Your resume, ready to send.</div>
+                {/* no repeated HIRE-READY label inside the image: the stage
+                   title above already says it (direct feedback, 6 Sept 2026) */}
+                <div className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Your resume is ready to send.</div>
               </div>
             </div>
           )}
@@ -288,7 +278,9 @@ export function GetHiredChapter() {
             <button
               type="button"
               onClick={() => setStage((value) => Math.min(STAGES.length - 1, value + 1))}
-              className="cursor-pointer rounded-full px-5 py-2 text-[12px] font-bold"
+              // the quiet hint (Joshua Pierce / Chandu, 7 Sept 2026): Next
+              // pulses so the four-stage demo reads as something to click through
+              className="mkt-pulse cursor-pointer rounded-full px-5 py-2 text-[12px] font-bold"
               style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               Next

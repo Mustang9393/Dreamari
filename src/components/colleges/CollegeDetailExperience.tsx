@@ -20,7 +20,34 @@ import { Segmented } from "@/components/connect/viz";
 // docs/COLLEGE_LOOKUP_AUDIT.md.
 
 const SIZE_WORD = { Small: "Small", Medium: "Mid-size", Large: "Big" } as const;
-type SectionKey = "in" | "cost" | "academics" | "study" | "who" | "life" | "after" | "see" | "sources";
+// Horizontal tabs (direct feedback, 8 Sept 2026): one section of information
+// on screen at a time instead of one long page of accordions, easier to
+// follow on a phone and less "everything at once" overload. "See it, then
+// ask someone" and "Where these numbers come from" are cross-cutting, not
+// specific to one tab, so they stay outside the tab system, always visible
+// under whichever tab is open (unchanged foldable behavior).
+type Tab = "overview" | "admissions" | "cost" | "academics" | "student" | "life";
+const TABS: { key: Tab; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "admissions", label: "Admissions" },
+  { key: "cost", label: "Cost" },
+  { key: "academics", label: "Academics" },
+  { key: "student", label: "Student body" },
+  { key: "life", label: "Campus life" },
+];
+type SectionKey = "see" | "sources";
+
+/** One tab's content: the same grounded panel "At a glance" already uses,
+ *  so a tab never reads as a lesser version of the page's own header
+ *  section. */
+function TabPanel({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  return (
+    <section aria-labelledby={id} className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
+      <h2 id={id} className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>{title}</h2>
+      <div className="flex flex-col gap-[var(--space-6)] pt-[var(--space-4)]">{children}</div>
+    </section>
+  );
+}
 
 /** A quiet in-section disclosure: the headline rows stay, the rest wait
  *  behind one link so a section never opens as a wall of numbers. */
@@ -36,7 +63,8 @@ function Reveal({ label, children }: { label: string; children: React.ReactNode 
 
 export function CollegeDetailExperience({ slug }: { slug: string }) {
   const c = collegeBySlug(slug);
-  const [open, setOpen] = useState<Set<SectionKey>>(() => new Set<SectionKey>(["in"]));
+  const [tab, setTab] = useState<Tab>("overview");
+  const [open, setOpen] = useState<Set<SectionKey>>(() => new Set<SectionKey>());
   const [saved, toggleSaved] = useSaved();
   const [level, setLevel] = useState<string | null>(null);
   const [allRows, setAllRows] = useState(false);
@@ -70,7 +98,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
         <QuickLinksMenu />
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[960px] flex-col gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[140px] md:pt-[96px]">
+      <main className="relative z-10 mx-auto flex w-full max-w-[960px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:pt-[var(--space-10)]">
         <div className="hidden md:block"><BackButton fallback="/colleges" /></div>
 
         {/* header: the photo runs behind the whole card on phones; from md it
@@ -119,22 +147,27 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           </p>
         )}
 
+        <Segmented ariaLabel="College section" value={tab} onChange={(k) => setTab(k)} options={TABS} grow />
+
         {/* At a glance: the four answers a student came for, as rows. Setting
            is already a chip in the header and the sticker price lives in What
            it costs, so neither repeats here. */}
-        <section aria-labelledby="glance-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
-          <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
-          <div className="pt-[var(--space-2)]">
-            <Row label="Cost for a year" note="what families pay after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
-            <Row label="Applicants who get in" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : "open admission"} value={c.admitRate === null ? "All of them" : `${c.admitRate}%`} />
-            <Row label="Students who finish their degree" note="within six years, counting everyone who started" value={pct(c.finish)} />
-            <Row label="Undergraduates" note={d?.gradStudents ? `plus ${d.gradStudents.toLocaleString("en-US")} graduate students` : undefined} value={c.undergrads.toLocaleString("en-US")} last />
-          </div>
-        </section>
+        {tab === "overview" && (
+          <section aria-labelledby="glance-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
+            <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
+            <div className="pt-[var(--space-2)]">
+              <Row label="Cost for a year" note="what families pay after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
+              <Row label="Applicants who get in" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : "open admission"} value={c.admitRate === null ? "All of them" : `${c.admitRate}%`} />
+              <Row label="Students who finish their degree" note="within six years, counting everyone who started" value={pct(c.finish)} />
+              <Row label="Undergraduates" note={d?.gradStudents ? `plus ${d.gradStudents.toLocaleString("en-US")} graduate students` : undefined} value={c.undergrads.toLocaleString("en-US")} last />
+            </div>
+          </section>
+        )}
 
         {d && (
           <>
-            <Folded id="in" title="Getting in" open={open.has("in")} onToggle={() => toggle("in")}>
+            {tab === "admissions" && (
+            <TabPanel id="in-title" title="Getting in">
               {c.admitRate === null ? (
                 <DotList items={["Everyone who applies gets in", "No test scores needed", "You still need to meet the requirements for your course"]} accent={ACCENT} />
               ) : (
@@ -170,9 +203,11 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   )}
                 </div>
               )}
-            </Folded>
+            </TabPanel>
+            )}
 
-            <Folded id="cost" title="What it costs" open={open.has("cost")} onToggle={() => toggle("cost")}>
+            {tab === "cost" && (
+            <TabPanel id="cost-title" title="What it costs">
               {(() => {
                 const sticker = d.tuitionInState !== null && d.fees !== null ? d.tuitionInState + d.fees + (d.housingCost ?? 0) + (d.foodCost ?? 0) : null;
                 const lowerPaysMore = d.bands.some((b, i) => i > 0 && b.pay < d.bands[i - 1].pay);
@@ -238,9 +273,12 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   </div>
                 );
               })()}
-            </Folded>
+            </TabPanel>
+            )}
 
-            <Folded id="academics" title="Academics" open={open.has("academics")} onToggle={() => toggle("academics")}>
+            {tab === "academics" && (
+            <div className="flex flex-col gap-[var(--space-5)]">
+            <TabPanel id="academics-title" title="Academics">
               <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Finishing</h3>
@@ -266,9 +304,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   </div>
                 </div>
               </div>
-            </Folded>
+            </TabPanel>
 
-            <Folded id="study" title="What you can study" open={open.has("study")} onToggle={() => toggle("study")}>
+            <TabPanel id="study-title" title="What you can study">
               {x && Object.keys(x.programmes).length > 0 ? (() => {
                 const levels = Object.keys(x.programmes);
                 const active = level && levels.includes(level) ? level : levels.includes("Bachelor's degrees") ? "Bachelor's degrees" : levels[0];
@@ -310,9 +348,12 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   </div>
                 </div>
               )}
-            </Folded>
+            </TabPanel>
+            </div>
+            )}
 
-            <Folded id="who" title="Who is there" open={open.has("who")} onToggle={() => toggle("who")}>
+            {tab === "student" && (
+            <TabPanel id="who-title" title="Who is there">
               <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                 <div>
                   <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{(c.undergrads + (d.gradStudents ?? 0)).toLocaleString("en-US")} students</h3>
@@ -330,9 +371,12 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   </div>
                 </div>
               </div>
-            </Folded>
+            </TabPanel>
+            )}
 
-            <Folded id="life" title="Life there" open={open.has("life")} onToggle={() => toggle("life")}>
+            {tab === "life" && (
+            <div className="flex flex-col gap-[var(--space-5)]">
+            <TabPanel id="life-title" title="Life there">
               <div className="flex flex-col gap-[var(--space-6)]">
                 <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                   <div>
@@ -364,9 +408,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   </div>
                 )}
               </div>
-            </Folded>
+            </TabPanel>
 
-            <Folded id="after" title="After college" open={open.has("after")} onToggle={() => toggle("after")}>
+            <TabPanel id="after-title" title="After college">
               <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Pay and debt</h3>
               <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, in every subject.</p>
               <div className="mt-[var(--space-2)]">
@@ -375,7 +419,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <Row label="Borrowers paying their loans back" value={c.repay !== null ? `${c.repay}%` : "Not published"} last={x?.fallBehind === null || x?.fallBehind === undefined} />
                 {x?.fallBehind !== null && x?.fallBehind !== undefined && <Row label="Borrowers who fall behind" value={`${x.fallBehind}%`} last />}
               </div>
-            </Folded>
+            </TabPanel>
+            </div>
+            )}
           </>
         )}
 

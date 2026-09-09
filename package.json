@@ -12,6 +12,11 @@
     "tokens:check": "npm run tokens:validate && node design-tokens/scripts/build-tokens.mjs --check"
   },
   "dependencies": {
+    "@dicebear/avataaars": "^9.4.2",
+    "@dicebear/core": "^9.4.3",
+    "@dicebear/notionists": "^9.4.2",
+    "@dicebear/open-peeps": "^9.4.2",
+    "@dicebear/personas": "^9.4.2",
     "@svg-maps/usa": "^2.0.0",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.32.0",

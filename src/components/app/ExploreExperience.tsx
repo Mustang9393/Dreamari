@@ -6,9 +6,10 @@ import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
+import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
+
 import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
   BROWSE_BECAUSE_LIKED,
@@ -33,6 +34,15 @@ import "./app.css";
 //  - "Browse All" (Explore-Browse, 3185:17011): search, world filter pills,
 //    Sort by, and six career rails ported section by section.
 
+// This pill answers one question -- what's shown within Careers -- so
+// Colleges (a different section entirely) doesn't live here; it sits as its
+// own text-tab strip under the page title instead (ExploreSectionTabs,
+// chrome.tsx). Was folded into this pill as a third stop briefly (8 Sept
+// 2026), then split back out: two full-weight controls side by side read as
+// clutter, but so did stacking three unrelated questions into one pill. Kept
+// as a pill deliberately (9 Sept 2026) once Careers/Schools became a text
+// tab strip of its own -- reserving the pill shape for this local, same-page
+// toggle keeps it visually distinct from that page-level section switch.
 function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void }) {
   return (
     <div
@@ -50,7 +60,7 @@ function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (
           type="button"
           aria-pressed={tab === item.key}
           onClick={() => onTab(item.key)}
-          className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold uppercase"
+          className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold whitespace-nowrap uppercase"
           style={{
             fontFamily: "var(--font-body)",
             background: tab === item.key ? "var(--primary)" : "transparent",
@@ -77,7 +87,7 @@ function Rail({ title, subtitle, children }: { title: string; subtitle?: string;
           </p>
         )}
       </div>
-      <div className="-mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
+      <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
     </section>
   );
 }
@@ -100,7 +110,7 @@ function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
       <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         Top 5 Trending Careers Among Gen Z
       </h2>
-      <div className="-mx-5 flex gap-[24px] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
+      <div className="poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
         {trending.map((career, index) => (
           <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
         ))}
@@ -109,7 +119,7 @@ function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
   );
 }
 
-const SORT_OPTIONS = ["Recommended", "A – Z", "Salary"] as const;
+const SORT_OPTIONS = ["Recommended", "A-Z", "Salary"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
 
 function FilterPill({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
@@ -226,7 +236,7 @@ function applyCatalogView(careers: CatalogCareer[], world: string, query: string
     const q = query.trim().toLowerCase();
     list = list.filter((career) => career.title.toLowerCase().includes(q) || career.world.toLowerCase().includes(q));
   }
-  if (sort === "A – Z") list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+  if (sort === "A-Z") list = [...list].sort((a, b) => a.title.localeCompare(b.title));
   if (sort === "Salary") {
     const value = (career: CatalogCareer) => (career.salary ? parseInt(career.salary.replace(/\D/g, ""), 10) : -1);
     list = [...list].sort((a, b) => value(b) - value(a));
@@ -688,7 +698,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
       <DesktopNavigation active="Explore" />
 
       {/* Mobile top tabs (the mobile frames' "Top Nav Scrim") */}
-      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[120px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
+      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[160px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
         <button
           type="button"
           onClick={() => switchTab("foryou")}
@@ -708,9 +718,18 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* Hamburger anchored top-right, same corner as every other page's
            mobile header -- it used to sit at the LEFT edge here, the one
            page out of step with the rest of the app. Search (Browse tab
-           only) sits just to its left instead of competing for the same
-           corner. */}
+           only) and the Colleges pill sit just to its left instead of
+           competing with For You/Browse All for the same row. */}
         <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center gap-[10px]">
+          <button
+            type="button"
+            aria-label="Find a college"
+            onClick={() => router.push("/colleges")}
+            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+            style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          >
+            <GraduationCap className="h-4 w-4" />
+          </button>
           {tab === "browse" && (
             <button
               type="button"
@@ -739,16 +758,23 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* Explore Header (desktop) */}
         <div className="hidden w-full flex-col gap-[var(--space-6)] md:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
-              Explore
-            </h1>
+            <div className="flex flex-col gap-[var(--space-2)]">
+              <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
+                Explore
+              </h1>
+              <ExploreSectionTabs active="careers" />
+            </div>
             <div className="flex min-w-0 items-center gap-[var(--space-6)]">
               {/* Search grows from icon to input; the toggle folds away while
-                 it is open. */}
+                 it is open. Perfectly circular collapsed (a fixed 40x40 with
+                 rounded-lg read as a rounded square, not a circle -- direct
+                 feedback, 8 Sept 2026); once it grows into a text field it
+                 needs the normal rounded-rect shape back. */}
               <div
-                className="flex h-10 min-w-0 items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                className="flex h-10 min-w-0 items-center gap-[var(--space-3)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{
                   width: searchOpen ? "min(480px, 44vw)" : 40,
+                  borderRadius: searchOpen ? "var(--radius-lg)" : 9999,
                   background: searchOpen ? "var(--glass-surface-1)" : "var(--glass-surface-2)",
                   borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",
                 }}
@@ -778,9 +804,9 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                   </button>
                 )}
               </div>
-              {/* Toggle collapses while search is open */}
+              {/* Toggle collapses while search is open. */}
               <div
-                className="overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                className="flex-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
               >
                 <ForYouBrowseToggle tab={tab} onTab={switchTab} />

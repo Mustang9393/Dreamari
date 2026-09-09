@@ -62,3 +62,5 @@ Last updated: 6 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 - Only Investment Banking and Private Equity carry the official roadmap copy.
 - Next-step banner does not yet change after the simulation is completed (no copy specified).
 - Career detail "Pay by state" panel shows state pay next to the national median; product decision pending.
+
+Home: the Daily Drop panel and its takeover are hidden for the school focus group (`SHOW_DAILY_DROP = false` in `HomeExperience.tsx`, Joshua Pierce, Slack, 6 Sept 2026). Flip it back when the Drop returns halfway through the focus group.

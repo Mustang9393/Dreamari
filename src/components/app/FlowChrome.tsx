@@ -3,6 +3,7 @@
 import { QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { DreamScoreTip } from "@/components/app/DreamScoreTip";
 import { useDreamScore } from "@/lib/dreamScore";
 
 // The header for focus flows (Build, Match, the games): the same wordmark and
@@ -48,9 +49,12 @@ export function FlowChrome() {
         {/* re-keyed on every score change: the chip bounces in, a ring flashes
            off it and the sparkle spins once as the points slot in */}
         {score > 0 && (
-          <span key={score} aria-label={`Dream Score ${score} XP`} className="flex h-9 items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[12.5px] leading-[16px] font-bold tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-            <Sparkles className="h-3.5 w-3.5 motion-safe:animate-[xp-spin_0.75s_ease-out_both]" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {score.toLocaleString("en-US")} XP
-          </span>
+          // hover or focus the chip: what earns the score and why it matters
+          <DreamScoreTip>
+            <span key={score} aria-label={`Dream Score ${score} XP`} className="flex h-9 items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[12.5px] leading-[16px] font-bold tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+              <Sparkles className="h-3.5 w-3.5 motion-safe:animate-[xp-spin_0.75s_ease-out_both]" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {score.toLocaleString("en-US")} XP
+            </span>
+          </DreamScoreTip>
         )}
         <QuickLinksMenu />
         {intro && (

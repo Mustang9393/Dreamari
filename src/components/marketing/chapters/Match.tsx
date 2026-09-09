@@ -480,7 +480,8 @@ function MatchDemo() {
               onClick={() => {
                 if (top?.key !== "iba") act("pass");
               }}
-              className="flex items-center justify-center rounded-full border"
+              // the quiet hint: the X pulses while Management Analyst is on top
+              className={`flex items-center justify-center rounded-full border ${top?.key === "ops" ? "mkt-pulse" : ""}`}
               style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }}>
@@ -494,7 +495,8 @@ function MatchDemo() {
               onClick={() => {
                 if (top?.key !== "ops") act("like");
               }}
-              className="flex items-center justify-center rounded-full border"
+              // then the thumbs-up pulses once Investment Banking is on top
+              className={`flex items-center justify-center rounded-full border ${top?.key === "iba" ? "mkt-pulse" : ""}`}
               style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: WORLD_COLOR, borderColor: WORLD_COLOR, color: "#fff" }}
             >
               {/* Thumbs-up, not a heart — per direct feedback the heart read as too

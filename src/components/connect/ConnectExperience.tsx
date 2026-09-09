@@ -4,9 +4,9 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 
 import Image from "next/image";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { type LucideIcon as ResourceIcon } from "lucide-react";
+import { type LucideIcon as ResourceIcon, UserRound } from "lucide-react";
 import {
   ArrowLeft,
   BookOpen,
@@ -42,13 +42,16 @@ import {
   Bell,
   Search,
   QrCode,
+  LayoutGrid,
+  Rows3,
 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar } from "./primitives";
+import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
-import { NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, ProProfileView, RULE, useStudentWorlds, type Follows } from "./ProProfile";
+import { PeopleTab, PeopleWelcome } from "./PeopleTab";
+import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
 
@@ -73,7 +76,7 @@ import {
   type EventBoard,
   type EventResource,
   type Insight,
-  type Thread, OPPORTUNITIES , type Opportunity } from "./data";
+  type Thread, type ProResponse, OPPORTUNITIES , type Opportunity, type Pro } from "./data";
 
 // Connect — moderated career Q&A + post-event continuation, built to the
 // implementation handoff (v1.0, 22 Aug 2026). This is the P1 FRONTEND surface
@@ -117,7 +120,7 @@ const STATE_COLOR: Record<Thread["state"], string> = {
 // warm event accent (handoff 20): the theme-aware gold
 const EVENT_ACCENT = "#f59e0b";
 
-type LandingTab = "communities" | "events" | "notifications";
+type LandingTab = "communities" | "events" | "people" | "notifications";
 type View =
   | { kind: "home"; tab: LandingTab }
   | { kind: "board"; id: string; filter: string }
@@ -127,12 +130,14 @@ type View =
   | { kind: "thread"; id: string }
   | { kind: "insight"; id: string }
   | { kind: "saved" }
+  | { kind: "followingFeed" }
   | { kind: "activity" }
   | { kind: "admin" }
   | { kind: "partner"; org: string };
 
 function viewToQuery(view: View): string {
   if (view.kind === "saved") return "?saved=1";
+  if (view.kind === "followingFeed") return "?following=1";
   if (view.kind === "activity") return "?activity=1";
   if (view.kind === "admin") return "?admin=1";
   if (view.kind === "partner") return `?partner=${encodeURIComponent(view.org)}`;
@@ -148,6 +153,7 @@ function viewToQuery(view: View): string {
 function queryToView(search: string): View {
   const q = new URLSearchParams(search);
   if (q.get("saved")) return { kind: "saved" };
+  if (q.get("following")) return { kind: "followingFeed" };
   if (q.get("activity")) return { kind: "activity" };
   if (q.get("admin")) return { kind: "admin" };
   if (q.get("partner")) return { kind: "partner", org: q.get("partner")! };
@@ -158,7 +164,7 @@ function queryToView(search: string): View {
   if (q.get("dashboard")) { const id = q.get("dashboard")!; return { kind: "proDashboard", id: id === "pro" ? "pro-okafor" : id }; }
   if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
   const tab = q.get("tab");
-  return { kind: "home", tab: tab === "events" || tab === "notifications" ? tab : "communities" };
+  return { kind: "home", tab: tab === "events" || tab === "people" || tab === "notifications" ? tab : "communities" };
 }
 
 const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
@@ -167,16 +173,70 @@ function proById(id: string) {
   return PROS.find((p) => p.id === id)!;
 }
 
+// The single line that gives a question row real information scent (direct
+// feedback, 8 Sept 2026: a title alone doesn't say whether it's worth a
+// click -- Stack Overflow/Quora both solve this with a snippet of the top
+// answer). Prefers the primary pro answer; falls back to the asker's own
+// elaboration (`context`) when nothing has answered yet, so an unanswered
+// question still previews as something specific rather than a bare title.
+function questionSnippet(thread: Thread): { by?: string; text: string } | undefined {
+  const answer = thread.responses.find((r): r is ProResponse => r.kind === "answer" && !!r.primary) ?? thread.responses.find((r): r is ProResponse => r.kind === "answer");
+  if (answer) return { by: proById(answer.proId).name, text: answer.body };
+  if (thread.context) return { text: thread.context };
+  return undefined;
+}
+
 function eventById(id: string) {
   return EVENTS.find((e) => e.id === id);
+}
+
+/** Every distinct person who's replied, in the order they first appear --
+ *  a follow-up borrows its answer's own pro (same rule ThreadView uses),
+ *  so it never double-counts as a second, nameless "responder". */
+function responderIdentities(thread: Thread): { name: string; pro?: boolean }[] {
+  const seen = new Set<string>();
+  const people: { name: string; pro?: boolean }[] = [];
+  let lastProId: string | undefined;
+  for (const r of thread.responses) {
+    if (r.kind === "answer") {
+      lastProId = r.proId;
+      if (!seen.has(r.proId)) { seen.add(r.proId); people.push({ name: proById(r.proId).name, pro: true }); }
+    } else if (r.kind === "peer") {
+      if (!seen.has(r.handle)) { seen.add(r.handle); people.push({ name: r.handle }); }
+    } else if (r.kind === "followup" && lastProId && !seen.has(lastProId)) {
+      seen.add(lastProId);
+      people.push({ name: proById(lastProId).name, pro: true });
+    }
+  }
+  return people;
+}
+
+/** Who's in this conversation, at a glance -- a small overlapping stack of
+ *  faces (Slack thread avatars, a GitHub PR's reviewer stack), tried as an
+ *  experiment (direct feedback: "is that a good idea? let's experiment if
+ *  yes") alongside the reply count it doesn't replace. A visible ring in
+ *  the row's own resting surface color is what makes the overlap read as
+ *  a stack instead of avatars just crowded together. */
+function ResponderStack({ thread, size = 20, max = 3 }: { thread: Thread; size?: number; max?: number }) {
+  const people = responderIdentities(thread).slice(0, max);
+  if (people.length === 0) return null;
+  return (
+    <span className="flex items-center" aria-label={`${people.length === 1 ? "1 person has" : `${people.length} people have`} replied`}>
+      {people.map((p, i) => (
+        <span key={p.name + i} className="rounded-full" style={{ marginLeft: i === 0 ? 0 : -Math.round(size * 0.38), zIndex: people.length - i, boxShadow: "0 0 0 2px var(--glass-surface-1)" }}>
+          <Avatar name={p.name} size={size} />
+        </span>
+      ))}
+    </span>
+  );
 }
 
 /** The one ask affordance. A box you can type into is an invitation; a button
  *  is a door you have to decide to open. Where the question goes is chosen in
  *  the sheet that opens, so this reads the same on every tab. */
 // The doc's composer, one for one: a "What do you want to ask?" field with
-// AI Ideas / Polish / Post actions along its bottom edge. All three open the
-// same Ask flow -- drafting, AI suggestions and posting live in the sheet.
+// Cancel/Post actions along its bottom edge. (AI Ideas/Polish removed 8 Sept
+// 2026 -- no AI integration for now.)
 /** Posting happens in place, not in a modal: a collapsed invitation that
  *  expands into a real composer right at the top of the feed. Reading is
  *  free; the first attempt to post in an un-joined community routes
@@ -242,12 +302,6 @@ function InlineAsk({
         <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           Posting as Jordan · Junior. Pros see your grade, never your full name.
         </span>
-        <button type="button" onClick={() => setText((t) => t || "What does a typical week actually look like in this career?")} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 50%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 12%, transparent)" }}>
-          <Sparkles className="h-[13px] w-[13px]" aria-hidden /> AI Ideas
-        </button>
-        <button type="button" onClick={() => setText((t) => t.trim() ? t.trim().replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase()).replace(/([^?.!])$/, "$1?") : t)} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          Polish
-        </button>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
@@ -280,6 +334,37 @@ function LocalQuestionCard({ title }: { title: string }) {
 
 // ——— tiny shared pieces ———
 
+// "Most Recent" needs an actual order, and the seed data only carries a
+// display string ("6h ago", "2d ago") -- minutes-ago from the unit lets the
+// two feeds (Reddit's Best/New, borrowed per direct feedback, 8 Sept 2026)
+// sort on something real instead of authoring order.
+const AGO_UNIT_MINUTES: Record<string, number> = { m: 1, h: 60, d: 1440, w: 10080 };
+function agoMinutes(postedAgo: string): number {
+  const match = /^(\d+)([mhdw])/.exec(postedAgo);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  return Number(match[1]) * (AGO_UNIT_MINUTES[match[2]] ?? 1);
+}
+
+// The one element Reddit renders as a rounded pill in both Card and Compact
+// (its vote widget) -- everything else in its action row (comments, share,
+// save...) is plain text/icon, not its own button-shaped chip (direct
+// feedback, 8 Sept 2026: don't clone the whole row, just the one real signal
+// that "this is a live control"). This feed has no downvote, so the pill
+// carries just the thumbs-up and its count.
+function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed: boolean; count: number }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={pressed}
+      className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
+      style={pressed ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
+    >
+      <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {count}
+    </button>
+  );
+}
+
 function StatusChip({ state }: { state: Thread["state"] }) {
   return (
     <span className="inline-flex items-center gap-[5px] text-[11px] leading-[15px] font-semibold" style={{ color: STATE_COLOR[state] }}>
@@ -289,103 +374,9 @@ function StatusChip({ state }: { state: Thread["state"] }) {
   );
 }
 
-// Avatar photos are PARKED for the pitch (direct feedback: mixed cartoons
-// and photos read as random) -- every avatar renders as initials until
-// USE_PHOTO_AVATARS flips back on. The portrait set and mapping stay.
-const USE_PHOTO_AVATARS = false;
-
-// Photo avatars (behind the flag above), initials only as the fallback
-// for a name with no portrait. The pool is a committed set of demo portraits
-// (public/images/connect/avatars); each named person maps to ONE photo, and
-// no two people who share a screen share a face. Jordan (the signed-in
-// student) wears their real profile photo.
-const AV = "/images/connect/avatars";
-const AVATAR_PHOTO: Record<string, string> = {
-  "Jordan Rivera": "/images/avatar-jordan.jpg",
-  Jordan: "/images/avatar-jordan.jpg",
-  // Verified professionals
-  "David Chen": `${AV}/m36.jpg`,
-  "Elena Martinez": `${AV}/w22.jpg`,
-  "Amara Okafor": `${AV}/w45.jpg`,
-  "Marcus Reyes": `${AV}/m47.jpg`,
-  "Jasmine Cole": `${AV}/w31.jpg`,
-  "Nadia Osei": `${AV}/w28.jpg`,
-  "Wei Zhang": `${AV}/m29.jpg`,
-  "Tom Gallagher": `${AV}/m11.jpg`,
-  "Sofia Grant": `${AV}/w5.jpg`,
-  "Andre Whitfield": `${AV}/m55.jpg`,
-  "Keiko Tanaka": `${AV}/w63.jpg`,
-  "Danielle Brooks": `${AV}/w41.jpg`,
-  "Leo Fontaine": `${AV}/m77.jpg`,
-  "Omar Haddad": `${AV}/m68.jpg`,
-  "Camille Vega": `${AV}/w52.jpg`,
-  // second voices per company (Unsplash, free licence, 4 Sept 2026); keep in
-  // step with the same map in primitives.tsx
-  "Samuel Adler": `${AV}/p1.jpg`,
-  "Isabella Rossi": `${AV}/p2.jpg`,
-  "Arjun Nair": `${AV}/p3.jpg`,
-  "Marisol Ortega": `${AV}/p4.jpg`,
-  "Erik Lindqvist": `${AV}/p5.jpg`,
-  "Simone Bell": `${AV}/p6.jpg`,
-  "Hannah Weiss": `${AV}/p7.jpg`,
-  "Daniel Kim": `${AV}/p8.jpg`,
-  "Lena Novak": `${AV}/p9.jpg`,
-  // Students wear friendly illustrated avatars (micah, generated per
-  // handle), never real photos -- on-brand for a teen product and no real
-  // minor's face is ever implied. Professionals keep realistic portraits:
-  // credibility is their whole job here.
-  Ethan: `${AV}/c-Ethan.png`,
-  Priya: `${AV}/c-Priya.png`,
-  Maya: `${AV}/c-Maya.png`,
-  Zoe: `${AV}/c-Zoe.png`,
-  Sam: `${AV}/c-Sam.png`,
-  Lena: `${AV}/c-Lena.png`,
-  Ava: `${AV}/c-Ava.png`,
-  Diego: `${AV}/c-Diego.png`,
-  Sana: `${AV}/c-Sana.png`,
-  Ruby: `${AV}/c-Ruby.png`,
-  Theo: `${AV}/c-Theo.png`,
-  Jo: `${AV}/c-Jo.png`,
-  Amir: `${AV}/c-Amir.png`,
-  Devon: `${AV}/c-Devon.png`,
-  Riley: `${AV}/c-Riley.png`,
-  Noah: `${AV}/c-Noah.png`,
-  Marcus: `${AV}/c-Riley.png`,
-};
-
-// A verified badge overlaps the corner exactly like the app's other verified
-// affordances — a small ShieldCheck on a solid chip, never color alone.
-function Avatar({ name, size = 34, verified }: { name: string; size?: number; verified?: boolean }) {
-  // Professionals always wear their portrait (direct feedback: a face for
-  // Elena Martinez); students stay behind the flag.
-  const isPro = PROS.some((p) => p.name === name);
-  const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
-  const initials = name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-  return (
-    <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
-      {photo ? (
-        <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
-      ) : (
-        <span
-          className="flex h-full w-full items-center justify-center rounded-full font-bold"
-          style={{
-            background: verified ? "var(--primary)" : "var(--secondary)",
-            color: verified ? "#FFFFFF" : "var(--foreground)",
-            fontSize: Math.max(11, size * 0.4),
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          {initials}
-        </span>
-      )}
-      {verified && (
-        <span role="img" aria-label="Verified" className="absolute right-[-2px] bottom-[-2px] flex items-center justify-center rounded-full border-2" style={{ width: size * 0.46, height: size * 0.46, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-surface-3)" }}>
-          <ShieldCheck aria-hidden style={{ width: size * 0.34, height: size * 0.34, color: "var(--accent-subtle)" }} />
-        </span>
-      )}
-    </span>
-  );
-}
+// Avatars come from primitives.tsx, the one portrait map (the copy that lived
+// here still pointed at the old photo set, so the volunteer picker showed
+// empty circles: direct feedback, 7 Sept 2026).
 
 
 // Student identity: handle + avatar + class year — Twitter-shaped, like the
@@ -777,21 +768,26 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 // has come back yet, the quoted bold question as the card's heading, a chip
 // row for the asker's grade and country, then likes · views · comments, with
 // the time at the top right.
-function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
+function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   // Display count for the demo (data.ts `comments`), falling back to the
   // real list; the thread itself may hold fewer. Direct feedback.
   const comments = thread.comments ?? thread.responses.length;
+  const snippet = questionSnippet(thread);
   return (
-    <Card accent={accent} className="dm-tap group relative cursor-pointer">
-      {/* The WHOLE card opens the thread (direct feedback: "make it
-         obviously easily clickable") -- an overlay target under the
-         like/save controls, a hover ring, and a chevron that says "this
-         goes somewhere" before you ever hover. */}
+    // A post in a feed, not a box on a page (direct feedback, 8 Sept 2026:
+    // "let's not do the cards for the card view, do it like Reddit does") --
+    // Reddit's own posts sit straight in the feed, divided by a hairline,
+    // never a bordered/shadowed card. The whole row still opens the thread
+    // (earlier direct feedback: "make it obviously easily clickable") -- an
+    // overlay target under the like/save controls, a hover tint standing in
+    // for the old hover ring, and a chevron that says "this goes somewhere"
+    // before you ever hover.
+    <div className="group relative rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
         <span className="sr-only">Open question: {thread.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
-      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
+      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       {/* A living row starts with a person: the asker's avatar and handle
          lead, the time sits at the far edge -- the same anatomy as every
@@ -800,30 +796,47 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
         <span className="flex min-w-0 items-center gap-[8px]">
           <Avatar name={thread.handle} size={26} />
           <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
-          <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
-          {comments === 0 && (
-            <span className="inline-flex flex-none rounded-[var(--radius-sm)] border px-[9px] py-[2px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "color-mix(in srgb, var(--hero-accent-purple) 55%, var(--glass-border))", color: "var(--accent-subtle)", background: "color-mix(in srgb, var(--hero-accent-purple) 14%, transparent)" }}>
-              Unanswered
-            </span>
-          )}
+          <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}</span>
         </span>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
       </div>
-      <h3 className="mt-[12px] pr-[22px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
-      <div className="relative z-20 mt-[14px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful + (helpful ? 1 : 0)}
-        </button>
+      {/* Plain heading, not a quoted line (direct feedback, 8 Sept 2026: a
+         question is the SUBJECT of the post, not something to read as a
+         quotation -- Reddit and Stack Overflow both just set the title). */}
+      <h3 className="mt-[12px] pr-[22px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{thread.title}</h3>
+      {/* Information scent (direct feedback: a title alone doesn't say
+         whether it's worth a click) -- a one-line snippet of the top answer
+         if one exists, or the asker's own elaboration if not, the way Stack
+         Overflow and Quora both preview a question before you open it. */}
+      {snippet && (
+        <p className="mt-[4px] line-clamp-1 pr-[22px] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+          {snippet.by && <span className="font-bold" style={{ color: "var(--foreground)" }}>{snippet.by}: </span>}
+          {snippet.text}
+        </p>
+      )}
+      <div className="relative z-20 mt-[14px] flex items-center gap-[var(--space-4)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        {/* The real answered/waiting state (direct feedback: make this the
+           obvious, always-visible signal, not a small pill that only ever
+           shows for the zero-comments case) -- leftmost, since it's the one
+           fact that actually decides whether this question needs you. */}
+        <StatusChip state={thread.state} />
+        <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
         <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
-          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{comments} comments</span>
+          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
         </button>
-        {/* Save rides next to comments at a smaller size (direct feedback):
-           one cluster to read, not three corners. */}
-        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-sm)] px-[6px] text-[11.5px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-          <Bookmark className="h-3 w-3" aria-hidden /> {saved ? "Saved" : "Save"}
+        {/* Experiment (direct feedback: "is that a good idea? let's
+           experiment if yes") -- who's actually in this conversation, at a
+           glance. Additive: the reply count above still says how many,
+           this says who. */}
+        <ResponderStack thread={thread} />
+        {/* Icon-only, pushed to the far edge: Save is a secondary action and
+           doesn't need to compete in text with the status/helpful/comments
+           cluster that actually explains the post (direct feedback). */}
+        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+          <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
         </button>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -831,47 +844,347 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful, accen
 // and their company chip, the insight's title line, then likes and comments
 // -- and the whole row OPENS: title and comment count both land on the
 // insight's own thread, where the conversation lives.
-function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful, accent = "var(--primary)" }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; accent?: string }) {
+function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   const nav = useContext(ConnectNav);
   return (
-    <Card accent={accent} className="dm-tap group relative cursor-pointer">
-      {/* The WHOLE card opens the insight's thread -- overlay target under
-         the like/save controls, hover ring, and an always-visible chevron. */}
+    // Same flat-feed-row treatment as QuestionCard (direct feedback, 8 Sept
+    // 2026) -- no bordered/shadowed box, a hairline divider instead.
+    <div className="group relative rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
         <span className="sr-only">Open insight: {insight.title}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ boxShadow: `inset 0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent)` }} />
-      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[10px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
+      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
 
       <div className="flex items-start gap-[12px] pr-[22px]">
         <ProAvatar proId={pro.id} name={pro.name} size={36} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-[6px]">
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 cursor-pointer text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
-            <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--glass-border))", color: "var(--world-food-farming-nature)", background: "color-mix(in srgb, var(--world-food-farming-nature) 12%, transparent)" }}>Pro</span>
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex cursor-pointer items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={13} /></button>
             <span className="flex min-w-0 items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span className="truncate">{pro.role}</span> <CompanyChip name={pro.org} tone="surface" size="sm" /></span>
           </div>
           <h3 className="mt-[8px] text-[15.5px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{insight.title}</h3>
           <p className="mt-[4px] line-clamp-2 text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{insight.body}</p>
-          <div className="relative z-20 mt-[10px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-              <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {insight.helpful + (helpful ? 1 : 0)}
-            </button>
+          <div className="relative z-20 mt-[10px] flex items-center gap-[var(--space-4)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
             <button type="button" onClick={onOpen} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px]">
-              <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> <span className="whitespace-nowrap">{insight.replies.length} comments</span>
+              <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.replies.length}
             </button>
-            <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
-              <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
+            {/* Icon-only, same reasoning as QuestionCard's Save (direct
+               feedback): a secondary action, not something to compete in
+               text with the counts that actually explain the post. */}
+            <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+              <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
             </button>
           </div>
         </div>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{insight.postedAgo}</span>
       </div>
-    </Card>
+    </div>
   );
 }
 
+// ——— feed controls: sort + view, learned from Reddit's community feed
+// (direct feedback, 8 Sept 2026), kept to the two moves worth borrowing:
+// a sort (Best/Most Recent, standing in for Reddit's Best/New -- no
+// "Rising"/"Controversial", this feed doesn't have the volume to need them)
+// and a view toggle (Card/Compact). Reddit's own left/right rails, awards,
+// crossposts etc. are out of scope -- just how the post LIST itself reads. ———
+
+export type FeedSort = "best" | "recent";
+// "card" is the original shipped row; "aligned" and "rail" are the two
+// hierarchy options from the mockup review (direct feedback, 8 Sept 2026:
+// "let's go with option 2 [rail] on the live site... return to option 1
+// [aligned] if needed" -- then, a toggle for all of them at once so they're
+// comparable live rather than one-at-a-time). "compact" is the existing
+// dense single-line view, unrelated to which of the other three is active.
+export type FeedView = "card" | "aligned" | "rail" | "compact";
+
+// Reddit's own version of this row is quiet plain text ("Best ⌄", a small
+// icon+chevron for view) -- never a second solid chip bar directly under the
+// real tabs. The first pass used the same Segmented pill as Questions/
+// Insights/Updates/About and it fought with them for the eye (direct
+// feedback, 8 Sept 2026). Plain text links now, muted except the active one.
+// The avatar-style switch and the four-way feed-view toggle that used to
+// live here were both demo-comparison scaffolding, removed once the real
+// choices were made (direct feedback, 8 Sept 2026: "remove the avatar
+// style toggles, we will be using custom generated ones", "remove the
+// question style toggles too, we will use a custom version of the columns
+// version" -- see the `view` constant in BoardView, fixed to "aligned").
+function FeedControls({ sort, onSort }: { sort: FeedSort; onSort: (s: FeedSort) => void }) {
+  const SORTS: { key: FeedSort; label: string }[] = [{ key: "best", label: "Best" }, { key: "recent", label: "Most Recent" }];
+  return (
+    <div className="flex flex-wrap items-center gap-[10px] text-[12.5px] leading-[17px] font-semibold">
+      {SORTS.map((s, i) => (
+        <span key={s.key} className="flex items-center gap-[10px]">
+          {i > 0 && <span aria-hidden style={{ color: "var(--muted-foreground)" }}>·</span>}
+          <button type="button" aria-pressed={sort === s.key} onClick={() => onSort(s.key)} className="dm-quiet cursor-pointer" style={{ color: sort === s.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
+            {s.label}
+          </button>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// One dense row, single hairline divider, no card box -- Reddit's compact
+// view swaps a floating card for a plain list because a list of thin rows
+// reads as "posts, scan and pick one" more plainly than a stack of separated
+// boxes does. No vote arrows (this feed's engagement signal is a helpful
+// count, not a score to up/down-vote), but the same left-anchored-number
+// idea: the thumbs-up count sits first, in the position a vote count would.
+function CompactRow({ onOpen, avatarName, title, meta, state, helpful, comments }: { onOpen: () => void; avatarName: string; title: string; meta: string; state?: Thread["state"]; helpful: number; comments: number }) {
+  return (
+    <button type="button" onClick={onOpen} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[10px] py-[10px] text-left transition-colors duration-150" style={{ background: "var(--glass-surface-1)" }}>
+      {/* Visually the same pill HelpfulPill renders in Card view -- just not
+         its own nested button here, since the whole row already is one. */}
+      <span aria-hidden className="flex flex-none items-center gap-[4px] rounded-full px-[8px] py-[4px] text-[11px] leading-[13px] font-bold tabular-nums" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>
+        <ThumbsUp className="h-3 w-3" /> {helpful}
+      </span>
+      {/* The real answered/waiting state as a plain colored dot -- the full
+         StatusChip's text ("Waiting for an answer") doesn't fit a one-line
+         row, but the fact still needs to be visible without opening the
+         thread (direct feedback, 8 Sept 2026). */}
+      {state && <span aria-label={STATE_LABEL[state]} className="size-[7px] flex-none rounded-full" style={{ background: STATE_COLOR[state] }} />}
+      <Avatar name={avatarName} size={24} />
+      <span className="min-w-0 flex-1">
+        <span className="block min-w-0 truncate text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
+        <span className="block truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>
+      </span>
+      <span className="flex flex-none items-center gap-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
+      </span>
+      <ChevronRight aria-hidden className="h-4 w-4 flex-none transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+    </button>
+  );
+}
+
+function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () => void }) {
+  const comments = thread.comments ?? thread.responses.length;
+  return (
+    <CompactRow
+      onOpen={onOpen}
+      avatarName={thread.handle}
+      title={thread.title}
+      meta={`${thread.handle} · ${thread.grade} · ${thread.postedAgo}`}
+      state={thread.state}
+      helpful={thread.helpful}
+      comments={comments}
+    />
+  );
+}
+
+function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOpen: () => void }) {
+  const pro = proById(insight.proId);
+  return <CompactRow onOpen={onOpen} avatarName={pro.name} title={insight.title} meta={`${pro.name} · ${pro.role} · ${insight.postedAgo}`} helpful={insight.helpful} comments={insight.replies.length} />;
+}
+
+// ——— Option 1: aligned stat column (Discourse) ———
+// A fixed-width, right-aligned, tabular-numeral column for the one number
+// that actually decides whether a question needs attention -- the reply
+// count -- so it scans down the page the way a spreadsheet's own numbers
+// do. Helpful and Save stay inline under the snippet, same actions as the
+// shipped row, just no longer repeating the reply count a second time.
+function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, count, countLabel, countTone, time, children }: {
+  onOpen: () => void; avatarName: string; proId?: string; head: string; title: string; snippet?: { by?: string; text: string };
+  count: number; countLabel: string; countTone: string; time: string; children: React.ReactNode;
+}) {
+  return (
+    <div className="group relative grid items-center gap-[14px] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", gridTemplateColumns: "40px 1fr 72px" }}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">Open: {title}</span>
+      </button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
+      {/* A professional's avatar opens THEIR profile, not the post, the way
+         Instagram/Twitter treat an author's avatar vs. the post body
+         (direct feedback) -- ProAvatar is already its own higher-stacked,
+         stopPropagation'd button that overrides the row's own overlay. */}
+      {proId ? <ProAvatar proId={proId} name={avatarName} size={40} /> : <Avatar name={avatarName} size={40} />}
+      {/* Plain (no z-index) -- text with no handler of its own must stay
+         BELOW the overlay button, or it silently swallows the click
+         instead of letting it fall through (direct feedback: "only
+         registers at a specific unobvious point" -- this was why). Only
+         `children` (real buttons) need to sit above the overlay. */}
+      <div className="min-w-0">
+        <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{head}</p>
+        <p className="mt-[3px] truncate text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</p>
+        {snippet && (
+          <p className="mt-[3px] truncate text-[12.5px]" style={{ color: "color-mix(in srgb, var(--muted-foreground) 88%, transparent)" }}>
+            {snippet.by && <b style={{ color: "var(--muted-foreground)" }}>{snippet.by}: </b>}
+            {snippet.text}
+          </p>
+        )}
+        <div className="relative z-20 mt-[8px] flex items-center gap-[12px]">{children}</div>
+      </div>
+      <div className="text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
+        <p className="text-[18px] leading-[20px] font-extrabold" style={{ color: countTone }}>{count}</p>
+        <p className="mt-[2px] text-[10px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{countLabel}</p>
+        <p className="mt-[6px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{time}</p>
+      </div>
+    </div>
+  );
+}
+
+function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const comments = thread.comments ?? thread.responses.length;
+  const answered = thread.state === "answered" || thread.state === "resolved";
+  return (
+    <AlignedRow
+      onOpen={onOpen}
+      avatarName={thread.handle}
+      head={`${thread.handle} · ${thread.grade}`}
+      title={thread.title}
+      snippet={questionSnippet(thread)}
+      count={comments}
+      countLabel="replies"
+      countTone={answered ? "var(--world-food-farming-nature)" : "var(--muted-foreground)"}
+      time={thread.postedAgo}
+    >
+      <StatusChip state={thread.state} />
+      <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
+      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+      </button>
+    </AlignedRow>
+  );
+}
+
+function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const pro = proById(insight.proId);
+  return (
+    <AlignedRow
+      onOpen={onOpen}
+      avatarName={pro.name}
+      proId={pro.id}
+      head={`${pro.name} · ${pro.role}`}
+      title={insight.title}
+      snippet={{ text: insight.body }}
+      count={insight.replies.length}
+      countLabel="replies"
+      countTone="var(--muted-foreground)"
+      time={insight.postedAgo}
+    >
+      <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
+      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+      </button>
+    </AlignedRow>
+  );
+}
+
+// ——— Option 2: accent rail + sharper type scale ———
+// A slim bar at the row's left edge and a bigger, bolder title with
+// metadata pushed down in size and color -- the contrast alone says "this
+// is the important thing" without a box (direct feedback, 8 Sept 2026:
+// "let's go with option 2 on the live site"). The rail is a constant brand
+// color, not the question's answered/waiting state -- an early pass colored
+// it per-state (Discourse colors its own category dot the same way), but
+// green-for-answered read as over-signaling on every single row rather than
+// a real status cue (direct feedback: "I like rail without the green rail,
+// let's get rid of that"). The StatusChip inside the row already says
+// answered/waiting in words; the rail doesn't need to repeat it in color.
+// The rail bar itself is gone (direct feedback, 8 Sept 2026: "remove the
+// rail from the rail variant, I don't want that line thing") -- what's left
+// is the part of the option that actually mattered, the sharper type scale
+// (bigger bolder title, metadata pushed down), plus two things this pass
+// adds: a chevron so the row reads as "opens somewhere" before you ever
+// hover (same device QuestionCard/InsightCard already use), and pill-chip
+// actions so Helpful/comments/Save read as distinct pressable things
+// instead of quiet inline text (direct feedback: "likes and comments and
+// save should be on chips so it's more prominent").
+function RailRow({ onOpen, avatarName, proId, head, title, snippet, children }: {
+  onOpen: () => void; avatarName: string; proId?: string; head: string; title: string; snippet?: { by?: string; text: string }; children: React.ReactNode;
+}) {
+  return (
+    <div className="group relative flex gap-[12px] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">Open: {title}</span>
+      </button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
+      {/* A professional's avatar opens THEIR profile, not the post (direct
+         feedback) -- same override as AlignedRow. */}
+      {proId ? <ProAvatar proId={proId} name={avatarName} size={34} /> : <Avatar name={avatarName} size={34} />}
+      {/* Plain (no z-index) -- same fix as AlignedRow: text with no click
+         handler of its own must stay below the overlay button, or it
+         swallows the click instead of letting it reach the overlay. */}
+      <div className="min-w-0 flex-1 pr-[22px]">
+        <p className="truncate text-[10.5px] font-bold tracking-[0.05em] uppercase" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>{head}</p>
+        <h3 className="mt-[5px] text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
+        {snippet && (
+          <p className="mt-[4px] truncate text-[13px]" style={{ color: "var(--muted-foreground)" }}>
+            {snippet.by && <b style={{ color: "var(--foreground)" }}>{snippet.by}: </b>}
+            {snippet.text}
+          </p>
+        )}
+        <div className="relative z-20 mt-[10px] flex items-center gap-[8px]">{children}</div>
+      </div>
+      <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] z-20 h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+    </div>
+  );
+}
+
+// The shared pill shape behind comments/Save in Rail (Helpful already has
+// its own via HelpfulPill) -- one consistent chip language for every action
+// in the row, not one style for Helpful and plain text for the rest.
+function ActionChip({ children, onClick, pressed, label }: { children: React.ReactNode; onClick?: () => void; pressed?: boolean; label?: string }) {
+  const style = pressed
+    ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }
+    : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" };
+  return onClick ? (
+    <button type="button" onClick={onClick} aria-pressed={pressed} aria-label={label} className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] font-bold" style={style}>
+      {children}
+    </button>
+  ) : (
+    <span className="flex min-h-[30px] items-center gap-[5px] rounded-full px-[10px] text-[12px] font-bold" style={style}>
+      {children}
+    </span>
+  );
+}
+
+function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const comments = thread.comments ?? thread.responses.length;
+  return (
+    <RailRow
+      onOpen={onOpen}
+      avatarName={thread.handle}
+      head={`${thread.handle} · ${thread.grade} · ${thread.postedAgo}`}
+      title={thread.title}
+      snippet={questionSnippet(thread)}
+    >
+      <StatusChip state={thread.state} />
+      <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
+      <ActionChip>
+        <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
+      </ActionChip>
+      <ActionChip onClick={onSave} pressed={saved} label={saved ? "Saved" : "Save"}>
+        <Bookmark className="h-3.5 w-3.5" aria-hidden fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save"}
+      </ActionChip>
+    </RailRow>
+  );
+}
+
+function RailInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+  const pro = proById(insight.proId);
+  return (
+    <RailRow
+      onOpen={onOpen}
+      avatarName={pro.name}
+      proId={pro.id}
+      head={`${pro.name} · ${pro.role} · ${insight.postedAgo}`}
+      title={insight.title}
+      snippet={{ text: insight.body }}
+    >
+      <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
+      <ActionChip>
+        <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {insight.replies.length}
+      </ActionChip>
+      <ActionChip onClick={onSave} pressed={saved} label={saved ? "Saved" : "Save"}>
+        <Bookmark className="h-3.5 w-3.5" aria-hidden fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save"}
+      </ActionChip>
+    </RailRow>
+  );
+}
 
 // ——— filter row (mobile: horizontal scroll with edge cue, never clipped) ———
 
@@ -911,6 +1224,24 @@ function FilterRow({ options, active, onPick, accent }: { options: { key: string
 
 export function ConnectExperience() {
   const [view, setViewState] = useState<View>({ kind: "home", tab: "communities" });
+  // Every view Connect has been on this session, oldest first -- real back
+  // navigation, not a hardcoded parent per view kind. Direct feedback, 9
+  // Sept 2026: "these screens go to the community home when I click back...
+  // all the back navigation from any screen, no matter what they say,
+  // should go to the last screen, the very previous step." Connect's own
+  // "view" state was never real browser history to begin with (setView
+  // below calls history.replaceState, not pushState, so the URL tracks the
+  // CURRENT view for reload/share but never accumulates entries a real
+  // back button could walk) -- so every onBack handler had to hardcode
+  // where it assumed the user came from (a pro's profile always "back" to
+  // Communities home, a thread always "back" to its own board), which is
+  // wrong the moment someone arrives from anywhere else (Saved, Following,
+  // a board's insights tab, another thread). This stack is that missing
+  // history: pushed once per setView call, popped by goBack below.
+  const [viewStack, setViewStack] = useState<View[]>([]);
+  // People tab's welcome modal: shown once per Connect visit, not once per
+  // PeopleTab mount (see PeopleWelcome in PeopleTab.tsx for why).
+  const [peopleWelcomeShown, setPeopleWelcomeShown] = useState(false);
   const [codeOpenFor, setCodeOpenFor] = useState<string | null>(null);
   /** Community awaiting join confirmation in the JoinSheet. */
   const [joinFor, setJoinFor] = useState<string | null>(null);
@@ -919,8 +1250,15 @@ export function ConnectExperience() {
   const [saves, setSaves] = useState<Record<string, boolean>>({ "t-ib-hours": true, "i-day-in-life": true });
   const [helpfuls, setHelpfuls] = useState<Record<string, boolean>>({});
   const [announce, setAnnounce] = useState("");
-  // Connect 2.0: who the student follows (local for the prototype).
-  const [follows, setFollows] = useState<Follows>({});
+  // Connect 2.0: who the student follows (local for the prototype). Seeded
+  // with two real pros who already have posts/answers in the data, so
+  // "New from people you follow" has something to show out of the box
+  // (direct feedback: "where is the new from people you follow thing?" --
+  // it was correctly empty for a fresh student who's followed no one,
+  // same principle as every other "no invented stats" empty state this
+  // session, but the review needs to see the finished section, the way
+  // the reference always shows it with its own sample people).
+  const [follows, setFollows] = useState<Follows>({ "pro-chen": true, "pro-martinez": true });
   const toggleFollow = (id: string) => setFollows((f) => ({ ...f, [id]: !f[id] }));
   // Connect 2.0: every question the student posts this session, from any
   // composer, so "Your questions" on the landing can show it waiting.
@@ -954,12 +1292,40 @@ export function ConnectExperience() {
     else if (params.get("partner")) setRole("partner");
   }, []);
   const setView = useCallback((next: View, as?: DemoRole) => {
+    setViewStack((stack) => [...stack, view]);
     setViewState(next);
     const base = viewToQuery(next);
     const keep = as ?? new URLSearchParams(window.location.search).get("as");
     window.history.replaceState(null, "", "/connect" + base + (keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : ""));
     window.scrollTo(0, 0);
-  }, []);
+  }, [view]);
+
+  /** Real "back": pop the last view off the stack and restore it exactly,
+   *  rather than jumping to a hardcoded parent. Every onBack handler below
+   *  calls this instead of setView({kind: "..."}); the stack only runs dry
+   *  on a fresh page load with nothing to pop, so home is a landing, not a
+   *  fallback pretending to be a real previous step. */
+  const goBack = useCallback(() => {
+    // The side effects (setViewState, history, scroll) used to live inside
+    // the setViewStack updater itself -- React runs that updater during a
+    // render-like phase, so calling other setters and window.history from
+    // in there triggered "Cannot update a component (Router) while
+    // rendering a different component" (console, 9 Sept 2026). Read the
+    // stack directly and keep the updater to a pure pop.
+    if (viewStack.length === 0) {
+      setViewState({ kind: "home", tab: "communities" });
+      window.history.replaceState(null, "", "/connect");
+      window.scrollTo(0, 0);
+      return;
+    }
+    const prev = viewStack[viewStack.length - 1];
+    setViewStack((stack) => stack.slice(0, -1));
+    setViewState(prev);
+    const base = viewToQuery(prev);
+    const keep = new URLSearchParams(window.location.search).get("as");
+    window.history.replaceState(null, "", "/connect" + base + (keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : ""));
+    window.scrollTo(0, 0);
+  }, [viewStack]);
 
   const say = useCallback((message: string) => {
     setAnnounce(message);
@@ -973,6 +1339,7 @@ export function ConnectExperience() {
       openInsight: (id: string) => setView({ kind: "insight", id }),
       openBoard: (id: string) => setView({ kind: "board", id, filter: "questions" }),
       openSaved: () => setView({ kind: "saved" }),
+      openFollowingFeed: () => setView({ kind: "followingFeed" }),
       noteAsked: (title: string, boardId: string) => setAsked((current) => [{ id: `asked-${Date.now()}`, title, boardId }, ...current]),
       report: (id: string) => setReportFor(id),
       isFollowing: (id: string) => !!follows[id],
@@ -1010,9 +1377,13 @@ export function ConnectExperience() {
   };
 
 
-  const cardProps = (id: string) => ({
+  // `what` names the thing being saved for the confirmation toast --
+  // defaults to "insight" (most callers save an insight), question rows
+  // pass "question" explicitly so the toast doesn't lie about what you
+  // just saved (direct feedback: flesh out what Save actually does).
+  const cardProps = (id: string, what = "insight") => ({
     saved: !!saves[id],
-    onSave: () => toggleSave(id),
+    onSave: () => toggleSave(id, what),
     helpful: !!helpfuls[id],
     onHelpful: () => toggleHelpful(id),
   });
@@ -1098,6 +1469,8 @@ export function ConnectExperience() {
             onOpenAll={() => setView({ kind: "activity" })}
             savedCount={Object.values(saves).filter(Boolean).length}
             onDeleteAsked={(id) => setAsked((current) => current.filter((q) => q.id !== id))}
+            peopleWelcomeShown={peopleWelcomeShown}
+            onPeopleWelcomeShown={() => setPeopleWelcomeShown(true)}
           />
         )}
 
@@ -1106,22 +1479,29 @@ export function ConnectExperience() {
             const pro = PROS.find((p) => p.id === view.id);
             if (!pro) return null;
             const boardId = COMMUNITIES.find((c) => c.world === pro.world)?.id ?? "teaching-education";
-            return <ProProfileView pro={pro} follows={follows} onFollow={toggleFollow} onBack={() => setView({ kind: "home", tab: "communities" })} onAsked={(title) => nav.noteAsked(title, boardId)} onOpenDashboard={role === "pro" ? () => setView({ kind: "proDashboard", id: pro.id }, "pro") : undefined} />;
+            // key={pro.id}: without it, navigating from one pro's profile to
+            // a different one reused the same component instance, so its
+            // useState(coverFor(pro.id)) never re-ran and every profile kept
+            // showing whichever cover the FIRST one you viewed that session
+            // had -- read as "they're all the same" / "no real cover" from
+            // Connect and People (direct feedback, 8 Sept 2026).
+            return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={toggleFollow} onBack={goBack} onAsked={(title) => nav.noteAsked(title, boardId)} onOpenDashboard={role === "pro" ? () => setView({ kind: "proDashboard", id: pro.id }, "pro") : undefined} />;
           })()}
-        {view.kind === "proDashboard" && <ProDashboardView key={view.id} pro={PROS.find((p) => p.id === view.id)} onBack={() => setView({ kind: "pro", id: view.id }, "pro")} />}
-        {view.kind === "admin" && <AdminDashboardView onBack={() => setView({ kind: "home", tab: "communities" })} />}
-        {view.kind === "partner" && <PartnerView org={view.org} onBack={() => setView({ kind: "home", tab: "communities" })} />}
+        {view.kind === "proDashboard" && <ProDashboardView key={view.id} pro={PROS.find((p) => p.id === view.id)} onBack={goBack} />}
+        {view.kind === "admin" && <AdminDashboardView onBack={goBack} />}
+        {view.kind === "partner" && <PartnerView org={view.org} onBack={goBack} />}
         {view.kind === "activity" && (
           <ActivityView
             asked={asked}
             follows={follows}
             savedCount={Object.values(saves).filter(Boolean).length}
-            onBack={() => setView({ kind: "home", tab: "communities" })}
+            onBack={goBack}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onDeleteAsked={(id) => { setAsked((a) => a.filter((q) => q.id !== id)); say("Question deleted."); }}
           />
         )}
-        {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={() => setView({ kind: "home", tab: "communities" })} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
+        {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={goBack} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
+        {view.kind === "followingFeed" && <FollowingFeedView follows={follows} onBack={goBack} />}
 
         {view.kind === "board" &&
           (() => {
@@ -1134,7 +1514,7 @@ export function ConnectExperience() {
             joined={!!joined[view.id]}
             onJoin={() => setJoinFor(view.id)}
             onFilter={(filter) => setView({ kind: "board", id: view.id, filter })}
-            onBack={() => setView({ kind: "home", tab: "communities" })}
+            onBack={goBack}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onOpenInsight={(id) => setView({ kind: "insight", id })}
             cardProps={cardProps}
@@ -1150,7 +1530,7 @@ export function ConnectExperience() {
             return (
               <InsightThreadView
                 insight={insight}
-                onBack={() => setView({ kind: "board", id: insight.boardId, filter: "insights" })}
+                onBack={goBack}
                 saved={p.saved}
                 onSave={p.onSave}
                 helpful={p.helpful}
@@ -1171,7 +1551,7 @@ export function ConnectExperience() {
                   event={event}
                   filter={view.filter}
                   onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
-                  onBack={() => setView({ kind: "home", tab: "events" })}
+                  onBack={goBack}
                   onOpenCommunity={(id) => setView({ kind: "board", id, filter: "questions" })}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
                   onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
@@ -1206,9 +1586,7 @@ export function ConnectExperience() {
             return (
           <ThreadView
             thread={thread}
-            onBack={() => {
-              setView(eventById(thread.boardId) ? { kind: "event", id: thread.boardId, filter: "questions" } : { kind: "board", id: thread.boardId, filter: "questions" });
-            }}
+            onBack={goBack}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             cardProps={cardProps}
             saves={saves}
@@ -1298,7 +1676,7 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
         const on = p.id === selected;
         return (
           <button key={p.id} type="button" role="tab" aria-selected={on} onClick={() => onPick(p.id)} className="dm-quiet flex w-[72px] flex-none cursor-pointer flex-col items-center gap-[6px] rounded-[var(--radius-md)] px-[4px] py-[8px]" style={on ? { background: "color-mix(in srgb, var(--primary) 18%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 60%, transparent)" } : undefined}>
-            <Avatar name={p.name} verified size={40} />
+            <Avatar name={p.name} size={40} />
             <span className="w-full truncate text-center text-[11px] leading-[14px] font-semibold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{p.name.split(" ")[0]}</span>
           </button>
         );
@@ -1311,10 +1689,25 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
  *  the way the ?cards= lane switcher worked, so a demo flips between the
  *  four journeys in one tap. Rides the URL as ?as=. */
 function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) => void }) {
+  // The five roles stay hidden until Demo is pressed (Joshua Pierce, Slack,
+  // 6 Sept 2026): a student sees a plain Connect page, a demo opens the
+  // switcher. Once a non-student role is showing, the switcher stays open so
+  // the way back is visible.
+  const [open, setOpen] = useState(false);
+  const showTabs = open || role !== "student";
   return (
     <div className="flex items-center gap-[10px]">
-      <span className="hidden flex-none rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase sm:inline" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Demo</span>
-      <div role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full flex-1 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+      <button
+        type="button"
+        aria-expanded={showTabs}
+        aria-controls="connect-demo-roles"
+        onClick={() => setOpen((value) => !value)}
+        className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+        style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+      >
+        Demo
+      </button>
+      {showTabs && <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full flex-1 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
         {ROLES.map(({ key, title, Icon }) => {
           const on = key === role;
           return (
@@ -1331,7 +1724,7 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
             </button>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }
@@ -1557,6 +1950,55 @@ function SavedView({ saves, onUnsave, onBack, onOpenThread, onOpenInsight }: { s
   );
 }
 
+/** Every post and answer from everyone the student follows, newest first --
+ *  not the capped one-per-person preview "New from people you follow"
+ *  shows. Direct feedback, 8 Sept 2026: "we know to follow people but
+ *  there is no real place to catch up on where those people's posts are or
+ *  how to get back to all of their profiles" -- reached via the same kind
+ *  of "View all" link Browse by industry already uses. Each row's name and
+ *  avatar open that pro's profile directly, answering the second half of
+ *  the note. */
+function FollowingFeedView({ follows, onBack }: { follows: Follows; onBack: () => void }) {
+  const nav = useContext(ConnectNav);
+  const ids = Object.keys(follows).filter((id) => follows[id]);
+  const rows: { key: string; pro: Pro; verb: "answered" | "posted"; topic: string; postedAgo: string; open: () => void }[] = [];
+  for (const id of ids) {
+    const pro = proById(id);
+    for (const thread of answersBy(id)) rows.push({ key: `a-${id}-${thread.id}`, pro, verb: "answered", topic: topicFor(thread.boardId), postedAgo: thread.postedAgo, open: () => nav?.openThread(thread.id) });
+    for (const post of postsBy(id)) rows.push({ key: `p-${post.id}`, pro, verb: "posted", topic: topicFor(post.boardId), postedAgo: post.postedAgo, open: () => nav?.openInsight(post.id) });
+  }
+  rows.sort((a, b) => agoMinutes(a.postedAgo) - agoMinutes(b.postedAgo));
+  return (
+    <>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+      </button>
+      <Panel id="following-feed-title" title="New from people you follow" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rows.length} {rows.length === 1 ? "update" : "updates"}</span>}>
+        {rows.length === 0 ? (
+          <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Follow a professional to see their posts and answers here.</p>
+        ) : (
+          <ul className="-mt-[var(--space-2)] flex flex-col">
+            {rows.map((row) => (
+              <li key={row.key} className="flex items-center gap-[var(--space-3)] border-t first:border-t-0" style={{ borderColor: RULE }}>
+                <button type="button" onClick={() => nav?.openPro(row.pro.id)} aria-label={`Open ${row.pro.name}'s profile`} className="dm-tap flex flex-none cursor-pointer rounded-full leading-none">
+                  <Avatar name={row.pro.name} size={40} />
+                </button>
+                <button type="button" onClick={() => nav?.openPro(row.pro.id)} className="dm-quiet -mx-[8px] flex min-w-0 flex-1 cursor-pointer flex-col gap-[2px] rounded-[var(--radius-sm)] px-[8px] py-[var(--space-3)] text-left">
+                  <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                    <span className="truncate">{row.pro.name}</span> <VerifiedBadge size={13} />
+                  </span>
+                  <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{row.verb === "answered" ? `Answered a question about ${row.topic}` : `Posted about ${row.topic}`} · {row.postedAgo}</span>
+                </button>
+                <button type="button" onClick={row.open} className="dm-link flex-none cursor-pointer text-[13px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>{row.verb === "answered" ? "Read answer" : "Read post"}</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
+    </>
+  );
+}
+
 const REPORT_REASONS = ["Shares personal contact details", "Unkind or bullying", "Not about careers or school", "Something else"];
 
 /** Report, made visible (safety by design): pick why, send, done. */
@@ -1611,6 +2053,8 @@ function HomeView({
   onOpenAll,
   savedCount,
   onDeleteAsked,
+  peopleWelcomeShown,
+  onPeopleWelcomeShown,
 }: {
   tab: LandingTab;
   onTab: (tab: LandingTab) => void;
@@ -1629,9 +2073,16 @@ function HomeView({
   onOpenAll: () => void;
   savedCount: number;
   onDeleteAsked: (id: string) => void;
+  peopleWelcomeShown: boolean;
+  onPeopleWelcomeShown: () => void;
 }) {
   const eventInk = "#f6f5fb";
   const [qrEvent, setQrEvent] = useState<EventBoard | null>(null);
+  // People's own drill-in views (one industry, or the full industry list)
+  // hide this shared "Find a professional" heading and search box (direct
+  // feedback: one task on screen at a time instead of carrying the whole
+  // People page along into a focused sub-view).
+  const [peopleFocused, setPeopleFocused] = useState(false);
   void onAsk; void onOpenAll;
   // Search, not Ask, at the top of Connect (CEO, 4 Sept): students come here
   // to find the right room, and asking lives inside each room. Typing
@@ -1644,6 +2095,15 @@ function HomeView({
 
   return (
     <>
+      {/* Shows for every tab, not just People (direct feedback, 9 Sept 2026:
+         "nobody lands on people tab from other places in the site directly
+         without landing on connect") -- one instance here, at the top of
+         the whole Connect landing, so it pops on arrival from anywhere else
+         on the site regardless of which tab is active, and stays mounted
+         (not re-triggered) while switching tabs or drilling into People's
+         own sub-views. */}
+      <PeopleWelcome hasShown={peopleWelcomeShown} onShown={onPeopleWelcomeShown} />
+
       {/* Title and the Community/Events toggle share one row on wider
          screens (same pattern as Explore's header: title left, controls
          right, one row instead of three stacked blocks) and wrap onto
@@ -1652,18 +2112,39 @@ function HomeView({
         <div className="min-w-0">
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Connect</h1>
         </div>
-        <TopTabs tab={tab} onTab={onTab} />
+        <div className="flex items-center gap-[var(--space-3)]">
+          <TopTabs tab={tab} onTab={onTab} />
+          {/* Notifications live behind the bell: your questions and what the
+             people you follow did lately */}
+          <button
+            type="button"
+            aria-label="Notifications"
+            aria-pressed={tab === "notifications"}
+            onClick={() => onTab(tab === "notifications" ? "communities" : "notifications")}
+            className="dm-quiet flex h-[48px] w-[48px] flex-none cursor-pointer items-center justify-center rounded-full border"
+            style={{ background: tab === "notifications" ? "var(--primary)" : "var(--glass-surface-1)", borderColor: tab === "notifications" ? "var(--primary)" : "var(--glass-border)", color: tab === "notifications" ? "#FFFFFF" : "var(--muted-foreground)" }}
+          >
+            <Bell className="h-[18px] w-[18px]" aria-hidden />
+          </button>
+        </div>
       </div>
 
-      {tab !== "notifications" && (
+      {/* "Find a professional" heads the shared search box on People, the
+         way the reference has it -- the heading has to come from here,
+         not from PeopleTab, since the search box itself is this shared
+         one line above every tab's own content (direct feedback: "the
+         search bar is above its title Find a professional... match the
+         Replit"). */}
+      {tab === "people" && !peopleFocused && <SectionHead>Find a professional</SectionHead>}
+      {tab !== "notifications" && !(tab === "people" && peopleFocused) && (
         <label className="flex min-h-[48px] items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-4)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
           <Search className="h-[18px] w-[18px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={tab === "events" ? "Search events and partners" : "Search communities, topics, companies"}
-            aria-label={tab === "events" ? "Search events" : "Search communities"}
+            placeholder={tab === "events" ? "Search events and partners" : tab === "people" ? "Search professionals, careers, companies" : "Search communities, topics, companies"}
+            aria-label={tab === "events" ? "Search events" : tab === "people" ? "Search professionals" : "Search communities"}
             className="min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[var(--muted-foreground)]"
             style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
           />
@@ -1721,6 +2202,10 @@ function HomeView({
          doors, the people are who is behind them. Then what the people you
          already follow did lately, only once you follow someone. */}
       {tab === "communities" && <PeopleToFollow follows={follows} onFollow={onFollow} />}
+
+      {/* People: search companies or careers and find people to follow
+         (Joshua Pierce, Slack, 6 Sept 2026) */}
+      {tab === "people" && <PeopleTab follows={follows} onFollow={onFollow} query={query} onFocusChange={setPeopleFocused} />}
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
@@ -1825,10 +2310,13 @@ function HomeView({
 
 /** The page-level Community/Events switcher: one glass segmented control
  *  with a sliding thumb, instead of two disconnected chips. */
+// Communities, People, Events (direct feedback, 8 Sept 2026): People moved
+// to the middle slot -- more valuable and scalable than Events, so it reads
+// second, not last. Notifications moved to the bell beside them.
 const LANDING_TABS = [
-  { key: "communities", label: "Community", Icon: Users },
+  { key: "communities", label: "Communities", Icon: Users },
+  { key: "people", label: "People", Icon: UserRound },
   { key: "events", label: "Events", Icon: Calendar },
-  { key: "notifications", label: "Notifications", Icon: Bell },
 ] as const;
 function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => void }) {
   const index = LANDING_TABS.findIndex((t) => t.key === tab);
@@ -1842,7 +2330,7 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
       <span
         aria-hidden
         className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(33.333%-2.667px)] rounded-full transition-transform duration-300 ease-out"
-        style={{ background: "var(--primary)", transform: `translateX(${index * 100}%)`, boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
+        style={{ background: "var(--primary)", transform: `translateX(${Math.max(index, 0) * 100}%)`, opacity: index < 0 ? 0 : 1, boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
       />
       {LANDING_TABS.map(({ key, label, Icon }) => (
         <button
@@ -1937,10 +2425,22 @@ function BoardView({
   onBack: () => void;
   onOpenThread: (id: string) => void;
   onOpenInsight: (id: string) => void;
-  cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
-  const threads = THREADS.filter((t) => t.boardId === community.id);
-  const insights = INSIGHTS.filter((i) => i.boardId === community.id);
+  const [sort, setSort] = useState<FeedSort>("best");
+  // Fixed to Columns, no toggle (direct feedback, 8 Sept 2026: "remove the
+  // question style toggles too, we will use a custom version of the
+  // columns version" -- Rail/Compact/Current stay defined below should a
+  // custom Columns build want to borrow a piece of one, just no longer
+  // switchable at runtime).
+  const view: FeedView = "aligned";
+  const sortFeed = useCallback(
+    <T extends { helpful: number; postedAgo: string }>(items: T[]): T[] =>
+      [...items].sort((a, b) => (sort === "best" ? b.helpful - a.helpful : agoMinutes(a.postedAgo) - agoMinutes(b.postedAgo))),
+    [sort],
+  );
+  const threads = sortFeed(THREADS.filter((t) => t.boardId === community.id));
+  const insights = sortFeed(INSIGHTS.filter((i) => i.boardId === community.id));
   const updates = OPPORTUNITIES.filter((o) => o.boardId === community.id);
   const firms = Array.from(new Set(updates.map((o) => o.org)));
   const [firm, setFirm] = useState<string>("All");
@@ -2003,6 +2503,17 @@ function BoardView({
          Professional Insights, Industry Updates. The board header, the tabs
          row and the card designs stay exactly as they were (direct
          instruction); only what each feed carries changed. */}
+      {/* Everything below the identity banner -- the tab row, the composer,
+         the feed -- now sits on one solid --card floor instead of loose on
+         the page's own gradient wash (direct feedback: this audience spans
+         students to corporate volunteers to older teacher/staff moderators,
+         closer to LinkedIn/Facebook's comfort zone than a young social
+         app's; too much reliance on gradients and transparency made the
+         page slower to parse). Individual rows keep their own lighter
+         glass-surface-1 tint, one visible step up from this floor, so the
+         two-level hierarchy (section, then item) reads the same way it now
+         does on Connect > People. */}
+      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
       <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Insights" }, { key: "updates", label: "Updates" }, { key: "about", label: "About" }]} />
 
       {about && (
@@ -2055,8 +2566,9 @@ function BoardView({
             placeholder="What do you want to ask?"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
+          {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={communityAccent(community)} {...cardProps(t.id)} />)}
+          {threads.map((t) => <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
           {threads.length === 0 && (
             <Card>
               <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
@@ -2071,7 +2583,8 @@ function BoardView({
       )}
       {tab === "insights" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {insights.map((i) => <InsightCard key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} accent={communityAccent(community)} {...cardProps(i.id)} />)}
+          {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+          {insights.map((i) => <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
           {insights.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
           )}
@@ -2092,6 +2605,7 @@ function BoardView({
           )}
         </div>
       )}
+      </SectionSurface>
     </>
   );
 }
@@ -2143,7 +2657,7 @@ function EventView({
   onSaveTakeaway: () => void;
   takeawaySaved: boolean;
   onAddToPlan: () => void;
-  cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const threads = EVENT_THREADS.filter((t) => t.boardId === event.id);
   // Real professionals, not an invented roster: whoever in PROS works at one
@@ -2247,7 +2761,7 @@ function EventView({
             onPost={(text) => setPostedQs((current) => [{ id: `${event.id}-local-${current.length}`, title: text }, ...current])}
           />
           {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} accent={EVENT_ACCENT} {...cardProps(t.id)} />)}
+          {threads.map((t) => <QuestionCard key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
           {threads.length === 0 && postedQs.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No questions here yet. Yours could be the first.</p>
           )}
@@ -2502,7 +3016,7 @@ function ThreadView({
   thread: Thread;
   onBack: () => void;
   onOpenThread: (id: string) => void;
-  cardProps: (id: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
   saves: Record<string, boolean>;
   toggleSave: (id: string, what?: string) => void;
   helpfuls: Record<string, boolean>;
@@ -2512,9 +3026,11 @@ function ThreadView({
   const boardName = eventById(thread.boardId)?.name ?? boardCommunity?.name ?? "Community";
   const boardAccent = boardCommunity ? communityAccent(boardCommunity) : EVENT_ACCENT;
   const related = ALL_THREADS.filter((t) => t.boardId === thread.boardId && t.id !== thread.id && (t.state === "answered" || t.state === "resolved")).slice(0, 2);
-  const p = cardProps(thread.id);
+  const p = cardProps(thread.id, "question");
   const nav = useContext(ConnectNav);
   const [posted, setPosted] = useState<LocalReply[]>([]);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const toggleCollapsed = (id: string) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
 
   return (
     <>
@@ -2534,7 +3050,7 @@ function ThreadView({
           <div className="mt-[10px]"><IdentityBadge handle={thread.handle} grade={thread.grade} postedAgo={thread.postedAgo} /></div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] border-b pb-[12px] text-[12px] leading-[16px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[4px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
           <StatusChip state={thread.state} />
           {/* the question's likes live up here with the question, not at the
              bottom of the answer (direct feedback) */}
@@ -2543,62 +3059,81 @@ function ThreadView({
           </button>
         </div>
 
-        {thread.responses.map((r, index) => {
-          if (r.kind === "answer") {
-            const rid = thread.id + "-a" + index;
-            return (
-              <div key={rid} className="rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--glass-surface-2)", borderColor: r.primary ? "color-mix(in srgb, var(--world-food-farming-nature) 50%, var(--glass-border))" : "var(--glass-border)" }}>
-                <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-                  <ProBadge proId={r.proId} postedAgo={r.postedAgo} />
-                  <span className="flex items-center gap-[8px]">
-                  {nav && <FollowButton compact following={nav.isFollowing(r.proId)} onToggle={() => nav.toggleFollow(r.proId)} />}
-                  {r.primary && (
-                    <span className="flex-none rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[11px] font-extrabold tracking-[0.05em] uppercase" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 18%, transparent)", color: "var(--world-food-farming-nature)" }}>
-                      Top answer
-                    </span>
-                  )}
-                  </span>
-                </div>
-                <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
-                <p className="mt-[12px] text-[14px] leading-[22px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
-                {r.disclosure && (
-                  <p className="mt-[8px] text-[11px] leading-[15px] italic" style={{ color: "var(--muted-foreground)" }}>{r.disclosure}</p>
+        {/* A solid, edge-to-edge surface for the whole reply stream --
+           answers, comments, the composer, Save/Share -- so the question
+           itself reads as its own thing above a clearly separate "replies"
+           zone, not one continuous gradient wash (direct feedback: "the
+           area under the question... should be a solid black or dark blue
+           color instead of having the background with the gradients...
+           the div line... can run edge to edge"). True viewport-edge
+           bleed at every width (direct feedback: "no need to limit its
+           width on larger screens") -- relative+left/right 50% with a
+           matching negative margin breaks out of the page's own centered
+           max-w container regardless of how deep it's nested, not just
+           out of <main>'s side padding. Re-applies that padding inside so
+           the content still lines up with the title above it. */}
+        <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "-50vw", marginRight: "-50vw", background: "var(--background)", borderColor: "var(--glass-border)" }}>
+          <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-5)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
+        <CommentStream>
+          {(() => {
+            // Every answer is its own top-level branch on the main trunk;
+            // every reply that FOLLOWS an answer (until the next one)
+            // belongs to it -- exactly the read a person gets looking at
+            // the thread (direct feedback: "the bake sale comment and the
+            // one under it seem like replies to the top answer, Andre and
+            // Keiko seem like direct replies to the question" -- that's
+            // literally what the array order already means; it just
+            // wasn't drawn that way). One curved branch per answer serves
+            // every one of its replies, the way Reddit draws one line for
+            // a whole sub-thread, not one curve per reply.
+            type AnswerResponse = Extract<Thread["responses"][number], { kind: "answer" }>;
+            type ReplyResponse = Exclude<Thread["responses"][number], { kind: "answer" }>;
+            type Group = { rid: string; answer: AnswerResponse; children: { index: number; r: ReplyResponse }[] };
+            const groups: Group[] = [];
+            thread.responses.forEach((r, index) => {
+              if (r.kind === "answer") {
+                groups.push({ rid: thread.id + "-a" + index, answer: r, children: [] });
+              } else if (groups.length > 0) {
+                groups[groups.length - 1].children.push({ index, r });
+              }
+            });
+
+            return groups.map((g) => (
+              <div key={g.rid} className="flex flex-col gap-[var(--space-4)]">
+                <AnswerRow
+                  r={g.answer}
+                  rid={g.rid}
+                  threadId={thread.id}
+                  threadTitle={thread.title}
+                  collapsed={!!collapsed[g.rid]}
+                  onToggleCollapse={() => toggleCollapsed(g.rid)}
+                  helpfuls={helpfuls}
+                  toggleHelpful={toggleHelpful}
+                  saves={saves}
+                  toggleSave={toggleSave}
+                />
+                {g.children.length > 0 && (
+                  <FollowupBranch>
+                    <CommentStream>
+                      {g.children.map(({ index, r }) => {
+                        if (r.kind === "followup") {
+                          // A follow-up carries no name of its own -- it's
+                          // the same pro continuing their answer, so it
+                          // borrows that pro's identity for its avatar.
+                          const fid = thread.id + "-f" + index;
+                          const pro = proById(g.answer.proId);
+                          return <CommentRow key={fid} id={fid} name={pro.name} chip="Pro" chipTone="pro" body={r.body} postedAgo={r.postedAgo} likes={0} liked={!!helpfuls[fid]} onLike={toggleHelpful} collapsed={!!collapsed[fid]} onToggleCollapse={() => toggleCollapsed(fid)} />;
+                        }
+                        const pid = thread.id + "-p" + index;
+                        return <CommentRow key={pid} id={pid} name={r.handle} chip="Student" meta={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} collapsed={!!collapsed[pid]} onToggleCollapse={() => toggleCollapsed(pid)} />;
+                      })}
+                    </CommentStream>
+                  </FollowupBranch>
                 )}
-                <div className="mt-[12px] border-t" style={{ borderColor: "var(--glass-border)" }} />
-                <div className="mt-[12px] flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  <button type="button" onClick={() => toggleHelpful(rid)} aria-pressed={!!helpfuls[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px] tabular-nums" style={{ color: helpfuls[rid] ? "var(--accent-subtle)" : undefined }}>
-                    <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {answerLikes(rid, r.primary) + (helpfuls[rid] ? 1 : 0)}
-                  </button>
-                  <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
-                    <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save"}
-                  </button>
-                  <button type="button" onClick={() => nav?.share(`?thread=${thread.id}`, thread.title)} className="dm-link flex min-h-[44px] cursor-pointer items-center gap-[5px]">
-                    <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
-                  </button>
-                  <button type="button" onClick={() => nav?.report(rid)} aria-label="Report this answer" className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
-                    <Flag className="h-3 w-3" aria-hidden /> Report
-                  </button>
-                </div>
               </div>
-            );
-          }
-          if (r.kind === "followup") {
-            return (
-              <div key={thread.id + "-f" + index} className="ml-[var(--space-6)] flex flex-col gap-[3px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
-                <span className="flex items-center gap-[5px] text-[11px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                  <CornerDownRight className="h-3 w-3" aria-hidden /> Follow-up · {r.postedAgo}
-                </span>
-                <p className="text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
-              </div>
-            );
-          }
-          const pid = thread.id + "-p" + index;
-          return (
-            <div key={pid} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
-              <CommentRow id={pid} name={r.handle} chip="Student" meta={r.grade} chipTone="student" body={r.body} postedAgo={r.postedAgo} likes={r.likes ?? 0} liked={!!helpfuls[pid]} onLike={toggleHelpful} image={r.image} imageAlt={r.imageAlt} />
-            </div>
-          );
-        })}
+            ));
+          })()}
+        </CommentStream>
 
         {thread.responses.length === 0 && (
           <Card>
@@ -2607,11 +3142,13 @@ function ThreadView({
           </Card>
         )}
 
-        {posted.map((reply) => (
-          <div key={reply.id} className="rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
-            <CommentRow id={reply.id} name="Jordan" chip="Student" meta="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} />
-          </div>
-        ))}
+        {posted.length > 0 && (
+          <CommentStream>
+            {posted.map((reply) => (
+              <CommentRow key={reply.id} id={reply.id} name="Jordan" chip="Student" meta="Junior" chipTone="student" body={reply.body} postedAgo="Just now" likes={0} liked={!!helpfuls[reply.id]} onLike={toggleHelpful} collapsed={!!collapsed[reply.id]} onToggleCollapse={() => toggleCollapsed(reply.id)} />
+            ))}
+          </CommentStream>
+        )}
         <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${thread.id}-local-${current.length}`, body: text }])} />
 
         <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
@@ -2624,6 +3161,8 @@ function ThreadView({
           <button type="button" onClick={() => nav?.report(thread.id)} className="dm-link ml-auto flex min-h-[44px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
             <Flag className="h-3 w-3" aria-hidden /> Report
           </button>
+        </div>
+          </div>
         </div>
 
         {related.length > 0 && (
@@ -2648,6 +3187,107 @@ function answerLikes(rid: string, primary?: boolean): number {
   let h = 2166136261;
   for (let i = 0; i < rid.length; i++) { h ^= rid.charCodeAt(i); h = Math.imul(h, 16777619); }
   return (primary ? 120 : 24) + ((h >>> 0) % (primary ? 180 : 60));
+}
+
+/** A run of replies under one answer: no card boxes, one continuous
+ *  trunk line down the left like Reddit — the line never breaks between
+ *  replies, only where an answer (a new "message", not a reply) starts. */
+// Reddit's own thread line is drawn from avatar CENTER to avatar center,
+// not from a padded edge -- every row in the stream uses a 32px avatar
+// (space-4, 16px, is exactly half of that), so the trunk sits at x=16px
+// and a nested reply's elbow lands precisely on ITS avatar's center too,
+// instead of a straight line disconnected from anyone's face.
+// OPAQUE, not a transparent tint -- the elbow and the trunk necessarily
+// overlap where a follow-up branches off, and two translucent layers
+// stacked on top of each other compound into a visibly brighter seam
+// right at that overlap (direct feedback: "it looks bad, not properly
+// designed"). Mixing toward the opaque page background instead of
+// "transparent" keeps it a single flat color no matter how many shapes
+// paint over the same pixels -- which is also how Reddit's own lines
+// stay a single flat gray at every junction.
+const THREAD_LINE = "color-mix(in srgb, var(--foreground) 26%, var(--background))";
+const AVATAR_CENTER = 16; // px: half of the 32px avatar every row here uses
+const ROW_GAP = 16; // px: the gap between stacked rows (space-4)
+const INDENT = 44; // px: one avatar (32) + a nesting indent -- one level
+
+/** The trunk, drawn per-row instead of as one span sized to the whole
+ *  container. A single absolutely-positioned line from "container top" to
+ *  "container bottom" only lands on the LAST avatar's center by accident --
+ *  the container's real bottom edge is wherever that row's own body text
+ *  and reactions end, which varies per reply, so the line either fell
+ *  short of or ran past the last avatar (direct feedback: "this line
+ *  should end at Ruby's avatar circle, not extend beyond it and sit
+ *  awkwardly"). Anchoring each segment to ITS OWN row's avatar center --
+ *  and only drawing one for a row that HAS a next sibling -- means the
+ *  trunk is exactly as long as the replies are, never longer. */
+function CommentStream({ children }: { children: React.ReactNode }) {
+  const items = Children.toArray(children);
+  return (
+    <div className="flex flex-col">
+      {items.map((child, i) => {
+        const isLast = i === items.length - 1;
+        return (
+          <div key={i} className="relative isolate">
+            {/* `isolate` (not just `relative`) is load-bearing: a negative
+               z-index only paints behind THIS row's own background if this
+               row actually forms its own stacking context. `relative`
+               alone doesn't -- without a z-index of its own, it has none,
+               so the trunk escaped upward looking for the nearest one that
+               did, which used to be harmless when there was nothing opaque
+               in between. Once the reply stream sat on its own solid
+               background (direct feedback: "a solid black or dark blue
+               color instead of the gradients"), that escape put the trunk
+               BEHIND the new opaque surface -- invisible, while the
+               elbow (a plain border, no z-index trick) kept showing fine
+               (direct feedback: "only the curved lines are visible"). */}
+            {!isLast && (
+              <span aria-hidden className="pointer-events-none absolute z-[-1] w-[2px]" style={{ top: AVATAR_CENTER, height: `calc(100% - ${AVATAR_CENTER}px + ${ROW_GAP}px + ${AVATAR_CENTER}px)`, left: AVATAR_CENTER - 1, background: THREAD_LINE }} />
+            )}
+            {child}
+            {!isLast && <div style={{ height: ROW_GAP }} aria-hidden />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** A follow-up branching off the trunk: a rounded elbow curves out of the
+ *  vertical line, landing exactly on THIS reply's own avatar CENTER --
+ *  not its edge. The center is what matters: when the branch holds more
+ *  than one reply, CommentStream draws a second, continuing trunk at
+ *  that same avatar-center x -- stopping the curve at the avatar's edge
+ *  instead left that continuing line 16px off from the curve, a visible
+ *  kink (direct feedback: "alignment issues on the main threadline and
+ *  the curved one nested on it"). Landing on the center instead means
+ *  both lines share one x-coordinate, and the curve's last few pixels
+ *  simply disappear behind the (opaque) avatar circle, same as Reddit. */
+function FollowupBranch({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative" style={{ marginLeft: INDENT }}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute rounded-bl-[16px]"
+        style={{
+          // The trunk (CommentStream) is a `background` span centered on
+          // x=AVATAR_CENTER, occupying [AVATAR_CENTER-1, AVATAR_CENTER+1].
+          // A CSS border instead draws OUTWARD from its box edge, so
+          // matching only the box's nominal x (not this -1px offset) left
+          // the two lines 1px apart -- close enough to read as "almost
+          // aligned, but off" (direct feedback: "one is slightly off to
+          // the side"). The -1 here is that same correction, so both
+          // lines occupy the exact same pixels.
+          top: -(AVATAR_CENTER + 8),
+          left: -(INDENT - AVATAR_CENTER) - 1,
+          width: INDENT + 1,
+          height: 2 * AVATAR_CENTER + 8,
+          borderLeft: `2px solid ${THREAD_LINE}`,
+          borderBottom: `2px solid ${THREAD_LINE}`,
+        }}
+      />
+      {children}
+    </div>
+  );
 }
 
 // ——— comments: one shape everywhere ———
@@ -2692,44 +3332,137 @@ function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; 
   );
 }
 
+/** The pro's answer, in the exact same flat shape as every reply below it
+ *  (direct feedback, 8 Sept 2026: "why is Andre's comment a card" -- Reddit
+ *  never gives one reply its own box, only badges say it's the notable
+ *  one). Lives in the SAME CommentStream as the replies underneath it, so
+ *  the thread line runs straight through both without a visual seam. */
+function AnswerRow({ r, rid, threadId, threadTitle, collapsed, onToggleCollapse, helpfuls, toggleHelpful, saves, toggleSave }: {
+  r: Extract<Thread["responses"][number], { kind: "answer" }>;
+  rid: string;
+  threadId: string;
+  threadTitle: string;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+  helpfuls: Record<string, boolean>;
+  toggleHelpful: (id: string) => void;
+  saves: Record<string, boolean>;
+  toggleSave: (id: string, what?: string) => void;
+}) {
+  const pro = proById(r.proId);
+  const nav = useContext(ConnectNav);
+  return (
+    <div className="flex items-start gap-[12px]">
+      {/* ProAvatar is already its own button (opens the profile) -- the
+         collapse toggle lives on the header row instead of double-nesting
+         buttons here. */}
+      <ProAvatar proId={pro.id} name={pro.name} size={32} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-[6px]">
+          <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={13} /></button>
+          <CompanyChip name={pro.org} tone="surface" size="sm" />
+          {nav && <FollowButton dense following={nav.isFollowing(pro.id)} onToggle={() => nav.toggleFollow(pro.id)} />}
+          <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} className="dm-link ml-auto flex cursor-pointer items-center gap-[3px] text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            {r.postedAgo}
+            <ChevronDown className={collapsed ? "h-3 w-3 -rotate-90 transition-transform" : "h-3 w-3 transition-transform"} aria-hidden />
+          </button>
+        </div>
+        {collapsed ? (
+          <p className="mt-[3px] text-[12px] leading-[16px] italic" style={{ color: "var(--muted-foreground)" }}>Answer collapsed</p>
+        ) : (
+          <>
+            {/* Top answer moved off the crowded header row (direct
+               feedback: "everyone has so many badges/chips right now") --
+               a small label of its own, right where the answer it's
+               praising actually starts. */}
+            {r.primary && (
+              <span className="mt-[6px] flex items-center gap-[4px] text-[10.5px] leading-[14px] font-extrabold tracking-[0.05em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>
+                <Sparkles className="h-3 w-3" aria-hidden /> Top answer
+              </span>
+            )}
+            <p className="mt-[5px] text-[14px] leading-[21px]" style={{ color: "var(--foreground)" }}>{r.body}</p>
+            {r.disclosure && <p className="mt-[6px] text-[11px] leading-[15px] italic" style={{ color: "var(--muted-foreground)" }}>{r.disclosure}</p>}
+            <div className="mt-[8px] flex flex-wrap items-center gap-[var(--space-4)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <button type="button" onClick={() => toggleHelpful(rid)} aria-pressed={!!helpfuls[rid]} className="dm-link flex min-h-[30px] cursor-pointer items-center gap-[5px] tabular-nums" style={{ color: helpfuls[rid] ? "var(--accent-subtle)" : undefined }}>
+                <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {answerLikes(rid, r.primary) + (helpfuls[rid] ? 1 : 0)}
+              </button>
+              <button type="button" onClick={() => toggleSave(rid, "answer")} aria-pressed={!!saves[rid]} className="dm-link flex min-h-[30px] cursor-pointer items-center gap-[5px]" style={{ color: saves[rid] ? "var(--accent-subtle)" : undefined }}>
+                <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saves[rid] ? "Saved" : "Save"}
+              </button>
+              <button type="button" onClick={() => nav?.share(`?thread=${threadId}`, threadTitle)} className="dm-link flex min-h-[30px] cursor-pointer items-center gap-[5px]">
+                <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
+              </button>
+              <button type="button" onClick={() => nav?.report(rid)} aria-label="Report this answer" className="dm-link ml-auto flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+                <Flag className="h-3 w-3" aria-hidden /> Report
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /** A comment under an insight or thread: avatar, name + role chip, the
  *  line itself, then a working like button and the time. `likes` is the
  *  seeded count; the toggle adds the student's own on top. */
-function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string }) {
+function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt, collapsed, onToggleCollapse }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
   const nav = useContext(ConnectNav);
   // a professional's face and name open their profile; students have none
   const pro = chipTone === "pro" ? PROS.find((p) => p.name === name) : undefined;
   return (
     <div className="flex items-start gap-[12px]">
-      {pro ? <ProAvatar proId={pro.id} name={name} size={32} /> : <Avatar name={name} size={32} />}
+      {/* ProAvatar is already its own button (opens the profile) -- only a
+         student's plain (non-button) avatar can also serve as the collapse
+         toggle without nesting a button inside a button. */}
+      {pro ? (
+        <ProAvatar proId={pro.id} name={name} size={32} />
+      ) : (
+        <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} aria-label={collapsed ? `Expand ${name}'s comment` : `Collapse ${name}'s comment`} className="dm-quiet flex-none cursor-pointer rounded-full">
+          <Avatar name={name} size={32} />
+        </button>
+      )}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-[6px]">
           {pro ? (
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link cursor-pointer text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</button>
+            <>
+              <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name} <VerifiedBadge size={13} /></button>
+            </>
           ) : (
-            <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+            <>
+              <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+              <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
+            </>
           )}
-          <span className="rounded-[var(--radius-sm)] border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold" style={{ borderColor: `color-mix(in srgb, ${tone} 50%, var(--glass-border))`, color: tone, background: `color-mix(in srgb, ${tone} 12%, transparent)` }}>{chip}</span>
           {meta && <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{meta}</span>}
-          <span className="text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>
+          <button type="button" onClick={onToggleCollapse} aria-expanded={!collapsed} className="dm-link ml-auto flex cursor-pointer items-center gap-[3px] text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            {postedAgo}
+            <ChevronDown className={collapsed ? "h-3 w-3 -rotate-90 transition-transform" : "h-3 w-3 transition-transform"} aria-hidden />
+          </button>
         </div>
-        <p className="mt-[5px] text-[13.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{body}</p>
-        {/* Reaction GIFs between pros and students are deliberate (the doc
-           shows them; it's a pitch beat about speaking Gen Z) -- rendered
-           unoptimized so the animation actually plays. */}
-        {image && (
-          <Image src={image} alt={imageAlt ?? ""} width={356} height={200} unoptimized className="mt-[8px] h-auto w-[200px] max-w-full rounded-[var(--radius-lg)] sm:w-[220px]" style={{ background: "var(--glass-surface-1)" }} />
+        {collapsed ? (
+          <p className="mt-[3px] text-[12px] leading-[16px] italic" style={{ color: "var(--muted-foreground)" }}>Comment collapsed</p>
+        ) : (
+          <>
+            <p className="mt-[5px] text-[13.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{body}</p>
+            {/* Reaction GIFs between pros and students are deliberate (the doc
+               shows them; it's a pitch beat about speaking Gen Z) -- rendered
+               unoptimized so the animation actually plays. */}
+            {image && (
+              <Image src={image} alt={imageAlt ?? ""} width={356} height={200} unoptimized className="mt-[8px] h-auto w-[200px] max-w-full rounded-[var(--radius-lg)] sm:w-[220px]" style={{ background: "var(--glass-surface-1)" }} />
+            )}
+            <div className="flex flex-wrap items-center gap-[10px]">
+              <ReactionRow id={id} likes={likes} liked={liked} onLike={onLike} />
+              <button type="button" onClick={focusReplyComposer} className="dm-link mt-[6px] flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                <CornerDownRight className="h-3 w-3" aria-hidden /> Reply
+              </button>
+              <button type="button" onClick={() => nav?.report(id)} aria-label="Report this comment" className="dm-link mt-[6px] ml-auto flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11px] leading-[15px] font-semibold opacity-55 hover:opacity-100" style={{ color: "var(--muted-foreground)" }}>
+                <Flag className="h-3 w-3" aria-hidden /> Report
+              </button>
+            </div>
+          </>
         )}
-        <div className="flex flex-wrap items-center gap-[10px]">
-          <ReactionRow id={id} likes={likes} liked={liked} onLike={onLike} />
-          <button type="button" onClick={focusReplyComposer} className="dm-link mt-[6px] flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <CornerDownRight className="h-3 w-3" aria-hidden /> Reply
-          </button>
-          <button type="button" onClick={() => nav?.report(id)} aria-label="Report this comment" className="dm-link mt-[6px] ml-auto flex min-h-[30px] cursor-pointer items-center gap-[4px] text-[11px] leading-[15px] font-semibold opacity-55 hover:opacity-100" style={{ color: "var(--muted-foreground)" }}>
-            <Flag className="h-3 w-3" aria-hidden /> Report
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -2823,73 +3556,89 @@ function InsightThreadView({
       </button>
 
       <article className="flex flex-col gap-[var(--space-5)]">
-        <div className="rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--card))", borderColor: "var(--glass-border)" }}>
+        {/* Plain on the page's own colored backdrop, same as ThreadView's
+           header -- no bordered/tinted card box (direct feedback, 9 Sept
+           2026: "the professional insight opened page should also follow
+           the question page ... on top with the colored backdrop"). */}
+        <div>
           <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Professional insight</span>
           <h1 className="mt-[6px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h1>
           <div className="mt-[12px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} /></div>
           <p className="mt-[14px] text-[13.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{insight.body}</p>
           <p className="mt-[10px] text-[11px] leading-[15px] italic" style={{ color: "var(--muted-foreground)" }}>{pro.verifiedBy}</p>
-          <div className="mt-[14px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-            <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
-                <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {insight.helpful + (helpful ? 1 : 0)}
-              </button>
-              <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
-                <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
-              </button>
-              <button type="button" onClick={() => nav?.share(`?insight=${insight.id}`, insight.title)} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
-                <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
-              </button>
-              <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
-                <Flag className="h-3 w-3" aria-hidden /> Report
-              </button>
-            </div>
-          </div>
         </div>
 
-        <section aria-label="Comments" className="flex flex-col gap-[var(--space-4)]">
-          <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            Comments ({insight.replies.length + posted.length})
-          </h2>
-          <div className="flex flex-col gap-[var(--space-4)]">
-            {insight.replies.map((reply, index) => {
-              const rid = `${insight.id}-r${index}`;
-              const isPro = !!reply.proId;
-              return (
+        <div className="flex flex-wrap items-center gap-[var(--space-5)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <button type="button" onClick={onHelpful} aria-pressed={helpful} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: helpful ? "var(--accent-subtle)" : undefined }}>
+            <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> Like · {insight.helpful + (helpful ? 1 : 0)}
+          </button>
+          <button type="button" onClick={onSave} aria-pressed={saved} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]" style={{ color: saved ? "var(--accent-subtle)" : undefined }}>
+            <Bookmark className="h-3.5 w-3.5" aria-hidden /> {saved ? "Saved" : "Save"}
+          </button>
+          <button type="button" onClick={() => nav?.share(`?insight=${insight.id}`, insight.title)} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
+            <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
+          </button>
+          <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+            <Flag className="h-3 w-3" aria-hidden /> Report
+          </button>
+        </div>
+
+        {/* A solid, edge-to-edge surface for the whole comment stream --
+           the exact same full-bleed panel ThreadView uses for its answers
+           (direct feedback, 9 Sept 2026), so the insight itself reads as
+           its own thing above a clearly separate "comments" zone instead
+           of one continuous wash. */}
+        <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "-50vw", marginRight: "-50vw", background: "var(--background)", borderColor: "var(--glass-border)" }}>
+          <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-4)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
+            <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+              Comments ({insight.replies.length + posted.length})
+            </h2>
+            {/* Same CommentStream every reply list uses (direct feedback, 9
+               Sept 2026: "the insights is missing the thread rails and the
+               curved lines etc, do that exactly like the questions, follow
+               exact alignments too") -- the trunk line, avatar-center math
+               and row spacing all come from the shared component, not a
+               plain flex column. */}
+            <CommentStream>
+              {insight.replies.map((reply, index) => {
+                const rid = `${insight.id}-r${index}`;
+                const isPro = !!reply.proId;
+                return (
+                  <CommentRow
+                    key={rid}
+                    id={rid}
+                    name={isPro ? proById(reply.proId!).name : reply.handle!}
+                    chip={isPro ? "Professional" : "Student"}
+                    meta={isPro ? undefined : reply.grade}
+                    chipTone={isPro ? "pro" : "student"}
+                    body={reply.body}
+                    postedAgo={reply.postedAgo}
+                    likes={reply.likes}
+                    liked={!!helpfuls[rid]}
+                    onLike={toggleHelpful}
+                    image={reply.image}
+                    imageAlt={reply.imageAlt}
+                  />
+                );
+              })}
+              {posted.map((reply) => (
                 <CommentRow
-                  key={rid}
-                  id={rid}
-                  name={isPro ? proById(reply.proId!).name : reply.handle!}
-                  chip={isPro ? "Professional" : "Student"}
-                  meta={isPro ? undefined : reply.grade}
-                  chipTone={isPro ? "pro" : "student"}
+                  key={reply.id}
+                  id={reply.id}
+                  name="Jordan"
+                  chip="Junior"
+                  chipTone="student"
                   body={reply.body}
-                  postedAgo={reply.postedAgo}
-                  likes={reply.likes}
-                  liked={!!helpfuls[rid]}
+                  postedAgo="Just now"
+                  likes={0}
+                  liked={!!helpfuls[reply.id]}
                   onLike={toggleHelpful}
-                  image={reply.image}
-                  imageAlt={reply.imageAlt}
                 />
-              );
-            })}
-            {posted.map((reply) => (
-              <CommentRow
-                key={reply.id}
-                id={reply.id}
-                name="Jordan"
-                chip="Junior"
-                chipTone="student"
-                body={reply.body}
-                postedAgo="Just now"
-                likes={0}
-                liked={!!helpfuls[reply.id]}
-                onLike={toggleHelpful}
-              />
-            ))}
+              ))}
+            </CommentStream>
+            <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
           </div>
-          <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
-        </section>
+        </div>
       </article>
     </>
   );

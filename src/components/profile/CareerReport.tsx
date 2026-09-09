@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, DollarSign, ExternalLink, GraduationCap, ListChecks, MapPin, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, ListChecks, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
 import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
@@ -34,7 +34,7 @@ export const REPORT_SECTIONS = [
   { id: "courses", n: 2, label: "High School Classes" },
   { id: "majors", n: 3, label: "College Majors" },
   { id: "education", n: 4, label: "College Pathways" },
-  { id: "colleges", n: 5, label: "Colleges" },
+  { id: "colleges", n: 5, label: "Schools" },
 ] as const;
 
 
@@ -295,9 +295,9 @@ function ReportDocument({
           }
         >
           <dl className="grid gap-[14px] sm:grid-cols-2" data-keep-together>
-            <Fact icon={Target} label="What You Do" value={report.glance.whatYouDo} className="sm:col-span-2" />
-            <Fact icon={MapPin} label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
-            <Fact icon={DollarSign} label="U.S. Median Salary" value={`${report.salary.median} a year`} />
+            <Fact label="What You Do" value={report.glance.whatYouDo} className="sm:col-span-2" />
+            <Fact label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
+            <Fact label="U.S. Median Salary" value={`${report.salary.median.replace(/^\$/, "")} a year`} />
           </dl>
         </ReportSection>
 
@@ -356,21 +356,21 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* 05 — Colleges */}
+        {/* 05 — Schools */}
         <ReportSection
           id={`${idPrefix}colleges`}
           n={5}
-          title="Colleges"
+          title="Schools"
           icon={Building2}
           action={
             <Link
               href="/colleges"
               data-print-hide
-              aria-label="College Lookup"
+              aria-label="School Lookup"
               className="dm-tap inline-flex min-h-[32px] items-center gap-[6px] rounded-[8px] border px-[9px] text-[12.5px] leading-[16px] font-bold tracking-[-0.008em] sm:px-[11px]"
               style={{ borderColor: "var(--rule-strong)", color: "var(--ink)", background: "var(--paper-sunken)" }}
             >
-              <Search className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">College Lookup</span>
+              <Search className="h-3.5 w-3.5" aria-hidden /> <span className="hidden sm:inline">School Lookup</span>
             </Link>
           }
         >
@@ -424,7 +424,7 @@ function ReportDocument({
           <ul className="flex list-none flex-col gap-[5px] p-0 text-[13px] leading-[19px]" style={{ color: "var(--ink-faint)" }}>
             {report.sources.map((source) => (
               <li key={source.url + source.label}>
-                {source.label} — {source.org}, {source.year}. Checked {source.verified}.{" "}
+                {source.label}, {source.org}, {source.year}. Checked {source.verified}.{" "}
                 <SourceLink url={source.url}>Open</SourceLink>
               </li>
             ))}

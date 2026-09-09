@@ -3,7 +3,7 @@
 Status: Overview in review (Do this next pattern open with Joshua); header locked; Resume placeholder.
 
 ## Header
-Cover photo (six options, picker) with name and school over it. Four compact tiles, left-aligned, one line each, in this order: "Dream Score 100 XP" (live; phone label "Score"), "12 day streak · Active 142 of 190 days" (subtext from desktop only), "Grade 11", "GPA 3.7". Phones show them as a 2×2 grid. Icons stay. Cover / Saved / Settings controls top right. On this page the top nav hides its streak and XP counters (the hero carries them).
+Cover photo (six options, picker) with name and school over it. Three compact tiles, left-aligned, one row at every width, in this order: "Grade 11", "GPA 3.7", "12 day streak · Active 142 of 190 days" (subtext from desktop only). Icons stay. Cover / Saved / Settings controls top right. The Dream Score is not a tile here: it stays in the app header on every page, Profile included, the way it lands there after Build (Joshua Pierce, Slack, 6 Sept 2026).
 
 ## Tabs
 Overview · Top Three · My Plan · Report · Resume. Query `?tab=`. Links to `/profile?tab=…` from inside the profile switch tabs.
@@ -24,3 +24,10 @@ Open question with Joshua: whether the button-as-verb pattern stays, and whether
 
 ## Files
 `src/components/profile/ProfileExperience.tsx`, `data.ts`.
+
+## Next step banner (Joshua Pierce, Slack, 5 and 6 Sept 2026)
+"Your next step · Play your #1 Career Simulation to see if it’s really your #1." with a Play button and an X (dismissal remembered in `dreamari:top3-next-step-dismissed`, shared by both tabs). `NextStepBanner` with `emphasis="priority"`. Top Three: under the cards. My Plan: at the foot of the plan, under Level 3, so it never interrupts the plan's order. After the simulation is completed the banner should update to the next recommended action (not built).
+
+The Play button routes to `/play?focus=investment-banking` -- the Play hub, with Investment Banking pre-selected as the hero card -- not straight into the simulation (Joshua Pierce, Slack, 7 Sept 2026: the Prime Video/Apple TV pattern, the content page — trailer, Express mode, level ladder — before playback). "Routes to Investment Banking for now; the dynamic #1 routing is a later step" still holds -- this only changed the DESTINATION shape, not which career it targets. See "HUD deep-links..." in `play.md` for how `?focus=` is read.
+
+The `priority` surface itself changed the same day: it used to be a solid brand-blue-to-violet gradient with white type -- the one saturated, off-palette block on an otherwise dark page (direct feedback: "not sure about the color... doesn't feel cohesive with the page"). It now uses the same dark inset surface as the `quiet` banner; "priority" reads through a shorter, more insistent pulse/flash on the border glow and the CTA's ring instead of a color that doesn't belong. See `NextStepBanner.tsx`.

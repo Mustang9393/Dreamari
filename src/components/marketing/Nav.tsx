@@ -160,7 +160,7 @@ export function Nav({ view, onSchoolsClick }: NavProps) {
         <div className="flex items-center gap-2">
           <Link
             href={cta.href}
-            className="rounded-full px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
+            className="rounded-xl px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
             style={{
               background: "linear-gradient(180deg, #4a82ff, var(--primary))",
               color: "var(--primary-foreground)",

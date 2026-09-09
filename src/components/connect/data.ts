@@ -121,6 +121,11 @@ export type Pro = {
   /** About (Connect 2.0): where they studied, how they got here, what they can help with */
   education?: string;
   journey?: string;
+  /** Experience: a prior role at an adjacent employer, same "; "-separated
+   *  segment shape as `education`, shown above it (direct feedback, 9 Sept
+   *  2026: "someone who is working at JPMorgan mightve once worked at
+   *  Blackrock or Goldman"). */
+  priorRole?: string;
   topics?: string[];
   /** Private activity signal: days since they last answered or posted. */
   activeDaysAgo: number;
@@ -145,33 +150,57 @@ export type Community = {
 };
 
 export const PROS: Pro[] = [
-  { id: "pro-chen", name: "David Chen", role: "Software Engineer", org: "Amazon", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Feb 2026", world: "Tech & Engineering", field: "Software Engineering", story: "I taught myself to code in a library after school because we didn't have a computer at home. Nine years later I ship features millions of people use, and the thing I still lean on most is asking better questions.", followers: 1286, studentsReached: 9418, totalLikes: 4921, questionsAnswered: 63, activeDaysAgo: 1, education: "B.S. Computer Science, University of Washington", journey: "Self-taught in a public library, then a state school degree, an internship that turned into an offer, and nine years shipping consumer features.", topics: ["Software engineering", "Internships", "Learning to code", "College"] },
-  { id: "pro-martinez", name: "Elena Martinez", role: "Brand Strategist", org: "EY", scope: "Consulting & professional services", verifiedBy: "Verified through EY partner program · Aug 2026", world: "Business & Money", field: "Consulting", story: "I switched from marketing to strategy consulting at 27 with no MBA. The pitch that got me in was a two-page teardown of a brand I loved, not a résumé.", followers: 742, studentsReached: 5104, totalLikes: 2380, questionsAnswered: 41, activeDaysAgo: 3, education: "B.A. Communications, Arizona State University", journey: "Six years in brand marketing, then a two-page teardown of a brand she loved got her into strategy consulting at 27, no MBA.", topics: ["Consulting", "Marketing", "Career switches", "Portfolios"] },
-  { id: "pro-okafor", name: "Amara Okafor", role: "Investment Banking Analyst", org: "JPMorgan Chase", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · May 2026", world: "Business & Money", field: "Investment Banking", story: "First in my family to work in finance. I got here from a state school by cold-emailing 140 analysts; 11 wrote back and two of them changed my life. I try to be one of those two for someone every week.", followers: 1934, studentsReached: 12660, totalLikes: 6812, questionsAnswered: 87, activeDaysAgo: 0, education: "B.S. Economics, University of Michigan", journey: "State school, 140 cold emails, two mentors who wrote back, an analyst program, and now deals in technology and media.", topics: ["Investment banking", "Finance careers", "Internships", "College"] },
-  { id: "pro-reyes", name: "Marcus Reyes", role: "Registered Nurse", org: "CVS Health", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Mar 2026", world: "Health & Medicine", field: "Nursing", story: "I was a lifeguard who liked the first-aid part more than the pool. Nursing school at a community college, then an ER, now a MinuteClinic. Every day is a hundred small decisions that matter.", followers: 968, studentsReached: 7215, totalLikes: 3540, questionsAnswered: 58, activeDaysAgo: 2, education: "A.D.N. Austin Community College; B.S.N. Texas State University", journey: "Lifeguard, community college nursing program, three years in an emergency room, now a MinuteClinic.", topics: ["Nursing", "Nursing school", "Emergency medicine", "Community college"] },
-  { id: "pro-cole", name: "Jasmine Cole", role: "Art Director", org: "Nike", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Jun 2026", world: "Arts, Media & Sport", field: "Design", story: "My portfolio at 17 was Instagram edits for my friends' sneaker resale accounts. That instinct for what makes people stop scrolling is the same one I use on campaigns now.", followers: 2210, studentsReached: 14380, totalLikes: 8104, questionsAnswered: 52, activeDaysAgo: 1, education: "B.F.A. Graphic Design, Savannah College of Art and Design", journey: "Instagram edits for friends at 17, a design degree, junior designer at an agency, now art director on global campaigns.", topics: ["Design", "Portfolios", "Art school", "Creative careers"] },
-  { id: "pro-osei", name: "Nadia Osei", role: "Engineering Manager", org: "Google", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Apr 2026", world: "Tech & Engineering", field: "Engineering Management", story: "I spent six years as an engineer before managing anyone. The job became less about the code I write and more about the people who can write it because I cleared the way.", followers: 1522, studentsReached: 8830, totalLikes: 4260, questionsAnswered: 39, activeDaysAgo: 5, education: "B.S. Electrical Engineering, Georgia Tech", journey: "Six years as an engineer before managing anyone; now leads a team of engineers and clears the way for them.", topics: ["Engineering management", "Software engineering", "Leadership", "Internships"] },
-  { id: "pro-zhang", name: "Wei Zhang", role: "Cybersecurity Engineer", org: "Microsoft", scope: "Security engineering careers", verifiedBy: "Work email verified by Dreamari · Jul 2026", world: "Tech & Engineering", field: "Cybersecurity", story: "Capture-the-flag competitions in high school taught me more than any class. Security is a career for people who like to understand how things break so they can keep them whole.", followers: 1107, studentsReached: 6940, totalLikes: 3312, questionsAnswered: 46, activeDaysAgo: 4, education: "B.S. Computer Science, University of Illinois", journey: "Capture-the-flag competitions in high school, a security internship, and a decade keeping systems whole.", topics: ["Cybersecurity", "Competitions", "Learning to code", "Internships"] },
-  { id: "pro-gallagher", name: "Tom Gallagher", role: "Markets Analyst", org: "Morgan Stanley", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Mar 2026", world: "Business & Money", field: "Markets", story: "I read the business section at breakfast as a kid because my dad did. Twenty years on I still start the day the same way; now people pay for what I think about it.", followers: 655, studentsReached: 4120, totalLikes: 1980, questionsAnswered: 33, activeDaysAgo: 9, education: "B.A. Economics, Boston College", journey: "Read the business pages at breakfast as a kid; twenty years later people pay for what he thinks about them.", topics: ["Markets", "Finance careers", "Economics", "Reading the news"] },
-  { id: "pro-grant", name: "Sofia Grant", role: "Investment Banking Associate", org: "Goldman Sachs", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Jan 2026", world: "Business & Money", field: "Investment Banking", story: "Nobody at my high school had heard of investment banking. A single alumni panel changed my trajectory, so I answer every question here the way I wish someone had answered mine.", followers: 1410, studentsReached: 9975, totalLikes: 5230, questionsAnswered: 71, activeDaysAgo: 2, education: "B.S. Finance, University of Florida; M.B.A., Wharton", journey: "One alumni panel in high school changed her path; analyst, then associate, now she answers the questions she once had.", topics: ["Investment banking", "Business school", "Internships", "College"] },
-  { id: "pro-whitfield", name: "Andre Whitfield", role: "Recruiter", org: "Deloitte", scope: "Hiring & early careers", verifiedBy: "Verified through Deloitte partner program · May 2026", world: "Teaching & Education", field: "Recruiting", story: "I have read more than ten thousand résumés. Most of what students worry about, I never notice; most of what I notice, nobody tells them. Ask me.", followers: 3020, studentsReached: 21540, totalLikes: 9870, questionsAnswered: 118, activeDaysAgo: 0, education: "B.A. Psychology, Howard University", journey: "Campus recruiter, then corporate recruiting; more than ten thousand resumes read, thousands of interviews run.", topics: ["Resumes", "Interviews", "Hiring", "Early careers"] },
-  { id: "pro-tanaka", name: "Keiko Tanaka", role: "HR Manager", org: "Amazon", scope: "Hiring & early careers", verifiedBy: "Work email verified by Dreamari · Feb 2026", world: "Teaching & Education", field: "Human Resources", story: "I hire for teams of 400 people. The interview is not a test of who you are; it is a conversation about whether we can do good work together. I can teach you how to have that conversation.", followers: 1188, studentsReached: 8410, totalLikes: 3925, questionsAnswered: 64, activeDaysAgo: 6, education: "B.A. Sociology, UCLA; M.S. Human Resources, Cornell", journey: "Started in staffing, moved into HR, now hires for teams of 400 and coaches candidates on the conversation.", topics: ["Interviews", "Human resources", "Hiring", "Workplace skills"] },
-  { id: "pro-brooks", name: "Danielle Brooks", role: "Nurse Practitioner", org: "Mayo Clinic", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Apr 2026", world: "Health & Medicine", field: "Nursing", story: "RN at 22, NP at 30, still learning at 41. Healthcare has a ladder most students never see; I like showing them the rungs.", followers: 1340, studentsReached: 9120, totalLikes: 4488, questionsAnswered: 55, activeDaysAgo: 3, education: "B.S.N. University of Minnesota; M.S.N. Nurse Practitioner", journey: "Registered nurse at 22, nurse practitioner at 30, still learning at 41; she likes showing students the rungs.", topics: ["Nursing", "Nurse practitioner path", "Healthcare careers", "Graduate school"] },
-  { id: "pro-fontaine", name: "Leo Fontaine", role: "Motion Designer", org: "Spotify", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Aug 2026", world: "Arts, Media & Sport", field: "Motion Design", story: "I made lyric videos for local bands for free for three years. One of them got a label deal, kept me on, and that reel is what Spotify saw.", followers: 1876, studentsReached: 11230, totalLikes: 7360, questionsAnswered: 29, activeDaysAgo: 12, education: "Self-taught; certificate in Motion Design, School of Motion", journey: "Free lyric videos for local bands for three years; one label deal later, the reel got him to Spotify.", topics: ["Motion design", "Portfolios", "Self-teaching", "Creative careers"] },
-  { id: "pro-haddad", name: "Omar Haddad", role: "Clinical Research Nurse", org: "Pfizer", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · May 2026", world: "Health & Medicine", field: "Clinical Research", story: "I wanted medicine but not the operating room. Research nursing let me stay close to patients and closer to the science; the trial I coordinate now might change how we treat asthma.", followers: 612, studentsReached: 3980, totalLikes: 1745, questionsAnswered: 24, activeDaysAgo: 7, education: "B.S.N. Rutgers University", journey: "Wanted medicine without the operating room; research nursing kept him close to patients and the science.", topics: ["Clinical research", "Nursing", "Healthcare careers", "Science"] },
-  { id: "pro-vega", name: "Camille Vega", role: "Content Producer", org: "Netflix", scope: "Media & content careers", verifiedBy: "Work email verified by Dreamari · Jul 2026", world: "Arts, Media & Sport", field: "Media Production", story: "I produced my school's morning announcements and took it far too seriously. That seriousness about small things is the entire job.", followers: 2490, studentsReached: 15870, totalLikes: 9012, questionsAnswered: 44, activeDaysAgo: 1, education: "B.A. Film and Media, University of Texas at Austin", journey: "Ran the school morning announcements far too seriously; production assistant, producer, now content at Netflix.", topics: ["Media production", "Content creation", "Internships", "Creative careers"] },
+  { id: "pro-chen", name: "David Chen", role: "Software Engineer", org: "Amazon", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Feb 2026", world: "Tech & Engineering", field: "Software Engineering", story: "I taught myself to code in a library after school because we didn't have a computer at home. Nine years later I ship features millions of people use, and the thing I still lean on most is asking better questions.", followers: 1286, studentsReached: 18510, totalLikes: 4921, questionsAnswered: 63, activeDaysAgo: 1, education: "B.S. Computer Science, University of Washington", journey: "Self-taught in a public library, then a state school degree, an internship that turned into an offer, and nine years shipping consumer features.", topics: ["Software engineering", "Internships", "Learning to code", "College"] },
+  { id: "pro-martinez", name: "Elena Martinez", role: "Brand Strategist", org: "EY", scope: "Consulting & professional services", verifiedBy: "Verified through EY partner program · Aug 2026", world: "Business & Money", field: "Consulting", story: "I switched from marketing to strategy consulting at 27 with no MBA. The pitch that got me in was a two-page teardown of a brand I loved, not a résumé.", followers: 742, studentsReached: 11580, totalLikes: 2380, questionsAnswered: 41, activeDaysAgo: 3, education: "B.A. Communications, Arizona State University", journey: "Six years in brand marketing, then a two-page teardown of a brand she loved got her into strategy consulting at 27, no MBA.", topics: ["Consulting", "Marketing", "Career switches", "Portfolios"] },
+  { id: "pro-okafor", name: "Amara Okafor", role: "Investment Banking Analyst", org: "JPMorgan Chase", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · May 2026", world: "Business & Money", field: "Investment Banking", story: "First in my family to work in finance. I got here from a state school by cold-emailing 140 analysts; 11 wrote back and two of them changed my life. I try to be one of those two for someone every week.", followers: 1934, studentsReached: 23730, totalLikes: 6812, questionsAnswered: 87, activeDaysAgo: 0, education: "B.S. Economics, University of Michigan", priorRole: "Investment Banking Summer Analyst, Goldman Sachs", journey: "State school, 140 cold emails, two mentors who wrote back, an analyst program, and now deals in technology and media.", topics: ["Investment banking", "Finance careers", "Internships", "College"] },
+  { id: "pro-reyes", name: "Marcus Reyes", role: "Registered Nurse", org: "CVS Health", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Mar 2026", world: "Health & Medicine", field: "Nursing", story: "I was a lifeguard who liked the first-aid part more than the pool. Nursing school at a community college, then an ER, now a MinuteClinic. Every day is a hundred small decisions that matter.", followers: 968, studentsReached: 14970, totalLikes: 3540, questionsAnswered: 58, activeDaysAgo: 2, education: "A.D.N. Austin Community College; B.S.N. Texas State University", journey: "Lifeguard, community college nursing program, three years in an emergency room, now a MinuteClinic.", topics: ["Nursing", "Nursing school", "Emergency medicine", "Community college"] },
+  { id: "pro-cole", name: "Jasmine Cole", role: "Art Director", org: "Nike", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Jun 2026", world: "Arts, Media & Sport", field: "Design", story: "My portfolio at 17 was Instagram edits for my friends' sneaker resale accounts. That instinct for what makes people stop scrolling is the same one I use on campaigns now.", followers: 2210, studentsReached: 26490, totalLikes: 8104, questionsAnswered: 52, activeDaysAgo: 1, education: "B.F.A. Graphic Design, Savannah College of Art and Design", journey: "Instagram edits for friends at 17, a design degree, junior designer at an agency, now art director on global campaigns.", topics: ["Design", "Portfolios", "Art school", "Creative careers"] },
+  { id: "pro-osei", name: "Nadia Osei", role: "Engineering Manager", org: "Google", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Apr 2026", world: "Tech & Engineering", field: "Engineering Management", story: "I spent six years as an engineer before managing anyone. The job became less about the code I write and more about the people who can write it because I cleared the way.", followers: 1522, studentsReached: 17570, totalLikes: 4260, questionsAnswered: 39, activeDaysAgo: 5, education: "B.S. Electrical Engineering, Georgia Tech", journey: "Six years as an engineer before managing anyone; now leads a team of engineers and clears the way for them.", topics: ["Engineering management", "Software engineering", "Leadership", "Internships"] },
+  { id: "pro-zhang", name: "Wei Zhang", role: "Cybersecurity Engineer", org: "Microsoft", scope: "Security engineering careers", verifiedBy: "Work email verified by Dreamari · Jul 2026", world: "Tech & Engineering", field: "Cybersecurity", story: "Capture-the-flag competitions in high school taught me more than any class. Security is a career for people who like to understand how things break so they can keep them whole.", followers: 1107, studentsReached: 14530, totalLikes: 3312, questionsAnswered: 46, activeDaysAgo: 4, education: "B.S. Computer Science, University of Illinois", journey: "Capture-the-flag competitions in high school, a security internship, and a decade keeping systems whole.", topics: ["Cybersecurity", "Competitions", "Learning to code", "Internships"] },
+  { id: "pro-gallagher", name: "Ryan Kessler", role: "Markets Analyst", org: "Morgan Stanley", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Mar 2026", world: "Business & Money", field: "Markets", story: "I read the business section at breakfast as a kid because my dad did. Twenty years on I still start the day the same way; now people pay for what I think about it.", followers: 655, studentsReached: 10000, totalLikes: 1980, questionsAnswered: 33, activeDaysAgo: 9, education: "B.A. Economics, Boston College", journey: "Read the business pages at breakfast as a kid; twenty years later people pay for what he thinks about them.", topics: ["Markets", "Finance careers", "Economics", "Reading the news"] },
+  { id: "pro-grant", name: "Sofia Grant", role: "Investment Banking Associate", org: "Goldman Sachs", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Jan 2026", world: "Business & Money", field: "Investment Banking", story: "Nobody at my high school had heard of investment banking. A single alumni panel changed my trajectory, so I answer every question here the way I wish someone had answered mine.", followers: 1410, studentsReached: 19410, totalLikes: 5230, questionsAnswered: 71, activeDaysAgo: 2, education: "B.S. Finance, University of Florida; M.B.A., Wharton", journey: "One alumni panel in high school changed her path; analyst, then associate, now she answers the questions she once had.", topics: ["Investment banking", "Business school", "Internships", "College"] },
+  { id: "pro-whitfield", name: "Andre Whitfield", role: "Recruiter", org: "Deloitte", scope: "Hiring & early careers", verifiedBy: "Verified through Deloitte partner program · May 2026", world: "Teaching & Education", field: "Recruiting", story: "I have read more than ten thousand résumés. Most of what students worry about, I never notice; most of what I notice, nobody tells them. Ask me.", followers: 3020, studentsReached: 38000, totalLikes: 9870, questionsAnswered: 118, activeDaysAgo: 0, education: "B.A. Psychology, Howard University", journey: "Campus recruiter, then corporate recruiting; more than ten thousand resumes read, thousands of interviews run.", topics: ["Resumes", "Interviews", "Hiring", "Early careers"] },
+  { id: "pro-tanaka", name: "Keiko Tanaka", role: "HR Manager", org: "Amazon", scope: "Hiring & early careers", verifiedBy: "Work email verified by Dreamari · Feb 2026", world: "Teaching & Education", field: "Human Resources", story: "I hire for teams of 400 people. The interview is not a test of who you are; it is a conversation about whether we can do good work together. I can teach you how to have that conversation.", followers: 1188, studentsReached: 16890, totalLikes: 3925, questionsAnswered: 64, activeDaysAgo: 6, education: "B.A. Sociology, UCLA; M.S. Human Resources, Cornell", journey: "Started in staffing, moved into HR, now hires for teams of 400 and coaches candidates on the conversation.", topics: ["Interviews", "Human resources", "Hiring", "Workplace skills"] },
+  { id: "pro-brooks", name: "Danielle Brooks", role: "Nurse Practitioner", org: "Mayo Clinic", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · Apr 2026", world: "Health & Medicine", field: "Nursing", story: "RN at 22, NP at 30, still learning at 41. Healthcare has a ladder most students never see; I like showing them the rungs.", followers: 1340, studentsReached: 18030, totalLikes: 4488, questionsAnswered: 55, activeDaysAgo: 3, education: "B.S.N. University of Minnesota; M.S.N. Nurse Practitioner", journey: "Registered nurse at 22, nurse practitioner at 30, still learning at 41; she likes showing students the rungs.", topics: ["Nursing", "Nurse practitioner path", "Healthcare careers", "Graduate school"] },
+  { id: "pro-fontaine", name: "Leo Fontaine", role: "Motion Designer", org: "Spotify", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Aug 2026", world: "Arts, Media & Sport", field: "Motion Design", story: "I made lyric videos for local bands for free for three years. One of them got a label deal, kept me on, and that reel is what Spotify saw.", followers: 1876, studentsReached: 21430, totalLikes: 7360, questionsAnswered: 29, activeDaysAgo: 12, education: "Self-taught; certificate in Motion Design, School of Motion", journey: "Free lyric videos for local bands for three years; one label deal later, the reel got him to Spotify.", topics: ["Motion design", "Portfolios", "Self-teaching", "Creative careers"] },
+  { id: "pro-haddad", name: "Omar Haddad", role: "Clinical Research Nurse", org: "Pfizer", scope: "Nursing & patient care careers", verifiedBy: "License + employer verified by Dreamari · May 2026", world: "Health & Medicine", field: "Clinical Research", story: "I wanted medicine but not the operating room. Research nursing let me stay close to patients and closer to the science; the trial I coordinate now might change how we treat asthma.", followers: 612, studentsReached: 9770, totalLikes: 1745, questionsAnswered: 24, activeDaysAgo: 7, education: "B.S.N. Rutgers University", journey: "Wanted medicine without the operating room; research nursing kept him close to patients and the science.", topics: ["Clinical research", "Nursing", "Healthcare careers", "Science"] },
+  { id: "pro-vega", name: "Camille Vega", role: "Content Producer", org: "Netflix", scope: "Media & content careers", verifiedBy: "Work email verified by Dreamari · Jul 2026", world: "Arts, Media & Sport", field: "Media Production", story: "I produced my school's morning announcements and took it far too seriously. That seriousness about small things is the entire job.", followers: 2490, studentsReached: 28890, totalLikes: 9012, questionsAnswered: 44, activeDaysAgo: 1, education: "B.A. Film and Media, University of Texas at Austin", journey: "Ran the school morning announcements far too seriously; production assistant, producer, now content at Netflix.", topics: ["Media production", "Content creation", "Internships", "Creative careers"] },
   // Second and third voices per company (4 Sept 2026): a company with one
   // volunteer read as a placeholder. Activity is deliberately uneven, from
   // answered-today to a two-month break, so the volunteer status varies.
-  { id: "pro-nair", name: "Arjun Nair", role: "Senior Cybersecurity Consultant", org: "EY", scope: "Consulting & professional services", verifiedBy: "Verified through EY partner program · Aug 2026", world: "Tech & Engineering", field: "Cybersecurity", story: "I failed my first security certification. The second time I studied with two friends over group chat, and now I run tabletop exercises for companies you have heard of. Study with people.", followers: 812, studentsReached: 5610, totalLikes: 2470, questionsAnswered: 44, activeDaysAgo: 0, education: "B.S. Information Systems, Rutgers University", journey: "Help desk during college, a failed cert, a passed cert, a consulting analyst role, now senior consultant running client security exercises.", topics: ["Cybersecurity", "Certifications", "Consulting", "Internships"] },
-  { id: "pro-weiss", name: "Hannah Weiss", role: "Audit Senior", org: "Deloitte", scope: "Consulting & professional services", verifiedBy: "Verified through Deloitte partner program · Jun 2026", world: "Business & Money", field: "Accounting", story: "Accounting is not about liking math. It is about liking the moment a messy pile of numbers turns into a true story. I got hooked in an intro class I only took for credit.", followers: 534, studentsReached: 3380, totalLikes: 1510, questionsAnswered: 29, activeDaysAgo: 12, education: "B.S. Accounting, Penn State University", journey: "An intro accounting class taken for credit, a summer internship, the CPA exam in her first year, now leading audit teams.", topics: ["Accounting", "CPA exam", "Internships", "College"] },
-  { id: "pro-ortega", name: "Marisol Ortega", role: "Pharmacist", org: "CVS Health", scope: "Pharmacy & patient care careers", verifiedBy: "License + employer verified by Dreamari · Feb 2026", world: "Health & Medicine", field: "Pharmacy", story: "My abuela managed eleven medications on her own. Watching her keep a notebook is why I do this. Half my day is chemistry; the other half is making sure someone's grandmother understands her notebook.", followers: 690, studentsReached: 4290, totalLikes: 1980, questionsAnswered: 37, activeDaysAgo: 41, education: "Pharm.D., University of Texas at Austin", journey: "Pharmacy technician in high school, six years of pharmacy school, now the pharmacist behind the counter she once worked.", topics: ["Pharmacy", "Pharmacy school", "Health careers", "Working while studying"] },
-  { id: "pro-bell", name: "Simone Bell", role: "Footwear Product Manager", org: "Nike", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Jul 2026", world: "Business & Money", field: "Product Management", story: "I played D2 basketball and never went pro. The thing I learned about feet, shoes and what athletes complain about turned into a career deciding what gets made.", followers: 1740, studentsReached: 10120, totalLikes: 5390, questionsAnswered: 48, activeDaysAgo: 3, education: "B.S. Business Administration, University of Oregon", journey: "Division II basketball, a retail job at a running store, an analyst role, now deciding which shoes get made.", topics: ["Product management", "Sports business", "Athletes after sport", "Internships"] },
-  { id: "pro-lindqvist", name: "Erik Lindqvist", role: "Product Manager", org: "Microsoft", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Mar 2026", world: "Tech & Engineering", field: "Product Management", story: "I was the friend who wrote the group project plan. Product management is that job, with engineers and designers instead of classmates, and the plan changes every week.", followers: 1320, studentsReached: 7860, totalLikes: 3610, questionsAnswered: 55, activeDaysAgo: 1, education: "B.A. Cognitive Science, University of California, Berkeley", journey: "Campus tutoring startup, a rotational program, two product teams, now owns a feature used by millions of students.", topics: ["Product management", "Tech careers", "Rotational programs", "College"] },
-  { id: "pro-adler", name: "Samuel Adler", role: "Physical Therapist", org: "Mayo Clinic", scope: "Rehabilitation & patient care careers", verifiedBy: "License + employer verified by Dreamari · Jan 2026", world: "Health & Medicine", field: "Physical Therapy", story: "A torn ACL at 16 put me in a PT clinic three times a week. I paid attention to the person fixing me more than to the exercises. Now I am that person.", followers: 905, studentsReached: 5980, totalLikes: 2760, questionsAnswered: 42, activeDaysAgo: 8, education: "D.P.T., University of Minnesota", journey: "A torn ACL, a kinesiology degree, three years of doctoral PT school, now sports rehab at a major clinic.", topics: ["Physical therapy", "Sports medicine", "Health careers", "Graduate school"] },
-  { id: "pro-kim", name: "Daniel Kim", role: "Regulatory Affairs Specialist", org: "Pfizer", scope: "Health science & research careers", verifiedBy: "Work email verified by Dreamari · Apr 2026", world: "Health & Medicine", field: "Regulatory Affairs", story: "I wanted to be a doctor and hated blood. Turns out there is a whole career deciding whether a medicine is safe enough to reach a pharmacy shelf, and it needed someone like me.", followers: 468, studentsReached: 2940, totalLikes: 1220, questionsAnswered: 24, activeDaysAgo: 21, education: "B.S. Biology, Boston University; M.S. Regulatory Science, Johns Hopkins", journey: "Pre-med, a lab internship, a master's in regulatory science, now writing the submissions that put medicines on shelves.", topics: ["Health science", "Regulatory affairs", "Alternatives to med school", "Graduate school"] },
-  { id: "pro-rossi", name: "Isabella Rossi", role: "Software Engineer", org: "JPMorgan Chase", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Jun 2026", world: "Tech & Engineering", field: "Software Engineering", story: "Everyone told me banks were for finance majors. I write the code that moves payments for millions of people. Tech jobs are everywhere, not only at tech companies.", followers: 1015, studentsReached: 6420, totalLikes: 2890, questionsAnswered: 51, activeDaysAgo: 0, education: "B.S. Computer Science, Stevens Institute of Technology", journey: "A coding bootcamp in high school, a computer science degree, a bank internship, now payments engineering.", topics: ["Software engineering", "Tech in finance", "Internships", "College"] },
-  { id: "pro-novak", name: "Lena Novak", role: "Data Scientist", org: "Spotify", scope: "Data & analytics careers", verifiedBy: "Work email verified by Dreamari · May 2026", world: "Tech & Engineering", field: "Data Science", story: "I made playlists for my whole dorm. Now I study why forty million people skip a song at second seven. Same curiosity, better tools.", followers: 1188, studentsReached: 7050, totalLikes: 3320, questionsAnswered: 36, activeDaysAgo: 2, education: "B.S. Statistics, University of Maryland", journey: "Dorm playlists, a statistics degree, an analytics internship, now data science on listening behaviour.", topics: ["Data science", "Statistics", "Music industry", "Internships"] },
+  { id: "pro-nair", name: "Arjun Nair", role: "Senior Cybersecurity Consultant", org: "EY", scope: "Consulting & professional services", verifiedBy: "Verified through EY partner program · Aug 2026", world: "Tech & Engineering", field: "Cybersecurity", story: "I failed my first security certification. The second time I studied with two friends over group chat, and now I run tabletop exercises for companies you have heard of. Study with people.", followers: 812, studentsReached: 12390, totalLikes: 2470, questionsAnswered: 44, activeDaysAgo: 0, education: "B.S. Information Systems, Rutgers University", journey: "Help desk during college, a failed cert, a passed cert, a consulting analyst role, now senior consultant running client security exercises.", topics: ["Cybersecurity", "Certifications", "Consulting", "Internships"] },
+  { id: "pro-weiss", name: "Hannah Weiss", role: "Audit Senior", org: "Deloitte", scope: "Consulting & professional services", verifiedBy: "Verified through Deloitte partner program · Jun 2026", world: "Business & Money", field: "Accounting", story: "Accounting is not about liking math. It is about liking the moment a messy pile of numbers turns into a true story. I got hooked in an intro class I only took for credit.", followers: 534, studentsReached: 8810, totalLikes: 1510, questionsAnswered: 29, activeDaysAgo: 12, education: "B.S. Accounting, Penn State University", journey: "An intro accounting class taken for credit, a summer internship, the CPA exam in her first year, now leading audit teams.", topics: ["Accounting", "CPA exam", "Internships", "College"] },
+  { id: "pro-ortega", name: "Marisol Ortega", role: "Pharmacist", org: "CVS Health", scope: "Pharmacy & patient care careers", verifiedBy: "License + employer verified by Dreamari · Feb 2026", world: "Health & Medicine", field: "Pharmacy", story: "My abuela managed eleven medications on her own. Watching her keep a notebook is why I do this. Half my day is chemistry; the other half is making sure someone's grandmother understands her notebook.", followers: 690, studentsReached: 10270, totalLikes: 1980, questionsAnswered: 37, activeDaysAgo: 41, education: "Pharm.D., University of Texas at Austin", journey: "Pharmacy technician in high school, six years of pharmacy school, now the pharmacist behind the counter she once worked.", topics: ["Pharmacy", "Pharmacy school", "Health careers", "Working while studying"] },
+  { id: "pro-bell", name: "Simone Bell", role: "Footwear Product Manager", org: "Nike", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Jul 2026", world: "Business & Money", field: "Product Management", story: "I played D2 basketball and never went pro. The thing I learned about feet, shoes and what athletes complain about turned into a career deciding what gets made.", followers: 1740, studentsReached: 19640, totalLikes: 5390, questionsAnswered: 48, activeDaysAgo: 3, education: "B.S. Business Administration, University of Oregon", journey: "Division II basketball, a retail job at a running store, an analyst role, now deciding which shoes get made.", topics: ["Product management", "Sports business", "Athletes after sport", "Internships"] },
+  { id: "pro-lindqvist", name: "Erik Lindqvist", role: "Product Manager", org: "Microsoft", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Mar 2026", world: "Tech & Engineering", field: "Product Management", story: "I was the friend who wrote the group project plan. Product management is that job, with engineers and designers instead of classmates, and the plan changes every week.", followers: 1320, studentsReached: 16010, totalLikes: 3610, questionsAnswered: 55, activeDaysAgo: 1, education: "B.A. Cognitive Science, University of California, Berkeley", journey: "Campus tutoring startup, a rotational program, two product teams, now owns a feature used by millions of students.", topics: ["Product management", "Tech careers", "Rotational programs", "College"] },
+  { id: "pro-adler", name: "Samuel Adler", role: "Physical Therapist", org: "Mayo Clinic", scope: "Rehabilitation & patient care careers", verifiedBy: "License + employer verified by Dreamari · Jan 2026", world: "Health & Medicine", field: "Physical Therapy", story: "A torn ACL at 16 put me in a PT clinic three times a week. I paid attention to the person fixing me more than to the exercises. Now I am that person.", followers: 905, studentsReached: 12990, totalLikes: 2760, questionsAnswered: 42, activeDaysAgo: 8, education: "D.P.T., University of Minnesota", journey: "A torn ACL, a kinesiology degree, three years of doctoral PT school, now sports rehab at a major clinic.", topics: ["Physical therapy", "Sports medicine", "Health careers", "Graduate school"] },
+  { id: "pro-kim", name: "Daniel Kim", role: "Regulatory Affairs Specialist", org: "Pfizer", scope: "Health science & research careers", verifiedBy: "Work email verified by Dreamari · Apr 2026", world: "Health & Medicine", field: "Regulatory Affairs", story: "I wanted to be a doctor and hated blood. Turns out there is a whole career deciding whether a medicine is safe enough to reach a pharmacy shelf, and it needed someone like me.", followers: 468, studentsReached: 8100, totalLikes: 1220, questionsAnswered: 24, activeDaysAgo: 21, education: "B.S. Biology, Boston University; M.S. Regulatory Science, Johns Hopkins", journey: "Pre-med, a lab internship, a master's in regulatory science, now writing the submissions that put medicines on shelves.", topics: ["Health science", "Regulatory affairs", "Alternatives to med school", "Graduate school"] },
+  { id: "pro-rossi", name: "Isabella Rossi", role: "Software Engineer", org: "JPMorgan Chase", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Jun 2026", world: "Tech & Engineering", field: "Software Engineering", story: "Everyone told me banks were for finance majors. I write the code that moves payments for millions of people. Tech jobs are everywhere, not only at tech companies.", followers: 1015, studentsReached: 13690, totalLikes: 2890, questionsAnswered: 51, activeDaysAgo: 0, education: "B.S. Computer Science, Stevens Institute of Technology", journey: "A coding bootcamp in high school, a computer science degree, a bank internship, now payments engineering.", topics: ["Software engineering", "Tech in finance", "Internships", "College"] },
+  { id: "pro-novak", name: "Lena Novak", role: "Data Scientist", org: "Spotify", scope: "Data & analytics careers", verifiedBy: "Work email verified by Dreamari · May 2026", world: "Tech & Engineering", field: "Data Science", story: "I made playlists for my whole dorm. Now I study why forty million people skip a song at second seven. Same curiosity, better tools.", followers: 1188, studentsReached: 14710, totalLikes: 3320, questionsAnswered: 36, activeDaysAgo: 2, education: "B.S. Statistics, University of Maryland", journey: "Dorm playlists, a statistics degree, an analytics internship, now data science on listening behaviour.", topics: ["Data science", "Statistics", "Music industry", "Internships"] },
+  // New volunteer headshots (9 Sept 2026): nine new professionals, real
+  // portraits supplied for this round, added rather than swapped onto
+  // existing names (direct feedback: "the names + photo swap won't make
+  // sense" -- a new face needs its own person, not someone else's bio).
+  { id: "pro-freeman", name: "Tiana Freeman", role: "Athlete Marketing Manager", org: "Nike", scope: "Marketing & brand careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Business & Money", field: "Marketing", story: "I ran track in college and thought my only way to stay in sport was coaching. Turns out brands need people who understand athletes from the inside just as much as teams do.", followers: 1370, studentsReached: 17780, totalLikes: 4720, questionsAnswered: 28, activeDaysAgo: 1, education: "B.A. Communications, University of Oregon", journey: "College track, an internship in sports marketing, now managing the campaigns that put athletes' stories in front of millions.", topics: ["Marketing", "Sports business", "Athletes after sport", "Internships"] },
+  { id: "pro-brennan", name: "Xavier Brennan", role: "Supply Chain Manager", org: "Johnson & Johnson", scope: "Operations & supply chain careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Business & Money", field: "Operations", story: "I started on a warehouse floor the summer after high school, counting pallets. Now I decide how a product gets from a factory to a shelf, and I still walk the floor every week.", followers: 588, studentsReached: 9230, totalLikes: 1410, questionsAnswered: 19, activeDaysAgo: 2, education: "B.S. Supply Chain Management, Rutgers University", journey: "A warehouse summer job after high school, a logistics internship, now running the plan that gets a product from a factory to a shelf.", topics: ["Operations", "Supply chain", "Internships", "College"] },
+  { id: "pro-park", name: "Kevin Park", role: "Machine Learning Engineer", org: "Meta", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Tech & Engineering", field: "Machine Learning", story: "I trained my first model on a laptop that overheated so badly it shut itself off mid-run. I still keep a fan pointed at my desk, partly for luck.", followers: 941, studentsReached: 12730, totalLikes: 2760, questionsAnswered: 27, activeDaysAgo: 0, education: "B.S. Computer Science, University of Michigan", journey: "A laptop that overheated training his first model, a machine learning internship, now models that run at Meta's scale.", topics: ["Machine learning", "Software engineering", "Internships", "College"] },
+  { id: "pro-cruz", name: "Daniela Cruz", role: "Physician", org: "Mayo Clinic", scope: "Medicine & patient care careers", verifiedBy: "License + employer verified by Dreamari · Sep 2026", world: "Health & Medicine", field: "Family Medicine", story: "My mother translated for our doctor because I was the only one in the room who spoke English. I became the doctor so no kid in my clinic has to do that job instead of just being a kid.", followers: 1256, studentsReached: 16780, totalLikes: 4190, questionsAnswered: 33, activeDaysAgo: 1, education: "B.S. Biology, University of Arizona; M.D., Mayo Clinic Alix School of Medicine", journey: "Translating for her own family's doctor as a kid, pre-med, medical school, now family medicine at Mayo Clinic.", topics: ["Medicine", "Medical school", "Pre-med", "Family medicine"] },
+  { id: "pro-walsh", name: "Catherine Walsh", role: "Marketing Director", org: "Disney", scope: "Marketing & brand careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Arts, Media & Sport", field: "Marketing", story: "I started in a mailroom answering fan letters. Twenty years later I still think the job is the same thing: figuring out what makes someone care.", followers: 1830, studentsReached: 22600, totalLikes: 6410, questionsAnswered: 41, activeDaysAgo: 4, education: "B.A. Marketing, Indiana University", journey: "A mailroom job answering fan letters, a marketing coordinator role, two decades of campaigns, now directing brand marketing.", topics: ["Marketing", "Brand strategy", "Entry-level jobs", "Career growth"] },
+  { id: "pro-desai", name: "Anika Desai", role: "Financial Analyst", org: "HSBC", scope: "Finance & banking careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Business & Money", field: "Banking", story: "I used to balance my family's budget spreadsheet for fun in high school. Turns out that is a career, and mine now involves a few more zeros.", followers: 623, studentsReached: 9820, totalLikes: 1690, questionsAnswered: 22, activeDaysAgo: 3, education: "B.S. Finance, Baruch College", journey: "Balancing the family budget for fun as a teenager, a banking internship, an analyst seat, still the same spreadsheet instinct.", topics: ["Banking", "Finance careers", "Internships", "College"] },
+  { id: "pro-hartley", name: "Richard Hartley", role: "Vice President, Finance", org: "AT&T", scope: "Finance & corporate careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Business & Money", field: "Corporate Finance", story: "I have sat in a version of the same budget meeting for thirty years. What changes is who is brave enough to ask the question nobody else will. I try to be that person, and I try to make room for it in others.", followers: 792, studentsReached: 11780, totalLikes: 2340, questionsAnswered: 26, activeDaysAgo: 6, education: "B.A. Economics, Boston College; M.B.A., NYU Stern", journey: "Thirty years in corporate finance, from analyst to VP, still sitting in the same kind of budget meeting.", topics: ["Corporate finance", "Business school", "Career growth", "Economics"] },
+  { id: "pro-johnson", name: "Trevor Johnson", role: "Product Design Lead", org: "Apple", scope: "Design & creative careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Tech & Engineering", field: "Product Design", story: "I redesigned my high school's website for free because the real one embarrassed me. Nobody asked me to. That instinct, fixing things nobody asked you to fix, is most of the job.", followers: 1540, studentsReached: 19240, totalLikes: 5680, questionsAnswered: 31, activeDaysAgo: 1, education: "B.F.A. Industrial Design, Art Center College of Design", journey: "An unsolicited high school website redesign, a design internship, a decade of shipping products, now leading a design team.", topics: ["Product design", "Design portfolios", "Art school", "Creative careers"] },
+  { id: "pro-sullivan", name: "Jack Sullivan", role: "Site Reliability Engineer", org: "Google", scope: "Software engineering careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Tech & Engineering", field: "Software Engineering", story: "I got into this because I liked being the one who stayed calm when something broke at 2 a.m. Turns out you can build a whole career around that.", followers: 512, studentsReached: 8500, totalLikes: 1340, questionsAnswered: 17, activeDaysAgo: 0, education: "B.S. Computer Engineering, University of Texas at Austin", journey: "A campus IT help desk job, a habit of staying calm when things broke, an internship, now keeping production systems up.", topics: ["Software engineering", "Internships", "College", "Reliability engineering"] },
+  // 7 new volunteers (8 Sept 2026), backfilling the three thinnest worlds
+  // (Science & Research, Teaching & Education, Arts Media & Sport) after
+  // Meera Iyer's removal (a PhD candidate, not an employed professional --
+  // direct feedback: "students should not be in the people to follow section").
+  { id: "pro-doyle", name: "Nathan Doyle", role: "Data Scientist, Public Health", org: "CDC Foundation", scope: "Public health & research careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Science & Research", field: "Public Health", story: "I track outbreaks for a living, the way other people track sports scores. The math is the same either way: what's the trend, and what do we do about it before it gets worse.", followers: 588, studentsReached: 9400, totalLikes: 1860, questionsAnswered: 21, activeDaysAgo: 1, education: "B.S. Applied Mathematics, Tufts University; M.P.H., Emory University", journey: "An undergrad epidemiology elective he almost skipped, a summer at a state health department, now modeling outbreaks nationally.", topics: ["Science & research", "Public health", "Data science", "Graduate school"] },
+  { id: "pro-sharma", name: "Ananya Sharma", role: "Research Scientist", org: "Genentech", scope: "Biotech & life sciences careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Science & Research", field: "Biotechnology", story: "My high school lab kit caught fire once, in a good way -- it's what made me curious instead of scared off. Now I run the experiments that decide whether a drug candidate moves forward.", followers: 447, studentsReached: 7900, totalLikes: 1510, questionsAnswered: 19, activeDaysAgo: 4, education: "B.S. Molecular Biology, UC Berkeley; Ph.D. Biochemistry, University of Washington", journey: "A high school chemistry mishap that hooked her instead of scaring her off, a PhD, now bench science that decides what moves to clinical trials.", topics: ["Science & research", "Biotechnology", "Graduate school", "Lab work"] },
+  { id: "pro-reid", name: "Nathaniel Reid", role: "Principal Research Scientist", org: "Pfizer", scope: "Pharmaceutical research careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Science & Research", field: "Pharmaceutical Research", story: "Most of what I do never makes it into a headline. It just quietly becomes the reason a medicine works the way the label says it will.", followers: 701, studentsReached: 12100, totalLikes: 2340, questionsAnswered: 28, activeDaysAgo: 2, education: "B.S. Chemistry, Howard University; Ph.D. Pharmaceutical Sciences, University of North Carolina", journey: "A chemistry degree, a doctorate in pharmaceutical sciences, fifteen years turning lab results into medicines people actually take.", topics: ["Science & research", "Pharmaceutical research", "Chemistry", "Graduate school"] },
+  { id: "pro-wong", name: "Naomi Wong", role: "STEM Curriculum Specialist", org: "Khan Academy", scope: "Education & curriculum careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Teaching & Education", field: "Curriculum Design", story: "I used to tutor my little cousins at the kitchen table. Now I design the lesson that reaches the kid who's convinced they're bad at math, at scale.", followers: 519, studentsReached: 8300, totalLikes: 1680, questionsAnswered: 24, activeDaysAgo: 1, education: "B.A. Mathematics, University of Pennsylvania; M.Ed., Harvard Graduate School of Education", journey: "Kitchen-table tutoring for cousins, a math degree, a master's in education, now building the lessons that reach the kids who think they're bad at it.", topics: ["Teaching & education", "Curriculum design", "Math education", "Graduate school"] },
+  { id: "pro-marshall", name: "Denise Marshall", role: "Senior Producer", org: "Paramount", scope: "Media & entertainment careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Arts, Media & Sport", field: "Media Production", story: "Thirty years in and the job hasn't changed much: find the story, protect the budget, get it finished on time. The tools changed more than the job did.", followers: 934, studentsReached: 13600, totalLikes: 2980, questionsAnswered: 33, activeDaysAgo: 5, education: "B.A. Film Studies, Howard University", journey: "A production assistant gig in her twenties, three decades of sets, now producing the projects other people cut their teeth on.", topics: ["Media production", "Entertainment careers", "Career growth", "Internships"] },
+  { id: "pro-koval", name: "Ryan Koval", role: "Athletic Performance Coach", org: "University of Maryland Athletics", scope: "Sports & athletic careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Arts, Media & Sport", field: "Athletic Performance", story: "I never made it pro. What I got instead was a very specific obsession with why some athletes recover faster than others, and a career built on answering that.", followers: 662, studentsReached: 9700, totalLikes: 1920, questionsAnswered: 20, activeDaysAgo: 0, education: "B.S. Kinesiology, Penn State University; M.S. Exercise Science, University of Florida", journey: "A college playing career that didn't turn pro, a kinesiology degree, now coaching the recovery and performance side of college athletics.", topics: ["Sports careers", "Athletes after sport", "Exercise science", "Graduate school"] },
+  { id: "pro-torres", name: "Camila Torres", role: "Talent Marketing Coordinator", org: "Warner Music Group", scope: "Music & entertainment marketing careers", verifiedBy: "Work email verified by Dreamari · Sep 2026", world: "Arts, Media & Sport", field: "Music Marketing", story: "I ran my college radio station's Instagram because nobody else wanted to. Turns out that was the whole résumé I needed to get in the door.", followers: 388, studentsReached: 6900, totalLikes: 1240, questionsAnswered: 15, activeDaysAgo: 2, education: "B.A. Communications, University of Miami", journey: "A college radio station's neglected Instagram account, an internship, now coordinating marketing campaigns for the label's artists.", topics: ["Music industry", "Marketing", "Entertainment careers", "Internships"] },
 ];
 
 // The five communities, their names, order, counts, companies and topic
@@ -291,8 +320,9 @@ export const THREADS: Thread[] = [
         postedAgo: "6h ago",
         body: "Tutorials are a fine start, just add one feature the tutorial didn't cover. That one change is where the real learning (and the interview story) comes from.",
       },
-      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer, built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 9 },
-      { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 13, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
+      { kind: "peer", handle: "Sam", grade: "Senior", body: "I did exactly this last summer, built a study-timer app off a tutorial and added a stats page. It came up in every conversation at the career fair.", postedAgo: "4h ago", likes: 98 },
+      { kind: "peer", handle: "Priya", grade: "Sophomore", body: "me finally understanding what tech companies actually want after reading this thread 😭😭 my life is changed forever", postedAgo: "2h ago", likes: 146, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
+      { kind: "peer", handle: "Ruby", grade: "Freshman", body: "screenshotting the README part, I always thought the code alone had to speak for itself", postedAgo: "1h ago", likes: 83 },
       {
         kind: "answer",
         proId: "pro-osei",
@@ -366,7 +396,7 @@ export const THREADS: Thread[] = [
     unreadAnswer: true,
     saved: true,
     responses: [
-      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "taking notes for my future self", postedAgo: "1d ago", likes: 6, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
+      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "taking notes for my future self", postedAgo: "1d ago", likes: 83, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
       {
         kind: "answer",
         proId: "pro-okafor",
@@ -375,10 +405,10 @@ export const THREADS: Thread[] = [
         body: "The first two years are the steepest learning curve of your career: live deals, real clients, and a team that teaches you fast. The rhythm follows the deal cycle, so busy stretches come and go, and time off is protected in between. What nobody tells you: you leave year two with skills most people take a decade to build.",
         disclosure: "Based on my experience as an analyst at one large bank.",
       },
-      { kind: "peer", handle: "Sam", grade: "Senior", body: "Following because I have been using the two words interchangeably in essays 💀", postedAgo: "4h ago", likes: 7 },
-      { kind: "peer", handle: "Lena", grade: "Junior", body: "me choosing my major based on vibes and this thread", postedAgo: "2h ago", likes: 10, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
-      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "the way this is everyone's first question about banking", postedAgo: "1d ago", likes: 8 },
-      { kind: "peer", handle: "Ava", grade: "Sophomore", body: "reading this from my 8am class already planning my first internship", postedAgo: "20h ago", likes: 14, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
+      { kind: "peer", handle: "Sam", grade: "Senior", body: "Following because I have been using the two words interchangeably in essays 💀", postedAgo: "4h ago", likes: 74 },
+      { kind: "peer", handle: "Lena", grade: "Junior", body: "me choosing my major based on vibes and this thread", postedAgo: "2h ago", likes: 110, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
+      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "the way this is everyone's first question about banking", postedAgo: "1d ago", likes: 86 },
+      { kind: "peer", handle: "Ava", grade: "Sophomore", body: "reading this from my 8am class already planning my first internship", postedAgo: "20h ago", likes: 137, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
       {
         kind: "answer",
         proId: "pro-gallagher",
@@ -417,8 +447,8 @@ export const THREADS: Thread[] = [
         postedAgo: "2d ago",
         body: "Most hospitals require you to be 16+ and go through a volunteer office rather than asking a nurse directly. Search '[your city] hospital volunteer program', that's the front door. Community clinics and long-term care facilities say yes more often than big hospitals. One practical example: our facility takes two high-school volunteers every semester through a school counselor referral, so ask your counselor first, it's the fastest route.",
       },
-      { kind: "peer", handle: "Sana", grade: "Junior", body: "My counselor literally set mine up with one email. Ask them first, for real.", postedAgo: "2d ago", likes: 9 },
-      { kind: "peer", handle: "Theo", grade: "Sophomore", body: "volunteer office route = the move", postedAgo: "1d ago", likes: 6, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
+      { kind: "peer", handle: "Sana", grade: "Junior", body: "My counselor literally set mine up with one email. Ask them first, for real.", postedAgo: "2d ago", likes: 98 },
+      { kind: "peer", handle: "Theo", grade: "Sophomore", body: "volunteer office route = the move", postedAgo: "1d ago", likes: 83, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
       {
         kind: "answer",
         proId: "pro-brooks",
@@ -439,7 +469,7 @@ export const THREADS: Thread[] = [
     boardId: "teaching-education",
     type: "question",
     title: "How do I write a resume with no work experience?",
-    handle: "Lena",
+    handle: "Sana",
     grade: "Junior",
     postedAgo: "4h ago",
     views: 2841,
@@ -458,8 +488,9 @@ export const THREADS: Thread[] = [
         postedAgo: "2h ago",
         body: "You have more than you think. School projects, clubs, sports, a job helping a family business, each one is a bullet if you say what you did and what changed. 'Organized a bake sale that raised $400' beats 'hard worker' every time.",
       },
-      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "the bake sale example just fixed my entire resume", postedAgo: "1h ago", likes: 11, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
-      { kind: "peer", handle: "Ruby", grade: "Junior", body: "quantify everything. noted.", postedAgo: "1h ago", likes: 5 },
+      { kind: "peer", handle: "Diego", grade: "Sophomore", body: "the bake sale example just fixed my entire resume", postedAgo: "1h ago", likes: 122, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
+      { kind: "peer", handle: "Ethan", grade: "Freshman", body: "wait I've been putting 'hard worker' on mine this whole time. rewriting tonight", postedAgo: "1h ago", likes: 98 },
+      { kind: "peer", handle: "Ruby", grade: "Junior", body: "quantify everything. noted.", postedAgo: "1h ago", likes: 71 },
       {
         kind: "answer",
         proId: "pro-whitfield",
@@ -537,8 +568,8 @@ export const THREADS: Thread[] = [
         body: "Nerves usually mean you care, not that you're unprepared. Practice your first sixty seconds out loud until it's boring to you, the opening is where nerves live, and once it's automatic the rest is a conversation.",
         disclosure: "Personal approach, different interviewers look for different things.",
       },
-      { kind: "peer", handle: "Jo", grade: "Senior", body: "Doing two practice interviews with my school counselor helped me more than any video I watched.", postedAgo: "12h ago", likes: 7 },
-      { kind: "peer", handle: "Marcus", grade: "Freshman", body: "practice it until it's boring… then walk in like", postedAgo: "8h ago", likes: 12, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
+      { kind: "peer", handle: "Jo", grade: "Senior", body: "Doing two practice interviews with my school counselor helped me more than any video I watched.", postedAgo: "12h ago", likes: 74 },
+      { kind: "peer", handle: "Marcus", grade: "Freshman", body: "practice it until it's boring… then walk in like", postedAgo: "8h ago", likes: 134, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
       {
         kind: "answer",
         proId: "pro-whitfield",
@@ -551,6 +582,33 @@ export const THREADS: Thread[] = [
         postedAgo: "14h ago",
         body: "Ask for the interview format in advance. Knowing what's coming removes half the fear before you walk in.",
       },
+    ],
+  },
+  {
+    id: "t-gpd-teacher-vs-tutor",
+    boardId: "teaching-education",
+    type: "question",
+    title: "Do I need a teaching degree to work in curriculum design instead of the classroom?",
+    handle: "Noah",
+    grade: "Senior",
+    postedAgo: "8h ago",
+    views: 743,
+    location: "United States",
+    state: "answered",
+    routedScope: "Education & curriculum careers",
+    expectedWindow: "within 2 days",
+    helpful: 205,
+    followers: 5,
+    comments: 13,
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-wong",
+        primary: true,
+        postedAgo: "5h ago",
+        body: "I never taught a classroom of my own, I tutored, then went straight into a curriculum design master's. What you actually need is time watching how real students get stuck on real material, classroom teaching is the most common way to get that, not the only one.",
+      },
+      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "this is such a relief, I want the design side without the classroom management part", postedAgo: "2h ago", likes: 74 },
     ],
   },
   {
@@ -592,6 +650,33 @@ export const THREADS: Thread[] = [
     ],
   },
   {
+    id: "t-fin-networking",
+    boardId: "business-money",
+    type: "question",
+    title: "How do I network into finance if nobody in my family works in it?",
+    handle: "Ava",
+    grade: "Junior",
+    postedAgo: "9h ago",
+    views: 701,
+    location: "United States",
+    state: "answered",
+    routedScope: "Finance & banking careers",
+    expectedWindow: "within 2 days",
+    helpful: 230,
+    followers: 6,
+    comments: 15,
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-desai",
+        primary: true,
+        postedAgo: "6h ago",
+        body: "Nobody in my family worked in finance either. I cold-messaged alumni from my school on LinkedIn, one reply at a time. Ask for fifteen minutes of advice, never a job, and follow up with a thank-you that mentions something specific they said.",
+      },
+      { kind: "peer", handle: "Devon", grade: "Sophomore", body: "sent 12 messages this week using this exact framing, got 3 replies already", postedAgo: "3h ago", likes: 86 },
+    ],
+  },
+  {
     id: "t-health-np",
     boardId: "health-medicine",
     type: "question",
@@ -615,8 +700,8 @@ export const THREADS: Thread[] = [
         postedAgo: "16h ago",
         body: "A nurse practitioner is a registered nurse who went back for a graduate degree. NPs can diagnose and prescribe in most states; RNs carry out the care plan and are with the patient far more of the day. Same ladder, different rungs, most NPs I know worked as RNs first.",
       },
-      { kind: "peer", handle: "Ruby", grade: "Junior", body: "so an NP is basically nurse+. got it.", postedAgo: "12h ago", likes: 7 },
-      { kind: "peer", handle: "Ethan", grade: "Junior", body: "'same ladder, different rungs' is a great way to put it", postedAgo: "10h ago", likes: 5 },
+      { kind: "peer", handle: "Ruby", grade: "Junior", body: "so an NP is basically nurse+. got it.", postedAgo: "12h ago", likes: 74 },
+      { kind: "peer", handle: "Ethan", grade: "Junior", body: "'same ladder, different rungs' is a great way to put it", postedAgo: "10h ago", likes: 71 },
       {
         kind: "answer",
         proId: "pro-brooks",
@@ -629,6 +714,33 @@ export const THREADS: Thread[] = [
         postedAgo: "12h ago",
         body: "There are also research nurses like me in the same buildings, same license, very different day. Worth comparing all the branches before you pick.",
       },
+    ],
+  },
+  {
+    id: "t-health-pt-vs-med",
+    boardId: "health-medicine",
+    type: "question",
+    title: "Is physical therapy school easier to get into than medical school?",
+    handle: "Devon",
+    grade: "Senior",
+    postedAgo: "5h ago",
+    views: 592,
+    location: "United States",
+    state: "answered",
+    routedScope: "Rehabilitation & patient care careers",
+    expectedWindow: "within 2 days",
+    helpful: 98,
+    followers: 3,
+    comments: 11,
+    responses: [
+      {
+        kind: "answer",
+        proId: "pro-adler",
+        primary: true,
+        postedAgo: "3h ago",
+        body: "Easier isn't the word I'd use, it's a different kind of hard. DPT programs still want strong science grades and real shadowing hours, they're just three years instead of four-plus-residency. Shadow both before deciding; the day-to-day is what should actually pick for you.",
+      },
+      { kind: "peer", handle: "Noah", grade: "Junior", body: "shadowed a PT clinic last month after reading this thread, definitely feels different from the ER shadowing I did", postedAgo: "1h ago", likes: 83 },
     ],
   },
   {
@@ -656,8 +768,8 @@ export const THREADS: Thread[] = [
         body: "No, a portfolio beats a diploma in this field. Art school buys you time, critique and connections, which are real, but every hiring conversation I've been in starts and ends with the work. Ten finished pieces you're proud of is the actual requirement.",
         disclosure: "My experience hiring at one company, agencies and studios vary.",
       },
-      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "ten finished pieces. okay. starting tonight", postedAgo: "2h ago", likes: 8, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
-      { kind: "peer", handle: "Jo", grade: "Senior", body: "portfolio > diploma is such a freeing thing to hear", postedAgo: "1h ago", likes: 6 },
+      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "ten finished pieces. okay. starting tonight", postedAgo: "2h ago", likes: 86, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
+      { kind: "peer", handle: "Jo", grade: "Senior", body: "portfolio > diploma is such a freeing thing to hear", postedAgo: "1h ago", likes: 83 },
       {
         kind: "answer",
         proId: "pro-fontaine",
@@ -724,14 +836,14 @@ export const INSIGHTS: Insight[] = [
     helpful: 153,
     saved: true,
     replies: [
-      { handle: "Priya", grade: "Sophomore", body: "Wait, only 3 hours of coding? That honestly makes it sound more doable.", postedAgo: "2d ago", likes: 14 },
-      { handle: "Ethan", grade: "Junior", body: "What happens in a code review? Is someone just grading your work?", postedAgo: "2d ago", likes: 6 },
-      { proId: "pro-chen", body: "Good question, a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 21 },
-      { handle: "Sam", grade: "Senior", body: "The communication part is real. My internship was half writing things down clearly.", postedAgo: "1d ago", likes: 9 },
-      { handle: "Zoe", grade: "Sophomore", body: "Saving this for when my parents ask what software engineers actually do.", postedAgo: "1d ago", likes: 11 },
-      { handle: "Maya", grade: "Junior", body: "3 hours of meetings a day 💀 the way school never mentions this part", postedAgo: "22h ago", likes: 16, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
-      { handle: "Marcus", grade: "Freshman", body: "Do you get to pick what you work on?", postedAgo: "20h ago", likes: 3 },
-      { handle: "Lena", grade: "Junior", body: "communication skills being the plot twist of every single career on this app", postedAgo: "18h ago", likes: 9 },
+      { handle: "Priya", grade: "Sophomore", body: "Wait, only 3 hours of coding? That honestly makes it sound more doable.", postedAgo: "2d ago", likes: 137 },
+      { handle: "Ethan", grade: "Junior", body: "What happens in a code review? Is someone just grading your work?", postedAgo: "2d ago", likes: 83 },
+      { proId: "pro-chen", body: "Good question, a teammate reads your change and suggests improvements before it ships. It's collaboration, not a grade.", postedAgo: "2d ago", likes: 200 },
+      { handle: "Sam", grade: "Senior", body: "The communication part is real. My internship was half writing things down clearly.", postedAgo: "1d ago", likes: 98 },
+      { handle: "Zoe", grade: "Sophomore", body: "Saving this for when my parents ask what software engineers actually do.", postedAgo: "1d ago", likes: 122 },
+      { handle: "Maya", grade: "Junior", body: "3 hours of meetings a day 💀 the way school never mentions this part", postedAgo: "22h ago", likes: 161, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
+      { handle: "Marcus", grade: "Freshman", body: "Do you get to pick what you work on?", postedAgo: "20h ago", likes: 47 },
+      { handle: "Lena", grade: "Junior", body: "communication skills being the plot twist of every single career on this app", postedAgo: "18h ago", likes: 98 },
     ],
   },
   {
@@ -744,11 +856,11 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "5d ago",
     helpful: 250,
     replies: [
-      { handle: "Maya", grade: "Junior", body: "Asking questions in batches is such a simple fix. Stealing this.", postedAgo: "4d ago", likes: 12 },
-      { handle: "Devon", grade: "Senior", body: "Did anything go wrong in your first week?", postedAgo: "3d ago", likes: 5 },
-      { proId: "pro-okafor", body: "Plenty, I mislabeled a whole folder of files on day two. Owning it fast mattered more than the mistake.", postedAgo: "3d ago", likes: 18 },
-      { handle: "Ethan", grade: "Junior", body: "writing everything down saved me in group projects too. it scales.", postedAgo: "2d ago", likes: 6 },
-      { handle: "Maya", grade: "Junior", body: "me visualizing myself being the reliable one", postedAgo: "2d ago", likes: 8, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
+      { handle: "Maya", grade: "Junior", body: "Asking questions in batches is such a simple fix. Stealing this.", postedAgo: "4d ago", likes: 134 },
+      { handle: "Devon", grade: "Senior", body: "Did anything go wrong in your first week?", postedAgo: "3d ago", likes: 71 },
+      { proId: "pro-okafor", body: "Plenty, I mislabeled a whole folder of files on day two. Owning it fast mattered more than the mistake.", postedAgo: "3d ago", likes: 185 },
+      { handle: "Ethan", grade: "Junior", body: "writing everything down saved me in group projects too. it scales.", postedAgo: "2d ago", likes: 83 },
+      { handle: "Maya", grade: "Junior", body: "me visualizing myself being the reliable one", postedAgo: "2d ago", likes: 86, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
     ],
   },
   {
@@ -761,12 +873,12 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "2d ago",
     helpful: 116,
     replies: [
-      { handle: "Lena", grade: "Junior", body: "Tried this out loud and it fixed my rambling problem immediately.", postedAgo: "1d ago", likes: 16 },
-      { handle: "Amir", grade: "Junior", body: "What if I don't have anything I'm proud of yet?", postedAgo: "1d ago", likes: 4 },
-      { proId: "pro-martinez", body: "You do, it just doesn't feel impressive to you because you were there. Pick the thing you stuck with the longest.", postedAgo: "22h ago", likes: 19 },
-      { handle: "Jo", grade: "Senior", body: "The 'checking whether you can organize a thought' line is so true.", postedAgo: "10h ago", likes: 7 },
-      { handle: "Riley", grade: "Sophomore", body: "sixty seconds. one organized thought. got it.", postedAgo: "8h ago", likes: 5 },
-      { handle: "Devon", grade: "Senior", body: "one line who you are, one line what you did, one line why you're here…", postedAgo: "6h ago", likes: 12, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
+      { handle: "Lena", grade: "Junior", body: "Tried this out loud and it fixed my rambling problem immediately.", postedAgo: "1d ago", likes: 161 },
+      { handle: "Amir", grade: "Junior", body: "What if I don't have anything I'm proud of yet?", postedAgo: "1d ago", likes: 59 },
+      { proId: "pro-martinez", body: "You do, it just doesn't feel impressive to you because you were there. Pick the thing you stuck with the longest.", postedAgo: "22h ago", likes: 197 },
+      { handle: "Jo", grade: "Senior", body: "The 'checking whether you can organize a thought' line is so true.", postedAgo: "10h ago", likes: 74 },
+      { handle: "Riley", grade: "Sophomore", body: "sixty seconds. one organized thought. got it.", postedAgo: "8h ago", likes: 71 },
+      { handle: "Devon", grade: "Senior", body: "one line who you are, one line what you did, one line why you're here…", postedAgo: "6h ago", likes: 134, image: "/images/connect/reactions/mic-drop.gif", imageAlt: "Obama mic drop GIF" },
     ],
   },
   {
@@ -779,13 +891,13 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "4d ago",
     helpful: 213,
     replies: [
-      { handle: "Sana", grade: "Junior", body: "Three shifts a week and four days for everything else. Sign me up.", postedAgo: "3d ago", likes: 13, image: "/images/connect/reactions/shocked-pikachu.gif", imageAlt: "Shocked Pikachu meme GIF" },
-      { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 4 },
-      { proId: "pro-reyes", body: "The opposite, the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 22 },
-      { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 8 },
-      { handle: "Theo", grade: "Sophomore", body: "Respect. This job sounds meaningful.", postedAgo: "1d ago", likes: 5 },
-      { handle: "Amir", grade: "Junior", body: "a schedule with room in it is the part nobody told me about nursing", postedAgo: "1d ago", likes: 6 },
-      { handle: "Ethan", grade: "Junior", body: "me hearing 'three shifts a week' and immediately planning the other four days", postedAgo: "1d ago", likes: 14, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
+      { handle: "Sana", grade: "Junior", body: "Three shifts a week and four days for everything else. Sign me up.", postedAgo: "3d ago", likes: 146, image: "/images/connect/reactions/shocked-pikachu.gif", imageAlt: "Shocked Pikachu meme GIF" },
+      { handle: "Zoe", grade: "Sophomore", body: "Does asking lots of questions ever annoy the senior nurses?", postedAgo: "3d ago", likes: 59 },
+      { proId: "pro-reyes", body: "The opposite, the new nurse who asks is the one we trust. Silence is what worries us.", postedAgo: "2d ago", likes: 212 },
+      { handle: "Ruby", grade: "Junior", body: "The 'say something the moment a patient looks different' part matches the Dreamari nurse game exactly.", postedAgo: "2d ago", likes: 86 },
+      { handle: "Theo", grade: "Sophomore", body: "Respect. This job sounds meaningful.", postedAgo: "1d ago", likes: 71 },
+      { handle: "Amir", grade: "Junior", body: "a schedule with room in it is the part nobody told me about nursing", postedAgo: "1d ago", likes: 83 },
+      { handle: "Ethan", grade: "Junior", body: "me hearing 'three shifts a week' and immediately planning the other four days", postedAgo: "1d ago", likes: 137, image: "/images/connect/reactions/tim-eric-mind-blown.gif", imageAlt: "Mind blown reaction GIF" },
     ],
   },
   {
@@ -798,9 +910,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1d ago",
     helpful: 79,
     replies: [
-      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 10, image: "/images/connect/reactions/math-lady.gif", imageAlt: "Calculating math meme GIF" },
-      { handle: "Theo", grade: "Sophomore", body: "How do you practice defending choices without a client?", postedAgo: "16h ago", likes: 6 },
-      { handle: "Sana", grade: "Junior", body: "defending my choices out loud, starting with my group project tomorrow", postedAgo: "12h ago", likes: 7, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
+      { handle: "Ruby", grade: "Junior", body: "'Decisions, not prettiness' just reframed my whole portfolio.", postedAgo: "20h ago", likes: 110, image: "/images/connect/reactions/math-lady.gif", imageAlt: "Calculating math meme GIF" },
+      { handle: "Theo", grade: "Sophomore", body: "How do you practice defending choices without a client?", postedAgo: "16h ago", likes: 83 },
+      { handle: "Sana", grade: "Junior", body: "defending my choices out loud, starting with my group project tomorrow", postedAgo: "12h ago", likes: 74, image: "/images/connect/reactions/high-five.gif", imageAlt: "The Office high five GIF" },
     ],
   },
   {
@@ -813,10 +925,10 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1d ago",
     helpful: 176,
     replies: [
-      { handle: "Ethan", grade: "Junior", body: "Does a school project count or does it have to be personal?", postedAgo: "20h ago", likes: 5 },
-      { handle: "Zoe", grade: "Sophomore", body: "me immediately opening my laptop to finish that half-built app", postedAgo: "14h ago", likes: 7, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
-      { proId: "pro-osei", body: "School projects count if you can explain your own contribution. 'We built' is fine; follow it with 'my part was…'", postedAgo: "16h ago", likes: 12 },
-      { handle: "Priya", grade: "Sophomore", body: "adding a feature nobody asked for is genuinely my specialty", postedAgo: "10h ago", likes: 9, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
+      { handle: "Ethan", grade: "Junior", body: "Does a school project count or does it have to be personal?", postedAgo: "20h ago", likes: 71 },
+      { handle: "Zoe", grade: "Sophomore", body: "me immediately opening my laptop to finish that half-built app", postedAgo: "14h ago", likes: 74, image: "/images/connect/reactions/kermit-typing.gif", imageAlt: "Kermit typing GIF" },
+      { proId: "pro-osei", body: "School projects count if you can explain your own contribution. 'We built' is fine; follow it with 'my part was…'", postedAgo: "16h ago", likes: 134 },
+      { handle: "Priya", grade: "Sophomore", body: "adding a feature nobody asked for is genuinely my specialty", postedAgo: "10h ago", likes: 98, image: "/images/connect/reactions/leo-laughing.gif", imageAlt: "Leonardo DiCaprio laughing GIF" },
     ],
   },
   {
@@ -829,9 +941,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "6d ago",
     helpful: 273,
     replies: [
-      { handle: "Priya", grade: "Sophomore", body: "Writing down what you ruled out is such a good idea for math homework too honestly.", postedAgo: "5d ago", likes: 8 },
-      { handle: "Sam", grade: "Senior", body: "Three days for one character. I feel better about my week now.", postedAgo: "5d ago", likes: 15 },
-      { handle: "Noah", grade: "Sophomore", body: "me on day two of the same bug", postedAgo: "4d ago", likes: 11, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
+      { handle: "Priya", grade: "Sophomore", body: "Writing down what you ruled out is such a good idea for math homework too honestly.", postedAgo: "5d ago", likes: 86 },
+      { handle: "Sam", grade: "Senior", body: "Three days for one character. I feel better about my week now.", postedAgo: "5d ago", likes: 149 },
+      { handle: "Noah", grade: "Sophomore", body: "me on day two of the same bug", postedAgo: "4d ago", likes: 122, image: "/images/connect/reactions/this-is-fine.gif", imageAlt: "This is fine dog meme GIF" },
     ],
   },
   {
@@ -844,10 +956,10 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "2d ago",
     helpful: 139,
     replies: [
-      { handle: "Maya", grade: "Junior", body: "Being the person who noticed first, that's basically the nurse game's lesson too.", postedAgo: "1d ago", likes: 9 },
-      { handle: "Diego", grade: "Sophomore", body: "What time does that mean you wake up?", postedAgo: "1d ago", likes: 4 },
-      { proId: "pro-gallagher", body: "Early. But honestly the wake-up matters less than the habit: same checklist, every morning, no exceptions.", postedAgo: "22h ago", likes: 11 },
-      { handle: "Riley", grade: "Sophomore", body: "'the person who noticed first' being the whole job is lowkey every job", postedAgo: "20h ago", likes: 6 },
+      { handle: "Maya", grade: "Junior", body: "Being the person who noticed first, that's basically the nurse game's lesson too.", postedAgo: "1d ago", likes: 98 },
+      { handle: "Diego", grade: "Sophomore", body: "What time does that mean you wake up?", postedAgo: "1d ago", likes: 59 },
+      { proId: "pro-gallagher", body: "Early. But honestly the wake-up matters less than the habit: same checklist, every morning, no exceptions.", postedAgo: "22h ago", likes: 122 },
+      { handle: "Riley", grade: "Sophomore", body: "'the person who noticed first' being the whole job is lowkey every job", postedAgo: "20h ago", likes: 83 },
     ],
   },
   {
@@ -860,9 +972,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1w ago",
     helpful: 236,
     replies: [
-      { handle: "Lena", grade: "Junior", body: "The writing part keeps coming up in every single insight on this app.", postedAgo: "6d ago", likes: 13 },
-      { handle: "Zoe", grade: "Sophomore", body: "reliable > brilliant. noted.", postedAgo: "5d ago", likes: 7 },
-      { handle: "Theo", grade: "Sophomore", body: "me preparing to be careful and reliable", postedAgo: "5d ago", likes: 5, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
+      { handle: "Lena", grade: "Junior", body: "The writing part keeps coming up in every single insight on this app.", postedAgo: "6d ago", likes: 146 },
+      { handle: "Zoe", grade: "Sophomore", body: "reliable > brilliant. noted.", postedAgo: "5d ago", likes: 74 },
+      { handle: "Theo", grade: "Sophomore", body: "me preparing to be careful and reliable", postedAgo: "5d ago", likes: 71, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
     ],
   },
   {
@@ -875,10 +987,10 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "3d ago",
     helpful: 102,
     replies: [
-      { handle: "Marcus", grade: "Freshman", body: "This makes it feel way less scary than 'go network'.", postedAgo: "2d ago", likes: 10 },
-      { handle: "Ava", grade: "Sophomore", body: "Tried the 'what surprised you' question at the panel last week and it worked.", postedAgo: "2d ago", likes: 7 },
-      { handle: "Marcus", grade: "Freshman", body: "everyone at the next career fair when I pull up with actual questions", postedAgo: "1d ago", likes: 9, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
-      { handle: "Jo", grade: "Senior", body: "asking real questions >> collecting contacts", postedAgo: "1d ago", likes: 8 },
+      { handle: "Marcus", grade: "Freshman", body: "This makes it feel way less scary than 'go network'.", postedAgo: "2d ago", likes: 110 },
+      { handle: "Ava", grade: "Sophomore", body: "Tried the 'what surprised you' question at the panel last week and it worked.", postedAgo: "2d ago", likes: 74 },
+      { handle: "Marcus", grade: "Freshman", body: "everyone at the next career fair when I pull up with actual questions", postedAgo: "1d ago", likes: 98, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
+      { handle: "Jo", grade: "Senior", body: "asking real questions >> collecting contacts", postedAgo: "1d ago", likes: 86 },
     ],
   },
   {
@@ -891,9 +1003,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "5d ago",
     helpful: 199,
     replies: [
-      { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 14, image: "/images/connect/reactions/office-celebrate.gif", imageAlt: "The Office celebration GIF" },
-      { handle: "Lena", grade: "Junior", body: "Saving this whole board at this point.", postedAgo: "4d ago", likes: 6 },
-      { handle: "Devon", grade: "Senior", body: "'here is how I would find out' is the cheat code", postedAgo: "6h ago", likes: 10, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
+      { handle: "Jo", grade: "Senior", body: "Used this in a scholarship interview. It works.", postedAgo: "4d ago", likes: 137, image: "/images/connect/reactions/office-celebrate.gif", imageAlt: "The Office celebration GIF" },
+      { handle: "Lena", grade: "Junior", body: "Saving this whole board at this point.", postedAgo: "4d ago", likes: 83 },
+      { handle: "Devon", grade: "Senior", body: "'here is how I would find out' is the cheat code", postedAgo: "6h ago", likes: 110, image: "/images/connect/reactions/drake-approve.gif", imageAlt: "Drake approving GIF" },
     ],
   },
   {
@@ -906,9 +1018,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "2d ago",
     helpful: 296,
     replies: [
-      { handle: "Sana", grade: "Junior", body: "Which one did you like more as a new grad?", postedAgo: "1d ago", likes: 3 },
-      { proId: "pro-brooks", body: "Nights, at first, more room to think. Then days, once thinking got faster.", postedAgo: "20h ago", likes: 9 },
-      { handle: "Lena", grade: "Junior", body: "'a rhythm you grow into' is such a good way to put it", postedAgo: "16h ago", likes: 5 },
+      { handle: "Sana", grade: "Junior", body: "Which one did you like more as a new grad?", postedAgo: "1d ago", likes: 47 },
+      { proId: "pro-brooks", body: "Nights, at first, more room to think. Then days, once thinking got faster.", postedAgo: "20h ago", likes: 98 },
+      { handle: "Lena", grade: "Junior", body: "'a rhythm you grow into' is such a good way to put it", postedAgo: "16h ago", likes: 71 },
     ],
   },
   {
@@ -921,8 +1033,8 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "6d ago",
     helpful: 162,
     replies: [
-      { handle: "Zoe", grade: "Sophomore", body: "This is the realest thing anyone has said on here.", postedAgo: "5d ago", likes: 17, image: "/images/connect/reactions/dicaprio-cheers.gif", imageAlt: "Leonardo DiCaprio toast GIF" },
-      { handle: "Noah", grade: "Sophomore", body: "seventeen and rethinking everything right now", postedAgo: "4d ago", likes: 8 },
+      { handle: "Zoe", grade: "Sophomore", body: "This is the realest thing anyone has said on here.", postedAgo: "5d ago", likes: 173, image: "/images/connect/reactions/dicaprio-cheers.gif", imageAlt: "Leonardo DiCaprio toast GIF" },
+      { handle: "Noah", grade: "Sophomore", body: "seventeen and rethinking everything right now", postedAgo: "4d ago", likes: 86 },
     ],
   },
   {
@@ -935,10 +1047,10 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "3d ago",
     helpful: 259,
     replies: [
-      { handle: "Ruby", grade: "Junior", body: "Posting my process pages instead of hiding them from now on.", postedAgo: "2d ago", likes: 8 },
-      { handle: "Theo", grade: "Sophomore", body: "Does this apply to video edits too? I have so many drafts.", postedAgo: "2d ago", likes: 4 },
-      { proId: "pro-fontaine", body: "Especially video. A before/after cut with one sentence on what you changed is a portfolio piece.", postedAgo: "1d ago", likes: 10 },
-      { handle: "Ava", grade: "Sophomore", body: "me realizing my messy sketchbook was the portfolio all along", postedAgo: "1d ago", likes: 9, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
+      { handle: "Ruby", grade: "Junior", body: "Posting my process pages instead of hiding them from now on.", postedAgo: "2d ago", likes: 86 },
+      { handle: "Theo", grade: "Sophomore", body: "Does this apply to video edits too? I have so many drafts.", postedAgo: "2d ago", likes: 59 },
+      { proId: "pro-fontaine", body: "Especially video. A before/after cut with one sentence on what you changed is a portfolio piece.", postedAgo: "1d ago", likes: 110 },
+      { handle: "Ava", grade: "Sophomore", body: "me realizing my messy sketchbook was the portfolio all along", postedAgo: "1d ago", likes: 98, image: "/images/connect/reactions/imagination.gif", imageAlt: "SpongeBob imagination GIF" },
     ],
   },
   {
@@ -951,9 +1063,9 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1w ago",
     helpful: 125,
     replies: [
-      { handle: "Theo", grade: "Sophomore", body: "'Rooms where good ideas could die' is a wild sentence. Noted.", postedAgo: "6d ago", likes: 12 },
-      { handle: "Ruby", grade: "Junior", body: "'the craft got me here; the communication keeps me here', writing that down forever", postedAgo: "5d ago", likes: 10 },
-      { handle: "Devon", grade: "Senior", body: "rooms where good ideas could die. respect for the honesty.", postedAgo: "5d ago", likes: 6 },
+      { handle: "Theo", grade: "Sophomore", body: "'Rooms where good ideas could die' is a wild sentence. Noted.", postedAgo: "6d ago", likes: 134 },
+      { handle: "Ruby", grade: "Junior", body: "'the craft got me here; the communication keeps me here', writing that down forever", postedAgo: "5d ago", likes: 110 },
+      { handle: "Devon", grade: "Senior", body: "rooms where good ideas could die. respect for the honesty.", postedAgo: "5d ago", likes: 83 },
     ],
   },
   {
@@ -967,7 +1079,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 107,
     views: 2367,
     saves: 32,
-    replies: [{ handle: "Priya", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 6 }, { handle: "Ethan", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 4 }, { proId: "pro-chen", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 10 }],
+    replies: [{ handle: "Priya", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 83 }, { handle: "Ethan", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 59 }, { proId: "pro-chen", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 110 }],
   },
   {
     id: "i-martinez-2",
@@ -980,7 +1092,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 144,
     views: 3144,
     saves: 43,
-    replies: [{ handle: "Maya", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 7 }, { handle: "Sam", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 5 }, { proId: "pro-martinez", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 11 }],
+    replies: [{ handle: "Maya", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 74 }, { handle: "Sam", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 71 }, { proId: "pro-martinez", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 122 }],
   },
   {
     id: "i-okafor-2",
@@ -993,7 +1105,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 181,
     views: 3921,
     saves: 54,
-    replies: [{ handle: "Diego", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 8 }, { handle: "Noah", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 6 }, { proId: "pro-okafor", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 12 }],
+    replies: [{ handle: "Diego", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 86 }, { handle: "Noah", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 83 }, { proId: "pro-okafor", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 134 }],
   },
   {
     id: "i-osei-2",
@@ -1006,7 +1118,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 218,
     views: 4698,
     saves: 65,
-    replies: [{ handle: "Ethan", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 9 }, { handle: "Zoe", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 7 }, { proId: "pro-osei", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 13 }],
+    replies: [{ handle: "Ethan", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 98 }, { handle: "Zoe", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 74 }, { proId: "pro-osei", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 146 }],
   },
   {
     id: "i-zhang-2",
@@ -1019,7 +1131,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 255,
     views: 5475,
     saves: 76,
-    replies: [{ handle: "Theo", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 10 }, { handle: "Sam", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 8 }, { proId: "pro-zhang", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 14 }],
+    replies: [{ handle: "Theo", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 110 }, { handle: "Sam", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 86 }, { proId: "pro-zhang", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 137 }],
   },
   {
     id: "i-gallagher-2",
@@ -1032,7 +1144,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 292,
     views: 6252,
     saves: 88,
-    replies: [{ handle: "Diego", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 11 }, { handle: "Ava", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 9 }, { proId: "pro-gallagher", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 15 }],
+    replies: [{ handle: "Diego", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 122 }, { handle: "Ava", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 98 }, { proId: "pro-gallagher", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 149 }],
   },
   {
     id: "i-grant-2",
@@ -1045,7 +1157,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 99,
     views: 2199,
     saves: 30,
-    replies: [{ handle: "Maya", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 12 }, { handle: "Lena", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 3 }, { proId: "pro-grant", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 16 }],
+    replies: [{ handle: "Maya", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 134 }, { handle: "Lena", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 47 }, { proId: "pro-grant", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 161 }],
   },
   {
     id: "i-whitfield-2",
@@ -1058,7 +1170,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 136,
     views: 2976,
     saves: 41,
-    replies: [{ handle: "Lena", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 13 }, { handle: "Marcus", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 4 }, { proId: "pro-whitfield", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 17 }],
+    replies: [{ handle: "Lena", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 146 }, { handle: "Marcus", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 59 }, { proId: "pro-whitfield", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 173 }],
   },
   {
     id: "i-tanaka-2",
@@ -1071,7 +1183,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 173,
     views: 3753,
     saves: 52,
-    replies: [{ handle: "Ava", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 5 }, { handle: "Riley", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 5 }, { proId: "pro-tanaka", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 18 }],
+    replies: [{ handle: "Ava", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 71 }, { handle: "Riley", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 71 }, { proId: "pro-tanaka", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 185 }],
   },
   {
     id: "i-brooks-2",
@@ -1084,7 +1196,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 210,
     views: 4530,
     saves: 63,
-    replies: [{ handle: "Zoe", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 6 }, { handle: "Sana", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 6 }, { proId: "pro-brooks", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 19 }],
+    replies: [{ handle: "Zoe", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 83 }, { handle: "Sana", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 83 }, { proId: "pro-brooks", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 197 }],
   },
   {
     id: "i-fontaine-2",
@@ -1097,7 +1209,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 247,
     views: 5307,
     saves: 74,
-    replies: [{ handle: "Ruby", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 7 }, { handle: "Theo", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 7 }, { proId: "pro-fontaine", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 20 }],
+    replies: [{ handle: "Ruby", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 74 }, { handle: "Theo", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 74 }, { proId: "pro-fontaine", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 209 }],
   },
   {
     id: "i-haddad-2",
@@ -1110,7 +1222,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 284,
     views: 6084,
     saves: 85,
-    replies: [{ handle: "Sana", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 8 }, { handle: "Zoe", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 8 }, { proId: "pro-haddad", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 9 }],
+    replies: [{ handle: "Sana", grade: "Sophomore", body: "saving this", postedAgo: "2d ago", likes: 86 }, { handle: "Zoe", grade: "Junior", body: "how did you start?", postedAgo: "1d ago", likes: 86 }, { proId: "pro-haddad", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 98 }],
   },
   {
     id: "i-haddad-3",
@@ -1123,7 +1235,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 91,
     views: 2031,
     saves: 27,
-    replies: [{ handle: "Priya", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 9 }, { handle: "Noah", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 9 }, { proId: "pro-haddad", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 10 }],
+    replies: [{ handle: "Priya", grade: "Junior", body: "okay this actually helps", postedAgo: "2d ago", likes: 98 }, { handle: "Noah", grade: "Sophomore", body: "is this true everywhere?", postedAgo: "1d ago", likes: 98 }, { proId: "pro-haddad", body: "It varies by place, but the idea holds.", postedAgo: "1d ago", likes: 110 }],
   },
   {
     id: "i-vega-2",
@@ -1136,7 +1248,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 128,
     views: 2808,
     saves: 38,
-    replies: [{ handle: "Ruby", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 10 }, { handle: "Lena", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 3 }, { proId: "pro-vega", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 11 }],
+    replies: [{ handle: "Ruby", grade: "Freshman", body: "wait this is so useful", postedAgo: "2d ago", likes: 110 }, { handle: "Lena", grade: "Senior", body: "can you do a post on the first year?", postedAgo: "1d ago", likes: 47 }, { proId: "pro-vega", body: "Start small this week. Ask me here if you get stuck.", postedAgo: "1d ago", likes: 122 }],
   },
   {
     id: "i-vega-3",
@@ -1149,7 +1261,7 @@ export const INSIGHTS: Insight[] = [
     helpful: 165,
     views: 3585,
     saves: 50,
-    replies: [{ handle: "Theo", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 11 }, { handle: "Ava", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 4 }, { proId: "pro-vega", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 12 }],
+    replies: [{ handle: "Theo", grade: "Senior", body: "needed this today", postedAgo: "2d ago", likes: 122 }, { handle: "Ava", grade: "Freshman", body: "my counselor never said this", postedAgo: "1d ago", likes: 59 }, { proId: "pro-vega", body: "Good question. Short answer: yes, and I will write that one next.", postedAgo: "1d ago", likes: 134 }],
   },
 ];
 
@@ -1373,72 +1485,6 @@ export const EVENTS: EventBoard[] = [
       photosLabel: "Event photos",
     },
   },
-  // The two partnership boards the Replit prototype carried, which the CEO
-  // of JA Singapore singled out (Slack, Sep 2), with the Replit's own
-  // figures. Morgan Stanley is already joined; Junior Achievement unlocks
-  // with its code.
-  {
-    id: "event-do-morgan-stanley-nyc",
-    name: "Dream Opportunity & Morgan Stanley",
-    resources: [
-      { kind: "slides", title: "Trading floor tour deck", description: "The slides from the morning session on how a trading floor works.", sourceLabel: "dreamari.co/resources", meta: "14 slides" },
-      { kind: "folder", title: "Markets 101 handouts", description: "The three handouts from the small-group tables.", sourceLabel: "dreamari.co/resources", meta: "3 files", items: ["What a Markets Analyst does.pdf", "Reading a stock chart.pdf", "Glossary of trading terms.pdf"] },
-      { kind: "link", title: "Morgan Stanley early insights programs", description: "The programs the recruiters mentioned for high school and first-year students.", sourceLabel: "morganstanley.com", meta: "Website" },
-    ],
-    photos: { count: 31, images: EVENT_FRAMES.finance },
-    host: "Morgan Stanley",
-    lead: "Dream Opportunity",
-    partner: "Morgan Stanley",
-    date: "March 12, 2026",
-    location: "New York, NY",
-    lifecycle: "Active follow-up",
-    closesOn: "September 30, 2026",
-    students: 312,
-    pros: 87,
-    postCount: 203,
-    orgs: ["Dream Opportunity", "Morgan Stanley", "Dreamari"],
-    topics: ["Finance", "Investing", "Networking"],
-    entitled: true,
-  },
-  {
-    id: "event-ja-goldman-sachs-nyc",
-    name: "Junior Achievement & Goldman Sachs",
-    resources: [
-      { kind: "pdf", title: "Personal finance workbook", description: "The workbook from the Junior Achievement session, with the answer key.", sourceLabel: "Junior Achievement", meta: "PDF · 12 pages" },
-      { kind: "reading", title: "Recommended reading on investing", description: "Four short pieces the volunteers pointed to for a first look at investing.", sourceLabel: "dreamari.co/resources", meta: "4 links" },
-    ],
-    photos: { count: 19, images: EVENT_FRAMES.finance },
-    host: "Junior Achievement",
-    lead: "Junior Achievement",
-    partner: "Goldman Sachs",
-    date: "April 16, 2026",
-    location: "New York, NY",
-    lifecycle: "Active follow-up",
-    closesOn: "October 15, 2026",
-    students: 236,
-    pros: 52,
-    postCount: 98,
-    orgs: ["Junior Achievement", "Goldman Sachs", "Dreamari"],
-    topics: ["Finance", "Banking", "Networking"],
-    entitled: false,
-    code: "JA-GS-2026",
-  },
-  // Asked for by the CEO (4 Sept). No company partner, date or figures have
-  // been given yet, so none are invented: the board exists, and opens after
-  // its first event.
-  {
-    id: "event-seo-scholars-nyc",
-    name: "Dream Opportunity & SEO Scholars",
-    host: "SEO Scholars",
-    lead: "Dream Opportunity",
-    partner: "SEO Scholars",
-    date: "First event to be announced",
-    location: "New York, NY",
-    lifecycle: "Upcoming",
-    orgs: ["SEO Scholars", "Dream Opportunity", "Dreamari"],
-    topics: ["College", "Careers", "Networking"],
-    entitled: false,
-  },
   // The real fall event within this student's reach (Slack, Sep 1):
   // Brooklyn with JPMorgan Chase on Oct 23. Its board opens after the
   // event, same lifecycle rule as always. No invented stats.
@@ -1453,6 +1499,71 @@ export const EVENTS: EventBoard[] = [
     lifecycle: "Upcoming",
     orgs: ["Dream Opportunity", "JPMorgan Chase", "Dreamari"],
     topics: ["Finance", "Networking"],
+    entitled: false,
+  },
+  // Asked for by the CEO (4 Sept). No company partner, date or figures have
+  // been given yet, so none are invented: the board exists, and opens after
+  // its first event.
+  {
+    id: "event-do-blackstone",
+    name: "Dream Opportunity & Blackstone",
+    host: "Blackstone",
+    lead: "Dream Opportunity",
+    partner: "Blackstone",
+    date: "First event to be announced",
+    location: "New York, NY",
+    lifecycle: "Upcoming",
+    orgs: ["Dream Opportunity", "Blackstone", "Dreamari"],
+    topics: ["Finance", "Investing", "Networking"],
+    entitled: false,
+  },
+  // The six-board list agreed on Slack (Joshua Pierce + Chandu, 8 Sept
+  // 2026): Junior Achievement's board now follows Amazon, not the earlier
+  // Goldman Sachs pairing -- no stats invented for the swap, since the
+  // Goldman Sachs board's numbers belonged to that event, not this one.
+  {
+    id: "event-ja-amazon-nyc",
+    name: "Junior Achievement & Amazon",
+    host: "Junior Achievement",
+    lead: "Junior Achievement",
+    partner: "Amazon",
+    date: "First event to be announced",
+    location: "New York, NY",
+    lifecycle: "Upcoming",
+    orgs: ["Junior Achievement", "Amazon", "Dreamari"],
+    topics: ["Business", "Operations", "Networking"],
+    entitled: false,
+  },
+  // Renamed from "Dream Opportunity & SEO Scholars" (Joshua Pierce, Slack,
+  // 8 Sept 2026: "he still has DO & SEO Scholars" -- the board's own
+  // partner is Google, not Dream Opportunity, per the agreed naming.
+  {
+    id: "event-seo-scholars-nyc",
+    name: "SEO Scholars & Google",
+    host: "SEO Scholars",
+    lead: "SEO Scholars",
+    partner: "Google",
+    date: "First event to be announced",
+    location: "New York, NY",
+    lifecycle: "Upcoming",
+    orgs: ["SEO Scholars", "Google", "Dreamari"],
+    topics: ["Technology", "College", "Networking"],
+    entitled: false,
+  },
+  // New nonprofit partner, no precedent board to follow -- JAG (Jobs for
+  // America's Graduates) organizes, same shape as every other
+  // first-event-pending board.
+  {
+    id: "event-jag-informa",
+    name: "JAG & Informa Markets",
+    host: "JAG",
+    lead: "JAG",
+    partner: "Informa Markets",
+    date: "First event to be announced",
+    location: "Secaucus, NJ",
+    lifecycle: "Upcoming",
+    orgs: ["JAG", "Informa Markets", "Dreamari"],
+    topics: ["Business", "Networking"],
     entitled: false,
   },
 ];
@@ -1476,9 +1587,9 @@ export const EVENT_THREADS: Thread[] = [
     followers: 19,
     comments: 45,
     responses: [
-      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 11 },
-      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "us walking out of that panel", postedAgo: "45m ago", likes: 13, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
-      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "the approachability surprised me too honestly", postedAgo: "30m ago", likes: 4 },
+      { kind: "peer", handle: "Noah", grade: "Sophomore", body: "The consultant who started as a music major completely changed how I think about picking a college path.", postedAgo: "1h ago", likes: 122 },
+      { kind: "peer", handle: "Riley", grade: "Sophomore", body: "us walking out of that panel", postedAgo: "45m ago", likes: 146, image: "/images/connect/reactions/minions-excited.gif", imageAlt: "Excited minions GIF" },
+      { kind: "peer", handle: "Zoe", grade: "Sophomore", body: "the approachability surprised me too honestly", postedAgo: "30m ago", likes: 59 },
       {
         kind: "answer",
         proId: "pro-martinez",
@@ -1546,7 +1657,7 @@ export const EVENT_THREADS: Thread[] = [
         body: "Pick one thing and act on it this month. If a panelist named a skill, find the free version of it and spend two hours there. If they named a class, check whether your school offers it next term. Then post what you found back here so the next person gets it too. Notes you act on once beat notes you reread five times.",
         disclosure: "Personal approach, different professionals prefer different styles.",
       },
-      { kind: "peer", handle: "Amir", grade: "Junior", body: "posting what you found back here is such a good rule", postedAgo: "4h ago", likes: 6 },
+      { kind: "peer", handle: "Amir", grade: "Junior", body: "posting what you found back here is such a good rule", postedAgo: "4h ago", likes: 83 },
     ],
   },
 ];

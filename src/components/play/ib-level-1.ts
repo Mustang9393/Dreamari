@@ -59,6 +59,8 @@ export const IB_LEVEL_1: Level = {
       id: "L1-01",
       speaker: "Narrator",
       setup: "Intern • Week 1",
+      // The first day is an event (direct feedback, 6 Sept 2026): a burst,
+      // a sweep, shimmering ink, and a line that says so.
       title: "Welcome to Cobalt Capital. Your first day starts now.",
       celebrate: true,
       cta: "Continue",
@@ -124,9 +126,8 @@ export const IB_LEVEL_1: Level = {
       speaker: "Narrator",
       castMember: "Christina",
       setup: "Christina • Associate",
-      // Replaces "She sat where you are sitting five years ago." (direct
-      // feedback, 9 Sept 2026: "something more useful about her role").
-      title: "Christina is an Associate, two levels above you, and she'll be giving you direction throughout your internship.",
+      // Useful about her role, not her past (direct feedback, 6 Sept 2026)
+      title: "Christina is an Associate, two levels above you, and she’ll be giving you direction throughout your internship.",
       cta: "Continue",
     },
     {
@@ -172,7 +173,8 @@ export const IB_LEVEL_1: Level = {
       progress: 0.1,
       castMembers: ["Christina", "Jordan"],
       speaker: "Narrator",
-      setup: "Christina meets you at reception. Jordan, another Intern, is starting too.",
+      // No setup line: the scene before already put Christina and Jordan at
+      // reception, so the question opens straight away (direct feedback, 6 Sept 2026)
       question: "Day 1: What should you do first?",
       prompt: "Tap one.",
       choices: [
@@ -265,12 +267,9 @@ export const IB_LEVEL_1: Level = {
       speaker: "Christina",
       castMember: "Christina",
       setup: '"Before client work, let me check how you communicate."',
-      question: "Four quick questions on one shared timer.",
-      // Blank, not omitted: omitting it would fall through to this beat
-      // kind's own default prompt ("Quick questions, one timer. Tap fast."),
-      // still a repeat of what Christina's setup line just said (direct
-      // feedback, 9 Sept 2026: "let the screen go directly into Question 1
-      // of 4 and the question").
+      // Christina's line is the whole setup; the quiz opens on Question 1 of 4
+      // with no restatement and no "Tap fast" (direct feedback, 6 Sept 2026)
+      question: "",
       prompt: "",
       items: [
         {
