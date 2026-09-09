@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
 import { ThemeBoot } from "@/components/app/theme";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
@@ -51,6 +52,7 @@ export default function RootLayout({
         <ThemeBoot />
         <ErrorReporter />
         {children}
+        <Analytics />
       </body>
     </html>
   );
