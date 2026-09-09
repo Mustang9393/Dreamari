@@ -541,39 +541,41 @@ export function HomeExperience() {
            personalised "27 cards, a pattern is forming" banner, which needed
            tracking the backend does not have. The three change whenever a
            feature needs attention. Redesigned (direct feedback, 9 Sept 2026:
-           "the your next moves cards on HOME need better design"): each card
-           used to be identical apart from its icon/copy -- same grey chip,
-           same muted arrow -- so nothing distinguished "go plan" from "go
-           post" from "go build a resume" except reading the words. Each now
-           carries its own accent (the same colors those destinations already
-           wear elsewhere: Plan's blue-purple matches Do This Next just above,
-           Connect's teal is its own landing-chapter color, Resume's gold
-           matches Get Hired's) -- a top-corner glow, a tinted icon chip, and
-           the border/arrow lighting up to it on hover -- plus the shared beam
-           ring, same language as the rest of the app now. */}
+           "the your next moves cards on HOME need better design and the
+           beam on hover"): a bigger tinted icon chip and a corner glow that
+           fades in on hover, plus the shared HoverBeam ring (hover-only --
+           its own default behavior, not forced active). One shared accent
+           for all three, not a different color per card (direct feedback:
+           "remove the different colors for the icons... make it
+           consistent" -- per-destination colors weren't there before this
+           redesign either). h-full on every card so the row's tallest body
+           copy (Community Boards' three lines) no longer leaves the other
+           two short -- CSS Grid's default row-stretch only reaches a direct
+           grid child, so it has to sit on the Link itself, not just the
+           grid container. */}
         <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-5)]">
           <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             Your Next Moves
           </h2>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             {[
-              { title: "My Plan", body: "Turn your dream career into clear next steps.", href: "/profile?tab=plan", Icon: ListChecks, accent: "var(--primary)" },
-              { title: "Community Boards", body: "Ask questions alongside fellow students and hear directly from professionals in the field.", href: "/connect", Icon: Users, accent: "#00c8dc" },
-              { title: "Resume Builder", body: "Get ready for internships, jobs, and future opportunities.", href: "/profile?tab=resume", Icon: FileText, accent: "var(--world-business-money-office)" },
-            ].map(({ title, body, href, Icon, accent }) => (
+              { title: "My Plan", body: "Turn your dream career into clear next steps.", href: "/profile?tab=plan", Icon: ListChecks },
+              { title: "Community Boards", body: "Ask questions alongside fellow students and hear directly from professionals in the field.", href: "/connect", Icon: Users },
+              { title: "Resume Builder", body: "Get ready for internships, jobs, and future opportunities.", href: "/profile?tab=resume", Icon: FileText },
+            ].map(({ title, body, href, Icon }) => (
               <HoverBeam key={title} strength={0.8}>
               <Link
                 href={href}
-                className="dm-tap group relative flex flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] transition-colors duration-200"
+                className="dm-tap group relative flex h-full flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] transition-colors duration-200"
                 style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
               >
                 <span
                   aria-hidden
                   className="pointer-events-none absolute -top-10 -right-10 h-[110px] w-[110px] rounded-full opacity-0 blur-[40px] transition-opacity duration-300 group-hover:opacity-100"
-                  style={{ background: `color-mix(in srgb, ${accent} 55%, transparent)` }}
+                  style={{ background: "color-mix(in srgb, var(--primary) 55%, transparent)" }}
                 />
                 <span className="relative flex items-center justify-between">
-                  <span className="flex h-[40px] w-[40px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
+                  <span className="flex h-[40px] w-[40px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
                     <Icon className="h-[19px] w-[19px]" aria-hidden />
                   </span>
                   <ArrowRight size={16} strokeWidth={2.5} aria-hidden className="transition-all duration-200 group-hover:translate-x-[3px]" style={{ color: "var(--muted-foreground)" }} />
