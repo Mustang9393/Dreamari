@@ -540,29 +540,50 @@ export function HomeExperience() {
         {/* Your Next Moves (CEO, 4 Sept): three static actions in place of the
            personalised "27 cards, a pattern is forming" banner, which needed
            tracking the backend does not have. The three change whenever a
-           feature needs attention. */}
+           feature needs attention. Redesigned (direct feedback, 9 Sept 2026:
+           "the your next moves cards on HOME need better design"): each card
+           used to be identical apart from its icon/copy -- same grey chip,
+           same muted arrow -- so nothing distinguished "go plan" from "go
+           post" from "go build a resume" except reading the words. Each now
+           carries its own accent (the same colors those destinations already
+           wear elsewhere: Plan's blue-purple matches Do This Next just above,
+           Connect's teal is its own landing-chapter color, Resume's gold
+           matches Get Hired's) -- a top-corner glow, a tinted icon chip, and
+           the border/arrow lighting up to it on hover -- plus the shared beam
+           ring, same language as the rest of the app now. */}
         <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-5)]">
           <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             Your Next Moves
           </h2>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             {[
-              { title: "My Plan", body: "Turn your dream career into clear next steps.", href: "/profile?tab=plan", Icon: ListChecks },
-              { title: "Community Boards", body: "Ask questions alongside fellow students and hear directly from professionals in the field.", href: "/connect", Icon: Users },
-              { title: "Resume Builder", body: "Get ready for internships, jobs, and future opportunities.", href: "/profile?tab=resume", Icon: FileText },
-            ].map(({ title, body, href, Icon }) => (
-              <Link key={title} href={href} className="dm-tap group flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-                <span className="flex items-center justify-between">
-                  <span className="flex h-[36px] w-[36px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
-                    <Icon className="h-[18px] w-[18px]" aria-hidden />
+              { title: "My Plan", body: "Turn your dream career into clear next steps.", href: "/profile?tab=plan", Icon: ListChecks, accent: "var(--primary)" },
+              { title: "Community Boards", body: "Ask questions alongside fellow students and hear directly from professionals in the field.", href: "/connect", Icon: Users, accent: "#00c8dc" },
+              { title: "Resume Builder", body: "Get ready for internships, jobs, and future opportunities.", href: "/profile?tab=resume", Icon: FileText, accent: "var(--world-business-money-office)" },
+            ].map(({ title, body, href, Icon, accent }) => (
+              <HoverBeam key={title} strength={0.8}>
+              <Link
+                href={href}
+                className="dm-tap group relative flex flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] transition-colors duration-200"
+                style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+              >
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -top-10 -right-10 h-[110px] w-[110px] rounded-full opacity-0 blur-[40px] transition-opacity duration-300 group-hover:opacity-100"
+                  style={{ background: `color-mix(in srgb, ${accent} 55%, transparent)` }}
+                />
+                <span className="relative flex items-center justify-between">
+                  <span className="flex h-[40px] w-[40px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
+                    <Icon className="h-[19px] w-[19px]" aria-hidden />
                   </span>
-                  <ArrowRight size={16} strokeWidth={2.5} aria-hidden className="transition-transform duration-200 group-hover:translate-x-[3px]" style={{ color: "var(--muted-foreground)" }} />
+                  <ArrowRight size={16} strokeWidth={2.5} aria-hidden className="transition-all duration-200 group-hover:translate-x-[3px]" style={{ color: "var(--muted-foreground)" }} />
                 </span>
-                <span className="flex flex-col gap-[4px]">
+                <span className="relative flex flex-col gap-[4px]">
                   <span className="text-[17px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</span>
                   <span className="text-[14px] leading-[20px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>{body}</span>
                 </span>
               </Link>
+              </HoverBeam>
             ))}
           </div>
         </section>
