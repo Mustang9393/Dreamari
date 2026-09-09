@@ -276,114 +276,24 @@ export const IB_LEVEL_1: Level = {
       skills: ["Reading Comprehension", "Active Learning"],
     },
     {
-      kind: "rapid",
+      // Reduced from a 4-question rapid quiz to a single choice (direct
+      // feedback, 9 Sept 2026: "after before client work let me check how
+      // you communicate its answer it should be the data room question") --
+      // Christina's setup line stays, but what follows it is now the data
+      // room question, not an unrelated four-item quiz on email length,
+      // uncertainty, error handling, and EOD. Content matches the old L1-16
+      // exactly (same choices/why text); L1-14 (the Maison Laurent
+      // assignment intro), L1-15 (the thank-you beat), and the old
+      // standalone L1-16 are removed entirely -- none of the three were in
+      // the numbered sequence given for this level.
+      kind: "choice",
+      layout: "blank",
       id: "L1-13",
-      planLineIfFailed: "you got the basics wrong on questions the team expects an intern to know cold",
+      planLineIfFailed: "you saved client files somewhere they should never have gone",
       progress: 0.3,
-      timer: 45,
       speaker: "Christina",
       castMember: "Christina",
       setup: '"Before client work, let me check how you communicate."',
-      // Christina's line is the whole setup; the quiz opens on Question 1 of 4
-      // with no restatement and no "Tap fast" (direct feedback, 6 Sept 2026)
-      question: "",
-      prompt: "",
-      items: [
-        {
-          question: "How long should an email to a senior banker be?",
-          options: [
-            { label: "Two full pages with every detail", correct: false, why: "Too long. Bankers read on a phone between meetings." },
-            { label: "Four sentences or less", correct: true, why: "Right. Answer first, detail underneath." },
-            { label: "As long as possible to explain everything", correct: false, why: "Long isn't thorough. The skill is what you leave out." },
-          ],
-        },
-        {
-          question: "Christina asks for a number you do not know. What should you say?",
-          options: [
-            { label: '"This estimate is probably correct."', correct: false, why: "Probably is dangerous around numbers. If it's wrong, you said it was fine." },
-            { label: '"Someone else should know that."', correct: false, why: "Maybe true, but it hands the problem back. She asked you." },
-            { label: '"I\'ll confirm and follow up."', correct: true, why: "Right. Honest, quick, and it commits you to closing the gap." },
-          ],
-        },
-        {
-          question: "You spot an error in a client deck. What should you do?",
-          options: [
-            { label: "Wait until after the meeting.", correct: false, why: "By then the client has seen it. Errors are cheapest early." },
-            { label: "Fix it and alert the team.", correct: true, why: "Right. Fixing it quietly leaves the team trusting a wrong version." },
-            { label: "Delete the entire presentation.", correct: false, why: "Destroying work to hide a mistake makes it a serious one." },
-          ],
-        },
-        {
-          question: "What does EOD mean?",
-          options: [
-            { label: "Estimate of debt", correct: false, why: "EOD means end of day." },
-            { label: "End of day", correct: true, why: "Right. And in banking that often means before sunrise." },
-            { label: "Earnings on demand", correct: false, why: "EOD means end of day, not earnings." },
-          ],
-        },
-      ],
-      whenPass: "Right. Three of four means you can be trusted with a client email.",
-      whenFail: "You needed three of four. These habits come up daily.",
-      feedback: "",
-      feedbackCta: "Continue",
-      skills: ["Written Communication", "Decision-Making"],
-    },
-
-    // ---- the first real assignment ----
-    {
-      kind: "choice",
-      layout: "options",
-      id: "L1-14",
-      planLineIfFailed: "you handled a request from a senior person without checking it was yours to handle",
-      progress: 0.4,
-      art: `${ART}/l1-07.webp`,
-      artAlt: "Over-the-shoulder view of hands at a laptop showing charts, sunset skyline through the windows.",
-      speaker: "Narrator",
-      // Client introduced on first mention (D88): the build named Maison
-      // Laurent five times across three levels without saying what it was.
-      setup: "Your first assignment. Maison Laurent, a multi-billion dollar luxury fashion brand, needs a slide by 5 PM. It is 4 PM and numbers are missing.",
-      question: "What do you do?",
-      prompt: "Tap one.",
-      choices: [
-        { id: "a", label: "Send it on time, flag the gaps", tier: "acceptable", why: "On time and honest beats making things up. But you had an hour." },
-        { id: "b", label: "Ask Christina for 30 more minutes", tier: "best", why: "Right. Asking early gives Christina a choice. She'd rather hear it at 4." },
-        { id: "c", label: "Make the numbers up", tier: "risky", why: "Invented numbers end internships. Everything a bank sells is trust in its numbers." },
-      ],
-      feedback: "",
-      feedbackCta: "Continue",
-      skills: ["Time Management", "Negotiation"],
-    },
-    {
-      kind: "choice",
-      layout: "boss",
-      id: "L1-15",
-      planLineIfFailed: "you froze when a senior banker put you on the spot",
-      progress: 0.5,
-      // L1-14's laptop POV shot is that beat's own moment -- it stops here
-      // rather than bleeding into an unrelated congratulations beat.
-      resetScene: true,
-      speaker: "Narrator",
-      setup: "Your name made the deal email to the whole bank. You're on the record for helping close it.",
-      question: "What do you do?",
-      prompt: "Choose one.",
-      choices: [
-        { id: "a", label: "Send a short thank-you to the deal lead", tier: "best", why: "Right. Two lines to the person who named you makes them do it again." },
-        { id: "b", label: "Assume everyone already knows your contribution", tier: "wrong", why: "Nobody tracks your work as closely as you do. Ten seconds costs nothing." },
-      ],
-      feedback: "",
-      feedbackCta: "Continue",
-      skills: ["Social Awareness", "Teamwork & Collaboration"],
-    },
-    {
-      // Drag to Blank (D75): same content as the old tap version, and it
-      // takes Level 1 to six pick-an-option beats out of ten.
-      kind: "choice",
-      layout: "blank",
-      id: "L1-16",
-      planLineIfFailed: "you saved client files somewhere they should never have gone",
-      progress: 0.6,
-      speaker: "Christina",
-      setup: '"Before you share anything: client materials stay secure."',
       question: "Client files belong in the secure ___.",
       prompt: "Drag or tap the right word into the space.",
       choices: [
