@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { BorderBeam } from "border-beam";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { Mascot } from "./Mascot";
@@ -113,10 +114,19 @@ export function Hero({ view, onChangeView }: HeroProps) {
           </p>
           {/* Single CTA per direct feedback — the ghost "See how it works" button is
              gone; the scroll hint below already covers "there's more to see." */}
+          {/* The site's single most important CTA (first thing every visitor
+             sees) gets the strongest, always-on beam treatment -- not
+             hover-only like an internal card, since the whole point is to
+             catch the eye of someone who hasn't decided to interact yet
+             (direct feedback, 9 Sept 2026: beam candidates "even on the
+             landing page"). Same 3.5s family as everywhere else, full
+             strength. */}
           <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
-            <MarketingButton href="/flow" variant="primary" size="lg">
-              Start Journey
-            </MarketingButton>
+            <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={1} brightness={1.8}>
+              <MarketingButton href="/flow" variant="primary" size="lg">
+                Start Journey
+              </MarketingButton>
+            </BorderBeam>
           </div>
           {/* Hidden on short viewports (same tier the mascot-visibility fix already
               tightens elsewhere) so this never competes with the mascot's peeking sliver

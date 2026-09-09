@@ -1,5 +1,6 @@
 "use client";
 
+import { BorderBeam } from "border-beam";
 import { MarketingButton } from "./Button";
 import { useRevealOnScroll } from "./scrollHooks";
 
@@ -36,10 +37,15 @@ export function CTABlock({ eyebrow, heading, body, primary }: CTABlockProps) {
       <p className="mx-auto mt-4 max-w-[560px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
         {body}
       </p>
+      {/* The page's last-chance conversion moment gets the same always-on,
+         full-strength beam as the hero CTA -- same tier, both the site's
+         one clear action (direct feedback, 9 Sept 2026). */}
       <div className="mt-8 flex flex-wrap justify-center gap-3.5">
-        <MarketingButton variant="primary" size="xl" href={primary.href}>
-          {primary.label}
-        </MarketingButton>
+        <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={1} brightness={1.8}>
+          <MarketingButton variant="primary" size="xl" href={primary.href}>
+            {primary.label}
+          </MarketingButton>
+        </BorderBeam>
       </div>
     </div>
   );
