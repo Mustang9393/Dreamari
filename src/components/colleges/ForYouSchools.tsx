@@ -162,24 +162,34 @@ export function ForYouSchools({
   );
   const rail = "dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 
-  const arrow = <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />;
-
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
-      {/* Header: the Replit's breadcrumb as two quiet lines. Career and route
-         are text dropdowns (a small menu under the word), not chip rows. */}
-      <section className="flex flex-col gap-[8px]">
-        <div className="flex flex-wrap items-center gap-x-[6px] gap-y-[4px] text-[16px] leading-[22px] font-extrabold sm:text-[18px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)" }} aria-label="Your pathway">
-          <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} accent>
-            {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
-          </Menu>
-          {arrow}
-          <Menu open={open === "route"} onToggle={() => setOpen(open === "route" ? null : "route")} label={route.label} sub={route.time} disabled={routes.length < 2}>
-            {routes.map((r: Route) => <MenuItem key={r.id} on={r.id === route.id} label={r.label} sub={r.time} onClick={() => { setRoutePick((cur) => ({ ...cur, [careerId]: r.id })); setOpen(null); }} />)}
-          </Menu>
-          {arrow}
-          <span style={{ color: "var(--muted-foreground)" }}>{program}</span>
+      {/* Header with a hierarchy (direct feedback, 11 Sept 2026: too many
+         words at the same prominence). One big thing -- the career -- then
+         two labelled fields (Route, Program), then the quiet "Based on" line. */}
+      <section className="flex flex-col gap-[var(--space-5)]">
+        <div className="flex flex-col gap-[6px]">
+          <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>Planning for</p>
+          <div className="text-[26px] leading-[30px] font-extrabold sm:text-[30px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)" }}>
+            <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} big>
+              {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
+            </Menu>
+          </div>
         </div>
+        <dl className="grid grid-cols-2 gap-[var(--space-4)] sm:max-w-[560px]">
+          <div className="flex flex-col gap-[4px]">
+            <dt className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Route</dt>
+            <dd className="m-0 text-[15px] leading-[20px] font-bold sm:text-[16px]" style={{ fontFamily: "var(--font-body)" }}>
+              <Menu open={open === "route"} onToggle={() => setOpen(open === "route" ? null : "route")} label={route.label} sub={route.time} disabled={routes.length < 2}>
+                {routes.map((r: Route) => <MenuItem key={r.id} on={r.id === route.id} label={r.label} sub={r.time} onClick={() => { setRoutePick((cur) => ({ ...cur, [careerId]: r.id })); setOpen(null); }} />)}
+              </Menu>
+            </dd>
+          </div>
+          <div className="flex flex-col gap-[4px]">
+            <dt className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Program</dt>
+            <dd className="m-0 text-[15px] leading-[20px] font-bold sm:text-[16px]" style={{ fontFamily: "var(--font-body)" }}>{program}</dd>
+          </div>
+        </dl>
         <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[6px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           <span>Based on</span>
           <span className="group relative">
@@ -252,14 +262,16 @@ export function ForYouSchools({
 
 // ---- text dropdowns for the breadcrumb ------------------------------------
 
-function Menu({ label, sub, open, onToggle, disabled, accent, children }: { label: string; sub?: string; open: boolean; onToggle: () => void; disabled?: boolean; accent?: boolean; children: React.ReactNode }) {
-  const color = accent ? SOFT : "var(--foreground)";
-  if (disabled) return <span style={{ color }}>{label}{sub && <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span>}</span>;
+function Menu({ label, sub, open, onToggle, disabled, big, children }: { label: string; sub?: string; open: boolean; onToggle: () => void; disabled?: boolean; big?: boolean; children: React.ReactNode }) {
+  const subEl = sub ? <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span> : null;
+  if (disabled) return <span style={{ color: "var(--foreground)" }}>{label}{subEl}</span>;
   return (
-    <span className="relative" data-menu>
-      <button type="button" onClick={onToggle} aria-haspopup="menu" aria-expanded={open} className="dm-link flex cursor-pointer items-center gap-[3px]" style={{ color, textDecoration: "underline", textDecorationColor: `color-mix(in srgb, ${SOFT} 55%, transparent)`, textUnderlineOffset: "5px", textDecorationThickness: "2px" }}>
-        {label}{sub && <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span>}
-        <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden style={{ color: "var(--muted-foreground)" }} />
+    <span className="relative inline-block" data-menu>
+      <button type="button" onClick={onToggle} aria-haspopup="menu" aria-expanded={open} className="dm-link flex cursor-pointer items-center gap-[6px] text-left" style={{ color: "var(--foreground)" }}>
+        <span>{label}{subEl}</span>
+        <span className="flex flex-none items-center justify-center rounded-full border" style={{ width: big ? 30 : 22, height: big ? 30 : 22, borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <ChevronDown className={`transition-transform ${open ? "rotate-180" : ""} ${big ? "h-4 w-4" : "h-[13px] w-[13px]"}`} aria-hidden style={{ color: SOFT }} />
+        </span>
       </button>
       {open && (
         <ul role="menu" className="absolute top-[calc(100%+8px)] left-0 z-40 flex min-w-[220px] list-none flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[6px] shadow-xl" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
