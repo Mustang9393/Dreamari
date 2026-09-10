@@ -151,13 +151,21 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const stored = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const [edits, setEdits] = useState<{ ids: string[]; focus: string | null } | null>(null);
   const base = useMemo(() => {
-    if (fromHandoff) return { ids: initialPicks, focus: initialFocus ?? initialPicks[0] };
+    // focus null means "no primary chosen yet": the strongest match stands
+    // in (Joshua, Slack, 11 Sept 2026), so every student has a Career Report
+    // and a Plan from the first visit without being asked to pick.
+    if (fromHandoff) return { ids: initialPicks, focus: initialFocus ?? null };
     const valid = stored.ids.filter((id) => ALL_PROFILE_CAREERS.some((career) => career.id === id));
-    if (valid.length) return { ids: valid, focus: stored.focus && valid.includes(stored.focus) ? stored.focus : valid[0] };
-    return { ids: DEMO_TOP3, focus: DEMO_TOP3[0] as string | null };
+    if (valid.length) return { ids: valid, focus: stored.focus && valid.includes(stored.focus) ? stored.focus : null };
+    return { ids: DEMO_TOP3, focus: null as string | null };
   }, [fromHandoff, initialPicks, initialFocus, stored]);
   const top3 = edits?.ids ?? base.ids;
-  const focusId = edits ? edits.focus : base.focus;
+  /** the student's own choice, or null while the strongest match is the default */
+  const chosenPrimaryId = edits ? edits.focus : base.focus;
+  const primaryChosen = chosenPrimaryId !== null && top3.includes(chosenPrimaryId);
+  // Algorithmic default: the highest Career Interest Score among the three.
+  const strongestId = useMemo(() => [...top3].map(careerById).filter((c): c is ProfileCareer => !!c).sort((a, b) => b.match - a.match)[0]?.id ?? top3[0] ?? null, [top3]);
+  const focusId = primaryChosen ? chosenPrimaryId : strongestId;
   const setTop3 = (next: string[] | ((previous: string[]) => string[])) =>
     setEdits((current) => {
       const previous = current ?? base;
@@ -336,7 +344,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     if (top3.includes(id)) return;
     if (top3.length < 3) {
       setTop3((current) => [...current, id]);
-      if (!focusId) setFocusId(id);
       return;
     }
     setSwapCandidate(id);
@@ -352,7 +359,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   function removeFromTop3(id: string) {
     const next = top3.filter((item) => item !== id);
     setTop3(next);
-    if (focusId === id) setFocusId(next[0] ?? null);
+    if (chosenPrimaryId === id) setFocusId(null); // back to the strongest match
   }
 
 
@@ -621,7 +628,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {tab === "top3" && (
           <div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3">
             <Top3Tab
-              top3={top3} focusId={focusId} setFocusId={setFocusId} chosenRoute={chosenRoute}
+              top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
               onAdd={() => setAddOpen(true)} onRemove={(id) => setConfirmRemove(id)}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
             />
@@ -841,10 +848,12 @@ function MoreFactsAccordion({ facts, accent }: { facts: { label: string; value: 
 }
 
 function Top3Tab({
-  top3, focusId, setFocusId, chosenRoute, onAdd, onRemove, onOpenCompare, onGoReport,
+  top3, focusId, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onOpenCompare, onGoReport,
 }: {
   top3: string[];
   focusId: string | null;
+  /** false while the strongest match is only the default */
+  primaryChosen: boolean;
   setFocusId: (id: string) => void;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   onAdd: () => void;
@@ -986,10 +995,10 @@ function Top3Tab({
                 </span>
                 {isFocus ? (
                   <span className="flex h-[36px] w-fit flex-none items-center gap-[4px] rounded-[var(--radius-md)] px-[12px] text-[14px] font-semibold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
-                    <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Starting here
+                    <Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My Primary Career" : "Your Strongest Match"}
                   </span>
                 ) : (
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex h-[36px] w-fit flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[12px] text-[12px] font-semibold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Start with this one</button>
+                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex h-[36px] w-fit flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[12px] text-[12px] font-semibold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my primary</button>
                 )}
               </div>
 
@@ -1037,7 +1046,7 @@ function Top3Tab({
         <NextStepBanner
           emphasis="priority"
           eyebrow="Your next step"
-          text="Play the Day in the Life for the career you’re starting with."
+          text="Play the Day in the Life for your primary career."
           ctaLabel="Play"
           href="/play?focus=investment-banking"
           Icon={Gamepad2}
@@ -1045,12 +1054,6 @@ function Top3Tab({
         />
       )}
 
-      {!focusId && (
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={INSET}>
-          <span className="text-[14px] font-bold">Pick a career to start with.</span>
-          <button type="button" onClick={() => setFocusId(top3[0])} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Start with the first one</button>
-        </div>
-      )}
     </div>
   );
 }

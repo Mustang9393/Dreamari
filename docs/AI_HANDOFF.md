@@ -7001,3 +7001,23 @@ Gate clean; verified 768x1024, 1024x800, 375x812. Not pushed.
   (`clamp(20px, 2.2vw, 26px)`, nowrap) and the chip uses compact wording
   between 640 and 1023px ("Bachelor's · 3.7 GPA · NJ", `shortRoute` /
   `stateCode`). Checked 768, 950, 1024, 1280: one line, no overlap.
+
+## 2026-09-11 · Match -> Profile: no forced choice, strongest match is the default primary
+Joshua (Slack, 11 Sept 2026), wording "primary" instead of "#1" per Chandu.
+- Match results sheet: cards are display-only, no selection. Line: "Compare
+  them next, then pick your primary career any time." CTA "Compare My Top 3"
+  -> /profile?picks=...&tab=top3&welcome=1 (no focus param). `writePicks`
+  stores focus: null.
+- picks.focus null now means "no primary chosen": Profile uses the highest
+  Career Interest Score (`ProfileCareer.match`) among the Top 3 as the
+  default, so Career Report and My Plan exist immediately. Label "Your
+  Strongest Match"; other cards "Make my primary"; once chosen, "My Primary
+  Career" (persisted). Removing the primary from the Top 3 falls back to the
+  strongest match. The old "Pick a career to start with" empty state is gone.
+- Schools Edit sheet GPA: back to a switch ("Use my GPA") with one-line hint
+  (on: "schools sort into Target, Safety and Reach around your GPA"; off:
+  "rows show how selective each school is instead"), plus the GPA range
+  picker and Weighted / Unweighted / Not sure while on. Other GPAs are
+  selectable on purpose, to see how the list changes.
+Verified: /match-lab (3 likes -> sheet), /profile?tab=top3 labels and
+persistence, /colleges edit sheet. Gate clean. Not pushed.

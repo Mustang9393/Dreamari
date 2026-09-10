@@ -283,8 +283,10 @@ export function ForYouSchools({
           onRoute={(id) => setRoutePick((cur) => ({ ...cur, [careerId]: id }))}
           place={place}
           onPlace={(v) => writeStudentProfile({ states: [v, ...stored.states.filter((x) => x !== v)] })}
-          gpa={useGpa ? gpaLabel : null}
-          onGpa={(v) => { if (v === null) setGpaUse(false); else { setGpaUse(true); writeStudentProfile({ gpa: v }); } }}
+          useGpa={useGpa}
+          onUseGpa={setGpaUse}
+          gpaValue={gpaLabel}
+          onGpa={(v) => writeStudentProfile({ gpa: v })}
           gpaType={stored.gpaType || "unsure"}
           onGpaType={(v) => writeStudentProfile({ gpaType: v })}
         />
@@ -425,9 +427,7 @@ function WhySheet({ onClose, onEdit, career, route, program, gpaLabel, place }: 
   );
 }
 
-const GPA_OFF = "Don't use my GPA";
-
-function EditSheet({ onClose, career, routes, route, onRoute, place, onPlace, gpa, onGpa, gpaType, onGpaType }: {
+function EditSheet({ onClose, career, routes, route, onRoute, place, onPlace, useGpa, onUseGpa, gpaValue, onGpa, gpaType, onGpaType }: {
   onClose: () => void;
   career: string;
   routes: Route[];
@@ -435,19 +435,21 @@ function EditSheet({ onClose, career, routes, route, onRoute, place, onPlace, gp
   onRoute: (id: string) => void;
   place: string;
   onPlace: (state: string) => void;
-  /** the GPA in use, or null when sorting by GPA is off */
-  gpa: string | null;
-  /** null turns GPA sorting off */
-  onGpa: (v: string | null) => void;
+  useGpa: boolean;
+  onUseGpa: (on: boolean) => void;
+  /** the GPA on file (always known, even while it is switched off) */
+  gpaValue: string;
+  onGpa: (v: string) => void;
   gpaType: string;
   onGpaType: (v: string) => void;
 }) {
   // The GPA on file may be a plain number from the demo record rather than
   // one of Build's ranges; keep it selectable so nothing changes underneath.
-  // Build's "My school does not use GPA" means the same as off here, so it is
-  // not offered twice.
+  // Build's "My school does not use GPA" is what the switch below is for, so
+  // the picker offers the ranges only. Other GPAs are selectable on purpose:
+  // seeing how the list changes with a higher GPA is useful.
   const ranges = GPA_OPTIONS.filter((g) => /\d/.test(g));
-  const gpaOptions = [...(gpa && !ranges.includes(gpa) ? [gpa] : []), ...ranges, GPA_OFF];
+  const gpaOptions = [...(gpaValue && !ranges.includes(gpaValue) ? [gpaValue] : []), ...ranges];
   return (
     <Sheet title="Edit your list" onClose={onClose}>
       <div className="flex flex-col gap-[var(--space-5)]">
@@ -461,10 +463,18 @@ function EditSheet({ onClose, career, routes, route, onRoute, place, onPlace, gp
         <Field label="Where">
           <Select ariaLabel="State" value={place} options={[...US_STATES]} onChange={onPlace} />
         </Field>
-        <Field label="GPA" hint={gpa ? "Sorts schools into Target, Safety and Reach." : "Off: rows show how selective each school is."}>
-          <Select ariaLabel="Your GPA" value={gpa ?? GPA_OFF} options={gpaOptions} onChange={(v) => onGpa(v === GPA_OFF ? null : v)} />
-          {gpa && (
-            <Segmented ariaLabel="GPA type" value={gpaType} options={[{ id: "weighted", label: "Weighted" }, { id: "unweighted", label: "Unweighted" }, { id: "unsure", label: "Not sure" }]} onChange={onGpaType} />
+        <Field label="GPA" hint={useGpa ? "On: schools sort into Target, Safety and Reach around your GPA." : "Off: rows show how selective each school is instead."}>
+          <div className="flex min-h-[46px] items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[14px]" style={FIELD}>
+            <span className="text-[15px] font-bold">Use my GPA</span>
+            <button type="button" role="switch" aria-checked={useGpa} aria-label="Use my GPA" onClick={() => onUseGpa(!useGpa)} className="relative inline-flex h-[26px] w-[46px] flex-none cursor-pointer items-center rounded-full transition-colors" style={{ background: useGpa ? ACCENT : "var(--glass-surface-2)" }}>
+              <span className="absolute size-[22px] rounded-full bg-white transition-transform" style={{ transform: `translateX(${useGpa ? 22 : 2}px)` }} />
+            </button>
+          </div>
+          {useGpa && (
+            <>
+              <Select ariaLabel="Your GPA" value={gpaValue || gpaOptions[0]} options={gpaOptions} onChange={onGpa} />
+              <Segmented ariaLabel="GPA type" value={gpaType} options={[{ id: "weighted", label: "Weighted" }, { id: "unweighted", label: "Unweighted" }, { id: "unsure", label: "Not sure" }]} onChange={onGpaType} />
+            </>
           )}
         </Field>
       </div>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, BookOpen, Check, GraduationCap, Laptop, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { ChevronRight, BookOpen, GraduationCap, Laptop, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
@@ -135,7 +135,6 @@ export function MatchLab() {
   // navigating straight there.
   // Which liked career is "#1" on the consolidated results screen — starts
   // as whichever they liked first, but tapping any of the three reassigns it.
-  const [chosenId, setChosenId] = useState<string | null>(null);
   const [swapFor, setSwapFor] = useState<Career | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
   const [ghost, setGhost] = useState<{ career: Career; from: DOMRect; to: DOMRect } | null>(null);
@@ -202,7 +201,6 @@ export function MatchLab() {
       decisionShown.current = true;
       setTimeout(() => {
         playMilestoneChime();
-        setChosenId(null);
         setDecisionOpen(true);
         setDecisionBurst((n) => n + 1);
       }, 820);
@@ -256,36 +254,27 @@ export function MatchLab() {
     setExiting(null);
   }
 
-  // Consolidated results screen (direct feedback, 5 Sept 2026): "Top 3
-  // Matches Found!" and the separate "Choose where to start" page used to
-  // be two screens doing the same job. One screen now does both — whichever
-  // career is tapped as #1 is the one Profile opens focused on, and every
-  // way of finishing Match (this screen, the always-on shortcut once 3 are
-  // saved, the manage sheet, running out of cards) lands straight on
-  // Profile's Top Three tab instead of the old separate chooser page.
-  function finishMatching(explicitFocusId?: string) {
+  // Results screen (Joshua, Slack, 11 Sept 2026): students have not seen
+  // enough here to choose one career, so nothing is chosen. The three are
+  // shown, the CTA is "Compare My Top 3", and Profile's Top Three tab opens
+  // with the algorithmic strongest match as the default primary career (the
+  // Career Report and My Plan build around it at once). "Make my primary"
+  // there is where the real choice happens, any time.
+  function finishMatching() {
     const ids = liked.map((c) => c.id);
     if (ids.length === 0) return;
-    // No ranking (direct feedback, 11 Sept 2026): the three stay in the order
-    // they were saved; the one they pick to start with is just the focus, and
-    // Profile lets them switch it any time.
-    const focusId2 = explicitFocusId ?? ids[0];
-    const ordered = ids;
-    writePicks({ ids: ordered, focus: focusId2 });
+    // focus null = "use the strongest match"; the three keep the order they
+    // were saved in (no ranking, direct feedback, 11 Sept 2026).
+    writePicks({ ids, focus: null });
     dispatchAuroraPulse("cta");
     // Straight to Profile: the "Welcome to Your Profile" popup lives there
     // now, over the page as it assembles (direct feedback, 5 Sept 2026 — the
     // story is "see the profile load, then the popup introduces it"), not
     // over a dark screen here. ?welcome=1 is what tells Profile to play it.
-    setTimeout(() => router.push(`/profile?picks=${picksParam(ordered)}&focus=${focusId2}&tab=top3&welcome=1`), 260);
+    setTimeout(() => router.push(`/profile?picks=${picksParam(ids)}&tab=top3&welcome=1`), 260);
   }
 
-  function saveTop3() {
-    const focusCareer = liked.find((c) => c.id === chosenId);
-    if (!focusCareer) return; // the CTA is disabled until one is picked
-    finishMatching(focusCareer.id);
-  }
-  // Every way of finishing now goes through the chooser: pick one to start with.
+  // Every way of finishing goes through the results sheet.
   function openChooser() {
     setDecisionBurst((n) => n + 1);
     setDecisionOpen(true);
@@ -667,8 +656,10 @@ export function MatchLab() {
       {/* ---- decision sheet at 3 matches: one consolidated screen for both
          "you're done, lock these in" and "which do you want to start with"
          (direct feedback, 5 Sept 2026 — these used to be two separate
-         screens with overlapping copy). Tapping a card makes it #1; Save
-         My Top 3 sends that ranking straight to Profile's Top Three tab. ---- */}
+         screens with overlapping copy). Nothing is chosen here (Joshua, 11
+         Sept 2026): the cards are shown, Compare My Top 3 sends the student
+         to Profile's Top Three tab where the strongest match is the default
+         primary and Make my primary is one tap. ---- */}
       {decisionOpen && (
         <Sheet onClose={() => setDecisionOpen(false)} maxWidth="720px">
           <div className="relative flex flex-col items-center gap-5 text-center">
@@ -698,18 +689,18 @@ export function MatchLab() {
                 <InkText text={liked.length === MAX_SLOTS ? "Your Top 3 Matches" : "Your matches"} delay={0.25} />
               </h2>
               <p className="motion-safe:animate-[fade-slide-up_0.6s_0.8s_ease-out_both] text-[14.5px] leading-[20px] font-extrabold text-[var(--color-night-foreground)]">
-                You can always change this later.
+                Compare them next, then pick your primary career any time.
               </p>
 
             </div>
             <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3" style={{ perspective: 900 }}>
               {liked.map((c, i) => (
-                <TopThreeCard key={c.id} career={c} chosen={c.id === chosenId} onChoose={() => setChosenId(c.id)} index={i} />
+                <TopThreeCard key={c.id} career={c} index={i} />
               ))}
             </div>
             <div className="flex w-full flex-col gap-2.5 motion-safe:animate-[fade-slide-up_0.6s_1.05s_ease-out_both]">
-              <Button variant="primary" size="large" onClick={saveTop3} type="button" aria-disabled={!chosenId} className={chosenId ? "" : "pointer-events-none opacity-50"}>
-                {chosenId ? <>Continue with {liked.find((c) => c.id === chosenId)?.title} <ChevronRight className="h-4 w-4" aria-hidden /></> : "Select one to continue"}
+              <Button variant="primary" size="large" onClick={finishMatching} type="button">
+                Compare My Top 3 <ChevronRight className="h-4 w-4" aria-hidden />
               </Button>
               {!deckDone && (
                 <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
@@ -1029,31 +1020,12 @@ function MiniRanking({ liked }: { liked: Career[] }) {
 // itself and, on the one they tap, a checkmark plus a glowing gold ring. No
 // rank badge, no numbering: picking one is "start here", not "#1" (direct
 // feedback, 11 Sept 2026).
-function TopThreeCard({ career, chosen, onChoose, index = 0 }: { career: Career; chosen: boolean; onChoose: () => void; index?: number }) {
-  const gold = "var(--color-world-business-money-office)";
+function TopThreeCard({ career, index = 0 }: { career: Career; index?: number }) {
   return (
-    <button
-      type="button"
-      onClick={onChoose}
-      aria-pressed={chosen}
-      className="dm-tap group relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left transition-transform duration-200 motion-safe:animate-[card-reveal-3d_0.8s_cubic-bezier(0.16,1,0.3,1)_both] hover:-translate-y-[3px]"
-      style={{
-        animationDelay: `${350 + index * 140}ms`,
-        borderColor: chosen ? gold : "var(--color-glass-border-raised)",
-        boxShadow: chosen
-          ? `0 0 0 2px ${gold}, 0 0 32px -6px color-mix(in srgb, ${gold} 70%, transparent), 0 20px 40px -20px color-mix(in srgb, ${gold} 60%, transparent)`
-          : "0 12px 30px -18px rgba(0,0,0,0.6)",
-      }}
+    <div
+      className="relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left motion-safe:animate-[card-reveal-3d_0.8s_cubic-bezier(0.16,1,0.3,1)_both]"
+      style={{ animationDelay: `${350 + index * 140}ms`, borderColor: "var(--color-glass-border-raised)", boxShadow: "0 12px 30px -18px rgba(0,0,0,0.6)" }}
     >
-      {/* a slow pulse behind the #1 card only — the gold ring should read as
-         alive, not a static selection state */}
-      {chosen && (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 motion-safe:animate-[card-glow-pulse_2.4s_ease-in-out_infinite]"
-          style={{ boxShadow: `0 0 0 2px ${gold}` }}
-        />
-      )}
       <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 90vw, 220px" className="object-cover" draggable={false} />
       <div
         className="absolute inset-0"
@@ -1066,16 +1038,6 @@ function TopThreeCard({ career, chosen, onChoose, index = 0 }: { career: Career;
         className="pointer-events-none absolute inset-y-0 left-0 w-[45%] motion-safe:animate-[card-sheen_1.1s_ease-out_both]"
         style={{ animationDelay: `${950 + index * 140}ms`, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)" }}
       />
-      {/* the check only exists on the #1 card (the pop animation ends at
-         opacity 1, so it must not be applied to a hidden badge — that put a
-         check on every card); it pops in when a card becomes #1 */}
-      <span
-        aria-hidden
-        className={`absolute top-2.5 left-2.5 flex size-7 items-center justify-center rounded-full text-white ${chosen ? "motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)_both]" : "opacity-0"}`}
-        style={{ background: gold, animationDelay: `${1000 + index * 140}ms` }}
-      >
-        <Check className="h-4 w-4" strokeWidth={3} />
-      </span>
       <div className="relative z-[1] flex flex-col gap-1.5 p-3">
         <p className="text-[15px] leading-[19px] font-extrabold text-white" style={{ fontFamily: career.font, fontWeight: career.fontWeight, letterSpacing: career.letterSpacing }}>{career.title}</p>
         <p className="text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: career.color }}>{career.world}</p>
@@ -1086,7 +1048,7 @@ function TopThreeCard({ career, chosen, onChoose, index = 0 }: { career: Career;
           {career.salary}
         </span>
       </div>
-    </button>
+    </div>
   );
 }
 
