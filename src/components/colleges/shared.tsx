@@ -150,6 +150,13 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
       <span aria-hidden className="poster-photo absolute inset-0">
         {img ? (
           <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+        ) : collegeMark(c) ? (
+          // No campus photo: the school's own mark, big, soft and dimmed,
+          // becomes the cover so every card gets the same photo-and-blur
+          // treatment (direct feedback, 10 Sept 2026).
+          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, #0e0c20) 0%, #0e0c20 65%)" }}>
+            <Image src={collegeMark(c)!} alt="" fill sizes="480px" className="object-contain opacity-[0.55] blur-[10px]" style={{ transform: "scale(1.9) translateY(-8%)" }} />
+          </span>
         ) : (
           <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }} />
         )}

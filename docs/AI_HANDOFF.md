@@ -6630,3 +6630,28 @@ school, "Make my #1" / "Your #1" (useTopSchool in shared.tsx, localStorage
 detail hero has the same "Make my #1" next to Save. Verified on 375x812.
 Remaining from the brainstorm: sticky Compare bar, distance once schools
 have coordinates, "Not for me" (left out of the student UI for now).
+
+### 10 Sept 2026 -- Explore Schools, pass 3: density cut, Schools welcome
+
+Direct feedback: "so much text, so much clutter, hard to understand what
+I'm supposed to do here", "reduce copy and not add anything new from the
+Replit except layout / visual / UX". Changes:
+- For you header is two short lines: "Planning for <career v>" (the only
+  control) and "<route> in <program>". The chips row (GPA / state /
+  distance / Why these schools?) and its explainer are gone; the Replit
+  subtitle "Turn a career idea..." is gone.
+- Groups are horizontal rails (the app's shelf idiom), headings only, no
+  sub-sentences, order Target, Safety, Reach, then Lower-cost ways to start,
+  then Trade & technical. Card line is "Program · $22K a year after aid"
+  ("2-year start" only on two-year cards).
+- "My plan" is one row, shown only once something is saved: "#1 school:
+  <name | Not chosen yet> · Saved · n" with the saved list folded under it.
+- Schools has its own welcome splash (`surface: "schools"`, hard-hat Dreamy
+  from Dream Expression V3/27 -> splash/dreamy-hardhat.webp): one line
+  ("Schools that fit the career you want. Save the ones you like, then pick
+  your #1.") and two rows explaining Target/Safety/Reach and Lower-cost
+  starts; CTA "See my schools". The page itself carries no explanation.
+- Cards without a campus photo use the school's mark as a blurred, dimmed
+  cover so every card gets the photo + progressive-blur treatment.
+Verified 375x812 and 1280x800. Explore (Careers) keeps its own splash with
+Joshua's two rows.

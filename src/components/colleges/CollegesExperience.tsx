@@ -12,6 +12,7 @@ import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, 
 import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
 import { BrowseShelves } from "./BrowseShelves";
+import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
@@ -139,6 +140,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
       </div>
       <DesktopNavigation active="Explore" />
+      <FirstVisitSplash surface="schools" />
       {/* Mobile top tabs: the same bar Explore Careers has (FOR YOU /
          BROWSE ALL as text tabs, icons at the right), so the two Explore
          screens read as one (direct feedback, 10 Sept 2026: "the toggles
@@ -183,7 +185,6 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
           <div className="flex flex-col gap-[var(--space-2)]">
             <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore Schools</h1>
             <ExploreSectionTabs active="colleges" />
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Turn a career idea into a place to start.</p>
           </div>
           <ForYouBrowseToggle tab={view} onTab={setView} />
         </div>
