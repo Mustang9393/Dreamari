@@ -867,7 +867,7 @@ function Top3Tab({
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-baseline sm:justify-between sm:gap-[var(--space-3)]">
-        <p className="max-w-[46ch] text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Pick one to start with.</p>
+        <p className="max-w-[46ch] text-[15px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>Pick one to start with.</p>
         {top3.length > 1 && (
           <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
