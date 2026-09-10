@@ -340,7 +340,9 @@ export function SchoolCard({
             {/* Two lines reserved for the name and one for the place, so a
                long name never pushes the rest of the card down relative to
                its neighbours (direct feedback, 11 Sept 2026). */}
-            <h3 className="line-clamp-2 min-h-[42px] text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
+            <span className="flex min-h-[42px] items-end">
+              <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
+            </span>
             <p className="flex min-w-0 items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
               <MapPin className="h-[12px] w-[12px] flex-none" aria-hidden /><span className="truncate">{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}</span>
             </p>

@@ -7087,3 +7087,8 @@ Gate clean; verified /match-lab splash 375 and 1280, /colleges cards.
   (`line-clamp-2 min-h-[42px]`), one truncated line for the place, 24px min
   for the programme row, so stats and actions sit at the same y on every
   card in a rail (checked: identical stats and Compare offsets on 4 cards).
+- Names are anchored to the bottom of their two-line space (`items-end`),
+  so one-line and two-line names share a baseline and the place line is at
+  the same y on every card (measured: name bottom 219px, place 222px on all
+  9 For you cards). Names are not truncated on purpose: Rutgers-New
+  Brunswick vs Rutgers-Newark differ at the end.
