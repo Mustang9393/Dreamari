@@ -130,6 +130,10 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
+/* Landscape sprites (Play's controller, Connect's puzzle): tight-cropped to
+   their content, shown in a wider box so the cloud reads the same size as
+   the square sprites do at 168px. */
+.dreamyWide { width: 236px; aspect-ratio: 640 / 445; border-radius: 40%; }
 .sprite { object-fit: contain; filter: drop-shadow(0 0 18px rgba(var(--t1), 0.42)) drop-shadow(0 10px 24px rgba(var(--t2), 0.3)); }
 .dreamy:focus-visible, .cta:focus-visible { outline: 2px solid var(--foreground); outline-offset: 4px; }
 
@@ -418,6 +422,7 @@
 @media (max-height: 720px) {
   .stage { height: 128px; }
   .dreamy { width: 120px; margin-top: -92px; }
+  .dreamyWide { width: 168px; }
   .orbit { width: 200px; height: 74px; }
   .copy { gap: 8px; padding: 2px 18px 18px; }
   .word { font-size: 40px; }

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { CatalogCareer } from "./catalog";
 import { posterTitleFont, WORLD_COLORS } from "./worlds";
 
@@ -50,7 +50,7 @@ export function OpenCue() {
         className="poster-cue pointer-events-none absolute top-1/2 left-1/2 z-[2] flex size-[52px] items-center justify-center rounded-full border backdrop-blur-[6px]"
         style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.5)", boxShadow: "0 10px 28px -8px rgba(0,0,0,0.7)" }}
       >
-        <ArrowUpRight className="h-[24px] w-[24px]" strokeWidth={2.5} style={{ color: "#FFFFFF" }} />
+        <ChevronRight className="ml-[2px] h-[26px] w-[26px]" strokeWidth={2.75} style={{ color: "#FFFFFF" }} />
       </span>
     </>
   );

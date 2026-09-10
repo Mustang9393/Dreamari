@@ -34,6 +34,9 @@ type Step = {
 
 type Scene = {
   sprite: string;
+  /** Landscape sprite (Dreamy plus a prop beside the cloud): rendered in a
+   *  wider box so the cloud itself stays the same size as the square ones. */
+  wide?: boolean;
   alt: string;
   /** the two dominant tints of this surface's light (rgb triplets) */
   tint: [string, string];
@@ -77,8 +80,9 @@ const SCENES: Record<SplashSurface, Scene> = {
     }],
   },
   play: {
-    sprite: "/images/dreamy/v2/dreamy-party.png",
-    alt: "Dreamy celebrating",
+    sprite: "/images/dreamy/v2/dreamy-controller.png",
+    wide: true,
+    alt: "Dreamy with a game controller",
     tint: ["255, 160, 30", "180, 40, 240"],
     steps: [{
       eyebrow: "You’re in",
@@ -95,7 +99,8 @@ const SCENES: Record<SplashSurface, Scene> = {
   },
   // Two steps, copy unchanged from the corporate-partner-reviewed sheet.
   connect: {
-    sprite: "/images/dreamy/v2/dreamy-puzzle.png",
+    sprite: "/images/dreamy/v2/dreamy-puzzle-wide.png",
+    wide: true,
     alt: "Dreamy with a puzzle piece",
     tint: ["40, 140, 255", "100, 70, 255"],
     steps: [
@@ -268,8 +273,8 @@ export function WelcomeSplash({ surface, open, onDone }: { surface: SplashSurfac
             ))}
           </div>
         </div>
-        <button type="button" className={`${styles.dreamy} ${wave ? styles.wave : ""}`} onClick={hello} aria-label="Say hello to Dreamy">
-          <Image src={scene.sprite} alt={scene.alt} fill sizes="180px" priority className={styles.sprite} />
+        <button type="button" className={`${styles.dreamy} ${scene.wide ? styles.dreamyWide : ""} ${wave ? styles.wave : ""}`} onClick={hello} aria-label="Say hello to Dreamy">
+          <Image src={scene.sprite} alt={scene.alt} fill sizes={scene.wide ? "250px" : "180px"} priority className={styles.sprite} />
         </button>
 
         <div className={styles.copy} key={step}>

@@ -6317,3 +6317,23 @@ banner visible with 24px gaps either side. eslint 0 errors, tsc clean.
 Still on: `DEMO_ALWAYS_SHOW_SPLASH` / `DEMO_ALWAYS_SHOW_GUIDE` (flip back
 before students use it). Play splash still uses the party sprite; swap to a
 controller Dreamy when that asset exists.
+
+### 10 Sept 2026 -- Play splash controller sprite, wide sprites, PosterCard chevron
+
+The controller Dreamy existed all along as `Dream Expression V3/29.png`
+(1366x768, transparent) in the untracked root asset drops; tight-cropped to
+its content with the v2 set's ~3.7% margin and saved as
+`public/images/dreamy/v2/dreamy-controller.png` (640x445). The Play splash
+uses it instead of the party sprite (direct feedback). Landscape sprites
+(Dreamy plus a prop beside the cloud) now declare `wide: true` on their
+Scene and render in a 236px-wide 640:445 box (`.dreamyWide`, 168px on
+short phones) so the cloud itself reads the same size as the square sprites
+at 168px; Connect switched to a tight-cropped copy of its puzzle sprite
+(`dreamy-puzzle-wide.png`) for the same reason -- the original 640x360 file
+is untouched because Build's quiz (`build/types.ts`) still uses it.
+
+Arrows: of the 15 `ArrowUpRight` marks, 14 sit on true external links
+(college website/apply/price/aid, Profile resources, Career Report tiles,
+event stubs, Connect community "Open", Schools outbound) and stay as the
+"leaves Dreamari" cue; the one internal use, Explore's PosterCard hover
+badge, is now a ChevronRight (direct feedback: "do as you recommend").
