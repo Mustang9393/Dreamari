@@ -164,7 +164,9 @@ export function ForYouSchools({
   };
   const targetChip = (m: SchoolMatch) => {
     const need = targetGpaFor(m.college);
-    return m.fit === "Reach" && need !== null && gpa !== null && need > gpa ? { label: `Target at ${need.toFixed(1)}`, tone: "target" as const } : undefined;
+    // The target GPA is the number a student can act on; the gap in brackets
+    // says how far it is (direct feedback, 11 Sept 2026).
+    return m.fit === "Reach" && need !== null && gpa !== null && need > gpa ? { label: `Target at ${need.toFixed(1)} (+${(need - gpa).toFixed(1)})`, tone: "target" as const } : undefined;
   };
 
   const whyFor = (m: SchoolMatch) => {

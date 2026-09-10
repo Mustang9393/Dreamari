@@ -7229,3 +7229,8 @@ Open admission.
   title above.
 Verified 1280: rows, counts, Reach note and chip, hover. Next image cache
 cleared; browsers may still show old photos until a hard refresh.
+- Reach chip reads "Target at 3.9 (+0.2)": the number to aim for plus the
+  gap. The GPA target applies to Reach only by definition: Target and Safety
+  are already reachable, and "More schools for your path" holds schools with
+  no acceptance rate (or open admission), where GPA plays no part.
+- Changelog emailed to chandu.mp.14@gmail.com from the same account.
