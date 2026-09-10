@@ -7161,3 +7161,21 @@ Verified at 375: Match, Play.
   150px.
 Verified at 375: "Scroll down for details" -> "Swipe right to save" ->
 "Swipe left to pass" -> done.
+
+## 2026-09-11 · Mobile pass: Build fits, no horizontal zoom, pages open at top
+- `ScrollReset` (app/layout.tsx): `history.scrollRestoration = "manual"` and
+  scroll to top on every pathname change (hash URLs excepted; elements with
+  `data-scroll-reset` also reset). Fixes screens opening mid-way.
+- `body { overflow-x: clip }`: iOS Safari widened the layout viewport to fit
+  a stray overflow and zoomed the whole page out (college detail screenshot).
+- Build at 390x660 (Safari with bars): Work Vibe's "Your Setup" summary is
+  desktop-only; Interests' picks panel tighter on phones; Location map height
+  is `clamp(150px, 100dvh - 470px, 44dvh)`, hint line desktop-only, toggle
+  margin smaller. Every step measured: no inner scroll at 390x660.
+- Match deck guide progress is per SESSION (sessionStorage) so a phone that
+  did the gestures once still gets the nudges in a new session.
+- Splash: `max-height: 620px` tier so nothing scrolls on short phones.
+- Profile Top Three: "Make my primary" is a solid primary button.
+- College detail: "Make my #1" removed (led nowhere in Profile); Save stays.
+Verified: /flow walk, /explore -> /play -> /explore lands at scrollY 0,
+/profile button, /colleges detail docW == viewport, /match-lab guide fires.

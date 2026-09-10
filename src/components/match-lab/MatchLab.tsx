@@ -96,11 +96,16 @@ export function MatchLab() {
   // Unlock audio on the first real tap/keypress (iOS mutes Web Audio behind the
   // ringer switch until an <audio> element has played; see feedback.ts).
   useEffect(() => primeAudioOnFirstGesture(), []);
-  const guideProgressKey = "dreamari:hint-progress:match-swipe";
+  // Per browser SESSION, not forever (direct feedback, 11 Sept 2026: "the
+  // gesture nudges don't even fire on mobile for Match" -- the phone had done
+  // the gestures once, weeks ago, and localStorage remembered). Same rule
+  // as the welcome splashes in demo mode: a new tab or a reload teaches
+  // again, navigating around inside one session does not.
+  const guideProgressKey = "dreamari:hint-progress:match-swipe:session";
   const [demonstrated, setDemonstrated] = useState<Set<GestureKind>>(() => {
     if (DEMO_ALWAYS_SHOW_GUIDE || typeof window === "undefined") return new Set();
     try {
-      const raw = window.localStorage.getItem(guideProgressKey);
+      const raw = window.sessionStorage.getItem(guideProgressKey);
       return raw ? new Set(JSON.parse(raw) as GestureKind[]) : new Set();
     } catch {
       return new Set();
@@ -122,7 +127,7 @@ export function MatchLab() {
         if (current.has(kind)) return current;
         const next = new Set(current).add(kind);
         try {
-          window.localStorage.setItem(guideProgressKey, JSON.stringify([...next]));
+          window.sessionStorage.setItem(guideProgressKey, JSON.stringify([...next]));
         } catch {
           // Nothing to persist to; progress just won't carry to next visit.
         }

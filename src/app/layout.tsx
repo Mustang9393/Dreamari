@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
+import { ScrollReset } from "@/components/app/ScrollReset";
 import { ThemeBoot } from "@/components/app/theme";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import "./globals.css";
@@ -50,6 +51,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeBoot />
         <ErrorReporter />
+        <ScrollReset />
         {children}
       </body>
     </html>

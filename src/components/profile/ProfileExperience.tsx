@@ -998,7 +998,10 @@ function Top3Tab({
                     <Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My Primary Career" : "Your Strongest Match"}
                   </span>
                 ) : (
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex h-[36px] w-fit flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[12px] text-[12px] font-semibold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my primary</button>
+                  // Solid, not a ghost: it blended into the card's facts (direct feedback, 11 Sept 2026).
+                  <button type="button" onClick={() => setFocusId(id)} className="dm-solid flex h-[36px] w-fit flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[14px] text-[13px] font-bold whitespace-nowrap" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                    <Star className="h-3 w-3" aria-hidden /> Make my primary
+                  </button>
                 )}
               </div>
 

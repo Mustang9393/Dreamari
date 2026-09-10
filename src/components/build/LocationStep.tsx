@@ -88,7 +88,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
 
       {/* Map | List segmented toggle. */}
       <div
-        className={`mb-4 grid grid-cols-2 gap-1 rounded-[var(--radius-md)] border p-1 ${GLASS_PANEL_CLASS}`}
+        className={`mb-3 grid grid-cols-2 gap-1 rounded-[var(--radius-md)] border p-1 sm:mb-4 ${GLASS_PANEL_CLASS}`}
         style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
       >
         {(["map", "list"] as const).map((tab) => (
@@ -132,7 +132,10 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
             </span>
           </div>
 
-          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 max-h-[44dvh] w-[calc(100%+8px)]">
+          {/* Height-aware: on a phone with Safari's bars up the map must leave
+             room for the heading, the toggle and the footer, or the step
+             scrolls (direct feedback, 11 Sept 2026). */}
+          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 w-[calc(100%+8px)] max-h-[clamp(150px,calc(100dvh-470px),44dvh)]">
             {USA.locations.map((location) => {
               const name = displayName(location.name);
               const isSelected = selected === name;
@@ -221,7 +224,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
               );
             })}
           </svg>
-          <p className="mt-2 px-1 text-[12px] font-medium text-[var(--color-night-muted-foreground)] opacity-70">Tap a state to select it.</p>
+          <p className="mt-2 hidden px-1 text-[12px] font-medium text-[var(--color-night-muted-foreground)] opacity-70 sm:block">Tap a state to select it.</p>
         </div>
       ) : (
         <select

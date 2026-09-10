@@ -112,4 +112,14 @@
 
 @media (prefers-reduced-motion: reduce) { }
 
-
+/* Short phones (Safari with its bars up on an SE-sized screen): everything
+   still fits without the dialog scrolling. */
+@media (max-height: 620px) {
+  .dialog { padding: 20px; }
+  .hero { height: 76px; margin-bottom: 8px; }
+  .dreamy { width: 84px; height: 84px; } .dreamyWide { width: 118px; }
+  .title { font-size: clamp(38px, 11vw, 48px); }
+  .line { margin-top: 10px; font-size: 14.5px; line-height: 1.5; }
+  .rows { gap: 8px; margin-top: 10px; } .row { font-size: 13.5px; }
+  .ctaWrap { margin-top: 16px; }
+}

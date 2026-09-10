@@ -74,7 +74,7 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
            caption row (label + counter), then the picks side by side as
            Bricolage statements in their world colors, separated by a dot.
            flex-wrap lets two long names break onto a second line cleanly. */}
-        <div className={`mb-3 rounded-[var(--radius-md)] border px-3.5 py-2.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
+        <div className={`mb-2 rounded-[var(--radius-md)] border px-3.5 py-2 sm:mb-3 sm:py-2.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your picks</span>
             <span
@@ -215,8 +215,11 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
             <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={state.energy} onChange={(energy) => { react(); patch({ energy }); }} />
             <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={state.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
           </div>
+          {/* The summary panel is desktop-only: on a phone it sat under the
+             rows and pushed the step past a Safari viewport (direct feedback,
+             11 Sept 2026); the highlighted chips already show the choice. */}
           <div
-            className={`flex flex-col justify-center gap-4 rounded-[var(--radius-md)] border px-4 py-4 ${GLASS_PANEL_CLASS}`}
+            className={`hidden flex-col justify-center gap-4 rounded-[var(--radius-md)] border px-4 py-4 sm:flex ${GLASS_PANEL_CLASS}`}
             style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
           >
             <p className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your Setup</p>
