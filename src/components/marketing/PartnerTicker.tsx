@@ -8,11 +8,24 @@ import { useRevealOnScroll } from "./scrollHooks";
 // host ourselves (public/images/marketing/partners; sources in ATTRIBUTION.md).
 //
 // Every mark is scaled by its INK, not by its file frame: each SVG was
-// trimmed to the drawn pixels, and the size below gives every logo the same
-// visual mass (constant ink area, clamped to a readable height and a sane
-// width), so a square mark and a long wordmark weigh the same in the row.
+// trimmed to the drawn pixels, and the size below gives every logo in the
+// SAME ROW the same visual mass (constant ink area, clamped to a readable
+// height and a sane width), so a square mark and a long wordmark weigh the
+// same next to each other.
+//
+// The row itself gets its own ink budget (ROW_SCALE), tapering down the
+// wall -- direct feedback via Slack, 10 Sept 2026 (reference screenshot
+// attached): "reorder and resize the partner logos so they follow the same
+// hierarchy, sizing, and overall composition shown in the reference image."
+// A flat grid where every mark reads the same size, regardless of row,
+// flattened exactly that hierarchy -- the reference's top rows (JPMorgan
+// Chase, Mars, HSBC, Warner Bros. Discovery...) are visibly bigger than its
+// dense bottom rows (BET, Bleacher Report, Cartoon Network, DC, TNT), same
+// as a real sponsor wall reads tiers by size. One scale per MARK_ROWS row,
+// same order as the reference.
 const INK_AREA = 27 * 27 * 2.6;
-const MIN_H = 16, MAX_H = 30, MAX_W = 150;
+const ROW_SCALE = [1.7, 1.5, 1.3, 1.05, 1.35, 1.0, 1.0, 0.7];
+const MIN_H = 14, MAX_H = 40, MAX_W = 160;
 
 type Mark = {
   name: string;
@@ -25,11 +38,18 @@ type Mark = {
 };
 // Order matches the reference partner wall (dreamari.com) EXACTLY, row by
 // row, left to right (direct feedback, 8 Sept 2026: "it can't match the
-// reference order closely, it should match it exactly"). Rendered as one
-// flat, uniform grid now (see PartnerLogoGrid below) rather than these exact
-// row breaks -- see ATTRIBUTION.md for why (a fixed rectangle with equal
-// cells reads as symmetric regardless of each row's item count, where
-// matching the reference's own irregular row lengths didn't).
+// reference order closely, it should match it exactly"). For a while this
+// rendered as one flat, uniform grid instead of these row breaks (a fixed
+// rectangle with equal cells reads as symmetric regardless of each row's
+// item count, where matching the reference's own irregular row lengths
+// via justify-between/justify-start didn't) -- see ATTRIBUTION.md. Reverted
+// to rendering row by row again (direct feedback via Slack, 10 Sept 2026,
+// reference screenshot attached: "reorder and resize... follow the same
+// hierarchy, sizing, and overall composition shown in the reference
+// image") -- a flat grid also flattened the reference's size hierarchy
+// (its top rows read bigger than its dense bottom rows), which mattered
+// more than the earlier symmetry fix. See PartnerLogoGrid's own comment
+// for how the previous failure mode is avoided this time.
 //
 // 9 Sept 2026 pass: replaced with the user's own curated, numbered set of
 // logo files ("Logos Page (Landscape)"), which is both higher-quality and
@@ -111,63 +131,64 @@ const MARK_ROWS: Mark[][] = [
     { name: "TNT", file: "tnt.png", ratio: 0.973, emblem: true },
   ],
 ];
-const MARKS: Mark[] = MARK_ROWS.flat();
-
-function sizeFor(ratio: number) {
-  let h = Math.sqrt(INK_AREA / ratio);
+function sizeFor(ratio: number, rowIndex: number) {
+  let h = Math.sqrt((INK_AREA * (ROW_SCALE[rowIndex] ?? 1)) / ratio);
   h = Math.max(MIN_H, Math.min(MAX_H, h));
   let w = h * ratio;
   if (w > MAX_W) { w = MAX_W; h = MAX_W / ratio; }
   return { width: Math.round(w), height: Math.round(h) };
 }
 
-/** All the marks at once, wrapped into a dense grid instead of a scrolling
- *  row (direct feedback, 8 Sept 2026: "all at once... way more bombastic
- *  and impressive," dreamopportunity.org's own reference) -- but built from
- *  our own individually-hosted vector marks, not the supplied flattened
- *  wall image, so it still carries the ticker's own rule: one colour
- *  (white) on the dark student site, real brand colour on the light
- *  Schools page. Same ink-area sizing as the ticker, so the grid and the
- *  ticker never disagree about how big a mark should read. */
+/** All the marks at once, wrapped into a dense composition instead of a
+ *  scrolling row (direct feedback, 8 Sept 2026: "all at once... way more
+ *  bombastic and impressive," dreamopportunity.org's own reference) -- but
+ *  built from our own individually-hosted vector marks, not the supplied
+ *  flattened wall image, so it still carries the ticker's own rule: one
+ *  colour (white) on the dark student site, real brand colour on the light
+ *  Schools page.
+ *
+ *  Rendered ROW BY ROW (MARK_ROWS, not the old flattened+regridded MARKS)
+ *  so the reference's own composition survives: each row centered on its
+ *  own, sized by that row's ink budget (see ROW_SCALE above), rather than
+ *  poured into one fixed-column grid that ignored where the reference
+ *  actually broke rows and normalized every mark to the same size regardless
+ *  of tier. A previous attempt at per-row sizing read as uneven because each
+ *  row's marks kept their own natural, unrelated widths (`justify-between`
+ *  stretched into gaps, `justify-start` packed to a different width than its
+ *  neighbours); this still shares ONE proven mechanism -- constant ink area
+ *  within a row, clamped -- so a row is internally consistent and centers
+ *  cleanly, and only the budget itself changes row to row. */
 export function PartnerLogoGrid({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
-  const [revealRef, revealed] = useRevealOnScroll<HTMLUListElement>();
+  const [revealRef, revealed] = useRevealOnScroll<HTMLDivElement>();
   const white = { filter: "brightness(0) invert(1)", opacity: 0.8 };
   const lumin = { filter: "grayscale(1) invert(1) brightness(1.08)", opacity: 0.85 };
   const colour = { opacity: 0.92 };
   const darkened = { filter: "brightness(0.45) saturate(1.2)", opacity: 0.92 };
-  // A real CSS grid with a FIXED column count and EQUAL-SIZE cells (direct
-  // feedback, 8 Sept 2026: "always form a symmetric shape... a perfect
-  // rectangle... some need to be scaled up or scaled down to fit"). Row
-  // arrays sized to each row's own natural ink (the previous two attempts)
-  // could never form one, because a wordmark and an icon-plus-wordmark mark
-  // are never the same width -- so every row either stretched into huge
-  // gaps (justify-between) or packed to a different natural width than its
-  // neighbours (justify-start), and the grid read as uneven either way. This
-  // scales every mark to fit the SAME fixed cell size (object-fit: contain),
-  // so every row has identical cell widths and genuinely lines up into
-  // columns, the way the reference wall's own grid does. One column count
-  // for every viewport (not responsive breakpoints swapping it out) so the
-  // rectangle's shape itself never changes, only each cell's absolute size.
-  const COLS = 7;
+  let index = 0;
   return (
-    <ul ref={revealRef} className={`grid gap-3 sm:gap-4 ${className}`} style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }} aria-label="Corporate partners" role="group">
-      {MARKS.map((mark, index) => {
-        const ink = tone === "light" ? (mark.faint ? darkened : colour) : mark.emblem ? lumin : white;
-        // A subtle staggered fade+rise, not a big reveal moment (this is a
-        // credibility footnote, not the hero) -- capped so a mark deep into
-        // the wall doesn't wait almost a second to appear.
-        const delay = Math.min(index * 22, 340);
-        return (
-          <li
-            key={mark.file}
-            className="flex aspect-[3/2] items-center justify-center rounded-[var(--radius-sm)] p-2"
-            style={{ opacity: revealed ? 1 : 0, transform: revealed ? "none" : "translateY(6px)", transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms` }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/images/marketing/partners/${mark.file}`} alt={mark.name} loading="lazy" decoding="async" className="h-full w-full" style={{ ...ink, objectFit: "contain" }} />
-          </li>
-        );
-      })}
-    </ul>
+    <div ref={revealRef} className={`flex flex-col gap-4 sm:gap-5 ${className}`} aria-label="Corporate partners" role="group">
+      {MARK_ROWS.map((row, rowIndex) => (
+        <ul key={rowIndex} className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 sm:gap-x-7">
+          {row.map((mark) => {
+            const ink = tone === "light" ? (mark.faint ? darkened : colour) : mark.emblem ? lumin : white;
+            const { width, height } = sizeFor(mark.ratio, rowIndex);
+            // A subtle staggered fade+rise, not a big reveal moment (this is
+            // a credibility footnote, not the hero) -- capped so a mark deep
+            // into the wall doesn't wait almost a second to appear.
+            const delay = Math.min(index++ * 22, 340);
+            return (
+              <li
+                key={mark.file}
+                className="flex items-center justify-center"
+                style={{ width, height, opacity: revealed ? 1 : 0, transform: revealed ? "none" : "translateY(6px)", transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms` }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/images/marketing/partners/${mark.file}`} alt={mark.name} loading="lazy" decoding="async" className="h-full w-full" style={{ ...ink, objectFit: "contain" }} />
+              </li>
+            );
+          })}
+        </ul>
+      ))}
+    </div>
   );
 }
