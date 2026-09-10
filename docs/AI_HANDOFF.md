@@ -6337,3 +6337,11 @@ Arrows: of the 15 `ArrowUpRight` marks, 14 sit on true external links
 event stubs, Connect community "Open", Schools outbound) and stay as the
 "leaves Dreamari" cue; the one internal use, Explore's PosterCard hover
 badge, is now a ChevronRight (direct feedback: "do as you recommend").
+
+### 10 Sept 2026 -- Build welcome: glow no longer clipped to the step column
+
+`.atmosphere` and `.stars` in `WelcomeScreen.module.css` are `position:
+fixed; inset: 0` now. As absolute children of `.welcome` they were clipped
+by the flow's 860px scroll column, which read as a sharp lighter rectangle
+around the content on wide screens (direct feedback). `.welcome` is isolated
+so z-index -1 still paints them behind the copy. Verified at 1600x1000.

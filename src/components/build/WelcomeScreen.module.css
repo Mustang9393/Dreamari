@@ -7,16 +7,20 @@
   min-height: 100%;
   color: var(--color-night-foreground);
 }
+/* Fixed to the viewport, not the 860px step column: as an absolute child
+   the glow was clipped by the column's overflow, leaving a sharp lighter
+   rectangle around the content on wide screens (direct feedback, 10 Sept
+   2026). .welcome is isolated, so z-index -1 still paints behind the copy. */
 .atmosphere {
-  position: absolute;
+  position: fixed;
   z-index: -1;
   pointer-events: none;
-  inset: -8% -25% 12%;
+  inset: 0;
   background: radial-gradient(ellipse at 50% 34%, color-mix(in srgb, var(--color-brand-500) 26%, transparent), transparent 57%), radial-gradient(ellipse at 26% 65%, color-mix(in srgb, var(--color-accent-purple) 17%, transparent), transparent 58%);
 }
 /* Faint field of glowing points behind everything: static at rest,
    twinkling with motion (star-twinkle, globals.css). */
-.stars { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.stars { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 .stars i {
   position: absolute;
   display: block;
