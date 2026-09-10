@@ -113,13 +113,7 @@ export function BuiltByStamp() {
         <p className="mx-auto mt-5 max-w-[720px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
           {DO_COPY.lead}
         </p>
-        {/* the closing paragraph stays on the Schools section only; the student
-           stamp ends on the partners (Chandu, 7 Sept 2026). All the marks at
-           once, wrapped into a grid instead of scrolling (direct feedback,
-           8 Sept 2026: "all at once... way more bombastic and impressive"
-           -- dreamopportunity.org's own reference), built from our own
-           individual marks so the dark student site still gets them in one
-           colour, not the supplied flattened full-colour wall image. */}
+        {/* Both audiences use the original partner composition; this view is monochrome. */}
         <PartnerLogoGrid tone="dark" className="mx-auto mt-10 w-full max-w-[1100px] sm:mt-12" />
       </div>
     </section>

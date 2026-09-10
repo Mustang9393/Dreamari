@@ -488,11 +488,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
             </div>
           </Reveal>
           <Reveal>
-            {/* All the marks at once, wrapped into a grid instead of
-               scrolling (direct feedback, 8 Sept 2026: "all at once... way
-               more bombastic and impressive" -- dreamopportunity.org's own
-               reference), built from our own individual marks in full
-               brand colour, on a white card the way the reference has it. */}
+            {/* Original partner composition, in its supplied brand colors. */}
             <div className="mx-auto mt-10 max-w-[1100px] rounded-[24px] border bg-white p-6 sm:mt-12 sm:p-10 lg:p-12" style={{ borderColor: "color-mix(in srgb, var(--foreground) 10%, transparent)", boxShadow: "0 32px 70px -34px rgba(5,7,15,0.35), 0 2px 6px -2px rgba(5,7,15,0.12)" }}>
               <PartnerLogoGrid tone="light" />
             </div>

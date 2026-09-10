@@ -6129,3 +6129,27 @@ Direct feedback: "not thorough enough, just words and boxes; evaluate everything
 - Wired into `ProProfile.tsx`: each `"; "`-separated clause in `pro.education` is its own row now (previously one single-line row assumed exactly one school); a clause with a sourced mark gets that school's own tile (44px tall, width follows the mark's own ink ratio via a new `eduMarkSize()` next to `PRO_ACCENT`, so a seal stays square and a wordmark like Wharton or NYU Stern widens the tile instead of being squashed into one); a clause with no match keeps the original 44x44 GraduationCap tile. The "Education" label shows once, on the first row, same as before.
 - Verified in the Browser pane (dev server on :3004) via `?pro=<id>` query nav: `pro-okafor` (single match, University of Michigan), `pro-reyes` (two schools, Austin Community College + Texas State University, both matched, stack as two rows), `pro-grant` (seal + Wharton wordmark side by side, tile widths differ correctly), `pro-hartley` (Boston College seal + NYU Stern wordmark), `pro-fontaine` and `pro-johnson` (both segments unmatched, GraduationCap fallback, no console errors). `npx tsc --noEmit -p .` is clean.
 - Nothing committed; `src/components/connect/schoolMarks.ts`, the edit to `ProProfile.tsx`, and `public/images/connect/schools/` (30 marks + `ATTRIBUTION.md`) are staged/unstaged for the primary session to review. Did not touch `PartnerTicker.tsx` / `public/images/marketing/partners/` / that `ATTRIBUTION.md` -- those were a concurrent session's unrelated work in this same worktree.
+
+
+### 2026-09-10 — Exact landing partner composition (Codex)
+
+Worktree: `dreamari-partner-grid`, branch `codex/landing-partner-grid`, based on
+`e15454c`. Direct user request supersedes prior row-normalization choices:
+match the supplied screenshot's exact logo order, positions and relative sizes.
+`PartnerLogoGrid` now renders the unaltered transparent `40.png` source artwork,
+added as `public/images/marketing/partners/partner-composition.png`. Schools uses
+original color; students use grayscale inversion with a contrast floor to keep
+bright-source details visible. All 50 partner names, including Adult Swim, are
+available to screen readers. Existing individual logos remain in the repository.
+
+Validation: targeted ESLint, TypeScript, tokens:check, diff whitespace check all
+passed. In-app browser verified both audiences at 1440×1000 and 390×844, loaded
+images, audience switching, no mobile overflow, no console errors. Reference
+comparison and screenshots: `work/partner-grid/`; report: `design-qa.md` (passed).
+
+No push or deployment performed. Next step: user review of the local preview,
+then integrate this branch when requested. Other local checkouts were not edited.
+
+User subsequently authorized publishing this change live. Committing the verified
+partner-grid change and pushing to `main` for the existing Vercel production
+integration (`dreamari.vercel.app`). No other deployment targets are in scope.

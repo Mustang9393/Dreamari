@@ -41,3 +41,14 @@ MD&M (file `22.png`) was also missing from the first four passes' set entirely (
 The user asked to double-check the folder for outdated marks post-rebrand. Two are worth a second look against the brands' current primary identity, kept as-is here since replacing them means sourcing a different asset the user hasn't supplied: Cartoon Network's tilted "CN cube" (the brand's main mark before its 2021 redesign) and TNT's ball/circle mark (superseded by a flat wordmark in TNT's 2016 rebrand). HSBC's red/white hexagon-plus-wordmark may also be pre-dated by a 2023-24 wordmark-only simplification in some markets. NCSolutions' mark is confirmed pre-acquisition (the brand folded into Circana) per the second pass's research.
 
 Sixth pass (9 Sept 2026, "the gdc logo has got bad in the dark version, its lost detail"): audited every mark programmatically for the same failure mode -- a gradient or multi-tone source that flattens to one blank white shape under the ticker's default `brightness(0) invert(1)` silhouette filter, because that filter erases any boundary between two adjacent OPAQUE colors (it only preserves boundaries where one side is transparent). Measured, for each PNG, what fraction of opaque-to-opaque pixel edges span a large color jump (indicating a gradient/shading detail with no transparent gap to protect it) versus opaque-to-transparent edges (safe). GDC (85% opaque-opaque) and Natural Products Expo West (23%) confirmed the user's report; WildBrain (30%, the three-eyed wave mark's eye shading) had the same undetected issue. All three are now `emblem: true`. Every other mark measured at 0% and was left alone.
+
+
+10 Sept 2026 — exact reference composition: `partner-composition.png` is an
+unaltered copy of the user-supplied `Logos Page (Landscape)/40.png` (1920 ×
+1080, transparent PNG). It is the source artwork for the logo region in
+`Screenshot 2026-09-09 at 3.00.39 PM.png`. Both landing audiences now use
+this composition, preserving every logo's position, spacing, scale, and
+internal detail, including Adult Swim, which the individual list omitted.
+Schools uses the original colors without darkening AT&T or changing opacity;
+students use a luminance-preserving monochrome inversion. Individual source
+assets remain available here for future edits, but do not drive layout.

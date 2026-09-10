@@ -1,90 +1,87 @@
-# Student Home Design QA
+# Partner composition QA — 10 September 2026
 
-## Comparison target
+final result: passed
 
-- Source visual truth: Figma UIKIT desktop node `790:35798`, mobile node `745:36522`, and exact career-card node `793:36808`.
-- Source captures: `work/figma-home-source-desktop-top.png` and the related desktop sequence in `work/figma-home-source-desktop-*.png`; `work/figma-home-source-mobile-top.png`, `work/figma-home-source-mobile-header.png`, and `work/figma-home-source-mobile-hero.png`.
-- Implementation: `http://localhost:3001/home`.
-- Implementation captures: `work/home-hero-desktop-final.png` and `work/home-mobile-final.png`.
-- Exact card source capture: `work/figma-card-reference-793-36808.png`; normalized component crop: `work/figma-card-reference-crop.png`.
-- Exact card implementation crop: `work/home-card-implementation-final.png`.
-- Combined comparison evidence: `work/home-design-qa-desktop-final.png`, `work/home-design-qa-mobile.png`, and the focused 1:1 component comparison `work/home-card-design-qa-final.png`.
+## Scope and source
 
-## Normalization and state
+User requested the reference logo layout, ordering, relative scale and exact
+positioning, with monochrome for students and original colors for schools.
+The surrounding landing-page heading, copy and section backgrounds are retained.
 
-- Desktop implementation viewport: 1280 × 720 CSS px at device density 1; capture is 1280 × 720 px.
-- Mobile implementation viewport: 390 × 844 CSS px at device density 1; capture is 390 × 844 px.
-- Source page captures: 1280 × 720 px. The full desktop/mobile frames were evaluated for composition, hierarchy, section order and responsive intent. The card node was separately viewed at 100% and normalized to its measured 427 × 336 px component size.
-- State: dark theme, student home/Play landing state, Product Manager featured story selected, challenge incomplete for primary comparison.
-- Focused evidence: `work/home-card-design-qa-final.png` places the 427 × 336 Figma card and 427 × 336 implementation together at 1:1 density. It makes the 180 px image, 156 px body, badge, duration, typography, metadata, CTA and component spacing directly comparable. Mobile was separately checked at its actual 390 × 844 viewport.
+Source screenshot: `/Users/chandump/Downloads/Screenshot 2026-09-09 at 3.00.39 PM.png`
+(2026 × 1464 pixels). Original transparent artwork:
+`public/images/marketing/partners/partner-composition.png` (1920 × 1080), copied
+byte-for-byte from `/Users/chandump/Downloads/Logos Page (Landscape)/40.png`.
 
-## Findings
+## Browser evidence
 
-- No actionable P0, P1 or P2 differences remain.
-- Typography: Montserrat uses the existing licensed-font fallback path and preserves the source's heavy display hierarchy. The desktop hero title and description each occupy one line at the reference width, while mobile wraps naturally without widows or clipping.
-- Spacing and layout: the featured story is now full-bleed directly below navigation, 520 px high at desktop and 470 px at mobile, with no container border, inset gutter or rounded shell. Progress percentage shares the bar row, the scene label sits beneath it, pagination is centered, and the four Quick Actions use the source's compact 72 px anatomy. The primary career-card variant is exactly 427 × 336 px on desktop, with a 180 px image and 156 px information panel. No horizontal page overflow occurs at 390 px.
-- Colors and tokens: all new surfaces, borders, type, category accents, feedback states, radii and shadows reference the generated DTCG semantic/primitives variables. No page-local palette was introduced.
-- Image quality: the Product Manager hero uses a new 1915 × 821 cinematic campus panorama composed for the full-bleed stage. Every visible career image has one clear subject and responsive object cropping. Cards add a token-mapped image-to-navy gradient so artwork blends into the information panel without a hard seam.
-- Copy and content: the desktop source-of-truth labels and content are retained for the featured story, quick actions, journey, recommendations, daily challenge, popular careers, mystery unlocks and sponsored Mars challenge.
-- Interactions and accessibility: desktop tabs and mobile bottom navigation work, quick actions scroll or navigate, challenge completion supplies a disabled success state and live feedback, streak feedback works, semantic controls have names, focus rings are visible and tap targets meet the existing control scale. Career rails use touch swipe, snap positions, partial-next-card affordances and accessible Next/Previous controls. Cards use a restrained 500 ms focus/hover lift and image push-in. The hero advances continuously every 5.5 seconds, including while hovered, with clickable dots, accessible arrows, 700 ms crossfades and a reduced-motion opt-out.
+In-app browser at `http://localhost:3017/`.
+Desktop CSS viewport: 1440 × 1000. Saved viewport captures: 1440 × 1000, 1×.
+Mobile CSS viewport: 390 × 844. Saved viewport captures: 390 × 844, 1×.
+
+- `work/partner-grid/student-desktop.png`
+- `work/partner-grid/schools-desktop.png`
+- `work/partner-grid/student-mobile.png`
+- `work/partner-grid/schools-mobile.png`
+- Combined source and implementation comparison: `work/partner-grid/comparison.jpg`.
+
+Comparison normalizes the screenshot logo region (85,319)–(1901,1321) and
+browser artwork ink regions to 960 × 530. Source headline/background are excluded
+because this change concerns the logos. Browser group bounds are recorded in
+`work/partner-grid/student-box.json` and `schools-box.json`. Whole desktop captures
+were also inspected at native size to check the fine-print and badge details.
+
+## Findings and fidelity
+
+No remaining actionable P0/P1/P2 findings within scope.
+
+- Typography: original logo lettering retained in the supplied artwork; no
+  substitute fonts or HTML wordmarks. Existing landing headings remain unchanged.
+- Layout: original artwork fixes every position, overlap and relative size;
+  no flex wrap or equal-area sizing. Both variants maintain 16:9 canvas proportions.
+- Color: school image is unfiltered at full opacity. Student grayscale inversion
+  retains internal badge detail. Contrast adjustment keeps the EY beam visible.
+  Background differences from the screenshot are intentional audience treatments.
+- Image fidelity: all 50 names represented, including Adult Swim. GDC, Pop-Tarts,
+  Blackstone, IWCE, MAGIC, WildBrain and Pringles retain their internal detail.
+  Image is the original 1920px source, not a screenshot crop or redrawn logos.
+- Copy/accessibility: landing copy retained; 50 partner names exposed as a
+  screen-reader list, with the composite image decorative to avoid duplicate reading.
+- Mobile: school artwork 292px wide, student artwork 342px wide; no overflow.
+  Small wordmarks become small by design when preserving the entire composition.
+  Browser zoom remains available; no rearranged mobile rows are introduced.
 
 ## Comparison history
 
-1. Initial full-view comparison (`work/home-design-qa-desktop.png`) found one P2 hierarchy mismatch: the implementation hero title used a 72 px maximum and wrapped to four lines, materially overpowering the source.
-2. Fix: changed the title to a token-aligned responsive 32–44 px range, widened its text measure, and kept mobile at 32 px.
-3. Post-fix comparison (`work/home-design-qa-desktop-final.png`) shows the title in a compact two-line grouping with the image subject, description, CTA and progress retaining the intended hierarchy. No new P0/P1/P2 issue appeared.
-4. Follow-up comparison against card node `793:36808` found a P1 component mismatch in the first implementation: imagery and copy were overlaid, metadata used chips, CTA styling was inverted, and card proportions did not match the 427 × 336 UIKIT component.
-5. Fix: rebuilt the shared card into the source's 180 px image/156 px navy body anatomy; added match badges, durations, plain dot-separated metadata, the full-width blue CTA, exact vertical spacing and token-mapped surface color. Applied wide, standard and compact width variants without changing the component anatomy.
-6. The final focused comparison (`work/home-card-design-qa-final.png`) shows matching 427 × 336 dimensions and internal geometry. Desktop controls were measured moving `scrollLeft` from `0 → 113 → 0`; mobile moved one 336 px card step while document `scrollWidth` remained equal to the 390 px viewport. No P0/P1/P2 issue remains.
-7. The follow-up hero audit at 100% found a P1 structural mismatch: the implementation was an inset, rounded 608 px panel with an eyebrow, tall icon actions, left-aligned dots and hover-paused autoplay; the source is a shorter full-bleed stage with compact text-only actions and centered pagination.
-8. Fix: rebuilt the hero at 520 px desktop/470 px mobile, generated the restrained campus panorama, removed the shell and eyebrow, matched the CTA/progress hierarchy, centered pagination, reduced Quick Actions to 72 px, enabled uninterrupted 5.5-second autoplay, and blended card images into their body surface. Browser verification observed the active story advance from UX Researcher to Mars while the page remained open.
-9. Token/theme audit found a P1 architecture gap: the UIKIT-accurate dark page consumed 21 palette primitives directly, had no launchpad component-token contract, and could not meaningfully respond to the existing light semantic mode.
-10. Fix: added mode-parity semantic roles for navigation, home cards, feature surfaces, on-media text and elevation; added documented `component.home-*` contracts; updated token generation to emit component aliases in both modes; and migrated `/home` so it consumes no palette primitives directly. The validator now passes 501 DTCG tokens.
-11. Light-mode visual QA (`work/home-theme-qa/02-desktop-light.png` and `work/home-theme-qa/04-desktop-light-cards.png`) confirms a warm off-white shell, white career cards, readable dark copy, soft branded feature panels, retained cinematic media contrast and preserved category accents. Dark-mode regression evidence is `work/home-theme-qa/01-desktop-dark.png` and `work/home-theme-qa/05-desktop-dark-cards.png`.
-12. Added visible, accessible View All plus chevron controls to Continue Your Journey, Recommended for You, Popular with Explorers This Week and Mystery Unlocks. Each control sets the Explore tab, writes a category-specific deep link and moves to the relevant rail.
-
-## Residual test gap
-
-- The connected Figma account still lacks edit access, so the connector could not return the node's code/export package. The public canvas did expose node `793:36808` at 100%, allowing an exact 427 × 336 focused visual comparison. Source imagery remains visually equivalent in direction rather than byte-identical because the home uses the approved generated Dreamari career art set.
-- The in-app browser's forced 390 px screenshot output visually cropped the mobile capture despite reporting the correct DOM viewport. Responsive DOM measurements remained valid: `innerWidth`, document `scrollWidth`, header, hero, Quick Action grid and card-rail bounds all reflowed to 390 px with no page overflow. Desktop light/dark screenshots are the accepted visual evidence for the theme pass.
+1. Original implementation normalized individual logo sizes and wrapped rows,
+   losing the reference's positioning. Replaced with the original transparent composition.
+2. Initial student inversion made bright-source details, especially EY's beam,
+   too dark. Added a contrast floor and brightness adjustment. Final native-size
+   browser inspection confirms the beam and badge lettering remain visible.
+3. Replaced initial clipped captures (which used document coordinates) with actual
+   viewport screenshots before producing the final comparison.
 
 ## Validation
 
-### Match no-eyebrow refinement
+- Audience toggle: Student → Enterprise → Student works.
+- Both image variants load with natural width 1920.
+- No horizontal page overflow at 390px.
+- Browser console error log: empty.
+- Targeted ESLint: passed.
+- TypeScript `tsc --noEmit`: passed.
+- `npm run tokens:check`: passed (464 tokens, both modes, generated files current).
+- `git diff --check`: passed.
 
-- Comparison target: the previously accepted Match decision layout, modified by the
-  explicit requirement to remove `MATCHES`, move the title/progress upward, and spend the
-  recovered height on the card without changing the gaps around its stack.
-- Before evidence: `work/match-hierarchy-audit/01-current-desktop.jpg` and
-  `work/match-hierarchy-audit/02-current-mobile.jpg`.
-- Accepted implementation evidence: `work/match-hierarchy-audit/09-no-eyebrow-elongated-mobile.jpg`,
-  `10-no-eyebrow-elongated-desktop.jpg`, and `11-no-eyebrow-elongated-compact.jpg`.
-- Geometry passed: the progress-to-card and card-to-actions gaps remain 20px at 320×700,
-  390×844, and 1280×800. The cards gained 22–25.7px of height, body copy stays contained,
-  and no tested viewport has horizontal or vertical document overflow.
-- Follow-up progress refinement removes `Card N of 5` and restores the percentage beside
-  the bar. Evidence at 320×700 and 1280×800 is
-  `work/match-hierarchy-audit/12-percentage-restored-compact.jpg` and
-  `13-percentage-restored-desktop.jpg`; the percentage column does not wrap or alter the
-  preserved 20px deck gaps.
-- Title-hierarchy comparison is recorded in
-  `work/match-hierarchy-audit/14-title-hierarchy-before.jpg` and
-  `15-title-hierarchy-after.jpg`. The final path/card title relationship is 700/800,
-  semantic-secondary/full-white, and approximately 0.87:1 in size. It stays distinct at
-  320, 390, and 1280px with no wrapping or overflow.
-- Saved-progress copy is constrained to one line with shortened state-specific wording.
-  `work/match-hierarchy-audit/16-saved-progress-single-line.jpg` confirms `4 liked` and
-  `Path saved!` share one row at 320×700 with no text widow or page overflow.
-- Toast comparison is recorded in `work/match-hierarchy-audit/16-toast-before.jpg` and
-  `17-toast-after.jpg`. Compact-phone feedback dropped from 208×44px to 145×32px in the
-  captured state. The 220px longest-label case also remains within the 320px viewport,
-  above the CTA row, with zero button intersection.
-- No P0, P1, or P2 mismatch remains for this refinement.
+## Implementation checklist
 
-- Browser-rendered evidence captured at desktop, tablet and mobile widths.
-- Primary interactions tested: Career Report home link, Explore tab, mobile tab state and URL, quick-action scroll, daily challenge success/disabled feedback, streak acknowledgement, rail Next/Previous state, mobile rail scroll/snap, hero arrows/dots, and hero crossfade state.
-- Browser layout measurements: `scrollWidth === innerWidth` at 390, 768 and 1440 px.
-- ESLint, TypeScript, all 501 token validations and production build pass.
-- Current browser checks showed no framework error overlay or broken asset requests.
+- [x] Preserve supplied composition and original asset.
+- [x] Apply student monochrome and school color treatments.
+- [x] Preserve all accessible partner names.
+- [x] Compare source and browser output together.
+- [x] Verify desktop, mobile, audience switching and static checks.
 
-final result: passed
+## Follow-up polish
+
+No required follow-ups. Individual source assets remain available if future work
+requires independently editable logos. The current component intentionally uses
+the supplied composition to guarantee the requested arrangement.
