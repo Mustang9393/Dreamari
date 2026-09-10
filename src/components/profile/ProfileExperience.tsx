@@ -16,7 +16,7 @@ import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRi
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
-import { WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { DEMO_ALWAYS_SHOW_SPLASH, WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
@@ -89,8 +89,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // student sees the profile arrive first, then gets introduced to it), and
   // Continue simply dismisses it — the Top Three tab is already open under it.
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  // Demo: every visit shows the welcome, like the other tabs' splashes
+  // (direct feedback, 10 Sept 2026: "the pop up isn't happening on my
+  // profile"); once DEMO_ALWAYS_SHOW_SPLASH is off it's arrival-only again.
   useEffect(() => {
-    if (!initialWelcome) return;
+    if (!initialWelcome && !DEMO_ALWAYS_SHOW_SPLASH) return;
     const open = setTimeout(() => {
       setWelcomeOpen(true);
       playMilestoneChime();
@@ -109,7 +112,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     }
     // Then bring the Top Three itself into view (direct feedback, 5 Sept
     // 2026): the popup sat over the header, so on Continue the tabs and the
-    // three cards scroll up to sit just under the fixed nav.
+    // three cards scroll up to sit just under the fixed nav. Only on a real
+    // arrival from Match; a plain visit stays where it is.
+    if (!initialWelcome) return;
     window.requestAnimationFrame(() => {
       const tabs = tablistRef.current;
       if (!tabs) return;

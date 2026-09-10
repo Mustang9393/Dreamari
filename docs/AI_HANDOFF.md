@@ -6372,3 +6372,8 @@ dismiss unchanged: opens 900ms after arrival with the milestone chime,
 Continue strips the query param and scrolls the tabs under the nav. The
 old popup's LocalBurst/Button imports are gone from ProfileExperience.
 Verified on 375x812: card 591px tall ending at 669, Continue works.
+
+Follow-up: the profile welcome also shows on every plain visit while
+`DEMO_ALWAYS_SHOW_SPLASH` (now exported from WelcomeSplash.tsx) is true,
+like the other tabs' splashes; the Continue scroll-to-tabs only runs on a
+real arrival from Match. Flipping the flag off returns it to arrival-only.

@@ -339,7 +339,7 @@ export function WelcomeSplash({ surface, open, onDone }: { surface: SplashSurfac
 // flag (direct request, 10 Sept 2026: "make it appear every time for now,
 // for demo"). Same pattern as MatchLab's DEMO_ALWAYS_SHOW_GUIDE. Flip back
 // to false before this ships to students.
-const DEMO_ALWAYS_SHOW_SPLASH = true;
+export const DEMO_ALWAYS_SHOW_SPLASH = true;
 
 /** First-visit-only, per surface (localStorage, same pattern as Match's
  *  gesture hint). Renders nothing once seen; marks seen when finished, not
