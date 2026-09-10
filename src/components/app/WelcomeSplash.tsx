@@ -52,7 +52,8 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-glasses.webp",
     tint: ["30, 185, 170", "40, 140, 255"],
     title: "SCHOOLS",
-    line: "Schools that fit the career you want.",
+    // Joshua's Schools line (Slack, 10 Sept 2026), reinstated 11 Sept 2026.
+    line: "Colleges, trade schools, programs, cost, and admissions.",
     cta: "See my schools",
   },
   play: {

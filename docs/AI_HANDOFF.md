@@ -7182,3 +7182,7 @@ Verified: /flow walk, /explore -> /play -> /explore lands at scrollY 0,
 - Deck guide dwell: scroll 2.6s, swipe right and swipe left 1.6s each (dot
   and card are at rest by ~1.15s), so the two swipes follow each other
   quickly. Measured: scroll 0.8s -> right 3.5s -> left 5.0s -> done 6.8s.
+
+## 2026-09-11 · Schools splash copy
+- Schools splash line is Joshua's: "Colleges, trade schools, programs, cost,
+  and admissions." Careers and Schools keep their two separate splashes.
