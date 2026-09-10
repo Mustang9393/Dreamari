@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Check, ChevronRight, X } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
@@ -14,12 +14,11 @@ type Scene = {
   sprite?: string;
   wide?: boolean;
   tint: [string, string];
-  eyebrow: string;
   title: string;
   line?: string;
   /** plain lines, no icons (direct feedback, 11 Sept 2026: splashes were
    *  inconsistent, some with icons, some without) */
-  rows?: { text: ReactNode }[];
+  rows?: { text: ReactNode; /** footnote styling: divider above, muted */ note?: boolean }[];
   cta: string;
 };
 
@@ -29,14 +28,19 @@ const SCENES: Record<SplashSurface, Scene> = {
   match: {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
-    eyebrow: "You’re in", title: "MATCH",
+    title: "MATCH",
     line: "Careers matched to you. Explore your options and save the 3 you like most.",
+    // Option 2 (11 Sept 2026): two plain lines instead of the animated demo.
+    rows: [
+      { text: <><strong>Swipe right</strong> to save.</> },
+      { text: <><strong>Swipe left</strong> to pass.</> },
+    ],
     cta: "Start Matching",
   },
   explore: {
     sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
     tint: ["40, 140, 255", "30, 185, 170"],
-    eyebrow: "You’re in", title: "EXPLORE",
+    title: "EXPLORE",
     // One sentence that names both halves (direct feedback, 11 Sept 2026);
     // the Schools tab has its own welcome with the detail.
     line: "Careers and schools: salary, education, daily life, and pathways.",
@@ -47,76 +51,39 @@ const SCENES: Record<SplashSurface, Scene> = {
   schools: {
     sprite: "/images/dreamy/v2/splash/dreamy-glasses.webp",
     tint: ["30, 185, 170", "40, 140, 255"],
-    eyebrow: "You’re in", title: "SCHOOLS",
+    title: "SCHOOLS",
     line: "Schools that fit the career you want.",
     cta: "See my schools",
   },
   play: {
     sprite: "/images/dreamy/v2/splash/dreamy-controller.webp", wide: true,
     tint: ["255, 160, 30", "180, 40, 240"],
-    eyebrow: "You’re in", title: "PLAY",
+    title: "PLAY",
     line: "Choose a career. Step into the job and see where your decisions take you.",
     cta: "Start playing",
   },
   connect: {
     sprite: "/images/dreamy/v2/splash/dreamy-puzzle-wide.webp", wide: true,
     tint: ["40, 140, 255", "100, 70, 255"],
-    eyebrow: "Welcome to", title: "CONNECT",
+    title: "CONNECT",
     // Retain all partner-reviewed permissions and moderation wording.
     rows: [
       { text: <>Students can <strong>follow</strong> Dream Volunteers.</> },
       { text: <>Students can <strong>ask questions publicly</strong>.</> },
       { text: <>Volunteers <strong>can’t follow or privately message</strong> students.</> },
-      { text: "All interactions are moderated by Dreamari staff and school faculty." },
+      { text: "All interactions are moderated by Dreamari staff and school faculty.", note: true },
     ],
     cta: "Start connecting",
   },
   profile: {
     sprite: "/images/dreamy/v2/splash/dreamy-party.webp",
     tint: ["255, 160, 30", "255, 50, 100"],
-    eyebrow: "Welcome to your", title: "PROFILE",
+    title: "PROFILE",
     line: "Your Top 3, your plan, your report.",
     cta: "Explore my profile",
   },
 };
 
-// All three gestures, one caption at a time; the CTA never waits for the demo.
-function MatchGestureDemo({ hero = false }: { hero?: boolean }) {
-  return (
-    <div className={`${styles.demo} ${hero ? styles.demoHero : ""}`} aria-label="How Match works: swipe right to save, swipe left to pass" role="img">
-      <div className={styles.demoStage} aria-hidden="true">
-        <div className={styles.demoBadgeSave}><Check strokeWidth={3} /></div>
-        <div className={styles.demoBadgePass}><X strokeWidth={3} /></div>
-        <div className={styles.demoCard}>
-          {/* Face over details, one column. The scroll beat was cut from this
-              demo (11 Sept 2026); the deck's own gesture guide teaches it on
-              the first real card. */}
-          <div className={styles.demoScroll}>
-            <div className={styles.demoFace}>
-              <span className={styles.demoPoster} />
-              <span className={styles.demoTitle} />
-              <span className={styles.demoSub} />
-            </div>
-            <div className={styles.demoDetails}>
-              <span className={styles.demoCaption} />
-              <span className={styles.demoChip} />
-              <span className={styles.demoLine} />
-              <span className={styles.demoLine} style={{ width: "76%" }} />
-              <span className={styles.demoLine} style={{ width: "60%" }} />
-              <span className={styles.demoChip} style={{ width: "34%", marginTop: 4 }} />
-              <span className={styles.demoLine} style={{ width: "82%" }} />
-            </div>
-          </div>
-        </div>
-        <span className={styles.demoFinger} />
-      </div>
-      <div className={styles.demoCaptions}>
-        <span className={styles.demoCap1}>Swipe right to save</span>
-        <span className={styles.demoCap2}>Swipe left to pass</span>
-      </div>
-    </div>
-  );
-}
 
 function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () => void }) {
   const scene = SCENES[surface];
@@ -167,15 +134,11 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
   return (
     <div className={`${styles.scrim} ${departing ? styles.departing : ""}`} style={style}>
       <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={`splash-${surface}-title`} aria-describedby={scene.line ? `splash-${surface}-description` : undefined} className={styles.dialog}>
-        <div className={`${styles.hero} ${surface === "match" ? styles.heroDemo : ""}`} aria-hidden="true">
+        <div className={styles.hero} aria-hidden="true">
           {/* Glow and Dreamy only: the orbit ring, particles and flare made
              the dialog busy (direct feedback, 11 Sept 2026). */}
           <div className={styles.glow} />
-          {/* Match (option 3, 11 Sept 2026): the swipe demo IS the hero, in
-             Dreamy's slot and larger, so the how reads as the point of this
-             splash rather than a third thing under the text. */}
-          {surface === "match" && <MatchGestureDemo hero />}
-          {scene.sprite && surface !== "match" && <div className={`${styles.dreamy} ${scene.wide ? styles.dreamyWide : ""}`}>
+          {scene.sprite && <div className={`${styles.dreamy} ${scene.wide ? styles.dreamyWide : ""}`}>
             {/* Tiny pre-rendered WebP served as-is: the 270KB PNGs went through the
               on-demand image optimizer at first open and the sprite arrived
               late (direct feedback, 10 Sept 2026). Preloaded on host mount. */}
@@ -183,12 +146,11 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
           </div>}
         </div>
         <div className={styles.header}>
-          <p className={styles.eyebrow}>{scene.eyebrow}</p>
           <h2 id={`splash-${surface}-title`} className={styles.title}>{scene.title}</h2>
         </div>
         {scene.line && <p id={`splash-${surface}-description`} className={styles.line}>{scene.line}</p>}
         {scene.rows && <ul className={styles.rows}>{scene.rows.map((row, i) => (
-          <li key={i} className={styles.row}>{row.text}</li>
+          <li key={i} className={`${styles.row} ${row.note ? styles.rowNote : ""}`}>{row.text}</li>
         ))}</ul>}
         <div className={styles.ctaWrap}>
         <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4.8} strength={1} active>

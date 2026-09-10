@@ -7136,3 +7136,16 @@ Verified at 375 and 1280.
 - Explore line: "Careers and schools: salary, education, daily life, and
   pathways." The Schools tab keeps its own splash with the detail.
 Verified at 375: Explore and Connect (only the CTA chevron svg remains).
+
+## 2026-09-11 · Splashes: no eyebrow; Match on option 2
+- "You're in" / "Welcome to" eyebrows removed from every splash (type field
+  and CSS gone). Title, line, optional rows, CTA.
+- Match is option 2: Dreamy back in the hero, Joshua's line, two plain rows
+  ("Swipe right to save." / "Swipe left to pass."), no animated demo. The
+  demo component and all its CSS/keyframes are deleted. Option 1 (no
+  swipe rows; deck teaches scroll, right, left once each) is the agreed
+  fallback if this is rejected.
+- Rows: `note: true` marks the footnote row (divider + muted), used by
+  Connect's moderation line; it was `.row:last-child` before, which would
+  have muted Match's second swipe row.
+Verified at 375: Match, Play.

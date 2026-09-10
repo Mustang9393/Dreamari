@@ -1,5 +1,4 @@
-/* Cinematic arrival, calm reading: decoration lives in the hero; the demo
-   starts after the greeting and teaches one gesture at a time. No animation gates the CTA. */
+/* Cinematic arrival, calm reading: decoration lives in the hero. No animation gates the CTA. */
 .scrim {
   position: fixed;
   inset: 0;
@@ -32,7 +31,6 @@
 }
 .dialog:focus { outline: none; }
 .header { text-align: center; position: relative; }
-.eyebrow { margin: 0 0 5px; font-size: clamp(19px, 5vw, 22px); font-weight: 600; line-height: 1.3; letter-spacing: -.025em; color: var(--foreground); }
 .title { margin: 0; font-family: var(--font-display); font-size: clamp(44px, 13vw, 60px); font-weight: 800; line-height: 1; letter-spacing: -.055em; padding-right: .055em; color: var(--foreground); }
 .dreamy { position: relative; width: 120px; height: 120px; flex: none; }
 .dreamyWide { width: 170px; }
@@ -40,7 +38,7 @@
 .line { text-align: center; margin: 16px 0 0; font-size: 16px; line-height: 1.65; color: color-mix(in srgb, var(--foreground) 88%, var(--muted-foreground)); text-wrap: pretty; }
 .rows { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
 .row { font-size: 14px; line-height: 1.55; text-align: center; color: var(--foreground); }
-.row:last-child { padding-top: 16px; border-top: 1px solid var(--glass-border); color: var(--muted-foreground); }
+.rowNote { padding-top: 16px; border-top: 1px solid var(--glass-border); color: var(--muted-foreground); }
 .cta {
   display: inline-flex;
   align-items: center;
@@ -62,83 +60,7 @@
 }
 .cta:hover { filter: brightness(1.08); }
 .cta:focus-visible { outline: 2px solid var(--foreground); outline-offset: 4px; }
-.demo { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; margin-top: 2px; }
-/* No tinted box behind the demo (direct feedback, 11 Sept 2026): the card
-   plays on the dialog itself. */
-.demoStage { position: relative; width: 100%; height: 132px; overflow: hidden; }
-.demoCard {
-  position: absolute;
-  left: 50%;
-  top: 14px;
-  width: 92px;
-  height: 118px;
-  translate: -50% 0;
-  overflow: hidden;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--foreground) 18%, transparent);
-  background: #10142a;
-  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.8);
-}
-/* The card is a viewport; .demoScroll is the tall content inside it (face,
-   then details), moved as one so scrolling reads as scrolling. */
-.demoScroll { position: absolute; left: 0; top: 0; width: 100%; }
-.demoFace { position: relative; height: 118px; display: flex; flex-direction: column; gap: 5px; padding: 7px; background: #171c38; }
-.demoPoster { display: block; height: 56px; border-radius: 6px; background: linear-gradient(160deg, rgba(var(--t1), 0.85), rgba(var(--t2), 0.75)); }
-.demoTitle { display: block; height: 7px; width: 70%; border-radius: 3px; background: color-mix(in srgb, var(--foreground) 88%, transparent); }
-.demoSub { display: block; height: 5px; width: 48%; border-radius: 3px; background: color-mix(in srgb, var(--foreground) 40%, transparent); }
-.demoDetails { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 9px 7px 12px; background: #10142a; }
-.demoCaption { display: block; height: 4px; width: 52%; border-radius: 2px; background: color-mix(in srgb, var(--foreground) 30%, transparent); }
-.demoChip { display: block; height: 9px; width: 40%; border-radius: 999px; background: rgba(var(--t1), 0.7); }
-.demoLine { display: block; height: 5px; width: 86%; border-radius: 3px; background: color-mix(in srgb, var(--foreground) 34%, transparent); }
-.demoBadgeSave, .demoBadgePass {
-  position: absolute;
-  top: 50%;
-  display: flex;
-  width: 30px;
-  height: 30px;
-  translate: 0 -50%;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  opacity: 0;
-  color: #fff;
-}
-.demoBadgeSave { right: 18%; background: var(--color-feedback-success, #33c78c); box-shadow: 0 0 18px rgba(51, 199, 140, 0.55); }
-.demoBadgePass { left: 18%; background: var(--destructive, #ef4444); box-shadow: 0 0 18px rgba(239, 68, 68, 0.5); }
-.demoBadgeSave svg, .demoBadgePass svg { width: 16px; height: 16px; }
-.demoFinger {
-  position: absolute;
-  left: 50%;
-  top: 66px; /* mid-card: both swipes start from the same spot */
-  width: 16px;
-  height: 16px;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.18), 0 0 14px rgba(var(--t1), 0.6);
-  opacity: 0;
-}
-.demoCaptions { position: relative; height: 18px; width: 100%; font-size: 13.5px; line-height: 18px; font-weight: 700; color: var(--foreground); }
-.demoCap1, .demoCap2, .demoCap3 { position: absolute; inset: 0; text-align: center; }
-/* Without motion: the card rests on its face and the three captions are simply listed. */
-@media (prefers-reduced-motion: reduce) {
-  .demoCaptions { height: auto; display: flex; flex-direction: column; gap: 2px; font-weight: 600; font-size: 13px; }
-  .demoCap1, .demoCap2, .demoCap3 { position: static; }
-  .demoFinger { display: none; }
-}
 .hero { height: 110px; position: relative; display: grid; place-items: center; margin: -12px -12px 12px; isolation: isolate; }
-/* Match: the demo sits in the hero, bigger than Dreamy would be. */
-.heroDemo { height: 196px; }
-.demoHero { margin-top: 0; gap: 6px; }
-.demoHero .demoStage { height: 164px; }
-.demoHero .demoCard { width: 112px; height: 144px; top: 10px; }
-.demoHero .demoFace { height: 144px; padding: 9px; gap: 6px; }
-.demoHero .demoPoster { height: 70px; }
-.demoHero .demoTitle { height: 8px; }
-.demoHero .demoSub { height: 6px; }
-.demoHero .demoFinger { top: 82px; }
-.demoHero .demoBadgeSave, .demoHero .demoBadgePass { width: 34px; height: 34px; }
-.demoHero .demoCaptions { font-size: 14px; }
 /* closest-side sizing: the light reaches full transparency at the nearest
    edge of its own box, so it never shows a hard rectangular cut (the
    farthest-corner default was still ~50% opaque at the top and bottom
@@ -168,7 +90,7 @@
 @media (prefers-reduced-motion: reduce) { .ctaWrap :global([data-beam])::before, .ctaWrap :global([data-beam])::after, .ctaWrap :global([data-beam-bloom]) { animation: none !important; } }
 @media (min-width: 640px) { .scrim { padding: 24px; } .dialog { max-height: calc(100dvh - 48px); } }
 @media (max-height: 700px) { .dialog { padding: 22px; } .dialog:focus { outline: none; }
-.hero { height: 86px; } .dreamy { height: 94px; width: 94px; } .dreamyWide { width: 132px; } .line { margin-top: 12px; font-size: 15px; } .demo { margin-top: 16px; } .demoStage { height: 140px; } .demoCard { width: 92px; height: 118px; left: 50%; } .ctaWrap { margin-top: 20px; } .rows { gap: 12px; margin-top: 14px; } }
+.hero { height: 86px; } .dreamy { height: 94px; width: 94px; } .dreamyWide { width: 132px; } .line { margin-top: 12px; font-size: 15px; } .ctaWrap { margin-top: 20px; } .rows { gap: 12px; margin-top: 14px; } }
 @media (prefers-reduced-motion: no-preference) {
   .scrim { animation: fadeIn 180ms ease-out both; }
   .dialog { animation: arrive 300ms cubic-bezier(.16, 1, .3, 1) both; }
@@ -178,12 +100,6 @@
   .particles i { animation: glint 7s ease-in-out infinite alternate; }
   .particles i:nth-child(2) { animation-delay: -3s; }
   .particles i:nth-child(3) { animation-delay: -5s; }
-  .demoCard { animation: demoSwipe 4.4s ease-in-out 900ms infinite; }
-  .demoFinger { animation: demoFinger 4.4s ease-in-out 900ms infinite; }
-  .demoBadgeSave { animation: demoSave 4.4s ease-out 900ms infinite; }
-  .demoBadgePass { animation: demoPass 4.4s ease-out 900ms infinite; }
-  .demoCap1 { animation: demoCap1 4.4s ease-in-out 900ms infinite; }
-  .demoCap2 { animation: demoCap2 4.4s ease-in-out 900ms infinite; }
   .departing .dialog { animation: leave 180ms ease-in both; }
   .cta { transition: filter 160ms ease; }
 }
@@ -192,33 +108,6 @@
 @keyframes hello { from { opacity: 0; transform: translateY(16px) scale(.8) rotate(-8deg); } to { opacity: 1; transform: none; } }
 @keyframes leave { to { opacity: 0; transform: translateY(-6px); } }
 
-.demoCap2 { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .demoCap2 { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { }
 
-/* Two beats (direct feedback, 11 Sept 2026): swipe right to save, swipe
-   left to pass. The scroll-for-details beat moved out; the deck's own
-   gesture guide teaches that on the first real card. */
-@keyframes demoSave { 0%, 22% { opacity: 0; scale: .6; } 28%, 36% { opacity: 1; scale: 1; } 42%, 100% { opacity: 0; scale: .6; } }
-@keyframes demoPass { 0%, 66% { opacity: 0; scale: .6; } 72%, 80% { opacity: 1; scale: 1; } 86%, 100% { opacity: 0; scale: .6; } }
-@keyframes demoCap1 { 0%, 42% { opacity: 1; } 46%, 96% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes demoCap2 { 0%, 44% { opacity: 0; } 48%, 94% { opacity: 1; } 98%, 100% { opacity: 0; } }
 
-@keyframes demoSwipe {
-  0%, 10% { translate: -50% 0; rotate: 0deg; opacity: 1; }
-  30% { translate: 70% 0; rotate: 12deg; opacity: 0; }
-  38% { translate: -50% 0; rotate: 0deg; opacity: 0; }
-  44%, 54% { translate: -50% 0; rotate: 0deg; opacity: 1; }
-  74% { translate: -170% 0; rotate: -12deg; opacity: 0; }
-  82% { translate: -50% 0; rotate: 0deg; opacity: 0; }
-  88%, 100% { translate: -50% 0; rotate: 0deg; opacity: 1; }
-}
-
-@keyframes demoFinger {
-  0%, 4% { translate: -50% -50%; opacity: 0; scale: 1.4; }
-  8%, 10% { translate: -50% -50%; opacity: 1; scale: 1; }
-  28% { translate: 90px -50%; opacity: 1; scale: 1; }
-  32%, 46% { translate: -50% -50%; opacity: 0; scale: 1.4; }
-  50%, 54% { translate: -50% -50%; opacity: 1; scale: 1; }
-  72% { translate: -150px -50%; opacity: 1; scale: 1; }
-  76%, 100% { translate: -50% -50%; opacity: 0; scale: 1.4; }
-}
