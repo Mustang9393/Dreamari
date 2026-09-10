@@ -99,11 +99,12 @@ export const GRADE_OPTIONS = ["8th grade", "9th grade", "10th grade", "11th grad
 
 export const TRAVEL_DISTANCE_OPTIONS = ["Within 25 miles", "Within 50 miles", "Within 100 miles", "Anywhere around your preferred state"];
 
-// Each tenth from 3.9 down to 2.0 instead of five range buckets, for
-// accuracy (Slack, 10 Sept 2026); the three fixed options stay as they were.
 export const GPA_OPTIONS = [
   "4.0 or higher",
-  ...Array.from({ length: 20 }, (_, i) => (3.9 - i / 10).toFixed(1)),
+  "3.5 to 3.9",
+  "3.0 to 3.4",
+  "2.5 to 2.9",
+  "2.0 to 2.4",
   "Below 2.0",
   "My school does not use GPA",
 ];
