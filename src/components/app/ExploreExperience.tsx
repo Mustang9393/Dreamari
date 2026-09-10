@@ -16,6 +16,7 @@ import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
   BROWSE_BECAUSE_LIKED,
   BROWSE_MIGHT_NOT_KNOW,
+  BROWSE_TRADES,
   BROWSE_TRENDING,
   BROWSE_TYPICAL_PAY,
   BROWSE_WORLD_RAIL,
@@ -154,6 +155,7 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
   const effectiveSort: SortOption = filtersOpen ? sort : "Recommended";
   const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, query, effectiveSort);
   const becauseLiked = view(BROWSE_BECAUSE_LIKED);
+  const trades = view(BROWSE_TRADES);
   const trending = view(BROWSE_TRENDING);
   const worldRail = view(BROWSE_WORLD_RAIL);
   const mightNotKnow = view(BROWSE_MIGHT_NOT_KNOW);
@@ -188,7 +190,8 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
       )}
 
       {/* Rail order + content per Joshua (2026-08-21): merged recommended
-         rail, then Tech, Top 5, Might Not Know, Typical Pay. `contents` keeps
+         rail, then Tech, Top 5, Might Not Know, Skilled Trades (added 11
+         Sept 2026), Typical Pay. `contents` keeps
          this div out of main's flex layout (the rails still lay out as if
          they were main's own direct children) while giving seq-reveal
          something to stagger the rails' entrance from off of. */}
@@ -212,6 +215,15 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
         {mightNotKnow.length > 0 && (
           <Rail title="Careers You Might Not Know">
             <PosterRail careers={mightNotKnow} />
+          </Rail>
+        )}
+
+        {/* Trades row (Slack, 11 Sept 2026): its own row, directly above
+           Typical Pay per the user, and trades are also mixed into the rows
+           above so they read as equal to everything else on the page. */}
+        {trades.length > 0 && (
+          <Rail title="Skilled Trades">
+            <PosterRail careers={trades} />
           </Rail>
         )}
 

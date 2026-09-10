@@ -75,13 +75,36 @@ export const BROWSE_WORLD_RAIL: CatalogCareer[] = [
   C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
 ];
 
+// Trades rail (Slack "Trades Tab Update", 11 Sept 2026): the six new trade
+// posters plus the trades already in the catalog, so skilled trades read as
+// a first-class row rather than an afterthought. Not a separate tab.
+// Order: Air Traffic Controller is last because it also opens the Typical Pay
+// row directly below; the same face twice on one screen clashed. Lighting
+// Technician opens the row above, so it is not first here either.
+export const BROWSE_TRADES: CatalogCareer[] = [
+  C("Hairstylist", "Personal Care & Community Services", "/images/app/poster-hairstylist.png"),
+  C("Electrician", "Building & Construction", "/images/app/poster-electrician.png"),
+  C("Sheet Metal Worker", "Building & Construction", "/images/app/poster-sheet-metal-worker.png"),
+  C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.png"),
+  C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.png"),
+  C("Forklift Operator", "Driving, Flying & Shipping", "/images/app/poster-forklift-operator.png"),
+  C("Roofer", "Building & Construction", "/images/app/poster-roofer.png"),
+  C("Truck Driver", "Driving, Flying & Shipping", "/images/app/poster-truck-driver.png"),
+  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.png"),
+];
+
 // Careers You Might Not Know — content + order per Joshua 2026-08-21.
 // (His earlier 8-career list still lacks images for Flavor Chemist, Beauty
 // Product Developer, Ethical Hacker, Animal Nutrition Scientist, Game QA
 // Tester, Shopper Insights Analyst, Genetic Counselor.)
+// Trades are also mixed into the rows below, in the first positions so they
+// are on screen before any horizontal scroll (only one poster is fully
+// visible on a phone). Nothing that was here before was removed.
 export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
+  C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.png"),
   C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.png"),
   C("Sound Engineering Technician", "Arts, Media & Sport", "/images/app/poster-sound-engineering-technician.png"),
+  C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.png"),
   C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.png"),
   C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.png"),
   C("Drone Pilot", "Driving, Flying & Shipping", "/images/app/poster-drone-pilot.png"),
@@ -89,6 +112,7 @@ export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
 ];
 
 export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
+  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.png", "$137K"),
   C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.png", "$559K"),
   C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.png", "$227K"),
   C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.png", "$148K"),
@@ -102,7 +126,7 @@ export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
 // "Similar careers" and its own title/world/photo resolution).
 export const ALL_CATALOG_CAREERS: CatalogCareer[] = (() => {
   const seen = new Map<string, CatalogCareer>();
-  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TYPICAL_PAY]) {
+  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TYPICAL_PAY]) {
     if (!seen.has(career.title)) seen.set(career.title, career);
   }
   return [...seen.values()];

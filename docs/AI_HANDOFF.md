@@ -6903,3 +6903,43 @@ a better way"; row headers shouldn't stack; look at Netflix / Hotstar.
   the right, no stacked eyebrow (Netflix / Hotstar). The 2-year rail keeps
   its Replit subtitle under the title.
 Verified 375x812 and 1280x800.
+
+## 2026-09-11 · Explore Browse All: Skilled Trades row + trades mixed in
+Slack "Trades Tab Update" + direct feedback: trades must not read as less
+important; a row, not a tab; mixed into other rows without removing anything;
+visible without horizontal scrolling.
+- Six new posters in `public/images/app/` (from the root `trades tab/`
+  folder, resized to 1254px tall): lighting-technician, forklift-operator,
+  forestry-technician, hairstylist, air-traffic-controller-v2,
+  sheet-metal-worker.
+- `catalog.ts`: new `BROWSE_TRADES` (the six + Electrician, Roofer, Truck
+  Driver), included in `ALL_CATALOG_CAREERS` so /career/<slug> resolves for
+  each (they render the "coming soon" report state like most of the catalog).
+- Mixed in at position 1 so they are on screen on a phone (one poster is
+  fully visible per row): Lighting Technician and Forestry Technician (4th)
+  in Careers You Might Not Know; Air Traffic Controller ($137K) first in
+  Typical Pay. No existing career removed.
+- `ExploreExperience.tsx`: `<Rail title="Skilled Trades">` placed directly
+  above Typical Pay (user: "put trades above the salary row"). Air Traffic
+  Controller sits LAST in the Trades row because it opens Typical Pay right
+  below it; the same photo twice on one screen read as a clash.
+- `profiles.generated.ts`: full career pages (same blueprint as every other
+  generated profile: summary, imagine line, four facts, pay by state, know
+  about / good at / software, three-rung ladder, education, fact details)
+  for Hairstylist, Sheet Metal Worker, Forestry Technician, Forklift
+  Operator and Lighting Technician, from 2024 OOH / OES figures for the
+  matching BLS occupations. Approximate prototype data, like the rest of the
+  file. Air Traffic Controller already had one.
+- `PosterCard.tsx`: poster title size is no longer decided by a character
+  count (10+ letter word -> 19px), which made ELECTRICIAN small next to a
+  full-size SHEET METAL WORKER in the same world. `posterTitleSize(title,
+  world)` now estimates the title's width from a per-world widest-glyph
+  table (`POSTER_GLYPH_EM`, measured in Chrome) and shrinks to 19 only when
+  the longest word will not fit 200px or the title needs a third line at 24.
+  Deterministic, so server and client agree. Result: Electrician, Hairstylist,
+  Accountant, Management Analyst, Lighting/Forestry Technician go to 24;
+  Air Traffic Controller, Administrative Assistant, Agricultural Technician,
+  Sound Engineering Technician, Sports Medicine Doctor stay/go to 19. No
+  word or band overflow on Explore Browse or Home.
+Gate: eslint + tsc clean. Verified 375x812 and desktop; /career/hairstylist
+and /career/sheet-metal-worker render full pages. Not pushed.

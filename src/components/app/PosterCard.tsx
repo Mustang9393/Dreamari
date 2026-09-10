@@ -9,13 +9,56 @@ import { posterTitleFont, WORLD_COLORS } from "./worlds";
 // gradient-shimmer Bricolage figure in the top-right, exactly as the
 // "Typical Pay" rail's cards carry it.
 
-// Exactly TWO title sizes, chosen by rule (not per career/world): the
-// standard 24, or one fixed compact 19 when the longest word is 10+ chars
-// (CONTROLLER, PSYCHOLOGIST) so nothing clips. Short titles never shrink.
-function posterTitleSize(title: string): { fontSize: number; lineHeight: string } {
-  const longest = Math.max(...title.split(/[\s-]+/).map((word) => word.length));
-  if (longest >= 10) return { fontSize: 19, lineHeight: "23px" };
-  return { fontSize: 24, lineHeight: "28px" };
+// Exactly TWO title sizes: the standard 24, or one fixed compact 19 when the
+// title genuinely will not fit at 24 (its longest word is wider than the
+// card, or it needs a third line). A character count used to decide this,
+// which made ELECTRICIAN small and SHEET METAL WORKER big in the same world
+// (direct feedback, 11 Sept 2026: "keep everything consistent"). Width is
+// estimated from each world's typeface so the same rule holds on the server
+// and the client with no re-measure flash.
+//
+// Widest uppercase glyph per poster face as a fraction of the font size,
+// letter-spacing included, measured in Chrome on 11 Sept 2026. Deliberately
+// the widest glyph, not the average: a title shrinks only when it truly must,
+// and never overflows because a narrow estimate said it would fit.
+const POSTER_GLYPH_EM: Record<string, number> = {
+  "Business & Money": 0.72,
+  "Tech & Engineering": 0.85,
+  "Health & Medicine": 0.75,
+  "Law, Safety & Justice": 0.67,
+  "Driving, Flying & Shipping": 0.97,
+  "Counseling & Social Work": 0.61,
+  "Arts, Media & Sport": 0.64,
+  "Farming, Animals & Nature": 0.75,
+  "Factories & Making Things": 0.73,
+  "Personal Care & Community Services": 0.65,
+  "Building & Construction": 0.72,
+};
+const UNMEASURED_GLYPH_EM = 0.85;
+// 210px card less the text band's horizontal padding.
+const POSTER_TITLE_WIDTH = 200;
+
+function titleFits(title: string, world: string, fontSize: number): boolean {
+  const em = POSTER_GLYPH_EM[world] ?? UNMEASURED_GLYPH_EM;
+  const space = fontSize * 0.3;
+  let lines = 1;
+  let line = 0;
+  for (const word of title.split(/[\s-]+/)) {
+    const width = word.length * fontSize * em;
+    if (width > POSTER_TITLE_WIDTH) return false;
+    if (line === 0) line = width;
+    else if (line + space + width <= POSTER_TITLE_WIDTH) line += space + width;
+    else {
+      lines += 1;
+      line = width;
+    }
+  }
+  return lines <= 2;
+}
+
+function posterTitleSize(title: string, world: string): { fontSize: number; lineHeight: string } {
+  if (titleFits(title, world, 24)) return { fontSize: 24, lineHeight: "28px" };
+  return { fontSize: 19, lineHeight: "23px" };
 }
 
 // Hyphenated compounds (INDUSTRIAL-ORGANIZATIONAL) don't reliably wrap at
@@ -57,7 +100,7 @@ export function OpenCue() {
 }
 
 export function PosterCard({ career, className = "", onClick }: { career: CatalogCareer; className?: string; onClick?: () => void }) {
-  const titleSize = posterTitleSize(career.title);
+  const titleSize = posterTitleSize(career.title, career.world);
   return (
     <button
       type="button"

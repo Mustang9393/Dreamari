@@ -6,6 +6,9 @@
 // the salary the catalog already shows on the poster (Pediatric Surgeon,
 // Purchasing Manager, Cardiologist, Public Relations Manager, Veterinarian).
 // Replace with production data when it is available; do not treat as sourced.
+// 2026-09-11: the five new trades (Hairstylist, Sheet Metal Worker, Forestry
+// Technician, Forklift Operator, Lighting Technician) were added the same
+// way, from the 2024 OOH / OES figures for the matching BLS occupations.
 import type { CareerProfile } from "./profiles";
 
 export const GENERATED_PROFILES: Record<string, CareerProfile> = {
@@ -7466,6 +7469,963 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       },
       "openings": {
         "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,600 by 2034. It is growing about as fast as most jobs."
+      }
+    }
+  },
+  "hairstylist": {
+    "slug": "hairstylist",
+    "title": "Hairstylist",
+    "world": "Personal Care & Community Services",
+    "photo": "/images/app/poster-hairstylist.png",
+    "summary": "Cuts, colors and styles hair, and builds a list of clients who come back.",
+    "scenario": "Imagine a bride in your chair at 7 a.m., photos at 10, and a color correction that has to look perfect under sunlight.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "Postsecondary certificate and a state license"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$36,150/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "671,600"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "91,700"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$32K"
+        }
+      ],
+      "best": [
+        {
+          "state": "Washington",
+          "pay": "$49K"
+        },
+        {
+          "state": "Massachusetts",
+          "pay": "$46K"
+        },
+        {
+          "state": "Colorado",
+          "pay": "$45K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Hair, skin and color chemistry",
+      "Current styles and trends",
+      "Sanitation and safety rules",
+      "Running a small business",
+      "Talking with all kinds of people"
+    ],
+    "goodAt": [
+      "Steady hands and an eye for detail",
+      "Listening to what a client means",
+      "Standing for long stretches",
+      "Selling your own work",
+      "A 1,000 to 1,500 hour cosmetology program"
+    ],
+    "software": [
+      "Vagaro",
+      "Square Appointments",
+      "Booksy",
+      "Instagram",
+      "Intuit QuickBooks"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Salon Assistant",
+        "pay": "$27K",
+        "description": "You shampoo, mix color and watch senior stylists while you finish school and pass the state board.",
+        "whatYouDo": [
+          "Shampoo clients",
+          "Mix color",
+          "Keep stations clean",
+          "Book appointments"
+        ],
+        "toGetHere": [
+          "Cosmetology program",
+          "State license exam"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Licensed Stylist",
+        "pay": "$36K",
+        "description": "You run your own chair and your own book of clients. Tips and product sales add to your pay.",
+        "whatYouDo": [
+          "Cut and color",
+          "Consult with clients",
+          "Recommend products",
+          "Build a client list"
+        ],
+        "toGetHere": [
+          "State cosmetology license",
+          "1 to 2 years assisting"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Senior Stylist or Salon Owner",
+        "pay": "$62K",
+        "description": "You charge more for your experience, train new stylists, or open your own salon or suite.",
+        "whatYouDo": [
+          "Set your prices",
+          "Train new stylists",
+          "Manage a salon",
+          "Market your work"
+        ],
+        "toGetHere": [
+          "Several years behind the chair",
+          "A loyal client list"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Cosmetology/Cosmetologist"
+        },
+        {
+          "name": "Hair Styling/Stylist and Hair Design"
+        }
+      ],
+      "where": [
+        {
+          "count": "1,240",
+          "credential": "Certificate, under a year"
+        },
+        {
+          "count": "910",
+          "credential": "Certificate, 1-2 years"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Postsecondary certificate and a state license",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "None",
+        "note": "Cosmetology school and the state board exam come first; from there you learn behind the chair.",
+        "noBachelorPct": "93%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 8.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 36.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 32.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 10.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 11.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 2.4
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.6
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$23,890",
+        "typical": "$36,150",
+        "top": "$66,290",
+        "note": "Tips are not counted here, and about half of stylists work for themselves."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +50,900 by 2034. It is growing faster than most jobs."
+      }
+    }
+  },
+  "sheet-metal-worker": {
+    "slug": "sheet-metal-worker",
+    "title": "Sheet Metal Worker",
+    "world": "Building & Construction",
+    "photo": "/images/app/poster-sheet-metal-worker.png",
+    "summary": "Makes and installs the metal ducts, roofs and panels that buildings run on.",
+    "scenario": "Imagine a data center that needs 600 feet of ductwork bent, fitted and sealed before the servers arrive. Every joint you make either holds air or leaks it.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "High school diploma or equivalent"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$58,780/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "129,600"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "12,300"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$52K"
+        }
+      ],
+      "best": [
+        {
+          "state": "Illinois",
+          "pay": "$86K"
+        },
+        {
+          "state": "Alaska",
+          "pay": "$84K"
+        },
+        {
+          "state": "New Jersey",
+          "pay": "$80K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Reading blueprints",
+      "Geometry and measurement",
+      "Metals and how they behave",
+      "Heating and cooling systems",
+      "Job site safety"
+    ],
+    "goodAt": [
+      "Working with your hands",
+      "Precise measuring",
+      "Physical stamina",
+      "Working at heights",
+      "A 4 to 5 year apprenticeship"
+    ],
+    "software": [
+      "AutoCAD",
+      "Autodesk Fabrication CAMduct",
+      "Bluebeam Revu",
+      "Microsoft Excel",
+      "Procore"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Apprentice Sheet Metal Worker",
+        "pay": "$40K",
+        "description": "You earn while you learn, cutting and carrying in the shop and on site with classes at night.",
+        "whatYouDo": [
+          "Cut and bend metal",
+          "Carry and stage material",
+          "Learn layout math",
+          "Assist journeymen"
+        ],
+        "toGetHere": [
+          "High school diploma",
+          "Accepted into apprenticeship"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Journeyman Sheet Metal Worker",
+        "pay": "$59K",
+        "description": "You fabricate and install on your own from the drawings, and sign off on your own work.",
+        "whatYouDo": [
+          "Lay out and fabricate",
+          "Install ductwork",
+          "Weld and seal",
+          "Read plans"
+        ],
+        "toGetHere": [
+          "4 to 5 year apprenticeship",
+          "Journeyman card"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Foreman or Shop Owner",
+        "pay": "$85K",
+        "description": "You run the crew or the shop, estimate jobs and answer for the schedule.",
+        "whatYouDo": [
+          "Run a crew",
+          "Estimate jobs",
+          "Order material",
+          "Own a shop"
+        ],
+        "toGetHere": [
+          "Years as journeyman",
+          "Contractor license to own"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Sheet Metal Technology/Sheetworking"
+        },
+        {
+          "name": "Heating, Air Conditioning, Ventilation and Refrigeration Technology"
+        }
+      ],
+      "where": [
+        {
+          "count": "95",
+          "credential": "Certificate, under a year"
+        },
+        {
+          "count": "140",
+          "credential": "Certificate, 1-2 years"
+        },
+        {
+          "count": "60",
+          "credential": "Associate's degree"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "High school diploma or equivalent",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "Apprenticeship",
+        "note": "This is a trade you learn on an apprenticeship: paid work with training, not a degree first.",
+        "noBachelorPct": "91%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 10.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 44.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 26.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 9.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 9.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 1.6
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.4
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$37,340",
+        "typical": "$58,780",
+        "top": "$101,190",
+        "note": "Union shops and big commercial jobs sit toward the top of this range."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +1,100 by 2034. It is holding about steady."
+      }
+    }
+  },
+  "forestry-technician": {
+    "slug": "forestry-technician",
+    "title": "Forestry Technician",
+    "world": "Farming, Animals & Nature",
+    "photo": "/images/app/poster-forestry-technician.png",
+    "summary": "Measures, protects and manages forests, from timber counts to fire prevention.",
+    "scenario": "Imagine walking 8 miles of ridge line with a GPS and a tape, tagging trees and checking for beetle damage before a fire season that starts in three weeks.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "Associate's degree"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$45,540/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "30,800"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "3,400"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$42K"
+        }
+      ],
+      "best": [
+        {
+          "state": "Washington",
+          "pay": "$56K"
+        },
+        {
+          "state": "California",
+          "pay": "$54K"
+        },
+        {
+          "state": "Alaska",
+          "pay": "$53K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Trees, plants and wildlife",
+      "Maps and GPS",
+      "Basic statistics",
+      "Fire behavior and safety",
+      "Environmental rules"
+    ],
+    "goodAt": [
+      "Long days outdoors in any weather",
+      "Careful measuring and record keeping",
+      "Reading maps and terrain",
+      "Working in a small crew",
+      "A 2 year forestry program"
+    ],
+    "software": [
+      "ArcGIS Pro",
+      "Avenza Maps",
+      "Microsoft Excel",
+      "Forest Vegetation Simulator",
+      "Trimble GPS software"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Seasonal Forestry Aide",
+        "pay": "$34K",
+        "description": "You spend a summer on a crew marking trees, clearing trails and learning the tools.",
+        "whatYouDo": [
+          "Mark boundaries",
+          "Clear trails",
+          "Collect samples",
+          "Fight small fires"
+        ],
+        "toGetHere": [
+          "High school diploma",
+          "Some college or a summer field course"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Forestry Technician",
+        "pay": "$45K",
+        "description": "You run timber inventories, map stands and write up what you find for the forester.",
+        "whatYouDo": [
+          "Inventory timber",
+          "Map with GPS",
+          "Monitor tree health",
+          "Plan prescribed burns"
+        ],
+        "toGetHere": [
+          "Associate's degree in forestry",
+          "1 to 2 seasons in the field"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Lead Technician or Forester",
+        "pay": "$67K",
+        "description": "You plan the work for a district, lead crews and decide what gets harvested, planted or protected.",
+        "whatYouDo": [
+          "Plan harvests",
+          "Lead field crews",
+          "Write management plans",
+          "Meet with landowners"
+        ],
+        "toGetHere": [
+          "Bachelor's degree for forester roles",
+          "Several years in the field"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Forest Technology/Technician"
+        },
+        {
+          "name": "Natural Resources Management and Policy"
+        }
+      ],
+      "where": [
+        {
+          "count": "35",
+          "credential": "Certificate, 1-2 years"
+        },
+        {
+          "count": "70",
+          "credential": "Associate's degree"
+        },
+        {
+          "count": "55",
+          "credential": "Bachelor's degree"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "Associate's degree",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "On the job",
+        "note": "A two year forestry program is the usual door; summer field crews count for a lot.",
+        "noBachelorPct": "62%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 2.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 18.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 22.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 20.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 33.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 4.5
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$32,110",
+        "typical": "$45,540",
+        "top": "$70,860",
+        "note": "Most of these jobs are with federal and state agencies, so pay follows government scales."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about -300 by 2034. It is holding about steady."
+      }
+    }
+  },
+  "forklift-operator": {
+    "slug": "forklift-operator",
+    "title": "Forklift Operator",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/poster-forklift-operator.png",
+    "summary": "Moves pallets and freight through warehouses, docks and factories.",
+    "scenario": "Imagine 40 trailers due out by midnight, a scanner telling you which pallet goes where, and aisles just wide enough for your forks.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "No formal degree; an OSHA forklift certification"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$45,020/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "803,300"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "90,600"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$41K"
+        }
+      ],
+      "best": [
+        {
+          "state": "Washington",
+          "pay": "$53K"
+        },
+        {
+          "state": "Alaska",
+          "pay": "$52K"
+        },
+        {
+          "state": "Massachusetts",
+          "pay": "$50K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Warehouse safety rules",
+      "How freight is stacked and secured",
+      "Basic math and counting",
+      "Shipping paperwork",
+      "How a warehouse flows"
+    ],
+    "goodAt": [
+      "Spatial awareness",
+      "Staying alert on repeat tasks",
+      "Working shifts and nights",
+      "Following procedures exactly",
+      "A 1 to 2 day certification course"
+    ],
+    "software": [
+      "SAP Extended Warehouse Management",
+      "Manhattan WMS",
+      "RF scanner software",
+      "Microsoft Excel",
+      "Oracle Warehouse Management"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Warehouse Associate",
+        "pay": "$36K",
+        "description": "You pick, pack and load by hand while you get certified on the lifts.",
+        "whatYouDo": [
+          "Pick orders",
+          "Load trucks",
+          "Scan inventory",
+          "Learn the floor"
+        ],
+        "toGetHere": [
+          "No degree required",
+          "Pass a drug and safety screen"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Certified Forklift Operator",
+        "pay": "$45K",
+        "description": "You run the lifts all shift: unloading trailers, stacking racks and keeping the count right.",
+        "whatYouDo": [
+          "Unload trailers",
+          "Stack racks safely",
+          "Move freight by scanner",
+          "Inspect your lift"
+        ],
+        "toGetHere": [
+          "OSHA forklift certification",
+          "A few months on the floor"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Warehouse Lead or Supervisor",
+        "pay": "$62K",
+        "description": "You run a shift or a zone, train new operators and answer for what ships on time.",
+        "whatYouDo": [
+          "Run a shift",
+          "Train operators",
+          "Track productivity",
+          "Fix problems fast"
+        ],
+        "toGetHere": [
+          "Years of reliable operating",
+          "Supervisor training"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Logistics, Materials and Supply Chain Management"
+        },
+        {
+          "name": "Truck, Bus and Commercial Vehicle Operation"
+        }
+      ],
+      "where": [
+        {
+          "count": "210",
+          "credential": "Certificate, under a year"
+        },
+        {
+          "count": "45",
+          "credential": "Certificate, 1-2 years"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "No formal degree; an OSHA forklift certification",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "Short on-the-job training",
+        "note": "Employers certify you on their own equipment, usually in the first weeks.",
+        "noBachelorPct": "95%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 16.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 47.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 22.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 8.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 6.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 0.8
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.2
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$33,570",
+        "typical": "$45,020",
+        "top": "$61,940",
+        "note": "Night and weekend shifts usually pay a premium on top of this."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +26,600 by 2034. It is growing about as fast as most jobs."
+      }
+    }
+  },
+  "lighting-technician": {
+    "slug": "lighting-technician",
+    "title": "Lighting Technician",
+    "world": "Arts, Media & Sport",
+    "photo": "/images/app/poster-lighting-technician.png",
+    "summary": "Rigs, focuses and runs the lights for concerts, film sets, theater and live events.",
+    "scenario": "Imagine a 40 foot truss going up at 6 a.m., 200 fixtures to hang and focus, and doors opening for 12,000 people at 7 p.m.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "High school diploma; many train through a stage union apprenticeship"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$58,380/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "12,500"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "1,400"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$44K"
+        }
+      ],
+      "best": [
+        {
+          "state": "California",
+          "pay": "$76K"
+        },
+        {
+          "state": "New York",
+          "pay": "$72K"
+        },
+        {
+          "state": "Nevada",
+          "pay": "$68K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Electricity and power distribution",
+      "How light, color and shadow work",
+      "Rigging and fall safety",
+      "Stage and film production",
+      "Reading a lighting plot"
+    ],
+    "goodAt": [
+      "Working at heights",
+      "Long, irregular hours",
+      "Fast, careful problem solving",
+      "Working as one crew",
+      "Programming a lighting console"
+    ],
+    "software": [
+      "ETC Eos",
+      "grandMA3",
+      "Vectorworks Spotlight",
+      "Lightwright",
+      "QLab"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Stagehand or Lighting Crew",
+        "pay": "$36K",
+        "description": "You load in, run cable, hang fixtures and learn the gear one show at a time.",
+        "whatYouDo": [
+          "Hang fixtures",
+          "Run cable",
+          "Load in and out",
+          "Follow the head electrician"
+        ],
+        "toGetHere": [
+          "High school diploma",
+          "Stagehand training or union apprenticeship"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Lighting Technician",
+        "pay": "$58K",
+        "description": "You focus the rig, patch the console and run cues for the show or the shoot.",
+        "whatYouDo": [
+          "Focus and patch",
+          "Run the console",
+          "Troubleshoot fixtures",
+          "Read the plot"
+        ],
+        "toGetHere": [
+          "2 to 4 years on crews",
+          "Rigging and electrical safety certifications"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Master Electrician or Lighting Director",
+        "pay": "$85K",
+        "description": "You lead the lighting crew, plan the power and the rig, and make the designer's plot real.",
+        "whatYouDo": [
+          "Plan power and rigging",
+          "Lead the crew",
+          "Budget the rig",
+          "Work with designers"
+        ],
+        "toGetHere": [
+          "Years as a technician",
+          "Tours or major venues on your credits"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Technical Theatre/Theatre Design and Technology"
+        },
+        {
+          "name": "Cinematography and Film/Video Production"
+        }
+      ],
+      "where": [
+        {
+          "count": "40",
+          "credential": "Certificate, under a year"
+        },
+        {
+          "count": "120",
+          "credential": "Associate's degree"
+        },
+        {
+          "count": "260",
+          "credential": "Bachelor's degree"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": {
+        "doorAsksFor": "High school diploma; many train through a stage union apprenticeship",
+        "experienceFirst": "No. You can start without it",
+        "trainingAfterHiring": "On the job",
+        "note": "Crews hire on skill and reliability; a theater or film program helps, a degree is not required.",
+        "noBachelorPct": "64%",
+        "distribution": [
+          {
+            "label": "Did not finish high school",
+            "pct": 4.0
+          },
+          {
+            "label": "Finished high school",
+            "pct": 24.0
+          },
+          {
+            "label": "Some college, no degree",
+            "pct": 24.0
+          },
+          {
+            "label": "Associate's degree",
+            "pct": 12.0
+          },
+          {
+            "label": "Bachelor's degree",
+            "pct": 32.0
+          },
+          {
+            "label": "Master's degree",
+            "pct": 3.5
+          },
+          {
+            "label": "Doctorate or professional degree",
+            "pct": 0.5
+          }
+        ]
+      },
+      "pay": {
+        "starting": "$34,450",
+        "typical": "$58,380",
+        "top": "$98,700",
+        "note": "Touring and union film work sit at the top; much of the work is freelance, paid by the day or the show."
+      },
+      "openings": {
+        "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +700 by 2034. It is growing about as fast as most jobs."
       }
     }
   }
