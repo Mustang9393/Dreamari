@@ -6792,3 +6792,23 @@ better; less clutter below the Careers/Schools tabs.
   doesn't already say it; the two sentences are gone. Browse-all shelves
   use the same card.
 Verified 375x812: strip, based-on line, sheet content, stat rows, rails.
+
+### 11 Sept 2026 -- Explore Schools, pass 5: Replit spacing/hierarchy, its Why sheet
+
+Direct feedback: mobile FOR YOU / BROWSE ALL wrapped; the Why sheet carried
+too much copy; the Replit's spacing, hierarchy and design are better; the
+programme chips sat badly.
+- Mobile top-bar tabs (Careers AND Schools, same markup): 14px +
+  whitespace-nowrap, so they sit on one line beside the icons.
+- Why sheet is the Replit's, structure and copy: eyebrow WHY THESE SCHOOLS?,
+  "A clear starting point", a check-list (Your career / Your education path /
+  Your recommended program / Your academic profile: 3.7 GPA / Your location
+  preference), one CTA "Adjust preferences" (-> Settings). The legend and
+  prose are gone. ("#1 career" on the Replit is "Your career" here: no
+  ranking language.)
+- Rails: Replit rhythm -- small eyebrow "N SCHOOLS" above a larger heading,
+  sections spaced at space-8; "Based on ..." on its own line with the two
+  links under it on phones.
+- Cards: no programme chip; the programme is a quiet 12.5px line under the
+  location. Fit chip only where the rail title doesn't say it.
+Verified 375x812.

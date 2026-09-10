@@ -710,7 +710,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         <button
           type="button"
           onClick={() => switchTab("foryou")}
-          className="dm-link cursor-pointer text-[16px] font-bold tracking-wide uppercase"
+          className="dm-link cursor-pointer text-[14px] font-bold tracking-wide uppercase whitespace-nowrap"
           style={{ fontFamily: "var(--font-body)", color: tab === "foryou" ? "var(--foreground)" : "var(--muted-foreground)" }}
         >
           For You
@@ -718,7 +718,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         <button
           type="button"
           onClick={() => switchTab("browse")}
-          className="dm-link cursor-pointer text-[16px] font-bold tracking-wide uppercase"
+          className="dm-link cursor-pointer text-[14px] font-bold tracking-wide uppercase whitespace-nowrap"
           style={{ fontFamily: "var(--font-body)", color: tab === "browse" ? "var(--foreground)" : "var(--muted-foreground)" }}
         >
           Browse All

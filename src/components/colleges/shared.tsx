@@ -194,7 +194,7 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
           <div className="flex min-w-0 flex-col gap-[2px]">
             <h3 className="text-[18px] leading-[22px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>{c.name}</h3>
             <p className="text-[13px] leading-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>{c.city}, {c.stateName}</p>
-            {subline && <p className="text-[13px] leading-[17px] font-bold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>{subline}</p>}
+            {subline && <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.72)", fontFamily: "var(--font-body)" }}>{subline}</p>}
           </div>
         </div>
 
