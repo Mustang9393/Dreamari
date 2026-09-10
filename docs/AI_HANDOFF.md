@@ -6977,3 +6977,23 @@ needs a nudge.
   selective each school is."), Done. Shared `Sheet`, `Field`, `Segmented`,
   `Select` helpers in ForYouSchools.tsx.
 Gate clean; verified 1280x800 and 375x812. Not pushed.
+
+## 2026-09-11 · Schools Edit chip: glow-to-beam nudge, tablet, Why link placement
+- Nudge is now a bright glow (`.dm-nudge-glow`, box-shadow + border in the
+  primary colour) that swells around the chip and fades as the beam takes
+  over; the two overlap so it reads as one motion. The scale pulse was
+  rejected ("weird pulse").
+- Header row no longer wraps on sm+; the career name in the heading is
+  `whitespace-nowrap`, so on a tablet the heading breaks "Schools for /
+  Private Equity", never mid-name, and the chip stays on the right.
+- "Why these schools?" is a quiet link AFTER the rails (it is about the whole
+  list; on the Target row header it read as Target-only, and beside the
+  chip it was rejected). Row headers all show their counts again.
+- Edit sheet: single-route careers show a static Path with the hint "The
+  only route into <career> in our data." (routes come from each career's
+  report education entries; Private Equity has one). GPA select offers
+  Build's ranges plus "Don't use my GPA" only.
+- "Edit" reveal: its width is reserved from first paint and only opacity and
+  a 10px slide animate (700ms), so the chip never widens and the heading
+  beside it never re-wraps mid-animation (direct feedback).
+Gate clean; verified 768x1024, 1024x800, 375x812. Not pushed.

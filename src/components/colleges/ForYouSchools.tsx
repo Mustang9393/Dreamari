@@ -95,12 +95,19 @@ export function ForYouSchools({
   const [why, setWhy] = useState(false);
   const [edit, setEdit] = useState(false);
   // one-time nudge on the Edit chip: label slides in, beam runs one loop
+  // Sequence: a bright glow swells around the chip and, as it fades, the
+  // beam takes over and runs one loop while "Edit" slides in; then
+  // everything waits for hover. Glow and beam overlap so it reads as one
+  // motion, not two effects.
+  const [glow, setGlow] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [nudge, setNudge] = useState(false);
   useEffect(() => {
-    const t1 = window.setTimeout(() => { setRevealed(true); setNudge(true); }, 900);
-    const t2 = window.setTimeout(() => setNudge(false), 900 + 3600);
-    return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
+    const t0 = window.setTimeout(() => setGlow(true), 700);
+    const t1 = window.setTimeout(() => { setRevealed(true); setNudge(true); }, 700 + 700);
+    const t2 = window.setTimeout(() => setGlow(false), 700 + 1600);
+    const t3 = window.setTimeout(() => setNudge(false), 700 + 700 + 3600);
+    return () => { window.clearTimeout(t0); window.clearTimeout(t1); window.clearTimeout(t2); window.clearTimeout(t3); };
   }, []);
   const place = profile.states[0] ?? HOME_STATE_NAME;
   const gpa = parseGpa(profile.gpa);
@@ -171,14 +178,14 @@ export function ForYouSchools({
          section tabs above, that stacked five text tiers before the first
          card (direct feedback, 11 Sept 2026: "too many text elements so close
          together"). On phones the chip wraps under the heading. */}
-      <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-6)] gap-y-[var(--space-3)]">
-        <h2 className="text-[24px] leading-[30px] font-extrabold sm:text-[28px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)" }}>
+      <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-6)] gap-y-[var(--space-3)] sm:flex-nowrap">
+        <h2 className="min-w-0 text-[24px] leading-[30px] font-extrabold sm:text-[28px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)" }}>
           <span style={{ color: "var(--muted-foreground)" }}>Schools for </span>
           <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} big>
             {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
           </Menu>
         </h2>
-        <div className="flex min-w-0 flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-2)]">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-2)] sm:flex-none sm:flex-nowrap">
           {/* The inputs, as one chip that edits them. "Edit" with a pencil
              sits at its trailing edge (a pencil alone is not understood),
              always visible and in full white: phones have no hover, and a
@@ -191,18 +198,23 @@ export function ForYouSchools({
               type="button"
               onClick={() => setEdit(true)}
               aria-label={`Edit preferences: ${route.label} in ${program}, ${useGpa ? `${gpaLabel} GPA` : "GPA off"}, ${place}`}
-              className="dm-quiet group flex min-h-[38px] max-w-full cursor-pointer items-center gap-[10px] rounded-[19px] border px-[14px] py-[8px] text-left text-[13px] leading-[18px] font-semibold sm:whitespace-nowrap"
+              className={`dm-quiet group flex min-h-[38px] max-w-full cursor-pointer items-center gap-[10px] rounded-[19px] border px-[14px] py-[8px] text-left text-[13px] leading-[18px] font-semibold sm:whitespace-nowrap ${glow ? "dm-nudge-glow" : ""}`}
               style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
             >
               <span>{route.label} in {program} · {useGpa ? `${gpaLabel} GPA` : "GPA off"} · {place}</span>
-              {revealed && (
-                <>
-                  <span aria-hidden className="dm-nudge-in h-[14px] w-px flex-none" style={{ background: "var(--glass-border)" }} />
-                  <span className="dm-nudge-in flex flex-none items-center gap-[5px] font-bold" style={{ color: "var(--foreground)" }}>
-                    <Pencil className="h-[13px] w-[13px]" aria-hidden />Edit
-                  </span>
-                </>
-              )}
+              {/* Slides out from behind the divider. Its width is reserved
+                 from the first paint, so the chip never widens and the
+                 heading beside it never re-wraps mid-animation. */}
+              <span
+                aria-hidden={!revealed}
+                className="flex flex-none items-center gap-[10px] overflow-hidden transition-opacity duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{ opacity: revealed ? 1 : 0 }}
+              >
+                <span aria-hidden className="h-[14px] w-px flex-none" style={{ background: "var(--glass-border)" }} />
+                <span className="flex flex-none items-center gap-[5px] font-bold transition-transform duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ color: "var(--foreground)", transform: revealed ? "translateX(0)" : "translateX(-10px)" }}>
+                  <Pencil className="h-[13px] w-[13px]" aria-hidden />Edit
+                </span>
+              </span>
             </button>
           </HoverBeam>
           {saved.size > 0 && (
@@ -219,7 +231,7 @@ export function ForYouSchools({
         </section>
       )}
 
-      {shown.map((s, i) => (
+      {shown.map((s) => (
         <section key={s.key} className="flex flex-col gap-[var(--space-3)]">
           {/* Netflix / Hotstar row header: title left, the count small on the right */}
           <div className="flex items-baseline justify-between gap-[var(--space-3)]">
@@ -227,18 +239,20 @@ export function ForYouSchools({
               <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{s.title}</h2>
               {RAIL_COPY[s.key]?.note && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{RAIL_COPY[s.key]!.note}</p>}
             </div>
-            {/* "Why these schools?" lives on the first row, right where the
-               Target / Safety / Reach question comes up; other rows carry
-               their count (direct feedback, 11 Sept 2026). */}
-            {i === 0 ? (
-              <button type="button" onClick={() => setWhy(true)} className="dm-link flex-none cursor-pointer text-[13px] leading-[18px] font-bold" style={{ color: SOFT }}>Why these schools?</button>
-            ) : (
-              <span className="flex-none text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{s.list.length} {s.list.length === 1 ? "school" : "schools"}</span>
-            )}
+            <span className="flex-none text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{s.list.length} {s.list.length === 1 ? "school" : "schools"}</span>
           </div>
           <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "start" || s.key === "trade"))}</ul>
         </section>
       ))}
+
+      {/* "Why these schools?" after the rails: it is about the whole list, so
+         it sits neither on one row header (read as Target-only) nor beside
+         the Edit chip (direct feedback, 11 Sept 2026). */}
+      {shown.length > 0 && (
+        <button type="button" onClick={() => setWhy(true)} className="dm-link flex cursor-pointer items-center gap-[2px] self-start text-[14px] leading-[20px] font-bold" style={{ color: SOFT }}>
+          Why these schools? <ChevronRight className="h-4 w-4" aria-hidden />
+        </button>
+      )}
 
       {why && (
         <WhySheet
@@ -254,6 +268,7 @@ export function ForYouSchools({
       {edit && (
         <EditSheet
           onClose={() => setEdit(false)}
+          career={pathway.careerTitle}
           routes={routes}
           route={route}
           onRoute={(id) => setRoutePick((cur) => ({ ...cur, [careerId]: id }))}
@@ -273,10 +288,10 @@ export function ForYouSchools({
 
 function Menu({ label, sub, open, onToggle, disabled, big, children }: { label: string; sub?: string; open: boolean; onToggle: () => void; disabled?: boolean; big?: boolean; children: React.ReactNode }) {
   const subEl = sub ? <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span> : null;
-  if (disabled) return <span style={{ color: "var(--foreground)" }}>{label}{subEl}</span>;
+  if (disabled) return <span className="whitespace-nowrap" style={{ color: "var(--foreground)" }}>{label}{subEl}</span>;
   return (
     <span className="relative inline-block" data-menu>
-      <button type="button" onClick={onToggle} aria-haspopup="menu" aria-expanded={open} className="dm-link flex cursor-pointer items-center gap-[6px] text-left" style={{ color: "var(--foreground)" }}>
+      <button type="button" onClick={onToggle} aria-haspopup="menu" aria-expanded={open} className="dm-link flex cursor-pointer items-center gap-[6px] text-left whitespace-nowrap" style={{ color: "var(--foreground)" }}>
         <span>{label}{subEl}</span>
         <span className="flex flex-none items-center justify-center rounded-full border" style={{ width: big ? 30 : 22, height: big ? 30 : 22, borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
           <ChevronDown className={`transition-transform ${open ? "rotate-180" : ""} ${big ? "h-4 w-4" : "h-[13px] w-[13px]"}`} aria-hidden style={{ color: SOFT }} />
@@ -395,8 +410,9 @@ function WhySheet({ onClose, onEdit, career, route, program, gpaLabel, place }: 
 
 const GPA_OFF = "Don't use my GPA";
 
-function EditSheet({ onClose, routes, route, onRoute, place, onPlace, gpa, onGpa, gpaType, onGpaType }: {
+function EditSheet({ onClose, career, routes, route, onRoute, place, onPlace, gpa, onGpa, gpaType, onGpaType }: {
   onClose: () => void;
+  career: string;
   routes: Route[];
   route: Route;
   onRoute: (id: string) => void;
@@ -411,15 +427,18 @@ function EditSheet({ onClose, routes, route, onRoute, place, onPlace, gpa, onGpa
 }) {
   // The GPA on file may be a plain number from the demo record rather than
   // one of Build's ranges; keep it selectable so nothing changes underneath.
-  const gpaOptions = [...(gpa && !GPA_OPTIONS.includes(gpa) ? [gpa] : []), ...GPA_OPTIONS, GPA_OFF];
+  // Build's "My school does not use GPA" means the same as off here, so it is
+  // not offered twice.
+  const ranges = GPA_OPTIONS.filter((g) => /\d/.test(g));
+  const gpaOptions = [...(gpa && !ranges.includes(gpa) ? [gpa] : []), ...ranges, GPA_OFF];
   return (
     <Sheet title="Edit your list" onClose={onClose}>
       <div className="flex flex-col gap-[var(--space-5)]">
-        <Field label="Path">
+        <Field label="Path" hint={routes.length > 1 ? undefined : `The only route into ${career} in our data.`}>
           {routes.length > 1 ? (
             <Segmented ariaLabel="Education path" value={route.id} options={routes.map((r) => ({ id: r.id, label: r.label }))} onChange={onRoute} />
           ) : (
-            <p className="flex min-h-[46px] items-center rounded-[var(--radius-md)] border px-[14px] text-[15px] font-bold" style={FIELD}>{route.label}</p>
+            <p className="flex min-h-[46px] items-center rounded-[var(--radius-md)] border px-[14px] text-[15px] font-bold" style={{ ...FIELD, color: "var(--muted-foreground)" }}>{route.label}</p>
           )}
         </Field>
         <Field label="Where">
