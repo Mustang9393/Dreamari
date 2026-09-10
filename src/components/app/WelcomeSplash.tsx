@@ -28,8 +28,8 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
     eyebrow: "You’re in", title: "MATCH",
-    line: "Careers picked for you. Save the 3 you like most. That’s your Top 3.",
-    cta: "Start matching",
+    line: "Careers matched to you. Explore your options and save the 3 you like most.",
+    cta: "Start Matching",
   },
   explore: {
     sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",

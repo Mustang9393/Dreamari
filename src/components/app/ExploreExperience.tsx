@@ -45,7 +45,7 @@ import "./app.css";
 // as a pill deliberately (9 Sept 2026) once Careers/Schools became a text
 // tab strip of its own -- reserving the pill shape for this local, same-page
 // toggle keeps it visually distinct from that page-level section switch.
-function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void }) {
+export function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void }) {
   return (
     <div
       className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-1)]"

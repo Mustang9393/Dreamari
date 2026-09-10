@@ -203,10 +203,27 @@ export function schoolsFor(pathway: Pathway, profile: StudentProfile): SchoolGro
   return groups;
 }
 
+// Plain words on the surface (direct feedback, 10 Sept 2026: "reach, target,
+// safety is a little confusing"); the counselor term travels alongside as a
+// small note so the language still lines up with the backend doc.
 export const FIT_WORDS: Record<Fit, string> = {
-  Reach: "Reach",
-  Target: "Target",
-  Safety: "Safety",
-  "Open admission": "Open admission",
-  "Fit unavailable": "Academic fit unavailable",
+  Reach: "A stretch",
+  Target: "Good match",
+  Safety: "Likely",
+  "Open admission": "Everyone gets in",
+  "Fit unavailable": "",
 };
+export const FIT_COUNSELOR: Partial<Record<Fit, string>> = { Reach: "reach", Target: "target", Safety: "safety" };
+
+/** A programme name short enough for a badge: "Business Administration and
+ *  Management, General" -> "Business Administration". */
+export function shortProgram(name: string): string {
+  return name
+    .replace(/,.*$/, "")
+    .replace(/\/.*$/, "")
+    .replace(/\s+(and|&)\s+Management$/i, "")
+    .replace(/\s+General$/i, "")
+    .replace(/Registered Nursing/i, "Nursing")
+    .trim()
+    .slice(0, 28);
+}

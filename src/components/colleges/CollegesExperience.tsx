@@ -11,6 +11,7 @@ import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExpe
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
+import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
 
@@ -160,21 +161,9 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
           <ExploreSectionTabs active="colleges" />
         </div>
 
-        <div role="tablist" aria-label="Schools view" className="flex w-fit gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-          {([{ key: "foryou", label: "For you" }, { key: "browse", label: "Browse all" }] as const).map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              role="tab"
-              aria-selected={view === option.key}
-              onClick={() => setView(option.key)}
-              className="dm-quiet min-h-[38px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[16px] text-[14px] font-bold"
-              style={{ background: view === option.key ? ACCENT : "transparent", color: view === option.key ? "#fff" : "var(--foreground)" }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        {/* The same pill Explore Careers uses, imported rather than redrawn
+           (direct feedback, 10 Sept 2026: "identical ... keep it consistent"). */}
+        <div className="flex"><ForYouBrowseToggle tab={view} onTab={setView} /></div>
 
         {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} />}
         {view === "browse" && (<>

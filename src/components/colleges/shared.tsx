@@ -113,7 +113,7 @@ const BADGE_STYLE: Record<CardBadge["tone"], React.CSSProperties> = {
   muted: { background: "rgba(255,255,255,0.14)", color: "#fff" },
 };
 
-export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": program, path and fit (Reach / Target / Safety) */ badges?: CardBadge[] }) {
+export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges, subline, hideTags = false }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": one fit chip, at most two */ badges?: CardBadge[]; /** one plain line under the place, e.g. the programme that matches the path */ subline?: string; /** For you: the 4-year / Public / City tags are noise next to the fit chip */ hideTags?: boolean }) {
   const img = collegeImage(c);
   return (
     // `poster-card`/`poster-photo` are the exact same hover classes Explore's
@@ -148,21 +148,25 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
       <OpenCue />
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
-      {badges && badges.length > 0 && (
-        <ul className="pointer-events-none absolute top-[14px] left-[14px] z-20 flex max-w-[calc(100%-70px)] flex-wrap gap-[5px]" aria-label="How this school fits your path" style={{ textShadow: "none" }}>
-          {badges.map((b) => (
-            <li key={b.label} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={BADGE_STYLE[b.tone]}>{b.label}</li>
-          ))}
-        </ul>
-      )}
+
 
       <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
         {/* profile row: the mark, then the name and place beside it */}
-        <div className={`flex items-center gap-[12px] pr-[44px] ${badges && badges.length > 0 ? "mt-[34px]" : ""}`}>
+        {badges && badges.length > 0 && (
+          // in the flow, above the name, so a long programme name wraps and
+          // pushes the row down instead of printing over it
+          <ul className="mb-[12px] flex max-w-[calc(100%-44px)] flex-wrap gap-[5px]" aria-label="How this school fits your path" style={{ textShadow: "none" }}>
+            {badges.filter((b) => b.label).map((b) => (
+              <li key={b.label} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={BADGE_STYLE[b.tone]}>{b.label}</li>
+            ))}
+          </ul>
+        )}
+        <div className="flex items-center gap-[12px] pr-[44px]">
           <MarkBadge c={c} size={44} />
           <div className="flex min-w-0 flex-col gap-[2px]">
             <h3 className="text-[18px] leading-[22px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>{c.name}</h3>
             <p className="text-[13px] leading-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>{c.city}, {c.stateName}</p>
+            {subline && <p className="text-[13px] leading-[17px] font-bold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>{subline}</p>}
           </div>
         </div>
 
@@ -172,7 +176,7 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
         </p>
         <div className="pointer-events-auto mt-[10px] flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none", fontFamily: "var(--font-body)" }}>
           <ul className="flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college">
-            {tags(c).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.12)", color: "#fff" }}>{t}</li>)}
+            {(hideTags ? [] : tags(c)).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.12)", color: "#fff" }}>{t}</li>)}
           </ul>
           {onCompare && (
             <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet relative z-20 flex min-h-[32px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-bold" style={{ color: "#fff", background: compared ? `color-mix(in srgb, ${ACCENT} 45%, transparent)` : "rgba(255,255,255,0.08)" }}>

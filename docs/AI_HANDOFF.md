@@ -6534,3 +6534,27 @@ $25K or less / $50K or less / $75K or less / $100K or less / Cost isn’t a
 major factor / I’m not sure (`COST_STOPS` in build/types.ts; labels and
 aria text in CostStep.tsx). The old wording left it unclear whether the
 figure meant one year or all of school. Nothing else reads costIndex.
+
+### 10 Sept 2026 -- Explore Schools "For you": UX pass after review
+
+Direct feedback on the first pass, and the fixes: (1) "Academic fit
+unavailable" and "Add your GPA to unlock" read as a locked feature -- with
+no GPA the degree schools are now one plain list ("Schools for your path")
+with a soft optional line linking to Settings; no fit chip, nothing
+negative. (2) Reach / Target / Safety was jargon -- groups are "Good match",
+"Likely to get in", "A stretch" in that order (good matches lead; a 5%
+school first set the wrong tone), each with a one-line note that names the
+counselor term so the language still maps to the backend doc; badges say
+Good match / Likely / A stretch / Everyone gets in (`FIT_WORDS`,
+`FIT_COUNSELOR`). (3) Too many chips -- a For you card carries ONE fit chip
+(plus "2-year start"/"Trade route" only when the path isn't the straight
+one), the programme is a plain line under the place (`subline`,
+`shortProgram`), and the 4-year/Public/City tags are hidden (`hideTags`);
+badges moved into the card's flow so a long programme name can't print over
+the school name. (4) Groups cap at 6 with "Show all N". (5) The pathway
+strip is two rows: "Planning for" chips, then route > program (career name
+only when there is a single career). (6) The For you / Browse All pill is
+Explore Careers' own `ForYouBrowseToggle`, now exported and reused. Match
+splash copy updated per Slack ("Careers matched to you. Explore your options
+and save the 3 you like most." / "Start Matching"). Verified on 375x812 with
+and without a GPA.
