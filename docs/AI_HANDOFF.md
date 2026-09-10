@@ -6466,3 +6466,8 @@ Share), plus delete. The version matching the current state is badged
 Current. `ReportViewProps.history` is optional so other callers are
 unaffected. Verified on 375x812: empty state, save, share-refresh, print
 routing. Restore with a differing snapshot exercised only by code review.
+
+Follow-up: the profile card's gear opens Settings directly (toggles back to
+Overview); the one-item "Profile and privacy" dropdown it used to open is
+gone, along with its state (direct feedback: "I don't see any change to the
+settings menu").

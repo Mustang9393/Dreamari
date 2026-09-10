@@ -139,7 +139,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     setSeenInitialTab(initialTab);
     if (initialTab && (TAB_IDS as string[]).includes(initialTab)) setTab(initialTab as TabId);
   }
-  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   // Screen-reader announcement when the focused career changes (a11y brief).
   const [announce, setAnnounce] = useState("");
   // Storage is an external store, so it is READ, never copied into state by an
@@ -443,32 +442,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               >
                 <Bookmark className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Saved</span>
               </button>
-              <span className="relative">
-                <button
-                  type="button"
-                  aria-label="Settings menu"
-                  aria-expanded={settingsMenuOpen}
-                  onClick={() => setSettingsMenuOpen((open) => !open)}
-                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
-                  style={{ background: tab === "settings" || settingsMenuOpen ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" || settingsMenuOpen ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
-                >
-                  <Settings className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Settings</span>
-                </button>
-                {settingsMenuOpen && (
-                  <>
-                    <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
-                    <div className="absolute top-[44px] right-0 z-[56] w-[200px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)" }}>
-                      <button
-                        type="button"
-                        onClick={() => { setSettingsMenuOpen(false); setTab("settings"); }}
-                        className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
-                      >
-                        <Settings className="h-4 w-4 flex-none" aria-hidden /> Profile and privacy
-                      </button>
-                    </div>
-                  </>
-                )}
-              </span>
+              {/* Straight into Settings: the gear used to open a one-item
+                 dropdown ("Profile and privacy") that hid the actual form a
+                 click away (direct feedback, 10 Sept 2026: "I don't see any
+                 change to the settings menu"). */}
+              <button
+                type="button"
+                aria-label="Settings"
+                aria-pressed={tab === "settings"}
+                onClick={() => setTab(tab === "settings" ? "overview" : "settings")}
+                className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
+                style={{ background: tab === "settings" ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+              >
+                <Settings className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Settings</span>
+              </button>
             </div>
             <div className="flex items-end gap-[var(--space-4)]">
               {/* Generated, not photographed (direct feedback, 8 Sept 2026:
