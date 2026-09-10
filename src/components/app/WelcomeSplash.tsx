@@ -28,8 +28,7 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
     eyebrow: "You’re in", title: "MATCH",
-    // Short (direct feedback, 11 Sept 2026): the demo below carries the how.
-    line: "Save the 3 you like most.",
+    line: "Careers matched to you. Explore your options and save the 3 you like most.",
     cta: "Start Matching",
   },
   explore: {

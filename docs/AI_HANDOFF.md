@@ -7112,3 +7112,11 @@ Gate clean; verified /match-lab splash and deck guide at 375, /colleges.
   hint no longer recycles until a real scroll (direct feedback: "only show
   the scroll nudge once"). A real gesture still ends the guide early.
 Verified at 375: "Scroll down for details" -> "Swipe right to save".
+
+## 2026-09-11 · Match copy restored; hints split between splash and deck
+- Match splash line is Joshua's again: "Careers matched to you. Explore your
+  options and save the 3 you like most." Same shape as the other splashes
+  (Dreamy, eyebrow, title, one line, CTA), plus the two-beat swipe demo.
+- Deck guide `GUIDE_SEQUENCE` = ["up"]: scroll hint once. Swipe right / left
+  are taught by the splash only, so nothing is repeated on the cards.
+Verified at 375: splash copy, deck shows "Scroll down for details" once.

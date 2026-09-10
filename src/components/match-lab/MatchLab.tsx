@@ -42,7 +42,11 @@ const SWIPE_COMMIT_PX = 100;
 const DEMO_ALWAYS_SHOW_GUIDE = false;
 
 const GUIDE_ORDER = ["up", "right", "left"] as const;
-const GUIDE_SEQUENCE: GestureKind[] = ["up", "right", "left", "right", "left"];
+// The welcome splash already demonstrates swipe right / swipe left, so the
+// deck teaches only the one gesture the splash does not: scroll, once
+// (direct feedback, 11 Sept 2026: "we don't need to repeat the swipe nudges
+// on the actual cards").
+const GUIDE_SEQUENCE: GestureKind[] = ["up"];
 type GestureKind = (typeof GUIDE_ORDER)[number];
 const GUIDE_LABEL: Record<GestureKind, string> = {
   // Label says "down" (direct feedback: "i think its scroll down not up") --
@@ -355,13 +359,10 @@ export function MatchLab() {
     const timer = window.setTimeout(() => setGuideGesture(GUIDE_ORDER[0]), 500);
     return () => window.clearTimeout(timer);
   }, [topId, deckIndex, demonstrated, splashSettled]);
-  // While it's up, walk scroll -> swipe right -> swipe left -> right -> left,
-  // one GestureHint dwell each, then stop. The scroll hint shows exactly once
-  // (direct feedback, 11 Sept 2026: "only show the scroll nudge once"; it
-  // used to recycle until a real scroll). A real gesture still ends the
-  // whole thing early (markDemonstratedRef above). Only the direction and
-  // label change on the ONE persistent overlay, so the scrim never flickers
-  // between gestures.
+  // While it's up, walk GUIDE_SEQUENCE one GestureHint dwell each, then
+  // stop. Today that is the scroll hint alone, exactly once (direct
+  // feedback, 11 Sept 2026). A real gesture still ends it early
+  // (markDemonstratedRef above).
   useEffect(() => {
     if (guideGesture === null) return;
     const timer = window.setTimeout(() => {
