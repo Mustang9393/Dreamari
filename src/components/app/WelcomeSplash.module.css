@@ -128,6 +128,18 @@
   .demoFinger { display: none; }
 }
 .hero { height: 110px; position: relative; display: grid; place-items: center; margin: -12px -12px 12px; isolation: isolate; }
+/* Match: the demo sits in the hero, bigger than Dreamy would be. */
+.heroDemo { height: 196px; }
+.demoHero { margin-top: 0; gap: 6px; }
+.demoHero .demoStage { height: 164px; }
+.demoHero .demoCard { width: 112px; height: 144px; top: 10px; }
+.demoHero .demoFace { height: 144px; padding: 9px; gap: 6px; }
+.demoHero .demoPoster { height: 70px; }
+.demoHero .demoTitle { height: 8px; }
+.demoHero .demoSub { height: 6px; }
+.demoHero .demoFinger { top: 82px; }
+.demoHero .demoBadgeSave, .demoHero .demoBadgePass { width: 34px; height: 34px; }
+.demoHero .demoCaptions { font-size: 14px; }
 /* closest-side sizing: the light reaches full transparency at the nearest
    edge of its own box, so it never shows a hard rectangular cut (the
    farthest-corner default was still ~50% opaque at the top and bottom

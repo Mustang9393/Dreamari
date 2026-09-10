@@ -81,9 +81,9 @@ const SCENES: Record<SplashSurface, Scene> = {
 };
 
 // All three gestures, one caption at a time; the CTA never waits for the demo.
-function MatchGestureDemo() {
+function MatchGestureDemo({ hero = false }: { hero?: boolean }) {
   return (
-    <div className={styles.demo} aria-label="How Match works: swipe right to save, swipe left to pass" role="img">
+    <div className={`${styles.demo} ${hero ? styles.demoHero : ""}`} aria-label="How Match works: swipe right to save, swipe left to pass" role="img">
       <div className={styles.demoStage} aria-hidden="true">
         <div className={styles.demoBadgeSave}><Check strokeWidth={3} /></div>
         <div className={styles.demoBadgePass}><X strokeWidth={3} /></div>
@@ -167,11 +167,15 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
   return (
     <div className={`${styles.scrim} ${departing ? styles.departing : ""}`} style={style}>
       <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={`splash-${surface}-title`} aria-describedby={scene.line ? `splash-${surface}-description` : undefined} className={styles.dialog}>
-        <div className={styles.hero} aria-hidden="true">
+        <div className={`${styles.hero} ${surface === "match" ? styles.heroDemo : ""}`} aria-hidden="true">
           {/* Glow and Dreamy only: the orbit ring, particles and flare made
              the dialog busy (direct feedback, 11 Sept 2026). */}
           <div className={styles.glow} />
-          {scene.sprite && <div className={`${styles.dreamy} ${scene.wide ? styles.dreamyWide : ""}`}>
+          {/* Match (option 3, 11 Sept 2026): the swipe demo IS the hero, in
+             Dreamy's slot and larger, so the how reads as the point of this
+             splash rather than a third thing under the text. */}
+          {surface === "match" && <MatchGestureDemo hero />}
+          {scene.sprite && surface !== "match" && <div className={`${styles.dreamy} ${scene.wide ? styles.dreamyWide : ""}`}>
             {/* Tiny pre-rendered WebP served as-is: the 270KB PNGs went through the
               on-demand image optimizer at first open and the sprite arrived
               late (direct feedback, 10 Sept 2026). Preloaded on host mount. */}
@@ -183,7 +187,6 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
           <h2 id={`splash-${surface}-title`} className={styles.title}>{scene.title}</h2>
         </div>
         {scene.line && <p id={`splash-${surface}-description`} className={styles.line}>{scene.line}</p>}
-        {surface === "match" && <MatchGestureDemo />}
         {scene.rows && <ul className={styles.rows}>{scene.rows.map((row, i) => (
           <li key={i} className={styles.row}><row.icon size={18} aria-hidden="true" /><span>{row.text}</span></li>
         ))}</ul>}

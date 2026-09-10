@@ -7120,3 +7120,11 @@ Verified at 375: "Scroll down for details" -> "Swipe right to save".
 - Deck guide `GUIDE_SEQUENCE` = ["up"]: scroll hint once. Swipe right / left
   are taught by the splash only, so nothing is repeated on the cards.
 Verified at 375: splash copy, deck shows "Scroll down for details" once.
+
+## 2026-09-11 · Match splash, option 3: the swipe demo is the hero
+- On Match the demo takes Dreamy's hero slot (`.heroDemo` 196px, card
+  112x144, captions 14px under it); Dreamy is not shown on this splash.
+  Eyebrow, title, Joshua's line and CTA follow as on every other splash.
+  Fallbacks agreed if this is rejected: option 2 (two static icon rows), then
+  option 1 (no demo; deck guide teaches scroll, right, left once each).
+Verified at 375 and 1280.
