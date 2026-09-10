@@ -138,7 +138,7 @@ const SCENES: Record<SplashSurface, Scene> = {
       rows: [
         { icon: Star, text: "Top Three: the careers you picked" },
         { icon: ListChecks, text: "My Plan: your next steps" },
-        { icon: FileText, text: "Report: share it with family" },
+        { icon: FileText, text: "Report: share it with your counselor" },
       ],
       cta: "Continue",
     }],
