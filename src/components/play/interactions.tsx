@@ -1285,6 +1285,25 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
           />
         ))}
       </div>
+      {/* Each option carries its own `why` (right or wrong), authored per
+         question, but the set only resolves once at the end -- so without
+         this, a wrong pick here just shook and recolored with no explanation
+         at all (direct feedback, 10 Sept 2026: "in the express version we
+         need explanation when you get something wrong ... didnt happen").
+         Shown for the ~480/1150ms window before the next question, same as
+         the reveal it sits next to. */}
+      {picked !== null && item.options[picked] && (
+        <p
+          className="rounded-[12px] border px-[12px] py-[10px] text-[13.5px] leading-[19px] font-semibold motion-safe:animate-[fade-slide-up_0.24s_cubic-bezier(0.16,1,0.3,1)_both]"
+          style={{
+            background: `color-mix(in srgb, ${item.options[picked].correct ? "var(--color-feedback-success)" : TIER_COLOR.wrong} 14%, var(--glass-surface-1))`,
+            borderColor: item.options[picked].correct ? "var(--color-feedback-success)" : TIER_COLOR.wrong,
+            color: "var(--foreground)",
+          }}
+        >
+          {item.options[picked].why}
+        </p>
+      )}
       <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         {need} of {beat.items.length} correct to pass. No score on single questions.
       </p>
