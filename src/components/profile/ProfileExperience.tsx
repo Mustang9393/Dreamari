@@ -867,7 +867,6 @@ function Top3Tab({
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-baseline sm:justify-between sm:gap-[var(--space-3)]">
-        <p className="max-w-[46ch] text-[15px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>Pick one to start with.</p>
         {top3.length > 1 && (
           <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
@@ -2224,7 +2223,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
       <section id="settings-answers" className={SETTINGS_CARD} style={INSET}>
         <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
           <div className="flex flex-col gap-[2px]">
-            <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>From Build. To change them, run Build again; earlier runs are kept below.</p>
+            <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>From Build. Rebuild to change them.</p>
           </div>
           {confirming === "rebuild" ? (
             <span className="flex flex-wrap items-center gap-[var(--space-2)]">
@@ -2338,7 +2337,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="flex min-w-0 flex-col">
               <span className="text-[14px] font-bold">Deactivate profile</span>
-              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>{deactivated ? "Deactivated. Sign in again any time to come back." : "Hides you from Connect and pauses your account. Nothing is deleted."}</span>
+              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>{deactivated ? "Deactivated. Sign in to come back." : "Hides you from Connect. Nothing is deleted."}</span>
             </span>
             {!deactivated && (confirming === "deactivate" ? (
               <span className="flex items-center gap-[var(--space-2)]">
@@ -2352,7 +2351,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="flex min-w-0 flex-col">
               <span className="text-[14px] font-bold">Delete profile and data</span>
-              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Removes your answers, Top 3, plan, reports and history for good.</span>
+              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Removes everything for good.</span>
             </span>
             {confirming === "delete" ? (
               <span className="flex items-center gap-[var(--space-2)]">

@@ -697,9 +697,6 @@ export function MatchLab() {
               <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
                 <InkText text={liked.length === MAX_SLOTS ? "Your Top 3 Matches" : "Your matches"} delay={0.25} />
               </h2>
-              <p className="motion-safe:animate-[fade-slide-up_0.6s_0.8s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
-                Pick one to start with.
-              </p>
             </div>
             <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3" style={{ perspective: 900 }}>
               {liked.map((c, i) => (
@@ -710,7 +707,7 @@ export function MatchLab() {
               <Button variant="primary" size="large" onClick={saveTop3} type="button" aria-disabled={!chosenId} className={chosenId ? "" : "pointer-events-none opacity-50"}>
                 {chosenId ? <>Continue with {liked.find((c) => c.id === chosenId)?.title} <ChevronRight className="h-4 w-4" aria-hidden /></> : "Select one to continue"}
               </Button>
-              <p className="text-[14.5px] leading-[20px] font-extrabold text-[var(--color-night-foreground)]">These are just your first 3 matches. Keep exploring to discover more careers.</p>
+              <p className="text-[14.5px] leading-[20px] font-extrabold text-[var(--color-night-foreground)]">Just your first 3. Keep exploring.</p>
               {!deckDone && (
                 <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                   Keep Swiping
@@ -1164,8 +1161,8 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
         {likedCount === MAX_SLOTS
           ? "Pick one to start with."
           : likedCount > 0
-            ? `You can continue with ${likedCount}, or run the remaining careers again to fill your Top 3.`
-            : "Knowing what's NOT for you is real progress. Wander through Explore, hundreds of paths, no pressure, and come back when one sparks."}
+            ? `Continue with ${likedCount}, or run the rest again.`
+            : "That’s okay. Explore more careers and come back."}
       </p>
       {likedCount > 0 && <MiniRanking liked={liked} />}
       <div className="flex w-full max-w-[320px] flex-col gap-2.5">

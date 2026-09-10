@@ -613,7 +613,7 @@ function HistoryTab({ history, onPrint, onShare }: { history?: ReportViewProps["
       <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
         <div className="flex flex-col gap-[3px]">
           <h3 id="history-title" className="text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>Version History</h3>
-          <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Every share and print is kept. Go back to any version, or print and share it as it was.</p>
+          <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Every share and print is kept.</p>
         </div>
         {history && (
           <button type="button" onClick={() => recordReportVersion("Saved", history.snapshot())} className="dm-solid flex min-h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
@@ -624,7 +624,7 @@ function HistoryTab({ history, onPrint, onShare }: { history?: ReportViewProps["
 
       {versions.length === 0 ? (
         <p className="rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          No versions yet. Share or print the report, or save one now.
+          No versions yet.
         </p>
       ) : (
         <ol className="flex list-none flex-col gap-[var(--space-2)] p-0">
