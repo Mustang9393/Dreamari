@@ -6350,3 +6350,12 @@ rectangle around the content on wide screens (direct feedback, twice --
 `position: fixed` alone did not escape the mask). The section is a stacking
 context (`relative z-10`), so `z-index: -1` paints them behind the column.
 Verified at 2000x1075: glow spans the viewport, no edges.
+
+Follow-up, same day: the top/bottom cuts remained because the welcome sat in
+the flow's masked scroll column and, on laptop heights, overflowed it. The
+welcome stage now skips that column (`BuildFlowExperience`: no
+`flow-scroll-fade`, `overflow-visible`) and fits the viewport on its own via
+a new `@media (max-height: 960px)` tier in `WelcomeScreen.module.css`
+(smaller stage/Dreamy/BUILD, tighter margins); the 660px tier still handles
+phones. Verified at 2000x1040 (welcome 935px, Skip bottom 995) and 1400x820
+(736px, Skip 784): no scroll, no mask, glow intact.

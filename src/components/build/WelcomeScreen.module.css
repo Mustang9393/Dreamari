@@ -277,6 +277,18 @@
   .description { max-width: 330px; margin-top: 16px; }
   .actions { margin-top: 24px; }
 }
+/* Fit without scrolling: the welcome renders outside the flow's scroll
+   column (see BuildFlowExperience), so it must fit the viewport on its own.
+   Natural height is ~935px; a laptop window at 1040px tall has ~950px to
+   give, anything shorter takes this tier, and phones the one below. */
+@media (max-height: 960px) {
+  .scene { padding-top: 8px; padding-bottom: 12px; }
+  .dreamyStage { height: clamp(150px, 22dvh, 210px); }
+  .dreamy { width: clamp(150px, 21dvh, 200px); }
+  .build { font-size: clamp(64px, 9vw, 96px); }
+  .description { margin-top: 12px; }
+  .actions { margin-top: 20px; }
+}
 @media (max-height: 660px) {
   .scene { padding-top: 12px; }
   .dreamyStage { height: 130px; }

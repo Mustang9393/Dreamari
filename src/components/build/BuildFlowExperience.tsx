@@ -132,7 +132,16 @@ export function BuildFlowExperience() {
                content and pins its footer to this container's bottom via
                mt-auto (see StepFooter), so the footer always reaches the
                real edge regardless of content height or viewport size. */}
-            <div className="flow-scroll-fade flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain px-4 [scrollbar-width:none] max-sm:pt-3 sm:px-10">
+            {/* The welcome stage skips the masked scroll column: its glow,
+               orbit and stars bleed past the content box by design, and the
+               column's top fade mask + scroll clip were cutting them (direct
+               feedback, 10 Sept 2026). It is sized to fit the viewport
+               instead (WelcomeScreen.module.css height tiers). */}
+            <div
+              className={`flex min-h-0 w-full flex-1 flex-col px-4 sm:px-10 ${
+                stageId === "welcome" ? "overflow-visible" : "flow-scroll-fade overflow-y-auto overscroll-contain [scrollbar-width:none] max-sm:pt-3"
+              }`}
+            >
               <StepTransition key={stageId}>{content}</StepTransition>
             </div>
           </div>
