@@ -7083,3 +7083,7 @@ WELCOME splash, not the results sheet):
 - SchoolCard hover cue is a labelled pill "View school ›" (dim + cue via the
   poster-card hover rules), centred on the photo band.
 Gate clean; verified /match-lab splash 375 and 1280, /colleges cards.
+- SchoolCard alignment (direct feedback): two lines reserved for the name
+  (`line-clamp-2 min-h-[42px]`), one truncated line for the place, 24px min
+  for the programme row, so stats and actions sit at the same y on every
+  card in a rail (checked: identical stats and Compare offsets on 4 cards).

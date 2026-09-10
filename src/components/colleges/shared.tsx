@@ -337,18 +337,21 @@ export function SchoolCard({
         <div className="flex flex-col gap-[10px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
           <MarkBadge c={c} size={48} />
           <div className="flex flex-col gap-[3px]">
-            <h3 className="text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
-            <p className="flex items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
-              <MapPin className="h-[12px] w-[12px] flex-none" aria-hidden />{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}
+            {/* Two lines reserved for the name and one for the place, so a
+               long name never pushes the rest of the card down relative to
+               its neighbours (direct feedback, 11 Sept 2026). */}
+            <h3 className="line-clamp-2 min-h-[42px] text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
+            <p className="flex min-w-0 items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
+              <MapPin className="h-[12px] w-[12px] flex-none" aria-hidden /><span className="truncate">{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}</span>
             </p>
           </div>
         </div>
 
         {(program || fit) && (
-          <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[6px]">
+          <div className="flex min-h-[24px] flex-wrap items-center gap-x-[8px] gap-y-[6px]">
             {program && (
-              <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
-                {program} <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden style={{ color: SOFT }} />
+              <span className="flex min-w-0 items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                <span className="truncate">{program}</span> <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden style={{ color: SOFT }} />
               </span>
             )}
             {program && <Chip label={PATH_WORD[c.level]} tone="path" />}
