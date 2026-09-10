@@ -6400,3 +6400,14 @@ all five welcomes and BUILD, with MATCH/EXPLORE/CONNECT dismissal and
 BUILD advancing to Interests. Final title tuning rechecked on MATCH.
 No production deployment in this iteration. Current changes remain local
 on codex/build-welcome. Review the local preview before a requested release.
+
+### 10 Sept 2026 -- Welcome light: no more rectangular frame around Dreamy
+
+The splash `.glow` and Build's `.beam` mask both used radial gradients at
+the default farthest-corner size, so at the top and bottom edges of their
+boxes the light was still ~50-60% opaque and got cut hard: a faint
+rectangle around Dreamy, visible when a blob drifted to an edge (direct
+feedback). Both now size to `closest-side` and reach full transparency at
+100%, so the light always fades out before any edge; Build's beam box got
+more vertical room (`inset: -45% -18%`) and the splash glow box stops at the
+card's inner top for the same reason. Checked on 375x812 and 1400x820.

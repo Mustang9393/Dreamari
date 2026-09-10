@@ -56,10 +56,14 @@
    Blurred, screen-blended, faded out radially so it reads as light. */
 .beam {
   position: absolute;
-  inset: -30% -18%;
+  inset: -45% -18%;
   pointer-events: none;
-  mask-image: radial-gradient(ellipse at 50% 50%, #000 28%, transparent 72%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 28%, transparent 72%);
+  /* closest-side: fully transparent by the nearest edge of the beam box, so
+     a drifting blob never meets a hard edge (farthest-corner left the top
+     and bottom edges ~60% opaque -- the rectangular frame around Dreamy,
+     direct feedback, 10 Sept 2026). */
+  mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
   mix-blend-mode: screen;
 }
 .beam i {

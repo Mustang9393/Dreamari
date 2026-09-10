@@ -124,7 +124,12 @@
   .demoFinger { display: none; }
 }
 .hero { height: 110px; position: relative; display: grid; place-items: center; margin: -12px -12px 12px; isolation: isolate; }
-.glow { position: absolute; z-index: -1; inset: -25px -15px; background: radial-gradient(ellipse at 40% 50%, rgba(var(--t1), .5), transparent 65%), radial-gradient(ellipse at 65% 45%, rgba(var(--t2), .28), transparent 60%); }
+/* closest-side sizing: the light reaches full transparency at the nearest
+   edge of its own box, so it never shows a hard rectangular cut (the
+   farthest-corner default was still ~50% opaque at the top and bottom
+   edges -- direct feedback, 10 Sept 2026: "a rectangular frame around
+   Dreamy"). The box stops at the card's inner top for the same reason. */
+.glow { position: absolute; z-index: -1; inset: -16px -40px -84px; background: radial-gradient(closest-side at 42% 42%, rgba(var(--t1), .5), transparent 100%), radial-gradient(closest-side at 62% 40%, rgba(var(--t2), .3), transparent 100%); }
 .orbit { position: absolute; z-index: -1; width: 230px; height: 70px; border: 1px solid rgba(var(--t1), .25); border-top-color: rgba(var(--t1), .6); border-radius: 50%; transform: rotate(-16deg); }
 .particles { position: absolute; inset: 0; pointer-events: none; opacity: .55; }
 .particles i { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--foreground); box-shadow: 0 0 9px 3px rgba(var(--t1), .5); }
