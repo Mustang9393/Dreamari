@@ -295,28 +295,31 @@ body {
    (travel 9% -> 32%, settle by 46%, rest), and the matching Match/Pass stamp
    fades partway in (guide-stamp-preview) -- a preview of the outcome, not
    just an arrow. All CSS on one 2.6s cycle so nothing drifts out of phase. */
+/* Snappier (direct feedback, 11 Sept 2026): the card rests, flicks out over
+   ~0.36s to land with the hint dot at 32% of the shared cycle, and settles
+   straight back. */
 @keyframes guide-nudge-right {
   0%,
-  9% {
+  18% {
     transform: translateX(0) rotate(0deg);
   }
   32% {
-    transform: translateX(26px) rotate(1.6deg);
+    transform: translateX(30px) rotate(1.8deg);
   }
-  46%,
+  44%,
   100% {
     transform: translateX(0) rotate(0deg);
   }
 }
 @keyframes guide-nudge-left {
   0%,
-  9% {
+  18% {
     transform: translateX(0) rotate(0deg);
   }
   32% {
-    transform: translateX(-26px) rotate(-1.6deg);
+    transform: translateX(-30px) rotate(-1.8deg);
   }
-  46%,
+  44%,
   100% {
     transform: translateX(0) rotate(0deg);
   }
@@ -327,23 +330,19 @@ body {
    this card doesn't move the card; it reveals more of the content inside
    it. The outer card keeps overflow-hidden, so this peek clips exactly the
    way a real scroll would -- the frame stays put, the content moves.
-   Travels far enough to bring the first breakdown section -- its label AND
-   the hook line under it -- into view, and holds there for a beat: a peek
-   that proves scrolling reveals real content. 52px used to stop at the
-   "Career Breakdown" caption alone (direct feedback, 10 Sept 2026: "show
-   more of the content below rather than just showing the career breakdown
-   title only"); still not the whole body copy dumped at once (earlier
-   direct feedback: "don't show the entire copy, just a peek"). */
+   A short peek (direct feedback, 11 Sept 2026: "just the first section, up
+   to two lines"): the first section's label and about two lines under it,
+   held for a beat, then back. */
 @keyframes guide-nudge-up {
   0%,
   9% {
     transform: translateY(0);
   }
   32% {
-    transform: translateY(-150px);
+    transform: translateY(-64px);
   }
   52% {
-    transform: translateY(-150px);
+    transform: translateY(-64px);
   }
   68%,
   100% {

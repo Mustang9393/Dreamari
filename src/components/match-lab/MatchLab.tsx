@@ -42,11 +42,10 @@ const SWIPE_COMMIT_PX = 100;
 const DEMO_ALWAYS_SHOW_GUIDE = false;
 
 const GUIDE_ORDER = ["up", "right", "left"] as const;
-// The welcome splash already demonstrates swipe right / swipe left, so the
-// deck teaches only the one gesture the splash does not: scroll, once
-// (direct feedback, 11 Sept 2026: "we don't need to repeat the swipe nudges
-// on the actual cards").
-const GUIDE_SEQUENCE: GestureKind[] = ["up"];
+// The welcome splash teaches no gestures (option 1, 11 Sept 2026), so the
+// deck walks all three once each on the first real card: scroll, swipe
+// right, swipe left. Nothing repeats.
+const GUIDE_SEQUENCE: GestureKind[] = ["up", "right", "left"];
 type GestureKind = (typeof GUIDE_ORDER)[number];
 const GUIDE_LABEL: Record<GestureKind, string> = {
   // Label says "down" (direct feedback: "i think its scroll down not up") --
@@ -349,13 +348,11 @@ export function MatchLab() {
   // How many gesture steps the guide has advanced through this run -- caps
   // the walk at two full loops (up/right/left, up/right/left) instead of
   // cycling forever, per direct feedback. Reset whenever a fresh run starts.
-  const guideStepRef = useRef(0);
   // First card only (deckIndex 0), and only while nothing has been
   // demonstrated yet -- the moment any real gesture lands, this stops and
   // never restarts for the rest of the visit. Opens on scroll-up.
   useEffect(() => {
     if (!topId || deckIndex !== 0 || demonstrated.size > 0 || !splashSettled) return;
-    guideStepRef.current = 0;
     const timer = window.setTimeout(() => setGuideGesture(GUIDE_ORDER[0]), 500);
     return () => window.clearTimeout(timer);
   }, [topId, deckIndex, demonstrated, splashSettled]);
@@ -368,11 +365,10 @@ export function MatchLab() {
     const timer = window.setTimeout(() => {
       setGuideGesture((current) => {
         if (current === null) return null;
-        // One pass each (direct feedback, 11 Sept 2026: "only show the
-        // scroll nudge once"): scroll, right, left, then right and left once
-        // more, then done. Scroll is never repeated.
-        guideStepRef.current += 1;
-        return GUIDE_SEQUENCE[guideStepRef.current] ?? null;
+        // Pure: the next hint is derived from the current one, not from a
+        // mutable counter (the counter was bumped twice per transition under
+        // React's dev double-invocation and skipped "left").
+        return GUIDE_SEQUENCE[GUIDE_SEQUENCE.indexOf(current) + 1] ?? null;
       });
     }, GESTURE_HINT_CYCLE_S * 1000);
     return () => window.clearTimeout(timer);

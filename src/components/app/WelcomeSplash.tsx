@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, EyeOff, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
@@ -18,7 +18,9 @@ type Scene = {
   line?: string;
   /** plain lines, no icons (direct feedback, 11 Sept 2026: splashes were
    *  inconsistent, some with icons, some without) */
-  rows?: { text: ReactNode; /** footnote styling: divider above, muted */ note?: boolean }[];
+  /** Connect keeps icons on its rows (direct feedback, 11 Sept 2026: "the
+   *  connect one worked better with icons"); no other splash has rows. */
+  rows?: { icon?: LucideIcon; text: ReactNode; /** footnote styling: divider above, muted */ note?: boolean }[];
   cta: string;
 };
 
@@ -29,12 +31,10 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
     title: "MATCH",
+    // Option 1 (11 Sept 2026): no gesture teaching here at all; the deck's
+    // own guide walks scroll, swipe right, swipe left once each on the first
+    // real card.
     line: "Careers matched to you. Explore your options and save the 3 you like most.",
-    // Option 2 (11 Sept 2026): two plain lines instead of the animated demo.
-    rows: [
-      { text: <><strong>Swipe right</strong> to save.</> },
-      { text: <><strong>Swipe left</strong> to pass.</> },
-    ],
     cta: "Start Matching",
   },
   explore: {
@@ -68,10 +68,10 @@ const SCENES: Record<SplashSurface, Scene> = {
     title: "CONNECT",
     // Retain all partner-reviewed permissions and moderation wording.
     rows: [
-      { text: <>Students can <strong>follow</strong> Dream Volunteers.</> },
-      { text: <>Students can <strong>ask questions publicly</strong>.</> },
-      { text: <>Volunteers <strong>can’t follow or privately message</strong> students.</> },
-      { text: "All interactions are moderated by Dreamari staff and school faculty.", note: true },
+      { icon: UserPlus, text: <>Students can <strong>follow</strong> Dream Volunteers.</> },
+      { icon: MessageCircleQuestion, text: <>Students can <strong>ask questions publicly</strong>.</> },
+      { icon: EyeOff, text: <>Volunteers <strong>can’t follow or privately message</strong> students.</> },
+      { icon: ShieldCheck, text: "All interactions are moderated by Dreamari staff and school faculty.", note: true },
     ],
     cta: "Start connecting",
   },
@@ -150,7 +150,7 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
         </div>
         {scene.line && <p id={`splash-${surface}-description`} className={styles.line}>{scene.line}</p>}
         {scene.rows && <ul className={styles.rows}>{scene.rows.map((row, i) => (
-          <li key={i} className={`${styles.row} ${row.note ? styles.rowNote : ""}`}>{row.text}</li>
+          <li key={i} className={`${styles.row} ${row.icon ? styles.rowIcon : ""} ${row.note ? styles.rowNote : ""}`}>{row.icon && <row.icon size={18} aria-hidden="true" />}<span>{row.text}</span></li>
         ))}</ul>}
         <div className={styles.ctaWrap}>
         <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4.8} strength={1} active>

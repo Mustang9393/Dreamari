@@ -7149,3 +7149,15 @@ Verified at 375: Explore and Connect (only the CTA chevron svg remains).
   Connect's moderation line; it was `.row:last-child` before, which would
   have muted Match's second swipe row.
 Verified at 375: Match, Play.
+
+## 2026-09-11 · Match: option 1; deck guide teaches all three, snappier
+- Match splash has no gesture rows (option 1). Connect rows have their icons
+  back (`icon?` per row, `.rowIcon`); no other splash uses rows.
+- Deck guide: `GUIDE_SEQUENCE` = up, right, left, once each. The walk derives
+  the next hint from the current one (a mutable counter was bumped twice per
+  transition under React's dev double-invocation and skipped "left").
+- Swipe nudge rests until 18% then flicks 30px to land with the hint dot at
+  32% and settles by 44%. Scroll peek is 64px (first section, ~2 lines), was
+  150px.
+Verified at 375: "Scroll down for details" -> "Swipe right to save" ->
+"Swipe left to pass" -> done.

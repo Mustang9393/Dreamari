@@ -38,6 +38,8 @@
 .line { text-align: center; margin: 16px 0 0; font-size: 16px; line-height: 1.65; color: color-mix(in srgb, var(--foreground) 88%, var(--muted-foreground)); text-wrap: pretty; }
 .rows { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
 .row { font-size: 14px; line-height: 1.55; text-align: center; color: var(--foreground); }
+.rowIcon { display: flex; align-items: flex-start; gap: 12px; text-align: left; }
+.rowIcon > svg { flex: none; margin-top: 3px; color: color-mix(in srgb, rgb(var(--t1)) 50%, var(--foreground)); }
 .rowNote { padding-top: 16px; border-top: 1px solid var(--glass-border); color: var(--muted-foreground); }
 .cta {
   display: inline-flex;
