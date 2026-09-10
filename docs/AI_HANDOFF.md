@@ -6377,3 +6377,26 @@ Follow-up: the profile welcome also shows on every plain visit while
 `DEMO_ALWAYS_SHOW_SPLASH` (now exported from WelcomeSplash.tsx) is true,
 like the other tabs' splashes; the Continue scroll-to-tabs only runs on a
 real arrival from Match. Flipping the flag off returns it to arrival-only.
+
+
+### 10 Sept 2026 — Focused cinematic welcomes (Codex, local)
+
+Shared MATCH/EXPLORE/PLAY/CONNECT/PROFILE welcomes now use one screen with
+one action, Dreamy hero glow/orbit/particles and the animated CTA border.
+The page backdrop is darker and each surface has less competing copy.
+CONNECT retains all four permissions/moderation statements. PROFILE copy
+does not claim Top 3 are saved on ordinary visits. Demo repeat flags remain.
+MATCH retains the complete looping scroll-details, save-right, pass-left
+demo with one caption at a time, starting after the greeting; CTA is never
+time-gated. Reduced motion exposes all three gesture instructions.
+Titles now match BUILD's large tight typography, sentence-case lead-in,
+clipped gradient/shimmer and ink-bleed entrance, scaled to modal width.
+BUILD retains Claude's full-viewport atmosphere and responsive layout;
+particles settle softer and CTA uses a slower border instead of a pulse.
+
+Validated: targeted ESLint and TypeScript passed before final title tuning;
+tokens:check passed (464 tokens); browser visual checks at 375x667 covered
+all five welcomes and BUILD, with MATCH/EXPLORE/CONNECT dismissal and
+BUILD advancing to Interests. Final title tuning rechecked on MATCH.
+No production deployment in this iteration. Current changes remain local
+on codex/build-welcome. Review the local preview before a requested release.

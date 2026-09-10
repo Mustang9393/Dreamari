@@ -221,7 +221,7 @@
   /* The hello: one wiggle (dreamy-wiggle, globals.css), on the image so it
      composes with the button's hover. */
   .wave .sprite { animation: dreamy-wiggle 700ms ease-in-out; }
-  .particles { animation: reveal 1.2s ease-out 250ms both; }
+  .particles { animation: welcomeParticles 1.8s ease-out 250ms both; }
   /* Orbs drift on their own period and twinkle at 60% of it (both set
      inline per orb); flares only breathe. */
   .orb { animation-name: drift, glint; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
@@ -232,9 +232,7 @@
   .dust i { animation: magic-dust 1100ms ease-out both; }
   .description { animation: reveal 700ms ease-out 400ms both; }
   .actions { animation: reveal 650ms ease-out 500ms both; }
-  /* Once the reveal has settled, the CTA is the one thing that keeps
-     moving: a soft recurring ring (next-step-cta-pulse, globals.css). */
-  .ready .cta { animation: next-step-cta-pulse 2.6s ease-out 400ms infinite; }
+  /* A slow border orbit carries attention after the arrival; no extra pulse. */
   .footer { animation: reveal 900ms ease-out 650ms both; }
   /* The chapter strip lights left to right, then settles on Build. */
   .chapters li:not([aria-current]) .chapterDot { animation: dotPass 520ms ease-out both; animation-delay: calc(800ms + var(--i) * 110ms); }
@@ -299,4 +297,11 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .cta svg, .dreamyStage { transition: none; }
+}
+
+.ctaBeam { width: 210px; margin-inline: auto; border-radius: var(--radius-md); }
+.ctaBeam .cta { width: 100%; }
+@keyframes welcomeParticles { 0% { opacity: 0; transform: scale(.9); } 40% { opacity: 1; } 100% { opacity: .6; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .ctaBeam :global([data-beam])::before, .ctaBeam :global([data-beam])::after, .ctaBeam :global([data-beam-bloom]) { animation: none !important; }
 }

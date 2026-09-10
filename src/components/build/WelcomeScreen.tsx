@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
+import { BorderBeam } from "border-beam";
 import { InkText } from "./ui";
 import styles from "./WelcomeScreen.module.css";
 
@@ -187,9 +188,13 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
           </h1>
           <p className={styles.description}>Tell us about you, so we can personalize your experience and help you find your dream career.</p>
           <div className={styles.actions}>
+            <div className={styles.ctaBeam}>
+            <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4.8} strength={1} active={ready}>
             <Button size="large" onClick={begin} aria-disabled={departing} className={styles.cta}>
               Let’s Go <ChevronRight size={20} strokeWidth={2.75} aria-hidden="true" />
             </Button>
+            </BorderBeam>
+            </div>
           </div>
         </div>
       </div>
