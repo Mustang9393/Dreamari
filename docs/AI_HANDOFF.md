@@ -7179,3 +7179,6 @@ Verified at 375: "Scroll down for details" -> "Swipe right to save" ->
 - College detail: "Make my #1" removed (led nowhere in Profile); Save stays.
 Verified: /flow walk, /explore -> /play -> /explore lands at scrollY 0,
 /profile button, /colleges detail docW == viewport, /match-lab guide fires.
+- Deck guide dwell: scroll 2.6s, swipe right and swipe left 1.6s each (dot
+  and card are at rest by ~1.15s), so the two swipes follow each other
+  quickly. Measured: scroll 0.8s -> right 3.5s -> left 5.0s -> done 6.8s.

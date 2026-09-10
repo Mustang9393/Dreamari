@@ -375,7 +375,11 @@ export function MatchLab() {
         // React's dev double-invocation and skipped "left").
         return GUIDE_SEQUENCE[GUIDE_SEQUENCE.indexOf(current) + 1] ?? null;
       });
-    }, GESTURE_HINT_CYCLE_S * 1000);
+      // The swipes need less dwell than the scroll: dot and card are back at
+      // rest by ~1.15s of the 2.6s cycle, so move on at 1.6s (direct
+      // feedback, 11 Sept 2026: "reduce the time between swipe right and
+      // swipe left").
+    }, (guideGesture === "up" ? GESTURE_HINT_CYCLE_S : 1.6) * 1000);
     return () => window.clearTimeout(timer);
   }, [guideGesture]);
   const dragXRef = useRef(0);
