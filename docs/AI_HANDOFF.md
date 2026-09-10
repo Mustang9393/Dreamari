@@ -6499,3 +6499,29 @@ uses.
 Follow-up: each Settings menu item shows ONLY its section (heading = the
 item's label); the scroll-to-section page made the menu look redundant
 (direct feedback).
+
+### 10 Sept 2026 -- Explore Schools "For you" (first pass, from the Replit reference)
+
+`/colleges` now has a For you / Browse all toggle under the Careers/Schools
+tabs (Joshua Pierce, Slack). Browse all is the existing search + filters.
+For you (`ForYouSchools.tsx`, logic in `pathway.ts`) follows the brief's
+chain: focus career (picks store; demo Top 3 fallback, with chips to switch
+between the student's Top 3) -> the career report's common education route
+-> its recommended major -> schools whose real programme list (detail-ref)
+offers it, plus schools the report itself names. Groups: Reach / Target /
+Safety only when the student has a GPA (student-profile store) AND the school
+publishes an acceptance rate (`fitFor`, indicative bands); "Lower-cost ways
+to start" (2-year) only when the career has a two-year/transfer route;
+"Trade and technical" only when it has a training/certificate/apprenticeship
+route; "More schools for your path" for selective schools we can't place.
+No school appears twice. Cards carry program / path / fit badges
+(`CollegeCard` badges + href) and link to the detail page with
+`?route=<career>`, where a "Why <school> fits you" panel (career, route,
+program, career fit, admissions) appears above the section tabs. A "Why
+these schools?" explainer states the logic in the student's words; with no
+GPA it links to Settings. Data caveat: 30 schools (NJ + SD), programme lists
+only on the reference-detailed ones, so coverage is uneven by career.
+Verified desktop: Investment Banking -> Bachelor's -> Finance, 21 schools,
+1 reach / 1 target / 14 safety / 2 two-year starts. Next: Saved as a
+decision board (My plan strip, #1 school), miles from home once schools have
+coordinates, Browse all category shelves.

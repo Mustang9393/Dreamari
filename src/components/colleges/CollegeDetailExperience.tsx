@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ArrowUpRight, ChevronDown, MessagesSquare, PlayCircle } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
@@ -13,6 +14,9 @@ import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
 import { Donut, Ladder, RangeBar, SplitBar } from "./viz";
 import { EXTRA } from "./extra";
+import { FIT_WORDS, fitFor, parseGpa, pathwayFor } from "./pathway";
+import { studentProfileSnapshot, serverStudentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
+import { useSyncExternalStore } from "react";
 import { Segmented } from "@/components/connect/viz";
 
 // One college. The career page's anatomy: a header that dissolves into the
@@ -153,6 +157,10 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <strong className="font-bold" style={{ color: "var(--foreground)" }}>Worth knowing.</strong> {worth}
           </p>
         )}
+
+        {/* Reached from Explore Schools "For you" (?route=<career>): why this
+           school is on the student's path, before the general sections. */}
+        <Suspense fallback={null}><YourPath c={c} /></Suspense>
 
         <Segmented ariaLabel="College section" value={tab} onChange={(k) => setTab(k)} options={TABS} grow />
 
@@ -470,5 +478,40 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
       <MobileNav active="Explore" />
     </div>
+  );
+}
+
+
+function YourPath({ c }: { c: NonNullable<ReturnType<typeof collegeBySlug>> }) {
+  const route = useSearchParams().get("route");
+  const profile = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
+  const pathway = pathwayFor(route);
+  if (!pathway) return null;
+  const fit = fitFor(c, parseGpa(profile.gpa));
+  const programmes = c.detail?.programmes.map((p) => p.name) ?? [];
+  const direct = programmes.some((n) => new RegExp(pathway.program.split(/[\s,/]+/)[0], "i").test(n)) || c.level === "Bachelor's degrees";
+  const rows: { label: string; value: string }[] = [
+    { label: "Career", value: pathway.careerTitle },
+    { label: "Education route", value: pathway.route },
+    { label: "Recommended program", value: pathway.program },
+    { label: "Career fit", value: direct ? "Direct path" : c.level === "Associate degrees" ? "2-year start, then transfer" : "Related route" },
+    { label: "Admissions", value: FIT_WORDS[fit] },
+  ];
+  return (
+    <section aria-labelledby="your-path" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ ...PANEL, borderColor: `color-mix(in srgb, ${ACCENT} 45%, var(--glass-border))` }}>
+      <div className="flex flex-col gap-[2px]">
+        <p className={LABEL} style={{ color: SOFT }}>Your path</p>
+        <h2 id="your-path" className={BIG}>Why {c.name} fits you</h2>
+      </div>
+      <dl className="grid gap-x-[var(--space-5)] gap-y-[8px] sm:grid-cols-2">
+        {rows.map((r) => (
+          <div key={r.label} className="flex items-baseline justify-between gap-[var(--space-3)] border-b pb-[6px]" style={{ borderColor: RULE }}>
+            <dt className={SMALL} style={{ color: "var(--muted-foreground)" }}>{r.label}</dt>
+            <dd className={`${SMALL} m-0 text-right font-bold`}>{r.value}</dd>
+          </div>
+        ))}
+      </dl>
+      {pathway.alsoRelevant.length > 0 && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Also relevant: {pathway.alsoRelevant.join(" · ")}</p>}
+    </section>
   );
 }

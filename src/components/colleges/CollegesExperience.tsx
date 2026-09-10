@@ -10,6 +10,9 @@ import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, Exp
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
+import { ForYouSchools } from "./ForYouSchools";
+import { pathwayFor } from "./pathway";
+import { readPicks } from "@/lib/picks";
 
 // Find a school -- colleges and trade schools both live here, so the page
 // (and its nav chip) says "Schools," never "Colleges" (direct feedback,
@@ -60,6 +63,16 @@ function matches(c: College, f: Filters, q: string, saved: Set<string>): boolean
 }
 
 export function CollegesExperience({ initialQuery = "", initialType = "" }: { initialQuery?: string; initialType?: string }) {
+  // For you (the student's pathway) vs Browse all (search + filters), the
+  // same split Explore Careers has (Joshua Pierce, Slack, 10 Sept 2026).
+  // A search or type handoff lands on Browse all; otherwise For you, when
+  // the focus career has a pathway (the demo Top 3 always does).
+  const [view, setView] = useState<"foryou" | "browse">(() => {
+    if (initialQuery || initialType) return "browse";
+    if (typeof window === "undefined") return "foryou";
+    const picks = readPicks();
+    return pathwayFor(picks.focus ?? picks.ids[0] ?? "investment-banking") ? "foryou" : "browse";
+  });
   const [query, setQuery] = useState(initialQuery);
   // Pinned to real focus, not HoverBeam's default hover-or-focus, so a
   // pointer merely passing over this always-visible box doesn't light it up
@@ -147,6 +160,25 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
           <ExploreSectionTabs active="colleges" />
         </div>
 
+        <div role="tablist" aria-label="Schools view" className="flex w-fit gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          {([{ key: "foryou", label: "For you" }, { key: "browse", label: "Browse all" }] as const).map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              role="tab"
+              aria-selected={view === option.key}
+              onClick={() => setView(option.key)}
+              className="dm-quiet min-h-[38px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[16px] text-[14px] font-bold"
+              style={{ background: view === option.key ? ACCENT : "transparent", color: view === option.key ? "#fff" : "var(--foreground)" }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} />}
+        {view === "browse" && (<>
+
         {/* the search: one box, results change as you type, and the door to
            every filter fixed beside it (never off the edge of a scroll row) */}
         <div className="flex items-stretch gap-[var(--space-3)]">
@@ -221,6 +253,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
           Government figures, 2024-25. Costs are what families paid after grants, not the sticker price.
         </p>
+        </>)}
       </main>
 
       {/* compare bar */}

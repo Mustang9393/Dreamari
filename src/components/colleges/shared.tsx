@@ -102,7 +102,18 @@ export function MarkBadge({ c, size = 44 }: { c: College; size?: number }) {
  *  double gradient wash made Explore Schools read as the diluted,
  *  placeholder version of the same idea) -- only a bottom scrim earns its
  *  keep, the same restraint PosterCard's own photo treatment uses. */
-export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void }) {
+export type CardBadge = { label: string; tone: "program" | "path" | "reach" | "target" | "safety" | "open" | "muted" };
+const BADGE_STYLE: Record<CardBadge["tone"], React.CSSProperties> = {
+  program: { background: "rgba(255,255,255,0.92)", color: "#0e0c20" },
+  path: { background: "rgba(47,107,242,0.85)", color: "#fff" },
+  reach: { background: "rgba(255,160,30,0.9)", color: "#1a1200" },
+  target: { background: "rgba(40,140,255,0.9)", color: "#fff" },
+  safety: { background: "rgba(51,199,140,0.9)", color: "#03211a" },
+  open: { background: "rgba(30,185,170,0.9)", color: "#032220" },
+  muted: { background: "rgba(255,255,255,0.14)", color: "#fff" },
+};
+
+export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": program, path and fit (Reach / Target / Safety) */ badges?: CardBadge[] }) {
   const img = collegeImage(c);
   return (
     // `poster-card`/`poster-photo` are the exact same hover classes Explore's
@@ -135,12 +146,19 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare }: { c: Coll
          card's own vertical gap between the profile row and the stats
          paragraph, where that content layer has nothing opaque painted. */}
       <OpenCue />
-      <Link href={`/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
+      <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
+      {badges && badges.length > 0 && (
+        <ul className="pointer-events-none absolute top-[14px] left-[14px] z-20 flex max-w-[calc(100%-70px)] flex-wrap gap-[5px]" aria-label="How this school fits your path" style={{ textShadow: "none" }}>
+          {badges.map((b) => (
+            <li key={b.label} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={BADGE_STYLE[b.tone]}>{b.label}</li>
+          ))}
+        </ul>
+      )}
 
       <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
         {/* profile row: the mark, then the name and place beside it */}
-        <div className="flex items-center gap-[12px] pr-[44px]">
+        <div className={`flex items-center gap-[12px] pr-[44px] ${badges && badges.length > 0 ? "mt-[34px]" : ""}`}>
           <MarkBadge c={c} size={44} />
           <div className="flex min-w-0 flex-col gap-[2px]">
             <h3 className="text-[18px] leading-[22px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>{c.name}</h3>
