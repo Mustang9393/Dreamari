@@ -6483,3 +6483,15 @@ deleted. Account keeps the four editable fields + Save. Danger zone:
 Deactivate (confirm; prototype flips a local flag) and Delete profile and
 data (confirm; clears every dreamari* key and returns to /). The chip editor
 is gone. Verified on 375x812 including restore.
+
+### 10 Sept 2026 -- Welcome sprites load instantly
+
+The welcomes' Dreamy sprites were the 640px, ~270KB PNGs, sent through the
+on-demand next/image optimizer at first open, so Dreamy arrived late (direct
+feedback). Pre-rendered WebP variants now live in
+`public/images/dreamy/v2/splash/` (400px square, 480px wide for the two
+landscape sprites; 11-20KB each), served `unoptimized`, and each surface's
+sprite is `preload`ed (react-dom) as soon as the host page renders the
+closed splash, before the timer opens it. Build's welcome uses the same
+treatment for dreamy-happy. The original PNGs are untouched for their other
+uses.

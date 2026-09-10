@@ -170,7 +170,7 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
             aria-label="Say hello to Dreamy"
             data-dreamy-anchor
           >
-            <Image src="/images/dreamy/v2/dreamy-happy.png" alt="Dreamy welcomes you" fill sizes="(max-width: 639px) 200px, 260px" preload className={styles.sprite} />
+            <Image src="/images/dreamy/v2/splash/dreamy-happy.webp" alt="Dreamy welcomes you" fill sizes="(max-width: 639px) 200px, 260px" unoptimized preload className={styles.sprite} />
           </button>
         </div>
 

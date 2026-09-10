@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { Check, ChevronRight, EyeOff, Sparkles, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
+import { preload } from "react-dom";
 import styles from "./WelcomeSplash.module.css";
 
 export type SplashSurface = "match" | "explore" | "play" | "connect" | "profile";
@@ -24,28 +25,28 @@ type Scene = {
 // but concentrate decoration above the instructions and give each gesture its own moment.
 const SCENES: Record<SplashSurface, Scene> = {
   match: {
-    sprite: "/images/dreamy/v2/dreamy-heart.png",
+    sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
     eyebrow: "You’re in", title: "MATCH",
     line: "Careers picked for you. Save the 3 you like most. That’s your Top 3.",
     cta: "Start matching",
   },
   explore: {
-    sprite: "/images/dreamy/v2/dreamy-curious.png",
+    sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
     tint: ["40, 140, 255", "30, 185, 170"],
     eyebrow: "You’re in", title: "EXPLORE",
     line: "Find a career that catches your eye. Watch a day in the life and see real pay.",
     cta: "Start exploring",
   },
   play: {
-    sprite: "/images/dreamy/v2/dreamy-controller.png", wide: true,
+    sprite: "/images/dreamy/v2/splash/dreamy-controller.webp", wide: true,
     tint: ["255, 160, 30", "180, 40, 240"],
     eyebrow: "You’re in", title: "PLAY",
     line: "Choose a career. Step into the job and see where your decisions take you.",
     cta: "Start playing",
   },
   connect: {
-    sprite: "/images/dreamy/v2/dreamy-puzzle-wide.png", wide: true,
+    sprite: "/images/dreamy/v2/splash/dreamy-puzzle-wide.webp", wide: true,
     tint: ["40, 140, 255", "100, 70, 255"],
     eyebrow: "Welcome to", title: "CONNECT",
     // Retain all partner-reviewed permissions and moderation wording.
@@ -58,7 +59,7 @@ const SCENES: Record<SplashSurface, Scene> = {
     cta: "Start connecting",
   },
   profile: {
-    sprite: "/images/dreamy/v2/dreamy-party.png",
+    sprite: "/images/dreamy/v2/splash/dreamy-party.webp",
     tint: ["255, 160, 30", "255, 50, 100"],
     eyebrow: "Welcome to your", title: "PROFILE",
     line: "Your home base for your Top 3, next steps, and a career report to share with your counselor.",
@@ -157,7 +158,10 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
             <Sparkles className={styles.flare} size={19} strokeWidth={1.2} />
           </div>
           {scene.sprite && <div className={`${styles.dreamy} ${scene.wide ? styles.dreamyWide : ""}`}>
-            <Image src={scene.sprite} alt="" fill sizes={scene.wide ? "170px" : "120px"} className={styles.sprite} />
+            {/* Tiny pre-rendered WebP served as-is: the 270KB PNGs went through the
+              on-demand image optimizer at first open and the sprite arrived
+              late (direct feedback, 10 Sept 2026). Preloaded on host mount. */}
+          <Image src={scene.sprite} alt="" fill sizes={scene.wide ? "170px" : "120px"} unoptimized preload className={styles.sprite} />
           </div>}
         </div>
         <div className={styles.header}>
@@ -183,6 +187,10 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
 
 /** Mount a fresh introduction on every open, including controlled revisits. */
 export function WelcomeSplash({ surface, open, onDone }: { surface: SplashSurface; open: boolean; onDone: () => void }) {
+  // Warm the sprite before the splash opens (the host renders this closed
+  // first); a no-op on the server and when already requested.
+  const spriteUrl = SCENES[surface].sprite;
+  if (spriteUrl) preload(spriteUrl, { as: "image" });
   return open ? <SplashDialog key={surface} surface={surface} onDone={onDone} /> : null;
 }
 
