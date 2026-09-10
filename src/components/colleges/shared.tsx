@@ -44,6 +44,27 @@ export function useSaved(): [Set<string>, (slug: string) => void] {
   return [saved, toggle];
 }
 
+// The one school the student is leaning toward (the Replit's "Make my #1").
+// Same storage idiom as saved; setting it also saves the school.
+const TOP_KEY = "dm-colleges-top";
+const TOP_EVENT = "dm-colleges-top-change";
+function readTop(): string { try { return window.localStorage.getItem(TOP_KEY) ?? ""; } catch { return ""; } }
+function subscribeTop(cb: () => void) { window.addEventListener(TOP_EVENT, cb); window.addEventListener("storage", cb); return () => { window.removeEventListener(TOP_EVENT, cb); window.removeEventListener("storage", cb); }; }
+export function useTopSchool(): [string | null, (slug: string | null) => void] {
+  const raw = useSyncExternalStore(subscribeTop, readTop, () => "");
+  const set = (slug: string | null) => {
+    try {
+      if (slug) {
+        window.localStorage.setItem(TOP_KEY, slug);
+        const saved = new Set<string>(JSON.parse(readRaw()) as string[]);
+        if (!saved.has(slug)) { saved.add(slug); window.localStorage.setItem(KEY, JSON.stringify([...saved])); window.dispatchEvent(new Event(EVENT)); }
+      } else window.localStorage.removeItem(TOP_KEY);
+    } catch { /* private mode */ }
+    window.dispatchEvent(new Event(TOP_EVENT));
+  };
+  return [raw || null, set];
+}
+
 /** The picture at the top of a card or a page: the campus photo when we have
  *  one, otherwise a quiet colour field with the college's mark. */
 export function CollegePicture({ c, sizes, priority = false, className = "" }: { c: College; sizes: string; priority?: boolean; className?: string }) {

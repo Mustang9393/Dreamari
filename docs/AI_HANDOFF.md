@@ -6605,3 +6605,28 @@ Verified 375x812 and 1280x800: 8 curated cards, 5 shelves, 0 duplicates.
 Next: Saved as the decision board (My plan strip + "Make my #1" on the
 detail page), then detail-page "Why this fits you" polish and a sticky
 Compare bar.
+
+### 10 Sept 2026 -- Explore Schools, pass 2: Replit taxonomy + decision board
+
+Direct feedback: "use the same copy/taxonomy from the replit." All labels
+now match the Replit verbatim while the structural fixes stay: chips and
+group headings Target / Safety / Reach (order: Target, Safety, Lower-cost
+ways to start, Reach), "Open admission", programme line "Finance · Direct
+path · $22K a year after aid" (or "2-year start"), "Lower-cost ways to
+start / Start here, then continue toward a 4-year degree.", "More schools
+for your path", "Trade & technical", "Why these schools?", title "Explore
+Schools" with "Turn a career idea into a place to start.", shelves "Schools
+with <program> / Near you / Lower-cost options / Trade & technical / High
+acceptance / More schools for your path", detail "Career fit: Strong". The
+one deliberate omission: no "Academic fit unavailable" chip -- a school
+without a published acceptance rate shows no fit chip at all (the negative
+reading was the original complaint).
+
+Decision board: "My plan" card on For you (Career / Education / Program /
+#1 school "Not chosen yet"), with the saved shortlist folded under it
+("A short list is more useful than a giant one..."): each row opens the
+school, "Make my #1" / "Your #1" (useTopSchool in shared.tsx, localStorage
+`dm-colleges-top`; setting it also saves the school), and remove. The
+detail hero has the same "Make my #1" next to Save. Verified on 375x812.
+Remaining from the brainstorm: sticky Compare bar, distance once schools
+have coordinates, "Not for me" (left out of the student UI for now).

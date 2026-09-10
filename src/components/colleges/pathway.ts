@@ -219,11 +219,14 @@ export function schoolsFor(pathway: Pathway, profile: StudentProfile): SchoolGro
 // Plain words on the surface (direct feedback, 10 Sept 2026: "reach, target,
 // safety is a little confusing"); the counselor term travels alongside as a
 // small note so the language still lines up with the backend doc.
+// The Replit's taxonomy, verbatim (direct feedback, 10 Sept 2026: "use the
+// same copy/taxonomy from the replit"). "Fit unavailable" stays chip-less:
+// a school without a published acceptance rate simply shows no fit.
 export const FIT_WORDS: Record<Fit, string> = {
-  Reach: "Worth a shot",
-  Target: "Best fit",
-  Safety: "Easy yes",
-  "Open admission": "Everyone gets in",
+  Reach: "Reach",
+  Target: "Target",
+  Safety: "Safety",
+  "Open admission": "Open admission",
   "Fit unavailable": "",
 };
 export const FIT_COUNSELOR: Partial<Record<Fit, string>> = { Reach: "reach", Target: "target", Safety: "safety" };

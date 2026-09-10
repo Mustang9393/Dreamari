@@ -181,8 +181,9 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
            pill on the right. Phones use the top bar above instead. */}
         <div className="hidden w-full items-center justify-between gap-[var(--space-6)] md:flex">
           <div className="flex flex-col gap-[var(--space-2)]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a school</h1>
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore Schools</h1>
             <ExploreSectionTabs active="colleges" />
+            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Turn a career idea into a place to start.</p>
           </div>
           <ForYouBrowseToggle tab={view} onTab={setView} />
         </div>

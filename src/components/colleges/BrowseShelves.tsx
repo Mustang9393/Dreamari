@@ -56,12 +56,13 @@ export function BrowseShelves({
     const rest = [...COLLEGES].sort(byFinish);
 
     const list: { key: string; title: string; note?: string; items: College[] }[] = [];
-    if (pathway) list.push({ key: "program", title: `Offers ${pathway.program}`, note: `For ${careerTitle(careerId)}`, items: take(offers) });
+    // Shelf names from the Replit's Browse all / filter taxonomy.
+    if (pathway) list.push({ key: "program", title: `Schools with ${pathway.program}`, note: `For ${careerTitle(careerId)}`, items: take(offers) });
     list.push({ key: "near", title: "Near you", note: "In your state", items: take(home) });
-    list.push({ key: "cheap", title: "Under $15K a year", note: "What students really pay after aid", items: take(cheap) });
-    if (pathway?.trade) list.push({ key: "trade", title: "Trade and technical", items: take(trade) });
-    list.push({ key: "open", title: "Everyone gets in", note: "Open admission", items: take(open) });
-    list.push({ key: "more", title: "More schools", items: take(rest) });
+    list.push({ key: "cheap", title: "Lower-cost options", note: "Under $15K a year after aid", items: take(cheap) });
+    if (pathway?.trade) list.push({ key: "trade", title: "Trade & technical", items: take(trade) });
+    list.push({ key: "open", title: "High acceptance", note: "Open admission", items: take(open) });
+    list.push({ key: "more", title: "More schools for your path", items: take(rest) });
     return list.filter((s) => s.items.length > 0);
   }, [pathway, profile.states, careerId]);
 

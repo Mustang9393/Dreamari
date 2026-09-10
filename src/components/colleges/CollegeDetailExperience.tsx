@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowUpRight, ChevronDown, MessagesSquare, PlayCircle } from "lucide-react";
+import { ArrowUpRight, ChevronDown, MessagesSquare, PlayCircle, Star } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -11,7 +11,7 @@ import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } fr
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money } from "./data";
-import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
+import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved, useTopSchool } from "./shared";
 import { Donut, Ladder, RangeBar, SplitBar } from "./viz";
 import { EXTRA } from "./extra";
 import { FIT_WORDS, fitFor, parseGpa, pathwayFor } from "./pathway";
@@ -72,6 +72,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [open, setOpen] = useState<Set<SectionKey>>(() => new Set<SectionKey>());
   const [saved, toggleSaved] = useSaved();
+  const [top, setTop] = useTopSchool();
   const [level, setLevel] = useState<string | null>(null);
   const [allRows, setAllRows] = useState(false);
   const toggle = (k: SectionKey) => setOpen((cur) => { const n = new Set(cur); if (n.has(k)) n.delete(k); else n.add(k); return n; });
@@ -146,6 +147,15 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   </a>
                   </BorderBeam>
                 )}
+                <button
+                  type="button"
+                  aria-pressed={top === c.slug}
+                  onClick={() => setTop(top === c.slug ? null : c.slug)}
+                  className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold"
+                  style={{ background: top === c.slug ? ACCENT : "var(--glass-surface-2)", borderColor: top === c.slug ? ACCENT : "var(--glass-border)", color: "#fff" }}
+                >
+                  <Star className="h-4 w-4" fill={top === c.slug ? "currentColor" : "none"} aria-hidden /> {top === c.slug ? "Your #1" : "Make my #1"}
+                </button>
                 <SaveButton on={saved.has(c.slug)} onToggle={() => toggleSaved(c.slug)} size={44} />
               </div>
             </div>
@@ -494,7 +504,7 @@ function YourPath({ c }: { c: NonNullable<ReturnType<typeof collegeBySlug>> }) {
     { label: "Career", value: pathway.careerTitle },
     { label: "Education route", value: pathway.route },
     { label: "Recommended program", value: pathway.program },
-    { label: "Career fit", value: direct ? "Direct path" : c.level === "Associate degrees" ? "2-year start, then transfer" : "Related route" },
+    { label: "Career fit", value: direct ? "Strong" : c.level === "Associate degrees" ? "2-year start" : "Related" },
     { label: "Admissions", value: FIT_WORDS[fit] },
   ];
   return (
