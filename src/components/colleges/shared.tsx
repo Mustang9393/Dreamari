@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { Bookmark, Check, ChevronDown, GraduationCap, Landmark, MapPin } from "lucide-react";
+import { ArrowLeftRight, Bookmark, Check, ChevronDown, GraduationCap, Landmark, MapPin } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { OpenCue } from "@/components/app/PosterCard";
 import { SMALL } from "@/components/career/CareerDetailExperience";
@@ -294,14 +294,16 @@ export function SchoolCard({
     { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "avg. after aid" },
     { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
   ];
-  const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.8)" };
+  const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.85)" };
   return (
     <article
       className="dm-tap poster-card relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border"
       style={{ background: "var(--card)", borderColor: compared ? ACCENT : "var(--glass-border)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-body)" }}
     >
-      {/* photo band */}
-      <span aria-hidden className="poster-photo relative block h-[148px] w-full flex-none overflow-hidden">
+      {/* the photo runs down behind the name and place, blurring and fading
+         into the card surface (direct feedback, 11 Sept 2026); everything
+         from the programme down sits on the solid card */}
+      <span aria-hidden className="poster-photo absolute inset-x-0 top-0 h-[300px] overflow-hidden">
         {img ? (
           <Image src={img} alt="" fill sizes="(min-width: 1024px) 340px, 86vw" className="object-cover" />
         ) : (
@@ -309,22 +311,26 @@ export function SchoolCard({
             {mark && <Image src={mark} alt="" fill sizes="480px" className="object-contain opacity-[0.5] blur-[10px]" style={{ transform: "scale(1.8)" }} />}
           </span>
         )}
-        <CardProgressiveBlur size="40%" />
-        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--card) 0%, color-mix(in srgb, var(--card) 55%, transparent) 30%, transparent 60%)" }} />
+        <CardProgressiveBlur size="62%" />
+        {/* the name and place sit in the lower third of this run: blurred
+           photo still showing through, fading to the solid card just below */}
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--card) 0%, color-mix(in srgb, var(--card) 72%, transparent) 16%, color-mix(in srgb, var(--card) 40%, transparent) 38%, transparent 62%)" }} />
         <span className="absolute inset-x-0 top-0 h-[64px]" style={{ background: cardTopScrim() }} />
-        <OpenCue />
+        <span className="absolute inset-x-0 top-0 h-[150px]"><OpenCue /></span>
       </span>
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
-      {/* the mark sits on the band's edge, like a profile picture */}
-      <span className="pointer-events-none absolute top-[122px] left-[16px] z-20"><MarkBadge c={c} size={48} /></span>
 
-      <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[12px] px-[16px] pt-[30px] pb-[14px]">
-        <div className="flex flex-col gap-[3px]">
-          <h3 className="text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.name}</h3>
-          <p className="flex items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <MapPin className="h-[12px] w-[12px] flex-none" aria-hidden />{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}
-          </p>
+      <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[12px] px-[16px] pt-[118px] pb-[14px]">
+        {/* mark, name and place, over the blurred tail of the photo */}
+        <div className="flex flex-col gap-[10px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
+          <MarkBadge c={c} size={48} />
+          <div className="flex flex-col gap-[3px]">
+            <h3 className="text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
+            <p className="flex items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
+              <MapPin className="h-[12px] w-[12px] flex-none" aria-hidden />{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}
+            </p>
+          </div>
         </div>
 
         {(program || fit) && (
@@ -357,17 +363,22 @@ export function SchoolCard({
           </div>
         )}
 
-        <div className="pointer-events-auto relative z-20 mt-auto flex items-center gap-[8px] pt-[2px]">
-          {onDismiss && (
-            <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[11px] text-[12.5px] font-bold" style={ghost}>Not for me</button>
-          )}
-          {onCompare && (
-            <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[11px] text-[12.5px] font-bold" style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 28%, transparent)`, color: "#fff" } : ghost}>
-              <Landmark className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
-            </button>
-          )}
-          <span className="ml-auto flex min-h-[34px] items-center rounded-[var(--radius-md)] px-[14px] text-[12.5px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>View</span>
-        </div>
+        {/* Two quiet actions at most (direct feedback, 11 Sept 2026): opening
+           the school is the whole card (hover cue), so there is no View
+           button and neither of these reads as the primary. "Not for me" is
+           plain text on the left; Compare is a ghost button on the right. */}
+        {(onCompare || onDismiss) && (
+          <div className="pointer-events-auto relative z-20 mt-auto flex items-center justify-between gap-[8px] pt-[2px]">
+            {onDismiss ? (
+              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); }} className="dm-link cursor-pointer text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.62)" }}>Not for me</button>
+            ) : <span />}
+            {onCompare && (
+              <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[12.5px] font-bold" style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 28%, transparent)`, color: "#fff" } : ghost}>
+                <ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );

@@ -657,32 +657,26 @@ export function MatchLab() {
          to Profile's Top Three tab where the strongest match is the default
          primary and Make my primary is one tap. ---- */}
       {decisionOpen && (
-        <Sheet onClose={() => setDecisionOpen(false)} maxWidth="720px">
-          <div className="relative flex flex-col items-center gap-5 text-center">
+        <Sheet onClose={() => setDecisionOpen(false)} maxWidth="860px" bare>
+          <div className="relative flex flex-col items-center gap-7 text-center">
             {/* One quiet entrance (direct feedback, 11 Sept 2026: the sheet
-               was "too busy"): the chip, title, line, cards and buttons rise
-               in one staggered fade. No drifting glows, no confetti, no ink
-               reveal, no 3D flips or sheens. */}
-            <span
-              className="motion-safe:animate-[fade-slide-up_0.5s_0.05s_ease-out_both] inline-flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
-              style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--color-glass-surface-raised)", color: "var(--color-brand-500)" }}
-            >
-              <Sparkles className="h-3 w-3" aria-hidden /> Match complete
-            </span>
-            <div className="flex flex-col gap-1.5">
-              <h2 className={`${bricolage.className} motion-safe:animate-[fade-slide-up_0.5s_0.15s_ease-out_both] text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
+               was "too busy", then "looks like it's in a box"): no panel, no
+               chip, no glows or confetti. Title, line, cards and buttons rise
+               in one quick stagger over the blurred deck. */}
+            <div className="flex flex-col gap-2">
+              <h2 className={`${bricolage.className} motion-safe:animate-[fade-slide-up_0.4s_0.05s_ease-out_both] text-[26px] font-extrabold text-[var(--color-night-foreground)] sm:text-[32px]`}>
                 {liked.length === MAX_SLOTS ? "Your Top 3 Matches" : "Your matches"}
               </h2>
-              <p className="motion-safe:animate-[fade-slide-up_0.5s_0.25s_ease-out_both] text-[14.5px] leading-[20px] font-semibold text-[var(--color-night-muted-foreground,rgba(255,255,255,0.72))]">
+              <p className="motion-safe:animate-[fade-slide-up_0.4s_0.12s_ease-out_both] text-[15px] leading-[21px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>
                 Compare them next, then pick your primary career any time.
               </p>
             </div>
-            <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3" style={{ perspective: 900 }}>
+            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
               {liked.map((c, i) => (
                 <TopThreeCard key={c.id} career={c} index={i} />
               ))}
             </div>
-            <div className="flex w-full flex-col gap-2.5 motion-safe:animate-[fade-slide-up_0.5s_0.75s_ease-out_both]">
+            <div className="flex w-full max-w-[420px] flex-col gap-2.5 motion-safe:animate-[fade-slide-up_0.4s_0.45s_ease-out_both]">
               <Button variant="primary" size="large" onClick={finishMatching} type="button">
                 Compare My Top 3 <ChevronRight className="h-4 w-4" aria-hidden />
               </Button>
@@ -1007,8 +1001,8 @@ function MiniRanking({ liked }: { liked: Career[] }) {
 function TopThreeCard({ career, index = 0 }: { career: Career; index?: number }) {
   return (
     <div
-      className="relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left motion-safe:animate-[fade-slide-up_0.55s_ease-out_both]"
-      style={{ animationDelay: `${350 + index * 120}ms`, borderColor: "var(--color-glass-border-raised)", boxShadow: "0 12px 30px -18px rgba(0,0,0,0.6)" }}
+      className="relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left motion-safe:animate-[fade-slide-up_0.45s_ease-out_both]"
+      style={{ animationDelay: `${200 + index * 80}ms`, borderColor: "var(--color-glass-border-raised)", boxShadow: "0 12px 30px -18px rgba(0,0,0,0.6)" }}
     >
       <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 90vw, 220px" className="object-cover" draggable={false} />
       <div
@@ -1029,11 +1023,18 @@ function TopThreeCard({ career, index = 0 }: { career: Career; index?: number })
   );
 }
 
-function Sheet({ children, onClose, maxWidth = "440px" }: { children: React.ReactNode; onClose: () => void; maxWidth?: string }) {
+function Sheet({ children, onClose, maxWidth = "440px", bare = false }: { children: React.ReactNode; onClose: () => void; maxWidth?: string; /** no panel: content floats on the blurred backdrop (results sheet) */ bare?: boolean }) {
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-5 backdrop-blur-xl select-none"
-      style={{ background: "color-mix(in srgb, var(--color-night-background) 78%, transparent)", WebkitTapHighlightColor: "transparent" }}
+      className={`fixed inset-0 z-[100] flex items-center justify-center p-5 select-none ${bare ? "" : "backdrop-blur-xl"}`}
+      style={{
+        // bare = the results moment: an opaque brand-tinted field, so the
+        // deck is not left peeking out behind it (direct feedback, 11 Sept 2026)
+        background: bare
+          ? "radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--color-brand-500) 22%, var(--color-night-background)) 0%, var(--color-night-background) 60%)"
+          : "color-mix(in srgb, var(--color-night-background) 78%, transparent)",
+        WebkitTapHighlightColor: "transparent",
+      }}
       onPointerUp={(e) => {
         // Backdrop-only dismiss, via pointerup with a self-target check —
         // click on a bare div is unreliable on iOS, and a tap that begins
@@ -1044,8 +1045,8 @@ function Sheet({ children, onClose, maxWidth = "440px" }: { children: React.Reac
       aria-modal="true"
     >
       <div
-        className="w-full max-h-[90dvh] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] [scrollbar-width:none]"
-        style={{ maxWidth, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
+        className={`w-full max-h-[90dvh] overflow-y-auto overscroll-contain [scrollbar-width:none] ${bare ? "p-2 motion-safe:animate-[fade-slide-up_0.45s_ease-out_both]" : "rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"}`}
+        style={bare ? { maxWidth } : { maxWidth, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {children}
       </div>

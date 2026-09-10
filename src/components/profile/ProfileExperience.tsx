@@ -2138,15 +2138,16 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
                   <span className="truncate text-[14px] leading-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
                   <span className="text-[8.5px] leading-[11px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
                 </span>
+                {/* Labelled, not an icon alone: the swap arrows were not
+                   understood (direct feedback, 11 Sept 2026). */}
                 <button
                   type="button"
                   onClick={() => addToTop3(career.id)}
                   aria-label={top3Count >= 3 ? `Swap ${career.title} into your Top 3` : `Add ${career.title} to your Top 3`}
-                  title={top3Count >= 3 ? "Swap into Top 3" : "Add to Top 3"}
-                  className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
+                  className="dm-quiet flex h-8 flex-none cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold whitespace-nowrap"
                   style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}
                 >
-                  {top3Count >= 3 ? <ArrowLeftRight className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  {top3Count >= 3 ? <><ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> Swap in</> : <><Plus className="h-[13px] w-[13px]" aria-hidden /> Add to Top 3</>}
                 </button>
               </span>
             </div>

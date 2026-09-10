@@ -52,12 +52,38 @@ const EXPLORE_SECTIONS = [
   { key: "careers" as const, label: "Careers", href: "/explore" },
   { key: "colleges" as const, label: "Schools", href: "/colleges" },
 ];
+const SCHOOLS_TAB_NUDGE_KEY = "dreamari:schools-tab-nudged:session";
+
 export function ExploreSectionTabs({ active }: { active: "careers" | "colleges" }) {
   const router = useRouter();
+  // First visit to Explore in a session (direct feedback, 11 Sept 2026): the
+  // Schools tab pulses once so students learn it is there. Waits for the
+  // welcome splash to clear so the pulse is not wasted behind it.
+  const [nudge, setNudge] = useState(false);
+  useEffect(() => {
+    if (active !== "careers") return;
+    try { if (window.sessionStorage.getItem(SCHOOLS_TAB_NUDGE_KEY)) return; } catch { /* fine */ }
+    let timer: number | undefined;
+    const fire = () => {
+      timer = window.setTimeout(() => {
+        setNudge(true);
+        try { window.sessionStorage.setItem(SCHOOLS_TAB_NUDGE_KEY, "1"); } catch { /* fine */ }
+      }, 900);
+    };
+    // The splash mounts a moment after this strip, so look for it after a
+    // beat; if it is up, wait for it to clear, otherwise go.
+    const check = () => {
+      if (document.querySelector('[role="dialog"][aria-labelledby^="splash-"]')) window.addEventListener("dreamari:welcome-done", fire, { once: true });
+      else fire();
+    };
+    const probe = window.setTimeout(check, 700);
+    return () => { window.clearTimeout(probe); window.clearTimeout(timer); window.removeEventListener("dreamari:welcome-done", fire); };
+  }, [active]);
   return (
     <div role="tablist" aria-label="Explore section" className="flex items-center gap-[var(--space-4)]">
       {EXPLORE_SECTIONS.map((section, i) => {
         const isActive = section.key === active;
+        const pulsing = nudge && section.key === "colleges" && !isActive;
         return (
           <span key={section.key} className="flex items-center gap-[var(--space-4)]">
             {i > 0 && <span aria-hidden style={{ color: "var(--glass-border)" }}>/</span>}
@@ -67,7 +93,8 @@ export function ExploreSectionTabs({ active }: { active: "careers" | "colleges" 
               aria-selected={isActive}
               aria-current={isActive ? "page" : undefined}
               onClick={() => { if (!isActive) router.push(section.href); }}
-              className={`-mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"}`}
+              onAnimationEnd={() => { if (pulsing) setNudge(false); }}
+              className={`-mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
               style={{
                 fontFamily: "var(--font-body)",
                 color: isActive ? "var(--foreground)" : "var(--muted-foreground)",

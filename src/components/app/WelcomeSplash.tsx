@@ -157,7 +157,13 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
     dispatchAuroraPulse("cta", undefined, { soft: true });
     setDeparting(true);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    exitTimer.current = setTimeout(onDone, reduce ? 0 : 180);
+    exitTimer.current = setTimeout(() => {
+      onDone();
+      // Nudges that should wait for the welcome to clear listen for this
+      // (Explore's Schools tab pulse, 11 Sept 2026). Fired here so every
+      // splash, however it is mounted, announces itself.
+      window.dispatchEvent(new CustomEvent("dreamari:welcome-done", { detail: surface }));
+    }, reduce ? 0 : 180);
   }
 
   return (

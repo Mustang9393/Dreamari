@@ -7049,3 +7049,23 @@ persistence, /colleges edit sheet. Gate clean. Not pushed.
   load; the openings seen were my test clicks in the shared pane.
 Gate clean; verified /match-lab -> /profile handoff, /colleges 1280 and
 375, Explore splash. Not pushed.
+
+## 2026-09-11 · Match results as a full-screen moment; card actions; Schools tab pulse
+- Match results (MatchLab `Sheet bare`): no panel, no chip; an opaque
+  brand-tinted field so the deck does not peek out behind it; title, line,
+  three larger cards (max 860px) and the two buttons rise in one quick
+  stagger (0.05s / 0.12s / 0.2s+80ms per card / 0.45s). Only /match-lab
+  renders MatchLab; if the sheet looks unchanged locally, hard-refresh the
+  tab or check the port (a worktree dev server runs on 3004).
+- SchoolCard: photo + progressive blur now run 300px down, so the mark, name
+  and place sit over the blurred tail before the solid card takes over.
+  Actions: "Not for me" plain text left, Compare (arrows icon) ghost right,
+  no View (the whole card opens, with the hover cue). Both read as secondary.
+- Profile > Saved: the icon-only add/swap control is a labelled pill,
+  "Add to Top 3" / "Swap in".
+- Explore: first visit of a session, the Schools tab pulses twice
+  (`.dm-tab-nudge`, brand glow) after the welcome splash clears; the splash
+  dialog dispatches `dreamari:welcome-done` on exit. Per-session flag
+  `dreamari:schools-tab-nudged:session`.
+Gate clean; verified /match-lab sheet, /colleges cards 1280, /explore pulse
+(class present ~2.4s after the splash closes). Not pushed.
