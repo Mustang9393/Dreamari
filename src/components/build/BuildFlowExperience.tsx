@@ -60,6 +60,7 @@ export function BuildFlowExperience() {
       gpa: state.gpa,
       zipCode: state.zipCode,
       travelDistance: state.travelDistance,
+      path: state.path ?? "",
     });
   };
   const seeMatches = () => {

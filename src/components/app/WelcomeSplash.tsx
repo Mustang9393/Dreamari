@@ -51,7 +51,7 @@ const SCENES: Record<SplashSurface, Scene> = {
     line: "Schools that fit the career you want. Save the ones you like, then pick your #1.",
     rows: [
       { icon: Star, text: <><strong>Target, Safety, Reach:</strong> how likely you are to get in.</> },
-      { icon: Sparkles, text: <><strong>Lower-cost ways to start:</strong> two years first, then the degree.</> },
+      { icon: Sparkles, text: <><strong>Pick your route:</strong> 4-year, 2-year, or trade school.</> },
     ],
     cta: "See my schools",
   },

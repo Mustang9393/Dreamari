@@ -19,9 +19,11 @@ export type StudentProfile = {
   zipCode: string;
   /** how far they would go for school (TRAVEL_DISTANCE_OPTIONS) */
   travelDistance: string;
+  /** Build's "college / trades / both"; "" until answered */
+  path: string;
 };
 
-export const EMPTY_PROFILE: StudentProfile = { interests: [], subjects: [], states: [], email: "", gpa: "", zipCode: "", travelDistance: "" };
+export const EMPTY_PROFILE: StudentProfile = { interests: [], subjects: [], states: [], email: "", gpa: "", zipCode: "", travelDistance: "", path: "" };
 
 export const MAX_INTERESTS = 2;
 export const MAX_SUBJECTS = 2;
@@ -52,6 +54,7 @@ function normalize(value: unknown): StudentProfile {
     gpa: str(v.gpa),
     zipCode: str(v.zipCode),
     travelDistance: str(v.travelDistance),
+    path: str(v.path),
   };
 }
 
@@ -122,7 +125,7 @@ const MAX_ARCHIVED = 10;
 export type ArchivedProfile = { id: string; savedAt: string; profile: StudentProfile };
 
 export function isEmptyProfile(p: StudentProfile): boolean {
-  return p.interests.length === 0 && p.subjects.length === 0 && p.states.length === 0 && !p.email && !p.gpa && !p.zipCode && !p.travelDistance;
+  return p.interests.length === 0 && p.subjects.length === 0 && p.states.length === 0 && !p.email && !p.gpa && !p.zipCode && !p.travelDistance && !p.path;
 }
 
 export function readProfileArchive(): ArchivedProfile[] {

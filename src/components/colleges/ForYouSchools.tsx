@@ -10,7 +10,7 @@ import { BIG, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, CollegeCard, MarkBadge, SOFT, useTopSchool } from "./shared";
 import { COLLEGES } from "./data";
 import { Star } from "lucide-react";
-import { FIT_WORDS, careerTitle, costLine, parseGpa, pathwayFor, schoolsFor, shortProgram, type SchoolMatch } from "./pathway";
+import { FIT_WORDS, careerTitle, costLine, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, type SchoolMatch } from "./pathway";
 
 // Explore Schools, "For you": the student's own pathway turned into a short,
 // curated set of schools (Joshua Pierce, Slack, 10 Sept 2026, after the
@@ -39,17 +39,22 @@ export function ForYouSchools({
   const [chosen, setChosen] = useState<string | null>(null);
   const careerId = chosen && top3.includes(chosen) ? chosen : picks.focus && top3.includes(picks.focus) ? picks.focus : top3[0];
   const pathway = useMemo(() => pathwayFor(careerId), [careerId]);
-  const groups = useMemo(() => (pathway ? schoolsFor(pathway, profile) : null), [pathway, profile]);
+  // The career constrains the routes; the student picks one; Build's
+  // college / trades / both answer sets the default.
+  const routes = useMemo(() => routesFor(careerId), [careerId]);
+  const [routePick, setRoutePick] = useState<Record<string, string>>({});
+  const route = routes.find((r) => r.id === routePick[careerId]) ?? defaultRoute(routes, profile.path);
+  const schools = useMemo(() => (pathway && route ? schoolsForRoute(pathway, route, profile) : null), [pathway, route, profile]);
   const [switching, setSwitching] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [top, setTop] = useTopSchool();
   const gpa = parseGpa(profile.gpa);
 
-  if (!pathway || !groups) {
+  if (!pathway || !route || !schools) {
     return (
       <section className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
         <p className={BIG}>No pathway yet for {careerTitle(careerId)}.</p>
-        <p className={`${SMALL} mt-[6px]`} style={{ color: "var(--muted-foreground)" }}>Browse all schools instead, or pick another career above.</p>
+        <p className={`${SMALL} mt-[6px]`} style={{ color: "var(--muted-foreground)" }}>Browse all schools instead, or pick another career.</p>
       </section>
     );
   }
@@ -70,7 +75,7 @@ export function ForYouSchools({
           onCompare={() => onCompare(m.college.slug)}
           href={`/colleges/${m.college.slug}?route=${pathway.careerId}`}
           badges={showFit ? [{ label: FIT_WORDS[m.fit], tone: m.fit === "Reach" ? "reach" : m.fit === "Target" ? "target" : m.fit === "Safety" ? "safety" : m.fit === "Open admission" ? "open" : "muted" }] : []}
-          subline={[shortProgram(m.program), m.path === "2-year start" ? m.path : null, cost].filter(Boolean).join(" · ")}
+          subline={[shortProgram(m.program), cost].filter(Boolean).join(" · ")}
           hideTags
         />
       </li>
@@ -87,20 +92,22 @@ export function ForYouSchools({
     </div>
   );
 
-  // Curated means short: about ten schools, best fits first, the realistic
-  // moves next, stretches last. Everything else lives in Browse all.
-  const sections: { key: string; title: string; note?: string; list: SchoolMatch[] }[] =
-    gpa === null
-      ? [{ key: "path", title: `Schools with ${pathway.program}`, list: [...groups.target, ...groups.safety, ...groups.reach, ...groups.unplaced].slice(0, 8) }]
-      : [
-          { key: "target", title: "Target", list: groups.target.slice(0, 4) },
-          { key: "safety", title: "Safety", list: groups.safety.slice(0, 4) },
-          { key: "reach", title: "Reach", list: groups.reach.slice(0, 2) },
-        ];
-  // Target, Safety and Reach together first (direct feedback, 10 Sept 2026), then the other routes.
-  if (groups.start2.length) sections.push({ key: "start", title: "Lower-cost ways to start", list: groups.start2.slice(0, 3) });
-  if (groups.trade.length) sections.push({ key: "trade", title: "Trade & technical", list: groups.trade.slice(0, 3) });
+  // Curated means short. 4-year route: Target / Safety / Reach (or one list
+  // without a GPA). 2-year and trade routes: one rail each; those schools are
+  // open admission, so a fit label would say nothing.
+  const sections: { key: string; title: string; note?: string; list: SchoolMatch[] }[] = [];
+  if (schools.fit) {
+    const g = schools.fit;
+    if (gpa === null) sections.push({ key: "path", title: `Schools with ${pathway.program}`, list: [...g.target, ...g.safety, ...g.reach, ...g.unplaced].slice(0, 8) });
+    else sections.push(
+      { key: "target", title: "Target", list: g.target.slice(0, 4) },
+      { key: "safety", title: "Safety", list: g.safety.slice(0, 4) },
+      { key: "reach", title: "Reach", list: g.reach.slice(0, 2) },
+    );
+  } else if (route.institution === "2-year") sections.push({ key: "start", title: "Community colleges near you", list: schools.list.slice(0, 8) });
+  else sections.push({ key: "trade", title: "Trade and technical programs", list: schools.list.slice(0, 8) });
   const shown = sections.filter((s) => s.list.length > 0);
+  const wantsTrade = (profile.path === "trades" || profile.path === "both") && !routes.some((r) => r.institution === "trade");
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
@@ -120,9 +127,30 @@ export function ForYouSchools({
             {top3.length > 1 && <ChevronRight className={`h-4 w-4 transition-transform ${switching ? "-rotate-90" : "rotate-90"}`} aria-hidden />}
           </button>
         </p>
-        <p className="-mt-[6px] text-[15px] leading-[22px] font-semibold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>
-          {pathway.route} in <strong style={{ color: "var(--foreground)" }}>{pathway.program}</strong>
+        {routes.length > 1 && (
+          <div role="tablist" aria-label="Education route" className="flex flex-wrap items-center gap-[6px]">
+            {routes.map((r) => {
+              const on = r.id === route.id;
+              return (
+                <button
+                  key={r.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setRoutePick((cur) => ({ ...cur, [careerId]: r.id }))}
+                  className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13.5px] font-bold"
+                  style={{ background: on ? ACCENT : "transparent", color: on ? "#fff" : "var(--foreground)", borderColor: on ? ACCENT : "var(--glass-border)" }}
+                >
+                  {r.label}<span className="font-semibold" style={{ color: on ? "rgba(255,255,255,0.8)" : "var(--muted-foreground)" }}>· {r.time}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <p className="text-[15px] leading-[22px] font-semibold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>
+          {routes.length > 1 ? "" : `${route.label} · ${route.time} · `}<strong style={{ color: "var(--foreground)" }}>{route.institution === "4-year" ? pathway.program : route.program}</strong>
         </p>
+        {wantsTrade && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{pathway.careerTitle} doesn&rsquo;t have a trade route.</p>}
         {switching && top3.length > 1 && (
           <div className="flex flex-wrap items-center gap-[6px]" aria-label="Choose a career">
             {top3.map((id) => (
@@ -189,7 +217,7 @@ export function ForYouSchools({
       {shown.map((s) => (
         <section key={s.key} className="flex flex-col gap-[var(--space-3)]">
           {heading(s.title, s.note)}
-          <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "start" || s.key === "trade" || s.key === "path"))}</ul>
+          <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "path"))}</ul>
         </section>
       ))}
     </div>

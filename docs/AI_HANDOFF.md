@@ -6665,3 +6665,30 @@ already in place (direct feedback). `PostCard` now takes `live`, true only
 once the screen switches, and attaches the `mkt-reply` class then, so the
 staggered entrance starts at the tap every time. Measured: 0 / 0 / 0 at
 120ms, 1 / 0.92 / 0 at 820ms, all 1 by 2.3s.
+
+### 11 Sept 2026 -- Explore Schools: the route is the student's choice
+
+Direct feedback: switching career silently changed the education route --
+the one decision the page exists for. Model now: the career constrains the
+menu, the student picks, Build's answer sets the default.
+- `routesFor(careerId)` (pathway.ts) turns the career report's education
+  routes into at most one pill per institution type: 4-year ("Bachelor's
+  degree · 4 yrs"), 2-year ("Start at a 2-year college · 2 + 2 yrs" or
+  "Associate degree · 2 yrs"), trade ("Flight school", "Trade or technical
+  school") -- only Training routes that name a school count; "self-taught
+  portfolio" or "store floor" are not school routes and get no pill.
+  Military and non-school routes are omitted. Careers with one route show no
+  pills.
+- `defaultRoute`: Build's college / trades / both (new `path` field on the
+  student profile, persisted by Build) picks a trade route when one exists,
+  otherwise the common route. If the student said trades and the career has
+  none, one quiet line: "<Career> doesn't have a trade route."
+- `schoolsForRoute`: 4-year -> Target / Safety / Reach rails (one list
+  without a GPA); 2-year -> one rail "Community colleges near you"; trade ->
+  "Trade and technical programs". "Lower-cost ways to start" is gone as a
+  separate rail: it IS the 2-year route, one tap away. Cards show
+  "Program · $X a year after aid" only.
+- Header: "Planning for <career v>", the route pills, then the program.
+  Schools splash row 2: "Pick your route: 4-year, 2-year, or trade school."
+Verified on 375x812: IB default Bachelor's (Target/Safety/Reach), 2-year
+pill -> Bergen/Middlesex rail, Nurse -> Bachelor's / Associate pills.

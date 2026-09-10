@@ -243,3 +243,79 @@ export function shortProgram(name: string): string {
     .trim()
     .slice(0, 28);
 }
+
+
+// ---- Routes: the career constrains the menu, the student picks ----------
+// (direct feedback, 11 Sept 2026: the route is the student's decision, so
+// it is a control, defaulted from Build's college / trades / both answer).
+
+export type Institution = "4-year" | "2-year" | "trade";
+export type Route = {
+  id: string;
+  institution: Institution;
+  /** pill label: "Bachelor's degree", "Start at a 2-year college", "Flight school" */
+  label: string;
+  /** pill time: "4 yrs", "2 + 2 yrs" */
+  time: string;
+  /** the program shown under the pills */
+  program: string;
+  common: boolean;
+};
+
+function shortTime(t: string): string {
+  const n = t.toLowerCase();
+  if (/^2 \+ 2/.test(n)) return "2 + 2 yrs";
+  if (/^4 years plus/.test(n)) return "4 yrs + more";
+  const range = n.match(/(\d+(?:\.\d)?)\s*(?:to|-)\s*(\d+(?:\.\d)?)/);
+  if (range) return `${range[1]}–${range[2]} yrs`;
+  const one = n.match(/(\d+(?:\.\d)?)\s*year/);
+  return one ? `${one[1]} yrs` : t;
+}
+
+export function routesFor(careerId: string): Route[] {
+  const report = reportV2(careerId);
+  if (!report) return [];
+  const major = report.majors[0]?.name ?? "";
+  const out: Route[] = [];
+  for (const r of report.education) {
+    const n = r.name.toLowerCase();
+    let inst: Institution | null = null;
+    let label = "";
+    let program = major;
+    if (r.kind === "Degree" && /two-year|2-year|associate|community college/.test(n)) {
+      inst = "2-year";
+      label = /associate/.test(n) ? "Associate degree" : "Start at a 2-year college";
+      program = /associate/.test(n) ? major : `Transfer path to ${major}`;
+    } else if (r.kind === "Degree") {
+      inst = "4-year";
+      label = "Bachelor's degree";
+    } else if ((r.kind === "Training" || r.kind === "Certificate") && /school|flight|technical|certificate|program|academy/.test(n)) {
+      inst = "trade";
+      label = /flight/.test(n) ? "Flight school" : "Trade or technical school";
+      program = r.name.replace(/,.*$/, "");
+    }
+    if (!inst || out.some((x) => x.institution === inst)) continue; // one pill per institution type
+    out.push({ id: inst, institution: inst, label, time: shortTime(r.time), program, common: r.common });
+  }
+  // the common route first, then shorter/cheaper routes
+  return out.sort((a, b) => Number(b.common) - Number(a.common));
+}
+
+/** Build's answer picks the default when it can: "trades"/"both" -> a trade
+ *  route if the career has one; otherwise the common route. */
+export function defaultRoute(routes: Route[], pathPreference: string): Route | null {
+  if (routes.length === 0) return null;
+  if ((pathPreference === "trades" || pathPreference === "both") && routes.some((r) => r.institution === "trade")) return routes.find((r) => r.institution === "trade")!;
+  return routes.find((r) => r.common) ?? routes[0];
+}
+
+export type RouteSchools = { fit: SchoolGroups | null; list: SchoolMatch[] };
+
+/** Schools for ONE chosen route. 4-year: the fit groups. 2-year / trade: a
+ *  single list (open admission mostly, so no fit). */
+export function schoolsForRoute(pathway: Pathway, route: Route, profile: StudentProfile): RouteSchools {
+  const groups = schoolsFor({ ...pathway, program: route.institution === "4-year" ? pathway.program : route.program, twoYearStart: true, trade: true }, profile);
+  if (route.institution === "4-year") return { fit: groups, list: [] };
+  if (route.institution === "2-year") return { fit: null, list: groups.start2 };
+  return { fit: null, list: groups.trade };
+}
