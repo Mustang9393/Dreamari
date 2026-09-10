@@ -9,7 +9,7 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
-import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
+import { ACCENT, SchoolCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
 import { BrowseShelves } from "./BrowseShelves";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
@@ -258,7 +258,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
           <ul className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2 lg:grid-cols-3" aria-label="Colleges">
             {results.map((c) => (
               <li key={c.slug} className="min-w-0">
-                <CollegeCard c={c} saved={saved.has(c.slug)} onSave={() => toggleSaved(c.slug)} compared={compare.includes(c.slug)} onCompare={() => toggleCompare(c.slug)} />
+                <SchoolCard c={c} saved={saved.has(c.slug)} onSave={() => toggleSaved(c.slug)} compared={compare.includes(c.slug)} onCompare={() => toggleCompare(c.slug)} />
               </li>
             ))}
           </ul>

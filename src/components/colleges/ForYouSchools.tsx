@@ -8,7 +8,7 @@ import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks"
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { ACADEMIC_RECORD } from "@/components/profile/report-data";
 import { BIG, PANEL } from "@/components/career/CareerDetailExperience";
-import { ACCENT, CollegeCard, SOFT } from "./shared";
+import { ACCENT, SchoolCard, SOFT } from "./shared";
 import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, type Route, type SchoolMatch } from "./pathway";
 
 // Explore Schools, "For you". The Replit's architecture, delivered leaner
@@ -50,9 +50,18 @@ export function ForYouSchools({
     }, 0);
     return () => window.clearTimeout(t);
   }, []);
+  // A short confirmation bubble after a tap (phones have no hover), plus a
+  // hover/focus tooltip on the chip itself.
+  const [gpaNote, setGpaNote] = useState<string | null>(null);
+  useEffect(() => {
+    if (!gpaNote) return;
+    const t = window.setTimeout(() => setGpaNote(null), 2600);
+    return () => window.clearTimeout(t);
+  }, [gpaNote]);
   const toggleGpa = () => {
     setUseGpa((v) => {
       try { window.localStorage.setItem(USE_GPA_KEY, v ? "0" : "1"); } catch {}
+      setGpaNote(v ? "GPA off. Grouped by how selective schools are." : "GPA on. Grouped by your fit.");
       return !v;
     });
   };
@@ -83,25 +92,32 @@ export function ForYouSchools({
   const sections: { key: string; title: string; list: SchoolMatch[] }[] = [];
   if (schools.fit) {
     const g = schools.fit;
-    if (gpa === null) sections.push({ key: "path", title: `Schools with ${pathway.program}`, list: [...g.target, ...g.safety, ...g.reach, ...g.unplaced].slice(0, 8) });
-    else sections.push({ key: "target", title: "Target", list: g.target.slice(0, 4) }, { key: "safety", title: "Safety", list: g.safety.slice(0, 4) }, { key: "reach", title: "Reach", list: g.reach.slice(0, 2) });
+    if (gpa === null) {
+      // GPA off: the school's own selectivity, in plain words, so the page
+      // keeps its shape without putting the student's grades into it.
+      const all = [...g.target, ...g.safety, ...g.reach, ...g.unplaced];
+      const rate = (m: SchoolMatch) => (m.college.admission === "open" ? 100 : (m.college.admitRate ?? 60));
+      sections.push(
+        { key: "hard", title: "Hardest to get into", list: all.filter((m) => rate(m) < 30).slice(0, 4) },
+        { key: "mid", title: "Selective", list: all.filter((m) => rate(m) >= 30 && rate(m) < 70).slice(0, 4) },
+        { key: "easy", title: "Most students get in", list: all.filter((m) => rate(m) >= 70).slice(0, 4) },
+      );
+    } else sections.push({ key: "target", title: "Target", list: g.target.slice(0, 4) }, { key: "safety", title: "Safety", list: g.safety.slice(0, 4) }, { key: "reach", title: "Reach", list: g.reach.slice(0, 2) });
   } else if (route.institution === "2-year") sections.push({ key: "start", title: "Community colleges near you", list: schools.list.slice(0, 8) });
   else sections.push({ key: "trade", title: "Trade and technical programs", list: schools.list.slice(0, 8) });
   const shown = sections.filter((s) => s.list.length > 0);
 
   const card = (m: SchoolMatch, showFit: boolean) => (
     <li key={m.college.slug} className="w-[min(84vw,320px)] flex-none">
-      <CollegeCard
+      <SchoolCard
         c={m.college}
         saved={saved.has(m.college.slug)}
         onSave={() => onSave(m.college.slug)}
         compared={compare.includes(m.college.slug)}
         onCompare={() => onCompare(m.college.slug)}
         href={`/colleges/${m.college.slug}?route=${pathway.careerId}`}
-        badges={showFit && FIT_WORDS[m.fit] ? [{ label: FIT_WORDS[m.fit], tone: m.fit === "Reach" ? ("reach" as const) : m.fit === "Target" ? ("target" as const) : m.fit === "Safety" ? ("safety" as const) : ("open" as const) }] : []}
-        subline={shortProgram(m.program)}
-        stats
-        hideTags
+        program={shortProgram(m.program)}
+        fit={showFit && FIT_WORDS[m.fit] ? { label: FIT_WORDS[m.fit], tone: m.fit === "Reach" ? "reach" : m.fit === "Target" ? "target" : m.fit === "Safety" ? "safety" : "open" } : undefined}
       />
     </li>
   );
@@ -128,54 +144,72 @@ export function ForYouSchools({
 
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
-      {/* The pathway strip: Career -> Route -> Program. Tap a chip with a
-         chevron to change it; the options appear right under the strip. */}
-      <section className="flex flex-col gap-[var(--space-4)]">
-        <div className="-mx-5 flex items-center gap-[6px] overflow-x-auto px-5 pb-[2px] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0" aria-label="Your pathway">
-          {chip(pathway.careerTitle, top3.length > 1 ? { onClick: () => setOpen(open === "career" ? null : "career"), open: open === "career", accent: true } : { accent: true })}
-          {arrow}
-          {chip(`${route.label} · ${route.time}`, routes.length > 1 ? { onClick: () => setOpen(open === "route" ? null : "route"), open: open === "route" } : undefined)}
-          {arrow}
-          {chip(program)}
+      {/* One summary card for the plan (the "trip header" pattern): eyebrow,
+         the career as the title, the route line, the based-on line. Tap the
+         career or the route to change it; options drop in inside the card. */}
+      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={PANEL}>
+        <div className="flex items-start justify-between gap-[var(--space-3)]">
+          <div className="flex min-w-0 flex-col gap-[4px]">
+            <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>Planning for</p>
+            {top3.length > 1 ? (
+              <button type="button" onClick={() => setOpen(open === "career" ? null : "career")} aria-expanded={open === "career"} className="dm-link flex w-fit cursor-pointer items-center gap-[6px] text-left text-[24px] leading-[28px] font-extrabold sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                {pathway.careerTitle} <ChevronDown className={`h-5 w-5 flex-none transition-transform ${open === "career" ? "rotate-180" : ""}`} aria-hidden style={{ color: SOFT }} />
+              </button>
+            ) : (
+              <h2 className="text-[24px] leading-[28px] font-extrabold sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>{pathway.careerTitle}</h2>
+            )}
+          </div>
+          {saved.size > 0 && (
+            <button type="button" onClick={onShowSaved} className="dm-link flex flex-none cursor-pointer items-center gap-[2px] pt-[4px] text-[13px] font-bold" style={{ color: SOFT }}>
+              Saved · {saved.size} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
+            </button>
+          )}
         </div>
         {open === "career" && (
           <div className="flex flex-wrap gap-[6px]" aria-label="Choose a career">
             {top3.map((id) => option(careerTitle(id), id === careerId, () => { setChosen(id); setOpen(null); }))}
           </div>
         )}
+        <div className="flex flex-wrap items-center gap-[6px]" aria-label="Your pathway">
+          {chip(`${route.label} · ${route.time}`, routes.length > 1 ? { onClick: () => setOpen(open === "route" ? null : "route"), open: open === "route" } : undefined)}
+          {arrow}
+          {chip(program)}
+        </div>
         {open === "route" && (
           <div className="flex flex-wrap gap-[6px]" aria-label="Choose a route">
             {routes.map((r: Route) => option(r.label, r.id === route.id, () => { setRoutePick((cur) => ({ ...cur, [careerId]: r.id })); setOpen(null); }, r.time))}
           </div>
         )}
-        {/* what shapes the list, the door to the full explanation, and the saved list */}
-        <div className="flex flex-col gap-[8px] text-[13.5px] font-semibold sm:flex-row sm:items-center sm:justify-between" style={{ color: "var(--muted-foreground)" }}>
+        <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px] border-t pt-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           <span className="flex flex-wrap items-center gap-[6px]">
             <span className="mr-[2px]">Based on</span>
-            <button
-              type="button"
-              onClick={toggleGpa}
-              aria-pressed={useGpa}
-              title={useGpa ? "Turn off to see every school without Target, Safety, Reach" : "Turn on to sort schools by your GPA"}
-              className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12.5px] font-bold"
-              style={useGpa ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-            >
-              {useGpa ? <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden /> : <X className="h-[13px] w-[13px]" aria-hidden />}
-              {useGpa ? `${gpaLabel} GPA` : "GPA off"}
-            </button>
+            <span className="group relative">
+              <button
+                type="button"
+                onClick={toggleGpa}
+                aria-pressed={useGpa}
+                aria-describedby="gpa-tip"
+                className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12.5px] font-bold"
+                style={useGpa ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+              >
+                {useGpa ? <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden /> : <X className="h-[13px] w-[13px]" aria-hidden />}
+                {useGpa ? `${gpaLabel} GPA` : "GPA off"}
+              </button>
+              <span
+                id="gpa-tip"
+                role="tooltip"
+                className={`pointer-events-none absolute top-[calc(100%+8px)] left-0 z-30 w-max max-w-[260px] rounded-[var(--radius-md)] border px-[10px] py-[7px] text-[12.5px] leading-[17px] font-semibold shadow-lg transition-opacity duration-150 ${gpaNote ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
+                style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+              >
+                {gpaNote ?? (useGpa ? "Tap to turn off: see every school without Target, Safety, Reach." : "Tap to turn on: sort schools by your GPA.")}
+              </span>
+            </span>
             <span className="rounded-full border px-[10px] py-[5px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{profile.states[0] ?? HOME_STATE_NAME}</span>
             {profile.travelDistance && <span className="rounded-full border px-[10px] py-[5px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{profile.travelDistance}</span>}
           </span>
-          <span className="flex items-center gap-[var(--space-4)]">
-            <button type="button" onClick={() => setWhy(true)} className="dm-link flex cursor-pointer items-center gap-[4px] font-bold" style={{ color: SOFT }}>
-              <Info className="h-[14px] w-[14px]" aria-hidden /> Why these schools?
-            </button>
-            {saved.size > 0 && (
-              <button type="button" onClick={onShowSaved} className="dm-link flex cursor-pointer items-center gap-[2px] font-bold" style={{ color: SOFT }}>
-                Saved schools · {saved.size} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
-              </button>
-            )}
-          </span>
+          <button type="button" onClick={() => setWhy(true)} className="dm-link ml-auto flex cursor-pointer items-center gap-[4px] font-bold" style={{ color: SOFT }}>
+            <Info className="h-[14px] w-[14px]" aria-hidden /> Why these schools?
+          </button>
         </div>
       </section>
 
@@ -191,7 +225,7 @@ export function ForYouSchools({
             <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>{s.list.length} {s.list.length === 1 ? "school" : "schools"}</p>
             <h2 className="text-[22px] leading-[26px] font-extrabold sm:text-[26px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}>{s.title}</h2>
           </div>
-          <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "path" || s.key === "start" || s.key === "trade"))}</ul>
+          <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "start" || s.key === "trade"))}</ul>
         </section>
       ))}
 

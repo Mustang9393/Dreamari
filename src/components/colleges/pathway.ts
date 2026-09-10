@@ -8,7 +8,7 @@
 
 import { reportV2, type CollegeStatus, type EducationRoute } from "@/components/profile/report-data";
 import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
-import { COLLEGES, synthDetail, type College } from "./data";
+import { COLLEGES, collegeImage, synthDetail, type College } from "./data";
 import type { StudentProfile } from "@/lib/studentProfile";
 
 export type Pathway = {
@@ -122,11 +122,13 @@ export function parseGpa(value: string | null | undefined): number | null {
 export function fitFor(c: College, gpa: number | null): Fit {
   if (c.admission === "open" || c.admitRate === null) return c.admission === "open" ? "Open admission" : "Fit unavailable";
   if (gpa === null) return "Fit unavailable";
+  // Acceptance rate is the proxy we have (no admitted-GPA data). A strong
+  // GPA at a 50-75% school is a textbook target, not a safety.
   const r = c.admitRate;
-  if (r < 20) return gpa >= 3.9 ? "Target" : "Reach";
-  if (r < 50) return gpa >= 3.6 ? "Target" : "Reach";
-  if (r < 80) return gpa >= 3.3 ? "Safety" : gpa >= 2.8 ? "Target" : "Reach";
-  return gpa >= 2.5 ? "Safety" : "Target";
+  if (r < 25) return gpa >= 3.9 ? "Target" : "Reach";
+  if (r < 50) return gpa >= 3.5 ? "Target" : "Reach";
+  if (r < 75) return gpa >= 3.9 ? "Safety" : gpa >= 3.0 ? "Target" : "Reach";
+  return gpa >= 3.0 ? "Safety" : gpa >= 2.5 ? "Target" : "Reach";
 }
 
 function realProgrammes(c: College): string[] | null {
@@ -181,7 +183,8 @@ export function schoolsFor(pathway: Pathway, profile: StudentProfile): SchoolGro
 
   // Home state and the student's preferred states first, then more finish.
   const near = (c: College) => (c.state === HOME_STATE || preferStates.has(c.stateName.toLowerCase()) ? 0 : 1);
-  const ordered = [...COLLEGES].sort((a, b) => near(a) - near(b) || (b.finish ?? -1) - (a.finish ?? -1));
+  const pictured = (c: College) => (collegeImage(c) ? 0 : 1);
+  const ordered = [...COLLEGES].sort((a, b) => near(a) - near(b) || pictured(a) - pictured(b) || (b.finish ?? -1) - (a.finish ?? -1));
 
   if (pathway.degree) {
     for (const c of ordered) {

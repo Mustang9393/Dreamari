@@ -6826,3 +6826,31 @@ Verified 375x812.
 - Rails (For you + Browse shelves): 28px vertical padding pulled back with
   negative margins, so the poster hover (translateY -10px, scale 1.09,
   40px shadow) no longer clips against overflow-x:auto.
+
+### 11 Sept 2026 -- Explore Schools, pass 6: school card + plan card
+
+Direct feedback: emulate and improve the Replit's card design, look at
+competitors; the page should be cleaner and beautiful; Target showed only
+photo-less Mount Marty; "GPA off" gave one anticlimactic row; the GPA chip
+needed a tooltip.
+- `SchoolCard` (shared.tsx) replaces CollegeCard everywhere on Schools: the
+  career poster's full-bleed photo + progressive blur (direct feedback),
+  circular mark, name, "City, ST · Public · 4-year", programme, a three-tile
+  stat row (acceptance · $ after aid · finish; BigFuture/Replit pattern, on a
+  scrim so it stays legible), Compare + View action row, Save on the photo,
+  fit chip only where the rail title doesn't say it. Photo-less schools get
+  the mark blurred as a wash.
+- Header is one "plan card" (trip-header pattern): eyebrow PLANNING FOR, the
+  career as the title (tap for the Top 3), route chip (tap for routes) ->
+  programme chip, then "Based on [3.7 GPA toggle] [New Jersey]" and "Why
+  these schools?" on a hairline row. Saved · n sits top-right of the card.
+- GPA chip: hover/focus tooltip ("Tap to turn off: see every school without
+  Target, Safety, Reach.") and a 2.6s confirmation bubble after a tap. GPA
+  off now groups by selectivity in plain words (Hardest to get into /
+  Selective / Most students get in) instead of one list.
+- Fit bands corrected (acceptance-rate proxy): <25% Reach (Target at 3.9+);
+  25-50% Target at 3.5+; 50-75% Target at 3.0+ (Safety at 3.9+); 75%+ Safety
+  at 3.0+. A 3.7 now puts TCNJ / Rutgers / NJIT / Ramapo in Target.
+  Photographed schools sort before photo-less ones within a rail.
+Verified 375x812 and 1280x800. Mount Marty has no photo on disk; fetching
+one needs the user's go-ahead (download).

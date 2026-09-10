@@ -5,7 +5,7 @@ import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks"
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { SMALL } from "@/components/career/CareerDetailExperience";
 import { COLLEGES, type College } from "./data";
-import { CollegeCard } from "./shared";
+import { SchoolCard } from "./shared";
 import { HOME_STATE, pathwayFor, programMatcher, offersProgram } from "./pathway";
 
 // Browse all, at rest (no search, no filters): shelves by the questions a
@@ -79,7 +79,7 @@ export function BrowseShelves({
           <ul className="dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" aria-label={shelf.title}>
             {shelf.items.map((c) => (
               <li key={c.slug} className="w-[min(86vw,320px)] flex-none">
-                <CollegeCard c={c} saved={saved.has(c.slug)} onSave={() => onSave(c.slug)} compared={compare.includes(c.slug)} onCompare={() => onCompare(c.slug)} stats hideTags />
+                <SchoolCard c={c} saved={saved.has(c.slug)} onSave={() => onSave(c.slug)} compared={compare.includes(c.slug)} onCompare={() => onCompare(c.slug)} />
               </li>
             ))}
           </ul>
