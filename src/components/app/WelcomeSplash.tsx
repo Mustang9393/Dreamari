@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Briefcase, Check, ChevronRight, EyeOff, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
+import { Check, ChevronRight, X } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
@@ -17,7 +17,9 @@ type Scene = {
   eyebrow: string;
   title: string;
   line?: string;
-  rows?: { icon: LucideIcon; text: ReactNode }[];
+  /** plain lines, no icons (direct feedback, 11 Sept 2026: splashes were
+   *  inconsistent, some with icons, some without) */
+  rows?: { text: ReactNode }[];
   cta: string;
 };
 
@@ -35,11 +37,9 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
     tint: ["40, 140, 255", "30, 185, 170"],
     eyebrow: "You’re in", title: "EXPLORE",
-    // One line (direct feedback, 11 Sept 2026): Schools has its own welcome,
-    // so the second row from Joshua's 10 Sept copy was saying it twice.
-    rows: [
-      { icon: Briefcase, text: <><strong>Careers:</strong> salary, education, daily life, and pathways.</> },
-    ],
+    // One sentence that names both halves (direct feedback, 11 Sept 2026);
+    // the Schools tab has its own welcome with the detail.
+    line: "Careers and schools: salary, education, daily life, and pathways.",
     cta: "Start exploring",
   },
   // Schools has its own welcome (direct feedback, 10 Sept 2026): the page
@@ -64,10 +64,10 @@ const SCENES: Record<SplashSurface, Scene> = {
     eyebrow: "Welcome to", title: "CONNECT",
     // Retain all partner-reviewed permissions and moderation wording.
     rows: [
-      { icon: UserPlus, text: <>Students can <strong>follow</strong> Dream Volunteers.</> },
-      { icon: MessageCircleQuestion, text: <>Students can <strong>ask questions publicly</strong>.</> },
-      { icon: EyeOff, text: <>Volunteers <strong>can’t follow or privately message</strong> students.</> },
-      { icon: ShieldCheck, text: "All interactions are moderated by Dreamari staff and school faculty." },
+      { text: <>Students can <strong>follow</strong> Dream Volunteers.</> },
+      { text: <>Students can <strong>ask questions publicly</strong>.</> },
+      { text: <>Volunteers <strong>can’t follow or privately message</strong> students.</> },
+      { text: "All interactions are moderated by Dreamari staff and school faculty." },
     ],
     cta: "Start connecting",
   },
@@ -188,7 +188,7 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
         </div>
         {scene.line && <p id={`splash-${surface}-description`} className={styles.line}>{scene.line}</p>}
         {scene.rows && <ul className={styles.rows}>{scene.rows.map((row, i) => (
-          <li key={i} className={styles.row}><row.icon size={18} aria-hidden="true" /><span>{row.text}</span></li>
+          <li key={i} className={styles.row}>{row.text}</li>
         ))}</ul>}
         <div className={styles.ctaWrap}>
         <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4.8} strength={1} active>

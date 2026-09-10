@@ -39,8 +39,7 @@
 .sprite { object-fit: contain; }
 .line { text-align: center; margin: 16px 0 0; font-size: 16px; line-height: 1.65; color: color-mix(in srgb, var(--foreground) 88%, var(--muted-foreground)); text-wrap: pretty; }
 .rows { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
-.row { display: flex; align-items: flex-start; gap: 12px; font-size: 14px; line-height: 1.55; color: var(--foreground); }
-.row > svg { flex: none; margin-top: 3px; color: color-mix(in srgb, rgb(var(--t1)) 50%, var(--foreground)); }
+.row { font-size: 14px; line-height: 1.55; text-align: center; color: var(--foreground); }
 .row:last-child { padding-top: 16px; border-top: 1px solid var(--glass-border); color: var(--muted-foreground); }
 .cta {
   display: inline-flex;

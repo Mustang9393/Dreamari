@@ -7128,3 +7128,11 @@ Verified at 375: splash copy, deck shows "Scroll down for details" once.
   Fallbacks agreed if this is rejected: option 2 (two static icon rows), then
   option 1 (no demo; deck guide teaches scroll, right, left once each).
 Verified at 375 and 1280.
+
+## 2026-09-11 · Splashes: no icons anywhere; Explore line names schools
+- Row icons removed from every splash (`rows` is now `{ text }[]`; only
+  Connect uses rows). Rows are centred plain lines; the last Connect row
+  keeps its divider and muted colour.
+- Explore line: "Careers and schools: salary, education, daily life, and
+  pathways." The Schools tab keeps its own splash with the detail.
+Verified at 375: Explore and Connect (only the CTA chevron svg remains).
