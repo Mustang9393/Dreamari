@@ -20,6 +20,7 @@ import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, 
 
 const DEMO_TOP3 = ["investment-banking", "registered-nurse", "software-engineer"];
 const HOME_STATE_NAME = "New Jersey";
+const USE_GPA_KEY = "dreamari:schools-use-gpa";
 
 export function ForYouSchools({
   saved,
@@ -39,7 +40,25 @@ export function ForYouSchools({
   const stored = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
   // Build writes the GPA on hand-off; until then use the GPA the Profile
   // card already shows, so the sorting is there from the first visit.
-  const profile = useMemo(() => (stored.gpa ? stored : { ...stored, gpa: ACADEMIC_RECORD.gpa }), [stored]);
+  // The GPA chip is a toggle (direct feedback, 11 Sept 2026): off means the
+  // list isn't sorted into Target / Safety / Reach at all. Remembered.
+  const [useGpa, setUseGpa] = useState(true);
+  useEffect(() => {
+    // read after paint (the set-state-in-effect rule); storage is external state
+    const t = window.setTimeout(() => {
+      try { if (window.localStorage.getItem(USE_GPA_KEY) === "0") setUseGpa(false); } catch {}
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  const toggleGpa = () => {
+    setUseGpa((v) => {
+      try { window.localStorage.setItem(USE_GPA_KEY, v ? "0" : "1"); } catch {}
+      return !v;
+    });
+  };
+  const withGpa = useMemo(() => (stored.gpa ? stored : { ...stored, gpa: ACADEMIC_RECORD.gpa }), [stored]);
+  const profile = useMemo(() => (useGpa ? withGpa : { ...withGpa, gpa: "" }), [withGpa, useGpa]);
+  const gpaLabel = withGpa.gpa;
   const top3 = picks.ids.length ? picks.ids : DEMO_TOP3;
   const [chosen, setChosen] = useState<string | null>(null);
   const careerId = chosen && top3.includes(chosen) ? chosen : picks.focus && top3.includes(picks.focus) ? picks.focus : top3[0];
@@ -69,7 +88,6 @@ export function ForYouSchools({
   } else if (route.institution === "2-year") sections.push({ key: "start", title: "Community colleges near you", list: schools.list.slice(0, 8) });
   else sections.push({ key: "trade", title: "Trade and technical programs", list: schools.list.slice(0, 8) });
   const shown = sections.filter((s) => s.list.length > 0);
-  const basedOn = [gpa !== null ? `${profile.gpa} GPA` : null, profile.states[0] ?? HOME_STATE_NAME, profile.travelDistance || null].filter(Boolean).join(" · ");
 
   const card = (m: SchoolMatch, showFit: boolean) => (
     <li key={m.college.slug} className="w-[min(84vw,320px)] flex-none">
@@ -87,7 +105,7 @@ export function ForYouSchools({
       />
     </li>
   );
-  const rail = "dreamari-card-rail -mx-5 flex list-none gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
+  const rail = "dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 
   // One chip of the pathway strip: a control when there is a choice.
   const chip = (label: string, opts?: { onClick?: () => void; open?: boolean; accent?: boolean }) => {
@@ -131,8 +149,23 @@ export function ForYouSchools({
           </div>
         )}
         {/* what shapes the list, the door to the full explanation, and the saved list */}
-        <div className="flex flex-col gap-[6px] text-[13.5px] font-semibold sm:flex-row sm:items-center sm:justify-between" style={{ color: "var(--muted-foreground)" }}>
-          <span>Based on {basedOn}</span>
+        <div className="flex flex-col gap-[8px] text-[13.5px] font-semibold sm:flex-row sm:items-center sm:justify-between" style={{ color: "var(--muted-foreground)" }}>
+          <span className="flex flex-wrap items-center gap-[6px]">
+            <span className="mr-[2px]">Based on</span>
+            <button
+              type="button"
+              onClick={toggleGpa}
+              aria-pressed={useGpa}
+              title={useGpa ? "Turn off to see every school without Target, Safety, Reach" : "Turn on to sort schools by your GPA"}
+              className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12.5px] font-bold"
+              style={useGpa ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+            >
+              {useGpa ? <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden /> : <X className="h-[13px] w-[13px]" aria-hidden />}
+              {useGpa ? `${gpaLabel} GPA` : "GPA off"}
+            </button>
+            <span className="rounded-full border px-[10px] py-[5px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{profile.states[0] ?? HOME_STATE_NAME}</span>
+            {profile.travelDistance && <span className="rounded-full border px-[10px] py-[5px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{profile.travelDistance}</span>}
+          </span>
           <span className="flex items-center gap-[var(--space-4)]">
             <button type="button" onClick={() => setWhy(true)} className="dm-link flex cursor-pointer items-center gap-[4px] font-bold" style={{ color: SOFT }}>
               <Info className="h-[14px] w-[14px]" aria-hidden /> Why these schools?
@@ -168,7 +201,7 @@ export function ForYouSchools({
           career={pathway.careerTitle}
           route={`${route.label} · ${route.time}`}
           program={program}
-          gpa={gpa !== null ? profile.gpa : null}
+          gpa={useGpa ? gpaLabel : null}
           place={profile.states[0] ?? HOME_STATE_NAME}
           distance={profile.travelDistance || null}
           twoYear={pathway.twoYearStart}
@@ -193,7 +226,7 @@ function WhySheet({ onClose, career, route, program, gpa, place, distance }: { o
     `Your career: ${career}`,
     `Your education path: ${route}`,
     `Your recommended program: ${program}`,
-    gpa ? `Your academic profile: ${gpa} GPA` : null,
+    gpa ? `Your academic profile: ${gpa} GPA` : "Your academic profile: not used",
     `Your location preference: ${place}${distance ? ` · ${distance}` : ""}`,
   ].filter(Boolean) as string[];
   return createPortal(

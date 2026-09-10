@@ -6812,3 +6812,17 @@ programme chips sat badly.
 - Cards: no programme chip; the programme is a quiet 12.5px line under the
   location. Fit chip only where the rail title doesn't say it.
 Verified 375x812.
+
+### 11 Sept 2026 -- Schools: GPA chip toggle, Why sheet layout, rail hover room
+
+- "Based on" is now chips. The GPA chip is a toggle (direct feedback):
+  filled "3.7 GPA" sorts into Target / Safety / Reach; tap -> outlined "GPA
+  off", the rails collapse to one "Schools with <program>" list, the Why
+  sheet says "Your academic profile: not used". Title text explains each
+  state; remembered in localStorage `dreamari:schools-use-gpa`.
+- Why sheet: centred on every size with a capped height and its own scroll,
+  full-width "Adjust preferences" (the bottom-anchored sheet clipped the CTA
+  against the fixed nav).
+- Rails (For you + Browse shelves): 28px vertical padding pulled back with
+  negative margins, so the poster hover (translateY -10px, scale 1.09,
+  40px shadow) no longer clips against overflow-x:auto.
