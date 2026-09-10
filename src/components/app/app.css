@@ -428,3 +428,12 @@ html.light .dm-report {
   50% { transform: scale(1.18) rotate(90deg); opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .dm-collab-mark { animation: none; } }
+
+/* One-time reveal for a nudge label (Schools "Edit" chip): slides in from
+   the right, then stays. */
+@keyframes dm-nudge-in {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.dm-nudge-in { animation: dm-nudge-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) { .dm-nudge-in { animation: none; } }

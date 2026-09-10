@@ -6957,3 +6957,23 @@ the inputs caption and the first row header before any card.
   chip wraps under the heading and to two lines.
 - Column gap 32 -> 40px so the header and the rails breathe like Careers.
 Gate clean; verified 1280x800 and 375x812. Not pushed.
+
+## 2026-09-11 · Explore Schools: Edit chip, separate Why sheet, simpler editor
+Direct feedback (several notes): the chip must say what it does, "Why these
+schools?" should not be folded into it, the inputs should be changeable, the
+sheet should be simpler, the GPA control needs a short hint, and the chip
+needs a nudge.
+- Header: chip alone on the right, "Bachelor's degree in Finance · 3.7 GPA
+  · New Jersey | ✎ Edit" (label always visible, full white; phones have no
+  hover). Wrapped in HoverBeam; on load "Edit" slides in (`.dm-nudge-in`,
+  app.css) and the beam runs one loop (~3.6s), then both wait for hover.
+- "Why these schools?" moved to the right end of the FIRST row header
+  (Target), where the fit question comes up. Opens an explanation-only
+  sheet: three lines, "Edit preferences" button.
+- New `EditSheet` ("Edit your list"): Path (segmented, or static when one
+  route), Where (state select, writes profile.states[0]), GPA (select of
+  Build's ranges plus "Don't use my GPA", type segmented, one-line hint
+  "Sorts schools into Target, Safety and Reach." / "Off: rows show how
+  selective each school is."), Done. Shared `Sheet`, `Field`, `Segmented`,
+  `Select` helpers in ForYouSchools.tsx.
+Gate clean; verified 1280x800 and 375x812. Not pushed.

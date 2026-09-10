@@ -1,14 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown, ChevronRight, SlidersHorizontal, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Pencil, X } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
-import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile, writeStudentProfile } from "@/lib/studentProfile";
+import { US_STATES, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile, writeStudentProfile } from "@/lib/studentProfile";
+import { GPA_OPTIONS } from "@/components/build/types";
 import { ACADEMIC_RECORD } from "@/components/profile/report-data";
 import { BIG, PANEL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SchoolCard, SOFT } from "./shared";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, type Route, type SchoolMatch } from "./pathway";
 
 // Explore Schools, "For you". The Replit's architecture, delivered leaner
@@ -51,11 +52,9 @@ export function ForYouSchools({
     }, 0);
     return () => window.clearTimeout(t);
   }, []);
-  const toggleGpa = () => {
-    setUseGpa((v) => {
-      try { window.localStorage.setItem(USE_GPA_KEY, v ? "0" : "1"); } catch {}
-      return !v;
-    });
+  const setGpaUse = (on: boolean) => {
+    try { window.localStorage.setItem(USE_GPA_KEY, on ? "1" : "0"); } catch {}
+    setUseGpa(on);
   };
   const withGpa = useMemo(() => (stored.gpa ? stored : { ...stored, gpa: ACADEMIC_RECORD.gpa }), [stored]);
   const profile = useMemo(() => (useGpa ? withGpa : { ...withGpa, gpa: "" }), [withGpa, useGpa]);
@@ -94,6 +93,16 @@ export function ForYouSchools({
     return () => { document.removeEventListener("pointerdown", close); window.removeEventListener("keydown", key); };
   }, [open]);
   const [why, setWhy] = useState(false);
+  const [edit, setEdit] = useState(false);
+  // one-time nudge on the Edit chip: label slides in, beam runs one loop
+  const [revealed, setRevealed] = useState(false);
+  const [nudge, setNudge] = useState(false);
+  useEffect(() => {
+    const t1 = window.setTimeout(() => { setRevealed(true); setNudge(true); }, 900);
+    const t2 = window.setTimeout(() => setNudge(false), 900 + 3600);
+    return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
+  }, []);
+  const place = profile.states[0] ?? HOME_STATE_NAME;
   const gpa = parseGpa(profile.gpa);
 
   if (!pathway || !route || !schools) {
@@ -169,17 +178,33 @@ export function ForYouSchools({
             {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
           </Menu>
         </h2>
-        <div className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
-          <button
-            type="button"
-            onClick={() => setWhy(true)}
-            aria-label={`Why these schools? ${route.label} in ${program}, ${useGpa ? `${gpaLabel} GPA` : "GPA off"}, ${profile.states[0] ?? HOME_STATE_NAME}`}
-            className="dm-quiet flex min-h-[36px] max-w-full cursor-pointer items-center gap-[8px] rounded-[18px] border px-[14px] py-[8px] text-left text-[13px] leading-[18px] font-semibold sm:whitespace-nowrap"
-            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-          >
-            <SlidersHorizontal className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: SOFT }} />
-            <span>{route.label} in {program} · {useGpa ? `${gpaLabel} GPA` : "GPA off"} · {profile.states[0] ?? HOME_STATE_NAME}</span>
-          </button>
+        <div className="flex min-w-0 flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-2)]">
+          {/* The inputs, as one chip that edits them. "Edit" with a pencil
+             sits at its trailing edge (a pencil alone is not understood),
+             always visible and in full white: phones have no hover, and a
+             label that vanished left the chip reading as static text.
+             Nudge, once per visit: the beam runs one loop and "Edit" slides
+             in shortly after load, then both wait for hover (direct
+             feedback, 11 Sept 2026). */}
+          <HoverBeam strength={0.85} active={nudge ? true : undefined} className="max-w-full">
+            <button
+              type="button"
+              onClick={() => setEdit(true)}
+              aria-label={`Edit preferences: ${route.label} in ${program}, ${useGpa ? `${gpaLabel} GPA` : "GPA off"}, ${place}`}
+              className="dm-quiet group flex min-h-[38px] max-w-full cursor-pointer items-center gap-[10px] rounded-[19px] border px-[14px] py-[8px] text-left text-[13px] leading-[18px] font-semibold sm:whitespace-nowrap"
+              style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+            >
+              <span>{route.label} in {program} · {useGpa ? `${gpaLabel} GPA` : "GPA off"} · {place}</span>
+              {revealed && (
+                <>
+                  <span aria-hidden className="dm-nudge-in h-[14px] w-px flex-none" style={{ background: "var(--glass-border)" }} />
+                  <span className="dm-nudge-in flex flex-none items-center gap-[5px] font-bold" style={{ color: "var(--foreground)" }}>
+                    <Pencil className="h-[13px] w-[13px]" aria-hidden />Edit
+                  </span>
+                </>
+              )}
+            </button>
+          </HoverBeam>
           {saved.size > 0 && (
             <button type="button" onClick={onShowSaved} className="dm-link flex cursor-pointer items-center gap-[2px] text-[13px] leading-[18px] font-bold whitespace-nowrap" style={{ color: SOFT }}>
               Saved · {saved.size} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
@@ -194,7 +219,7 @@ export function ForYouSchools({
         </section>
       )}
 
-      {shown.map((s) => (
+      {shown.map((s, i) => (
         <section key={s.key} className="flex flex-col gap-[var(--space-3)]">
           {/* Netflix / Hotstar row header: title left, the count small on the right */}
           <div className="flex items-baseline justify-between gap-[var(--space-3)]">
@@ -202,7 +227,14 @@ export function ForYouSchools({
               <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{s.title}</h2>
               {RAIL_COPY[s.key]?.note && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{RAIL_COPY[s.key]!.note}</p>}
             </div>
-            <span className="flex-none text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{s.list.length} {s.list.length === 1 ? "school" : "schools"}</span>
+            {/* "Why these schools?" lives on the first row, right where the
+               Target / Safety / Reach question comes up; other rows carry
+               their count (direct feedback, 11 Sept 2026). */}
+            {i === 0 ? (
+              <button type="button" onClick={() => setWhy(true)} className="dm-link flex-none cursor-pointer text-[13px] leading-[18px] font-bold" style={{ color: SOFT }}>Why these schools?</button>
+            ) : (
+              <span className="flex-none text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{s.list.length} {s.list.length === 1 ? "school" : "schools"}</span>
+            )}
           </div>
           <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "start" || s.key === "trade"))}</ul>
         </section>
@@ -211,18 +243,26 @@ export function ForYouSchools({
       {why && (
         <WhySheet
           onClose={() => setWhy(false)}
+          onEdit={() => { setWhy(false); setEdit(true); }}
           career={pathway.careerTitle}
+          route={route}
+          program={program}
+          gpaLabel={useGpa ? gpaLabel : null}
+          place={place}
+        />
+      )}
+      {edit && (
+        <EditSheet
+          onClose={() => setEdit(false)}
           routes={routes}
           route={route}
           onRoute={(id) => setRoutePick((cur) => ({ ...cur, [careerId]: id }))}
-          program={program}
-          gpaLabel={gpaLabel}
-          useGpa={useGpa}
-          onToggleGpa={toggleGpa}
+          place={place}
+          onPlace={(v) => writeStudentProfile({ states: [v, ...stored.states.filter((x) => x !== v)] })}
+          gpa={useGpa ? gpaLabel : null}
+          onGpa={(v) => { if (v === null) setGpaUse(false); else { setGpaUse(true); writeStudentProfile({ gpa: v }); } }}
           gpaType={stored.gpaType || "unsure"}
           onGpaType={(v) => writeStudentProfile({ gpaType: v })}
-          place={profile.states[0] ?? HOME_STATE_NAME}
-          distance={profile.travelDistance || null}
         />
       )}
     </div>
@@ -261,72 +301,140 @@ function MenuItem({ label, sub, on, onClick }: { label: string; sub?: string; on
   );
 }
 
-// ---- "Why these schools?" -------------------------------------------------
-// The Replit's "A clear starting point" checklist, with the inputs editable
-// in place: the route, whether the GPA sorts the list, which kind of GPA it
-// is. The page stays a result; this sheet is where it gets tuned.
+// ---- sheets -------------------------------------------------------------
+// Two separate sheets (direct feedback, 11 Sept 2026: the explanation and
+// the editing should not be one thing). "Why these schools?" only explains
+// how the list was built; the chip opens the editor.
 
-function WhySheet({ onClose, career, routes, route, onRoute, program, gpaLabel, useGpa, onToggleGpa, gpaType, onGpaType, place, distance }: {
-  onClose: () => void; career: string; routes: Route[]; route: Route; onRoute: (id: string) => void; program: string;
-  gpaLabel: string; useGpa: boolean; onToggleGpa: () => void; gpaType: string; onGpaType: (v: string) => void; place: string; distance: string | null;
-}) {
+function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-  const rowCls = "flex flex-col gap-[8px] border-b pb-[12px] last:border-b-0 last:pb-0";
-  const label = (t: string) => <span className="flex items-center gap-[8px] text-[14px] font-bold"><Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} />{t}</span>;
-  const pill = (on: boolean) => ({ background: on ? ACCENT : "transparent", borderColor: on ? ACCENT : "var(--glass-border)", color: on ? "#fff" : "var(--foreground)" });
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-5 pb-[calc(20px+env(safe-area-inset-bottom))]" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", backdropFilter: "blur(10px)" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" />
-      <section role="dialog" aria-modal="true" aria-labelledby="why-schools" className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[440px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
-        <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet absolute top-[12px] right-[12px] flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
-        <div className="flex flex-col gap-[6px] pr-[40px]">
-          <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>Why these schools?</p>
-          <h2 id="why-schools" className="text-[24px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>A clear starting point</h2>
+      <section role="dialog" aria-modal="true" aria-labelledby="schools-sheet" className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[400px] flex-col gap-[var(--space-6)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
+        <div className="flex items-center justify-between gap-[var(--space-3)]">
+          <h2 id="schools-sheet" className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
+          <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet -mr-[8px] flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
         </div>
-        <ul className="flex list-none flex-col gap-[12px] p-0">
-          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>{label(`Your career: ${career}`)}</li>
-          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>
-            {label(`Your education path: ${route.label}`)}
-            {routes.length > 1 && (
-              <div role="radiogroup" aria-label="Education path" className="flex flex-wrap gap-[6px] pl-[24px]">
-                {routes.map((r) => (
-                  <button key={r.id} type="button" role="radio" aria-checked={r.id === route.id} onClick={() => onRoute(r.id)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[4px] rounded-full border px-[11px] text-[12.5px] font-bold" style={pill(r.id === route.id)}>
-                    {r.label}<span className="font-semibold" style={{ opacity: 0.75 }}>· {r.time}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </li>
-          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>{label(`Your recommended program: ${program}`)}</li>
-          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>
-            <div className="flex items-center justify-between gap-[var(--space-3)]">
-              {label(useGpa ? `Your academic profile: ${gpaLabel} GPA` : "Your academic profile: not used")}
-              <button type="button" role="switch" aria-checked={useGpa} aria-label="Sort by my GPA" onClick={onToggleGpa} className="relative inline-flex h-[24px] w-[42px] flex-none cursor-pointer items-center rounded-full transition-colors" style={{ background: useGpa ? ACCENT : "var(--glass-surface-2)" }}>
-                <span className="absolute size-[20px] rounded-full bg-white transition-transform" style={{ transform: `translateX(${useGpa ? 20 : 2}px)` }} />
-              </button>
-            </div>
-            {useGpa && (
-              <div className="flex flex-col gap-[6px] pl-[24px]">
-                <div role="radiogroup" aria-label="GPA type" className="flex flex-wrap gap-[6px]">
-                  {([["weighted", "Weighted"], ["unweighted", "Unweighted"], ["unsure", "Not sure"]] as const).map(([v, l]) => (
-                    <button key={v} type="button" role="radio" aria-checked={gpaType === v} onClick={() => onGpaType(v)} className="dm-quiet min-h-[32px] cursor-pointer rounded-full border px-[11px] text-[12.5px] font-bold" style={pill(gpaType === v)}>{l}</button>
-                  ))}
-                </div>
-                <p className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Weighted can go above 4.0, so we adjust it first. Not sure counts as unweighted.</p>
-              </div>
-            )}
-          </li>
-          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>{label(`Your location preference: ${place}${distance ? ` · ${distance}` : ""}`)}</li>
-        </ul>
-        <Link href="/profile?tab=settings" className="dm-solid flex min-h-[48px] w-full items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
-          Adjust preferences <ChevronRight className="h-4 w-4" aria-hidden />
-        </Link>
+        {children}
       </section>
     </div>,
     document.body,
+  );
+}
+
+const FIELD = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" } as const;
+
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-[8px]">
+      <span className="text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+      {children}
+      {hint && <span className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{hint}</span>}
+    </div>
+  );
+}
+
+/** One full-width segmented control; every option is visible, one tap to change. */
+function Segmented({ value, options, onChange, ariaLabel }: { value: string; options: { id: string; label: string }[]; onChange: (id: string) => void; ariaLabel: string }) {
+  return (
+    <div role="radiogroup" aria-label={ariaLabel} className="grid gap-[4px] rounded-[var(--radius-md)] border p-[4px]" style={{ ...FIELD, gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
+      {options.map((o) => {
+        const on = o.id === value;
+        return (
+          <button key={o.id} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.id)} className={`min-h-[38px] cursor-pointer rounded-[calc(var(--radius-md)-4px)] px-[8px] text-[13px] leading-[16px] font-bold transition-colors ${on ? "" : "dm-quiet"}`} style={{ background: on ? ACCENT : "transparent", color: on ? "#fff" : "var(--foreground)" }}>
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function Select({ value, options, onChange, ariaLabel }: { value: string; options: string[]; onChange: (v: string) => void; ariaLabel: string }) {
+  return (
+    <span className="relative flex items-center">
+      <select value={value} onChange={(e) => onChange(e.target.value)} aria-label={ariaLabel} className="dm-quiet min-h-[46px] w-full cursor-pointer appearance-none rounded-[var(--radius-md)] border px-[14px] pr-[40px] text-[15px] font-bold outline-none" style={FIELD}>
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-[14px] h-4 w-4" aria-hidden style={{ color: SOFT }} />
+    </span>
+  );
+}
+
+function WhySheet({ onClose, onEdit, career, route, program, gpaLabel, place }: {
+  onClose: () => void;
+  onEdit: () => void;
+  career: string;
+  route: Route;
+  program: string;
+  /** null when GPA sorting is off */
+  gpaLabel: string | null;
+  place: string;
+}) {
+  const line = (t: string) => (
+    <li className="flex items-start gap-[10px] text-[15px] leading-[22px] font-semibold"><Check className="mt-[3px] h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} />{t}</li>
+  );
+  return (
+    <Sheet title="Why these schools?" onClose={onClose}>
+      <ul className="flex list-none flex-col gap-[12px] p-0">
+        {line(`They offer ${program}, the usual ${route.label.toLowerCase()} route into ${career}.`)}
+        {line(gpaLabel ? `Target, Safety and Reach compare your ${gpaLabel} GPA with each school's average.` : "GPA is off, so the rows show how selective each school is instead.")}
+        {line(`Schools in ${place} come first.`)}
+      </ul>
+      <button type="button" onClick={onEdit} className="dm-quiet flex min-h-[46px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[15px] font-bold" style={FIELD}>
+        <Pencil className="h-4 w-4" aria-hidden style={{ color: SOFT }} /> Edit preferences
+      </button>
+    </Sheet>
+  );
+}
+
+const GPA_OFF = "Don't use my GPA";
+
+function EditSheet({ onClose, routes, route, onRoute, place, onPlace, gpa, onGpa, gpaType, onGpaType }: {
+  onClose: () => void;
+  routes: Route[];
+  route: Route;
+  onRoute: (id: string) => void;
+  place: string;
+  onPlace: (state: string) => void;
+  /** the GPA in use, or null when sorting by GPA is off */
+  gpa: string | null;
+  /** null turns GPA sorting off */
+  onGpa: (v: string | null) => void;
+  gpaType: string;
+  onGpaType: (v: string) => void;
+}) {
+  // The GPA on file may be a plain number from the demo record rather than
+  // one of Build's ranges; keep it selectable so nothing changes underneath.
+  const gpaOptions = [...(gpa && !GPA_OPTIONS.includes(gpa) ? [gpa] : []), ...GPA_OPTIONS, GPA_OFF];
+  return (
+    <Sheet title="Edit your list" onClose={onClose}>
+      <div className="flex flex-col gap-[var(--space-5)]">
+        <Field label="Path">
+          {routes.length > 1 ? (
+            <Segmented ariaLabel="Education path" value={route.id} options={routes.map((r) => ({ id: r.id, label: r.label }))} onChange={onRoute} />
+          ) : (
+            <p className="flex min-h-[46px] items-center rounded-[var(--radius-md)] border px-[14px] text-[15px] font-bold" style={FIELD}>{route.label}</p>
+          )}
+        </Field>
+        <Field label="Where">
+          <Select ariaLabel="State" value={place} options={[...US_STATES]} onChange={onPlace} />
+        </Field>
+        <Field label="GPA" hint={gpa ? "Sorts schools into Target, Safety and Reach." : "Off: rows show how selective each school is."}>
+          <Select ariaLabel="Your GPA" value={gpa ?? GPA_OFF} options={gpaOptions} onChange={(v) => onGpa(v === GPA_OFF ? null : v)} />
+          {gpa && (
+            <Segmented ariaLabel="GPA type" value={gpaType} options={[{ id: "weighted", label: "Weighted" }, { id: "unweighted", label: "Unweighted" }, { id: "unsure", label: "Not sure" }]} onChange={onGpaType} />
+          )}
+        </Field>
+      </div>
+      <button type="button" onClick={onClose} className="dm-solid flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
+        Done
+      </button>
+    </Sheet>
   );
 }
