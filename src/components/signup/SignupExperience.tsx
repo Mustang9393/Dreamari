@@ -4,7 +4,7 @@ import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, Check, Eye, EyeOff, GraduationCap, Heart, PartyPopper } from "lucide-react";
+import { ChevronLeft, BookOpen, Check, Eye, EyeOff, GraduationCap, Heart, PartyPopper } from "lucide-react";
 import { playMilestoneChime } from "@/components/build/sound";
 import { Wordmark } from "@/components/app/chrome";
 import { InkText } from "@/components/build/ui";
@@ -342,7 +342,7 @@ export function SignupExperience() {
             className="dm-quiet flex items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] py-[8px] text-[13px] font-semibold"
             style={{ fontFamily: "var(--font-body)", background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+            <ChevronLeft className="h-4 w-4" aria-hidden /> Back
           </button>
         )}
       </header>

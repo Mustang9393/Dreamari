@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, ListChecks, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
+import { AlertCircle, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, ListChecks, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
 import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
@@ -290,7 +290,7 @@ function ReportDocument({
             >
               {/* the words from sm up; on a phone the title needs the room, so
                  the action is its icon alone, still on the title row */}
-              <span className="hidden sm:inline">Career details</span> <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              <span className="hidden sm:inline">Career details</span> <ChevronRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           }
         >
@@ -514,8 +514,8 @@ export function CareerReportView(props: ReportViewProps) {
             const order = REPORT_TABS.map((item) => item.id);
             const index = order.indexOf(tab);
             let next: ReportTabId | null = null;
-            if (event.key === "ArrowRight") next = order[(index + 1) % order.length];
-            if (event.key === "ArrowLeft") next = order[(index + order.length - 1) % order.length];
+            if (event.key === "ChevronRight") next = order[(index + 1) % order.length];
+            if (event.key === "ChevronLeft") next = order[(index + order.length - 1) % order.length];
             if (next) {
               event.preventDefault();
               setTab(next);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useMemo, useState } from "react";
-import { ArrowLeft, Building2, CheckCircle2, Flag, GraduationCap, MessagesSquare, School, ShieldCheck, Trash2, Users, XCircle } from "lucide-react";
+import { ChevronLeft, Building2, CheckCircle2, Flag, GraduationCap, MessagesSquare, School, ShieldCheck, Trash2, Users, XCircle } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { COMMUNITIES, PROS, THREADS } from "./data";
@@ -63,7 +63,7 @@ export function AdminDashboardView({ onBack }: { onBack: () => void }) {
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
 
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">

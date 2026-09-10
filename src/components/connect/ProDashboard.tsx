@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useMemo, useState } from "react";
-import { ArrowLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
+import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
@@ -119,7 +119,7 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
     return (
       <>
         <button type="button" onClick={() => setShowAnswered(false)} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-          <ArrowLeft className="h-4 w-4" aria-hidden /> My profile
+          <ChevronLeft className="h-4 w-4" aria-hidden /> My profile
         </button>
         <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
           <h1 className="text-[26px] leading-[31px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Questions you answered</h1>
@@ -160,7 +160,7 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
 
       {/* who this is, then the two jobs as tabs (the Replit's My Profile / My Impact) */}

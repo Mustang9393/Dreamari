@@ -327,24 +327,25 @@ body {
    this card doesn't move the card; it reveals more of the content inside
    it. The outer card keeps overflow-hidden, so this peek clips exactly the
    way a real scroll would -- the frame stays put, the content moves.
-   Travels far enough to bring the NEXT section's own heading into view
-   and holds there for a beat -- a peek that proves scrolling reveals more
-   (direct feedback: "scroll up until the following content is visible,
-   otherwise nobody sees the scroll doing anything meaningful"), not the
-   whole section's body copy dumped at once (direct feedback right after:
-   "don't show the entire copy, just a peek"). */
+   Travels far enough to bring the first breakdown section -- its label AND
+   the hook line under it -- into view, and holds there for a beat: a peek
+   that proves scrolling reveals real content. 52px used to stop at the
+   "Career Breakdown" caption alone (direct feedback, 10 Sept 2026: "show
+   more of the content below rather than just showing the career breakdown
+   title only"); still not the whole body copy dumped at once (earlier
+   direct feedback: "don't show the entire copy, just a peek"). */
 @keyframes guide-nudge-up {
   0%,
   9% {
     transform: translateY(0);
   }
-  30% {
-    transform: translateY(-52px);
+  32% {
+    transform: translateY(-150px);
   }
-  46% {
-    transform: translateY(-52px);
+  52% {
+    transform: translateY(-150px);
   }
-  62%,
+  68%,
   100% {
     transform: translateY(0);
   }

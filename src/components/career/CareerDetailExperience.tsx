@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
+import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -443,7 +443,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           className={`dm-link ${SMALL} flex w-fit cursor-pointer items-center gap-[6px] font-semibold`}
           style={{ color: "var(--muted-foreground)" }}
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Explore
+          <ChevronLeft className="h-4 w-4" aria-hidden /> Explore
         </button>
 
         {/* Header card: the poster photo, full bleed, with the same legibility

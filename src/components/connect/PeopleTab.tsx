@@ -1,12 +1,12 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
-import { ArrowLeft, ChevronLeft, ChevronRight, EyeOff, Eye, Gem, MessageCircleQuestion, MessagesSquare, Medal, ShieldCheck, Sparkles, Trophy, UserPlus, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Gem, MessagesSquare, Medal, Sparkles, Trophy, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { COMMUNITIES, PROS, type Pro } from "./data";
-import { Avatar, CompanyChip, ConnectNav, PrimaryCta, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
+import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
 import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 
 /** "Active daily/weekly/bi-weekly/monthly" -- the same activeDaysAgo the
@@ -294,100 +294,17 @@ function Grid({ pros, follows, onFollow }: { pros: Pro[]; follows: Follows; onFo
  *  corporate-partner review) the first time someone opens Connect >
  *  People from OUTSIDE Connect -- but only once per Connect visit, not
  *  every time PeopleTab remounts from in-app back navigation (direct
- *  feedback, 9 Sept 2026: "doesn't need to come up again when I click
- *  back from a people profile to the people tab"). The "seen it already"
- *  flag has to live in the parent (ConnectExperience), one level above
- *  where PeopleTab itself mounts and unmounts as the student moves
- *  between views -- tracked there, it survives exactly as long as Connect
- *  itself stays mounted, and resets naturally the next time they arrive
- *  fresh from somewhere else. */
-/** The two rules on step one, each its own row with an icon so the
- *  "students can / volunteers can't" contrast reads at a glance instead
- *  of as one dense paragraph (direct feedback: "don't make the popups so
- *  boring and text only"). */
-function WelcomeRule({ icon: Icon, tone, children }: { icon: LucideIcon; tone: "yes" | "no"; children: React.ReactNode }) {
-  const color = tone === "yes" ? "var(--accent-subtle)" : "var(--muted-foreground)";
-  return (
-    <li className="flex items-start gap-[10px] rounded-[var(--radius-md)] p-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-      <span className="mt-[1px] flex size-[26px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, " + color + " 18%, transparent)", color }}>
-        <Icon className="h-[14px] w-[14px]" aria-hidden />
-      </span>
-      <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--foreground)" }}>{children}</span>
-    </li>
-  );
-}
-
+ *  feedback, 9 Sept 2026). The "seen it already" flag lives in the parent
+ *  (ConnectExperience), one level above where PeopleTab mounts and
+ *  unmounts, so it survives exactly as long as Connect itself stays
+ *  mounted and resets naturally on the next fresh arrival. The two steps'
+ *  copy is the reviewed copy, verbatim; the look is now the shared
+ *  WelcomeSplash (Dreamy in living light, the surface's word, chevron CTA)
+ *  so it matches Build/Match/Explore/Play (direct feedback, 10 Sept 2026:
+ *  "modify the connect modal to look better"). "Seen" is still marked only
+ *  when the student finishes step two, never on mount. */
 export function PeopleWelcome({ hasShown, onShown }: { hasShown: boolean; onShown: () => void }) {
-  const [step, setStep] = useState<0 | 1 | 2>(1);
-  if (hasShown || step === 0) return null;
-  return (
-    // Flush-to-bottom on mobile used to seat the sheet's own CTA right where
-    // the fixed MobileNav bar (56px + its own safe-area padding) sits,
-    // cropping the button under it and making it unreachable (direct
-    // feedback, 9 Sept 2026: "the welcome popup on connect... gets cropped
-    // and i cant hit the cta"). Bottom padding here clears the nav bar; the
-    // max-height + internal scroll on the dialog itself is a safety net so
-    // taller content (a third rule, a longer translation) can never push the
-    // CTA past the bottom of the screen again, on this sheet or short
-    // viewports generally.
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:p-[var(--space-5)]" style={{ background: "color-mix(in srgb, #000000 72%, transparent)" }}>
-      {/* A near-black surface on a near-black page background used to read
-         as the same slab (direct feedback, 8 Sept 2026: "blends into the
-         background") -- the glass-surface-3 token plus a blurred backdrop
-         and a primary-tinted border gives it real edges and depth, and the
-         darker backdrop scrim (55% -> 72%) pushes the page further back. */}
-      <div role="dialog" aria-modal="true" aria-labelledby="people-welcome-title" className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[440px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border backdrop-blur-xl sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--color-glass-surface-3)", borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
-        {/* The cloud mascot leads every welcome moment app-wide -- a soft
-           glow behind it instead of a flat icon-on-white so the header
-           reads as a moment, not a form field. */}
-        <div className="relative flex flex-col items-center gap-[var(--space-3)] px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)] text-center">
-          <span aria-hidden className="pointer-events-none absolute top-[-40px] size-[180px] rounded-full blur-[40px]" style={{ background: "color-mix(in srgb, var(--primary) 35%, transparent)" }} />
-          <span className="relative flex size-[136px] flex-none items-center justify-center">
-            <Image src="/images/dreamy/v2/dreamy-puzzle.png" alt="" width={272} height={272} className="h-full w-full object-contain" priority />
-          </span>
-          <h2 id="people-welcome-title" className="relative text-[21px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-            {step === 1 ? "Welcome to Connect!" : "A moderated space"}
-          </h2>
-        </div>
-
-        <div className="flex flex-col gap-[var(--space-4)] px-[var(--space-6)] pb-[var(--space-6)]">
-          {step === 1 ? (
-            <ul className="flex flex-col gap-[8px]">
-              <WelcomeRule icon={UserPlus} tone="yes">Students can <strong>follow</strong> Dream Volunteers.</WelcomeRule>
-              <WelcomeRule icon={MessageCircleQuestion} tone="yes">Students can <strong>ask questions publicly</strong>.</WelcomeRule>
-              <WelcomeRule icon={EyeOff} tone="no">Volunteers <strong>can&rsquo;t follow or privately message</strong> students.</WelcomeRule>
-            </ul>
-          ) : (
-            <div className="flex items-start gap-[10px] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
-              <ShieldCheck className="mt-[1px] h-5 w-5 flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
-              <p className="text-[14.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>All interactions are moderated by Dreamari staff and school faculty.</p>
-            </div>
-          )}
-
-          <div className="flex items-center justify-center gap-[6px]" aria-hidden>
-            <span className="h-[6px] rounded-full transition-[width]" style={{ width: step === 1 ? 18 : 6, background: step === 1 ? "var(--primary)" : "var(--glass-border)" }} />
-            <span className="h-[6px] rounded-full transition-[width]" style={{ width: step === 2 ? 18 : 6, background: step === 2 ? "var(--primary)" : "var(--glass-border)" }} />
-          </div>
-
-          <PrimaryCta
-            className="w-full"
-            size="md"
-            onClick={() => {
-              // Mark "seen" only when the student actually finishes it
-              // (step 2 -> 0), not on mount -- calling onShown() eagerly
-              // flipped the parent's flag before the modal ever painted,
-              // so it hid itself instantly (direct feedback, 9 Sept 2026:
-              // "now the popup doesn't pop up at all").
-              if (step === 2) onShown();
-              setStep(step === 1 ? 2 : 0);
-            }}
-          >
-            {step === 1 ? "Continue" : "Start Connecting!"}
-          </PrimaryCta>
-        </div>
-      </div>
-    </div>
-  );
+  return <WelcomeSplash surface="connect" open={!hasShown} onDone={onShown} />;
 }
 
 export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows: Follows; onFollow: (id: string) => void; query: string; onFocusChange?: (focused: boolean) => void }) {
@@ -454,7 +371,7 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
       <>
         <SectionSurface className="flex flex-col gap-[var(--space-4)]">
           <button type="button" onClick={() => setIndustry(null)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-            <ArrowLeft className="h-4 w-4" aria-hidden /> All industries
+            <ChevronLeft className="h-4 w-4" aria-hidden /> All industries
           </button>
           <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
             <SectionHead>{industry}</SectionHead>
@@ -475,7 +392,7 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
       <>
         <SectionSurface className="flex flex-col gap-[var(--space-4)]">
           <button type="button" onClick={() => setShowAllIndustries(false)} className="dm-link flex min-h-[40px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-            <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+            <ChevronLeft className="h-4 w-4" aria-hidden /> Back
           </button>
           <div className="flex flex-col gap-[2px]">
             <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.08em]" style={{ color: "var(--accent-subtle)" }}>BROWSE BY INDUSTRY</span>

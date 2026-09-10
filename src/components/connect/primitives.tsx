@@ -7,7 +7,7 @@
 
 import Image from "next/image";
 import { createContext, useContext, useState } from "react";
-import { ArrowRight, CheckCircle2, Clock } from "lucide-react";
+import { ChevronRight, CheckCircle2, Clock } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { studentAvatarSrc } from "@/lib/avatar";
@@ -263,7 +263,7 @@ export function InlineAsk({
         <Avatar name="Jordan Rivera" size={30} />
         <span className="min-w-0 flex-1 truncate text-[13.5px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{placeholder}</span>
         <span className="flex flex-none items-center gap-[5px] rounded-[var(--radius-sm)] px-[14px] py-[7px] text-[12px] leading-[16px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: "var(--foreground)" }}>
-          Ask <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+          Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
         </span>
       </button>
     );
@@ -305,7 +305,7 @@ export function InlineAsk({
             Cancel
           </button>
           <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-solid flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[15px] text-[12px] leading-[16px] font-bold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-            Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+            Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
           </button>
         </div>
       </div>

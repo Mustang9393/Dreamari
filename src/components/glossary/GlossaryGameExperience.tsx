@@ -5,34 +5,7 @@ import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import {
-  Activity,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpCircle,
-  Bug,
-  Building2,
-  Check,
-  CircleDollarSign,
-  Database,
-  Flame,
-  HeartPulse,
-  Mountain,
-  Paintbrush,
-  Plug,
-  Siren,
-  Sparkles,
-  Stethoscope,
-  UserRound,
-  Trophy,
-  Volume2,
-  VolumeX,
-  Wind,
-  Workflow,
-  X,
-  Zap,
-  RotateCw,
-} from "lucide-react";
+import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { QuickLinksMenu } from "@/components/app/chrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -204,7 +177,7 @@ function TopBar({ onBack }: { onBack: () => void }) {
   return (
     <header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
       {/* Mute stays (it is this game's own control); everything else is the
          app's one hamburger, same as every screen. */}
@@ -238,7 +211,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
         className="dm-solid flex w-full max-w-[480px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
-        Next <ArrowRight className="h-4 w-4" aria-hidden />
+        Next <ChevronRight className="h-4 w-4" aria-hidden />
       </button>
     </div>
   );
@@ -270,7 +243,7 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
           className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
           style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
         >
-          Start Learning Finance <ArrowRight className="h-4 w-4" aria-hidden />
+          Start Learning Finance <ChevronRight className="h-4 w-4" aria-hidden />
         </button>
       </div>
     </div>
@@ -320,7 +293,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
         className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
-        Start Lesson {lesson.lessonNumber} <ArrowRight className="h-4 w-4" aria-hidden />
+        Start Lesson {lesson.lessonNumber} <ChevronRight className="h-4 w-4" aria-hidden />
       </button>
     </div>
   );
@@ -573,7 +546,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
         className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
-        Start Practice <ArrowRight className="h-4 w-4" aria-hidden />
+        Start Practice <ChevronRight className="h-4 w-4" aria-hidden />
       </button>
     </div>
   );
@@ -1164,7 +1137,7 @@ function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; te
           className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
           style={{ background: correct ? CORRECT_COLOR : "var(--foreground)", color: correct ? "#05070f" : "var(--background)" }}
         >
-          {isLast ? "See Results" : "Next Question"} <ArrowRight className="h-4 w-4" aria-hidden />
+          {isLast ? "See Results" : "Next Question"} <ChevronRight className="h-4 w-4" aria-hidden />
         </button>
       </div>
     </div>
@@ -1199,7 +1172,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
           className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-3)] text-[15px] font-semibold"
           style={{ background: "var(--foreground)", color: "var(--background)" }}
         >
-          Keep Going <ArrowRight className="h-4 w-4" aria-hidden />
+          Keep Going <ChevronRight className="h-4 w-4" aria-hidden />
         </button>
       </div>
     </div>
@@ -1227,7 +1200,7 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
         className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ background: "var(--hero-accent-purple)", color: "#fff", fontFamily: "var(--font-display)" }}
       >
-        <Zap className="h-4 w-4" fill="currentColor" aria-hidden /> Unlock &amp; Test My Knowledge <ArrowRight className="h-4 w-4" aria-hidden />
+        <Zap className="h-4 w-4" fill="currentColor" aria-hidden /> Unlock &amp; Test My Knowledge <ChevronRight className="h-4 w-4" aria-hidden />
       </button>
     </div>
   );
@@ -1320,7 +1293,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
       >
         {allCorrect ? (
           <>
-            Finish Lesson <ArrowRight className="h-4 w-4" aria-hidden />
+            Finish Lesson <ChevronRight className="h-4 w-4" aria-hidden />
           </>
         ) : (
           <>
@@ -1414,7 +1387,7 @@ function CompleteScreen({
         className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
-        Continue <ArrowRight className="h-4 w-4" aria-hidden />
+        Continue <ChevronRight className="h-4 w-4" aria-hidden />
       </button>
     </div>
   );

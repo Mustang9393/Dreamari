@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, Briefcase, ChevronRight, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, Briefcase, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
 import { Meter, Ring } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
@@ -460,7 +460,7 @@ export function ProProfileView({
          and About as connected cards. */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-          <ArrowLeft className="h-4 w-4" aria-hidden /> View all professionals
+          <ChevronLeft className="h-4 w-4" aria-hidden /> View all professionals
         </button>
         <div className="flex items-center gap-[var(--space-3)]">
           {onOpenDashboard && (
@@ -593,13 +593,13 @@ export function ProProfileView({
         )}
         {answers.length > 1 && (
           <div className="flex justify-end">
-            <button type="button" onClick={() => setAllAnswers((v) => !v)} aria-expanded={allAnswers} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allAnswers ? "Show less" : `View all ${answers.length}`} <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button>
+            <button type="button" onClick={() => setAllAnswers((v) => !v)} aria-expanded={allAnswers} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allAnswers ? "Show less" : `View all ${answers.length}`} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
           </div>
         )}
       </ProfileCard>
 
       {posts.length > 0 && (
-        <ProfileCard id="posts-title" title="My Posts" aside={posts.length > 2 ? <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button> : undefined}>
+        <ProfileCard id="posts-title" title="My Posts" aside={posts.length > 2 ? <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button> : undefined}>
           <ul className="flex flex-col gap-[var(--space-3)]">
             {(allPosts ? posts : posts.slice(0, 2)).map((insight) => {
               const s = signals(insight.views, insight.helpful, insight.saves);
@@ -615,7 +615,7 @@ export function ProProfileView({
       )}
 
       {communities.length > 0 && (
-        <ProfileCard id="communities-title" title="Communities" aside={<button type="button" onClick={() => nav?.openBoard(communities[0].id)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ArrowRight className="h-3.5 w-3.5" aria-hidden /></button>}>
+        <ProfileCard id="communities-title" title="Communities" aside={<button type="button" onClick={() => nav?.openBoard(communities[0].id)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}>
           <ul className="grid gap-[var(--space-4)] sm:grid-cols-2">
             {communities.map((c) => (
               <li key={c.id} className="h-full min-w-0">
@@ -731,7 +731,7 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
 
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">

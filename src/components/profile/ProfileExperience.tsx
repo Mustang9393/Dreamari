@@ -12,37 +12,7 @@ import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import {
-  ArrowLeftRight,
-  Briefcase,
-  CalendarCheck,
-  CheckCircle2,
-  Send,
-  ArrowRight,
-  ArrowUpRight,
-  Bookmark,
-  BadgeCheck,
-  BookOpen,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Compass,
-  Flame,
-  Gamepad2,
-  GraduationCap,
-  MoreVertical,
-  Plane,
-  Plus,
-  Printer,
-  Settings,
-  Shield,
-  Sparkles,
-  Star,
-  Users,
-  Wrench,
-  X,
-  ImagePlus,
-} from "lucide-react";
+import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Plane, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus } from "lucide-react";
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
@@ -580,8 +550,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
-            if (event.key === "ArrowRight") next = order[(index + 1) % order.length];
-            if (event.key === "ArrowLeft") next = order[(index + order.length - 1) % order.length];
+            if (event.key === "ChevronRight") next = order[(index + 1) % order.length];
+            if (event.key === "ChevronLeft") next = order[(index + order.length - 1) % order.length];
             if (next) {
               event.preventDefault();
               setTab(next);
@@ -737,7 +707,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   </p>
                 </div>
                 <Button variant="primary" size="large" className="motion-safe:animate-[fade-slide-up_0.6s_1.05s_ease-out_both]" onClick={dismissWelcome} type="button">
-                  Continue <ArrowRight className="h-4 w-4" aria-hidden />
+                  Continue <ChevronRight className="h-4 w-4" aria-hidden />
                 </Button>
               </div>
             </div>
@@ -1047,7 +1017,7 @@ function Top3Tab({
               <MoreFactsAccordion facts={moreFacts} accent={accent} />
 
               <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-link mt-auto flex min-h-[44px] w-fit cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                View Career Report <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                View Career Report <ChevronRight className="h-3.5 w-3.5" aria-hidden />
               </button>
             </div>
           </div>
@@ -1694,7 +1664,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
       <section className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={INSET}>
         <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
           <h2 key={focus.id} className="text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan for ${focus.title}`} /></h2>
-          <button type="button" onClick={onGoPath} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route <ArrowRight size={14} strokeWidth={2.75} aria-hidden /></button>
+          <button type="button" onClick={onGoPath} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route <ChevronRight size={14} strokeWidth={2.75} aria-hidden /></button>
         </div>
         <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
           <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>

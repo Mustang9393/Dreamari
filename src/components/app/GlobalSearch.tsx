@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowRight, Briefcase, Building2, GraduationCap, MessagesSquare, Search, Users, X } from "lucide-react";
+import { ChevronRight, Briefcase, Building2, GraduationCap, MessagesSquare, Search, Users, X } from "lucide-react";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { careerSlug } from "@/components/career/slug";
 import { COLLEGES, money } from "@/components/colleges/data";
@@ -140,7 +140,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                     <Link key={d.href} href={d.href} onClick={onClose} className="dm-tap flex items-center gap-[12px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                       <span className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}><d.icon className="h-5 w-5" aria-hidden /></span>
                       <span className="flex min-w-0 flex-1 flex-col"><span className="text-[15px] leading-[20px] font-bold">{d.title}</span><span className="truncate text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{d.sub}</span></span>
-                      <ArrowRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                      <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
                     </Link>
                   ))}
                 </div>
@@ -163,7 +163,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                     <section key={g.key} className="flex flex-col gap-[6px]" aria-labelledby={`gs-${g.key}`}>
                       <div className="flex items-center justify-between gap-[var(--space-3)] px-[var(--space-2)]">
                         <h2 id={`gs-${g.key}`} className="flex items-center gap-[6px] text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}><g.icon className="h-[14px] w-[14px]" aria-hidden /> {g.label} · {hits.length}</h2>
-                        {hits.length > shown.length && <Link href={g.seeAll(q.trim())} onClick={onClose} className="dm-link flex items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--accent-subtle)" }}>All in {g.seeAllLabel} <ArrowRight className="h-3.5 w-3.5" aria-hidden /></Link>}
+                        {hits.length > shown.length && <Link href={g.seeAll(q.trim())} onClick={onClose} className="dm-link flex items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--accent-subtle)" }}>All in {g.seeAllLabel} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>}
                       </div>
                       <ul className="flex flex-col">
                         {shown.map((h) => (

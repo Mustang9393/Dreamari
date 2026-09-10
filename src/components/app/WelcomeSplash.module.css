@@ -1,0 +1,429 @@
+/* Per-surface tints arrive as --t1 / --t2 (rgb triplets) on the scrim. */
+/* Centered card on every size (direct feedback, 10 Sept 2026: "make sure
+   these modals don't get cropped and need scrolling on mobile"). On phones
+   the bottom padding reserves the fixed MobileNav's zone (56px + safe area,
+   the crop that bit Connect's old sheet) so the card centers in what's
+   left; the card itself is sized to fit that space and only scrolls as a
+   last resort -- see the short-viewport compaction at the end. */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 12px calc(76px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, #000 72%, transparent);
+  color: var(--foreground);
+}
+.dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+  max-height: calc(100dvh - 88px - env(safe-area-inset-bottom));
+  overflow: hidden auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, rgb(var(--t1)) 45%, var(--glass-border));
+  background: var(--color-glass-surface-3, var(--glass-surface-3));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.9), 0 0 60px -20px rgba(var(--t1), 0.35);
+  isolation: isolate;
+}
+@media (min-width: 640px) {
+  .scrim { padding: 20px; }
+  .dialog { max-height: 85dvh; }
+}
+
+/* --- the scene: a short band of living light Dreamy sits in ------------ */
+.stage {
+  position: relative;
+  height: 180px;
+  flex-shrink: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.beam {
+  position: absolute;
+  inset: -20% -10%;
+  mask-image: radial-gradient(ellipse at 50% 55%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 55%, #000 30%, transparent 75%);
+  mix-blend-mode: screen;
+}
+.beam i {
+  position: absolute;
+  display: block;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  filter: blur(18px) saturate(1.3) brightness(1.2);
+  opacity: 0.7;
+  will-change: translate, scale, opacity, border-radius;
+}
+.orbit {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 250px;
+  height: 92px;
+  translate: -50% -50%;
+  border: 1px solid rgba(var(--t1), 0.35);
+  border-top-color: color-mix(in srgb, var(--foreground) 45%, transparent);
+  border-radius: 50%;
+  transform: rotate(-20deg);
+  box-shadow: 0 -6px 26px rgba(var(--t1), 0.16);
+}
+.ground {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 200px;
+  height: 44px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(var(--t1), 0.42), rgba(var(--t2), 0.16) 45%, transparent 75%);
+  filter: blur(12px);
+}
+.particles { position: absolute; inset: 0; }
+.orb {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 30%, #fff 0 16%, rgba(255, 255, 255, 0.75) 26%, transparent 34%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9), rgba(var(--t1), 0.85) 55%, rgba(var(--t2), 0.35) 78%, transparent 100%);
+  box-shadow: 0 0 10px 2px rgba(var(--t1), 0.35), 0 0 22px 4px rgba(var(--t2), 0.18);
+  opacity: 0.9;
+}
+.flare {
+  position: absolute;
+  display: block;
+  opacity: 0.75;
+  background: radial-gradient(circle, #fff 0 10%, rgba(220, 225, 255, 0.9) 18%, transparent 40%);
+}
+.flare::before, .flare::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 12%;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95) 45%, #fff 50%, rgba(255, 255, 255, 0.95) 55%, transparent);
+  filter: blur(0.6px) drop-shadow(0 0 4px rgba(var(--t1), 0.8));
+}
+.flare::after { rotate: 90deg; }
+
+/* Dreamy overlaps the scene's bottom edge into the copy. */
+/* Big enough to carry the card (direct feedback, 10 Sept 2026: "the sprite
+   is too small on connect"); the short-phone rule below brings it down. */
+.dreamy {
+  position: relative;
+  z-index: 1;
+  width: 168px;
+  aspect-ratio: 1;
+  margin: -128px auto 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sprite { object-fit: contain; filter: drop-shadow(0 0 18px rgba(var(--t1), 0.42)) drop-shadow(0 10px 24px rgba(var(--t2), 0.3)); }
+.dreamy:focus-visible, .cta:focus-visible { outline: 2px solid var(--foreground); outline-offset: 4px; }
+
+/* --- copy --------------------------------------------------------------- */
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 24px 24px;
+  text-align: center;
+}
+.eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+/* The big word: same treatment as Build's title, two background layers
+   clipped to the glyphs -- a one-shot sweep over the standing gradient. */
+.word {
+  margin: -6px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(44px, 12vw, 56px);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  padding-right: 0.045em;
+  background:
+    linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.85) 50%, transparent 58%) no-repeat -160% 0 / 60% 100%,
+    linear-gradient(165deg, var(--foreground) 25%, color-mix(in srgb, rgb(var(--t1)) 38%, var(--foreground)) 90%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+.line {
+  margin: 0;
+  max-width: 380px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--foreground) 82%, var(--muted-foreground));
+  text-wrap: pretty;
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--glass-surface-1);
+  font-size: 13.5px;
+  line-height: 19px;
+  color: var(--foreground);
+}
+.rowIcon {
+  display: flex;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -3px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(var(--t1), 0.16);
+  color: rgb(var(--t1));
+}
+.rowIcon svg { width: 14px; height: 14px; }
+.row[data-tone="no"] .rowIcon { background: color-mix(in srgb, var(--muted-foreground) 18%, transparent); color: var(--muted-foreground); }
+/* --- Match's mini-deck demo --------------------------------------------- */
+.demo { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; margin-top: 2px; }
+.demoStage { position: relative; width: 100%; height: 132px; overflow: hidden; border-radius: var(--radius-md); background: color-mix(in srgb, var(--glass-surface-1) 70%, transparent); }
+.demoCard {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  width: 92px;
+  height: 118px;
+  translate: -50% 0;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 18%, transparent);
+  background: #10142a;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.8);
+}
+/* The card is a viewport; .demoScroll is the tall content inside it (face,
+   then details), moved as one so scrolling reads as scrolling. */
+.demoScroll { position: absolute; left: 0; top: 0; width: 100%; }
+.demoFace { position: relative; height: 118px; display: flex; flex-direction: column; gap: 5px; padding: 7px; background: #171c38; }
+.demoPoster { display: block; height: 56px; border-radius: 6px; background: linear-gradient(160deg, rgba(var(--t1), 0.85), rgba(var(--t2), 0.75)); }
+.demoTitle { display: block; height: 7px; width: 70%; border-radius: 3px; background: color-mix(in srgb, var(--foreground) 88%, transparent); }
+.demoSub { display: block; height: 5px; width: 48%; border-radius: 3px; background: color-mix(in srgb, var(--foreground) 40%, transparent); }
+.demoDetails { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 9px 7px 12px; background: #10142a; }
+.demoCaption { display: block; height: 4px; width: 52%; border-radius: 2px; background: color-mix(in srgb, var(--foreground) 30%, transparent); }
+.demoChip { display: block; height: 9px; width: 40%; border-radius: 999px; background: rgba(var(--t1), 0.7); }
+.demoLine { display: block; height: 5px; width: 86%; border-radius: 3px; background: color-mix(in srgb, var(--foreground) 34%, transparent); }
+.demoBadgeSave, .demoBadgePass {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  translate: 0 -50%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  color: #fff;
+}
+.demoBadgeSave { right: 18%; background: var(--color-feedback-success, #33c78c); box-shadow: 0 0 18px rgba(51, 199, 140, 0.55); }
+.demoBadgePass { left: 18%; background: var(--destructive, #ef4444); box-shadow: 0 0 18px rgba(239, 68, 68, 0.5); }
+.demoBadgeSave svg, .demoBadgePass svg { width: 16px; height: 16px; }
+.demoFinger {
+  position: absolute;
+  left: 50%;
+  top: 102px; /* low on the card, so the whole upward drag stays inside it */
+  width: 16px;
+  height: 16px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.18), 0 0 14px rgba(var(--t1), 0.6);
+  opacity: 0;
+}
+.demoCaptions { position: relative; height: 18px; width: 100%; font-size: 13.5px; line-height: 18px; font-weight: 700; color: var(--foreground); }
+.demoCap1, .demoCap2, .demoCap3 { position: absolute; inset: 0; text-align: center; }
+/* Without motion: the card rests on its face and the three captions are simply listed. */
+@media (prefers-reduced-motion: reduce) {
+  .demoCaptions { height: auto; display: flex; flex-direction: column; gap: 2px; font-weight: 600; font-size: 13px; }
+  .demoCap1, .demoCap2, .demoCap3 { position: static; }
+  .demoFinger { display: none; }
+}
+.dots { display: flex; gap: 6px; margin-top: 2px; }
+.dot, .dotOn { height: 6px; width: 6px; border-radius: 999px; background: var(--glass-border); transition: width 200ms; }
+.dotOn { width: 18px; background: rgb(var(--t1)); }
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 6px;
+  padding: 0 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 22%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 0 5px rgba(var(--t1), 0.09), 0 10px 32px rgba(var(--t1), 0.3);
+  transition: transform 160ms ease, filter 160ms ease;
+}
+.cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.cta svg { transition: transform 180ms ease; }
+.cta:hover svg { transform: translateX(3px); }
+
+/* --- motion --------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .scrim { animation: fadeIn 260ms ease-out both; }
+  .dialog { animation: rise 520ms cubic-bezier(.16, 1, .3, 1) both; }
+  .beam i { animation-name: blobDrift, blobMorph, blobGlow; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+  .orbit { animation: orbit 9s ease-in-out infinite alternate; }
+  .ground { animation: breathe 5s ease-in-out infinite alternate; }
+  .orb { animation-name: drift, glint; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+  .flare { animation-name: glint; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+  .dreamy { animation: arrive 700ms cubic-bezier(.16, 1, .3, 1) 120ms both, hover 5s ease-in-out 900ms infinite; }
+  .wave .sprite { animation: dreamy-wiggle 700ms ease-in-out; }
+  .eyebrow { animation: reveal 500ms ease-out 200ms both; }
+  .word { animation: ink-bleed-in 800ms cubic-bezier(.16, 1, .3, 1) 260ms both, wordSweep 1000ms ease-in-out 1000ms both; }
+  .title { animation: reveal 600ms ease-out 260ms both; }
+  .line { animation: reveal 600ms ease-out 360ms both; }
+  .row { animation: reveal 500ms ease-out both; animation-delay: calc(440ms + var(--i) * 80ms); }
+  .dots, .cta { animation: reveal 500ms ease-out 640ms both; }
+  .cta { animation: reveal 500ms ease-out 640ms both, ctaPulse 2.6s ease-out 1600ms infinite; }
+  /* One 7.5s timeline, three 2.5s phases: peek, save, pass. */
+  .demoScroll { animation: demoPeek 7.5s ease-in-out infinite; }
+  .demoCard { animation: demoSwipe 7.5s ease-in-out infinite; }
+  .demoFinger { animation: demoFinger 7.5s ease-in-out infinite; }
+  .demoBadgeSave { animation: demoSave 7.5s ease-out infinite; }
+  .demoBadgePass { animation: demoPass 7.5s ease-out infinite; }
+  .demoCap1 { animation: demoCap1 7.5s ease-in-out infinite; }
+  .demoCap2 { animation: demoCap2 7.5s ease-in-out infinite; }
+  .demoCap3 { animation: demoCap3 7.5s ease-in-out infinite; }
+  .departing .dialog { animation: depart 320ms ease-in both; }
+  .departing { animation: fadeOut 320ms ease-in both; }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(28px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes depart { to { opacity: 0; transform: translateY(-14px) scale(1.02); } }
+@keyframes arrive { from { opacity: 0; transform: translateY(26px) scale(.7) rotate(-8deg); } to { opacity: 1; transform: none; } }
+@keyframes hover { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
+@keyframes reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes breathe { from { opacity: .55; } to { opacity: 1; } }
+@keyframes orbit { from { transform: rotate(-20deg) scale(.96); } to { transform: rotate(-10deg) scale(1.04); } }
+@keyframes drift { from { translate: 0 0; } to { translate: 5px -10px; } }
+@keyframes glint { from { opacity: .35; } to { opacity: 1; } }
+@keyframes wordSweep { from { background-position: -160% 0, 0 0; } to { background-position: 260% 0, 0 0; } }
+@keyframes ctaPulse { 0% { box-shadow: 0 0 0 0 rgba(var(--t1), 0.45), 0 10px 32px rgba(var(--t1), 0.3); } 70%, 100% { box-shadow: 0 0 0 10px transparent, 0 10px 32px rgba(var(--t1), 0.3); } }
+/* Phase 1 (0-33%): the face slides up to peek the details, then settles back.
+   Phase 2 (33-66%): the card swipes right, tilts, the save badge blooms.
+   Phase 3 (66-100%): swipes left, pass badge blooms. */
+/* Phase 1: finger presses (5-8%), then finger and content move UP together
+   (8-18%) so more of the details rise into view, hold (18-24%), finger lifts.
+   The content never visibly scrolls back down: it resets at 30% while the
+   card is blinked out between phases (direct feedback, 10 Sept 2026: "it
+   scrolls down and not when the dot goes up"). */
+@keyframes demoPeek {
+  0%, 8% { translate: 0 0; }
+  18%, 29.5% { translate: 0 -78px; }
+  30.5%, 100% { translate: 0 0; }
+}
+@keyframes demoSwipe {
+  0%, 27% { translate: -50% 0; rotate: 0deg; opacity: 1; }
+  29.5%, 33% { translate: -50% 0; rotate: 0deg; opacity: 0; }
+  36% { translate: -50% 0; rotate: 0deg; opacity: 1; }
+  52% { translate: 70% 0; rotate: 12deg; opacity: 0; }
+  60% { translate: -50% 0; rotate: 0deg; opacity: 0; }
+  66%, 70% { translate: -50% 0; rotate: 0deg; opacity: 1; }
+  86% { translate: -170% 0; rotate: -12deg; opacity: 0; }
+  92% { translate: -50% 0; rotate: 0deg; opacity: 0; }
+  100% { translate: -50% 0; rotate: 0deg; opacity: 1; }
+}
+@keyframes demoFinger {
+  0%, 3% { translate: -50% -50%; opacity: 0; scale: 1.4; }
+  5% { translate: -50% -50%; opacity: 1; scale: 1.4; }
+  8% { translate: -50% -50%; opacity: 1; scale: 1; }
+  18%, 24% { translate: -50% calc(-50% - 62px); opacity: 1; scale: 1; }
+  27% { opacity: 0; translate: -50% calc(-50% - 62px); scale: 1.3; }
+  28% { opacity: 0; translate: -50% -50%; scale: 1; }
+  36% { translate: -50% -50%; opacity: 0; }
+  38% { opacity: 1; }
+  50% { translate: 90px -50%; opacity: 1; }
+  54%, 68% { opacity: 0; translate: -50% -50%; }
+  70% { opacity: 1; }
+  82% { translate: -150px -50%; opacity: 1; }
+  86%, 100% { opacity: 0; translate: -50% -50%; }
+}
+@keyframes demoSave { 0%, 44% { opacity: 0; scale: .6; } 52%, 58% { opacity: 1; scale: 1; } 64%, 100% { opacity: 0; scale: .6; } }
+@keyframes demoPass { 0%, 78% { opacity: 0; scale: .6; } 86%, 92% { opacity: 1; scale: 1; } 98%, 100% { opacity: 0; scale: .6; } }
+@keyframes demoCap1 { 0%, 30% { opacity: 1; } 34%, 96% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes demoCap2 { 0%, 32% { opacity: 0; } 36%, 62% { opacity: 1; } 66%, 100% { opacity: 0; } }
+@keyframes demoCap3 { 0%, 64% { opacity: 0; } 68%, 96% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes blobDrift {
+  0% { translate: 0 0; scale: 1 1; }
+  33% { translate: var(--dx1) var(--dy1); scale: 1.22 .86; }
+  66% { translate: var(--dx2) var(--dy2); scale: .84 1.18; }
+  100% { translate: var(--dx3) var(--dy3); scale: 1.08 1.04; }
+}
+@keyframes blobMorph {
+  0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  100% { border-radius: 55% 45% 40% 60% / 40% 65% 35% 60%; }
+}
+@keyframes blobGlow {
+  0% { opacity: .38; filter: blur(20px) saturate(1.15) brightness(1.02); }
+  45% { opacity: .95; filter: blur(14px) saturate(1.5) brightness(1.4); }
+  100% { opacity: .58; filter: blur(22px) saturate(1.25) brightness(1.12); }
+}
+/* Short phones (an iPhone SE is 667px tall, minus the nav zone): shrink the
+   scene, Dreamy and the type so the whole card still fits with no scroll. */
+@media (max-height: 720px) {
+  .stage { height: 128px; }
+  .dreamy { width: 120px; margin-top: -92px; }
+  .orbit { width: 200px; height: 74px; }
+  .copy { gap: 8px; padding: 2px 18px 18px; }
+  .word { font-size: 40px; }
+  .title { font-size: 21px; }
+  .line { font-size: 14px; line-height: 1.45; }
+  .row { padding: 8px 10px; font-size: 13px; line-height: 18px; }
+  .cta { min-height: 44px; margin-top: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta, .cta svg, .dot, .dotOn { transition: none; }
+}

@@ -5,6 +5,7 @@
 import Image from "next/image";
 import { BorderBeam } from "border-beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
@@ -700,6 +701,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
       <AppBackdrop />
+      <FirstVisitSplash surface="explore" />
 
       <DesktopNavigation active="Explore" />
 

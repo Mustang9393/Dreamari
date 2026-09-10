@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
+import { ChevronRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
 
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
@@ -62,6 +63,7 @@ export function PlayHub() {
       }}
     >
       <AppBackdrop />
+      <FirstVisitSplash surface="play" />
 
       <DesktopNavigation active="Play" />
 
@@ -114,7 +116,7 @@ export function PlayHub() {
           text="Explore more careers and find another simulation to play."
           ctaLabel="Explore"
           href="/explore"
-          Icon={ArrowRight}
+          Icon={ChevronRight}
           storageKey="dreamari:play-explore-bridge-dismissed"
         />
 

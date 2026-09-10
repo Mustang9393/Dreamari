@@ -3,9 +3,10 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BookOpen, Check, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { ChevronRight, BookOpen, Check, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
+import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
@@ -103,6 +104,11 @@ export function MatchLab() {
     }
   });
   const [guideGesture, setGuideGesture] = useState<GestureKind | null>(null);
+  // The first-visit welcome splash goes first; the in-deck gesture spotlight
+  // waits until it has either closed or reported it isn't showing, so the
+  // two never stack (direct feedback, 10 Sept 2026: gesture demos live in
+  // the modal along with a short intro).
+  const [splashSettled, setSplashSettled] = useState(false);
   // Kept fresh via effect, not assigned during render -- refs can't be
   // written while rendering (matches dragLive's own pattern below).
   const markDemonstratedRef = useRef<(kind: GestureKind) => void>(() => {});
@@ -363,11 +369,11 @@ export function MatchLab() {
   // demonstrated yet -- the moment any real gesture lands, this stops and
   // never restarts for the rest of the visit. Opens on scroll-up.
   useEffect(() => {
-    if (!topId || deckIndex !== 0 || demonstrated.size > 0) return;
+    if (!topId || deckIndex !== 0 || demonstrated.size > 0 || !splashSettled) return;
     guideStepRef.current = 0;
     const timer = window.setTimeout(() => setGuideGesture(GUIDE_ORDER[0]), 500);
     return () => window.clearTimeout(timer);
-  }, [topId, deckIndex, demonstrated]);
+  }, [topId, deckIndex, demonstrated, splashSettled]);
   // While it's up, walk scroll-up -> swipe right -> swipe left, one
   // GestureHint cycle's dwell on each -- except scroll-up, which keeps
   // recycling itself instead of moving on after one dwell (direct
@@ -464,6 +470,7 @@ export function MatchLab() {
       <BackgroundSpace />
       <AuroraBackground accent={top?.color?.startsWith("var") ? "#2f6bf2" : "#2f6bf2"} visitedAccents={[]} finale={liked.length >= MAX_SLOTS} lightning={false} />
       <FlowChrome />
+      <FirstVisitSplash surface="match" onOpenChange={(open) => setSplashSettled(!open)} />
 
       <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-3 select-none sm:pt-[72px] sm:pb-5" style={{ WebkitTapHighlightColor: "transparent" }}>
         {/* Phones: the column fills the screen and the deck takes whatever
@@ -551,7 +558,7 @@ export function MatchLab() {
              screen (direct feedback), not only in the once-only sheet. */}
           {!deckDone && liked.length === MAX_SLOTS && (
             <Button variant="primary" size="compact" onClick={() => finishMatching()} type="button" className="mb-3 w-full">
-              Continue with your 3 <ArrowRight className="h-4 w-4" aria-hidden />
+              Continue with your 3 <ChevronRight className="h-4 w-4" aria-hidden />
             </Button>
           )}
 
@@ -703,7 +710,7 @@ export function MatchLab() {
             </div>
             <div className="flex w-full flex-col gap-2.5 motion-safe:animate-[fade-slide-up_0.6s_1.05s_ease-out_both]">
               <Button variant="primary" size="large" onClick={saveTop3} type="button">
-                Save My Top 3 <ArrowRight className="h-4 w-4" aria-hidden />
+                Save My Top 3 <ChevronRight className="h-4 w-4" aria-hidden />
               </Button>
               <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                 Keep Swiping

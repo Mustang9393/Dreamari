@@ -5,7 +5,7 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Transition, Variants } from "framer-motion";
-import { ArrowRight, Banknote, Flame, TrendingUp, X } from "lucide-react";
+import { ChevronRight, Banknote, Flame, TrendingUp, X } from "lucide-react";
 import { SPRING_BOUNCY, TACTILE_PRESS, popIn } from "./duo-motion";
 import { DreamyRig } from "./characters/DreamyRig";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -793,7 +793,7 @@ function RevealPhase({ onClose }: { onClose: () => void }) {
           }}
         >
           View Career Details
-          <ArrowRight size={16} strokeWidth={3} aria-hidden />
+          <ChevronRight size={16} strokeWidth={3} aria-hidden />
         </button>
         <button
           type="button"
@@ -959,7 +959,7 @@ export function DailyDropDemo() {
             style={{ background: V.primary, color: V.primaryFg }}
           >
             Catch the Drop
-            <ArrowRight size={14} strokeWidth={3} aria-hidden />
+            <ChevronRight size={14} strokeWidth={3} aria-hidden />
           </span>
           <span className="flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: V.gold }}>
             <Flame size={13} strokeWidth={2.5} aria-hidden /> 12-day streak

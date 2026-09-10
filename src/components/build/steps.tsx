@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { CardHud, ChipGrid, Citation, ConfirmShimmer, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
-import { ArrowRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
+import { ChevronRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { playMilestoneChime, playXpRise } from "./sound";
@@ -383,7 +383,7 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
         </div>
       </GlassCard>
       </div>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} onSkip={onSkip} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>} onSkip={onSkip} />
     </div>
   );
 }
@@ -425,7 +425,7 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
       </div>
       </div>
       {/* Dreamy IS this screen -- the pulse always launches from him here. */}
-      <StepFooter onBack={onBack} onNext={onNext} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Continue<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
+      <StepFooter onBack={onBack} onNext={onNext} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Continue<ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
 }
@@ -661,7 +661,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       {/* the success is sparkles, not confetti (direct feedback, 5 Sept 2026):
          two waves of stars bloom out from the centre and drift up */}
       {sparkNonce > 0 && <MagicSparkles key={sparkNonce} count={sparkNonce === 1 ? 84 : 48} />}
-      <StepFooter onBack={onBack} onNext={onSeeMatches} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Reveal My Matches<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
+      <StepFooter onBack={onBack} onNext={onSeeMatches} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Reveal My Matches<ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>} />
     </div>
   );
 }

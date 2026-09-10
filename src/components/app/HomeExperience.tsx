@@ -8,7 +8,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronLeft, ChevronRight, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
+import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HoverBeam } from "./HoverBeam";
 import { PosterCard } from "./PosterCard";
@@ -310,7 +310,7 @@ function HeroBanner() {
           }
         >
           <HeroAction onClick={() => router.push(`/career/${careerSlug("Drone Pilot")}`)}>
-            Explore this career <ArrowRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+            Explore this career <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>
       </div>
@@ -496,7 +496,7 @@ export function HomeExperience() {
               Continue Learning & Playing
             </h2>
             <Link href="/play" className="dm-link mt-[2px] flex-none text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-              <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>
+              <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>
             </Link>
           </div>
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
@@ -526,7 +526,7 @@ export function HomeExperience() {
                 style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}
               >
                 Explore All Careers
-                <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
+                <ChevronRight size={14} strokeWidth={2.75} aria-hidden />
               </a>
             </div>
           </div>
@@ -578,7 +578,7 @@ export function HomeExperience() {
                   <span className="flex h-[40px] w-[40px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
                     <Icon className="h-[19px] w-[19px]" aria-hidden />
                   </span>
-                  <ArrowRight size={16} strokeWidth={2.5} aria-hidden className="transition-all duration-200 group-hover:translate-x-[3px]" style={{ color: "var(--muted-foreground)" }} />
+                  <ChevronRight size={16} strokeWidth={2.5} aria-hidden className="transition-all duration-200 group-hover:translate-x-[3px]" style={{ color: "var(--muted-foreground)" }} />
                 </span>
                 <span className="relative flex flex-col gap-[4px]">
                   <span className="text-[17px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</span>

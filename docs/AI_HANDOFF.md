@@ -6210,3 +6210,61 @@ per "borrow the lighting, without the border stroke animation". Description
 line stepped up to 16-19px and brightened, kept in the body face (not
 Bricolage: it is body copy and the questions after it use the body font).
 eslint + tsc clean; desktop and mobile checked in-app.
+
+Later still (same session, local, unpushed unless noted): (1) The light behind
+Dreamy on the Build welcome was one fixed cluster of tinted ellipses on a
+`rotate`, which read "like a static thing just rotating on an axis" (direct
+feedback). Now six independent blobs, each on its own drift waypoints,
+breathing in size and aspect, morphing outline (border-radius) and cycling
+brightness, on mutually unrelated periods, so it never visibly repeats.
+Blender was offered for the atmosphere but is not installed here; CSS keeps
+it live and themeable anyway. (2) CTA arrows: "just the three point arrow
+head shape without the body" -- tried on the Build welcome first
+(ChevronRight, stroke 2.75 at 20px), liked, then applied site-wide by a
+codemod: every lucide ArrowRight -> ChevronRight and ArrowLeft ->
+ChevronLeft (61 icons, 20 files, lucide import lists de-duplicated). Left
+alone on purpose, pending a call: the 15 ArrowUpRight "opens elsewhere"
+marks (college website / how to apply / financial aid links, PosterCard's
+corner), since a diagonal has no chevron form and the up-right carries the
+external-link meaning. tsc clean; eslint 0 errors.
+
+### 2026-09-10 — Welcome splashes for Match / Explore / Play, Connect restyled (Claude)
+
+Direct request: "similar designs but in modal form for when users land on
+match, explore, play and modify the connect modal to look better ... guide
+the user through where they are and what the intention of that screen is.
+Build is the most flamboyant, the others can have simpler modals but still
+cinematic". Local only.
+
+New shared `src/components/app/WelcomeSplash.tsx` (+ `.module.css`): a
+centered dialog with a short band of the same living light as the Build
+welcome (independent drifting blobs in the surface's own two tints, specular
+orbs, flares, orbit, ground glow), Dreamy overlapping into the copy, an
+eyebrow saying where you are ("You're in"), the surface's word as a gradient
+title with a glyph-clipped sweep, one short line, up to three icon rows, dots
+for multi-step, a chevron CTA with the app's pulse + chime. Copy is short,
+8th-grade level (direct feedback). Sprites: heart (Match), curious (Explore),
+party (Play), puzzle (Connect, the prior explicit choice). `FirstVisitSplash`
+wraps it for one-time surfaces (localStorage `dreamari:welcome:<surface>`,
+marked seen only on finish) and reports open/closed to its host.
+
+Match: instead of rows, a looping mini-deck demo (7.5s, three 2.5s phases):
+the card face slides up to peek the details underneath, then swipes right
+with a save badge, then left with a pass badge, a finger dot travelling with
+each move and one caption at a time (direct feedback: "the scroll down
+gesture isn't very visible ... show you can scroll up on a card to peek at
+the information below"). Reduced motion lists the three captions instead.
+MatchLab holds its in-deck gesture spotlight until the splash reports it has
+closed or isn't showing, so the two never stack. Explore and Play mount
+`FirstVisitSplash` beside `AppBackdrop`. Connect's `PeopleWelcome` is now a
+thin wrapper around the shared splash: same parent-held once-per-visit
+logic, both steps' reviewed copy verbatim, "seen" still marked only on
+finishing step two.
+
+Mobile (direct feedback: "make sure these modals don't get cropped and need
+scrolling"): centered on phones too (a bottom sheet assumed a bottom nav;
+Match has none), scrim padding reserves the MobileNav zone, a
+`max-height: 720px` compaction shrinks the scene/Dreamy/type, scrolling is
+a last-resort safety net only. Measured in-app: Match 604px card on 375×812
+and Connect 461px on 375×667, neither overflowing. eslint 0 errors, tsc
+clean. Not committed or pushed.

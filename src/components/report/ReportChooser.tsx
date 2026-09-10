@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check } from "lucide-react";
+import { ChevronRight, Check } from "lucide-react";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -134,7 +134,7 @@ export function ReportChooser({ initialPicks }: { initialPicks: string[] }) {
             </div>
 
             <Button variant="primary" size="large" onClick={confirm} disabled={!chosenCareer || leaving} type="button" className="min-w-[260px]">
-              {chosenCareer ? `Start with ${chosenCareer.title}` : "Start"} <ArrowRight className="h-4 w-4" aria-hidden />
+              {chosenCareer ? `Start with ${chosenCareer.title}` : "Start"} <ChevronRight className="h-4 w-4" aria-hidden />
             </Button>
           </>
         )}
@@ -149,7 +149,7 @@ function EmptyState({ onGoMatch }: { onGoMatch: () => void }) {
       <h1 className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>No matches yet</h1>
       <p className="max-w-[40ch] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Swipe right on up to three careers in Match, and they show up here to choose from.</p>
       <Button variant="primary" onClick={onGoMatch} type="button">
-        Go to Match <ArrowRight className="h-4 w-4" aria-hidden />
+        Go to Match <ChevronRight className="h-4 w-4" aria-hidden />
       </Button>
     </div>
   );

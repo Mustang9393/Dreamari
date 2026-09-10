@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
@@ -35,6 +35,17 @@ const DUST = [
   { x: 12, y: 30, sx: -52, sy: -26, d: 0.52 }, { x: 24, y: 78, sx: -36, sy: 30, d: 0.6 }, { x: 40, y: 18, sx: -12, sy: -48, d: 0.56 },
   { x: 55, y: 84, sx: 10, sy: 40, d: 0.66 }, { x: 68, y: 22, sx: 30, sy: -42, d: 0.58 }, { x: 82, y: 70, sx: 48, sy: 22, d: 0.62 },
   { x: 90, y: 34, sx: 58, sy: -18, d: 0.7 }, { x: 4, y: 60, sx: -60, sy: 8, d: 0.64 },
+];
+// The light blobs: BorderBeam's colorful palette. x/y/w/h in % of the stage,
+// p = three drift waypoints (dx,dy in %), t = drift / morph / glow periods
+// (s), chosen mutually prime-ish so no two blobs ever line up for long.
+const BLOBS = [
+  { x: 22, y: 18, w: 52, h: 46, c: "rgba(100, 70, 255, 0.60)", p: [10, 8, -6, 14, 4, -4], t: [13, 9, 7.5], d: 0 },
+  { x: 44, y: 12, w: 42, h: 40, c: "rgba(40, 140, 255, 0.55)", p: [-12, 10, 8, 6, -4, 16], t: [11, 8.5, 6.5], d: 1.4 },
+  { x: 8, y: 40, w: 40, h: 38, c: "rgba(30, 185, 170, 0.46)", p: [14, -6, 6, 12, 16, 2], t: [15, 10, 8], d: 2.7 },
+  { x: 48, y: 46, w: 38, h: 40, c: "rgba(180, 40, 240, 0.46)", p: [-8, -12, -14, 4, -2, -10], t: [12, 7.5, 9], d: 0.8 },
+  { x: 26, y: 56, w: 30, h: 26, c: "rgba(255, 50, 100, 0.28)", p: [12, 6, -6, -8, 8, 10], t: [10, 11, 6], d: 3.6 },
+  { x: 60, y: 30, w: 26, h: 24, c: "rgba(255, 160, 30, 0.24)", p: [-10, 12, -4, -10, -14, 4], t: [14, 6.5, 8.5], d: 2.1 },
 ];
 const CHAPTERS = ["Build", "Match", "Explore", "Play", "Connect"];
 
@@ -109,12 +120,24 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
       </div>
       <div className={styles.scene}>
         <div ref={stage} className={styles.dreamyStage}>
-          {/* The light: BorderBeam's tinted-ellipse cluster (bloom over core,
-              brightness/saturation lifted, slow hue drift), set free behind
-              Dreamy instead of running along a border. */}
+          {/* The light: BorderBeam's palette (indigo, blue, teal, violet, pink,
+              amber), but each tint is its own blob on its own drift path,
+              breathing in size, aspect, outline and brightness on unrelated
+              periods -- a glow that keeps changing, not a cluster on a spin
+              (direct feedback, 10 Sept 2026: "reads like a static thing just
+              rotating on an axis"). */}
           <div className={styles.beam} aria-hidden="true">
-            <div className={styles.beamBloom} />
-            <div className={styles.beamCore} />
+            {BLOBS.map((b, i) => (
+              <i
+                key={i}
+                style={{
+                  left: `${b.x}%`, top: `${b.y}%`, width: `${b.w}%`, height: `${b.h}%`,
+                  background: `radial-gradient(circle at 42% 40%, ${b.c}, transparent 72%)`,
+                  "--dx1": `${b.p[0]}%`, "--dy1": `${b.p[1]}%`, "--dx2": `${b.p[2]}%`, "--dy2": `${b.p[3]}%`, "--dx3": `${b.p[4]}%`, "--dy3": `${b.p[5]}%`,
+                  animationDuration: `${b.t[0]}s, ${b.t[1]}s, ${b.t[2]}s`, animationDelay: `${b.d}s, ${b.d * 0.7}s, ${b.d * 1.3}s`,
+                } as CSSProperties}
+              />
+            ))}
           </div>
           <div className={styles.orbit} aria-hidden="true" />
           <div className={styles.ground} aria-hidden="true" />
@@ -152,7 +175,7 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
           <p className={styles.description}>Tell us about you, so we can personalize your experience and help you find your dream career.</p>
           <div className={styles.actions}>
             <Button size="large" onClick={begin} aria-disabled={departing} className={styles.cta}>
-              Let’s Go <ArrowRight size={20} strokeWidth={2} aria-hidden="true" />
+              Let’s Go <ChevronRight size={20} strokeWidth={2.75} aria-hidden="true" />
             </Button>
           </div>
         </div>

@@ -5,7 +5,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Briefcase, ChevronLeft, ChevronRight, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { ChevronRight, Briefcase, ChevronLeft, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { WORLD_COLORS } from "@/components/app/worlds";
 
@@ -1667,7 +1667,7 @@ function DialogueBox({
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === " " || event.key === "Enter" || event.key === "ArrowRight" || event.key.toLowerCase() === "a") {
+      if (event.key === " " || event.key === "Enter" || event.key === "ChevronRight" || event.key.toLowerCase() === "a") {
         // Never hijack a key the player is aiming at a button.
         if (document.activeElement instanceof HTMLButtonElement) return;
         event.preventDefault();
@@ -2129,7 +2129,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
   // should all dismiss it whatever happens to hold focus.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Enter" && event.key !== " " && event.key !== "ArrowRight") return;
+      if (event.key !== "Enter" && event.key !== " " && event.key !== "ChevronRight") return;
       event.preventDefault();
       onNext();
     };
@@ -2273,7 +2273,7 @@ function EndingCard({
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             Start Level {next.n} · {next.role}
-            <ArrowRight className="h-[17px] w-[17px]" aria-hidden />
+            <ChevronRight className="h-[17px] w-[17px]" aria-hidden />
           </Link>
         ) : ending.advances ? (
           <span

@@ -9,44 +9,7 @@ import Image from "next/image";
 import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { type LucideIcon as ResourceIcon, UserRound } from "lucide-react";
-import {
-  ArrowLeft,
-  BookOpen,
-  ChevronLeft,
-  FileText,
-  FolderOpen,
-  Images,
-  Link2,
-  Presentation,
-  ArrowRight,
-  Bookmark,
-  Calendar,
-  MapPin,
-  CheckCircle2,
-  ChevronRight,
-  ChevronDown,
-  CornerDownRight,
-  Clock,
-  MessagesSquare,
-  Sparkles,
-  Building2,
-  GraduationCap,
-  ExternalLink,
-  Flag,
-  KeyRound,
-  Share2,
-  LayoutDashboard,
-  Pin,
-  ShieldCheck,
-  ThumbsUp,
-  Users,
-  X,
-  Bell,
-  Search,
-  QrCode,
-  LayoutGrid,
-  Rows3,
-} from "lucide-react";
+import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge } from "./primitives";
@@ -276,7 +239,7 @@ function InlineAsk({
         <Avatar name="Jordan Rivera" size={30} />
         <span className="min-w-0 flex-1 truncate text-[13.5px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{placeholder}</span>
         <span className="flex flex-none items-center gap-[5px] rounded-[var(--radius-sm)] px-[14px] py-[7px] text-[12px] leading-[16px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: "var(--foreground)" }}>
-          Ask <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+          Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
         </span>
       </button>
     );
@@ -314,7 +277,7 @@ function InlineAsk({
           Cancel
         </button>
         <button type="button" onClick={submit} disabled={!text.trim()} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-          Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+          Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
         </button>
       </div>
     </div>
@@ -376,7 +339,7 @@ function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed
 function StatusChip({ state }: { state: Thread["state"] }) {
   return (
     <span className="inline-flex items-center gap-[5px] text-[11px] leading-[15px] font-semibold" style={{ color: STATE_COLOR[state] }}>
-      {state === "awaiting" ? <Clock className="h-3 w-3" aria-hidden /> : state === "routed" ? <ArrowRight className="h-3 w-3" aria-hidden /> : <CheckCircle2 className="h-3 w-3" aria-hidden />}
+      {state === "awaiting" ? <Clock className="h-3 w-3" aria-hidden /> : state === "routed" ? <ChevronRight className="h-3 w-3" aria-hidden /> : <CheckCircle2 className="h-3 w-3" aria-hidden />}
       {STATE_LABEL[state]}
     </span>
   );
@@ -1803,7 +1766,7 @@ function ActivityView({ asked, follows, savedCount, onBack, onOpenThread, onDele
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
       <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} onDeleteAsked={onDeleteAsked} />
       <NewFromFollowing follows={follows} />
@@ -1911,7 +1874,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
             <span>Posting as Jordan · Junior</span>
           </span>
           <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
-            <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ArrowRight className="h-[14px] w-[14px]" aria-hidden /></span>
+            <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></span>
           </PrimaryCta>
         </div>
       </div>
@@ -1943,7 +1906,7 @@ function SavedView({ saves, onUnsave, onBack, onOpenThread, onOpenInsight }: { s
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
       <Panel id="saved-title" title="Saved" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rows.length} saved</span>}>
         {rows.length === 0 ? (
@@ -1989,7 +1952,7 @@ function FollowingFeedView({ follows, onBack }: { follows: Follows; onBack: () =
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
       <Panel id="following-feed-title" title="New from people you follow" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rows.length} {rows.length === 1 ? "update" : "updates"}</span>}>
         {rows.length === 0 ? (
@@ -2308,7 +2271,7 @@ function HomeView({
                          line that says why there is none, in the same place */}
                       <div className="mt-[var(--space-4)] flex min-h-[38px] items-center">
                         {joined ? (
-                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
                         ) : upcoming ? (
                           <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
                         ) : (
@@ -2486,7 +2449,7 @@ function BoardView({
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back to all communities
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Back to all communities
       </button>
 
       {/* Identity banner in the community-card language: pastel accent
@@ -2521,7 +2484,7 @@ function BoardView({
             </span>
           ) : (
             <button type="button" onClick={onJoin} className="dm-quiet flex cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-extrabold tracking-[0.08em] uppercase" style={{ color: `color-mix(in srgb, ${communityAccent(community)} 45%, ${bannerInk})` }}>
-              Join <ArrowRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} />
+              Join <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} />
             </button>
           )}
         </div>
@@ -2718,7 +2681,7 @@ function EventView({
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Connect
+        <ChevronLeft className="h-4 w-4" aria-hidden /> Connect
       </button>
       {qrOpen && (
         <QrSheet name={event.name} seed={event.id} accent={pAccent} lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} onClose={() => setQrOpen(false)} />
@@ -2826,7 +2789,7 @@ function EventView({
                 ))}
               </ul>
               <div className="mt-[14px] flex flex-wrap gap-[8px]">
-                <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId)}>Keep talking in {event.official.communityName} <ArrowRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
+                <QuietCta onClick={() => onOpenCommunity?.(event.official!.communityId)}>Keep talking in {event.official.communityName} <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></QuietCta>
               </div>
             </Card>
           )}
@@ -2846,7 +2809,7 @@ function EventView({
               </ol>
               <div className="mt-[10px] flex flex-wrap gap-[var(--space-3)]">
                 <QuietCta onClick={onSaveTakeaway} done={takeawaySaved}>{!takeawaySaved && <Bookmark className="h-4 w-4" aria-hidden />} {takeawaySaved ? "Takeaway saved" : "Save a takeaway"}</QuietCta>
-                <QuietCta onClick={() => { setPlanAdded(true); onAddToPlan(); }} done={planAdded}>{!planAdded && <ArrowRight className="h-4 w-4" aria-hidden />} Add to my Plan</QuietCta>
+                <QuietCta onClick={() => { setPlanAdded(true); onAddToPlan(); }} done={planAdded}>{!planAdded && <ChevronRight className="h-4 w-4" aria-hidden />} Add to my Plan</QuietCta>
               </div>
             </Card>
           )}
@@ -3071,7 +3034,7 @@ function ThreadView({
         className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold"
         style={{ color: "var(--muted-foreground)" }}
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> {boardName}
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {boardName}
       </button>
 
       <article className="flex flex-col gap-[var(--space-5)]">
@@ -3547,7 +3510,7 @@ function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
         <div className="mt-[8px] flex items-center justify-between gap-[var(--space-3)]">
           <span className="text-[11px] leading-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>Posts as Jordan · Junior{text.length > 200 ? ` · ${280 - text.length} left` : ""}</span>
           <button type="button" onClick={submit} disabled={!text.trim() || blocked} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-            Post <ArrowRight className="h-[13px] w-[13px]" aria-hidden />
+            Post <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
           </button>
         </div>
       </div>
@@ -3593,7 +3556,7 @@ function InsightThreadView({
         className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold"
         style={{ color: "var(--muted-foreground)" }}
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> {boardName}
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {boardName}
       </button>
 
       <article className="flex flex-col gap-[var(--space-5)]">

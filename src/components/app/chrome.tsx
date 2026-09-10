@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
+import { ChevronLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
 import { useGlobalTheme } from "./theme";
 import { useDreamScore } from "@/lib/dreamScore";
 import { DreamScoreTip } from "@/components/app/DreamScoreTip";
@@ -157,7 +157,7 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
       className={`dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] ${className}`}
       style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
     >
-      <ArrowLeft className="h-5 w-5" />
+      <ChevronLeft className="h-5 w-5" />
     </button>
   );
 }
