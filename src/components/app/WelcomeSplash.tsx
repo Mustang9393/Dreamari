@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { BookOpen, Check, ChevronRight, EyeOff, Film, Gamepad2, LayoutGrid, MessageCircleQuestion, ShieldCheck, UserPlus, Video, X, Zap, type LucideIcon } from "lucide-react";
+import { BookOpen, Check, ChevronRight, EyeOff, FileText, Film, Gamepad2, LayoutGrid, ListChecks, MessageCircleQuestion, ShieldCheck, Star, UserPlus, Video, X, Zap, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
 import styles from "./WelcomeSplash.module.css";
@@ -15,7 +15,7 @@ import styles from "./WelcomeSplash.module.css";
 // the Build welcome (Dreamy in living light, gradient title with a clipped
 // sweep, chevron CTA), at a fraction of its size and motion.
 
-export type SplashSurface = "match" | "explore" | "play" | "connect";
+export type SplashSurface = "match" | "explore" | "play" | "connect" | "profile";
 
 type Step = {
   eyebrow: string;
@@ -122,6 +122,26 @@ const SCENES: Record<SplashSurface, Scene> = {
         cta: "Start Connecting!",
       },
     ],
+  },
+  // Arrival from Match only (ProfileExperience opens it once the page has
+  // assembled). The party sprite is free again now that Play has the
+  // controller, and "your Top 3 is saved" is the one true celebration.
+  profile: {
+    sprite: "/images/dreamy/v2/dreamy-party.png",
+    alt: "Dreamy celebrating",
+    tint: ["255, 160, 30", "255, 50, 100"],
+    steps: [{
+      eyebrow: "Welcome to your",
+      title: "PROFILE",
+      word: true,
+      line: "Your Top 3 is saved. This is your home base.",
+      rows: [
+        { icon: Star, text: "Top Three: the careers you picked" },
+        { icon: ListChecks, text: "My Plan: your next steps" },
+        { icon: FileText, text: "Report: share it with family" },
+      ],
+      cta: "Continue",
+    }],
   },
 };
 
@@ -324,7 +344,7 @@ const DEMO_ALWAYS_SHOW_SPLASH = true;
 /** First-visit-only, per surface (localStorage, same pattern as Match's
  *  gesture hint). Renders nothing once seen; marks seen when finished, not
  *  on mount, so it can't hide itself before it paints. */
-export function FirstVisitSplash({ surface, onOpenChange }: { surface: Exclude<SplashSurface, "connect">; onOpenChange?: (open: boolean) => void }) {
+export function FirstVisitSplash({ surface, onOpenChange }: { surface: Exclude<SplashSurface, "connect" | "profile">; onOpenChange?: (open: boolean) => void }) {
   const key = `dreamari:welcome:${surface}`;
   const [open, setOpen] = useState(false);
   useEffect(() => {

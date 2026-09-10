@@ -16,8 +16,7 @@ import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRi
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
-import { Button } from "@/components/ui/Button";
-import { LocalBurst } from "@/components/build/DreamyGuide";
+import { WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
@@ -90,13 +89,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // student sees the profile arrive first, then gets introduced to it), and
   // Continue simply dismisses it — the Top Three tab is already open under it.
   const [welcomeOpen, setWelcomeOpen] = useState(false);
-  const [welcomeBurst, setWelcomeBurst] = useState(0);
   useEffect(() => {
     if (!initialWelcome) return;
     const open = setTimeout(() => {
       setWelcomeOpen(true);
       playMilestoneChime();
-      setWelcomeBurst((n) => n + 1);
     }, 900);
     return () => clearTimeout(open);
   }, [initialWelcome]);
@@ -663,57 +660,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
       </main>
 
-      {/* ---- Welcome to Your Profile (arrival from Match only): the popup
-         from the notes, played over the page it introduces rather than a
-         dark screen — a light frosted scrim, the assembled profile still
-         readable behind it. Dreamy's celebration bounce and confetti with
-         the chime, the heading revealing word by word, one caption, the
-         standard Continue. ---- */}
-      {welcomeOpen && (
-        <Portal>
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="profile-welcome-title"
-            className="fixed inset-0 z-[120] flex items-center justify-center p-5 motion-safe:animate-[fade-slide-up_0.35s_ease-out_both]"
-            style={{ background: "color-mix(in srgb, var(--background) 42%, transparent)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
-            onPointerUp={(e) => { if (e.target === e.currentTarget) dismissWelcome(); }}
-          >
-            <div
-              className="relative w-full max-w-[440px] overflow-hidden rounded-[var(--radius-lg)] border p-6 text-center motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)_both]"
-              /* near-solid, not glass: on glass the profile bled through the
-                 card and the text sat on it (direct feedback, 5 Sept 2026) —
-                 the same surface the quick-links menu and search sheet use */
-              style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.55)" }}
-            >
-              <span
-                aria-hidden
-                className="pointer-events-none absolute -top-20 left-1/2 h-[240px] w-[90%] -translate-x-1/2 rounded-full blur-[70px]"
-                style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--hero-accent-purple, var(--primary)) 40%, transparent), transparent 70%)" }}
-              />
-              <div className="relative flex flex-col items-center gap-4">
-                <div className="relative h-28 w-28 sm:h-32 sm:w-32">
-                  <span className="absolute inset-0 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
-                    <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
-                  </span>
-                  <LocalBurst nonce={welcomeBurst} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <h2 id="profile-welcome-title" className="text-[24px] leading-[28px] font-extrabold sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>
-                    <InkText text="Welcome to Your Profile" delay={0.25} />
-                  </h2>
-                  <p className="motion-safe:animate-[fade-slide-up_0.6s_0.85s_ease-out_both] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
-                    Your Top 3 is saved.
-                  </p>
-                </div>
-                <Button variant="primary" size="large" className="motion-safe:animate-[fade-slide-up_0.6s_1.05s_ease-out_both]" onClick={dismissWelcome} type="button">
-                  Continue <ChevronRight className="h-4 w-4" aria-hidden />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Portal>
-      )}
+      {/* ---- Welcome to Your Profile (arrival from Match only): the shared
+         WelcomeSplash, same treatment as the Match/Explore/Play/Connect
+         welcomes (direct feedback, 10 Sept 2026). Opens once the page has
+         visibly begun assembling; Continue dismisses it and scrolls the
+         Top Three into view. ---- */}
+      <WelcomeSplash surface="profile" open={welcomeOpen} onDone={dismissWelcome} />
 
       {compareOpen && (
         <CompareSheet careers={top3.map(careerById).filter(Boolean) as ProfileCareer[]} focusId={focus?.id ?? ""} onClose={() => setCompareOpen(false)} />

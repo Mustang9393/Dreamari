@@ -6359,3 +6359,16 @@ a new `@media (max-height: 960px)` tier in `WelcomeScreen.module.css`
 (smaller stage/Dreamy/BUILD, tighter margins); the 660px tier still handles
 phones. Verified at 2000x1040 (welcome 935px, Skip bottom 995) and 1400x820
 (736px, Skip 784): no scroll, no mask, glow intact.
+
+### 10 Sept 2026 -- Profile welcome on the shared splash
+
+"Welcome to Your Profile" (arrival from Match, `?welcome=1`) is now a
+`WelcomeSplash` scene (`surface: "profile"`) instead of its own popup, so it
+matches the Match/Explore/Play/Connect welcomes (direct feedback). Party
+Dreamy (free again since Play took the controller), amber/pink light,
+"Welcome to your / PROFILE", one line ("Your Top 3 is saved. This is your
+home base."), three rows (Top Three, My Plan, Report), Continue. Trigger and
+dismiss unchanged: opens 900ms after arrival with the milestone chime,
+Continue strips the query param and scrolls the tabs under the nav. The
+old popup's LocalBurst/Button imports are gone from ProfileExperience.
+Verified on 375x812: card 591px tall ending at 669, Continue works.
