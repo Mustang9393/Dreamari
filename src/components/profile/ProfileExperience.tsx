@@ -1181,8 +1181,8 @@ export function OverviewTab({
          splitting it read as disintegrated, direct feedback, 9 Sept 2026),
          holding two full-width list rows instead of a pill button sitting
          mid-sentence: each row is the whole tap target, with an icon, the
-         verb bolded inline, and a trailing chevron matching the cards
-         above. Hover fills only the row's own rect (dm-quiet, no radius of
+         verb plain in the sentence, and a solid CTA at the end matching
+         NextStepBanner. Hover fills only the row's own rect (dm-quiet, no radius of
          its own) -- the section's overflow-hidden clips it to the card's
          rounded corners, so the boundary still reads as one piece. The
          border itself is BorderBeam (border-beam npm package), the same
@@ -1207,33 +1207,20 @@ export function OverviewTab({
               href={line.href}
               className={`dm-quiet group flex items-center justify-between gap-[var(--space-3)] rounded-none px-[var(--space-4)] py-[var(--space-3)] sm:px-[var(--space-5)] ${index === list.length - 1 ? "pb-[var(--space-4)] sm:pb-[var(--space-5)]" : ""}`}
             >
+              {/* Plain sentence, verb uncoloured, and the action is a real
+                 button at the end -- the same solid CTA NextStepBanner's
+                 "Your next step" cards use -- instead of a gradient verb
+                 plus a "Let's go" that only appeared on hover (direct
+                 feedback, 10 Sept 2026: "uncolor the first word in both
+                 sentences and add a cta button to the end where 'let's go'
+                 appears ... consistent with the other your next step
+                 cards"). The whole row stays the link; the CTA is a styled
+                 span inside it, since a button can't nest in an anchor. */}
               <span className="min-w-0 text-[14px] leading-[19px] font-semibold sm:text-[15px]" style={{ color: "var(--foreground)" }}>
-                {/* Verb wears the same primary-to-violet gradient as the
-                   NextStepBanner CTAs, so it reads as the actionable word
-                   in the line at a glance (direct feedback, 9 Sept 2026:
-                   wanted the rows to read as tappable more obviously). */}
-                <span
-                  className="bg-clip-text font-extrabold text-transparent"
-                  style={{ backgroundImage: "linear-gradient(90deg, #6EA8FF, #C9A4FF)" }}
-                >
-                  {line.verb}
-                </span>{" "}
-                {line.rest}
+                {line.verb} {line.rest}
               </span>
-              {/* The leading icon moved here (direct feedback, 9 Sept 2026):
-                 on hover it slides out from behind the arrow together with
-                 "Let's go", and the arrow itself rotates from pointing
-                 up-right to pointing straight ahead -- the row visibly
-                 "launches" instead of just nudging 2px. */}
-              <span className="flex flex-none items-center gap-[6px]">
-                <span className="flex max-w-0 items-center gap-[6px] overflow-hidden opacity-0 transition-all duration-300 ease-out group-hover:max-w-[110px] group-hover:opacity-100">
-                  <line.Icon className="h-[15px] w-[15px] flex-none text-[var(--primary)] transition-colors duration-300 group-hover:text-white" aria-hidden />
-                  <span className="whitespace-nowrap text-[12px] font-bold tracking-[0.04em] uppercase text-[var(--primary)] transition-colors duration-300 group-hover:text-white">Let&rsquo;s go</span>
-                </span>
-                <ArrowUpRight
-                  className="h-4 w-4 flex-none text-[var(--primary)] transition-[transform,color] duration-300 ease-out group-hover:rotate-45 group-hover:text-white"
-                  aria-hidden
-                />
+              <span className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+                <line.Icon className="h-4 w-4" aria-hidden /> Let&rsquo;s go <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
               </span>
             </Link>
           </Fragment>

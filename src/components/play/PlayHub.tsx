@@ -7,7 +7,8 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
 
@@ -50,7 +51,8 @@ export function PlayHub() {
   }, [picks.ids]);
 
   const featuredRowSoon = useMemo(() => SOON.filter((game) => FEATURED_ROW_SOON_IDS.includes(game.careerId)), []);
-
+  // The hero row's idle swipe hint waits for the welcome splash to close.
+  const [splashSettled, setSplashSettled] = useState(false);
 
   return (
     <div
@@ -63,7 +65,7 @@ export function PlayHub() {
       }}
     >
       <AppBackdrop />
-      <FirstVisitSplash surface="play" />
+      <FirstVisitSplash surface="play" onOpenChange={(open) => setSplashSettled(!open)} />
 
       <DesktopNavigation active="Play" />
 
@@ -77,7 +79,7 @@ export function PlayHub() {
           Play
         </h1>
 
-        <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} focusId={focusId} />
+        <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} focusId={focusId} hintReady={splashSettled} />
 
         {/* Glossary Games: split by whether the career actually has authored
            content (hasGlossary) -- Finance Essentials has a real page now,
@@ -142,15 +144,23 @@ type FeaturedCandidate = { kind: "sim"; id: string; sim: Simulation } | { kind: 
 // page's HERO: it must dominate every row below it, the way Netflix's
 // billboard dwarfs the rows underneath -- at md the featured card is
 // ~676px wide, and the sm side card is literally PosterCard's own 210x297.
-const ROW_HEIGHT = "h-[212px] sm:h-[300px] md:h-[380px] lg:h-[430px]";
+// From sm up only -- phones render the MobileDeck stack instead of this rail
+// (direct feedback, 10 Sept 2026, from a JioHotstar "For You" recording).
+const ROW_HEIGHT = "sm:h-[300px] md:h-[380px] lg:h-[430px]";
 // EXPLICIT widths (16:9 and 210/297 of ROW_HEIGHT) rather than aspect-ratio
 // classes: the expand-in-place animation transitions `width` with CSS, so
 // the card RE-LAYS-OUT each frame -- framer's transform-based `layout`
 // animation scaled the contents and read as stretchy (direct feedback).
-const FEATURED_W = "w-[calc(100vw-40px)] sm:w-[533px] md:w-[676px] lg:w-[764px]";
-const SIDE_W = "w-[150px] sm:w-[212px] md:w-[269px] lg:w-[304px]";
+const FEATURED_W = "sm:w-[533px] md:w-[676px] lg:w-[764px]";
+const SIDE_W = "sm:w-[212px] md:w-[269px] lg:w-[304px]";
 // Rows BELOW the hero: uniform smaller shelves, Netflix-style.
 const SHELF_HEIGHT = "h-[150px] sm:h-[170px] md:h-[195px]";
+// Explicit 16:9 widths for the glossary shelf (of SHELF_HEIGHT) instead of
+// an aspect-ratio class: inside a flex-none <li>, HoverBeam's wrapper divs
+// gave the playable card no intrinsic width, so it collapsed to 2px and
+// its neighbour rendered on top of it on mobile (direct feedback, 10 Sept
+// 2026: "overlapping cards").
+const SHELF_W = "w-[267px] sm:w-[302px] md:w-[347px]";
 // "In the works" cards read too small at SHELF_HEIGHT (direct feedback, 9
 // Sept 2026) -- closer to PosterCard's own real 210x297 poster size, scaled
 // down slightly to still sit in a shelf row rather than the full browse grid.
@@ -180,7 +190,7 @@ function breakable(title: string): string {
  *  level ladder / CTA / "Coming soon" state for whichever card is
  *  currently selected, the way Netflix's own info panel sits below its row
  *  rather than being baked into one oversized card. */
-function FeaturedRow({ simulations, soonCareers, focusId }: { simulations: Simulation[]; soonCareers: SoonCareer[]; focusId?: string }) {
+function FeaturedRow({ simulations, soonCareers, focusId, hintReady }: { simulations: Simulation[]; soonCareers: SoonCareer[]; focusId?: string; hintReady: boolean }) {
   const candidates: FeaturedCandidate[] = useMemo(
     () => [
       ...simulations.map((sim): FeaturedCandidate => ({ kind: "sim", id: sim.id, sim })),
@@ -204,10 +214,15 @@ function FeaturedRow({ simulations, soonCareers, focusId }: { simulations: Simul
       <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
         Career Simulations
       </h2>
-      {/* No CTA button anywhere -- the featured card carries a centered
-         play badge on the artwork itself and is one whole-card link, with
-         saved progress as a thin strip along the card's bottom edge (the
-         exact idiom Netflix uses for partially-watched titles), per direct
+      {/* Phones: a swipeable stack, matching the JioHotstar "For You" deck
+         the CEO recorded (10 Sept 2026) -- one tall poster in front, the
+         next two fanned out behind it to the right, swipe left to advance.
+         The front card is the featured one; there is no separate selection. */}
+      <MobileDeck candidates={candidates} focusId={featured.id} hintReady={hintReady} onTrailer={(sim) => setTrailerSim(sim)} />
+      {/* No CTA button anywhere -- the featured card carries a play badge
+         in its bottom-right corner and is one whole-card link, with saved
+         progress as a thin strip along the card's bottom edge (the exact
+         idiom Netflix uses for partially-watched titles), per direct
          feedback. Every card shares one fixed ROW_HEIGHT (see above), so
          the featured card is wider than its neighbors, never taller. */}
       {/* Full-bleed rail: negative margins let the row run to the viewport
@@ -220,7 +235,7 @@ function FeaturedRow({ simulations, soonCareers, focusId }: { simulations: Simul
          simply grows into the billboard while the old one shrinks (direct
          feedback -- reordering the row on every click read as a shuffle,
          not a selection). */}
-      <div className="dreamari-card-rail -mx-5 flex items-start gap-[var(--space-3)] overflow-x-auto px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
+      <div className="dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
         {candidates.map((c) => (
           <RowCard
             key={c.id}
@@ -232,6 +247,156 @@ function FeaturedRow({ simulations, soonCareers, focusId }: { simulations: Simul
         ))}
       </div>
     </section>
+  );
+}
+
+// The phone stack's geometry, measured off the reference recording (1180px
+// frame, /3.147 to points): the card behind sits 16pt further right and
+// ~6% smaller, scaled about its right edge so the fan grows rightward; the
+// third one 32pt / ~12%. Anything deeper is parked (invisible) at the third
+// slot so it can fan in without a jump when the deck rotates.
+const DECK_STEP_X = 16;
+const DECK_STEP_SCALE = 0.06;
+const DECK_VISIBLE = 3;
+const DECK_SPRING = { type: "spring", stiffness: 300, damping: 32, mass: 0.9 } as const;
+const DECK_HINT_DELAY_MS = 2400;
+const SWIPE_DISTANCE = 72;
+const SWIPE_VELOCITY = 550;
+
+/** The phone-only card stack (hidden from sm up, where the free-scrolling
+ *  rail takes over). Swipe left: the front card slides off and the deck
+ *  rotates so it rejoins at the back. Swipe right: the previous card slides
+ *  back in from the left. Idle hint: once the welcome splash is gone, if
+ *  the student does nothing for a couple of seconds, the deck advances one
+ *  card on its own -- a single time -- so it's obvious the stack moves and
+ *  they can take over (direct feedback, 10 Sept 2026, from a JioHotstar
+ *  recording). Any touch before that cancels it. */
+function MobileDeck({ candidates, focusId, hintReady, onTrailer }: { candidates: FeaturedCandidate[]; focusId: string; hintReady: boolean; onTrailer: (sim: Simulation) => void }) {
+  // Deck order, front first. The deep-linked/first card starts in front.
+  const [order, setOrder] = useState<string[]>(() => {
+    const ids = candidates.map((c) => c.id);
+    const at = Math.max(0, ids.indexOf(focusId));
+    return [...ids.slice(at), ...ids.slice(0, at)];
+  });
+  // While a card is on its way off-screen the rest of the deck already
+  // moves up one slot; the rotation commits when the slide finishes.
+  const [leaving, setLeaving] = useState<{ id: string; dir: 1 | -1 } | null>(null);
+  // The card that just came back from the bottom of the deck slides in
+  // from the left rather than fanning in from the right.
+  const [entering, setEntering] = useState<string | null>(null);
+  const [width, setWidth] = useState(300);
+  const slotRef = useRef<HTMLDivElement>(null);
+  const dragged = useRef(false);
+  const touched = useRef(false);
+
+  useEffect(() => {
+    const el = slotRef.current;
+    if (!el) return;
+    const measure = () => setWidth(el.getBoundingClientRect().width || 300);
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(el);
+    // one measurement before the first paint settles the offscreen distance
+    const t = window.setTimeout(measure, 0);
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(t);
+    };
+  }, []);
+
+  const advance = (dir: 1 | -1) => {
+    if (leaving) return;
+    setEntering(null);
+    setLeaving({ id: order[0], dir });
+  };
+  const back = () => {
+    if (leaving || order.length < 2) return;
+    const last = order[order.length - 1];
+    setEntering(last);
+    setOrder([last, ...order.slice(0, -1)]);
+  };
+  const settle = () => {
+    setOrder((o) => [...o.slice(1), o[0]]);
+    setLeaving(null);
+  };
+
+  // Idle hint, once. Only on phones (this component only renders there),
+  // only after the splash, never under reduced motion.
+  useEffect(() => {
+    if (!hintReady || touched.current) return;
+    if (typeof window === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(min-width: 640px)").matches) return;
+    const t = window.setTimeout(() => {
+      if (!touched.current) advance(-1);
+    }, DECK_HINT_DELAY_MS);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hintReady]);
+
+  const offscreen = width + 60;
+  return (
+    <div
+      className="relative w-full pt-1 pb-3 sm:hidden"
+      onPointerDownCapture={() => {
+        touched.current = true;
+      }}
+      // A drag must never fall through as a tap on the card's link.
+      onClickCapture={(e) => {
+        if (dragged.current) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }}
+    >
+      {/* the sizer: the front slot's own box, so the stack's height comes
+         from the card ratio (319:386, measured off the recording) */}
+      <div ref={slotRef} aria-hidden className="w-[calc(100%-32px)]" style={{ aspectRatio: "319 / 386" }} />
+      {order.map((id, index) => {
+        const candidate = candidates.find((c) => c.id === id);
+        if (!candidate) return null;
+        const isLeaving = leaving?.id === id;
+        // everyone behind a leaving card already sits one slot forward
+        const slot = leaving && !isLeaving ? index - 1 : index;
+        const shown = isLeaving || slot < DECK_VISIBLE;
+        const depth = Math.min(slot, DECK_VISIBLE - 1);
+        const front = slot === 0 && !leaving;
+        const target = isLeaving
+          ? { x: leaving.dir * offscreen, scale: 1, opacity: 1 }
+          : { x: depth * DECK_STEP_X, scale: 1 - depth * DECK_STEP_SCALE, opacity: shown ? 1 : 0 };
+        const animate = entering === id && slot === 0 ? { ...target, x: [-offscreen, 0] } : target;
+        return (
+          <motion.div
+            key={id}
+            className="absolute top-1 bottom-3 left-0 w-[calc(100%-32px)]"
+            style={{ originX: 1, originY: 0.5, zIndex: isLeaving ? DECK_VISIBLE + 2 : DECK_VISIBLE + 1 - slot, pointerEvents: front ? "auto" : "none", touchAction: "pan-y" }}
+            initial={false}
+            animate={animate}
+            transition={DECK_SPRING}
+            onAnimationComplete={() => {
+              if (isLeaving) settle();
+              if (entering === id) setEntering(null);
+            }}
+            drag={front ? "x" : false}
+            dragDirectionLock
+            dragSnapToOrigin
+            dragMomentum={false}
+            dragElastic={1}
+            onDragStart={() => {
+              dragged.current = true;
+            }}
+            onDragEnd={(_, info) => {
+              // let the click-capture see the flag before clearing it
+              window.setTimeout(() => {
+                dragged.current = false;
+              }, 0);
+              if (info.offset.x < -SWIPE_DISTANCE || info.velocity.x < -SWIPE_VELOCITY) advance(-1);
+              else if (info.offset.x > SWIPE_DISTANCE || info.velocity.x > SWIPE_VELOCITY) back();
+            }}
+          >
+            <RowCard candidate={candidate} large deck front={front} onTrailer={onTrailer} />
+          </motion.div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -249,10 +414,19 @@ function FeaturedRow({ simulations, soonCareers, focusId }: { simulations: Simul
 function RowCard({
   candidate,
   large = false,
+  deck = false,
+  front = true,
   onSelect,
   onTrailer,
 }: {
   candidate: FeaturedCandidate;
+  /** Inside the phone stack: the card fills its deck slot (the slot sets
+   *  the size), never the rail's own width/height classes. */
+  deck?: boolean;
+  /** Deck only: false for the cards fanned out behind the front one, whose
+   *  corner badge and chips would otherwise peek out past the front card's
+   *  edge as stray slivers. They fade back in as the card comes forward. */
+  front?: boolean;
   /** The one featured card: 16:9 billboard aspect instead of the Browse-
    *  poster portrait every side card uses, and a bigger title to match --
    *  the extra width was making a title sized for a narrow poster look
@@ -265,9 +439,10 @@ function RowCard({
   const title = candidate.kind === "sim" ? candidate.sim.title : candidate.soon.title;
   const world = candidate.kind === "sim" ? candidate.sim.world : candidate.soon.world;
   const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
-  // The featured card's copy reads left-aligned (a billboard); every side
-  // card centers its copy, matching Browse's own PosterCard convention.
-  const className = `dm-tap group relative flex-none overflow-hidden rounded-[var(--radius-lg)] border ${large ? "text-left" : "text-center"} ${ROW_HEIGHT} ${large ? FEATURED_W : SIDE_W}`;
+  // Every card reads left-aligned now: the play/lock badge lives in the
+  // bottom-right corner (reference carousel, 10 Sept 2026), so the copy
+  // keeps to the left of it on the side cards too.
+  const className = `dm-tap group relative flex-none overflow-hidden rounded-[var(--radius-lg)] border text-left ${deck ? "h-full w-full" : `${ROW_HEIGHT} ${large ? FEATURED_W : SIDE_W}`}`;
   const style = {
     borderColor: "var(--color-glass-border-raised)",
     background: "var(--glass-surface-1)",
@@ -286,21 +461,23 @@ function RowCard({
       ? "text-[21px] sm:text-[27px] md:text-[33px] lg:text-[37px]"
       : "text-[26px] sm:text-[34px] md:text-[42px] lg:text-[46px]"
     : compact
-      ? "text-[14px] sm:text-[19px] md:text-[24px] lg:text-[27px]"
-      : "text-[17px] sm:text-[24px] md:text-[30px] lg:text-[34px]";
-  const worldSize = large ? "text-[11px] sm:text-[13px] md:text-[15px]" : "text-[9px] sm:text-[10px] md:text-[13px] lg:text-[14px]";
+      ? "text-[21px] sm:text-[19px] md:text-[24px] lg:text-[27px]"
+      : "text-[26px] sm:text-[24px] md:text-[30px] lg:text-[34px]";
+  const worldSize = large ? "text-[11px] sm:text-[13px] md:text-[15px]" : "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]";
   const content = (
     <div className="relative h-full w-full">
       <Image src={cover} alt="" fill sizes={large ? "(min-width: 1024px) 764px, 90vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
       {candidate.kind === "soon" && !large && (
-        <span className="absolute top-[8px] left-[8px] z-[1] flex items-center gap-[4px] rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
-          <Lock className="h-[10px] w-[10px]" aria-hidden /> Coming soon
+        <span className="absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+          Coming soon
         </span>
       )}
       {/* Same scrim + title + world-label (in the world's own accent color)
          as Browse's own PosterCard -- accent color lives on the world
          label, never the title itself, matching that convention exactly. */}
-      <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[4px] px-[12px] pt-[32px] pb-[12px] sm:px-[16px] sm:pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+      {/* Every card keeps its bottom-right corner clear for the play/lock
+         badge (pr), so a long title wraps beside it instead of under it. */}
+      <span className={`absolute inset-x-0 bottom-0 flex flex-col gap-[4px] px-[14px] pt-[32px] pb-[14px] sm:px-[16px] sm:pb-[14px] ${large ? "pr-[80px] sm:pr-[96px] md:pr-[108px]" : "pr-[64px] md:pr-[72px]"}`} style={{ backgroundImage: "var(--poster-scrim)" }}>
         {/* the series name, so Home, Play and the game itself all say
            "Day in the Life: <career>" (CEO, 4 Sept) */}
         {candidate.kind === "sim" && <span className={`block font-semibold tracking-[0.6px] uppercase ${worldSize}`} style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.75 }}>Day in the Life</span>}
@@ -311,14 +488,20 @@ function RowCard({
           {world}
         </span>
         {large && candidate.kind === "soon" && (
-          <span className="mt-[4px] flex items-center gap-[6px] text-[13px] font-bold sm:text-[14px]" style={{ color: "var(--foreground)" }}>
-            <Lock className="h-[13px] w-[13px]" aria-hidden />
+          // plain text: the lock sits in the corner badge instead (direct
+          // feedback, 10 Sept 2026)
+          <span className="mt-[4px] text-[13px] font-bold sm:text-[14px]" style={{ color: "var(--foreground)" }}>
             Coming soon
           </span>
         )}
         {large && candidate.kind === "sim" && <FeaturedMeta sim={candidate.sim} />}
       </span>
-      {large && candidate.kind === "sim" && <FeaturedPlayOverlay sim={candidate.sim} onTrailer={onTrailer ? () => onTrailer(candidate.sim) : undefined} />}
+      {/* The corner badge on EVERY card: play on a playable simulation, a
+         lock on one that's still in the works (direct feedback, 10 Sept
+         2026: "include the play button on registered nurse too ... show
+         the locked icon for the rest"). */}
+      <CornerBadge kind={candidate.kind === "sim" ? "play" : "lock"} large={large} faded={deck && !front} />
+      {large && candidate.kind === "sim" && <FeaturedPlayOverlay sim={candidate.sim} faded={deck && !front} onTrailer={onTrailer ? () => onTrailer(candidate.sim) : undefined} />}
     </div>
   );
 
@@ -331,7 +514,7 @@ function RowCard({
   // <Link> overlay, so a pressable side card gets its own absolute overlay
   // button instead (same idiom as the whole-card links across the app).
   return (
-    <article className={`dm-tap ${className}`} style={style}>
+    <article data-card-id={candidate.id} className={`dm-tap ${className}`} style={style}>
       {content}
       {!large && candidate.kind === "sim" && onSelect && (
         <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
@@ -339,6 +522,25 @@ function RowCard({
         </button>
       )}
     </article>
+  );
+}
+
+/** The bottom-right circular badge every hero-row card carries, where the
+ *  reference carousel puts its play control (direct feedback, 10 Sept
+ *  2026): a play glyph on a real simulation, a lock on a coming-soon one.
+ *  Purely visual (aria-hidden) -- the whole-card link or select button
+ *  underneath is the control. */
+function CornerBadge({ kind, large, faded = false }: { kind: "play" | "lock"; large: boolean; faded?: boolean }) {
+  const size = large ? "size-[52px] sm:size-[64px] md:size-[72px]" : "size-[44px] md:size-[52px]";
+  const glyph = large ? "h-[22px] w-[22px] sm:h-[26px] sm:w-[26px] md:h-[30px] md:w-[30px]" : "h-[18px] w-[18px] md:h-[22px] md:w-[22px]";
+  return (
+    <span
+      aria-hidden
+      className={`pointer-events-none absolute right-[14px] bottom-[14px] z-[2] flex items-center justify-center rounded-full border backdrop-blur-[6px] transition-[transform,opacity] duration-300 group-hover:scale-110 sm:right-[16px] sm:bottom-[16px] ${size} ${faded ? "opacity-0" : "opacity-100"}`}
+      style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+    >
+      {kind === "play" ? <Play className={`ml-[3px] ${glyph}`} fill="currentColor" style={{ color: "#FFFFFF" }} /> : <Lock className={glyph} style={{ color: "#FFFFFF" }} />}
+    </span>
   );
 }
 
@@ -377,7 +579,7 @@ function FeaturedMeta({ sim }: { sim: Simulation }) {
  *  starting the game (per direct feedback, overriding the doc's
  *  play-once-on-first-open rule): a quiet Trailer chip in the card's
  *  corner opens it, and pressing play never does. */
-function FeaturedPlayOverlay({ sim, onTrailer }: { sim: Simulation; onTrailer?: () => void }) {
+function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulation; faded?: boolean; onTrailer?: () => void }) {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
   const first = sim.levels[0];
   const run = readRun(progress, sim.id, first.n);
@@ -387,14 +589,7 @@ function FeaturedPlayOverlay({ sim, onTrailer }: { sim: Simulation; onTrailer?: 
       <Link href={`/play/${sim.id}`} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
         <span className="sr-only">{resumable ? `Continue ${sim.title} · Level ${first.n}` : `Play ${sim.title} · Level ${first.n}`}</span>
       </Link>
-      <span
-        aria-hidden
-        className="pointer-events-none absolute top-1/2 left-1/2 flex size-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110 sm:size-[64px] md:size-[72px]"
-        style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
-      >
-        <Play className="ml-[3px] h-[22px] w-[22px] sm:h-[26px] sm:w-[26px] md:h-[30px] md:w-[30px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
-      </span>
-      <span className="absolute top-[10px] right-[10px] z-20 flex items-center gap-[6px]">
+      <span className={`absolute top-[10px] right-[10px] z-20 flex items-center gap-[6px] transition-opacity duration-300 ${faded ? "opacity-0" : "opacity-100"}`}>
         {/* Express mode: the trimmed demo run (Level 1 minus its teaching
            screens; every scored beat, threshold and ending intact). Only
            offered when the level declares an expressCut list. */}
@@ -539,7 +734,7 @@ function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; titl
     return (
       <span
         aria-label={`${game.title} — coming soon`}
-        className={`group relative block aspect-[16/9] flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
+        className={`group relative block flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_W} ${SHELF_HEIGHT}`}
         style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
       >
         {art}
@@ -548,7 +743,7 @@ function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; titl
   }
 
   return (
-    <HoverBeam strength={0.8} className={`flex-none aspect-[16/9] ${SHELF_HEIGHT}`}>
+    <HoverBeam strength={0.8} className={`flex-none ${SHELF_W} ${SHELF_HEIGHT}`}>
     <Link
       href={`/play/glossary/${game.careerSlug}`}
       className="dm-tap group relative block h-full w-full overflow-hidden rounded-[var(--radius-lg)] border"

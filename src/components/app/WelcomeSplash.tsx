@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { BookOpen, Check, ChevronRight, EyeOff, Film, Gamepad2, LayoutGrid, MessageCircleQuestion, ShieldCheck, UserPlus, Video, X, Zap, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+import { BorderBeam } from "border-beam";
 import styles from "./WelcomeSplash.module.css";
 
 // The welcome moment for each tab, in modal form: where you are, what the
@@ -291,9 +292,18 @@ export function WelcomeSplash({ surface, open, onDone }: { surface: SplashSurfac
               {scene.steps.map((_, i) => <span key={i} className={i === step ? styles.dotOn : styles.dot} />)}
             </div>
           )}
-          <button ref={cta} type="button" className={styles.cta} onClick={advance} aria-disabled={departing}>
-            {current.cta} <ChevronRight size={18} strokeWidth={2.75} aria-hidden />
-          </button>
+          {/* The ring, not a pulse: the box-shadow nudge read as too much
+             (direct feedback, 10 Sept 2026), so the CTA wears the same
+             BorderBeam every priority CTA on the site wears. The wrapper
+             carries the reveal so BorderBeam's own root animation isn't
+             fighting it. */}
+          <div className={styles.ctaWrap}>
+            <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.2} strength={1} active>
+              <button ref={cta} type="button" className={styles.cta} onClick={advance} aria-disabled={departing}>
+                {current.cta} <ChevronRight size={18} strokeWidth={2.75} aria-hidden />
+              </button>
+            </BorderBeam>
+          </div>
         </div>
       </div>
     </div>

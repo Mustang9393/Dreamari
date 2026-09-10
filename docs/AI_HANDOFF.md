@@ -6268,3 +6268,52 @@ Match has none), scrim padding reserves the MobileNav zone, a
 a last-resort safety net only. Measured in-app: Match 604px card on 375×812
 and Connect 461px on 375×667, neither overflowing. eslint 0 errors, tsc
 clean. Not committed or pushed.
+
+### 10 Sept 2026 -- Play: phone card stack, corner badges, banner fix, splash CTA ring
+
+Play's "Career Simulations" row on phones is now a swipeable card STACK
+(`MobileDeck` in `PlayHub.tsx`, `sm:hidden`; the free-scrolling rail is
+`hidden sm:flex`), matching a JioHotstar "For You" recording the CEO sent
+(direct feedback). Geometry measured off the recording: one 319:386 poster in
+front, the next card 16pt further right at 0.94 scale, the third at 32pt /
+0.88, scaled about the right edge so the fan grows rightward; deeper cards
+park invisible at the third slot. framer-motion: front card drags on x, swipe
+left (72px or 550px/s) slides it off and the deck rotates so it rejoins at
+the back; swipe right brings the previous card in from the left (keyframe
+`x: [-offscreen, 0]`). A drag never falls through as a tap on the card link
+(`onClickCapture` gate). Idle hint, once: after the welcome splash reports
+closed (`FirstVisitSplash onOpenChange` -> `hintReady`), 2.4s with no touch
+on the deck advances it one card on its own; any pointerdown cancels it;
+skipped under reduced motion. Behind cards fade their corner badge and chips
+(`front={false}`) so nothing peeks past the front card's edge.
+
+Every hero-row card now carries a bottom-right circular `CornerBadge`: play
+on a real simulation (Investment Banker AND Registered Nurse -- direct
+feedback), a lock on a coming-soon one; the "Coming soon" text lost its
+inline lock icon since the badge carries it. The featured card's centered
+play badge is gone (badge placement per the reference, direct feedback).
+All cards read left-aligned with right padding on the scrim so titles wrap
+beside the badge.
+
+Fixes (direct feedback, same day): Glossary Games' playable card collapsed
+to 2px inside HoverBeam (aspect-ratio has no intrinsic width in a flex-none
+li) and the next card sat on top of it -> explicit `SHELF_W` widths.
+`NextStepBanner` was invisible inside any `seq-reveal` page (BorderBeam's
+root `animation` overrides the `.seq-reveal > *` fade-in, leaving opacity 0;
+on Play that was a 144px blank between Glossary Games and In the works) ->
+plain wrapper div takes the reveal. Its X now sits in the card's top-right
+corner (eyebrow keeps clear of it on phones; the row reserves 52px from sm).
+
+Welcome splash CTAs (Match/Explore/Play/Connect): the box-shadow pulse was
+too much (direct feedback) -> replaced by a BorderBeam ring (`size="sm"`,
+always on), wrapper carries the reveal. Profile "Do this next": first word
+no longer coloured, row ends in the same solid "Let's go" CTA the "Your next
+step" cards use.
+
+Verified on 375x812 in-app: stack front card 303x367 at x=20, backs' right
+edges at +16/+32, hint fired at ~2.4s (nurse to front), synthetic swipes
+both directions rotate the deck, glossary cards 267px each with no overlap,
+banner visible with 24px gaps either side. eslint 0 errors, tsc clean.
+Still on: `DEMO_ALWAYS_SHOW_SPLASH` / `DEMO_ALWAYS_SHOW_GUIDE` (flip back
+before students use it). Play splash still uses the party sprite; swap to a
+controller Dreamy when that asset exists.
