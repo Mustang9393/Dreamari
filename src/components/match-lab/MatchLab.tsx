@@ -407,6 +407,22 @@ export function MatchLab() {
   useEffect(() => {
     dragLive.current = { like, pass, exiting: !!exiting };
   });
+  // A REAL scroll of the top card's own scroller ends the scroll-up nudge,
+  // whatever produced it -- wheel, trackpad, grab-drag or touch. The touch
+  // handler below only caught touch moves, so on desktop the nudge kept
+  // recycling after the student had already scrolled (direct feedback,
+  // 10 Sept 2026: "it keeps doing the scroll even after I've scrolled").
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || !topId) return;
+    const scroller = el.querySelector<HTMLElement>("[data-card-scroller]");
+    if (!scroller) return;
+    const onScroll = () => {
+      if (scroller.scrollTop > 24) markDemonstratedRef.current("up");
+    };
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => scroller.removeEventListener("scroll", onScroll);
+  }, [topId]);
   useEffect(() => {
     const el = cardRef.current;
     if (!el || !topId) return;

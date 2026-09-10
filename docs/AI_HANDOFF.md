@@ -6439,3 +6439,12 @@ would you go for school?"), one Save that writes the store, shows Saved and
 plays the soft CTA pulse; zip/email validate inline. The Soon rows and Sign
 out remain below. Nothing else reads the store yet -- it is the source for
 Explore Schools' personalization when that lands. Verified on 375x812.
+
+### 10 Sept 2026 -- Match: the scroll-up nudge ends on any real scroll
+
+The recycling "Scroll down for details" nudge only heard touch moves, so a
+wheel/trackpad/grab-drag scroll on desktop never ended it (direct feedback:
+"it keeps doing the scroll even after I've scrolled"). MatchLab now listens
+to `scroll` on the top card's `[data-card-scroller]` and marks "up"
+demonstrated past 24px, whatever produced the scroll. Verified: nudge on,
+programmatic scroll to 90px, nudge off, progress stored.
