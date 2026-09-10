@@ -697,6 +697,9 @@ export function MatchLab() {
               <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
                 <InkText text={liked.length === MAX_SLOTS ? "Your Top 3 Matches" : "Your matches"} delay={0.25} />
               </h2>
+              <p className="motion-safe:animate-[fade-slide-up_0.6s_0.8s_ease-out_both] text-[14.5px] leading-[20px] font-extrabold text-[var(--color-night-foreground)]">
+                You can always change this later.
+              </p>
 
             </div>
             <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3" style={{ perspective: 900 }}>
@@ -708,7 +711,6 @@ export function MatchLab() {
               <Button variant="primary" size="large" onClick={saveTop3} type="button" aria-disabled={!chosenId} className={chosenId ? "" : "pointer-events-none opacity-50"}>
                 {chosenId ? <>Continue with {liked.find((c) => c.id === chosenId)?.title} <ChevronRight className="h-4 w-4" aria-hidden /></> : "Select one to continue"}
               </Button>
-              <p className="text-[14.5px] leading-[20px] font-extrabold text-[var(--color-night-foreground)]">You can always change this later.</p>
               {!deckDone && (
                 <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                   Keep Swiping
