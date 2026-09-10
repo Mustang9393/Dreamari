@@ -4,7 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Eye, Gem, MessagesSquare, Medal, Sparkles, Trophy, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
 import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
@@ -304,7 +304,32 @@ function Grid({ pros, follows, onFollow }: { pros: Pro[]; follows: Follows; onFo
  *  "modify the connect modal to look better"). "Seen" is still marked only
  *  when the student finishes step two, never on mount. */
 export function PeopleWelcome({ hasShown, onShown }: { hasShown: boolean; onShown: () => void }) {
-  return <WelcomeSplash surface="connect" open={!hasShown} onDone={onShown} />;
+  // Once per browser session (direct feedback, 10 Sept 2026): the parent's
+  // flag only survives while Connect stays mounted, so a round trip to a
+  // profile and back replayed the welcome. sessionStorage remembers across
+  // that; a refresh or new tab brings it back.
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (hasShown) return;
+    if (demoSeenThisSession("dreamari:welcome:connect")) {
+      onShown();
+      return;
+    }
+    const t = setTimeout(() => setOpen(true), 0);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasShown]);
+  return (
+    <WelcomeSplash
+      surface="connect"
+      open={open && !hasShown}
+      onDone={() => {
+        markDemoSeenThisSession("dreamari:welcome:connect");
+        setOpen(false);
+        onShown();
+      }}
+    />
+  );
 }
 
 export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows: Follows; onFollow: (id: string) => void; query: string; onFocusChange?: (focused: boolean) => void }) {

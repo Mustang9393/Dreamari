@@ -192,6 +192,46 @@ export function WelcomeSplash({ surface, open, onDone }: { surface: SplashSurfac
 // to false before this ships to students.
 export const DEMO_ALWAYS_SHOW_SPLASH = true;
 
+/* Demo mode shows a welcome once per browser SESSION, not once per mount:
+   opening a career card and coming back re-mounted the page and replayed the
+   splash every time (direct feedback, 10 Sept 2026). sessionStorage clears
+   on refresh / new tab, which is exactly when it should come back. */
+// A plain refresh keeps sessionStorage, but for the demo a refresh should
+// bring the welcomes back ("if I refresh ... they can appear"), so the first
+// check after a reload-type navigation clears every demo "seen" key.
+let reloadChecked = false;
+function clearOnReload(): void {
+  if (reloadChecked) return;
+  reloadChecked = true;
+  try {
+    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    if (nav?.type !== "reload") return;
+    const stale: string[] = [];
+    for (let i = 0; i < window.sessionStorage.length; i++) {
+      const k = window.sessionStorage.key(i);
+      if (k && k.startsWith("dreamari:welcome:") && k.endsWith(":session")) stale.push(k);
+    }
+    stale.forEach((k) => window.sessionStorage.removeItem(k));
+  } catch {
+    // no storage / no timing API: nothing to clear
+  }
+}
+export function demoSeenThisSession(key: string): boolean {
+  try {
+    clearOnReload();
+    return window.sessionStorage.getItem(`${key}:session`) === "1";
+  } catch {
+    return false;
+  }
+}
+export function markDemoSeenThisSession(key: string): void {
+  try {
+    window.sessionStorage.setItem(`${key}:session`, "1");
+  } catch {
+    // no storage: it will simply show again
+  }
+}
+
 /** First-visit-only, per surface (localStorage, same pattern as Match's
  *  gesture hint). Renders nothing once seen; marks seen when finished, not
  *  on mount, so it can't hide itself before it paints. */
@@ -201,7 +241,7 @@ export function FirstVisitSplash({ surface, onOpenChange }: { surface: Exclude<S
   useEffect(() => {
     let seen = true;
     try {
-      seen = !DEMO_ALWAYS_SHOW_SPLASH && window.localStorage.getItem(key) === "1";
+      seen = DEMO_ALWAYS_SHOW_SPLASH ? demoSeenThisSession(key) : window.localStorage.getItem(key) === "1";
     } catch {
       // no storage: show it, it just won't be remembered
       seen = false;
@@ -225,6 +265,7 @@ export function FirstVisitSplash({ surface, onOpenChange }: { surface: Exclude<S
       surface={surface}
       open={open}
       onDone={() => {
+        markDemoSeenThisSession(key);
         try {
           window.localStorage.setItem(key, "1");
         } catch {

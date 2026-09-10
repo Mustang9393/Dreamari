@@ -6411,3 +6411,16 @@ feedback). Both now size to `closest-side` and reach full transparency at
 100%, so the light always fades out before any edge; Build's beam box got
 more vertical room (`inset: -45% -18%`) and the splash glow box stops at the
 card's inner top for the same reason. Checked on 375x812 and 1400x820.
+
+### 10 Sept 2026 -- Demo welcomes: once per session, back on refresh
+
+With `DEMO_ALWAYS_SHOW_SPLASH` on, every welcome (Match/Explore/Play splash,
+Profile, Connect) now remembers "seen" in sessionStorage
+(`dreamari:welcome:<surface>:session`) instead of replaying on every mount --
+opening a career card and coming back replayed them each time (Slack, direct
+feedback). A reload-type navigation clears those keys first
+(`clearOnReload` in WelcomeSplash.tsx), so a refresh or a new tab brings
+them back for a demo. Helpers `demoSeenThisSession` / `markDemoSeenThisSession`
+are exported; PeopleWelcome (Connect) now runs the same check itself since
+the parent's flag only lived while Connect stayed mounted. Verified: first
+visit shows, dismiss, Explore and back does not, plain reload does.

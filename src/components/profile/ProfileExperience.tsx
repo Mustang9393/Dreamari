@@ -16,7 +16,7 @@ import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRi
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
-import { DEMO_ALWAYS_SHOW_SPLASH, WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
@@ -93,7 +93,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // (direct feedback, 10 Sept 2026: "the pop up isn't happening on my
   // profile"); once DEMO_ALWAYS_SHOW_SPLASH is off it's arrival-only again.
   useEffect(() => {
-    if (!initialWelcome && !DEMO_ALWAYS_SHOW_SPLASH) return;
+    if (!initialWelcome && !(DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
     const open = setTimeout(() => {
       setWelcomeOpen(true);
       playMilestoneChime();
@@ -102,6 +102,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   }, [initialWelcome]);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
+    markDemoSeenThisSession("dreamari:welcome:profile");
     // so a refresh doesn't replay the introduction
     try {
       const url = new URL(window.location.href);
