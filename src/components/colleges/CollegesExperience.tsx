@@ -11,6 +11,7 @@ import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExpe
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
+import { BrowseShelves } from "./BrowseShelves";
 import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
@@ -243,7 +244,9 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
           </div>
         )}
 
-        {results.length === 0 ? (
+        {activeCount === 0 ? (
+          <BrowseShelves saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} />
+        ) : results.length === 0 ? (
           <section className="flex flex-col items-start gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
             <h2 className={BIG} style={DISPLAY}>No college matches that</h2>
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Try a shorter name, a city, or take off a filter.</p>

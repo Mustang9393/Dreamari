@@ -147,6 +147,19 @@ function reportEntryFor(careerId: string, c: College): { status: CollegeStatus; 
 
 export const HOME_STATE = "NJ";
 
+/** The wording test for "offers the recommended program" for this pathway. */
+export function programMatcher(pathway: Pathway): RegExp {
+  return PROGRAM_MATCH[pathway.careerId] ?? new RegExp(pathway.program.split(/[\s,/]+/)[0], "i");
+}
+/** Real programme list only (no synthesised lists), so Browse shelves stay honest. */
+export function offersProgram(c: College, rx: RegExp): boolean {
+  return (realProgrammes(c) ?? []).some((n) => rx.test(n));
+}
+/** "$30K a year after aid" or null when the school doesn't publish it. */
+export function costLine(c: College): string | null {
+  return c.netPrice === null ? null : `$${Math.round(c.netPrice / 1000)}K a year after aid`;
+}
+
 export function schoolsFor(pathway: Pathway, profile: StudentProfile): SchoolGroups {
   const gpa = parseGpa(profile.gpa);
   const rx = PROGRAM_MATCH[pathway.careerId] ?? new RegExp(pathway.program.split(/[\s,/]+/)[0], "i");
@@ -207,9 +220,9 @@ export function schoolsFor(pathway: Pathway, profile: StudentProfile): SchoolGro
 // safety is a little confusing"); the counselor term travels alongside as a
 // small note so the language still lines up with the backend doc.
 export const FIT_WORDS: Record<Fit, string> = {
-  Reach: "A stretch",
-  Target: "Good match",
-  Safety: "Likely",
+  Reach: "Worth a shot",
+  Target: "Best fit",
+  Safety: "Easy yes",
   "Open admission": "Everyone gets in",
   "Fit unavailable": "",
 };

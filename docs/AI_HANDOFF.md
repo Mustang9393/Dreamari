@@ -6578,3 +6578,30 @@ md the title + strip sit left and the shared `ForYouBrowseToggle` pill sits
 right on the same row. Measured identical on 375x812 (tabs at 20,4 and
 111,4) and 1280x800 (pill 1009-1219 at y 126, h1 y 102). The old
 Back + wordmark mobile header is gone from Schools.
+
+### 10 Sept 2026 -- Explore Schools: the "perfect version", pass 1 of 3
+
+After a joint audit of the Replit (direct feedback: "a little confusing"),
+agreed shape: one job per page, one vocabulary per card, two tabs that mean
+different things. Built so far:
+- For you header is ONE sentence: "Planning for <career> · Bachelor's degree
+  in <program>". The career is the only control (tap to switch among the
+  Top 3). GPA / states / distance are inputs, shown as quiet chips behind a
+  "Your details" toggle that also explains the list and links to Settings.
+- Groups, plain words, in this order and capped (~10 schools total): Best fit
+  for you (target, 4), Easy yes (safety, 4), Start for less (2-year, 3, only
+  when the career has that route), Worth a shot (reach, 2), Hands-on route
+  (trade, 3, only when relevant). Selective schools we can't place are NOT in
+  For you; they live in Browse all. No GPA -> one list "Schools for your
+  path" (8). `FIT_WORDS`: Best fit / Easy yes / Worth a shot / Everyone gets in.
+- Cards: one fit chip; one line "Program · $30K a year after aid"
+  (`costLine`); no path chips, no type tags. Distance is hidden until schools
+  have coordinates.
+- Browse all at rest is shelves (`BrowseShelves.tsx`): Offers <program>,
+  Near you, Under $15K a year, Trade and technical (only if the career has a
+  trade route), Everyone gets in, More schools; each school on ONE shelf, 8
+  per shelf, horizontal rails. Search or any filter swaps in the flat grid.
+Verified 375x812 and 1280x800: 8 curated cards, 5 shelves, 0 duplicates.
+Next: Saved as the decision board (My plan strip + "Make my #1" on the
+detail page), then detail-page "Why this fits you" polish and a sticky
+Compare bar.
