@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { ArrowLeftRight, Bookmark, Check, ChevronDown, GraduationCap, Landmark, MapPin } from "lucide-react";
+import { ArrowLeftRight, Bookmark, Check, ChevronDown, ChevronRight, GraduationCap, Landmark, MapPin } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { OpenCue } from "@/components/app/PosterCard";
 import { SMALL } from "@/components/career/CareerDetailExperience";
@@ -316,7 +316,18 @@ export function SchoolCard({
            photo still showing through, fading to the solid card just below */}
         <span className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--card) 0%, color-mix(in srgb, var(--card) 72%, transparent) 16%, color-mix(in srgb, var(--card) 40%, transparent) 38%, transparent 62%)" }} />
         <span className="absolute inset-x-0 top-0 h-[64px]" style={{ background: cardTopScrim() }} />
-        <span className="absolute inset-x-0 top-0 h-[150px]"><OpenCue /></span>
+        {/* Hover cue, school cards only (direct feedback, 11 Sept 2026): a
+           labelled pill, not a bare chevron, centred on the photo band. Uses
+           the poster-card hover rules (dim + cue) from globals.css. */}
+        <span className="absolute inset-x-0 top-0 h-[150px]">
+          <span className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgba(5,8,20,0.28)" }} />
+          <span
+            className="poster-cue pointer-events-none absolute top-1/2 left-1/2 z-[2] flex h-[40px] items-center gap-[4px] rounded-full border pl-[16px] pr-[12px] text-[13.5px] font-bold whitespace-nowrap backdrop-blur-[8px]"
+            style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.5)", color: "#fff", boxShadow: "0 10px 28px -8px rgba(0,0,0,0.7)", textShadow: "none" }}
+          >
+            View school <ChevronRight className="h-[16px] w-[16px]" strokeWidth={2.75} aria-hidden />
+          </span>
+        </span>
       </span>
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>

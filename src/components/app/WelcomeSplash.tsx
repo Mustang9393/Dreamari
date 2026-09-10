@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Briefcase, Check, ChevronRight, EyeOff, Sparkles, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
+import { Briefcase, Check, ChevronRight, EyeOff, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
@@ -170,12 +170,9 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
     <div className={`${styles.scrim} ${departing ? styles.departing : ""}`} style={style}>
       <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={`splash-${surface}-title`} aria-describedby={scene.line ? `splash-${surface}-description` : undefined} className={styles.dialog}>
         <div className={styles.hero} aria-hidden="true">
+          {/* Glow and Dreamy only: the orbit ring, particles and flare made
+             the dialog busy (direct feedback, 11 Sept 2026). */}
           <div className={styles.glow} />
-          <div className={styles.orbit} />
-          <div className={styles.particles}>
-            <i className={styles.orbOne} /><i className={styles.orbTwo} /><i className={styles.orbThree} />
-            <Sparkles className={styles.flare} size={19} strokeWidth={1.2} />
-          </div>
           {scene.sprite && <div className={`${styles.dreamy} ${scene.wide ? styles.dreamyWide : ""}`}>
             {/* Tiny pre-rendered WebP served as-is: the 270KB PNGs went through the
               on-demand image optimizer at first open and the sprite arrived

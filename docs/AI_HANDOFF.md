@@ -7069,3 +7069,17 @@ Gate clean; verified /match-lab -> /profile handoff, /colleges 1280 and
   `dreamari:schools-tab-nudged:session`.
 Gate clean; verified /match-lab sheet, /colleges cards 1280, /explore pulse
 (class present ~2.4s after the splash closes). Not pushed.
+
+## 2026-09-11 · Match welcome splash decluttered; school card hover cue
+Direct feedback (the notes about "the match popup" were about the Match
+WELCOME splash, not the results sheet):
+- `WelcomeSplash.module.css` `.scrim` is opaque (radial tint over the night
+  background, no blur): the page underneath ("Find your Top 3", the deck) no
+  longer shows behind any splash. Dialog max-width 420 -> 460.
+- Swipe demo: the tinted `.demoStage` box is gone (the card plays on the
+  dialog); loop 7.5s -> 5.6s, start 1200ms -> 900ms. The animation itself
+  is unchanged.
+- Hero: orbit ring, particles and flare removed; glow + Dreamy remain.
+- SchoolCard hover cue is a labelled pill "View school ›" (dim + cue via the
+  poster-card hover rules), centred on the photo band.
+Gate clean; verified /match-lab splash 375 and 1280, /colleges cards.
