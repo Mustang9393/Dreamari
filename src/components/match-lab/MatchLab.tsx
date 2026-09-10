@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, BookOpen, Check, ChevronDown, ChevronUp, GraduationCap, Laptop, Pencil, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
+import { ChevronRight, BookOpen, Check, GraduationCap, Laptop, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
@@ -266,8 +266,11 @@ export function MatchLab() {
   function finishMatching(explicitFocusId?: string) {
     const ids = liked.map((c) => c.id);
     if (ids.length === 0) return;
+    // No ranking (direct feedback, 11 Sept 2026): the three stay in the order
+    // they were saved; the one they pick to start with is just the focus, and
+    // Profile lets them switch it any time.
     const focusId2 = explicitFocusId ?? ids[0];
-    const ordered = [focusId2, ...ids.filter((id) => id !== focusId2)];
+    const ordered = ids;
     writePicks({ ids: ordered, focus: focusId2 });
     dispatchAuroraPulse("cta");
     // Straight to Profile: the "Welcome to Your Profile" popup lives there
@@ -278,24 +281,16 @@ export function MatchLab() {
   }
 
   function saveTop3() {
-    const focusCareer = liked.find((c) => c.id === chosenId) ?? liked[0];
-    if (!focusCareer) return;
+    const focusCareer = liked.find((c) => c.id === chosenId);
+    if (!focusCareer) return; // the CTA is disabled until one is picked
     finishMatching(focusCareer.id);
   }
-
-  function reorder(slot: number, dir: -1 | 1) {
-    const j = slot + dir;
-    if (j < 0 || j >= liked.length) return;
-    // Both slots that trade places pop, plus the tick -- the manage sheet sits
-    // over the slot strip, so the pops are what make the swap visible behind it.
-    dispatchAuroraPulse("select");
-    popSlots(slot, j);
-    setLiked((l) => {
-      const next = [...l];
-      [next[slot], next[j]] = [next[j], next[slot]];
-      return next;
-    });
+  // Every way of finishing now goes through the chooser: pick one to start with.
+  function openChooser() {
+    setDecisionBurst((n) => n + 1);
+    setDecisionOpen(true);
   }
+
 
   function removeLiked(slot: number) {
     dispatchAuroraPulse("select");
@@ -552,28 +547,18 @@ export function MatchLab() {
                       <span className="truncate">{c.title}</span>
                     </span>
                   ) : (
-                    <span>{i + 1}. Empty</span>
+                    <span>Empty</span>
                   )}
                   {slotPops[i] > 0 && <LocalBurst nonce={slotPops[i]} />}
                 </div>
               );
             })}
-            <button
-              type="button"
-              aria-label="Rank and edit your picks"
-              onClick={() => setManageOpen(true)}
-              disabled={liked.length === 0}
-              className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border disabled:opacity-35"
-              style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)", color: "var(--color-night-muted-foreground)" }}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
           </div>
 
           {/* Three saved and cards still left: the way forward is always on
              screen (direct feedback), not only in the once-only sheet. */}
           {!deckDone && liked.length === MAX_SLOTS && (
-            <Button variant="primary" size="compact" onClick={() => finishMatching()} type="button" className="mb-3 w-full">
+            <Button variant="primary" size="compact" onClick={openChooser} type="button" className="mb-3 w-full">
               Continue with your 3 <ChevronRight className="h-4 w-4" aria-hidden />
             </Button>
           )}
@@ -581,7 +566,7 @@ export function MatchLab() {
           {/* ---- deck ---- */}
           <div className="relative min-h-0 w-full flex-1 sm:h-[min(600px,calc(100dvh-280px))] sm:flex-none">
             {deckDone ? (
-              <EndPanel likedCount={liked.length} liked={liked} onRestart={restartDeck} onReport={() => finishMatching()} onManage={() => setManageOpen(true)} onExplore={() => router.push("/#explore")} />
+              <EndPanel likedCount={liked.length} liked={liked} onRestart={restartDeck} onReport={openChooser} onManage={() => setManageOpen(true)} onExplore={() => router.push("/#explore")} />
             ) : (
               roundDeck.slice(deckIndex, deckIndex + 3).map((career, depth) => {
                 const isTop = depth === 0;
@@ -710,27 +695,27 @@ export function MatchLab() {
             </span>
             <div className="flex flex-col gap-1.5">
               <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
-                <InkText text="Your Top 3 Matches" delay={0.25} />
+                <InkText text={liked.length === MAX_SLOTS ? "Your Top 3 Matches" : "Your matches"} delay={0.25} />
               </h2>
               <p className="motion-safe:animate-[fade-slide-up_0.6s_0.8s_ease-out_both] text-[13.5px] font-medium text-[var(--color-night-muted-foreground)]">
-                Tap a card to lead with it.
+                Pick one to start with.
               </p>
             </div>
             <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3" style={{ perspective: 900 }}>
-              {liked
-                .map((c, i) => ({ c, i }))
-                .sort((a, b) => (a.c.id === (chosenId ?? liked[0]?.id) ? -1 : b.c.id === (chosenId ?? liked[0]?.id) ? 1 : a.i - b.i))
-                .map(({ c }, rank) => (
-                  <TopThreeCard key={c.id} career={c} rank={rank + 1} chosen={rank === 0} onChoose={() => setChosenId(c.id)} index={rank} />
-                ))}
+              {liked.map((c, i) => (
+                <TopThreeCard key={c.id} career={c} chosen={c.id === chosenId} onChoose={() => setChosenId(c.id)} index={i} />
+              ))}
             </div>
             <div className="flex w-full flex-col gap-2.5 motion-safe:animate-[fade-slide-up_0.6s_1.05s_ease-out_both]">
-              <Button variant="primary" size="large" onClick={saveTop3} type="button">
-                Save My Top 3 <ChevronRight className="h-4 w-4" aria-hidden />
+              <Button variant="primary" size="large" onClick={saveTop3} type="button" aria-disabled={!chosenId} className={chosenId ? "" : "pointer-events-none opacity-50"}>
+                {chosenId ? <>Continue with {liked.find((c) => c.id === chosenId)?.title} <ChevronRight className="h-4 w-4" aria-hidden /></> : "Select one to continue"}
               </Button>
-              <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
-                Keep Swiping
-              </Button>
+              <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">You can switch careers any time to update your plan and Career Report.</p>
+              {!deckDone && (
+                <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
+                  Keep Swiping
+                </Button>
+              )}
             </div>
           </div>
         </Sheet>
@@ -774,8 +759,8 @@ export function MatchLab() {
       {manageOpen && (
         <Sheet onClose={() => setManageOpen(false)}>
           <div className="flex flex-col items-center gap-4 text-center">
-            <h2 className={`${bricolage.className} text-[20px] font-extrabold text-[var(--color-night-foreground)]`}>Rank your picks</h2>
-            <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">#1 is your top choice. It leads your Career Report.</p>
+            <h2 className={`${bricolage.className} text-[20px] font-extrabold text-[var(--color-night-foreground)]`}>Your picks</h2>
+            <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">Remove any you&rsquo;ve changed your mind about.</p>
             <div className="flex w-full flex-col gap-2">
               {liked.length === 0 && <p className="py-4 text-[13px] text-[var(--color-night-muted-foreground)]">Nothing saved yet. Swipe right on a career you like.</p>}
               {liked.map((c, i) => (
@@ -784,16 +769,8 @@ export function MatchLab() {
                   className="flex items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2.5"
                   style={{ background: `color-mix(in srgb, ${c.color} 10%, var(--color-glass-surface-raised))`, borderColor: "var(--color-glass-border-raised)" }}
                 >
-                  <span className={`${bricolage.className} w-7 flex-none text-[16px] font-extrabold`} style={{ color: c.color }}>
-                    #{i + 1}
-                  </span>
+                  <span aria-hidden className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: c.color }} />
                   <span className="min-w-0 flex-1 truncate text-left text-[13.5px] font-semibold text-[var(--color-night-foreground)]">{c.title}</span>
-                  <IconGhostButton label={`Move ${c.title} up`} disabled={i === 0} onClick={() => reorder(i, -1)}>
-                    <ChevronUp className="h-4 w-4" />
-                  </IconGhostButton>
-                  <IconGhostButton label={`Move ${c.title} down`} disabled={i === liked.length - 1} onClick={() => reorder(i, 1)}>
-                    <ChevronDown className="h-4 w-4" />
-                  </IconGhostButton>
                   <IconGhostButton label={`Remove ${c.title}`} onClick={() => removeLiked(i)}>
                     <X className="h-4 w-4" />
                   </IconGhostButton>
@@ -802,8 +779,8 @@ export function MatchLab() {
             </div>
             <div className="flex w-full flex-col gap-2.5">
               {liked.length > 0 && (
-                <Button variant="primary" onClick={() => finishMatching()} type="button">
-                  {liked.length === MAX_SLOTS ? "Lock in & continue" : `Continue with ${liked.length}`}
+                <Button variant="primary" onClick={() => { setManageOpen(false); openChooser(); }} type="button">
+                  Continue with {liked.length}
                 </Button>
               )}
               <Button variant="secondary" onClick={() => setManageOpen(false)} type="button">
@@ -1034,10 +1011,10 @@ function IconGhostButton({ label, onClick, disabled, children }: { label: string
 function MiniRanking({ liked }: { liked: Career[] }) {
   return (
     <div className="flex w-full flex-col gap-2">
-      {liked.map((c, i) => (
+      {liked.map((c) => (
         <div key={c.id} className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border px-3.5 py-2.5" style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}>
           <span className="flex min-w-0 items-center gap-2 text-[13px] font-bold" style={{ color: c.color }}>
-            #{i + 1} <span className="truncate text-[var(--color-night-foreground)]">{c.title}</span>
+            <span aria-hidden className="h-2 w-2 flex-none rounded-full" style={{ background: c.color }} /> <span className="truncate text-[var(--color-night-foreground)]">{c.title}</span>
           </span>
           <span className="flex-none text-[12px] font-bold" style={{ color: SUCCESS }}>
             {c.salary}
@@ -1048,10 +1025,11 @@ function MiniRanking({ liked }: { liked: Career[] }) {
   );
 }
 
-// One card on the consolidated Top 3 results screen: the same poster face
-// as the deck itself, a rank badge, and (on whichever is #1) a checkmark
-// plus a glowing gold ring — tapping any card makes IT #1 instead.
-function TopThreeCard({ career, rank, chosen, onChoose, index = 0 }: { career: Career; rank: number; chosen: boolean; onChoose: () => void; index?: number }) {
+// One card on the Top 3 results screen: the same poster face as the deck
+// itself and, on the one they tap, a checkmark plus a glowing gold ring. No
+// rank badge, no numbering: picking one is "start here", not "#1" (direct
+// feedback, 11 Sept 2026).
+function TopThreeCard({ career, chosen, onChoose, index = 0 }: { career: Career; chosen: boolean; onChoose: () => void; index?: number }) {
   const gold = "var(--color-world-business-money-office)";
   return (
     <button
@@ -1097,13 +1075,6 @@ function TopThreeCard({ career, rank, chosen, onChoose, index = 0 }: { career: C
         style={{ background: gold, animationDelay: `${1000 + index * 140}ms` }}
       >
         <Check className="h-4 w-4" strokeWidth={3} />
-      </span>
-      <span
-        aria-hidden
-        className="absolute top-2.5 right-2.5 rounded-[var(--radius-sm)] border px-2 py-0.5 text-[12px] font-extrabold backdrop-blur-md motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)_both]"
-        style={{ color: chosen ? gold : "var(--color-night-foreground)", borderColor: chosen ? gold : "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", animationDelay: `${1000 + index * 140}ms` }}
-      >
-        #{rank}
       </span>
       <div className="relative z-[1] flex flex-col gap-1.5 p-3">
         <p className="text-[15px] leading-[19px] font-extrabold text-white" style={{ fontFamily: career.font, fontWeight: career.fontWeight, letterSpacing: career.letterSpacing }}>{career.title}</p>
@@ -1191,7 +1162,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
       </h2>
       <p className="text-[13.5px] leading-relaxed font-medium text-[var(--color-night-muted-foreground)]">
         {likedCount === MAX_SLOTS
-          ? "Save them to your profile."
+          ? "Pick one to start with."
           : likedCount > 0
             ? `You can continue with ${likedCount}, or run the remaining careers again to fill your Top 3.`
             : "Knowing what's NOT for you is real progress. Wander through Explore, hundreds of paths, no pressure, and come back when one sparks."}
@@ -1200,7 +1171,7 @@ function EndPanel({ likedCount, liked, onRestart, onReport, onManage, onExplore 
       <div className="flex w-full max-w-[320px] flex-col gap-2.5">
         {likedCount > 0 ? (
           <Button variant="primary" size="large" onClick={onReport} type="button">
-            {likedCount === MAX_SLOTS ? "Continue with your 3" : `Continue with ${likedCount}`}
+            Choose where to start
           </Button>
         ) : (
           <Button variant="primary" size="large" onClick={onExplore} type="button">

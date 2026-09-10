@@ -6692,3 +6692,27 @@ menu, the student picks, Build's answer sets the default.
   Schools splash row 2: "Pick your route: 4-year, 2-year, or trade school."
 Verified on 375x812: IB default Bachelor's (Target/Safety/Reach), 2-year
 pill -> Bergen/Middlesex rail, Nurse -> Bachelor's / Associate pills.
+
+### 11 Sept 2026 -- Match: pick one to start with, no ranking
+
+Direct feedback: after the Top 3, the student selects ONE card to continue
+with; no numbering, re-ranking or ranking anywhere; pencil gone; make it
+clear they can switch later.
+- Decision sheet: cards in saved order, none pre-selected, no #rank badges
+  (`TopThreeCard` lost its `rank` prop); subtitle "Pick one to start with.";
+  CTA is "Select one to continue" (aria-disabled) until a tap, then
+  "Continue with <career>"; a line under it: "You can switch careers any
+  time to update your plan and Career Report." Keep Swiping only while cards
+  remain.
+- Every finish path goes through that chooser (`openChooser`): the always-on
+  "Continue with your 3" shortcut, the end-of-deck panel ("Choose where to
+  start"), and the picks sheet.
+- The pencil button is removed from the slot strip; slots read "Empty"
+  without numbers. The manage sheet is now "Your picks", remove-only (no
+  up/down reorder; `reorder()` deleted). EndPanel's list shows names with
+  colour dots, no #.
+- Hand-off writes picks in saved order with `focus` = the chosen career (no
+  reordering of ids). Verified: three likes -> sheet, tap second card -> CTA
+  "Continue with Private Equity Analyst", lands on Profile Top Three.
+Not touched: Profile's own Top Three tab still shows its slot numbers and
+swap flow; flag if that should follow.
