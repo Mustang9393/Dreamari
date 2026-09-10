@@ -6655,3 +6655,13 @@ Replit except layout / visual / UX". Changes:
   cover so every card gets the photo + progressive-blur treatment.
 Verified 375x812 and 1280x800. Explore (Careers) keeps its own splash with
 Joshua's two rows.
+
+### 11 Sept 2026 -- Landing Connect graphic: replies always animate in on tap
+
+Both Connect demo cards stay mounted (height stability), so the replies'
+`mkt-reply` entrance ran as soon as the chapter started playing -- while the
+post card was still hidden -- and a later "Enter Community" tap found them
+already in place (direct feedback). `PostCard` now takes `live`, true only
+once the screen switches, and attaches the `mkt-reply` class then, so the
+staggered entrance starts at the tap every time. Measured: 0 / 0 / 0 at
+120ms, 1 / 0.92 / 0 at 820ms, all 1 by 2.3s.

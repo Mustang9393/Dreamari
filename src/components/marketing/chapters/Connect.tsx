@@ -223,7 +223,12 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
 
 // Screen 2 — the post/comment thread this chapter always had, reached after "Enter
 // Community" rather than shown by default.
-function PostCard() {
+/** `live` flips true the moment Enter Community is tapped: the card stays
+ *  mounted all along (so the section never changes height), but the replies'
+ *  entrance animation is only attached then -- attached at mount, it played
+ *  out while the card was still hidden, so a later tap found every reply
+ *  already sitting there (direct feedback, 11 Sept 2026). */
+function PostCard({ live }: { live: boolean }) {
   return (
     <CardShell>
       {/* Post — tightened from the original padding/gaps (18/14/12 → smaller
@@ -289,7 +294,7 @@ function PostCard() {
           {REPLIES.map((reply, i) => (
             <div
               key={reply.name}
-              className="mkt-reply rounded-xl"
+              className={`${live ? "mkt-reply" : ""} rounded-xl`}
               style={{ padding: "calc(var(--mu) * 9px) calc(var(--mu) * 12px)", background: "var(--glass-surface-2)", ["--d" as string]: i }}
             >
               <div className="flex items-center" style={{ gap: "calc(var(--mu) * 7px)" }}>
@@ -357,7 +362,7 @@ function ConnectDemo() {
         <CommunityOverviewCard onEnter={() => setScreen("post")} />
       </div>
       <div className="[grid-area:1/1] transition-opacity duration-300" style={{ opacity: screen === "post" ? 1 : 0, pointerEvents: screen === "post" ? "auto" : "none", visibility: screen === "post" ? "visible" : "hidden" }}>
-        <PostCard />
+        <PostCard live={screen === "post"} />
       </div>
     </div>
   );
