@@ -79,7 +79,7 @@ export function BrowseShelves({
           <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" aria-label={shelf.title}>
             {shelf.items.map((c) => (
               <li key={c.slug} className="w-[min(86vw,320px)] flex-none">
-                <CollegeCard c={c} saved={saved.has(c.slug)} onSave={() => onSave(c.slug)} compared={compare.includes(c.slug)} onCompare={() => onCompare(c.slug)} />
+                <CollegeCard c={c} saved={saved.has(c.slug)} onSave={() => onSave(c.slug)} compared={compare.includes(c.slug)} onCompare={() => onCompare(c.slug)} stats hideTags />
               </li>
             ))}
           </ul>

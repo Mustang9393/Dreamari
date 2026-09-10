@@ -189,7 +189,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
           <ForYouBrowseToggle tab={view} onTab={setView} />
         </div>
 
-        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} />}
+        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => { set({ savedOnly: true }); setView("browse"); }} />}
         {view === "browse" && (<>
         {/* the search: one box, results change as you type, and the door to
            every filter fixed beside it (never off the edge of a scroll row) */}

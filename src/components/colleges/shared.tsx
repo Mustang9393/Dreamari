@@ -134,7 +134,7 @@ const BADGE_STYLE: Record<CardBadge["tone"], React.CSSProperties> = {
   muted: { background: "rgba(255,255,255,0.14)", color: "#fff" },
 };
 
-export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges, subline, hideTags = false }: { c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": one fit chip, at most two */ badges?: CardBadge[]; /** one plain line under the place, e.g. the programme that matches the path */ subline?: string; /** For you: the 4-year / Public / City tags are noise next to the fit chip */ hideTags?: boolean }) {
+export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges, subline, hideTags = false, stats = false }: { /** Explore Schools: a three-number stat row (acceptance, price after aid, finish rate) instead of the two sentences */ stats?: boolean; c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": one fit chip, at most two */ badges?: CardBadge[]; /** one plain line under the place, e.g. the programme that matches the path */ subline?: string; /** For you: the 4-year / Public / City tags are noise next to the fit chip */ hideTags?: boolean }) {
   const img = collegeImage(c);
   return (
     // `poster-card`/`poster-photo` are the exact same hover classes Explore's
@@ -198,10 +198,25 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
           </div>
         </div>
 
-        <p className="mt-auto pt-[var(--space-6)] text-[15px] leading-[21px] font-semibold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>
-          Acceptance rate: {c.admitRate === null ? "Everyone gets in" : `${c.admitRate}%`}
-          <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>Undergraduate enrollment: {compact(c.undergrads)}</span>
-        </p>
+        {stats ? (
+          <dl className="mt-auto grid grid-cols-3 gap-[var(--space-2)] pt-[var(--space-6)]" style={{ fontFamily: "var(--font-body)", textShadow: "none" }}>
+            {[
+              { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
+              { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "after aid" },
+              { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
+            ].map((x) => (
+              <div key={x.k} className="flex min-w-0 flex-col">
+                <dd className="m-0 text-[17px] leading-[20px] font-extrabold" style={{ color: "#FFFFFF", fontFamily: "var(--font-display)" }}>{x.v}</dd>
+                <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{x.k}</dt>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="mt-auto pt-[var(--space-6)] text-[15px] leading-[21px] font-semibold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+            Acceptance rate: {c.admitRate === null ? "Everyone gets in" : `${c.admitRate}%`}
+            <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>Undergraduate enrollment: {compact(c.undergrads)}</span>
+          </p>
+        )}
         <div className="pointer-events-auto mt-[10px] flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none", fontFamily: "var(--font-body)" }}>
           <ul className="flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college">
             {(hideTags ? [] : tags(c)).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.12)", color: "#fff" }}>{t}</li>)}

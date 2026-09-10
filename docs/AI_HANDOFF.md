@@ -6768,3 +6768,27 @@ writes the GPA only on hand-off, so any browser that never ran Build had
 none): For you now falls back to `ACADEMIC_RECORD.gpa` (the 3.7 the Profile
 card shows) when the store has no GPA, so Target / Safety / Reach appear from
 the first visit.
+
+### 11 Sept 2026 -- Explore Schools, pass 4: the Replit's architecture, delivered leaner
+
+Direct feedback: match the Replit, then deliver it better; show the GPA since
+it drives the list; "why these schools" matters but must be delivered
+better; less clutter below the Careers/Schools tabs.
+- The Replit's breadcrumb (Career -> Route -> Program) is now the control
+  strip: chips connected by arrows; the career chip (accent) and the route
+  chip open their options inline under the strip when there is a choice
+  (Top 3 careers; the career's routes with time). The program chip is
+  static. No separate pill rows.
+- One line under it: "Based on 3.7 GPA · New Jersey · Within 100 miles" +
+  "Why these schools?" + "Saved schools · n" (opens Browse all filtered to
+  saved -- the Replit keeps Saved off the list too; "Make my #1" stays on
+  the school page). The inline My plan row is gone from For you.
+- "Why these schools?" is a bottom sheet (`WhySheet`, portalled): Your path
+  as three chips + one sentence; How we sort as a Target/Safety/Reach colour
+  legend with one line each and the "guide, not a prediction" caveat; What
+  we use (GPA / Where / How far) with "Change in Settings".
+- Cards: the Replit's stat row -- acceptance · $ after aid · finish rate
+  (`CollegeCard stats`), programme chip, fit chip only where the rail
+  doesn't already say it; the two sentences are gone. Browse-all shelves
+  use the same card.
+Verified 375x812: strip, based-on line, sheet content, stat rows, rails.
