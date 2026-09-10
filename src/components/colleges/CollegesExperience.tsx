@@ -107,12 +107,12 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
   // quick picks: the six choices an 8th grader can act on, in their words
   const nearHome = filters.states.size === 1 && filters.states.has(HOME_STATE);
   const quick: { key: string; label: string; on: boolean; toggle: () => void }[] = [
-    { key: "home", label: "Near home", on: nearHome, toggle: () => set({ states: nearHome ? new Set() : new Set([HOME_STATE]) }) },
-    { key: "4", label: "4-year", on: filters.levels.has("Bachelor's degrees"), toggle: () => set({ levels: toggleIn(filters.levels, "Bachelor's degrees") }) },
-    { key: "2", label: "2-year", on: filters.levels.has("Associate degrees"), toggle: () => set({ levels: toggleIn(filters.levels, "Associate degrees") }) },
-    { key: "trade", label: "Trade school", on: filters.levels.has("Certificates"), toggle: () => set({ levels: toggleIn(filters.levels, "Certificates") }) },
-    { key: "cost", label: "Under $15K a year", on: filters.costCap === 15000, toggle: () => set({ costCap: filters.costCap === 15000 ? null : 15000 }) },
-    { key: "open", label: "Everyone gets in", on: filters.admissions.has("open"), toggle: () => set({ admissions: toggleIn(filters.admissions, "open") }) },
+    { key: "home", label: "Near you", on: nearHome, toggle: () => set({ states: nearHome ? new Set() : new Set([HOME_STATE]) }) },
+    { key: "4", label: "4-year schools", on: filters.levels.has("Bachelor's degrees"), toggle: () => set({ levels: toggleIn(filters.levels, "Bachelor's degrees") }) },
+    { key: "2", label: "Community colleges", on: filters.levels.has("Associate degrees"), toggle: () => set({ levels: toggleIn(filters.levels, "Associate degrees") }) },
+    { key: "trade", label: "Trade & technical", on: filters.levels.has("Certificates"), toggle: () => set({ levels: toggleIn(filters.levels, "Certificates") }) },
+    { key: "cost", label: "Lower cost", on: filters.costCap === 15000, toggle: () => set({ costCap: filters.costCap === 15000 ? null : 15000 }) },
+    { key: "open", label: "High acceptance", on: filters.admissions.has("open"), toggle: () => set({ admissions: toggleIn(filters.admissions, "open") }) },
   ];
   if (saved.size) quick.push({ key: "saved", label: `Saved · ${saved.size}`, on: filters.savedOnly, toggle: () => set({ savedOnly: !filters.savedOnly }) });
 

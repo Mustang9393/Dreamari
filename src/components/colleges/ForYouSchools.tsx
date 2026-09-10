@@ -21,6 +21,7 @@ import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, 
 const DEMO_TOP3 = ["investment-banking", "registered-nurse", "software-engineer"];
 const HOME_STATE_NAME = "New Jersey";
 const USE_GPA_KEY = "dreamari:schools-use-gpa";
+const HIDDEN_KEY = "dm-colleges-hidden";
 
 export function ForYouSchools({
   saved,
@@ -77,6 +78,30 @@ export function ForYouSchools({
   const route = routes.find((r) => r.id === routePick[careerId]) ?? defaultRoute(routes, profile.path);
   const schools = useMemo(() => (pathway && route ? schoolsForRoute(pathway, route, profile) : null), [pathway, route, profile]);
   const [open, setOpen] = useState<"career" | "route" | null>(null);
+  // "Not for me" hides a school from For you; remembered.
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      try { setHidden(new Set(JSON.parse(window.localStorage.getItem(HIDDEN_KEY) ?? "[]") as string[])); } catch {}
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  const dismiss = (slug: string) => {
+    setHidden((cur) => {
+      const next = new Set(cur).add(slug);
+      try { window.localStorage.setItem(HIDDEN_KEY, JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  };
+  // close any open menu on outside click / Escape
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: Event) => { if (!(e.target as HTMLElement).closest?.("[data-menu]")) setOpen(null); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(null); };
+    document.addEventListener("pointerdown", close);
+    window.addEventListener("keydown", key);
+    return () => { document.removeEventListener("pointerdown", close); window.removeEventListener("keydown", key); };
+  }, [open]);
   const [why, setWhy] = useState(false);
   const gpa = parseGpa(profile.gpa);
 
@@ -103,10 +128,22 @@ export function ForYouSchools({
         { key: "easy", title: "Most students get in", list: all.filter((m) => rate(m) >= 70).slice(0, 4) },
       );
     } else sections.push({ key: "target", title: "Target", list: g.target.slice(0, 4) }, { key: "safety", title: "Safety", list: g.safety.slice(0, 4) }, { key: "reach", title: "Reach", list: g.reach.slice(0, 2) });
-  } else if (route.institution === "2-year") sections.push({ key: "start", title: "Community colleges near you", list: schools.list.slice(0, 8) });
+  } else if (route.institution === "2-year") sections.push({ key: "start", title: "Lower-cost ways to start", list: schools.list.slice(0, 8) });
   else sections.push({ key: "trade", title: "Trade and technical programs", list: schools.list.slice(0, 8) });
-  const shown = sections.filter((s) => s.list.length > 0);
+  const shown = sections.map((s) => ({ ...s, list: s.list.filter((m) => !hidden.has(m.college.slug)) })).filter((s) => s.list.length > 0);
+  const RAIL_COPY: Record<string, { eyebrow?: string; note?: string }> = {
+    start: { eyebrow: "A practical first step", note: "Start here, then continue toward a 4-year degree." },
+  };
 
+  const whyFor = (m: SchoolMatch) => {
+    if (m.why) return m.why;
+    const c = m.college;
+    const bits = [`Offers ${shortProgram(m.program)}`];
+    if (c.state === "NJ" || profile.states.some((st) => st.toLowerCase() === c.stateName.toLowerCase())) bits.push("close to home");
+    if (c.netPrice !== null && c.netPrice < 15000) bits.push("among the lower-cost options");
+    if (c.finish !== null && c.finish >= 80) bits.push(`${c.finish}% finish`);
+    return bits.join(" · ") + ".";
+  };
   const card = (m: SchoolMatch, showFit: boolean) => (
     <li key={m.college.slug} className="w-[min(84vw,320px)] flex-none">
       <SchoolCard
@@ -118,98 +155,64 @@ export function ForYouSchools({
         href={`/colleges/${m.college.slug}?route=${pathway.careerId}`}
         program={shortProgram(m.program)}
         fit={showFit && FIT_WORDS[m.fit] ? { label: FIT_WORDS[m.fit], tone: m.fit === "Reach" ? "reach" : m.fit === "Target" ? "target" : m.fit === "Safety" ? "safety" : "open" } : undefined}
+        why={whyFor(m)}
+        onDismiss={() => dismiss(m.college.slug)}
       />
     </li>
   );
   const rail = "dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 
-  // One chip of the pathway strip: a control when there is a choice.
-  const chip = (label: string, opts?: { onClick?: () => void; open?: boolean; accent?: boolean }) => {
-    const base = "flex min-h-[38px] items-center gap-[6px] rounded-full border px-[14px] text-[14px] font-bold whitespace-nowrap";
-    const style = opts?.accent ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "var(--glass-surface-1)", borderColor: opts?.open ? ACCENT : "var(--glass-border)", color: "var(--foreground)" };
-    return opts?.onClick ? (
-      <button type="button" onClick={opts.onClick} aria-expanded={opts.open} className={`dm-quiet cursor-pointer ${base}`} style={style}>
-        {label} <ChevronDown className={`h-4 w-4 transition-transform ${opts.open ? "rotate-180" : ""}`} aria-hidden style={{ opacity: 0.75 }} />
-      </button>
-    ) : (
-      <span className={base} style={style}>{label}</span>
-    );
-  };
   const arrow = <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />;
-  const option = (label: string, on: boolean, onClick: () => void, sub?: string) => (
-    <button key={label} type="button" aria-pressed={on} onClick={onClick} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[13.5px] font-bold" style={{ background: on ? ACCENT : "transparent", borderColor: on ? ACCENT : "var(--glass-border)", color: on ? "#fff" : "var(--foreground)" }}>
-      {label}{sub && <span className="font-semibold" style={{ color: on ? "rgba(255,255,255,0.8)" : "var(--muted-foreground)" }}>· {sub}</span>}
-    </button>
-  );
 
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
-      {/* One summary card for the plan (the "trip header" pattern): eyebrow,
-         the career as the title, the route line, the based-on line. Tap the
-         career or the route to change it; options drop in inside the card. */}
-      <section className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={PANEL}>
-        <div className="flex items-start justify-between gap-[var(--space-3)]">
-          <div className="flex min-w-0 flex-col gap-[4px]">
-            <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>Planning for</p>
-            {top3.length > 1 ? (
-              <button type="button" onClick={() => setOpen(open === "career" ? null : "career")} aria-expanded={open === "career"} className="dm-link flex w-fit cursor-pointer items-center gap-[6px] text-left text-[24px] leading-[28px] font-extrabold sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                {pathway.careerTitle} <ChevronDown className={`h-5 w-5 flex-none transition-transform ${open === "career" ? "rotate-180" : ""}`} aria-hidden style={{ color: SOFT }} />
-              </button>
-            ) : (
-              <h2 className="text-[24px] leading-[28px] font-extrabold sm:text-[28px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>{pathway.careerTitle}</h2>
-            )}
-          </div>
-          {saved.size > 0 && (
-            <button type="button" onClick={onShowSaved} className="dm-link flex flex-none cursor-pointer items-center gap-[2px] pt-[4px] text-[13px] font-bold" style={{ color: SOFT }}>
-              Saved · {saved.size} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
-            </button>
-          )}
-        </div>
-        {open === "career" && (
-          <div className="flex flex-wrap gap-[6px]" aria-label="Choose a career">
-            {top3.map((id) => option(careerTitle(id), id === careerId, () => { setChosen(id); setOpen(null); }))}
-          </div>
-        )}
-        <div className="flex flex-wrap items-center gap-[6px]" aria-label="Your pathway">
-          {chip(`${route.label} · ${route.time}`, routes.length > 1 ? { onClick: () => setOpen(open === "route" ? null : "route"), open: open === "route" } : undefined)}
+      {/* Header: the Replit's breadcrumb as two quiet lines. Career and route
+         are text dropdowns (a small menu under the word), not chip rows. */}
+      <section className="flex flex-col gap-[8px]">
+        <div className="flex flex-wrap items-center gap-x-[6px] gap-y-[4px] text-[16px] leading-[22px] font-extrabold sm:text-[18px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)" }} aria-label="Your pathway">
+          <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} accent>
+            {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
+          </Menu>
           {arrow}
-          {chip(program)}
+          <Menu open={open === "route"} onToggle={() => setOpen(open === "route" ? null : "route")} label={route.label} sub={route.time} disabled={routes.length < 2}>
+            {routes.map((r: Route) => <MenuItem key={r.id} on={r.id === route.id} label={r.label} sub={r.time} onClick={() => { setRoutePick((cur) => ({ ...cur, [careerId]: r.id })); setOpen(null); }} />)}
+          </Menu>
+          {arrow}
+          <span style={{ color: "var(--muted-foreground)" }}>{program}</span>
         </div>
-        {open === "route" && (
-          <div className="flex flex-wrap gap-[6px]" aria-label="Choose a route">
-            {routes.map((r: Route) => option(r.label, r.id === route.id, () => { setRoutePick((cur) => ({ ...cur, [careerId]: r.id })); setOpen(null); }, r.time))}
-          </div>
-        )}
-        <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px] border-t pt-[var(--space-3)] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          <span className="flex flex-wrap items-center gap-[6px]">
-            <span className="mr-[2px]">Based on</span>
-            <span className="group relative">
-              <button
-                type="button"
-                onClick={toggleGpa}
-                aria-pressed={useGpa}
-                aria-describedby="gpa-tip"
-                className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12.5px] font-bold"
-                style={useGpa ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-              >
-                {useGpa ? <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden /> : <X className="h-[13px] w-[13px]" aria-hidden />}
-                {useGpa ? `${gpaLabel} GPA` : "GPA off"}
-              </button>
-              <span
-                id="gpa-tip"
-                role="tooltip"
-                className={`pointer-events-none absolute top-[calc(100%+8px)] left-0 z-30 w-max max-w-[260px] rounded-[var(--radius-md)] border px-[10px] py-[7px] text-[12.5px] leading-[17px] font-semibold shadow-lg transition-opacity duration-150 ${gpaNote ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
-                style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                {gpaNote ?? (useGpa ? "Tap to turn off: see every school without Target, Safety, Reach." : "Tap to turn on: sort schools by your GPA.")}
-              </span>
+        <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[6px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span>Based on</span>
+          <span className="group relative">
+            <button
+              type="button"
+              onClick={toggleGpa}
+              aria-pressed={useGpa}
+              aria-describedby="gpa-tip"
+              className="dm-quiet flex min-h-[26px] cursor-pointer items-center gap-[4px] rounded-full border px-[9px] text-[12px] font-bold"
+              style={useGpa ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+            >
+              {useGpa ? <Check className="h-[12px] w-[12px]" strokeWidth={3} aria-hidden /> : <X className="h-[12px] w-[12px]" aria-hidden />}
+              {useGpa ? `${gpaLabel} GPA` : "GPA off"}
+            </button>
+            <span
+              id="gpa-tip"
+              role="tooltip"
+              className={`pointer-events-none absolute top-[calc(100%+8px)] left-0 z-30 w-max max-w-[260px] rounded-[var(--radius-md)] border px-[10px] py-[7px] text-[12.5px] leading-[17px] font-semibold shadow-lg transition-opacity duration-150 ${gpaNote ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
+              style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+            >
+              {gpaNote ?? (useGpa ? "Tap to turn off: see every school without Target, Safety, Reach." : "Tap to turn on: sort schools by your GPA.")}
             </span>
-            <span className="rounded-full border px-[10px] py-[5px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{profile.states[0] ?? HOME_STATE_NAME}</span>
-            {profile.travelDistance && <span className="rounded-full border px-[10px] py-[5px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{profile.travelDistance}</span>}
           </span>
-          <button type="button" onClick={() => setWhy(true)} className="dm-link ml-auto flex cursor-pointer items-center gap-[4px] font-bold" style={{ color: SOFT }}>
+          <span>· {profile.states[0] ?? HOME_STATE_NAME}{profile.travelDistance ? ` · ${profile.travelDistance}` : ""}</span>
+          <span aria-hidden>·</span>
+          <button type="button" onClick={() => setWhy(true)} className="dm-link flex cursor-pointer items-center gap-[4px] font-bold" style={{ color: SOFT }}>
             <Info className="h-[14px] w-[14px]" aria-hidden /> Why these schools?
           </button>
+          {saved.size > 0 && (
+            <button type="button" onClick={onShowSaved} className="dm-link ml-auto flex cursor-pointer items-center gap-[2px] font-bold" style={{ color: SOFT }}>
+              Saved schools · {saved.size} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
+            </button>
+          )}
         </div>
       </section>
 
@@ -222,8 +225,9 @@ export function ForYouSchools({
       {shown.map((s) => (
         <section key={s.key} className="flex flex-col gap-[var(--space-3)]">
           <div className="flex flex-col gap-[2px]">
-            <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>{s.list.length} {s.list.length === 1 ? "school" : "schools"}</p>
+            <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>{RAIL_COPY[s.key]?.eyebrow ?? `${s.list.length} ${s.list.length === 1 ? "school" : "schools"}`}</p>
             <h2 className="text-[22px] leading-[26px] font-extrabold sm:text-[26px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}>{s.title}</h2>
+            {RAIL_COPY[s.key]?.note && <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{RAIL_COPY[s.key]!.note}</p>}
           </div>
           <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "start" || s.key === "trade"))}</ul>
         </section>
@@ -243,6 +247,36 @@ export function ForYouSchools({
         />
       )}
     </div>
+  );
+}
+
+// ---- text dropdowns for the breadcrumb ------------------------------------
+
+function Menu({ label, sub, open, onToggle, disabled, accent, children }: { label: string; sub?: string; open: boolean; onToggle: () => void; disabled?: boolean; accent?: boolean; children: React.ReactNode }) {
+  const color = accent ? SOFT : "var(--foreground)";
+  if (disabled) return <span style={{ color }}>{label}{sub && <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span>}</span>;
+  return (
+    <span className="relative" data-menu>
+      <button type="button" onClick={onToggle} aria-haspopup="menu" aria-expanded={open} className="dm-link flex cursor-pointer items-center gap-[3px]" style={{ color, textDecoration: "underline", textDecorationColor: `color-mix(in srgb, ${SOFT} 55%, transparent)`, textUnderlineOffset: "5px", textDecorationThickness: "2px" }}>
+        {label}{sub && <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span>}
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden style={{ color: "var(--muted-foreground)" }} />
+      </button>
+      {open && (
+        <ul role="menu" className="absolute top-[calc(100%+8px)] left-0 z-40 flex min-w-[220px] list-none flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[6px] shadow-xl" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          {children}
+        </ul>
+      )}
+    </span>
+  );
+}
+function MenuItem({ label, sub, on, onClick }: { label: string; sub?: string; on: boolean; onClick: () => void }) {
+  return (
+    <li role="none">
+      <button type="button" role="menuitemradio" aria-checked={on} onClick={onClick} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[12px] py-[9px] text-left text-[14px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: on ? `color-mix(in srgb, ${ACCENT} 18%, transparent)` : "transparent" }}>
+        <span>{label}{sub && <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span>}</span>
+        {on && <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} />}
+      </button>
+    </li>
   );
 }
 

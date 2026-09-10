@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { Bookmark, GraduationCap, Landmark , ChevronRight } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { OpenCue } from "@/components/app/PosterCard";
@@ -246,6 +246,8 @@ export function SchoolCard({
   href,
   program,
   fit,
+  why,
+  onDismiss,
 }: {
   c: College;
   saved: boolean;
@@ -257,12 +259,17 @@ export function SchoolCard({
   program?: string;
   /** Target / Safety / Reach / Open admission, only where the rail title doesn't already say it */
   fit?: CardBadge;
+  /** one sentence behind "Why this school?" (the Replit's link) */
+  why?: string;
+  /** "Not for me": hides the school from For you */
+  onDismiss?: () => void;
 }) {
+  const [showWhy, setShowWhy] = useState(false);
   const img = collegeImage(c);
   const mark = collegeMark(c);
   const stats = [
     { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
-    { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "after aid" },
+    { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "avg. after aid" },
     { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
   ];
   return (
@@ -284,7 +291,9 @@ export function SchoolCard({
         <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.97) 0%, rgba(12,16,35,0.88) 34%, rgba(12,16,35,0.45) 58%, rgba(12,16,35,0.08) 78%, transparent 100%)" }} />
         <span className="absolute inset-x-0 top-0 h-[80px]" style={{ background: cardTopScrim() }} />
       </span>
-      <OpenCue />
+      {/* the "this opens" cue lives in the photo band, above the text block,
+         where it can actually be seen (direct feedback, 11 Sept 2026) */}
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[15] h-[44%]"><OpenCue /></span>
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       {fit && (
         <span className="absolute top-[14px] left-[14px] z-20 rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ ...BADGE_STYLE[fit.tone], textShadow: "none" }}>{fit.label}</span>
@@ -300,6 +309,14 @@ export function SchoolCard({
             {program && <p className="text-[12.5px] leading-[16px] font-bold" style={{ color: "#FFFFFF" }}>{program}</p>}
           </div>
         </div>
+        {why && (
+          <div className="pointer-events-auto relative z-20 -mt-[4px]" style={{ textShadow: "none" }}>
+            <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link flex cursor-pointer items-center gap-[2px] text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.85)" }}>
+              Why this school? <ChevronRight className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-90" : ""}`} aria-hidden />
+            </button>
+            {showWhy && <p className="mt-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.88)" }}>{why}</p>}
+          </div>
+        )}
         <dl className="grid grid-cols-3 gap-[6px]" style={{ textShadow: "none" }}>
           {stats.map((x) => (
             <div key={x.k} className="flex min-w-0 flex-col items-start rounded-[var(--radius-md)] px-[10px] py-[7px] backdrop-blur-[6px]" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.14)" }}>
@@ -314,7 +331,12 @@ export function SchoolCard({
               <Landmark className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
             </button>
           ) : <span />}
-          <span className="flex items-center gap-[2px] text-[13px] font-bold" style={{ color: "#FFFFFF" }}>View <ChevronRight className="h-4 w-4" aria-hidden /></span>
+          <span className="flex items-center gap-[var(--space-3)]">
+            {onDismiss && (
+              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); }} className="dm-link relative z-20 cursor-pointer text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.7)" }}>Not for me</button>
+            )}
+            <span className="flex items-center gap-[2px] text-[13px] font-bold" style={{ color: "#FFFFFF" }}>View <ChevronRight className="h-4 w-4" aria-hidden /></span>
+          </span>
         </div>
       </div>
     </article>

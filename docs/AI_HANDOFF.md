@@ -6854,3 +6854,30 @@ needed a tooltip.
   Photographed schools sort before photo-less ones within a rail.
 Verified 375x812 and 1280x800. Mount Marty has no photo on disk; fetching
 one needs the user's go-ahead (download).
+
+### 11 Sept 2026 -- Explore Schools, pass 7: quiet header with dropdowns, Replit copy, why / not for me
+
+Direct feedback: chip rows were confusing and the header box didn't help;
+use the Replit's approved copy and decide keep/remove on research.
+- Header is two lines, no box. Line 1 is the breadcrumb as text: career and
+  route are dropdown menus (`Menu`/`MenuItem`: a small list under the word,
+  closes on outside click / Escape); the programme is plain muted text.
+  Line 2: "Based on [GPA toggle] · New Jersey · Why these schools?" with
+  "Saved schools · n" at the right. GPA chip and tooltip shrunk to match.
+- Kept the two tabs (search stays in Browse all): research and the Careers
+  page both argue against hiding the catalogue behind a search box.
+- Browse-all quick filters carry the Replit's labels: Near you · 4-year
+  schools · Community colleges · Trade & technical · Lower cost · High
+  acceptance.
+- The 2-year route rail uses the Replit's copy: eyebrow "A practical first
+  step", "Lower-cost ways to start", "Start here, then continue toward a
+  4-year degree."
+- Cards: "Why this school? ›" (Replit link) reveals one sentence -- the
+  report's `why` where it exists, otherwise generated ("Offers Business
+  Administration · close to home · 85% finish."); "Not for me" hides the
+  school from For you (localStorage `dm-colleges-hidden`); stat label "avg.
+  after aid" (Replit). The open-cue chevron now sits in the photo band
+  instead of behind the text block.
+- Not built, on purpose: weighted/unweighted GPA prompt (our GPA is a
+  range); distance (no coordinates). Compare bar already existed.
+Verified 375x812.
