@@ -710,7 +710,7 @@ export function MatchLab() {
               <Button variant="primary" size="large" onClick={saveTop3} type="button" aria-disabled={!chosenId} className={chosenId ? "" : "pointer-events-none opacity-50"}>
                 {chosenId ? <>Continue with {liked.find((c) => c.id === chosenId)?.title} <ChevronRight className="h-4 w-4" aria-hidden /></> : "Select one to continue"}
               </Button>
-              <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">You can switch careers any time to update your plan and Career Report.</p>
+              <p className="text-[12.5px] font-medium text-[var(--color-night-muted-foreground)]">These are just your first 3 matches. Keep exploring to discover more careers.</p>
               {!deckDone && (
                 <Button variant="secondary" onClick={() => setDecisionOpen(false)} type="button">
                   Keep Swiping

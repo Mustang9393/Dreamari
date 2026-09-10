@@ -721,11 +721,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>
             <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to Saved.</p>
             <div className="mt-4 flex flex-col gap-[var(--space-2)]">
-              {top3.map((id, index) => {
+              {top3.map((id) => {
                 const career = careerById(id)!;
                 return (
                   <button key={id} type="button" onClick={() => confirmSwap(id)} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-left" style={GLASS}>
-                    <span className="text-[14px] font-bold">{index + 1} · {career.title}</span>
+                    <span className="text-[14px] font-bold">{career.title}</span>
                     <span className="text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>Replace</span>
                   </button>
                 );
@@ -858,7 +858,7 @@ function Top3Tab({
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={INSET}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
-        <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Add up to 3 careers here to compare them and choose your #1.</p>
+        <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Add up to 3 careers to compare, then pick one to start with.</p>
         <button type="button" onClick={onAdd} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Add a career</button>
       </section>
     );
@@ -866,8 +866,11 @@ function Top3Tab({
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-        <p className="max-w-[46ch] text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Compare your best-fit careers and choose your #1.</p>
+      <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-baseline sm:justify-between sm:gap-[var(--space-3)]">
+        <p className="max-w-[46ch] text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+          Compare your careers and pick one to start with.
+          <span className="block font-medium">Your matches don&rsquo;t stop here. Add, remove or switch any time; your plan and Career Report follow.</span>
+        </p>
         {top3.length > 1 && (
           <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
@@ -884,7 +887,7 @@ function Top3Tab({
          tint per the design language, never a solid color block. Copy is
          unchanged from the stacked version. */}
       <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] md:grid-cols-3">
-      {top3.map((id, index) => {
+      {top3.map((id) => {
         const career = careerById(id)!;
         const report = reportV2(id);
         const route = chosenRoute(career);
@@ -924,12 +927,6 @@ function Top3Tab({
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
               <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
-              <span
-                className="absolute top-[10px] left-[10px] flex h-[26px] min-w-[26px] items-center justify-center rounded-[var(--radius-sm)] px-[9px] text-[13px] font-extrabold"
-                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(6px)", fontFamily: "var(--font-display)", color: "var(--foreground)" }}
-              >
-                #{index + 1}
-              </span>
               <div className="absolute top-[6px] right-[6px]">
                 <button
                   type="button"
@@ -980,10 +977,10 @@ function Top3Tab({
                 </span>
                 {isFocus ? (
                   <span className="flex h-[36px] w-fit flex-none items-center gap-[4px] rounded-[var(--radius-md)] px-[12px] text-[14px] font-semibold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
-                    <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Your #1
+                    <Star className="h-3 w-3" fill="currentColor" aria-hidden /> Starting here
                   </span>
                 ) : (
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex h-[36px] w-fit flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[12px] text-[12px] font-semibold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Make my #1</button>
+                  <button type="button" onClick={() => setFocusId(id)} className="dm-quiet flex h-[36px] w-fit flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[12px] text-[12px] font-semibold whitespace-nowrap" style={{ borderColor: "var(--border)" }}>Start with this one</button>
                 )}
               </div>
 
@@ -1031,7 +1028,7 @@ function Top3Tab({
         <NextStepBanner
           emphasis="priority"
           eyebrow="Your next step"
-          text="Play your #1 Career Simulation to see if it’s really your #1."
+          text="Play the Day in the Life for the career you’re starting with."
           ctaLabel="Play"
           href="/play?focus=investment-banking"
           Icon={Gamepad2}
@@ -1041,8 +1038,8 @@ function Top3Tab({
 
       {!focusId && (
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={INSET}>
-          <span className="text-[14px] font-bold">Choose your #1 career to build your plan around it.</span>
-          <button type="button" onClick={() => setFocusId(top3[0])} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Choose my #1</button>
+          <span className="text-[14px] font-bold">Pick a career to start with. Your plan builds around it.</span>
+          <button type="button" onClick={() => setFocusId(top3[0])} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Start with the first one</button>
         </div>
       )}
     </div>
@@ -1177,7 +1174,7 @@ export function OverviewTab({
         <h3 id="next-title" className="px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-2)] text-[12px] font-bold tracking-[1.4px] uppercase sm:px-[var(--space-5)] sm:pt-[var(--space-5)]" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
         {[
           { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers and save your Top 3" },
-          { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Your #1: Day in the Life of an Investment Banker Simulation" },
+          { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Day in the Life of an Investment Banker Simulation" },
         ].map((line, index, list) => (
           <Fragment key={line.verb}>
             {index > 0 && (
@@ -1765,7 +1762,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
       <NextStepBanner
         emphasis="priority"
         eyebrow="Your next step"
-        text="Play your #1 Career Simulation to see if it’s really your #1."
+        text="Play the Day in the Life for the career you’re starting with."
         ctaLabel="Play"
         href="/play/investment-banking"
         Icon={Gamepad2}

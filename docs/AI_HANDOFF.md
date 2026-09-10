@@ -6716,3 +6716,24 @@ clear they can switch later.
   "Continue with Private Equity Analyst", lands on Profile Top Three.
 Not touched: Profile's own Top Three tab still shows its slot numbers and
 swap flow; flag if that should follow.
+
+### 11 Sept 2026 -- Top 3 without ranking, and "you're not boxed in" copy
+
+Direct feedback: no slot numbers anywhere; three careers, none better than
+another; you lead with one; remind students they can change these choices.
+- Profile Top Three: the #1/#2/#3 photo badges are gone; the focused card
+  says "Starting here", the others offer "Start with this one"; the empty
+  state says "Add up to 3 careers to compare, then pick one to start with";
+  the no-focus prompt says "Pick a career to start with. Your plan builds
+  around it." with "Start with the first one"; the swap sheet lists titles
+  without numbers (swapping itself stays -- direct feedback). Intro copy:
+  "Compare your careers and pick one to start with. Your matches don't stop
+  here. Add, remove or switch any time; your plan and Career Report follow."
+  (stacked above "Compare all 3" on phones). Banner/Do-this-next copy lost
+  "#1" ("Play the Day in the Life for the career you're starting with.").
+- Match chooser line (student's copy): "These are just your first 3
+  matches. Keep exploring to discover more careers."
+- Profile welcome splash gains one row: "Your matches don't stop here. Keep
+  exploring, and switch careers any time."
+Left as is: Explore Schools' "#1 school / Make my #1" (a single choice among
+saved schools, Replit taxonomy, not a ranking) -- flag if it should change.
