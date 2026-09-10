@@ -106,7 +106,7 @@ export function BuiltByStamp() {
   return (
     <section aria-labelledby="built-by-heading" className="mkt-snap relative px-6 py-20 pt-[104px] sm:py-28 md:pt-28">
       <div className="mx-auto flex max-w-[1200px] flex-col items-center text-center">
-        <DOMark variant="ghost" className="mb-6 h-16 w-16 sm:mb-8 sm:h-20 sm:w-20" />
+        <DOMark variant="ghost" className="mb-3 h-24 w-24 sm:mb-4 sm:h-32 sm:w-32" />
         <h2 id="built-by-heading" className="max-w-[760px] text-[clamp(1.75rem,4vw,3rem)] leading-[1.08] font-extrabold text-balance" style={{ color: "var(--foreground)" }}>
           {DO_COPY.heading}
         </h2>
