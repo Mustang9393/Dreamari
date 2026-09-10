@@ -6153,3 +6153,60 @@ then integrate this branch when requested. Other local checkouts were not edited
 User subsequently authorized publishing this change live. Committing the verified
 partner-grid change and pushing to `main` for the existing Vercel production
 integration (`dreamari.vercel.app`). No other deployment targets are in scope.
+
+### 2026-09-10 — Build welcome: opening scene, taken over from Codex (Claude)
+
+Codex (worktree `~/Documents/Dreamari/dreamari-partner-grid`, branch
+`codex/build-welcome`) rebuilt the Build welcome as its own opening scene and
+hit its usage limit on the final `eslint && tsc --noEmit`, leaving the work
+uncommitted there. Lifted into `schools-landing` unchanged: new
+`src/components/build/WelcomeScreen.tsx` + `WelcomeScreen.module.css`
+(Dreamy arrives through a halo/orbit with sparkles, tap-to-greet heart swap,
+oversized gradient BUILD title, "Let's Go" directly under the copy, chapter
+dots Build/Match/Explore/Play/Connect, Skip; no question HUD on this screen),
+old `WelcomeScreen` removed from `steps.tsx`, import swapped in
+`BuildFlowExperience.tsx`. Direct intent (Codex transcript, relayed by
+Chandu): "a stronger opening moment: a more expressive Dreamy entrance,
+atmospheric movement, and a clear Let's Go focal point ... the first question
+keeps the existing flow layout, and reduced-motion users get a calm, fully
+usable version."
+
+Validation (the part Codex never saw): `eslint` on the three files and
+`tsc --noEmit` both pass; dev server compiles clean. In-app browser: scene
+renders at desktop, Dreamy tap swaps to the heart sprite, Let's Go lands on
+"What sounds interesting?" with the normal HUD/footer, no new console
+errors. Reduced motion verified by reading the CSS: every animation sits in a
+`prefers-reduced-motion: no-preference` block, resting opacity is 1, and
+`begin()` uses a 0ms delay under reduce. Mobile (390×844) and short-viewport
+(`max-height: 660px` rule) renders checked next in the same session.
+
+Also this session: `PartnerLogoGrid` is Codex's flat `partner-composition.png`
+(commit `0816924`, already on `main`/production); my own flat-image attempt is
+parked in `git stash` on `schools-landing` and its generated
+`partners-wall-*.png` files were deleted as superseded.
+
+Not committed or pushed -- Chandu asked for no push until he says so. Next
+step: his review of the local preview, then commit + push on his word. The
+Codex worktree still holds the same changes uncommitted; not touched.
+
+Same session, later: the welcome was then pushed further at Chandu's request
+("even more engaging and beautiful ... don't change copy"), all local, still
+unpushed. Copy untouched. Added, all inside the reduced-motion guard: Dreamy
+waves once on landing and on tap (dreamy-wiggle; a single normal sprite --
+the tap-to-heart sprite swap was removed on direct feedback, "don't use that
+weird two layer sprite thing"); BUILD lands with ink-bleed-in, a one-shot
+dust scatter and one highlight sweep drawn as a second background-clip:text
+layer so it exists only inside the glyphs (a first pass used the
+ConfirmShimmer overlay, which swept the word's whole box -- direct feedback:
+"it should be clipped to the text only"); "Welcome to" uses InkText; the
+CTA gets a recurring next-step-cta-pulse once the reveal settles; a twinkling
+star field; pointer parallax on the stage (mouse only); chapter dots light
+left to right. The two lucide Sparkles icons were replaced with lit
+particles (specular-highlight orbs with depth blur, four-point flares), a
+ground-bounce glow and a rim light on Dreamy. The moving light behind Dreamy
+borrows BorderBeam's colorful recipe (tinted radial ellipses, bloom over
+core, brightness/saturation lift, slow hue drift) without its border stroke,
+per "borrow the lighting, without the border stroke animation". Description
+line stepped up to 16-19px and brightened, kept in the body face (not
+Bricolage: it is body copy and the questions after it use the body font).
+eslint + tsc clean; desktop and mobile checked in-app.

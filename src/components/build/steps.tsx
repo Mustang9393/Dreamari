@@ -388,34 +388,6 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
   );
 }
 
-// The very first thing a student sees arriving from signup (direct
-// feedback, 8 Sept 2026: "a screen introducing students to the build flow
-// ... seamless and interesting and welcoming and delightful"). Same
-// three-part skeleton as every other step, at 0% -- Dreamy pops in
-// (dreamy-pop, the same entrance every expression-swap uses) then settles
-// into a gentle ambient float, calmer than the celebration bounce reserved
-// for the 50% milestone. No Back (nothing to go back to); Skip stays
-// available for demo runs, same as every real step.
-export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?: () => void }) {
-  return (
-    <div className="flex h-full w-full flex-col">
-      <CardHud percent={0} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
-      <div className="mx-auto w-full max-w-[560px]">
-      <GlassCard className="text-center">
-        <div data-dreamy-anchor className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1),cloud-float_4s_ease-in-out_0.5s_infinite] sm:h-32 sm:w-32">
-          <Image src="/images/dreamy/v2/dreamy-happy.png" alt="Dreamy waving hello" fill sizes="128px" className="object-contain" />
-        </div>
-        <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="Welcome to BUILD" /></h1>
-        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">Tell us about you, so we can personalize your experience and help you find your dream career.</p>
-      </GlassCard>
-      </div>
-      </div>
-      <StepFooter onNext={onNext} pulseFromDreamy nextLabel={<span className="inline-flex items-center gap-[6px]">Let’s go<ArrowRight size={15} strokeWidth={2.75} aria-hidden /></span>} onSkip={onSkip} />
-    </div>
-  );
-}
-
 // 50% interstitial — celebration beat. Dreamy parties: dedicated bounce keyframe
 // (globals.css: dreamy-celebrate) instead of the ambient float, plus the page-level
 // Confetti the orchestrator fires for this stage.

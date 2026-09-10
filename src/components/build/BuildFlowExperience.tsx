@@ -9,9 +9,10 @@ import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { WelcomeScreen } from "./WelcomeScreen";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
-import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WelcomeScreen, WorkVibeStep, type StepProps } from "./steps";
+import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
 import { INITIAL_BUILD_STATE, STAGES, STAGE_ACCENTS, STAGE_DREAMY, type BuildState, type StageId } from "./types";
 
 // The rebuilt build-profile flow (docs/BUILD_FLOW_SPEC.md = verbatim copy source).

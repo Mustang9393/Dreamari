@@ -1,0 +1,279 @@
+.welcome {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  color: var(--color-night-foreground);
+}
+.atmosphere {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: -8% -25% 12%;
+  background: radial-gradient(ellipse at 50% 34%, color-mix(in srgb, var(--color-brand-500) 26%, transparent), transparent 57%), radial-gradient(ellipse at 26% 65%, color-mix(in srgb, var(--color-accent-purple) 17%, transparent), transparent 58%);
+}
+/* Faint field of glowing points behind everything: static at rest,
+   twinkling with motion (star-twinkle, globals.css). */
+.stars { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.stars i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-night-foreground) 0 18%, color-mix(in srgb, var(--color-night-foreground) 45%, transparent) 40%, transparent 70%);
+  opacity: 0.35;
+}
+.scene {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0 30px;
+  text-align: center;
+}
+.dreamyStage {
+  --px: 0;
+  --py: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 420px);
+  height: clamp(180px, 29dvh, 260px);
+  flex-shrink: 0;
+  transition: transform 400ms ease-out;
+}
+/* --- the light -------------------------------------------------------
+   BorderBeam's colorful beam is a cluster of tinted radial ellipses drawn
+   twice: a wide blurred bloom under a tighter core, both pushed in
+   brightness and saturation and slowly hue-rotated. Same recipe, same
+   palette (indigo, blue, teal, violet, pink, amber), set free behind Dreamy
+   and faded out radially, so it reads as moving light, not a border. */
+.beam {
+  position: absolute;
+  inset: -30% -18%;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 72%);
+  mix-blend-mode: screen;
+}
+.beamBloom, .beamCore {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 34% 30% at 50% 44%, rgba(100, 70, 255, 0.55), transparent 70%),
+    radial-gradient(ellipse 26% 26% at 74% 40%, rgba(40, 140, 255, 0.5), transparent 70%),
+    radial-gradient(ellipse 24% 28% at 28% 48%, rgba(30, 185, 170, 0.42), transparent 70%),
+    radial-gradient(ellipse 22% 26% at 62% 66%, rgba(180, 40, 240, 0.42), transparent 70%),
+    radial-gradient(ellipse 18% 20% at 36% 70%, rgba(255, 50, 100, 0.26), transparent 70%),
+    radial-gradient(ellipse 16% 16% at 82% 62%, rgba(255, 160, 30, 0.22), transparent 70%);
+}
+.beamBloom { --b: 26px; --br: 1.25; --sat: 1.3; filter: blur(var(--b)) brightness(var(--br)) saturate(var(--sat)); opacity: 0.9; }
+.beamCore { --b: 9px; --br: 1.4; --sat: 1.4; filter: blur(var(--b)) brightness(var(--br)) saturate(var(--sat)); opacity: 0.55; }
+.orbit {
+  position: absolute;
+  width: 88%;
+  height: 57%;
+  border: 1px solid color-mix(in srgb, var(--color-brand-500) 30%, transparent);
+  border-top-color: color-mix(in srgb, var(--color-night-foreground) 45%, transparent);
+  border-radius: 50%;
+  transform: rotate(-22deg);
+  box-shadow: 0 -8px 32px color-mix(in srgb, var(--color-brand-500) 14%, transparent), inset 0 8px 20px color-mix(in srgb, var(--color-brand-500) 10%, transparent);
+  pointer-events: none;
+}
+/* Bounce light under Dreamy: his glow landing on the "floor". */
+.ground {
+  position: absolute;
+  left: 50%;
+  bottom: -6%;
+  width: 62%;
+  height: 22%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(100, 70, 255, 0.42), rgba(40, 140, 255, 0.18) 45%, transparent 75%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+/* --- particles -------------------------------------------------------- */
+.particles { position: absolute; inset: 0; pointer-events: none; }
+/* A lit sphere: hard white specular off-centre, tinted body, soft rim. */
+.orb {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 30%, #fff 0 16%, rgba(255, 255, 255, 0.75) 26%, transparent 34%),
+    radial-gradient(circle at 50% 50%, rgba(160, 175, 255, 0.95), rgba(100, 70, 255, 0.8) 55%, rgba(40, 140, 255, 0.35) 78%, transparent 100%);
+  box-shadow: 0 0 10px 2px rgba(100, 70, 255, 0.35), 0 0 22px 4px rgba(40, 140, 255, 0.18);
+  opacity: 0.9;
+}
+/* A four-point flare: two crossed soft bars around a hot core. */
+.flare {
+  position: absolute;
+  display: block;
+  opacity: 0.75;
+  background: radial-gradient(circle, #fff 0 10%, rgba(200, 210, 255, 0.9) 18%, transparent 40%);
+}
+.flare::before, .flare::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 12%;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95) 45%, #fff 50%, rgba(255, 255, 255, 0.95) 55%, transparent);
+  filter: blur(0.6px) drop-shadow(0 0 4px rgba(120, 140, 255, 0.8));
+}
+.flare::after { rotate: 90deg; }
+/* --- Dreamy ----------------------------------------------------------- */
+.dreamy {
+  position: relative;
+  width: clamp(180px, 28dvh, 260px);
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Rim light: the scene's light wrapping Dreamy's edge. */
+.sprite { object-fit: contain; filter: drop-shadow(0 0 22px rgba(100, 70, 255, 0.42)) drop-shadow(0 14px 30px rgba(40, 140, 255, 0.3)); }
+.dreamy:focus-visible, .skip:focus-visible {
+  outline: 2px solid var(--color-night-foreground);
+  outline-offset: 6px;
+}
+/* --- copy ------------------------------------------------------------- */
+.message { position: relative; width: 100%; }
+.heading { margin: 8px 0 0; font-weight: 800; }
+.welcomeTo { display: block; font-size: clamp(22px, 3vw, 30px); font-weight: 600; line-height: 1.3; letter-spacing: -0.025em; }
+.buildWrap { position: relative; display: inline-block; border-radius: 14px; }
+/* Two background layers, both clipped to the glyphs: a highlight band that
+   sweeps across once after the word lands (parked off-glyph at rest), over
+   the standing gradient fill. Clipping to the text is why this is a
+   background layer and not the ConfirmShimmer overlay, which swept the
+   word's whole box (direct feedback, 10 Sept 2026). */
+.build {
+  display: block;
+  font-size: clamp(76px, 12vw, 122px);
+  line-height: 1;
+  letter-spacing: -0.055em;
+  padding-right: 0.055em;
+  background:
+    linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.85) 50%, transparent 58%) no-repeat -160% 0 / 60% 100%,
+    linear-gradient(165deg, var(--color-night-foreground) 25%, color-mix(in srgb, var(--color-brand-500) 34%, var(--color-night-foreground)) 90%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 6px 55px color-mix(in srgb, var(--color-brand-500) 20%, transparent);
+}
+/* Dust scattering off the title as it lands (magic-dust, globals.css):
+   invisible at rest, so without motion it simply never appears. */
+.dust { position: absolute; inset: 0; pointer-events: none; }
+.dust i {
+  position: absolute;
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0 30%, rgba(160, 175, 255, 0.9) 60%, transparent 100%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-brand-500) 60%, transparent);
+  opacity: 0;
+}
+/* A step up from the questionnaire's body size (direct feedback, 10 Sept
+   2026: "a little bigger"), still clearly below "Welcome to" so the
+   heading > subheading > body order holds. Body face, not Bricolage: this
+   is body copy, and the questions after it set theirs in the body font. */
+.description {
+  max-width: 520px;
+  margin: 20px auto 0;
+  font-size: clamp(16px, 1.9vw, 19px);
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--color-night-foreground) 78%, var(--color-night-muted-foreground));
+  text-wrap: pretty;
+}
+.actions { margin-top: 28px; }
+.cta {
+  min-width: 186px;
+  border: 1px solid color-mix(in srgb, var(--color-night-foreground) 22%, transparent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-brand-500) 9%, transparent), 0 10px 38px color-mix(in srgb, var(--color-brand-500) 35%, transparent);
+}
+.cta svg { transition: transform 180ms ease; }
+.cta:hover svg { transform: translateX(3px); }
+.cta:focus-visible { outline: 2px solid var(--color-night-foreground); outline-offset: 6px; }
+.footer { position: relative; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 8px 0 max(16px, env(safe-area-inset-bottom)); }
+.chapters { display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; list-style: none; gap: clamp(12px, 2.8vw, 28px); }
+.chapters li { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--color-night-muted-foreground); }
+.chapterDot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.35; }
+.chapters [aria-current] { color: var(--color-night-foreground); }
+.chapters [aria-current] .chapterDot { opacity: 1; background: var(--color-brand-500); box-shadow: 0 0 12px 3px color-mix(in srgb, var(--color-brand-500) 50%, transparent); }
+.skip { padding: 10px 20px; min-height: 40px; background: none; border: 0; color: var(--color-night-muted-foreground); font-size: 12px; cursor: pointer; }
+.skip:hover { color: var(--color-night-foreground); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .atmosphere { animation: atmosphere 12s ease-in-out infinite alternate; }
+  .stars i { animation: star-twinkle 3.6s ease-in-out infinite; }
+  .beam { animation: beamTurn 22s linear infinite; }
+  .beamBloom { animation: beamHue 14s ease-in-out infinite alternate; }
+  .beamCore { animation: beamHue 14s ease-in-out -7s infinite alternate; }
+  .orbit { animation: orbit 9s ease-in-out infinite alternate; }
+  .ground { animation: breathe 5s ease-in-out infinite alternate; }
+  .dreamyStage { transform: translate(calc(var(--px) * 7px), calc(var(--py) * 5px)); }
+  .dreamy { animation: arrive 900ms cubic-bezier(.16,1,.3,1) both, hover 5s ease-in-out 900ms infinite; }
+  /* The hello: one wiggle (dreamy-wiggle, globals.css), on the image so it
+     composes with the button's hover. */
+  .wave .sprite { animation: dreamy-wiggle 700ms ease-in-out; }
+  .particles { animation: reveal 1.2s ease-out 250ms both; }
+  /* Orbs drift on their own period and twinkle at 60% of it (both set
+     inline per orb); flares only breathe. */
+  .orb { animation-name: drift, glint; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+  .flare { animation-name: glint; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+  /* The title lands the way the app's display headlines do (ink-bleed-in,
+     globals.css), the dust flies off it, the word gets one shimmer sweep. */
+  .build { animation: ink-bleed-in 900ms cubic-bezier(.16,1,.3,1) 280ms both, buildSweep 1100ms ease-in-out 1250ms both; }
+  .dust i { animation: magic-dust 1100ms ease-out both; }
+  .description { animation: reveal 700ms ease-out 400ms both; }
+  .actions { animation: reveal 650ms ease-out 500ms both; }
+  /* Once the reveal has settled, the CTA is the one thing that keeps
+     moving: a soft recurring ring (next-step-cta-pulse, globals.css). */
+  .ready .cta { animation: next-step-cta-pulse 2.6s ease-out 400ms infinite; }
+  .footer { animation: reveal 900ms ease-out 650ms both; }
+  /* The chapter strip lights left to right, then settles on Build. */
+  .chapters li:not([aria-current]) .chapterDot { animation: dotPass 520ms ease-out both; animation-delay: calc(800ms + var(--i) * 110ms); }
+  .chapters [aria-current] .chapterDot { animation: dotArrive 700ms cubic-bezier(.34,1.56,.64,1) 800ms both; }
+  .departing .scene { animation: depart 420ms ease-in both; }
+  .departing .footer { opacity: 0; transition: opacity 200ms; }
+}
+@keyframes arrive { from { opacity: 0; transform: translateY(36px) scale(.65) rotate(-8deg); } to { opacity: 1; transform: none; } }
+@keyframes hover { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+@keyframes reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes breathe { from { opacity: .55; } to { opacity: 1; } }
+@keyframes orbit { from { transform: rotate(-22deg) scale(.96); } to { transform: rotate(-12deg) scale(1.04); } }
+@keyframes atmosphere { from { transform: translate(-2%, -2%) scale(.95); } to { transform: translate(2%, 2%) scale(1.05); } }
+@keyframes depart { to { opacity: 0; transform: translateY(-18px) scale(1.035); } }
+@keyframes beamTurn { to { transform: rotate(360deg); } }
+@keyframes buildSweep { from { background-position: -160% 0, 0 0; } to { background-position: 260% 0, 0 0; } }
+@keyframes beamHue { from { filter: blur(var(--b)) brightness(var(--br)) saturate(var(--sat)) hue-rotate(-18deg); } to { filter: blur(var(--b)) brightness(var(--br)) saturate(var(--sat)) hue-rotate(18deg); } }
+@keyframes drift { from { translate: 0 0; } to { translate: 6px -14px; } }
+@keyframes glint { from { opacity: .35; } to { opacity: 1; } }
+@keyframes dotPass { 0%, 100% { opacity: .35; background: currentColor; } 45% { opacity: 1; background: var(--color-brand-500); box-shadow: 0 0 10px 2px color-mix(in srgb, var(--color-brand-500) 50%, transparent); } }
+@keyframes dotArrive { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: scale(1); } }
+@media (max-width: 639px) {
+  .scene { padding-top: 12px; padding-bottom: 24px; }
+  .dreamyStage { max-width: 320px; height: clamp(160px, 25dvh, 220px); }
+  .dreamy { width: clamp(170px, 24dvh, 210px); }
+  .description { max-width: 330px; margin-top: 16px; }
+  .actions { margin-top: 24px; }
+}
+@media (max-height: 660px) {
+  .scene { padding-top: 12px; }
+  .dreamyStage { height: 130px; }
+  .dreamy { width: 150px; }
+  .build { font-size: 72px; }
+  .description { margin-top: 12px; line-height: 1.5; }
+  .actions { margin-top: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta svg, .dreamyStage { transition: none; }
+}
