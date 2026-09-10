@@ -6558,3 +6558,11 @@ Explore Careers' own `ForYouBrowseToggle`, now exported and reused. Match
 splash copy updated per Slack ("Careers matched to you. Explore your options
 and save the 3 you like most." / "Start Matching"). Verified on 375x812 with
 and without a GPA.
+
+### 10 Sept 2026 -- Explore welcome: the two things you can do
+
+Per Joshua Pierce (Slack, 10 Sept 2026) the Explore splash body is now two
+labelled rows instead of one sentence: "Explore Careers: Salary, education,
+daily life, and pathways." (briefcase) and "Explore Schools: Colleges,
+trade schools, programs, cost, and admissions." (graduation cap). Structure
+otherwise unchanged. Verified on 375x812: card ends at 617 of 812.

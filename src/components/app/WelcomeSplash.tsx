@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Check, ChevronRight, EyeOff, Sparkles, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
+import { Briefcase, Check, ChevronRight, EyeOff, GraduationCap, Sparkles, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
@@ -35,7 +35,11 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
     tint: ["40, 140, 255", "30, 185, 170"],
     eyebrow: "You’re in", title: "EXPLORE",
-    line: "Find a career that catches your eye. Watch a day in the life and see real pay.",
+    // The two things you can do here, at a glance (Joshua Pierce, Slack, 10 Sept 2026).
+    rows: [
+      { icon: Briefcase, text: <><strong>Explore Careers:</strong> Salary, education, daily life, and pathways.</> },
+      { icon: GraduationCap, text: <><strong>Explore Schools:</strong> Colleges, trade schools, programs, cost, and admissions.</> },
+    ],
     cta: "Start exploring",
   },
   play: {
