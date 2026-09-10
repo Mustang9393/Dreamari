@@ -9,6 +9,7 @@ import { GPA_OPTIONS } from "@/components/build/types";
 import { ACADEMIC_RECORD } from "@/components/profile/report-data";
 import { BIG, PANEL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SchoolCard, SOFT } from "./shared";
+import { COLLEGES } from "./data";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, type Route, type SchoolMatch } from "./pathway";
 
@@ -110,6 +111,7 @@ export function ForYouSchools({
     return () => { window.clearTimeout(t0); window.clearTimeout(t1); window.clearTimeout(t2); window.clearTimeout(t3); };
   }, []);
   const place = profile.states[0] ?? HOME_STATE_NAME;
+  const gpaText = useGpa ? `${gpaLabel} GPA` : "GPA off";
   const gpa = parseGpa(profile.gpa);
 
   if (!pathway || !route || !schools) {
@@ -179,7 +181,10 @@ export function ForYouSchools({
          card (direct feedback, 11 Sept 2026: "too many text elements so close
          together"). On phones the chip wraps under the heading. */}
       <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-6)] gap-y-[var(--space-3)] sm:flex-nowrap">
-        <h2 className="min-w-0 text-[24px] leading-[30px] font-extrabold sm:text-[28px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)" }}>
+        {/* Fluid on sm+ and never wrapping there: the chip beside it has a
+           fixed width, so the heading is the part that gives (direct
+           feedback, 11 Sept 2026: the two collided at ~950px). */}
+        <h2 className="min-w-0 text-[24px] leading-[30px] font-extrabold sm:whitespace-nowrap sm:text-[clamp(20px,2.2vw,26px)] sm:leading-[1.25]" style={{ fontFamily: "var(--font-display)" }}>
           <span style={{ color: "var(--muted-foreground)" }}>Schools for </span>
           <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} big>
             {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
@@ -201,7 +206,11 @@ export function ForYouSchools({
               className={`dm-quiet group flex min-h-[38px] max-w-full cursor-pointer items-center gap-[10px] rounded-[19px] border px-[14px] py-[8px] text-left text-[13px] leading-[18px] font-semibold sm:whitespace-nowrap ${glow ? "dm-nudge-glow" : ""}`}
               style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
             >
-              <span>{route.label} in {program} · {useGpa ? `${gpaLabel} GPA` : "GPA off"} · {place}</span>
+              {/* Full wording on phones (the chip has the whole row) and from
+                 1024px up; a compact form in between so the row still fits
+                 on one line beside the heading. */}
+              <span className="sm:hidden lg:inline">{route.label} in {program} · {gpaText} · {place}</span>
+              <span className="hidden sm:inline lg:hidden">{shortRoute(route.label)} · {gpaText} · {stateCode(place)}</span>
               {/* Slides out from behind the divider. Its width is reserved
                  from the first paint, so the chip never widens and the
                  heading beside it never re-wraps mid-animation. */}
@@ -282,6 +291,14 @@ export function ForYouSchools({
       )}
     </div>
   );
+}
+
+// Compact wording for the Edit chip at tablet widths.
+function shortRoute(label: string): string {
+  return label.replace("Bachelor's degree", "Bachelor's").replace("Associate degree", "Associate").replace("Trade or technical school", "Trade school").replace("Start at a 2-year college", "2-year college");
+}
+function stateCode(stateName: string): string {
+  return COLLEGES.find((c) => c.stateName.toLowerCase() === stateName.toLowerCase())?.state ?? stateName;
 }
 
 // ---- text dropdowns for the breadcrumb ------------------------------------

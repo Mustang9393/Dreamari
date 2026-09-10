@@ -6997,3 +6997,7 @@ Gate clean; verified 1280x800 and 375x812. Not pushed.
   a 10px slide animate (700ms), so the chip never widens and the heading
   beside it never re-wraps mid-animation (direct feedback).
 Gate clean; verified 768x1024, 1024x800, 375x812. Not pushed.
+- Header row fits on one line from 640px up: heading is fluid
+  (`clamp(20px, 2.2vw, 26px)`, nowrap) and the chip uses compact wording
+  between 640 and 1023px ("Bachelor's · 3.7 GPA · NJ", `shortRoute` /
+  `stateCode`). Checked 768, 950, 1024, 1280: one line, no overlap.
