@@ -10,7 +10,7 @@ import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { WelcomeAtmosphere, WelcomeScreen } from "./WelcomeScreen";
-import { writeStudentProfile } from "@/lib/studentProfile";
+import { archiveCurrentProfile, writeStudentProfile } from "@/lib/studentProfile";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
@@ -50,7 +50,8 @@ export function BuildFlowExperience() {
   const react = () => setReactionNonce((n) => n + 1);
   // The answers a student may revise later live in the student-profile store
   // (Profile > Settings edits them); written once, when Build hands off.
-  const persistAnswers = () =>
+  const persistAnswers = () => {
+    archiveCurrentProfile();
     writeStudentProfile({
       interests: state.interests,
       subjects: state.subjects,
@@ -60,6 +61,7 @@ export function BuildFlowExperience() {
       zipCode: state.zipCode,
       travelDistance: state.travelDistance,
     });
+  };
   const seeMatches = () => {
     persistAnswers();
     router.push("/match-lab");

@@ -6471,3 +6471,15 @@ Follow-up: the profile card's gear opens Settings directly (toggles back to
 Overview); the one-item "Profile and privacy" dropdown it used to open is
 gone, along with its state (direct feedback: "I don't see any change to the
 settings menu").
+
+Follow-up (same day, direct feedback: "so much on screen"): Settings is
+lean again. The gear opens a four-item menu (Your answers, Account, Privacy
+and sharing, Danger zone), each scrolling to its section. Your answers is a
+read-only summary (interests / subjects / states) with a confirm-first
+Rebuild (goes to /flow) and a "Previous builds" archive: Build archives the
+answers it replaces (`archiveCurrentProfile` in studentProfile.ts, cap 10);
+each entry can be restored (today's answers move into the archive) or
+deleted. Account keeps the four editable fields + Save. Danger zone:
+Deactivate (confirm; prototype flips a local flag) and Delete profile and
+data (confirm; clears every dreamari* key and returns to /). The chip editor
+is gone. Verified on 375x812 including restore.

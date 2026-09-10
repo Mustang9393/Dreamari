@@ -110,3 +110,100 @@ export function writeStudentProfile(patch: Partial<StudentProfile>): void {
   }
   for (const listener of listeners) listener();
 }
+
+// ---- Previous builds ------------------------------------------------------
+// Each time Build finishes, the answers it replaces are archived (Slack /
+// direct feedback, 10 Sept 2026: "launch the build again and have an
+// archived version of previous builds"). Newest first, capped.
+
+export const STUDENT_PROFILE_ARCHIVE_KEY = "dreamari-student-profile-archive";
+const MAX_ARCHIVED = 10;
+
+export type ArchivedProfile = { id: string; savedAt: string; profile: StudentProfile };
+
+export function isEmptyProfile(p: StudentProfile): boolean {
+  return p.interests.length === 0 && p.subjects.length === 0 && p.states.length === 0 && !p.email && !p.gpa && !p.zipCode && !p.travelDistance;
+}
+
+export function readProfileArchive(): ArchivedProfile[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STUDENT_PROFILE_ARCHIVE_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((v): v is ArchivedProfile => !!v && typeof v === "object" && typeof (v as ArchivedProfile).id === "string" && typeof (v as ArchivedProfile).savedAt === "string")
+      .map((v) => ({ ...v, profile: normalize(v.profile) }))
+      .slice(0, MAX_ARCHIVED);
+  } catch {
+    return [];
+  }
+}
+
+let cachedArchiveRaw: string | null | undefined;
+let cachedArchive: ArchivedProfile[] = [];
+const EMPTY_ARCHIVE: ArchivedProfile[] = [];
+export function profileArchiveSnapshot(): ArchivedProfile[] {
+  if (typeof window === "undefined") return EMPTY_ARCHIVE;
+  let raw: string | null = null;
+  try {
+    raw = window.localStorage.getItem(STUDENT_PROFILE_ARCHIVE_KEY);
+  } catch {
+    return EMPTY_ARCHIVE;
+  }
+  if (raw !== cachedArchiveRaw) {
+    cachedArchiveRaw = raw;
+    cachedArchive = readProfileArchive();
+  }
+  return cachedArchive;
+}
+export function serverProfileArchiveSnapshot(): ArchivedProfile[] {
+  return EMPTY_ARCHIVE;
+}
+export function subscribeProfileArchive(listener: () => void): () => void {
+  listeners.add(listener);
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === null || event.key === STUDENT_PROFILE_ARCHIVE_KEY) listener();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(listener);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+function writeArchive(list: ArchivedProfile[]): void {
+  try {
+    window.localStorage.setItem(STUDENT_PROFILE_ARCHIVE_KEY, JSON.stringify(list.slice(0, MAX_ARCHIVED)));
+  } catch {
+    // no storage
+  }
+  for (const listener of listeners) listener();
+}
+
+/** Put the current answers into the archive (no-op when there are none). */
+export function archiveCurrentProfile(): void {
+  if (typeof window === "undefined") return;
+  const current = readStudentProfile();
+  if (isEmptyProfile(current)) return;
+  const entry: ArchivedProfile = { id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, savedAt: new Date().toISOString(), profile: current };
+  writeArchive([entry, ...readProfileArchive()]);
+}
+
+/** Make an archived build current again; today's answers take its place in the archive. */
+export function restoreArchivedProfile(id: string): void {
+  if (typeof window === "undefined") return;
+  const archive = readProfileArchive();
+  const target = archive.find((a) => a.id === id);
+  if (!target) return;
+  const current = readStudentProfile();
+  const rest = archive.filter((a) => a.id !== id);
+  const swapped: ArchivedProfile[] = isEmptyProfile(current) ? rest : [{ id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, savedAt: new Date().toISOString(), profile: current }, ...rest];
+  writeArchive(swapped);
+  writeStudentProfile(target.profile);
+}
+
+export function deleteArchivedProfile(id: string): void {
+  if (typeof window === "undefined") return;
+  writeArchive(readProfileArchive().filter((a) => a.id !== id));
+}

@@ -12,13 +12,13 @@ import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Plane, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus } from "lucide-react";
+import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Plane, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
-import { MAX_INTERESTS, MAX_SUBJECTS, US_STATES, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile, writeStudentProfile, type StudentProfile } from "@/lib/studentProfile";
-import { GPA_OPTIONS, INTEREST_WORLDS, SUBJECTS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
+import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, serverProfileArchiveSnapshot, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeProfileArchive, subscribeStudentProfile, writeStudentProfile, type StudentProfile } from "@/lib/studentProfile";
+import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
@@ -135,6 +135,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
+  // Which Settings section the gear menu asked for; Settings scrolls to it.
+  const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   if (initialTab !== seenInitialTab) {
     setSeenInitialTab(initialTab);
     if (initialTab && (TAB_IDS as string[]).includes(initialTab)) setTab(initialTab as TabId);
@@ -442,20 +445,42 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               >
                 <Bookmark className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Saved</span>
               </button>
-              {/* Straight into Settings: the gear used to open a one-item
-                 dropdown ("Profile and privacy") that hid the actual form a
-                 click away (direct feedback, 10 Sept 2026: "I don't see any
-                 change to the settings menu"). */}
-              <button
-                type="button"
-                aria-label="Settings"
-                aria-pressed={tab === "settings"}
-                onClick={() => setTab(tab === "settings" ? "overview" : "settings")}
-                className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
-                style={{ background: tab === "settings" ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
-              >
-                <Settings className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Settings</span>
-              </button>
+              {/* The gear menu, split into the things a student actually
+                 comes here for (direct feedback, 10 Sept 2026): each item
+                 opens Settings scrolled to that section. */}
+              <span className="relative">
+                <button
+                  type="button"
+                  aria-label="Settings menu"
+                  aria-expanded={settingsMenuOpen}
+                  onClick={() => setSettingsMenuOpen((open) => !open)}
+                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
+                  style={{ background: tab === "settings" || settingsMenuOpen ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" || settingsMenuOpen ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+                >
+                  <Settings className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Settings</span>
+                </button>
+                {settingsMenuOpen && (
+                  <>
+                    <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
+                    <div role="menu" className="absolute top-[44px] right-0 z-[56] w-[236px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-lg, 0 20px 50px -20px rgba(0,0,0,0.6))" }}>
+                      {SETTINGS_SECTIONS.map((item) => (
+                        <Fragment key={item.id}>
+                          {item.divider && <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />}
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => { setSettingsMenuOpen(false); setSettingsSection(item.id); setTab("settings"); }}
+                            className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold"
+                            style={{ color: item.id === "danger" ? "var(--color-feedback-error, #ff6b6b)" : "var(--foreground)" }}
+                          >
+                            <item.Icon className="h-4 w-4 flex-none" aria-hidden /> {item.label}
+                          </button>
+                        </Fragment>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </span>
             </div>
             <div className="flex items-end gap-[var(--space-4)]">
               {/* Generated, not photographed (direct feedback, 8 Sept 2026:
@@ -664,7 +689,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            comment above), but the underlying route-choice flow still needs
            a real destination rather than a dead link. */}
         {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
-        {tab === "settings" && <SettingsView onClose={() => setTab("overview")} />}
+        {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("overview"); }} />}
       </main>
 
       {/* ---- Welcome to Your Profile (arrival from Match only): the shared
@@ -2125,48 +2150,79 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
 
 // ---- Settings: a full view under the header, prototype stubs ----
 
-function SettingsView({ onClose }: { onClose: () => void }) {
-  // Everything a student may revise after Build (Slack, 10 Sept 2026): the
-  // answers that shape their matches, plus the account basics. Edits are
-  // held locally and written to the student-profile store on Save.
+type SettingsSection = "answers" | "account" | "privacy" | "danger";
+const SETTINGS_SECTIONS: { id: SettingsSection; label: string; Icon: LucideIcon; divider?: boolean }[] = [
+  { id: "answers", label: "Your answers", Icon: Sparkles },
+  { id: "account", label: "Account", Icon: UserRound },
+  { id: "privacy", label: "Privacy and sharing", Icon: Lock },
+  { id: "danger", label: "Danger zone", Icon: AlertTriangle, divider: true },
+];
+
+const SETTINGS_CARD = "flex max-w-[640px] scroll-mt-[84px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]";
+const SETTINGS_FIELD = "min-h-[44px] w-full rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]";
+const SETTINGS_FIELD_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as React.CSSProperties;
+const SETTINGS_LABEL = "text-[12px] font-bold tracking-[0.06em] uppercase";
+const DANGER = "var(--color-feedback-error, #ff6b6b)";
+
+function answersSummary(p: StudentProfile): { label: string; value: string }[] {
+  return [
+    { label: "Interests", value: p.interests.join(", ") || "Not set" },
+    { label: "Subjects", value: p.subjects.join(", ") || "Not set" },
+    { label: "States", value: p.states.join(", ") || "Not set" },
+  ];
+}
+
+function SettingsView({ section, onClose }: { section: SettingsSection | null; onClose: () => void }) {
+  // Opened from a menu item: land on that section (the whole view is one
+  // page so everything is still reachable by scrolling).
+  useEffect(() => {
+    if (!section) return;
+    const t = window.setTimeout(() => {
+      document.getElementById(`settings-${section}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+    return () => window.clearTimeout(t);
+  }, [section]);
+
+  // Your answers: read-only summary of what Build recorded; changing them is
+  // a deliberate act -- run Build again -- and every earlier run is kept in
+  // the archive and can be put back (direct feedback, 10 Sept 2026: fewer
+  // things on screen, "launch the build again and have an archived version
+  // of previous builds").
   const stored = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
-  const [draft, setDraft] = useState<StudentProfile>(stored);
+  const archive = useSyncExternalStore(subscribeProfileArchive, profileArchiveSnapshot, serverProfileArchiveSnapshot);
+  const [confirming, setConfirming] = useState<"rebuild" | "deactivate" | "delete" | `restore:${string}` | null>(null);
+  const [deactivated, setDeactivated] = useState(false);
+
+  // Account basics stay directly editable: small, and no reason to redo Build for a typo.
+  const [draft, setDraft] = useState({ email: stored.email, gpa: stored.gpa, zipCode: stored.zipCode, travelDistance: stored.travelDistance });
   const [saved, setSaved] = useState(false);
-  const dirty = JSON.stringify(draft) !== JSON.stringify(stored);
-  const patch = (next: Partial<StudentProfile>) => {
+  const dirty = draft.email !== stored.email || draft.gpa !== stored.gpa || draft.zipCode !== stored.zipCode || draft.travelDistance !== stored.travelDistance;
+  const patch = (next: Partial<typeof draft>) => {
     setSaved(false);
     setDraft((current) => ({ ...current, ...next }));
   };
-  const toggleIn = (key: "interests" | "subjects", value: string, max: number) => {
-    setSaved(false);
-    setDraft((current) => {
-      const list = current[key];
-      if (list.includes(value)) return { ...current, [key]: list.filter((v) => v !== value) };
-      if (list.length >= max) return current;
-      return { ...current, [key]: [...list, value] };
-    });
-  };
+  const zipOk = draft.zipCode === "" || /^\d{5}$/.test(draft.zipCode);
+  const emailOk = draft.email === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email);
   const save = () => {
     writeStudentProfile(draft);
     setSaved(true);
     dispatchAuroraPulse("cta", undefined, { soft: true });
   };
-  const zipOk = draft.zipCode === "" || /^\d{5}$/.test(draft.zipCode);
-  const emailOk = draft.email === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email);
 
-  const chip = (on: boolean, disabled = false) =>
-    ({
-      background: on ? "var(--primary)" : "var(--glass-surface-1)",
-      color: on ? "#FFFFFF" : disabled ? "var(--muted-foreground)" : "var(--foreground)",
-      borderColor: on ? "var(--primary)" : "var(--glass-border)",
-      opacity: disabled ? 0.55 : 1,
-    }) as React.CSSProperties;
-  const field = "min-h-[44px] w-full rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]";
-  const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as React.CSSProperties;
-  const label = "text-[12px] font-bold tracking-[0.06em] uppercase";
+  const wipe = () => {
+    try {
+      Object.keys(window.localStorage).filter((k) => k.startsWith("dreamari")).forEach((k) => window.localStorage.removeItem(k));
+      window.sessionStorage.clear();
+    } catch {}
+    window.location.assign("/");
+  };
+  const ghost = "dm-quiet flex w-fit min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[13.5px] font-semibold";
+  const ghostStyle = { borderColor: "var(--glass-border)" } as const;
+  const dangerGhostStyle = { borderColor: `color-mix(in srgb, ${DANGER} 45%, var(--glass-border))`, color: DANGER } as const;
+  const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <div className="flex flex-col gap-[var(--space-5)]">
+    <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Settings</h2>
         <button type="button" aria-label="Close settings" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
@@ -2174,109 +2230,148 @@ function SettingsView({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      <section className="flex max-w-[640px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={INSET}>
-        <div className="flex flex-col gap-[2px]">
-          <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Your answers</h3>
-          <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>From Build. Change them any time; your matches follow.</p>
-        </div>
-
-        <div className="flex flex-col gap-[var(--space-2)]">
-          <span className={label} style={{ color: "var(--muted-foreground)" }}>Industry interests · pick up to {MAX_INTERESTS}</span>
-          <div className="flex flex-wrap gap-[6px]">
-            {INTEREST_WORLDS.map((world) => {
-              const on = draft.interests.includes(world.label);
-              const full = !on && draft.interests.length >= MAX_INTERESTS;
-              return (
-                <button key={world.slug} type="button" aria-pressed={on} disabled={full} onClick={() => toggleIn("interests", world.label, MAX_INTERESTS)} className="dm-quiet min-h-[36px] cursor-pointer rounded-full border px-[12px] text-[13.5px] font-semibold disabled:cursor-not-allowed" style={chip(on, full)}>
-                  {world.label}
-                </button>
-              );
-            })}
+      <section id="settings-answers" className={SETTINGS_CARD} style={INSET}>
+        <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+          <div className="flex flex-col gap-[2px]">
+            <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Your answers</h3>
+            <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>From Build. To change them, run Build again; earlier runs are kept below.</p>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-[var(--space-2)]">
-          <span className={label} style={{ color: "var(--muted-foreground)" }}>Subjects · pick up to {MAX_SUBJECTS}</span>
-          <div className="flex flex-wrap gap-[6px]">
-            {SUBJECTS.map((subject) => {
-              const on = draft.subjects.includes(subject);
-              const full = !on && draft.subjects.length >= MAX_SUBJECTS;
-              return (
-                <button key={subject} type="button" aria-pressed={on} disabled={full} onClick={() => toggleIn("subjects", subject, MAX_SUBJECTS)} className="dm-quiet min-h-[36px] cursor-pointer rounded-full border px-[12px] text-[13.5px] font-semibold disabled:cursor-not-allowed" style={chip(on, full)}>
-                  {subject}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-[var(--space-2)]">
-          <label className={label} htmlFor="settings-state" style={{ color: "var(--muted-foreground)" }}>States you would go to school in</label>
-          {draft.states.length > 0 && (
-            <div className="flex flex-wrap gap-[6px]">
-              {draft.states.map((name) => (
-                <button key={name} type="button" onClick={() => patch({ states: draft.states.filter((v) => v !== name) })} aria-label={`Remove ${name}`} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[13.5px] font-semibold" style={chip(true)}>
-                  {name} <X className="h-[14px] w-[14px]" aria-hidden />
-                </button>
-              ))}
-            </div>
+          {confirming === "rebuild" ? (
+            <span className="flex flex-wrap items-center gap-[var(--space-2)]">
+              <button type="button" onClick={() => window.location.assign("/flow")} className="dm-solid flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+                <RefreshCw className="h-4 w-4" aria-hidden /> Yes, start Build again
+              </button>
+              <button type="button" onClick={() => setConfirming(null)} className={ghost} style={ghostStyle}>Never mind</button>
+            </span>
+          ) : (
+            <button type="button" onClick={() => setConfirming("rebuild")} className={ghost} style={ghostStyle}>
+              <RefreshCw className="h-4 w-4" aria-hidden /> Rebuild
+            </button>
           )}
-          <select id="settings-state" value="" onChange={(e) => { if (e.target.value) patch({ states: [...draft.states, e.target.value] }); }} className={`${field} cursor-pointer`} style={fieldStyle}>
-            <option value="">Add a state</option>
-            {US_STATES.filter((name) => !draft.states.includes(name)).map((name) => <option key={name} value={name}>{name}</option>)}
-          </select>
         </div>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-[var(--space-4)] gap-y-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-[14px]" style={{ background: "var(--glass-surface-1)" }}>
+          {answersSummary(stored).map((row) => (
+            <Fragment key={row.label}>
+              <dt className="font-bold" style={{ color: "var(--muted-foreground)" }}>{row.label}</dt>
+              <dd className="m-0 font-semibold">{row.value}</dd>
+            </Fragment>
+          ))}
+        </dl>
+        {archive.length > 0 && (
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <span className={SETTINGS_LABEL} style={{ color: "var(--muted-foreground)" }}>Previous builds</span>
+            <ol className="flex list-none flex-col gap-[6px] p-0">
+              {archive.map((entry) => (
+                <li key={entry.id} className="flex flex-wrap items-center justify-between gap-[var(--space-2)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)" }}>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-[14px] font-bold">{when(entry.savedAt)}</span>
+                    <span className="truncate text-[13px]" style={{ color: "var(--muted-foreground)" }}>{[...entry.profile.interests, ...entry.profile.subjects, ...entry.profile.states].join(" · ") || "No answers"}</span>
+                  </span>
+                  {confirming === `restore:${entry.id}` ? (
+                    <span className="flex items-center gap-[var(--space-2)]">
+                      <button type="button" onClick={() => { restoreArchivedProfile(entry.id); setConfirming(null); }} className="dm-solid min-h-[36px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>Yes, use this build</button>
+                      <button type="button" onClick={() => setConfirming(null)} className={ghost} style={ghostStyle}>Never mind</button>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-[var(--space-1)]">
+                      <button type="button" onClick={() => setConfirming(`restore:${entry.id}`)} className={ghost} style={ghostStyle}>Restore</button>
+                      <button type="button" onClick={() => deleteArchivedProfile(entry.id)} aria-label="Delete this build" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </section>
 
-      <section className="flex max-w-[640px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={INSET}>
+      <section id="settings-account" className={SETTINGS_CARD} style={INSET}>
         <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Account</h3>
-        <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
+        <div className="grid gap-[var(--space-3)] sm:grid-cols-2">
           <div className="flex flex-col gap-[6px] sm:col-span-2">
-            <label className={label} htmlFor="settings-email" style={{ color: "var(--muted-foreground)" }}>Email</label>
-            <input id="settings-email" type="email" inputMode="email" autoComplete="email" value={draft.email} onChange={(e) => patch({ email: e.target.value })} placeholder="you@school.org" className={field} style={{ ...fieldStyle, borderColor: emailOk ? fieldStyle.borderColor : "var(--color-feedback-error, #ff6b6b)" }} />
+            <label className={SETTINGS_LABEL} htmlFor="settings-email" style={{ color: "var(--muted-foreground)" }}>Email</label>
+            <input id="settings-email" type="email" inputMode="email" autoComplete="email" value={draft.email} onChange={(e) => patch({ email: e.target.value })} placeholder="you@school.org" className={SETTINGS_FIELD} style={{ ...SETTINGS_FIELD_STYLE, borderColor: emailOk ? SETTINGS_FIELD_STYLE.borderColor : DANGER }} />
           </div>
           <div className="flex flex-col gap-[6px]">
-            <label className={label} htmlFor="settings-gpa" style={{ color: "var(--muted-foreground)" }}>GPA</label>
-            <select id="settings-gpa" value={draft.gpa} onChange={(e) => patch({ gpa: e.target.value })} className={`${field} cursor-pointer`} style={fieldStyle}>
+            <label className={SETTINGS_LABEL} htmlFor="settings-gpa" style={{ color: "var(--muted-foreground)" }}>GPA</label>
+            <select id="settings-gpa" value={draft.gpa} onChange={(e) => patch({ gpa: e.target.value })} className={`${SETTINGS_FIELD} cursor-pointer`} style={SETTINGS_FIELD_STYLE}>
               <option value="">Select</option>
               {GPA_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
             </select>
           </div>
           <div className="flex flex-col gap-[6px]">
-            <label className={label} htmlFor="settings-zip" style={{ color: "var(--muted-foreground)" }}>Zip code</label>
-            <input id="settings-zip" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={draft.zipCode} onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })} placeholder="12345" className={field} style={{ ...fieldStyle, borderColor: zipOk ? fieldStyle.borderColor : "var(--color-feedback-error, #ff6b6b)" }} />
+            <label className={SETTINGS_LABEL} htmlFor="settings-zip" style={{ color: "var(--muted-foreground)" }}>Zip code</label>
+            <input id="settings-zip" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={draft.zipCode} onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })} placeholder="12345" className={SETTINGS_FIELD} style={{ ...SETTINGS_FIELD_STYLE, borderColor: zipOk ? SETTINGS_FIELD_STYLE.borderColor : DANGER }} />
           </div>
           <div className="flex flex-col gap-[6px] sm:col-span-2">
-            <label className={label} htmlFor="settings-distance" style={{ color: "var(--muted-foreground)" }}>How far would you go for school?</label>
-            <select id="settings-distance" value={draft.travelDistance} onChange={(e) => patch({ travelDistance: e.target.value })} className={`${field} cursor-pointer`} style={fieldStyle}>
+            <label className={SETTINGS_LABEL} htmlFor="settings-distance" style={{ color: "var(--muted-foreground)" }}>How far would you go for school?</label>
+            <select id="settings-distance" value={draft.travelDistance} onChange={(e) => patch({ travelDistance: e.target.value })} className={`${SETTINGS_FIELD} cursor-pointer`} style={SETTINGS_FIELD_STYLE}>
               <option value="">Select</option>
               {TRAVEL_DISTANCE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
             </select>
           </div>
         </div>
         <div className="flex items-center gap-[var(--space-3)]">
-          <button type="button" onClick={save} disabled={!dirty || !zipOk || !emailOk} className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-            {saved && !dirty ? <><Check className="h-4 w-4" aria-hidden /> Saved</> : <>Save changes <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></>}
+          <button type="button" onClick={save} disabled={!dirty || !zipOk || !emailOk} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            {saved && !dirty ? <><Check className="h-4 w-4" aria-hidden /> Saved</> : <>Save <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></>}
           </button>
           {dirty && <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Unsaved changes</span>}
         </div>
       </section>
 
-      <div className="flex max-w-[640px] flex-col gap-[var(--space-2)]">
-        <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-          <span className="text-[15px] font-bold">Profile avatar</span>
-          <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>Generated for privacy, never a photo</span>
-        </div>
-        {["Notifications", "Privacy and sharing", "Talent Pipeline opt-in", "Linked school account"].map((item) => (
-          <div key={item} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
-            <span className="text-[15px] font-bold">{item}</span>
-            <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[12px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
+      <section id="settings-privacy" className={SETTINGS_CARD} style={INSET}>
+        <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Privacy and sharing</h3>
+        <div className="flex flex-col gap-[6px]">
+          <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)" }}>
+            <span className="text-[14px] font-bold">Profile avatar</span>
+            <span className="text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>Generated, never a photo</span>
           </div>
-        ))}
-        <button type="button" className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[15px] font-bold" style={{ background: "var(--glass-surface-1)" }}>
-          Sign out
-        </button>
-      </div>
+          {["Notifications", "Who can see your profile", "Talent Pipeline opt-in", "Linked school account"].map((item) => (
+            <div key={item} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)" }}>
+              <span className="text-[14px] font-bold">{item}</span>
+              <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[11.5px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
+            </div>
+          ))}
+        </div>
+        <button type="button" className={ghost} style={ghostStyle}>Sign out</button>
+      </section>
+
+      <section id="settings-danger" className={SETTINGS_CARD} style={{ background: `color-mix(in srgb, ${DANGER} 6%, var(--inset-surface))`, borderColor: `color-mix(in srgb, ${DANGER} 35%, var(--inset-border))` }}>
+        <div className="flex flex-col gap-[2px]">
+          <h3 className="flex items-center gap-[6px] text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: DANGER }}><AlertTriangle className="h-4 w-4" aria-hidden /> Danger zone</h3>
+          <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>These can&rsquo;t be undone from here.</p>
+        </div>
+        <div className="flex flex-col gap-[6px]">
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+            <span className="flex min-w-0 flex-col">
+              <span className="text-[14px] font-bold">Deactivate profile</span>
+              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>{deactivated ? "Deactivated. Sign in again any time to come back." : "Hides you from Connect and pauses your account. Nothing is deleted."}</span>
+            </span>
+            {!deactivated && (confirming === "deactivate" ? (
+              <span className="flex items-center gap-[var(--space-2)]">
+                <button type="button" onClick={() => { setDeactivated(true); setConfirming(null); }} className="dm-solid min-h-[36px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: DANGER, color: "#FFFFFF" }}>Yes, deactivate</button>
+                <button type="button" onClick={() => setConfirming(null)} className={ghost} style={ghostStyle}>Never mind</button>
+              </span>
+            ) : (
+              <button type="button" onClick={() => setConfirming("deactivate")} className={ghost} style={dangerGhostStyle}>Deactivate</button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+            <span className="flex min-w-0 flex-col">
+              <span className="text-[14px] font-bold">Delete profile and data</span>
+              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Removes your answers, Top 3, plan, reports and history for good.</span>
+            </span>
+            {confirming === "delete" ? (
+              <span className="flex items-center gap-[var(--space-2)]">
+                <button type="button" onClick={wipe} className="dm-solid min-h-[36px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[13.5px] font-semibold" style={{ background: DANGER, color: "#FFFFFF" }}>Yes, delete everything</button>
+                <button type="button" onClick={() => setConfirming(null)} className={ghost} style={ghostStyle}>Never mind</button>
+              </span>
+            ) : (
+              <button type="button" onClick={() => setConfirming("delete")} className={ghost} style={dangerGhostStyle}>Delete</button>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
