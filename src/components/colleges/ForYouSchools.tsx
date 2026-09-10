@@ -197,9 +197,12 @@ function WhySheet({ onClose, career, route, program, gpa, place, distance }: { o
     `Your location preference: ${place}${distance ? ` · ${distance}` : ""}`,
   ].filter(Boolean) as string[];
   return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", backdropFilter: "blur(10px)" }}>
+    // Centred on every size, never bottom-anchored: a sheet flush with the
+    // bottom edge collided with the fixed nav and clipped the CTA (direct
+    // feedback, 11 Sept 2026). Capped height with its own scroll.
+    <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-5 pb-[calc(20px+env(safe-area-inset-bottom))]" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", backdropFilter: "blur(10px)" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" />
-      <section role="dialog" aria-modal="true" aria-labelledby="why-schools" className="relative flex w-full max-w-[440px] flex-col gap-[var(--space-5)] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] pb-[calc(var(--space-7)+env(safe-area-inset-bottom))] sm:rounded-[var(--radius-lg)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="why-schools" className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[420px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
         <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet absolute top-[12px] right-[12px] flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
         <div className="flex flex-col gap-[6px] pr-[40px]">
           <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>Why these schools?</p>
@@ -213,7 +216,7 @@ function WhySheet({ onClose, career, route, program, gpa, place, distance }: { o
             </li>
           ))}
         </ul>
-        <Link href="/profile?tab=settings" className="dm-solid flex min-h-[44px] w-fit items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
+        <Link href="/profile?tab=settings" className="dm-solid flex min-h-[48px] w-full items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
           Adjust preferences <ChevronRight className="h-4 w-4" aria-hidden />
         </Link>
       </section>
