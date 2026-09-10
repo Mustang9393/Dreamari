@@ -140,6 +140,15 @@ export function ForYouSchools({
         { key: "easy", title: "Most students get in", list: all.filter((m) => rate(m) >= 70).slice(0, 4) },
       );
     } else sections.push({ key: "target", title: "Target", list: g.target.slice(0, 4) }, { key: "safety", title: "Safety", list: g.safety.slice(0, 4) }, { key: "reach", title: "Reach", list: g.reach.slice(0, 2) });
+    // The Replit's 2-year row under a bachelor's route (direct feedback, 11
+    // Sept 2026: "everything shows Direct path, the Replit has other
+    // signals"): community colleges as a 2-year start, whose cards carry
+    // 2-YEAR START and OPEN ADMISSION. The fit rows above keep no chips
+    // because their titles say it. The Replit's "More schools for your path"
+    // (4-year schools we cannot place by GPA) is Browse-only here: for the
+    // demo student it surfaced three schools 1,400 miles away with single
+    // digit finish rates, which read as a mistake, not variety.
+    if (g.start2.length) sections.push({ key: "start", title: "Lower-cost ways to start", list: g.start2.slice(0, 4) });
   } else if (route.institution === "2-year") sections.push({ key: "start", title: "Lower-cost ways to start", list: schools.list.slice(0, 8) });
   else sections.push({ key: "trade", title: "Trade and technical programs", list: schools.list.slice(0, 8) });
   const shown = sections.map((s) => ({ ...s, list: s.list.filter((m) => !hidden.has(m.college.slug)) })).filter((s) => s.list.length > 0);

@@ -55,9 +55,11 @@ export function BrowseShelves({
     const open = COLLEGES.filter((c) => c.admission === "open").sort(byFinish);
     const rest = [...COLLEGES].sort(byFinish);
 
-    const list: { key: string; title: string; note?: string; items: College[] }[] = [];
-    // Shelf names from the Replit's Browse all / filter taxonomy.
-    if (pathway) list.push({ key: "program", title: `Schools with ${pathway.program}`, items: take(offers) });
+    const list: { key: string; title: string; note?: string; items: College[]; /** shown on the card with its route chip (Direct path / 2-year start / Trade & technical) */ program?: string }[] = [];
+    // Shelf names from the Replit's Browse all / filter taxonomy. Only the
+    // programme shelf carries the programme and route chip on its cards; the
+    // other shelves' titles already say what the chip would.
+    if (pathway) list.push({ key: "program", title: `Schools with ${pathway.program}`, items: take(offers), program: pathway.program });
     list.push({ key: "near", title: "Near you", items: take(home) });
     list.push({ key: "cheap", title: "Lower-cost options", items: take(cheap) });
     if (pathway?.trade) list.push({ key: "trade", title: "Trade & technical", items: take(trade) });
@@ -77,7 +79,7 @@ export function BrowseShelves({
           <ul className="dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" aria-label={shelf.title}>
             {shelf.items.map((c) => (
               <li key={c.slug} className="w-[min(86vw,320px)] flex-none">
-                <SchoolCard c={c} saved={saved.has(c.slug)} onSave={() => onSave(c.slug)} compared={compare.includes(c.slug)} onCompare={() => onCompare(c.slug)} />
+                <SchoolCard c={c} saved={saved.has(c.slug)} onSave={() => onSave(c.slug)} compared={compare.includes(c.slug)} onCompare={() => onCompare(c.slug)} program={shelf.program} />
               </li>
             ))}
           </ul>

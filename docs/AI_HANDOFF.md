@@ -7193,3 +7193,16 @@ Verified: /flow walk, /explore -> /play -> /explore lands at scrollY 0,
   1,300-1,740 mi). Mock, not geocoded; a town with no entry falls back to the
   finish-rate figure. Cards now show acceptance / avg. after aid / from home,
   the Replit's three figures.
+
+## 2026-09-11 · School signals: variety, tastefully
+- For you (bachelor's route) adds the Replit's "Lower-cost ways to start" row
+  after Target / Safety / Reach: community colleges whose cards carry
+  2-YEAR START and OPEN ADMISSION chips (the fit rows stay chip-free because
+  their titles already say it). "More schools for your path" stays
+  Browse-only: for the demo student it surfaced far-away schools with single
+  digit finish rates.
+- Browse all: the "Schools with <program>" shelf passes the programme, so its
+  cards show the route chip (Direct path / 2-year start / Trade & technical);
+  other shelves' titles already say it, so no chip there.
+Verified 1280: Target/Safety/Reach = Direct path; Lower-cost = 2-year start +
+Open admission.
