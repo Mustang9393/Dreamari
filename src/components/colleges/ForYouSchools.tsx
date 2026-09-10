@@ -9,6 +9,7 @@ import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentP
 import { BIG, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, CollegeCard, MarkBadge, SOFT, useTopSchool } from "./shared";
 import { COLLEGES } from "./data";
+import { ACADEMIC_RECORD } from "@/components/profile/report-data";
 import { Star } from "lucide-react";
 import { FIT_WORDS, careerTitle, costLine, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, type SchoolMatch } from "./pathway";
 
@@ -32,7 +33,11 @@ export function ForYouSchools({
   onCompare: (slug: string) => void;
 }) {
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
-  const profile = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
+  const stored = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
+  // Build writes the GPA on hand-off; until then (and for every demo browser
+  // that never ran Build) use the same GPA the Profile card already shows,
+  // so Target / Safety / Reach are there from the first visit.
+  const profile = useMemo(() => (stored.gpa ? stored : { ...stored, gpa: ACADEMIC_RECORD.gpa }), [stored]);
   // Their Top 3 (demo default when nothing is saved yet); the focus career
   // leads, and the others are one tap away.
   const top3 = picks.ids.length ? picks.ids : DEMO_TOP3;

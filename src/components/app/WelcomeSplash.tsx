@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Briefcase, Check, ChevronRight, EyeOff, GraduationCap, Sparkles, Star, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
+import { Briefcase, Check, ChevronRight, EyeOff, GraduationCap, Sparkles, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
@@ -45,14 +45,10 @@ const SCENES: Record<SplashSurface, Scene> = {
   // Schools has its own welcome (direct feedback, 10 Sept 2026): the page
   // itself stays almost wordless, so the "what do I do here" lives here.
   schools: {
-    sprite: "/images/dreamy/v2/splash/dreamy-hardhat.webp", wide: true,
+    sprite: "/images/dreamy/v2/splash/dreamy-glasses.webp",
     tint: ["30, 185, 170", "40, 140, 255"],
     eyebrow: "You’re in", title: "SCHOOLS",
-    line: "Schools that fit your career. Save the ones you like.",
-    rows: [
-      { icon: Star, text: <><strong>Target, Safety, Reach:</strong> how likely you get in.</> },
-      { icon: Sparkles, text: <><strong>Your route:</strong> 4-year, 2-year, or trade.</> },
-    ],
+    line: "Schools that fit the career you want.",
     cta: "See my schools",
   },
   play: {

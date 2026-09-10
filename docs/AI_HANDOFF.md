@@ -6756,3 +6756,15 @@ saved schools, Replit taxonomy, not a ranking) -- flag if it should change.
   later." ("Keep exploring" duplicated Keep Swiping there). Joshua's
   proposed "These are your first 3 matches; visit Explore to discover
   hundreds more careers." is NOT applied -- held on request.
+
+### 11 Sept 2026 -- Schools: glasses Dreamy, less copy, fit groups always on
+
+Direct feedback: no hard-hat Dreamy; too much copy; "the schools tab isn't
+even showing reach/target/safety, just one row". Schools splash now uses the
+glasses Dreamy (`splash/dreamy-glasses.webp` from v2) with one line only
+("Schools that fit the career you want."); Browse-all shelves lost their
+sub-notes. The single-row case was the empty student-profile store (Build
+writes the GPA only on hand-off, so any browser that never ran Build had
+none): For you now falls back to `ACADEMIC_RECORD.gpa` (the 3.7 the Profile
+card shows) when the store has no GPA, so Target / Safety / Reach appear from
+the first visit.

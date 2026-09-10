@@ -6,7 +6,7 @@ import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentP
 import { SMALL } from "@/components/career/CareerDetailExperience";
 import { COLLEGES, type College } from "./data";
 import { CollegeCard } from "./shared";
-import { HOME_STATE, careerTitle, pathwayFor, programMatcher, offersProgram } from "./pathway";
+import { HOME_STATE, pathwayFor, programMatcher, offersProgram } from "./pathway";
 
 // Browse all, at rest (no search, no filters): shelves by the questions a
 // student actually asks, so the long tail has shape. Each school appears on
@@ -57,14 +57,14 @@ export function BrowseShelves({
 
     const list: { key: string; title: string; note?: string; items: College[] }[] = [];
     // Shelf names from the Replit's Browse all / filter taxonomy.
-    if (pathway) list.push({ key: "program", title: `Schools with ${pathway.program}`, note: `For ${careerTitle(careerId)}`, items: take(offers) });
-    list.push({ key: "near", title: "Near you", note: "In your state", items: take(home) });
-    list.push({ key: "cheap", title: "Lower-cost options", note: "Under $15K a year after aid", items: take(cheap) });
+    if (pathway) list.push({ key: "program", title: `Schools with ${pathway.program}`, items: take(offers) });
+    list.push({ key: "near", title: "Near you", items: take(home) });
+    list.push({ key: "cheap", title: "Lower-cost options", items: take(cheap) });
     if (pathway?.trade) list.push({ key: "trade", title: "Trade & technical", items: take(trade) });
-    list.push({ key: "open", title: "High acceptance", note: "Open admission", items: take(open) });
+    list.push({ key: "open", title: "High acceptance", items: take(open) });
     list.push({ key: "more", title: "More schools for your path", items: take(rest) });
     return list.filter((s) => s.items.length > 0);
-  }, [pathway, profile.states, careerId]);
+  }, [pathway, profile.states]);
 
   return (
     <div className="flex flex-col gap-[var(--space-7)]">
