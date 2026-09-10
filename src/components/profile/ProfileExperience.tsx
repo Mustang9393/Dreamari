@@ -2173,15 +2173,11 @@ function answersSummary(p: StudentProfile): { label: string; value: string }[] {
 }
 
 function SettingsView({ section, onClose }: { section: SettingsSection | null; onClose: () => void }) {
-  // Opened from a menu item: land on that section (the whole view is one
-  // page so everything is still reachable by scrolling).
-  useEffect(() => {
-    if (!section) return;
-    const t = window.setTimeout(() => {
-      document.getElementById(`settings-${section}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
-    return () => window.clearTimeout(t);
-  }, [section]);
+  // One section at a time: the menu item IS the choice, so the view shows
+  // only that section (direct feedback, 10 Sept 2026: seeing every section
+  // under "Your answers" made the menu look redundant).
+  const show = section ?? "answers";
+  const title = SETTINGS_SECTIONS.find((item) => item.id === show)?.label ?? "Settings";
 
   // Your answers: read-only summary of what Build recorded; changing them is
   // a deliberate act -- run Build again -- and every earlier run is kept in
@@ -2224,16 +2220,16 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between">
-        <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Settings</h2>
+        <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
         <button type="button" aria-label="Close settings" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
           <X className="h-4 w-4" />
         </button>
       </div>
 
+      {show === "answers" && (
       <section id="settings-answers" className={SETTINGS_CARD} style={INSET}>
         <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
           <div className="flex flex-col gap-[2px]">
-            <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Your answers</h3>
             <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>From Build. To change them, run Build again; earlier runs are kept below.</p>
           </div>
           {confirming === "rebuild" ? (
@@ -2284,9 +2280,10 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           </div>
         )}
       </section>
+      )}
 
+      {show === "account" && (
       <section id="settings-account" className={SETTINGS_CARD} style={INSET}>
-        <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Account</h3>
         <div className="grid gap-[var(--space-3)] sm:grid-cols-2">
           <div className="flex flex-col gap-[6px] sm:col-span-2">
             <label className={SETTINGS_LABEL} htmlFor="settings-email" style={{ color: "var(--muted-foreground)" }}>Email</label>
@@ -2318,9 +2315,10 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           {dirty && <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Unsaved changes</span>}
         </div>
       </section>
+      )}
 
+      {show === "privacy" && (
       <section id="settings-privacy" className={SETTINGS_CARD} style={INSET}>
-        <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Privacy and sharing</h3>
         <div className="flex flex-col gap-[6px]">
           <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="text-[14px] font-bold">Profile avatar</span>
@@ -2335,11 +2333,12 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
         </div>
         <button type="button" className={ghost} style={ghostStyle}>Sign out</button>
       </section>
+      )}
 
+      {show === "danger" && (
       <section id="settings-danger" className={SETTINGS_CARD} style={{ background: `color-mix(in srgb, ${DANGER} 6%, var(--inset-surface))`, borderColor: `color-mix(in srgb, ${DANGER} 35%, var(--inset-border))` }}>
         <div className="flex flex-col gap-[2px]">
-          <h3 className="flex items-center gap-[6px] text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: DANGER }}><AlertTriangle className="h-4 w-4" aria-hidden /> Danger zone</h3>
-          <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>These can&rsquo;t be undone from here.</p>
+          <p className="flex items-center gap-[6px] text-[13.5px] font-bold" style={{ color: DANGER }}><AlertTriangle className="h-4 w-4" aria-hidden /> These can&rsquo;t be undone from here.</p>
         </div>
         <div className="flex flex-col gap-[6px]">
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
@@ -2372,6 +2371,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 }

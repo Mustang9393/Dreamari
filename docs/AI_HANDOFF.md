@@ -6495,3 +6495,7 @@ sprite is `preload`ed (react-dom) as soon as the host page renders the
 closed splash, before the timer opens it. Build's welcome uses the same
 treatment for dreamy-happy. The original PNGs are untouched for their other
 uses.
+
+Follow-up: each Settings menu item shows ONLY its section (heading = the
+item's label); the scroll-to-section page made the menu look redundant
+(direct feedback).
