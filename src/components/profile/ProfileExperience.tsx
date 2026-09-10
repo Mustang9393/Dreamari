@@ -858,7 +858,7 @@ function Top3Tab({
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={INSET}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
-        <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Add up to 3 careers to compare, then pick one to start with.</p>
+        <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Add up to 3 careers, then pick one to start with.</p>
         <button type="button" onClick={onAdd} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Add a career</button>
       </section>
     );
@@ -867,10 +867,7 @@ function Top3Tab({
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-baseline sm:justify-between sm:gap-[var(--space-3)]">
-        <p className="max-w-[46ch] text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-          Compare your careers and pick one to start with.
-          <span className="block font-medium">Your matches don&rsquo;t stop here. Add, remove or switch any time; your plan and Career Report follow.</span>
-        </p>
+        <p className="max-w-[46ch] text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Pick one to start with.</p>
         {top3.length > 1 && (
           <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
@@ -1038,7 +1035,7 @@ function Top3Tab({
 
       {!focusId && (
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={INSET}>
-          <span className="text-[14px] font-bold">Pick a career to start with. Your plan builds around it.</span>
+          <span className="text-[14px] font-bold">Pick a career to start with.</span>
           <button type="button" onClick={() => setFocusId(top3[0])} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold" style={{ background: "var(--foreground)", color: "var(--background)" }}>Start with the first one</button>
         </div>
       )}
