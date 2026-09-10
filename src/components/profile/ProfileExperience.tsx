@@ -866,6 +866,19 @@ function Top3Tab({
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
+      {/* Same treatment as "Do this next" / the next-step banners (direct
+         feedback, 11 Sept 2026): beam ring, one line, one CTA into Explore,
+         dismissable and remembered. */}
+      <NextStepBanner
+        text="More career matches are waiting."
+        ctaLabel="Explore"
+        href="/explore"
+        Icon={Compass}
+        emphasis="priority"
+        calm
+        // demo: comes back every visit; remembered once the demo flag is off
+        storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
+      />
       <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-baseline sm:justify-between sm:gap-[var(--space-3)]">
         {top3.length > 1 && (
           <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>

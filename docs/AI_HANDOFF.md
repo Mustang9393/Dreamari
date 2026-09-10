@@ -6737,3 +6737,22 @@ another; you lead with one; remind students they can change these choices.
   exploring, and switch careers any time."
 Left as is: Explore Schools' "#1 school / Make my #1" (a single choice among
 saved schools, Replit taxonomy, not a ranking) -- flag if it should change.
+
+### 11 Sept 2026 -- Top Three nudge, Match reassurance, banner options
+
+- Profile Top Three: a `NextStepBanner` at the top of the tab, Joshua's copy
+  verbatim: "More career matches are waiting." with an "Explore" CTA to
+  /explore. `emphasis="priority"` for the beam ring but `calm` (no wash, no
+  sheen, no CTA pulse, no dot pulse -- direct feedback: "lose the shimmer",
+  "and the cta pulse"). While `DEMO_ALWAYS_SHOW_SPLASH` is on it has no
+  storageKey, so it returns on every visit for demos; flip the flag and it is
+  remembered under `dreamari:top3-keep-exploring-dismissed`.
+- `NextStepBanner`: new `calm` prop (ring only) and `eyebrow` is optional
+  (text-only banners); aria labels fall back to the text.
+- Profile welcome pop-up: the "Not locked in" row is removed; the
+  reassurance lives on the Top Three tab instead (direct feedback: not in the
+  pop-up, a dismissable card where the choice is made).
+- Match chooser: the line under the CTA is "You can always change this
+  later." ("Keep exploring" duplicated Keep Swiping there). Joshua's
+  proposed "These are your first 3 matches; visit Explore to discover
+  hundreds more careers." is NOT applied -- held on request.

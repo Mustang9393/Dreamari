@@ -10,16 +10,18 @@ import { BorderBeam } from "border-beam";
 // a small X that remembers the dismissal. One component for every bridge
 // between features: Top Three -> Play, Play -> Explore.
 export function NextStepBanner({
-  eyebrow,
+  eyebrow = "",
   text,
   ctaLabel,
   href,
   Icon,
   storageKey,
-  ariaLabel = eyebrow,
+  ariaLabel = eyebrow || text,
   emphasis = "quiet",
+  calm = false,
 }: {
-  eyebrow: string;
+  /** small uppercase line above the text; omit or pass "" for just the text */
+  eyebrow?: string;
   text: string;
   ctaLabel: string;
   href: string;
@@ -31,6 +33,8 @@ export function NextStepBanner({
    *  a pulsing dot on the eyebrow; same size as the quiet banner (Joshua
    *  Pierce, Slack, 6 Sept 2026: more obvious, not larger). */
   emphasis?: "quiet" | "priority";
+  /** beam ring only: no wash, no sheen (direct feedback, 11 Sept 2026: "lose the shimmer") */
+  calm?: boolean;
 }) {
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
@@ -70,24 +74,24 @@ export function NextStepBanner({
              little more accentuated than quiet, direct feedback, 9 Sept
              2026). The wash+sheen below run on their OWN, slower, unrelated
              cycle so they read as atmosphere, not a second competing beam. */}
-          <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 45%, color-mix(in srgb, #7c5cff 10%, transparent) 80%, transparent 100%)", animation: "next-step-wash 5.2s ease-in-out infinite" }} />
-          <span aria-hidden className="pointer-events-none absolute inset-y-0 w-[35%] motion-safe:animate-[next-step-sheen_5.4s_ease-in-out_infinite]" style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)" }} />
+          {!calm && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 45%, color-mix(in srgb, #7c5cff 10%, transparent) 80%, transparent 100%)", animation: "next-step-wash 5.2s ease-in-out infinite" }} />}
+          {!calm && <span aria-hidden className="pointer-events-none absolute inset-y-0 w-[35%] motion-safe:animate-[next-step-sheen_5.4s_ease-in-out_infinite]" style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)" }} />}
           <div className="relative flex flex-wrap items-center justify-start gap-[var(--space-3)] p-[var(--space-4)] sm:flex-nowrap sm:gap-[var(--space-4)] sm:p-[var(--space-5)] sm:pr-[52px]">
             <span className="flex min-w-0 basis-full flex-col gap-[3px] sm:flex-1 sm:basis-auto">
-              <span className="flex items-center gap-[7px] pr-[28px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase sm:pr-0" style={{ color: "var(--primary)" }}>
+              {eyebrow && <span className="flex items-center gap-[7px] pr-[28px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase sm:pr-0" style={{ color: "var(--primary)" }}>
                 <span aria-hidden className="relative flex size-[8px] flex-none">
-                  <span className="absolute inset-0 rounded-full motion-safe:animate-[next-step-dot_1.4s_ease-out_infinite]" style={{ background: "var(--primary)" }} />
+                  {!calm && <span className="absolute inset-0 rounded-full motion-safe:animate-[next-step-dot_1.4s_ease-out_infinite]" style={{ background: "var(--primary)" }} />}
                   <span className="relative size-[8px] rounded-full" style={{ background: "var(--primary)" }} />
                 </span>
                 {eyebrow}
-              </span>
-              <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{text}</span>
+              </span>}
+              <span className={`text-[15px] leading-[21px] font-semibold ${eyebrow ? "" : "pr-[28px] sm:pr-0"}`} style={{ color: "var(--foreground)" }}>{text}</span>
             </span>
-            <Link href={href} className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] motion-safe:animate-[next-step-cta-pulse_2.2s_ease-out_infinite]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            <Link href={href} className={`dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_2.2s_ease-out_infinite]"}`} style={{ background: "var(--primary)", color: "#FFFFFF" }}>
               {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
             </Link>
           </div>
-          <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow}`} className="dm-quiet absolute top-[8px] right-[8px] flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+          <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow || text}`} className="dm-quiet absolute top-[8px] right-[8px] flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
             <X className="h-4 w-4" aria-hidden />
           </button>
         </aside>
@@ -103,8 +107,8 @@ export function NextStepBanner({
            +sheen below run on their own slower, unrelated cycle so they
            read as atmosphere behind the ring rather than a second beam
            competing with it (direct feedback, 9 Sept 2026). */}
-        <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 9%, transparent) 0%, transparent 45%, color-mix(in srgb, #7c5cff 7%, transparent) 80%, transparent 100%)", animation: "next-step-wash 6.5s ease-in-out infinite" }} />
-        <span aria-hidden className="pointer-events-none absolute inset-y-0 w-[35%] motion-safe:animate-[next-step-sheen_7.5s_ease-in-out_infinite]" style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)" }} />
+        {!calm && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 9%, transparent) 0%, transparent 45%, color-mix(in srgb, #7c5cff 7%, transparent) 80%, transparent 100%)", animation: "next-step-wash 6.5s ease-in-out infinite" }} />}
+        {!calm && <span aria-hidden className="pointer-events-none absolute inset-y-0 w-[35%] motion-safe:animate-[next-step-sheen_7.5s_ease-in-out_infinite]" style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)" }} />}
         {/* one row: the words, the button, then the X at the far end, all on
            the same centre line (the X used to float in the top-left corner) */}
         <div className="relative flex flex-wrap items-center justify-start gap-[var(--space-3)] p-[var(--space-4)] sm:flex-nowrap sm:gap-[var(--space-4)] sm:p-[var(--space-5)] sm:pr-[52px]">
@@ -113,14 +117,14 @@ export function NextStepBanner({
              lives in the card's top-right corner (direct feedback, 10 Sept
              2026), out of the row, so it never leaves a hole in the layout. */}
           <span className="flex min-w-0 basis-full flex-col gap-[3px] sm:flex-1 sm:basis-auto">
-            <span className="pr-[28px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase sm:pr-0" style={{ color: "var(--accent-subtle)" }}>{eyebrow}</span>
-            <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{text}</span>
+            {eyebrow && <span className="pr-[28px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase sm:pr-0" style={{ color: "var(--accent-subtle)" }}>{eyebrow}</span>}
+            <span className={`text-[15px] leading-[21px] font-semibold ${eyebrow ? "" : "pr-[28px] sm:pr-0"}`} style={{ color: "var(--foreground)" }}>{text}</span>
           </span>
-          <Link href={href} className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] motion-safe:animate-[next-step-cta-pulse_3.2s_ease-out_infinite]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+          <Link href={href} className={`dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_3.2s_ease-out_infinite]"}`} style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
           </Link>
         </div>
-        <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow}`} className="dm-quiet absolute top-[8px] right-[8px] flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+        <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow || text}`} className="dm-quiet absolute top-[8px] right-[8px] flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
           <X className="h-4 w-4" aria-hidden />
         </button>
       </aside>

@@ -80,7 +80,6 @@ const SCENES: Record<SplashSurface, Scene> = {
     tint: ["255, 160, 30", "255, 50, 100"],
     eyebrow: "Welcome to your", title: "PROFILE",
     line: "Your Top 3, your plan, your report.",
-    rows: [{ icon: Sparkles, text: <strong>Not locked in. Switch careers any time.</strong> }],
     cta: "Explore my profile",
   },
 };
