@@ -7,7 +7,7 @@ import { ArrowLeftRight, Bookmark, Check, ChevronDown, ChevronRight, GraduationC
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { OpenCue } from "@/components/app/PosterCard";
 import { SMALL } from "@/components/career/CareerDetailExperience";
-import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, type College } from "./data";
+import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, milesFromHome, milesLabel, type College } from "./data";
 
 // One accent for the whole feature: colleges have no world, so they borrow
 // the app's primary blue. Cards for tribal colleges, trade schools etc. do
@@ -289,10 +289,12 @@ export function SchoolCard({
   const [showWhy, setShowWhy] = useState(false);
   const img = collegeImage(c);
   const mark = collegeMark(c);
+  // The Replit's three figures: acceptance, price after aid, miles from home.
+  const miles = milesFromHome(c);
   const stats = [
     { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
     { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "avg. after aid" },
-    { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
+    miles !== null ? { v: milesLabel(miles), k: "from home" } : { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
   ];
   const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.85)" };
   return (

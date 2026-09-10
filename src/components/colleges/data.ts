@@ -488,3 +488,22 @@ export const STATES = [...new Set(COLLEGES.map((c) => c.state))].map((s) => ({ c
 
 export const money = (n: number) => `$${n.toLocaleString("en-US")}`;
 export const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "")}K` : String(n));
+
+// ---- Miles from home (demo) -----------------------------------------------
+// The demo student is Jordan Rivera at Westfield High School, so "home" is
+// Westfield, NJ. Road distances, rounded, by campus town; a mock that reads
+// right on the cards (the Replit's "from home" figure) until real geocoding
+// exists. Unknown towns return null and the card shows finish rate instead.
+const HOME_MILES: Record<string, number> = {
+  "New Brunswick, NJ": 18, "Ewing, NJ": 40, "Mahwah, NJ": 38, "Paramus, NJ": 25, "Edison, NJ": 10,
+  "Montclair, NJ": 20, "Newark, NJ": 14, "Princeton, NJ": 32, "Glassboro, NJ": 85, "Union, NJ": 5,
+  "Brookings, SD": 1360, "Vermillion, SD": 1320, "Sioux Falls, SD": 1300, "Kyle, SD": 1650, "Watertown, SD": 1370,
+  "Madison, SD": 1340, "Mitchell, SD": 1370, "Rapid City, SD": 1700, "Spearfish, SD": 1740, "Aberdeen, SD": 1420,
+  "Yankton, SD": 1340, "Mission, SD": 1540, "Sisseton, SD": 1400,
+};
+export function milesFromHome(c: College): number | null {
+  return HOME_MILES[`${c.city}, ${c.state}`] ?? null;
+}
+export function milesLabel(miles: number): string {
+  return `${miles.toLocaleString("en-US")} mi`;
+}

@@ -7186,3 +7186,10 @@ Verified: /flow walk, /explore -> /play -> /explore lands at scrollY 0,
 ## 2026-09-11 · Schools splash copy
 - Schools splash line is Joshua's: "Colleges, trade schools, programs, cost,
   and admissions." Careers and Schools keep their two separate splashes.
+
+## 2026-09-11 · School cards: miles from home (demo data)
+- `milesFromHome(c)` in colleges/data.ts: road miles from Westfield, NJ (the
+  demo student's school) by campus town, for all 33 colleges (NJ 5-85 mi, SD
+  1,300-1,740 mi). Mock, not geocoded; a town with no entry falls back to the
+  finish-rate figure. Cards now show acceptance / avg. after aid / from home,
+  the Replit's three figures.
