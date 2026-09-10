@@ -50,6 +50,23 @@ const BLOBS = [
 const CHAPTERS = ["Build", "Match", "Explore", "Play", "Connect"];
 
 /** A dedicated opening scene; the question HUD starts with Interests. */
+/** The welcome's viewport-wide glow and star field. Rendered by the flow
+ *  itself (BuildFlowExperience), NOT inside WelcomeScreen: the step column
+ *  is a masked scroll container (`.flow-scroll-fade`), and a mask clips its
+ *  whole subtree, fixed descendants included -- inside it the glow was cut
+ *  to the column and read as a sharp lighter rectangle around the content
+ *  on wide screens (direct feedback, 10 Sept 2026). */
+export function WelcomeAtmosphere() {
+  return (
+    <>
+      <div className={styles.atmosphere} aria-hidden="true" />
+      <div className={styles.stars} aria-hidden="true">
+        {STARS.map((s, i) => <i key={i} style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s * 3, height: s.s * 3, animationDelay: `${s.d}s` }} />)}
+      </div>
+    </>
+  );
+}
+
 export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?: () => void }) {
   const [departing, setDeparting] = useState(false);
   const [wave, setWave] = useState(false);
@@ -114,10 +131,6 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
 
   return (
     <div className={`${styles.welcome} ${departing ? styles.departing : ""} ${ready ? styles.ready : ""}`} onPointerMove={track} onPointerLeave={untrack}>
-      <div className={styles.atmosphere} aria-hidden="true" />
-      <div className={styles.stars} aria-hidden="true">
-        {STARS.map((s, i) => <i key={i} style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s * 3, height: s.s * 3, animationDelay: `${s.d}s` }} />)}
-      </div>
       <div className={styles.scene}>
         <div ref={stage} className={styles.dreamyStage}>
           {/* The light: BorderBeam's palette (indigo, blue, teal, violet, pink,

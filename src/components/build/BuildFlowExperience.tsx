@@ -9,7 +9,7 @@ import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
-import { WelcomeScreen } from "./WelcomeScreen";
+import { WelcomeAtmosphere, WelcomeScreen } from "./WelcomeScreen";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
@@ -117,6 +117,9 @@ export function BuildFlowExperience() {
            row inside each step is sticky to this scroll container's bottom so
            Next/Previous never need hunting. */}
         <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden pt-[72px] sm:pt-16 sm:pb-5">
+          {/* Welcome's glow + stars: viewport-wide, behind the column, outside
+             the masked scroll container below (which would clip them). */}
+          {stageId === "welcome" && <WelcomeAtmosphere />}
           {/* Same 860px column for BOTH variants — per direct feedback the framed
              question blocks should match the unframed version's width. */}
           <div className="flex max-w-[860px] min-h-0 w-full flex-1 flex-col justify-center">

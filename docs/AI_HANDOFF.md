@@ -6340,8 +6340,13 @@ badge, is now a ChevronRight (direct feedback: "do as you recommend").
 
 ### 10 Sept 2026 -- Build welcome: glow no longer clipped to the step column
 
-`.atmosphere` and `.stars` in `WelcomeScreen.module.css` are `position:
-fixed; inset: 0` now. As absolute children of `.welcome` they were clipped
-by the flow's 860px scroll column, which read as a sharp lighter rectangle
-around the content on wide screens (direct feedback). `.welcome` is isolated
-so z-index -1 still paints them behind the copy. Verified at 1600x1000.
+The welcome's glow and star field (`WelcomeAtmosphere`, exported from
+`WelcomeScreen.tsx`) are now mounted by `BuildFlowExperience` directly in
+its full-height section, only on the welcome stage. Inside `WelcomeScreen`
+they sat in the step column, which is a masked scroll container
+(`.flow-scroll-fade`); a mask clips its whole subtree, fixed descendants
+included, so the glow was cut to the column and read as a sharp lighter
+rectangle around the content on wide screens (direct feedback, twice --
+`position: fixed` alone did not escape the mask). The section is a stacking
+context (`relative z-10`), so `z-index: -1` paints them behind the column.
+Verified at 2000x1075: glow spans the viewport, no edges.
