@@ -55,7 +55,10 @@ export function ForYouSchools({
   }
 
   // One chip (the fit), one line (program · cost). Distance waits for data.
-  const card = (m: SchoolMatch) => {
+  // Inside a rail titled Target / Safety / Reach the chip would just repeat
+  // the heading (direct feedback, 11 Sept 2026), so it's only drawn where it
+  // says something new: "Open admission" on the two-year cards.
+  const card = (m: SchoolMatch, showFit = false) => {
     const cost = costLine(m.college);
     return (
       <li key={m.college.slug} className="w-[min(84vw,320px)] flex-none">
@@ -66,7 +69,7 @@ export function ForYouSchools({
           compared={compare.includes(m.college.slug)}
           onCompare={() => onCompare(m.college.slug)}
           href={`/colleges/${m.college.slug}?route=${pathway.careerId}`}
-          badges={[{ label: FIT_WORDS[m.fit], tone: m.fit === "Reach" ? "reach" : m.fit === "Target" ? "target" : m.fit === "Safety" ? "safety" : m.fit === "Open admission" ? "open" : "muted" }]}
+          badges={showFit ? [{ label: FIT_WORDS[m.fit], tone: m.fit === "Reach" ? "reach" : m.fit === "Target" ? "target" : m.fit === "Safety" ? "safety" : m.fit === "Open admission" ? "open" : "muted" }] : []}
           subline={[shortProgram(m.program), m.path === "2-year start" ? m.path : null, cost].filter(Boolean).join(" · ")}
           hideTags
         />
@@ -186,7 +189,7 @@ export function ForYouSchools({
       {shown.map((s) => (
         <section key={s.key} className="flex flex-col gap-[var(--space-3)]">
           {heading(s.title, s.note)}
-          <ul className={rail} aria-label={s.title}>{s.list.map(card)}</ul>
+          <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "start" || s.key === "trade" || s.key === "path"))}</ul>
         </section>
       ))}
     </div>
