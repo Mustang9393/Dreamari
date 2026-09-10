@@ -28,7 +28,8 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
     eyebrow: "You’re in", title: "MATCH",
-    line: "Careers matched to you. Explore your options and save the 3 you like most.",
+    // Short (direct feedback, 11 Sept 2026): the demo below carries the how.
+    line: "Save the 3 you like most.",
     cta: "Start Matching",
   },
   explore: {
@@ -83,15 +84,14 @@ const SCENES: Record<SplashSurface, Scene> = {
 // All three gestures, one caption at a time; the CTA never waits for the demo.
 function MatchGestureDemo() {
   return (
-    <div className={styles.demo} aria-label="How Match works: scroll a card for details, swipe right to save, swipe left to pass" role="img">
+    <div className={styles.demo} aria-label="How Match works: swipe right to save, swipe left to pass" role="img">
       <div className={styles.demoStage} aria-hidden="true">
         <div className={styles.demoBadgeSave}><Check strokeWidth={3} /></div>
         <div className={styles.demoBadgePass}><X strokeWidth={3} /></div>
         <div className={styles.demoCard}>
-          {/* One column, face over details, scrolled as a unit: the details
-              rise in from the bottom as the face leaves at the top, the way
-              the deck card really scrolls (direct feedback, 10 Sept 2026:
-              "make it look like more information is scrolled up"). */}
+          {/* Face over details, one column. The scroll beat was cut from this
+              demo (11 Sept 2026); the deck's own gesture guide teaches it on
+              the first real card. */}
           <div className={styles.demoScroll}>
             <div className={styles.demoFace}>
               <span className={styles.demoPoster} />
@@ -112,9 +112,8 @@ function MatchGestureDemo() {
         <span className={styles.demoFinger} />
       </div>
       <div className={styles.demoCaptions}>
-        <span className={styles.demoCap1}>Scroll for details</span>
-        <span className={styles.demoCap2}>Swipe right to save</span>
-        <span className={styles.demoCap3}>Swipe left to pass</span>
+        <span className={styles.demoCap1}>Swipe right to save</span>
+        <span className={styles.demoCap2}>Swipe left to pass</span>
       </div>
     </div>
   );

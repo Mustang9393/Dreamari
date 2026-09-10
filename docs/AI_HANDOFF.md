@@ -7092,3 +7092,17 @@ Gate clean; verified /match-lab splash 375 and 1280, /colleges cards.
   the same y on every card (measured: name bottom 219px, place 222px on all
   9 For you cards). Names are not truncated on purpose: Rutgers-New
   Brunswick vs Rutgers-Newark differ at the end.
+
+## 2026-09-11 · Match welcome: one shape with the other splashes
+- Match line is "Save the 3 you like most."; the demo carries the how.
+- Demo is two beats (swipe right to save, swipe left to pass), 4.4s loop,
+  finger starts mid-card. The scroll-for-details beat is gone from the
+  splash; the deck's own gesture guide ("Scroll down for details", first
+  card, persists until a real scroll) is unchanged and verified.
+- Title ink-bleed and sweep animations removed: every splash now enters the
+  same way (dialog arrive, Dreamy hello, text, then demo where there is one).
+- `.dialog` overflow is `hidden auto`: the hero glow reaching past the edges
+  was producing a horizontal scrollbar on every splash.
+- SchoolCard hover dim now covers the whole photo run (a band-sized dim drew
+  a hard line across the picture on hover).
+Gate clean; verified /match-lab splash and deck guide at 375, /colleges.

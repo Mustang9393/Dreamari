@@ -319,8 +319,10 @@ export function SchoolCard({
         {/* Hover cue, school cards only (direct feedback, 11 Sept 2026): a
            labelled pill, not a bare chevron, centred on the photo band. Uses
            the poster-card hover rules (dim + cue) from globals.css. */}
+        {/* the dim covers the whole photo run, not just the cue band: a
+           band-sized dim drew a hard line across the picture on hover */}
+        <span className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgba(5,8,20,0.28)" }} />
         <span className="absolute inset-x-0 top-0 h-[150px]">
-          <span className="poster-dim pointer-events-none absolute inset-0 z-[1]" style={{ background: "rgba(5,8,20,0.28)" }} />
           <span
             className="poster-cue pointer-events-none absolute top-1/2 left-1/2 z-[2] flex h-[40px] items-center gap-[4px] rounded-full border pl-[16px] pr-[12px] text-[13.5px] font-bold whitespace-nowrap backdrop-blur-[8px]"
             style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.5)", color: "#fff", boxShadow: "0 10px 28px -8px rgba(0,0,0,0.7)", textShadow: "none" }}
