@@ -17,6 +17,8 @@ import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, Quick
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { MAX_INTERESTS, MAX_SUBJECTS, US_STATES, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile, writeStudentProfile, type StudentProfile } from "@/lib/studentProfile";
+import { GPA_OPTIONS, INTEREST_WORLDS, SUBJECTS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
@@ -2125,15 +2127,143 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
 // ---- Settings: a full view under the header, prototype stubs ----
 
 function SettingsView({ onClose }: { onClose: () => void }) {
+  // Everything a student may revise after Build (Slack, 10 Sept 2026): the
+  // answers that shape their matches, plus the account basics. Edits are
+  // held locally and written to the student-profile store on Save.
+  const stored = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
+  const [draft, setDraft] = useState<StudentProfile>(stored);
+  const [saved, setSaved] = useState(false);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(stored);
+  const patch = (next: Partial<StudentProfile>) => {
+    setSaved(false);
+    setDraft((current) => ({ ...current, ...next }));
+  };
+  const toggleIn = (key: "interests" | "subjects", value: string, max: number) => {
+    setSaved(false);
+    setDraft((current) => {
+      const list = current[key];
+      if (list.includes(value)) return { ...current, [key]: list.filter((v) => v !== value) };
+      if (list.length >= max) return current;
+      return { ...current, [key]: [...list, value] };
+    });
+  };
+  const save = () => {
+    writeStudentProfile(draft);
+    setSaved(true);
+    dispatchAuroraPulse("cta", undefined, { soft: true });
+  };
+  const zipOk = draft.zipCode === "" || /^\d{5}$/.test(draft.zipCode);
+  const emailOk = draft.email === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email);
+
+  const chip = (on: boolean, disabled = false) =>
+    ({
+      background: on ? "var(--primary)" : "var(--glass-surface-1)",
+      color: on ? "#FFFFFF" : disabled ? "var(--muted-foreground)" : "var(--foreground)",
+      borderColor: on ? "var(--primary)" : "var(--glass-border)",
+      opacity: disabled ? 0.55 : 1,
+    }) as React.CSSProperties;
+  const field = "min-h-[44px] w-full rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]";
+  const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as React.CSSProperties;
+  const label = "text-[12px] font-bold tracking-[0.06em] uppercase";
+
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
+    <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex items-center justify-between">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Settings</h2>
-        <button type="button" aria-label="Close settings" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+        <button type="button" aria-label="Close settings" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
           <X className="h-4 w-4" />
         </button>
       </div>
-      <div className="flex max-w-[560px] flex-col gap-[var(--space-2)]">
+
+      <section className="flex max-w-[640px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={INSET}>
+        <div className="flex flex-col gap-[2px]">
+          <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Your answers</h3>
+          <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>From Build. Change them any time; your matches follow.</p>
+        </div>
+
+        <div className="flex flex-col gap-[var(--space-2)]">
+          <span className={label} style={{ color: "var(--muted-foreground)" }}>Industry interests · pick up to {MAX_INTERESTS}</span>
+          <div className="flex flex-wrap gap-[6px]">
+            {INTEREST_WORLDS.map((world) => {
+              const on = draft.interests.includes(world.label);
+              const full = !on && draft.interests.length >= MAX_INTERESTS;
+              return (
+                <button key={world.slug} type="button" aria-pressed={on} disabled={full} onClick={() => toggleIn("interests", world.label, MAX_INTERESTS)} className="dm-quiet min-h-[36px] cursor-pointer rounded-full border px-[12px] text-[13.5px] font-semibold disabled:cursor-not-allowed" style={chip(on, full)}>
+                  {world.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-[var(--space-2)]">
+          <span className={label} style={{ color: "var(--muted-foreground)" }}>Subjects · pick up to {MAX_SUBJECTS}</span>
+          <div className="flex flex-wrap gap-[6px]">
+            {SUBJECTS.map((subject) => {
+              const on = draft.subjects.includes(subject);
+              const full = !on && draft.subjects.length >= MAX_SUBJECTS;
+              return (
+                <button key={subject} type="button" aria-pressed={on} disabled={full} onClick={() => toggleIn("subjects", subject, MAX_SUBJECTS)} className="dm-quiet min-h-[36px] cursor-pointer rounded-full border px-[12px] text-[13.5px] font-semibold disabled:cursor-not-allowed" style={chip(on, full)}>
+                  {subject}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-[var(--space-2)]">
+          <label className={label} htmlFor="settings-state" style={{ color: "var(--muted-foreground)" }}>States you would go to school in</label>
+          {draft.states.length > 0 && (
+            <div className="flex flex-wrap gap-[6px]">
+              {draft.states.map((name) => (
+                <button key={name} type="button" onClick={() => patch({ states: draft.states.filter((v) => v !== name) })} aria-label={`Remove ${name}`} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[13.5px] font-semibold" style={chip(true)}>
+                  {name} <X className="h-[14px] w-[14px]" aria-hidden />
+                </button>
+              ))}
+            </div>
+          )}
+          <select id="settings-state" value="" onChange={(e) => { if (e.target.value) patch({ states: [...draft.states, e.target.value] }); }} className={`${field} cursor-pointer`} style={fieldStyle}>
+            <option value="">Add a state</option>
+            {US_STATES.filter((name) => !draft.states.includes(name)).map((name) => <option key={name} value={name}>{name}</option>)}
+          </select>
+        </div>
+      </section>
+
+      <section className="flex max-w-[640px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={INSET}>
+        <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Account</h3>
+        <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
+          <div className="flex flex-col gap-[6px] sm:col-span-2">
+            <label className={label} htmlFor="settings-email" style={{ color: "var(--muted-foreground)" }}>Email</label>
+            <input id="settings-email" type="email" inputMode="email" autoComplete="email" value={draft.email} onChange={(e) => patch({ email: e.target.value })} placeholder="you@school.org" className={field} style={{ ...fieldStyle, borderColor: emailOk ? fieldStyle.borderColor : "var(--color-feedback-error, #ff6b6b)" }} />
+          </div>
+          <div className="flex flex-col gap-[6px]">
+            <label className={label} htmlFor="settings-gpa" style={{ color: "var(--muted-foreground)" }}>GPA</label>
+            <select id="settings-gpa" value={draft.gpa} onChange={(e) => patch({ gpa: e.target.value })} className={`${field} cursor-pointer`} style={fieldStyle}>
+              <option value="">Select</option>
+              {GPA_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-[6px]">
+            <label className={label} htmlFor="settings-zip" style={{ color: "var(--muted-foreground)" }}>Zip code</label>
+            <input id="settings-zip" inputMode="numeric" autoComplete="postal-code" maxLength={5} value={draft.zipCode} onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })} placeholder="12345" className={field} style={{ ...fieldStyle, borderColor: zipOk ? fieldStyle.borderColor : "var(--color-feedback-error, #ff6b6b)" }} />
+          </div>
+          <div className="flex flex-col gap-[6px] sm:col-span-2">
+            <label className={label} htmlFor="settings-distance" style={{ color: "var(--muted-foreground)" }}>How far would you go for school?</label>
+            <select id="settings-distance" value={draft.travelDistance} onChange={(e) => patch({ travelDistance: e.target.value })} className={`${field} cursor-pointer`} style={fieldStyle}>
+              <option value="">Select</option>
+              {TRAVEL_DISTANCE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="flex items-center gap-[var(--space-3)]">
+          <button type="button" onClick={save} disabled={!dirty || !zipOk || !emailOk} className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            {saved && !dirty ? <><Check className="h-4 w-4" aria-hidden /> Saved</> : <>Save changes <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></>}
+          </button>
+          {dirty && <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Unsaved changes</span>}
+        </div>
+      </section>
+
+      <div className="flex max-w-[640px] flex-col gap-[var(--space-2)]">
         <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
           <span className="text-[15px] font-bold">Profile avatar</span>
           <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>Generated for privacy, never a photo</span>
@@ -2144,7 +2274,7 @@ function SettingsView({ onClose }: { onClose: () => void }) {
             <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[12px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
           </div>
         ))}
-        <button type="button" className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[15px] font-bold" style={{ background: "var(--glass-surface-1)", color: "var(--destructive)" }}>
+        <button type="button" className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-left text-[15px] font-bold" style={{ background: "var(--glass-surface-1)" }}>
           Sign out
         </button>
       </div>

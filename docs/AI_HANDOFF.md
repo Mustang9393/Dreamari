@@ -6424,3 +6424,18 @@ them back for a demo. Helpers `demoSeenThisSession` / `markDemoSeenThisSession`
 are exported; PeopleWelcome (Connect) now runs the same check itself since
 the parent's flag only lived while Connect stayed mounted. Verified: first
 visit shows, dismiss, Explore and back does not, plain reload does.
+
+### 10 Sept 2026 -- Profile > Settings edits the Build answers
+
+New store `src/lib/studentProfile.ts` (localStorage `dreamari-student-profile`,
+same useSyncExternalStore idiom as picks.ts): interests (max 2), subjects
+(max 2), states, email, GPA, zip code, travel distance. Build writes it when
+the flow hands off to Match (`persistAnswers` in BuildFlowExperience;
+Build's single state becomes a one-item list). `SettingsView` in
+ProfileExperience is now a real form (Slack, 10 Sept 2026): "Your answers"
+(interest and subject chips capped at two, states as removable pills plus an
+"Add a state" select) and "Account" (email, GPA select, 5-digit zip, "How far
+would you go for school?"), one Save that writes the store, shows Saved and
+plays the soft CTA pulse; zip/email validate inline. The Soon rows and Sign
+out remain below. Nothing else reads the store yet -- it is the source for
+Explore Schools' personalization when that lands. Verified on 375x812.

@@ -10,6 +10,7 @@ import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
 import { StepTransition } from "@/components/flow/StepTransition";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { WelcomeAtmosphere, WelcomeScreen } from "./WelcomeScreen";
+import { writeStudentProfile } from "@/lib/studentProfile";
 import { CostStep } from "./CostStep";
 import { LocationStep } from "./LocationStep";
 import { CompletionScreen, EducationStep, InterestsStep, MilestoneScreen, ProfileStep, SubjectsStep, WorkVibeStep, type StepProps } from "./steps";
@@ -47,7 +48,22 @@ export function BuildFlowExperience() {
   const next = () => setStageIndex((current) => Math.min(current + 1, STAGES.length - 1));
   const back = () => setStageIndex((current) => Math.max(current - 1, 0));
   const react = () => setReactionNonce((n) => n + 1);
-  const seeMatches = () => router.push("/match-lab");
+  // The answers a student may revise later live in the student-profile store
+  // (Profile > Settings edits them); written once, when Build hands off.
+  const persistAnswers = () =>
+    writeStudentProfile({
+      interests: state.interests,
+      subjects: state.subjects,
+      states: state.state ? [state.state] : [],
+      email: state.email,
+      gpa: state.gpa,
+      zipCode: state.zipCode,
+      travelDistance: state.travelDistance,
+    });
+  const seeMatches = () => {
+    persistAnswers();
+    router.push("/match-lab");
+  };
 
   // Unlock audio on the first real tap/keypress (iOS mutes Web Audio behind the
   // ringer switch until an <audio> element has played; see feedback.ts).
