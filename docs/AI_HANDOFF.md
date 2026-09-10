@@ -7106,3 +7106,9 @@ Gate clean; verified /match-lab splash 375 and 1280, /colleges cards.
 - SchoolCard hover dim now covers the whole photo run (a band-sized dim drew
   a hard line across the picture on hover).
 Gate clean; verified /match-lab splash and deck guide at 375, /colleges.
+
+## 2026-09-11 · Deck gesture guide: scroll hint once
+- `GUIDE_SEQUENCE` = scroll, right, left, right, left, then stop. The scroll
+  hint no longer recycles until a real scroll (direct feedback: "only show
+  the scroll nudge once"). A real gesture still ends the guide early.
+Verified at 375: "Scroll down for details" -> "Swipe right to save".

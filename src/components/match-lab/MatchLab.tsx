@@ -42,6 +42,7 @@ const SWIPE_COMMIT_PX = 100;
 const DEMO_ALWAYS_SHOW_GUIDE = false;
 
 const GUIDE_ORDER = ["up", "right", "left"] as const;
+const GUIDE_SEQUENCE: GestureKind[] = ["up", "right", "left", "right", "left"];
 type GestureKind = (typeof GUIDE_ORDER)[number];
 const GUIDE_LABEL: Record<GestureKind, string> = {
   // Label says "down" (direct feedback: "i think its scroll down not up") --
@@ -354,30 +355,23 @@ export function MatchLab() {
     const timer = window.setTimeout(() => setGuideGesture(GUIDE_ORDER[0]), 500);
     return () => window.clearTimeout(timer);
   }, [topId, deckIndex, demonstrated, splashSettled]);
-  // While it's up, walk scroll-up -> swipe right -> swipe left, one
-  // GestureHint cycle's dwell on each -- except scroll-up, which keeps
-  // recycling itself instead of moving on after one dwell (direct
-  // feedback, 8 Sept 2026: "have the scroll nudge reappear and be
-  // persistent until they scroll for real, in case they don't see it
-  // the first time" -- it's the least familiar of the three gestures,
-  // so a single 2.6s window is the one most likely to be missed). Swipe
-  // right/left still cap at two loops apiece and then stop on their own.
-  // A real gesture ends the whole thing early at any point
-  // (markDemonstratedRef above) -- that's still the only true exit for
-  // scroll-up. Only the direction/label change on the ONE persistent
-  // overlay, so the dark scrim never drops and re-raises between
-  // gestures -- that mount/unmount flicker was the complaint with the
-  // earlier per-gesture instances.
+  // While it's up, walk scroll -> swipe right -> swipe left -> right -> left,
+  // one GestureHint dwell each, then stop. The scroll hint shows exactly once
+  // (direct feedback, 11 Sept 2026: "only show the scroll nudge once"; it
+  // used to recycle until a real scroll). A real gesture still ends the
+  // whole thing early (markDemonstratedRef above). Only the direction and
+  // label change on the ONE persistent overlay, so the scrim never flickers
+  // between gestures.
   useEffect(() => {
     if (guideGesture === null) return;
     const timer = window.setTimeout(() => {
       setGuideGesture((current) => {
         if (current === null) return null;
-        if (current === "up") return "up"; // recycles until a real scroll ends it
+        // One pass each (direct feedback, 11 Sept 2026: "only show the
+        // scroll nudge once"): scroll, right, left, then right and left once
+        // more, then done. Scroll is never repeated.
         guideStepRef.current += 1;
-        if (guideStepRef.current >= (GUIDE_ORDER.length - 1) * 2) return null;
-        const index = GUIDE_ORDER.indexOf(current);
-        return GUIDE_ORDER[(index + 1) % GUIDE_ORDER.length];
+        return GUIDE_SEQUENCE[guideStepRef.current] ?? null;
       });
     }, GESTURE_HINT_CYCLE_S * 1000);
     return () => window.clearTimeout(timer);
