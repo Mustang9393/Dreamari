@@ -639,6 +639,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               career={focus}
               savedMajors={savedMajors} onToggleMajor={toggleMajor}
               onOpenEvidence={() => setEvidenceOpen(true)} updatedLabel="today"
+              history={{
+                snapshot: () => ({ careerId: focus.id, careerTitle: focus.title, top3, focusId: focus.id, routeChoice, done, savedMajors: [...savedMajors] }),
+                // Putting a version back is the same as the student having
+                // made those choices: Top 3 + focus (persisted through the
+                // picks effect), route choices, plan progress, saved majors.
+                restore: (snapshot) => {
+                  setEdits({ ids: snapshot.top3, focus: snapshot.focusId ?? snapshot.top3[0] ?? null });
+                  setRouteChoice(snapshot.routeChoice);
+                  setDone(snapshot.done);
+                  setSavedMajors(new Set(snapshot.savedMajors));
+                },
+              }}
             />
           </div>
         )}

@@ -6448,3 +6448,21 @@ wheel/trackpad/grab-drag scroll on desktop never ended it (direct feedback:
 to `scroll` on the top card's `[data-card-scroller]` and marks "up"
 demonstrated past 24px, whatever produced the scroll. Verified: nudge on,
 programmatic scroll to 90px, nudge off, progress stored.
+
+### 10 Sept 2026 -- Career Report version history
+
+New store `src/lib/reportHistory.ts` (localStorage `dreamari-report-history`,
+newest first, capped at 30). A version = label + time + snapshot of what
+shapes the report: career, Top 3, focus, route choices, plan progress
+(done task ids per career), saved majors. Recorded automatically on Share
+(with counselor / with family) and Print, and on demand via "Save this
+version" in the new History tab (fifth tab on the report, after Download);
+an identical snapshot refreshes the newest entry's label/time rather than
+duplicating it. Each version offers Restore (confirm step; puts the
+snapshot back through ProfileExperience: setEdits -> picks effect persists
+Top 3 + focus, setRouteChoice, setDone, setSavedMajors), Print (restore,
+switch to Download, window.print after 350ms) and Share (restore, switch to
+Share), plus delete. The version matching the current state is badged
+Current. `ReportViewProps.history` is optional so other callers are
+unaffected. Verified on 375x812: empty state, save, share-refresh, print
+routing. Restore with a differing snapshot exercised only by code review.

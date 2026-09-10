@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, ListChecks, PenLine, Printer, Search, Send, Target, Trash2 } from "lucide-react";
+import { AlertCircle, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2 } from "lucide-react";
+import { deleteReportVersion, formatVersionTime, recordReportVersion, reportHistorySnapshot, sameSnapshot, serverReportHistorySnapshot, subscribeReportHistory, type ReportSnapshot } from "@/lib/reportHistory";
 import type { ProfileCareer } from "./data";
 import {
   ACADEMIC_RECORD,
@@ -215,6 +216,9 @@ export type ReportViewProps = {
   onToggleMajor: (name: string) => void;
   onOpenEvidence: () => void;
   updatedLabel: string;
+  /** Version history (Slack, 10 Sept 2026): the host hands over what shapes
+   *  the report right now and how to put an older version back. */
+  history?: { snapshot: () => ReportSnapshot; restore: (snapshot: ReportSnapshot) => void };
 };
 
 
@@ -477,6 +481,7 @@ const REPORT_TABS = [
   { id: "share", label: "Share" },
   { id: "counselor", label: "Counselor Review" },
   { id: "download", label: "Download" },
+  { id: "history", label: "History" },
 ] as const;
 type ReportTabId = (typeof REPORT_TABS)[number]["id"];
 
@@ -484,6 +489,10 @@ export function CareerReportView(props: ReportViewProps) {
   const { student, career } = props;
   const report = reportV2(career.id);
   const [tab, setTab] = useState<ReportTabId>("report");
+  // Every share / print keeps a version automatically; History lists them.
+  const keep = (label: string) => {
+    if (props.history) recordReportVersion(label, props.history.snapshot());
+  };
   // The report used to accent itself with the career's own world colour,
   // which put amber/olive tones on the Business & Money reports — "just not
   // easy on the eyes" (direct feedback, 5 Sept 2026). Every --primary/
@@ -554,7 +563,7 @@ export function CareerReportView(props: ReportViewProps) {
       )}
       {tab === "share" && (
         <div role="tabpanel" id="report-panel-share" aria-labelledby="report-tab-share">
-          <ShareTab />
+          <ShareTab onShared={keep} />
         </div>
       )}
       {tab === "counselor" && (
@@ -564,10 +573,108 @@ export function CareerReportView(props: ReportViewProps) {
       )}
       {tab === "download" && (
         <div role="tabpanel" id="report-panel-download" aria-labelledby="report-tab-download">
-          <DownloadTab student={student} career={career} report={report} />
+          <DownloadTab student={student} career={career} report={report} onPrinted={() => keep("Printed")} />
+        </div>
+      )}
+      {tab === "history" && (
+        <div role="tabpanel" id="report-panel-history" aria-labelledby="report-tab-history">
+          <HistoryTab
+            history={props.history}
+            onPrint={(snapshot) => {
+              props.history?.restore(snapshot);
+              setTab("download");
+              window.setTimeout(() => window.print(), 350);
+            }}
+            onShare={(snapshot) => {
+              props.history?.restore(snapshot);
+              setTab("share");
+            }}
+          />
         </div>
       )}
     </div>
+  );
+}
+
+// ---- History tab ----
+// Older versions of the report, newest first: what created each (shared,
+// printed, saved), when, and for which career. Restore puts that version's
+// Top 3, focus, route choices, plan progress and saved majors back; Print
+// and Share restore first, then open the matching tab.
+
+function HistoryTab({ history, onPrint, onShare }: { history?: ReportViewProps["history"]; onPrint: (snapshot: ReportSnapshot) => void; onShare: (snapshot: ReportSnapshot) => void }) {
+  const versions = useSyncExternalStore(subscribeReportHistory, reportHistorySnapshot, serverReportHistorySnapshot);
+  const [confirm, setConfirm] = useState<string | null>(null);
+  const current = history?.snapshot();
+  const action = "dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[12px] text-[13px] font-bold";
+  const actionStyle = { borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+  return (
+    <section aria-labelledby="history-title" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+        <div className="flex flex-col gap-[3px]">
+          <h3 id="history-title" className="text-[18px] leading-[23px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>Version History</h3>
+          <p className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--muted-foreground)" }}>Every share and print is kept. Go back to any version, or print and share it as it was.</p>
+        </div>
+        {history && (
+          <button type="button" onClick={() => recordReportVersion("Saved", history.snapshot())} className="dm-solid flex min-h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            <History className="h-4 w-4" aria-hidden /> Save this version
+          </button>
+        )}
+      </div>
+
+      {versions.length === 0 ? (
+        <p className="rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+          No versions yet. Share or print the report, or save one now.
+        </p>
+      ) : (
+        <ol className="flex list-none flex-col gap-[var(--space-2)] p-0">
+          {versions.map((version, index) => {
+            const isCurrent = !!current && sameSnapshot(version.snapshot, current);
+            return (
+              <li key={version.id} className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)", borderColor: isCurrent ? "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" : "var(--glass-border)" }}>
+                <div className="flex flex-wrap items-center justify-between gap-[var(--space-2)]">
+                  <span className="flex min-w-0 flex-col gap-[2px]">
+                    <span className="text-[15px] leading-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+                      {version.snapshot.careerTitle}
+                      <span className="ml-[8px] text-[12px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{version.label}</span>
+                    </span>
+                    <span className="text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+                      {formatVersionTime(version.createdAt)}{index === 0 ? " · Latest" : ""}
+                    </span>
+                  </span>
+                  {isCurrent && <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[11.5px] font-bold tracking-[0.06em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>Current</span>}
+                </div>
+                <div className="flex flex-wrap items-center gap-[var(--space-2)]">
+                  {history && !isCurrent && (
+                    confirm === version.id ? (
+                      <>
+                        <button type="button" onClick={() => { history.restore(version.snapshot); setConfirm(null); }} className="dm-solid flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[12px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+                          <Check className="h-4 w-4" aria-hidden /> Yes, go back to this
+                        </button>
+                        <button type="button" onClick={() => setConfirm(null)} className={action} style={actionStyle}>Never mind</button>
+                      </>
+                    ) : (
+                      <button type="button" onClick={() => setConfirm(version.id)} className={action} style={actionStyle}>
+                        <RotateCcw className="h-4 w-4" aria-hidden /> Restore
+                      </button>
+                    )
+                  )}
+                  <button type="button" onClick={() => onPrint(version.snapshot)} className={action} style={actionStyle}>
+                    <Printer className="h-4 w-4" aria-hidden /> Print
+                  </button>
+                  <button type="button" onClick={() => onShare(version.snapshot)} className={action} style={actionStyle}>
+                    <Send className="h-4 w-4" aria-hidden /> Share
+                  </button>
+                  <button type="button" onClick={() => deleteReportVersion(version.id)} aria-label="Delete this version" className="dm-quiet ml-auto flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                    <Trash2 className="h-4 w-4" aria-hidden />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
   );
 }
 
@@ -725,7 +832,7 @@ const SHARE_TARGETS = [
   { id: "family", title: "Share with Parent / Guardian", note: "Email a secure link to your family" },
 ] as const;
 
-function ShareTab() {
+function ShareTab({ onShared }: { onShared?: (label: string) => void }) {
   const [shared, setShared] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
   const link = "https://dreamari.app/report/3704cbe0-ef";
@@ -751,7 +858,10 @@ function ShareTab() {
           <button
             key={target.id}
             type="button"
-            onClick={() => setShared((current) => ({ ...current, [target.id]: true }))}
+            onClick={() => {
+              setShared((current) => ({ ...current, [target.id]: true }));
+              onShared?.(target.id === "counselor" ? "Shared with counselor" : "Shared with family");
+            }}
             className="dm-tap flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-5)] py-[var(--space-4)] text-left"
             style={{ background: "var(--glass-surface-1)", borderColor: shared[target.id] ? "color-mix(in srgb, var(--color-feedback-success, #33c78c) 45%, var(--glass-border))" : "var(--glass-border)" }}
           >
@@ -863,11 +973,11 @@ function CounselorReviewTab() {
 // The old export preview, inline: the page you see IS the page that prints,
 // so the Print button needs no separate modal anymore.
 
-function DownloadTab({ student, career, report }: { student: { name: string; grade: string; school: string }; career: ProfileCareer; report: CareerReportV2 }) {
+function DownloadTab({ student, career, report, onPrinted }: { student: { name: string; grade: string; school: string }; career: ProfileCareer; report: CareerReportV2; onPrinted?: () => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center gap-[var(--space-4)]">
-        <button type="button" onClick={() => window.print()} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+        <button type="button" onClick={() => { onPrinted?.(); window.print(); }} className="dm-solid flex min-h-[44px] flex-none cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           <Printer className="h-4 w-4" aria-hidden /> Print or save PDF
         </button>
         <p className="min-w-[220px] flex-1 text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
