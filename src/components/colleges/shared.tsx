@@ -3,11 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { Bookmark, GraduationCap, Landmark , ChevronRight } from "lucide-react";
+import { Bookmark, Check, ChevronDown, GraduationCap, Landmark, MapPin } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { OpenCue } from "@/components/app/PosterCard";
 import { SMALL } from "@/components/career/CareerDetailExperience";
-import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, money, type College } from "./data";
+import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, type College } from "./data";
 
 // One accent for the whole feature: colleges have no world, so they borrow
 // the app's primary blue. Cards for tribal colleges, trade schools etc. do
@@ -232,11 +232,33 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
   );
 }
 
-/** The Schools card (11 Sept 2026): the career poster's full-bleed photo and
- *  progressive blur (direct feedback), with a decision-card hierarchy over
- *  it: circular mark + name + place + programme, a three-tile stat row
- *  (acceptance · price after aid · finish), one quiet action row. Photo-less
- *  schools get the mark blurred into a wash. The whole card opens the school. */
+/** Outlined chips, the Replit's signal language: DIRECT PATH / 2-YEAR START /
+ *  TRADE & TECHNICAL for the route, REACH / TARGET / SAFETY / OPEN ADMISSION
+ *  for fit. Tinted text on a faint fill so they read without shouting. */
+const CHIP_TONE: Record<CardBadge["tone"], string> = {
+  program: "#ffffff",
+  path: "var(--accent-subtle)",
+  reach: "#ffb35c",
+  target: "#7db2ff",
+  safety: "#5fd6a8",
+  open: "#e6cf6a",
+  muted: "rgba(255,255,255,0.7)",
+};
+function Chip({ label, tone }: CardBadge) {
+  const c = CHIP_TONE[tone];
+  return (
+    <span className="rounded-full border px-[8px] py-[2px] text-[10.5px] leading-[14px] font-extrabold tracking-[0.06em] uppercase whitespace-nowrap" style={{ color: c, borderColor: `color-mix(in srgb, ${c} 45%, transparent)`, background: `color-mix(in srgb, ${c} 10%, transparent)` }}>{label}</span>
+  );
+}
+const PATH_WORD: Record<College["level"], string> = { "Bachelor's degrees": "Direct path", "Associate degrees": "2-year start", "Certificates": "Trade & technical" };
+
+/** The school card, laid out like the Replit reference (direct feedback, 11
+ *  Sept 2026: its cards "deliver information a lot better, uncluttered"):
+ *  a short photo band with the mark overlapping its edge, then everything
+ *  else on the solid card surface, top to bottom in the order a student
+ *  skims: name and place, the programme with its route and fit chips, three
+ *  plain figures, Why this school?, actions. No text over photos, no glass
+ *  tiles. The whole card opens the school. */
 export function SchoolCard({
   c,
   saved,
@@ -272,71 +294,79 @@ export function SchoolCard({
     { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "avg. after aid" },
     { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
   ];
+  const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.8)" };
   return (
     <article
-      className="dm-tap poster-card relative flex h-full min-h-[380px] flex-col overflow-hidden rounded-[var(--radius-lg)] border"
-      style={{ background: "#0e0c20", borderColor: compared ? `color-mix(in srgb, ${ACCENT} 70%, transparent)` : `color-mix(in srgb, ${ACCENT} 40%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+      className="dm-tap poster-card relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border"
+      style={{ background: "var(--card)", borderColor: compared ? ACCENT : "var(--glass-border)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-body)" }}
     >
-      <span aria-hidden className="poster-photo absolute inset-0">
+      {/* photo band */}
+      <span aria-hidden className="poster-photo relative block h-[148px] w-full flex-none overflow-hidden">
         {img ? (
           <Image src={img} alt="" fill sizes="(min-width: 1024px) 340px, 86vw" className="object-cover" />
-        ) : mark ? (
-          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, #0e0c20) 0%, #0e0c20 65%)" }}>
-            <Image src={mark} alt="" fill sizes="480px" className="object-contain opacity-[0.55] blur-[10px]" style={{ transform: "scale(1.9) translateY(-8%)" }} />
-          </span>
         ) : (
-          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }} />
+          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 38%, var(--card)) 0%, var(--card) 70%, color-mix(in srgb, var(--hero-accent-teal) 30%, var(--card)) 100%)" }}>
+            {mark && <Image src={mark} alt="" fill sizes="480px" className="object-contain opacity-[0.5] blur-[10px]" style={{ transform: "scale(1.8)" }} />}
+          </span>
         )}
-        <CardProgressiveBlur size="62%" />
-        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.97) 0%, rgba(12,16,35,0.88) 34%, rgba(12,16,35,0.45) 58%, rgba(12,16,35,0.08) 78%, transparent 100%)" }} />
-        <span className="absolute inset-x-0 top-0 h-[80px]" style={{ background: cardTopScrim() }} />
+        <CardProgressiveBlur size="40%" />
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--card) 0%, color-mix(in srgb, var(--card) 55%, transparent) 30%, transparent 60%)" }} />
+        <span className="absolute inset-x-0 top-0 h-[64px]" style={{ background: cardTopScrim() }} />
+        <OpenCue />
       </span>
-      {/* the "this opens" cue lives in the photo band, above the text block,
-         where it can actually be seen (direct feedback, 11 Sept 2026) */}
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[15] h-[44%]"><OpenCue /></span>
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
-      {fit && (
-        <span className="absolute top-[14px] left-[14px] z-20 rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ ...BADGE_STYLE[fit.tone], textShadow: "none" }}>{fit.label}</span>
-      )}
-      <span className="absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
+      <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
+      {/* the mark sits on the band's edge, like a profile picture */}
+      <span className="pointer-events-none absolute top-[122px] left-[16px] z-20"><MarkBadge c={c} size={48} /></span>
 
-      <div className="pointer-events-none relative z-20 flex h-full w-full flex-col justify-end gap-[var(--space-3)] px-[var(--space-4)] pb-[var(--space-4)] pt-[var(--space-5)]" style={{ fontFamily: "var(--font-body)" }}>
-        <div className="flex items-center gap-[12px]">
-          <MarkBadge c={c} size={44} />
-          <div className="flex min-w-0 flex-col gap-[2px]">
-            <h3 className="text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
-            <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}</p>
-            {program && <p className="text-[12.5px] leading-[16px] font-bold" style={{ color: "#FFFFFF" }}>{program}</p>}
-          </div>
+      <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[12px] px-[16px] pt-[30px] pb-[14px]">
+        <div className="flex flex-col gap-[3px]">
+          <h3 className="text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.name}</h3>
+          <p className="flex items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <MapPin className="h-[12px] w-[12px] flex-none" aria-hidden />{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}
+          </p>
         </div>
-        {why && (
-          <div className="pointer-events-auto relative z-20 -mt-[4px]" style={{ textShadow: "none" }}>
-            <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link flex cursor-pointer items-center gap-[2px] text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.85)" }}>
-              Why this school? <ChevronRight className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-90" : ""}`} aria-hidden />
-            </button>
-            {showWhy && <p className="mt-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.88)" }}>{why}</p>}
+
+        {(program || fit) && (
+          <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[6px]">
+            {program && (
+              <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                {program} <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden style={{ color: SOFT }} />
+              </span>
+            )}
+            {program && <Chip label={PATH_WORD[c.level]} tone="path" />}
+            {fit && <Chip label={fit.label} tone={fit.tone} />}
           </div>
         )}
-        <dl className="grid grid-cols-3 gap-[6px]" style={{ textShadow: "none" }}>
+
+        <dl className="grid grid-cols-3 gap-[8px] border-t pt-[10px]" style={{ borderColor: RULE }}>
           {stats.map((x) => (
-            <div key={x.k} className="flex min-w-0 flex-col items-start rounded-[var(--radius-md)] px-[10px] py-[7px] backdrop-blur-[6px]" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.14)" }}>
-              <dd className="m-0 text-[17px] leading-[20px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{x.v}</dd>
-              <dt className="text-[10.5px] leading-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>{x.k}</dt>
+            <div key={x.k} className="flex min-w-0 flex-col">
+              <dd className="m-0 text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.v}</dd>
+              <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.k}</dt>
             </div>
           ))}
         </dl>
-        <div className="pointer-events-auto flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.18)", textShadow: "none" }}>
-          {onCompare ? (
-            <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet relative z-20 flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[11px] text-[12.5px] font-bold" style={{ borderColor: compared ? ACCENT : "rgba(255,255,255,0.3)", background: compared ? `color-mix(in srgb, ${ACCENT} 30%, transparent)` : "rgba(255,255,255,0.08)", color: "#fff" }}>
+
+        {why && (
+          <div className="pointer-events-auto relative z-20">
+            <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link flex cursor-pointer items-center gap-[3px] text-[13px] font-bold" style={{ color: SOFT }}>
+              Why this school? <ChevronDown className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-180" : ""}`} aria-hidden />
+            </button>
+            {showWhy && <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{why}</p>}
+          </div>
+        )}
+
+        <div className="pointer-events-auto relative z-20 mt-auto flex items-center gap-[8px] pt-[2px]">
+          {onDismiss && (
+            <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[11px] text-[12.5px] font-bold" style={ghost}>Not for me</button>
+          )}
+          {onCompare && (
+            <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[11px] text-[12.5px] font-bold" style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 28%, transparent)`, color: "#fff" } : ghost}>
               <Landmark className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
             </button>
-          ) : <span />}
-          <span className="flex items-center gap-[var(--space-3)]">
-            {onDismiss && (
-              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); }} className="dm-link relative z-20 cursor-pointer text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.7)" }}>Not for me</button>
-            )}
-            <span className="flex items-center gap-[2px] text-[13px] font-bold" style={{ color: "#FFFFFF" }}>View <ChevronRight className="h-4 w-4" aria-hidden /></span>
-          </span>
+          )}
+          <span className="ml-auto flex min-h-[34px] items-center rounded-[var(--radius-md)] px-[14px] text-[12.5px] font-bold" style={{ background: "var(--foreground)", color: "var(--background)" }}>View</span>
         </div>
       </div>
     </article>

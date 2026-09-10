@@ -21,7 +21,7 @@ import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, 
 import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
-import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer } from "./data";
+import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import { EventStubs } from "./EventStubs";
@@ -164,7 +164,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const chosenPrimaryId = edits ? edits.focus : base.focus;
   const primaryChosen = chosenPrimaryId !== null && top3.includes(chosenPrimaryId);
   // Algorithmic default: the highest Career Interest Score among the three.
-  const strongestId = useMemo(() => [...top3].map(careerById).filter((c): c is ProfileCareer => !!c).sort((a, b) => b.match - a.match)[0]?.id ?? top3[0] ?? null, [top3]);
+  const strongestId = useMemo(() => strongestCareerId(top3), [top3]);
   const focusId = primaryChosen ? chosenPrimaryId : strongestId;
   const setTop3 = (next: string[] | ((previous: string[]) => string[])) =>
     setEdits((current) => {

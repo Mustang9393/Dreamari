@@ -2,6 +2,7 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
+import { primaryCareerId } from "@/components/profile/data";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { COLLEGES, type College } from "./data";
 import { SchoolCard } from "./shared";
@@ -30,7 +31,7 @@ export function BrowseShelves({
 }) {
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const profile = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
-  const careerId = picks.focus ?? picks.ids[0] ?? DEMO_TOP3[0];
+  const careerId = primaryCareerId(picks) ?? DEMO_TOP3[0];
   const pathway = useMemo(() => pathwayFor(careerId), [careerId]);
 
   const shelves = useMemo(() => {

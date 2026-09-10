@@ -112,7 +112,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     world: "Business & Money",
     photo: "/images/app/poster-investment-banking-v3.png",
     photoFocus: "50% 40%",
-    match: 86,
+    match: 91,
     receipts: [
       { kind: "sim", value: "2x", label: "IB sim finished" },
       { kind: "level", value: "Lv 4", label: "Finance glossary" },
@@ -788,3 +788,16 @@ export const interestTier = (score: number): string => {
   if (score >= 25) return "Early interest";
   return "Just exploring";
 };
+
+// ---- Primary career -------------------------------------------------------
+// Joshua (Slack, 11 Sept 2026): after Match nothing is chosen; the strongest
+// match (highest Career Interest Score among the Top 3) stands in as the
+// primary career until the student taps "Make my primary". One helper so
+// Profile, Explore Schools and anything else agree on who that is.
+export function strongestCareerId(ids: string[]): string | null {
+  const known = ids.map((id) => ALL_PROFILE_CAREERS.find((c) => c.id === id)).filter((c): c is ProfileCareer => !!c);
+  return known.sort((a, b) => b.match - a.match)[0]?.id ?? ids[0] ?? null;
+}
+export function primaryCareerId(picks: { ids: string[]; focus: string | null }): string | null {
+  return picks.focus && picks.ids.includes(picks.focus) ? picks.focus : strongestCareerId(picks.ids);
+}

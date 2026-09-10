@@ -16,7 +16,10 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const query = await searchParams;
   const picks = parsePicksParam(query.picks);
   const focusParam = Array.isArray(query.focus) ? query.focus[0] : query.focus;
-  const focus = focusParam && picks.includes(focusParam) ? focusParam : (picks[0] ?? null);
+  // No focus in the URL means no primary chosen yet: Profile then labels the
+  // strongest match as the default (Joshua, 11 Sept 2026). Defaulting to
+  // picks[0] here made every handoff look like a deliberate choice.
+  const focus = focusParam && picks.includes(focusParam) ? focusParam : null;
   // ?tab=plan|report|resume|top3 opens that tab (Home's Your Next Moves links here)
   const tabParam = Array.isArray(query.tab) ? query.tab[0] : query.tab;
   // ?welcome=1 is set only by Match's handoff: the page assembles itself into

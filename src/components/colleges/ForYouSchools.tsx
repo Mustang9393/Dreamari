@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, ChevronRight, Pencil, X } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
+import { primaryCareerId } from "@/components/profile/data";
 import { US_STATES, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile, writeStudentProfile } from "@/lib/studentProfile";
 import { GPA_OPTIONS } from "@/components/build/types";
 import { ACADEMIC_RECORD } from "@/components/profile/report-data";
@@ -62,7 +63,9 @@ export function ForYouSchools({
   const gpaLabel = withGpa.gpa;
   const top3 = picks.ids.length ? picks.ids : DEMO_TOP3;
   const [chosen, setChosen] = useState<string | null>(null);
-  const careerId = chosen && top3.includes(chosen) ? chosen : picks.focus && top3.includes(picks.focus) ? picks.focus : top3[0];
+  // Default to the primary career (chosen, else the strongest match), the
+  // same rule Profile uses, so Schools and Profile never disagree.
+  const careerId = chosen && top3.includes(chosen) ? chosen : (primaryCareerId({ ids: top3, focus: picks.focus }) ?? top3[0]);
   const pathway = useMemo(() => pathwayFor(careerId), [careerId]);
   const routes = useMemo(() => routesFor(careerId), [careerId]);
   const [routePick, setRoutePick] = useState<Record<string, string>>({});

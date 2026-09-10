@@ -16,7 +16,6 @@ import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { LocalBurst } from "@/components/build/DreamyGuide";
-import { InkText } from "@/components/build/ui";
 import { picksParam, writePicks } from "@/lib/picks";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
@@ -129,7 +128,6 @@ export function MatchLab() {
   });
   const [decisionOpen, setDecisionOpen] = useState(false);
   // confetti from the top of the Top 3 sheet the moment it opens
-  const [decisionBurst, setDecisionBurst] = useState(0);
   // Set the moment Match hands off to Profile (any of the "finish" buttons):
   // holds the destination URL while the welcome popup shows, rather than
   // navigating straight there.
@@ -202,7 +200,6 @@ export function MatchLab() {
       setTimeout(() => {
         playMilestoneChime();
         setDecisionOpen(true);
-        setDecisionBurst((n) => n + 1);
       }, 820);
     }
   }
@@ -276,7 +273,6 @@ export function MatchLab() {
 
   // Every way of finishing goes through the results sheet.
   function openChooser() {
-    setDecisionBurst((n) => n + 1);
     setDecisionOpen(true);
   }
 
@@ -663,42 +659,30 @@ export function MatchLab() {
       {decisionOpen && (
         <Sheet onClose={() => setDecisionOpen(false)} maxWidth="720px">
           <div className="relative flex flex-col items-center gap-5 text-center">
-            {/* Two glows drift slowly behind everything (brand blue, accent
-               purple) so the sheet breathes instead of sitting flat; both
-               are clipped by the sheet's own corners and never leave it. */}
+            {/* One quiet entrance (direct feedback, 11 Sept 2026: the sheet
+               was "too busy"): the chip, title, line, cards and buttons rise
+               in one staggered fade. No drifting glows, no confetti, no ink
+               reveal, no 3D flips or sheens. */}
             <span
-              aria-hidden
-              className="pointer-events-none absolute -top-24 left-[10%] -z-[1] h-[260px] w-[60%] rounded-full blur-[70px] motion-safe:animate-[play-ambient-drift-a_9s_ease-in-out_infinite]"
-              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 40%, transparent), transparent 70%)" }}
-            />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -top-10 right-[8%] -z-[1] h-[220px] w-[50%] rounded-full blur-[70px] motion-safe:animate-[play-ambient-drift-b_11s_ease-in-out_infinite]"
-              style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) 34%, transparent), transparent 70%)" }}
-            />
-            {/* confetti launches from the top center as the sheet lands */}
-            <span aria-hidden className="pointer-events-none absolute -top-6 left-1/2 h-24 w-24 -translate-x-1/2"><LocalBurst nonce={decisionBurst} /></span>
-            <span
-              className="motion-safe:animate-[dreamy-pop_0.45s_0.1s_cubic-bezier(0.34,1.56,0.64,1)_both] inline-flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
+              className="motion-safe:animate-[fade-slide-up_0.5s_0.05s_ease-out_both] inline-flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.1em] uppercase"
               style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--color-glass-surface-raised)", color: "var(--color-brand-500)" }}
             >
               <Sparkles className="h-3 w-3" aria-hidden /> Match complete
             </span>
             <div className="flex flex-col gap-1.5">
-              <h2 className={`${bricolage.className} text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
-                <InkText text={liked.length === MAX_SLOTS ? "Your Top 3 Matches" : "Your matches"} delay={0.25} />
+              <h2 className={`${bricolage.className} motion-safe:animate-[fade-slide-up_0.5s_0.15s_ease-out_both] text-[24px] font-extrabold text-[var(--color-night-foreground)] sm:text-[28px]`}>
+                {liked.length === MAX_SLOTS ? "Your Top 3 Matches" : "Your matches"}
               </h2>
-              <p className="motion-safe:animate-[fade-slide-up_0.6s_0.8s_ease-out_both] text-[14.5px] leading-[20px] font-extrabold text-[var(--color-night-foreground)]">
+              <p className="motion-safe:animate-[fade-slide-up_0.5s_0.25s_ease-out_both] text-[14.5px] leading-[20px] font-semibold text-[var(--color-night-muted-foreground,rgba(255,255,255,0.72))]">
                 Compare them next, then pick your primary career any time.
               </p>
-
             </div>
             <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3" style={{ perspective: 900 }}>
               {liked.map((c, i) => (
                 <TopThreeCard key={c.id} career={c} index={i} />
               ))}
             </div>
-            <div className="flex w-full flex-col gap-2.5 motion-safe:animate-[fade-slide-up_0.6s_1.05s_ease-out_both]">
+            <div className="flex w-full flex-col gap-2.5 motion-safe:animate-[fade-slide-up_0.5s_0.75s_ease-out_both]">
               <Button variant="primary" size="large" onClick={finishMatching} type="button">
                 Compare My Top 3 <ChevronRight className="h-4 w-4" aria-hidden />
               </Button>
@@ -1023,20 +1007,13 @@ function MiniRanking({ liked }: { liked: Career[] }) {
 function TopThreeCard({ career, index = 0 }: { career: Career; index?: number }) {
   return (
     <div
-      className="relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left motion-safe:animate-[card-reveal-3d_0.8s_cubic-bezier(0.16,1,0.3,1)_both]"
-      style={{ animationDelay: `${350 + index * 140}ms`, borderColor: "var(--color-glass-border-raised)", boxShadow: "0 12px 30px -18px rgba(0,0,0,0.6)" }}
+      className="relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left motion-safe:animate-[fade-slide-up_0.55s_ease-out_both]"
+      style={{ animationDelay: `${350 + index * 120}ms`, borderColor: "var(--color-glass-border-raised)", boxShadow: "0 12px 30px -18px rgba(0,0,0,0.6)" }}
     >
       <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 90vw, 220px" className="object-cover" draggable={false} />
       <div
         className="absolute inset-0"
         style={{ background: "linear-gradient(180deg, rgba(5,7,15,0.05) 0%, rgba(5,7,15,0.35) 55%, rgba(5,7,15,0.88) 100%)" }}
-      />
-      {/* one pass of light over the card just after it lands (clipped by the
-         card's own overflow-hidden, so it never spills into the grid) */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 w-[45%] motion-safe:animate-[card-sheen_1.1s_ease-out_both]"
-        style={{ animationDelay: `${950 + index * 140}ms`, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)" }}
       />
       <div className="relative z-[1] flex flex-col gap-1.5 p-3">
         <p className="text-[15px] leading-[19px] font-extrabold text-white" style={{ fontFamily: career.font, fontWeight: career.fontWeight, letterSpacing: career.letterSpacing }}>{career.title}</p>

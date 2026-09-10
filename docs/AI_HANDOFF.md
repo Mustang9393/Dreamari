@@ -7021,3 +7021,31 @@ Joshua (Slack, 11 Sept 2026), wording "primary" instead of "#1" per Chandu.
   selectable on purpose, to see how the list changes.
 Verified: /match-lab (3 likes -> sheet), /profile?tab=top3 labels and
 persistence, /colleges edit sheet. Gate clean. Not pushed.
+
+## 2026-09-11 · School cards in the Replit's layout, calm Match sheet, story guard
+- `SchoolCard` (shared.tsx) rebuilt in the Replit reference's information
+  order on the brand surface: 148px photo band (progressive blur into the
+  card), circular mark overlapping the band edge, then on solid card: name,
+  pin + "City, ST · Public · 4-year", programme ✓ with outlined chips
+  (DIRECT PATH / 2-YEAR START / TRADE & TECHNICAL, plus REACH / TARGET /
+  SAFETY / OPEN ADMISSION only where the rail title does not already say
+  it), three plain figures (acceptance / avg. after aid / finish), "Why this
+  school? ⌄", then Not for me · Compare · View. No text over photos, no
+  glass tiles. Distance "from home" (Replit) still not shown: no coordinates.
+- Match results sheet: one staggered fade-up (chip, title, line, cards,
+  buttons). Removed drifting glows, confetti, ink reveal, 3D card flip,
+  sheen ("too busy" feedback).
+- Story guard: `profile/data.ts` Investment Banking match 86 -> 91 so it is
+  the strongest of the demo Top 3 (Private Equity is 88); new
+  `strongestCareerId` / `primaryCareerId` helpers used by Profile, Explore
+  Schools For you and Browse shelves so all agree on the primary career.
+  `app/profile/page.tsx` no longer defaults focus to picks[0] (that made
+  every handoff look like a chosen primary).
+- Explore splash: one line ("Careers: salary, education, daily life, and
+  pathways."); the Schools line was redundant with the Schools splash.
+- Note for the demo: the shared preview browser had test state (Airline
+  Pilot as primary, Nebraska as state) from my clicks; cleared. The "Edit
+  your list" sheet opening by itself could not be reproduced on a clean
+  load; the openings seen were my test clicks in the shared pane.
+Gate clean; verified /match-lab -> /profile handoff, /colleges 1280 and
+375, Explore splash. Not pushed.

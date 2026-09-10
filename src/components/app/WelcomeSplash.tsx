@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Briefcase, Check, ChevronRight, EyeOff, GraduationCap, Sparkles, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
+import { Briefcase, Check, ChevronRight, EyeOff, Sparkles, X, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
@@ -35,10 +35,10 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
     tint: ["40, 140, 255", "30, 185, 170"],
     eyebrow: "You’re in", title: "EXPLORE",
-    // The two things you can do here, at a glance (Joshua Pierce, Slack, 10 Sept 2026).
+    // One line (direct feedback, 11 Sept 2026): Schools has its own welcome,
+    // so the second row from Joshua's 10 Sept copy was saying it twice.
     rows: [
-      { icon: Briefcase, text: <><strong>Explore Careers:</strong> Salary, education, daily life, and pathways.</> },
-      { icon: GraduationCap, text: <><strong>Explore Schools:</strong> Colleges, trade schools, programs, cost, and admissions.</> },
+      { icon: Briefcase, text: <><strong>Careers:</strong> salary, education, daily life, and pathways.</> },
     ],
     cta: "Start exploring",
   },
