@@ -16,6 +16,9 @@ export type StudentProfile = {
   states: string[];
   email: string;
   gpa: string;
+  /** "weighted" | "unweighted" | "unsure" | "" -- a weighted 3.6 and an
+   *  unweighted 3.6 are different students (team doc, 11 Sept 2026) */
+  gpaType: string;
   zipCode: string;
   /** how far they would go for school (TRAVEL_DISTANCE_OPTIONS) */
   travelDistance: string;
@@ -23,7 +26,7 @@ export type StudentProfile = {
   path: string;
 };
 
-export const EMPTY_PROFILE: StudentProfile = { interests: [], subjects: [], states: [], email: "", gpa: "", zipCode: "", travelDistance: "", path: "" };
+export const EMPTY_PROFILE: StudentProfile = { interests: [], subjects: [], states: [], email: "", gpa: "", gpaType: "", zipCode: "", travelDistance: "", path: "" };
 
 export const MAX_INTERESTS = 2;
 export const MAX_SUBJECTS = 2;
@@ -52,6 +55,7 @@ function normalize(value: unknown): StudentProfile {
     states: strings(v.states),
     email: str(v.email),
     gpa: str(v.gpa),
+    gpaType: str(v.gpaType),
     zipCode: str(v.zipCode),
     travelDistance: str(v.travelDistance),
     path: str(v.path),
@@ -125,7 +129,7 @@ const MAX_ARCHIVED = 10;
 export type ArchivedProfile = { id: string; savedAt: string; profile: StudentProfile };
 
 export function isEmptyProfile(p: StudentProfile): boolean {
-  return p.interests.length === 0 && p.subjects.length === 0 && p.states.length === 0 && !p.email && !p.gpa && !p.zipCode && !p.travelDistance && !p.path;
+  return p.interests.length === 0 && p.subjects.length === 0 && p.states.length === 0 && !p.email && !p.gpa && !p.gpaType && !p.zipCode && !p.travelDistance && !p.path;
 }
 
 export function readProfileArchive(): ArchivedProfile[] {

@@ -6881,3 +6881,25 @@ use the Replit's approved copy and decide keep/remove on research.
 - Not built, on purpose: weighted/unweighted GPA prompt (our GPA is a
   range); distance (no coordinates). Compare bar already existed.
 Verified 375x812.
+
+### 11 Sept 2026 -- Explore Schools, pass 8: result on the page, inputs in the sheet
+
+Direct feedback: still too many words at equal prominence; "there has to be
+a better way"; row headers shouldn't stack; look at Netflix / Hotstar.
+- Header is one sentence and one caption: "Schools for <career v>" (the
+  career is the only control on the page) and "Bachelor's degree in Finance
+  · 3.7 GPA · New Jersey · Why these schools?" (Saved · n at the right).
+  The chip breadcrumb, labelled fields and header box are gone.
+- The Why sheet ("A clear starting point", the Replit's checklist) is where
+  the inputs live and are EDITED: the education path row carries the route
+  choices, the academic-profile row has an on/off switch for sorting by GPA
+  plus Weighted / Unweighted / Not sure; Adjust preferences -> Settings.
+- GPA type (team doc, 11 Sept 2026): new `gpaType` on the student profile
+  (also a select in Settings > Account). `effectiveGpa` brings a weighted GPA
+  down by 0.4 (cap 4.0) before banding, since colleges' averages are on an
+  unweighted 4.0 scale; "Not sure" counts as unweighted. The caption and
+  sheet show "(weighted)" when set.
+- Row headers on For you and Browse all: title left, "4 schools" small on
+  the right, no stacked eyebrow (Netflix / Hotstar). The 2-year rail keeps
+  its Replit subtitle under the title.
+Verified 375x812 and 1280x800.

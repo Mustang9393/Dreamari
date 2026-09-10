@@ -2196,9 +2196,9 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
   const [deactivated, setDeactivated] = useState(false);
 
   // Account basics stay directly editable: small, and no reason to redo Build for a typo.
-  const [draft, setDraft] = useState({ email: stored.email, gpa: stored.gpa, zipCode: stored.zipCode, travelDistance: stored.travelDistance });
+  const [draft, setDraft] = useState({ email: stored.email, gpa: stored.gpa, gpaType: stored.gpaType, zipCode: stored.zipCode, travelDistance: stored.travelDistance });
   const [saved, setSaved] = useState(false);
-  const dirty = draft.email !== stored.email || draft.gpa !== stored.gpa || draft.zipCode !== stored.zipCode || draft.travelDistance !== stored.travelDistance;
+  const dirty = draft.email !== stored.email || draft.gpa !== stored.gpa || draft.gpaType !== stored.gpaType || draft.zipCode !== stored.zipCode || draft.travelDistance !== stored.travelDistance;
   const patch = (next: Partial<typeof draft>) => {
     setSaved(false);
     setDraft((current) => ({ ...current, ...next }));
@@ -2300,6 +2300,14 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
             <select id="settings-gpa" value={draft.gpa} onChange={(e) => patch({ gpa: e.target.value })} className={`${SETTINGS_FIELD} cursor-pointer`} style={SETTINGS_FIELD_STYLE}>
               <option value="">Select</option>
               {GPA_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-[6px]">
+            <label className={SETTINGS_LABEL} htmlFor="settings-gpa-type" style={{ color: "var(--muted-foreground)" }}>GPA type</label>
+            <select id="settings-gpa-type" value={draft.gpaType} onChange={(e) => patch({ gpaType: e.target.value })} className={`${SETTINGS_FIELD} cursor-pointer`} style={SETTINGS_FIELD_STYLE}>
+              <option value="">Not sure</option>
+              <option value="weighted">Weighted</option>
+              <option value="unweighted">Unweighted</option>
             </select>
           </div>
           <div className="flex flex-col gap-[6px]">

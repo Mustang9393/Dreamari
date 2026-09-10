@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown, ChevronRight, Info, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, X } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
-import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
+import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile, writeStudentProfile } from "@/lib/studentProfile";
 import { ACADEMIC_RECORD } from "@/components/profile/report-data";
 import { BIG, PANEL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SchoolCard, SOFT } from "./shared";
@@ -51,18 +51,9 @@ export function ForYouSchools({
     }, 0);
     return () => window.clearTimeout(t);
   }, []);
-  // A short confirmation bubble after a tap (phones have no hover), plus a
-  // hover/focus tooltip on the chip itself.
-  const [gpaNote, setGpaNote] = useState<string | null>(null);
-  useEffect(() => {
-    if (!gpaNote) return;
-    const t = window.setTimeout(() => setGpaNote(null), 2600);
-    return () => window.clearTimeout(t);
-  }, [gpaNote]);
   const toggleGpa = () => {
     setUseGpa((v) => {
       try { window.localStorage.setItem(USE_GPA_KEY, v ? "0" : "1"); } catch {}
-      setGpaNote(v ? "GPA off. Grouped by how selective schools are." : "GPA on. Grouped by your fit.");
       return !v;
     });
   };
@@ -77,7 +68,7 @@ export function ForYouSchools({
   const [routePick, setRoutePick] = useState<Record<string, string>>({});
   const route = routes.find((r) => r.id === routePick[careerId]) ?? defaultRoute(routes, profile.path);
   const schools = useMemo(() => (pathway && route ? schoolsForRoute(pathway, route, profile) : null), [pathway, route, profile]);
-  const [open, setOpen] = useState<"career" | "route" | null>(null);
+  const [open, setOpen] = useState<"career" | "route" | "gpa" | null>(null);
   // "Not for me" hides a school from For you; remembered.
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   useEffect(() => {
@@ -131,8 +122,8 @@ export function ForYouSchools({
   } else if (route.institution === "2-year") sections.push({ key: "start", title: "Lower-cost ways to start", list: schools.list.slice(0, 8) });
   else sections.push({ key: "trade", title: "Trade and technical programs", list: schools.list.slice(0, 8) });
   const shown = sections.map((s) => ({ ...s, list: s.list.filter((m) => !hidden.has(m.college.slug)) })).filter((s) => s.list.length > 0);
-  const RAIL_COPY: Record<string, { eyebrow?: string; note?: string }> = {
-    start: { eyebrow: "A practical first step", note: "Start here, then continue toward a 4-year degree." },
+  const RAIL_COPY: Record<string, { note?: string }> = {
+    start: { note: "Start here, then continue toward a 4-year degree." },
   };
 
   const whyFor = (m: SchoolMatch) => {
@@ -164,66 +155,31 @@ export function ForYouSchools({
 
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
-      {/* Header with a hierarchy (direct feedback, 11 Sept 2026: too many
-         words at the same prominence). One big thing -- the career -- then
-         two labelled fields (Route, Program), then the quiet "Based on" line. */}
-      <section className="flex flex-col gap-[var(--space-5)]">
-        <div className="flex flex-col gap-[6px]">
-          <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>Planning for</p>
-          <div className="text-[26px] leading-[30px] font-extrabold sm:text-[30px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)" }}>
-            <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} big>
-              {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
-            </Menu>
-          </div>
-        </div>
-        <dl className="grid grid-cols-2 gap-[var(--space-4)] sm:max-w-[560px]">
-          <div className="flex flex-col gap-[4px]">
-            <dt className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Route</dt>
-            <dd className="m-0 text-[15px] leading-[20px] font-bold sm:text-[16px]" style={{ fontFamily: "var(--font-body)" }}>
-              <Menu open={open === "route"} onToggle={() => setOpen(open === "route" ? null : "route")} label={route.label} sub={route.time} disabled={routes.length < 2}>
-                {routes.map((r: Route) => <MenuItem key={r.id} on={r.id === route.id} label={r.label} sub={r.time} onClick={() => { setRoutePick((cur) => ({ ...cur, [careerId]: r.id })); setOpen(null); }} />)}
-              </Menu>
-            </dd>
-          </div>
-          <div className="flex flex-col gap-[4px]">
-            <dt className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Program</dt>
-            <dd className="m-0 text-[15px] leading-[20px] font-bold sm:text-[16px]" style={{ fontFamily: "var(--font-body)" }}>{program}</dd>
-          </div>
-        </dl>
-        <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[6px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span>Based on</span>
-          <span className="group relative">
-            <button
-              type="button"
-              onClick={toggleGpa}
-              aria-pressed={useGpa}
-              aria-describedby="gpa-tip"
-              className="dm-quiet flex min-h-[26px] cursor-pointer items-center gap-[4px] rounded-full border px-[9px] text-[12px] font-bold"
-              style={useGpa ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "transparent", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-            >
-              {useGpa ? <Check className="h-[12px] w-[12px]" strokeWidth={3} aria-hidden /> : <X className="h-[12px] w-[12px]" aria-hidden />}
-              {useGpa ? `${gpaLabel} GPA` : "GPA off"}
-            </button>
-            <span
-              id="gpa-tip"
-              role="tooltip"
-              className={`pointer-events-none absolute top-[calc(100%+8px)] left-0 z-30 w-max max-w-[260px] rounded-[var(--radius-md)] border px-[10px] py-[7px] text-[12.5px] leading-[17px] font-semibold shadow-lg transition-opacity duration-150 ${gpaNote ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
-              style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-            >
-              {gpaNote ?? (useGpa ? "Tap to turn off: see every school without Target, Safety, Reach." : "Tap to turn on: sort schools by your GPA.")}
-            </span>
-          </span>
-          <span>· {profile.states[0] ?? HOME_STATE_NAME}{profile.travelDistance ? ` · ${profile.travelDistance}` : ""}</span>
+      {/* Header: one sentence (the result), one caption (the inputs). Every
+         input is edited inside the "Why these schools?" sheet -- the page
+         itself holds one control, the career (direct feedback, 11 Sept 2026:
+         "there has to be a better way"). */}
+      <section className="flex flex-col gap-[8px]">
+        <h2 className="text-[24px] leading-[30px] font-extrabold sm:text-[28px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)" }}>
+          <span style={{ color: "var(--muted-foreground)" }}>Schools for </span>
+          <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} big>
+            {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
+          </Menu>
+        </h2>
+        <p className="flex flex-wrap items-center gap-x-[6px] gap-y-[4px] text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span>{route.label} in {program}</span>
           <span aria-hidden>·</span>
-          <button type="button" onClick={() => setWhy(true)} className="dm-link flex cursor-pointer items-center gap-[4px] font-bold" style={{ color: SOFT }}>
-            <Info className="h-[14px] w-[14px]" aria-hidden /> Why these schools?
-          </button>
+          <span>{useGpa ? `${gpaLabel} GPA` : "GPA off"}</span>
+          <span aria-hidden>·</span>
+          <span>{profile.states[0] ?? HOME_STATE_NAME}</span>
+          <span aria-hidden>·</span>
+          <button type="button" onClick={() => setWhy(true)} className="dm-link cursor-pointer font-bold" style={{ color: SOFT }}>Why these schools?</button>
           {saved.size > 0 && (
             <button type="button" onClick={onShowSaved} className="dm-link ml-auto flex cursor-pointer items-center gap-[2px] font-bold" style={{ color: SOFT }}>
-              Saved schools · {saved.size} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
+              Saved · {saved.size} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
             </button>
           )}
-        </div>
+        </p>
       </section>
 
       {shown.length === 0 && (
@@ -234,10 +190,13 @@ export function ForYouSchools({
 
       {shown.map((s) => (
         <section key={s.key} className="flex flex-col gap-[var(--space-3)]">
-          <div className="flex flex-col gap-[2px]">
-            <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>{RAIL_COPY[s.key]?.eyebrow ?? `${s.list.length} ${s.list.length === 1 ? "school" : "schools"}`}</p>
-            <h2 className="text-[22px] leading-[26px] font-extrabold sm:text-[26px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}>{s.title}</h2>
-            {RAIL_COPY[s.key]?.note && <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{RAIL_COPY[s.key]!.note}</p>}
+          {/* Netflix / Hotstar row header: title left, the count small on the right */}
+          <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+            <div className="flex min-w-0 flex-col gap-[2px]">
+              <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{s.title}</h2>
+              {RAIL_COPY[s.key]?.note && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{RAIL_COPY[s.key]!.note}</p>}
+            </div>
+            <span className="flex-none text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{s.list.length} {s.list.length === 1 ? "school" : "schools"}</span>
           </div>
           <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "start" || s.key === "trade"))}</ul>
         </section>
@@ -247,13 +206,17 @@ export function ForYouSchools({
         <WhySheet
           onClose={() => setWhy(false)}
           career={pathway.careerTitle}
-          route={`${route.label} · ${route.time}`}
+          routes={routes}
+          route={route}
+          onRoute={(id) => setRoutePick((cur) => ({ ...cur, [careerId]: id }))}
           program={program}
-          gpa={useGpa ? gpaLabel : null}
+          gpaLabel={gpaLabel}
+          useGpa={useGpa}
+          onToggleGpa={toggleGpa}
+          gpaType={stored.gpaType || "unsure"}
+          onGpaType={(v) => writeStudentProfile({ gpaType: v })}
           place={profile.states[0] ?? HOME_STATE_NAME}
           distance={profile.travelDistance || null}
-          twoYear={pathway.twoYearStart}
-          trade={pathway.trade}
         />
       )}
     </div>
@@ -293,41 +256,65 @@ function MenuItem({ label, sub, on, onClick }: { label: string; sub?: string; on
 }
 
 // ---- "Why these schools?" -------------------------------------------------
-// The Replit's sheet, as is: an eyebrow, "A clear starting point", a
-// checklist of what shaped the list, one CTA to adjust it.
+// The Replit's "A clear starting point" checklist, with the inputs editable
+// in place: the route, whether the GPA sorts the list, which kind of GPA it
+// is. The page stays a result; this sheet is where it gets tuned.
 
-function WhySheet({ onClose, career, route, program, gpa, place, distance }: { onClose: () => void; career: string; route: string; program: string; gpa: string | null; place: string; distance: string | null; twoYear?: boolean; trade?: boolean }) {
+function WhySheet({ onClose, career, routes, route, onRoute, program, gpaLabel, useGpa, onToggleGpa, gpaType, onGpaType, place, distance }: {
+  onClose: () => void; career: string; routes: Route[]; route: Route; onRoute: (id: string) => void; program: string;
+  gpaLabel: string; useGpa: boolean; onToggleGpa: () => void; gpaType: string; onGpaType: (v: string) => void; place: string; distance: string | null;
+}) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-  const items = [
-    `Your career: ${career}`,
-    `Your education path: ${route}`,
-    `Your recommended program: ${program}`,
-    gpa ? `Your academic profile: ${gpa} GPA` : "Your academic profile: not used",
-    `Your location preference: ${place}${distance ? ` · ${distance}` : ""}`,
-  ].filter(Boolean) as string[];
+  const rowCls = "flex flex-col gap-[8px] border-b pb-[12px] last:border-b-0 last:pb-0";
+  const label = (t: string) => <span className="flex items-center gap-[8px] text-[14px] font-bold"><Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} />{t}</span>;
+  const pill = (on: boolean) => ({ background: on ? ACCENT : "transparent", borderColor: on ? ACCENT : "var(--glass-border)", color: on ? "#fff" : "var(--foreground)" });
   return createPortal(
-    // Centred on every size, never bottom-anchored: a sheet flush with the
-    // bottom edge collided with the fixed nav and clipped the CTA (direct
-    // feedback, 11 Sept 2026). Capped height with its own scroll.
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-5 pb-[calc(20px+env(safe-area-inset-bottom))]" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", backdropFilter: "blur(10px)" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" />
-      <section role="dialog" aria-modal="true" aria-labelledby="why-schools" className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[420px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="why-schools" className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[440px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
         <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet absolute top-[12px] right-[12px] flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
         <div className="flex flex-col gap-[6px] pr-[40px]">
           <p className="text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: SOFT }}>Why these schools?</p>
           <h2 id="why-schools" className="text-[24px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>A clear starting point</h2>
         </div>
-        <ul className="flex list-none flex-col gap-[12px] p-0 text-[15px] leading-[20px] font-semibold">
-          {items.map((t) => (
-            <li key={t} className="flex items-start gap-[10px]">
-              <Check className="mt-[2px] h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} />
-              <span>{t}</span>
-            </li>
-          ))}
+        <ul className="flex list-none flex-col gap-[12px] p-0">
+          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>{label(`Your career: ${career}`)}</li>
+          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>
+            {label(`Your education path: ${route.label}`)}
+            {routes.length > 1 && (
+              <div role="radiogroup" aria-label="Education path" className="flex flex-wrap gap-[6px] pl-[24px]">
+                {routes.map((r) => (
+                  <button key={r.id} type="button" role="radio" aria-checked={r.id === route.id} onClick={() => onRoute(r.id)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[4px] rounded-full border px-[11px] text-[12.5px] font-bold" style={pill(r.id === route.id)}>
+                    {r.label}<span className="font-semibold" style={{ opacity: 0.75 }}>· {r.time}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </li>
+          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>{label(`Your recommended program: ${program}`)}</li>
+          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>
+            <div className="flex items-center justify-between gap-[var(--space-3)]">
+              {label(useGpa ? `Your academic profile: ${gpaLabel} GPA` : "Your academic profile: not used")}
+              <button type="button" role="switch" aria-checked={useGpa} aria-label="Sort by my GPA" onClick={onToggleGpa} className="relative inline-flex h-[24px] w-[42px] flex-none cursor-pointer items-center rounded-full transition-colors" style={{ background: useGpa ? ACCENT : "var(--glass-surface-2)" }}>
+                <span className="absolute size-[20px] rounded-full bg-white transition-transform" style={{ transform: `translateX(${useGpa ? 20 : 2}px)` }} />
+              </button>
+            </div>
+            {useGpa && (
+              <div className="flex flex-col gap-[6px] pl-[24px]">
+                <div role="radiogroup" aria-label="GPA type" className="flex flex-wrap gap-[6px]">
+                  {([["weighted", "Weighted"], ["unweighted", "Unweighted"], ["unsure", "Not sure"]] as const).map(([v, l]) => (
+                    <button key={v} type="button" role="radio" aria-checked={gpaType === v} onClick={() => onGpaType(v)} className="dm-quiet min-h-[32px] cursor-pointer rounded-full border px-[11px] text-[12.5px] font-bold" style={pill(gpaType === v)}>{l}</button>
+                  ))}
+                </div>
+                <p className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Weighted can go above 4.0, so we adjust it first. Not sure counts as unweighted.</p>
+              </div>
+            )}
+          </li>
+          <li className={rowCls} style={{ borderColor: "var(--glass-border)" }}>{label(`Your location preference: ${place}${distance ? ` · ${distance}` : ""}`)}</li>
         </ul>
         <Link href="/profile?tab=settings" className="dm-solid flex min-h-[48px] w-full items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>
           Adjust preferences <ChevronRight className="h-4 w-4" aria-hidden />

@@ -3,7 +3,6 @@
 import { useMemo, useSyncExternalStore } from "react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
-import { SMALL } from "@/components/career/CareerDetailExperience";
 import { COLLEGES, type College } from "./data";
 import { SchoolCard } from "./shared";
 import { HOME_STATE, pathwayFor, programMatcher, offersProgram } from "./pathway";
@@ -70,11 +69,9 @@ export function BrowseShelves({
     <div className="flex flex-col gap-[var(--space-7)]">
       {shelves.map((shelf) => (
         <section key={shelf.key} className="flex flex-col gap-[var(--space-3)]">
-          <div className="flex flex-col gap-[2px]">
-            <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[24px] sm:leading-[28px]" style={{ fontFamily: "var(--font-display)" }}>
-              {shelf.title}<span className="ml-[8px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{shelf.items.length}</span>
-            </h2>
-            {shelf.note && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{shelf.note}</p>}
+          <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+            <h2 className="min-w-0 text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{shelf.title}</h2>
+            <span className="flex-none text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{shelf.items.length} {shelf.items.length === 1 ? "school" : "schools"}</span>
           </div>
           <ul className="dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" aria-label={shelf.title}>
             {shelf.items.map((c) => (

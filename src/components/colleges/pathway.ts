@@ -118,6 +118,15 @@ export function parseGpa(value: string | null | undefined): number | null {
   return nums.reduce((a, b) => a + b, 0) / nums.length;
 }
 
+/** Colleges' averages are on an unweighted 4.0 scale, so a weighted GPA is
+ *  brought down before comparing (team doc, 11 Sept 2026: a weighted 3.6 got
+ *  B's and C's in hard classes; unweighted 3.6 got A's and B's). "Not sure"
+ *  is treated as unweighted, the conservative read. */
+export function effectiveGpa(gpa: number | null, gpaType: string): number | null {
+  if (gpa === null) return null;
+  return gpaType === "weighted" ? Math.min(4, Math.round((gpa - 0.4) * 10) / 10) : gpa;
+}
+
 /** Indicative bands, not predictions; the caveat travels with the label. */
 export function fitFor(c: College, gpa: number | null): Fit {
   if (c.admission === "open" || c.admitRate === null) return c.admission === "open" ? "Open admission" : "Fit unavailable";
@@ -163,7 +172,7 @@ export function costLine(c: College): string | null {
 }
 
 export function schoolsFor(pathway: Pathway, profile: StudentProfile): SchoolGroups {
-  const gpa = parseGpa(profile.gpa);
+  const gpa = effectiveGpa(parseGpa(profile.gpa), profile.gpaType);
   const rx = PROGRAM_MATCH[pathway.careerId] ?? new RegExp(pathway.program.split(/[\s,/]+/)[0], "i");
   const preferStates = new Set(profile.states.length ? profile.states.map((s) => s.toLowerCase()) : []);
   const used = new Set<string>();
