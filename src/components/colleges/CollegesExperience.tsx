@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeftRight, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowLeftRight, Briefcase, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, CollegeCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
@@ -138,36 +138,56 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
       </div>
       <DesktopNavigation active="Explore" />
-      <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
-        {/* Reachable from many places (nav, quick links, Profile, Career
-           Report, global search) with no single correct parent, so this is
-           an honest "nowhere to go" default (direct feedback, 9 Sept 2026:
-           back should never guess a wrong parent) -- router.back() above it
-           in BackButton already returns to the real previous page whenever
-           real navigation history exists, which is true for every one of
-           those entries; this only fires with none at all. */}
-        <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/home" /><Wordmark /></span>
-        <QuickLinksMenu />
-      </header>
-
-      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
-        {/* Desktop back button removed 9 Sept 2026: the Careers/Schools tab
-           strip right under the H1 below already gets you back to Explore,
-           so a separate Back control here was a redundant second way to do
-           the same thing. Mobile keeps its own Back (above, in the mobile
-           header) since mobile doesn't render the tab strip. */}
-        <div className="flex flex-col gap-[var(--space-2)]">
-          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a school</h1>
-          <ExploreSectionTabs active="colleges" />
+      {/* Mobile top tabs: the same bar Explore Careers has (FOR YOU /
+         BROWSE ALL as text tabs, icons at the right), so the two Explore
+         screens read as one (direct feedback, 10 Sept 2026: "the toggles
+         on explore/careers and schools need to be the same, positions
+         etc."). The briefcase goes back to Careers the way Careers' cap
+         comes here. */}
+      <div className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[160px] md:hidden">
+        <button
+          type="button"
+          onClick={() => setView("foryou")}
+          className="dm-link cursor-pointer text-[16px] font-bold tracking-wide uppercase"
+          style={{ fontFamily: "var(--font-body)", color: view === "foryou" ? "var(--foreground)" : "var(--muted-foreground)" }}
+        >
+          For You
+        </button>
+        <button
+          type="button"
+          onClick={() => setView("browse")}
+          className="dm-link cursor-pointer text-[16px] font-bold tracking-wide uppercase"
+          style={{ fontFamily: "var(--font-body)", color: view === "browse" ? "var(--foreground)" : "var(--muted-foreground)" }}
+        >
+          Browse All
+        </button>
+        <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center gap-[10px]">
+          <Link
+            href="/explore"
+            aria-label="Explore careers"
+            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+            style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          >
+            <Briefcase className="h-4 w-4" />
+          </Link>
+          <QuickLinksMenu />
         </div>
+      </div>
 
-        {/* The same pill Explore Careers uses, imported rather than redrawn
-           (direct feedback, 10 Sept 2026: "identical ... keep it consistent"). */}
-        <div className="flex"><ForYouBrowseToggle tab={view} onTab={setView} /></div>
+      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-[72px] pb-[140px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
+        {/* Desktop header, laid out exactly like Explore Careers': title and
+           the Careers/Schools strip on the left, the For you / Browse All
+           pill on the right. Phones use the top bar above instead. */}
+        <div className="hidden w-full items-center justify-between gap-[var(--space-6)] md:flex">
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Find a school</h1>
+            <ExploreSectionTabs active="colleges" />
+          </div>
+          <ForYouBrowseToggle tab={view} onTab={setView} />
+        </div>
 
         {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} />}
         {view === "browse" && (<>
-
         {/* the search: one box, results change as you type, and the door to
            every filter fixed beside it (never off the edge of a scroll row) */}
         <div className="flex items-stretch gap-[var(--space-3)]">

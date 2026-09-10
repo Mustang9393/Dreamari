@@ -6566,3 +6566,15 @@ labelled rows instead of one sentence: "Explore Careers: Salary, education,
 daily life, and pathways." (briefcase) and "Explore Schools: Colleges,
 trade schools, programs, cost, and admissions." (graduation cap). Structure
 otherwise unchanged. Verified on 375x812: card ends at 617 of 812.
+
+### 10 Sept 2026 -- Schools header matches Careers exactly
+
+Direct feedback: "the toggles on explore/careers and schools need to be the
+same, positions etc." Schools now uses Careers' layout verbatim: on phones
+an absolute 56px top bar with FOR YOU / BROWSE ALL text tabs (left) and
+icons on the right (briefcase -> /explore, mirroring Careers' cap ->
+/colleges; quick-links menu), title and Careers/Schools strip hidden; from
+md the title + strip sit left and the shared `ForYouBrowseToggle` pill sits
+right on the same row. Measured identical on 375x812 (tabs at 20,4 and
+111,4) and 1280x800 (pill 1009-1219 at y 126, h1 y 102). The old
+Back + wordmark mobile header is gone from Schools.
