@@ -7206,3 +7206,26 @@ Verified: /flow walk, /explore -> /play -> /explore lands at scrollY 0,
   other shelves' titles already say it, so no chip there.
 Verified 1280: Target/Safety/Reach = Direct path; Lower-cost = 2-year start +
 Open admission.
+
+## 2026-09-11 · Schools: photos for every school, counts in brackets, Reach made actionable
+- Every one of the 30 schools now has a campus photo (`public/images/colleges`,
+  manifest regenerated). 18 replaced or added from Wikimedia Commons (CC /
+  public domain, credited in credits.json), 3 from the schools' own sites
+  (Bergen, Northern State, Sisseton Wahpeton: all rights reserved, demo use),
+  and 3 stand-ins where no campus photo exists anywhere fetchable, noted in
+  credits: Mitchell Tech (Corn Palace), Mount Marty (Yankton's Meridian
+  Bridge), Sinte Gleska (South Dakota prairie sunset). Stronger photos
+  replaced the old ones for Rutgers, Montclair, NJIT, Princeton, Rowan,
+  SDSU, USD, Augustana, SD Mines, Dakota Wesleyan.
+- The no-photo fallback (now unused) shows a crisp mark on a brand field,
+  not a blurred mark.
+- Row counts sit in brackets beside the title, "Target (4)", For you and
+  Browse all.
+- Route chip stays wherever it is true (Direct path on every 4-year card).
+- Reach row: note "A 3.9 GPA would make these targets. You're at 3.7." and
+  each Reach card carries "Target at <GPA>" (`targetGpaFor` in pathway.ts,
+  from the fit bands), only while the student's GPA is below it.
+- School card hover: 4px lift, 1.2% grow, so it no longer covers the row
+  title above.
+Verified 1280: rows, counts, Reach note and chip, hover. Next image cache
+cleared; browsers may still show old photos until a hard refresh.

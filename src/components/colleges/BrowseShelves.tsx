@@ -72,10 +72,9 @@ export function BrowseShelves({
     <div className="flex flex-col gap-[var(--space-7)]">
       {shelves.map((shelf) => (
         <section key={shelf.key} className="flex flex-col gap-[var(--space-3)]">
-          <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-            <h2 className="min-w-0 text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{shelf.title}</h2>
-            <span className="flex-none text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{shelf.items.length} {shelf.items.length === 1 ? "school" : "schools"}</span>
-          </div>
+          <h2 className="min-w-0 text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
+            {shelf.title} <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({shelf.items.length})</span>
+          </h2>
           <ul className="dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" aria-label={shelf.title}>
             {shelf.items.map((c) => (
               <li key={c.slug} className="w-[min(86vw,320px)] flex-none">

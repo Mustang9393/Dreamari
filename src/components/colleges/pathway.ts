@@ -140,6 +140,17 @@ export function fitFor(c: College, gpa: number | null): Fit {
   return gpa >= 3.0 ? "Safety" : gpa >= 2.5 ? "Target" : "Reach";
 }
 
+/** The GPA at which this school would count as a Target under fitFor's
+ *  bands; null where GPA plays no part (open admission, no rate). */
+export function targetGpaFor(c: College): number | null {
+  if (c.admission === "open" || c.admitRate === null) return null;
+  const r = c.admitRate;
+  if (r < 25) return 3.9;
+  if (r < 50) return 3.5;
+  if (r < 75) return 3.0;
+  return 2.5;
+}
+
 function realProgrammes(c: College): string[] | null {
   if (c.detail && !c.detail.sample) return c.detail.programmes.map((p) => p.name);
   return null;

@@ -1390,3 +1390,11 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   .poster-card:hover .poster-cue, .poster-card:focus-visible .poster-cue { opacity: 1; transform: translate(-50%, -50%) scale(1); transition-delay: 0.16s; }
 }
 @media (prefers-reduced-motion: reduce) { .poster-card, .poster-card .poster-photo, .poster-cue, .poster-dim { transition: none; } }
+
+/* School cards are big (320px wide, ~420px tall): the poster hover's 9% grow
+   and 10px lift pushed them over the row title above (direct feedback, 11
+   Sept 2026). A gentler lift, and the card stays under its heading. */
+@media (hover: hover) {
+  .school-card.poster-card:hover, .school-card.poster-card:focus-visible { transform: translateY(-4px) scale(1.012); }
+  .school-card.poster-card:hover .poster-photo { transform: scale(1.03); }
+}

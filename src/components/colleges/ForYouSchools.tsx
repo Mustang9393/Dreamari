@@ -12,7 +12,7 @@ import { BIG, PANEL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SchoolCard, SOFT } from "./shared";
 import { COLLEGES } from "./data";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, type Route, type SchoolMatch } from "./pathway";
+import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, targetGpaFor, type Route, type SchoolMatch } from "./pathway";
 
 // Explore Schools, "For you". The Replit's architecture, delivered leaner
 // (direct feedback, 11 Sept 2026): the Career -> Route -> Program breadcrumb
@@ -144,16 +144,27 @@ export function ForYouSchools({
     // Sept 2026: "everything shows Direct path, the Replit has other
     // signals"): community colleges as a 2-year start, whose cards carry
     // 2-YEAR START and OPEN ADMISSION. The fit rows above keep no chips
-    // because their titles say it. The Replit's "More schools for your path"
-    // (4-year schools we cannot place by GPA) is Browse-only here: for the
-    // demo student it surfaced three schools 1,400 miles away with single
-    // digit finish rates, which read as a mistake, not variety.
+    // because their titles say it. "More schools for your path" (4-year
+    // schools we cannot place by GPA) follows, per the Replit and direct
+    // feedback ("keep the more schools for your path row").
     if (g.start2.length) sections.push({ key: "start", title: "Lower-cost ways to start", list: g.start2.slice(0, 4) });
+    if (g.unplaced.length) sections.push({ key: "more", title: "More schools for your path", list: g.unplaced.slice(0, 4) });
   } else if (route.institution === "2-year") sections.push({ key: "start", title: "Lower-cost ways to start", list: schools.list.slice(0, 8) });
   else sections.push({ key: "trade", title: "Trade and technical programs", list: schools.list.slice(0, 8) });
   const shown = sections.map((s) => ({ ...s, list: s.list.filter((m) => !hidden.has(m.college.slug)) })).filter((s) => s.list.length > 0);
+  // Reach, made actionable (direct feedback, 11 Sept 2026: "if you get your
+  // GPA up by x these become realistic"): the row note names the GPA that
+  // would turn the whole row into targets, and each card carries its own
+  // "Target at 3.9" chip. Only while the student's GPA is below it.
+  const reachTargets = (schools.fit?.reach ?? []).map((m) => targetGpaFor(m.college)).filter((g): g is number => g !== null && gpa !== null && g > gpa);
+  const reachNote = reachTargets.length && gpa !== null ? `A ${Math.max(...reachTargets).toFixed(1)} GPA would make these targets. You’re at ${gpaLabel}.` : undefined;
   const RAIL_COPY: Record<string, { note?: string }> = {
     start: { note: "Start here, then continue toward a 4-year degree." },
+    reach: { note: reachNote },
+  };
+  const targetChip = (m: SchoolMatch) => {
+    const need = targetGpaFor(m.college);
+    return m.fit === "Reach" && need !== null && gpa !== null && need > gpa ? { label: `Target at ${need.toFixed(1)}`, tone: "target" as const } : undefined;
   };
 
   const whyFor = (m: SchoolMatch) => {
@@ -178,6 +189,7 @@ export function ForYouSchools({
         fit={showFit && FIT_WORDS[m.fit] ? { label: FIT_WORDS[m.fit], tone: m.fit === "Reach" ? "reach" : m.fit === "Target" ? "target" : m.fit === "Safety" ? "safety" : "open" } : undefined}
         why={whyFor(m)}
         onDismiss={() => dismiss(m.college.slug)}
+        extraChip={targetChip(m)}
       />
     </li>
   );
@@ -255,12 +267,13 @@ export function ForYouSchools({
       {shown.map((s) => (
         <section key={s.key} className="flex flex-col gap-[var(--space-3)]">
           {/* Netflix / Hotstar row header: title left, the count small on the right */}
-          <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-            <div className="flex min-w-0 flex-col gap-[2px]">
-              <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>{s.title}</h2>
-              {RAIL_COPY[s.key]?.note && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{RAIL_COPY[s.key]!.note}</p>}
-            </div>
-            <span className="flex-none text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{s.list.length} {s.list.length === 1 ? "school" : "schools"}</span>
+          {/* Count in brackets beside the title, not at the far edge (direct
+             feedback, 11 Sept 2026). */}
+          <div className="flex min-w-0 flex-col gap-[2px]">
+            <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
+              {s.title} <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({s.list.length})</span>
+            </h2>
+            {RAIL_COPY[s.key]?.note && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{RAIL_COPY[s.key]!.note}</p>}
           </div>
           <ul className={rail} aria-label={s.title}>{s.list.map((m) => card(m, s.key === "start" || s.key === "trade"))}</ul>
         </section>

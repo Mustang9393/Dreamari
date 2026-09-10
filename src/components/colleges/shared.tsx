@@ -270,6 +270,7 @@ export function SchoolCard({
   fit,
   why,
   onDismiss,
+  extraChip,
 }: {
   c: College;
   saved: boolean;
@@ -277,7 +278,10 @@ export function SchoolCard({
   compared: boolean;
   onCompare?: () => void;
   href?: string;
-  /** the programme that lines up with the student's path */
+  /** the programme that lines up with the student's path; its route chip
+   *  (Direct path / 2-year start / Trade & technical) always shows with it,
+   *  even when a whole row says the same (direct feedback, 11 Sept 2026:
+   *  "if it's logically there let it stay") */
   program?: string;
   /** Target / Safety / Reach / Open admission, only where the rail title doesn't already say it */
   fit?: CardBadge;
@@ -285,6 +289,8 @@ export function SchoolCard({
   why?: string;
   /** "Not for me": hides the school from For you */
   onDismiss?: () => void;
+  /** one more chip after the route and fit chips, e.g. "Target at 3.9" */
+  extraChip?: CardBadge;
 }) {
   const [showWhy, setShowWhy] = useState(false);
   const img = collegeImage(c);
@@ -299,7 +305,7 @@ export function SchoolCard({
   const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.85)" };
   return (
     <article
-      className="dm-tap poster-card relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border"
+      className="dm-tap poster-card school-card relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border"
       style={{ background: "var(--card)", borderColor: compared ? ACCENT : "var(--glass-border)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-body)" }}
     >
       {/* the photo runs down behind the name and place, blurring and fading
@@ -309,8 +315,12 @@ export function SchoolCard({
         {img ? (
           <Image src={img} alt="" fill sizes="(min-width: 1024px) 340px, 86vw" className="object-cover" />
         ) : (
-          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 38%, var(--card)) 0%, var(--card) 70%, color-mix(in srgb, var(--hero-accent-teal) 30%, var(--card)) 100%)" }}>
-            {mark && <Image src={mark} alt="" fill sizes="480px" className="object-contain opacity-[0.5] blur-[10px]" style={{ transform: "scale(1.8)" }} />}
+          /* No campus photo yet: a quiet brand field with the mark crisp and
+             small at its centre. The blown-up blurred mark it replaces read
+             as a broken image (direct feedback, 11 Sept 2026). */
+          <span className="absolute inset-0 flex items-center justify-center" style={{ background: "radial-gradient(120% 90% at 30% 20%, color-mix(in srgb, var(--primary) 34%, var(--card)) 0%, var(--card) 60%), linear-gradient(160deg, var(--card), color-mix(in srgb, var(--hero-accent-teal) 26%, var(--card)))" }}>
+            <span className="pointer-events-none absolute inset-0" style={{ background: "repeating-linear-gradient(135deg, rgba(255,255,255,0.028) 0 2px, transparent 2px 14px)" }} />
+            {mark && <span className="relative mb-[36px] flex size-[72px] items-center justify-center rounded-full bg-white/95" style={{ boxShadow: "0 10px 30px -10px rgba(0,0,0,0.6)" }}><Image src={mark} alt="" width={48} height={48} className="object-contain" /></span>}
           </span>
         )}
         <CardProgressiveBlur size="62%" />
@@ -353,7 +363,7 @@ export function SchoolCard({
           </div>
         </div>
 
-        {(program || fit) && (
+        {(program || fit || extraChip) && (
           <div className="flex min-h-[24px] flex-wrap items-center gap-x-[8px] gap-y-[6px]">
             {program && (
               <span className="flex min-w-0 items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
@@ -362,6 +372,7 @@ export function SchoolCard({
             )}
             {program && <Chip label={PATH_WORD[c.level]} tone="path" />}
             {fit && <Chip label={fit.label} tone={fit.tone} />}
+            {extraChip && <Chip label={extraChip.label} tone={extraChip.tone} />}
           </div>
         )}
 
