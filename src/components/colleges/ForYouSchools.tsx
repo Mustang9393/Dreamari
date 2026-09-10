@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown, ChevronRight, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile, writeStudentProfile } from "@/lib/studentProfile";
 import { ACADEMIC_RECORD } from "@/components/profile/report-data";
@@ -154,32 +154,38 @@ export function ForYouSchools({
   const rail = "dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 
   return (
-    <div className="flex flex-col gap-[var(--space-8)]">
-      {/* Header: one sentence (the result), one caption (the inputs). Every
-         input is edited inside the "Why these schools?" sheet -- the page
-         itself holds one control, the career (direct feedback, 11 Sept 2026:
-         "there has to be a better way"). */}
-      <section className="flex flex-col gap-[8px]">
+    <div className="flex flex-col gap-[var(--space-10)]">
+      {/* Header: one row. The result on the left ("Schools for <career v>",
+         the page's one control) and the inputs on the right as a single quiet
+         chip that opens the "Why these schools?" sheet, where they are edited.
+         Was a heading plus a caption line under it; with the page title and
+         section tabs above, that stacked five text tiers before the first
+         card (direct feedback, 11 Sept 2026: "too many text elements so close
+         together"). On phones the chip wraps under the heading. */}
+      <section className="flex flex-wrap items-center justify-between gap-x-[var(--space-6)] gap-y-[var(--space-3)]">
         <h2 className="text-[24px] leading-[30px] font-extrabold sm:text-[28px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)" }}>
           <span style={{ color: "var(--muted-foreground)" }}>Schools for </span>
           <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} big>
             {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
           </Menu>
         </h2>
-        <p className="flex flex-wrap items-center gap-x-[6px] gap-y-[4px] text-[14px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span>{route.label} in {program}</span>
-          <span aria-hidden>·</span>
-          <span>{useGpa ? `${gpaLabel} GPA` : "GPA off"}</span>
-          <span aria-hidden>·</span>
-          <span>{profile.states[0] ?? HOME_STATE_NAME}</span>
-          <span aria-hidden>·</span>
-          <button type="button" onClick={() => setWhy(true)} className="dm-link cursor-pointer font-bold" style={{ color: SOFT }}>Why these schools?</button>
+        <div className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
+          <button
+            type="button"
+            onClick={() => setWhy(true)}
+            aria-label={`Why these schools? ${route.label} in ${program}, ${useGpa ? `${gpaLabel} GPA` : "GPA off"}, ${profile.states[0] ?? HOME_STATE_NAME}`}
+            className="dm-quiet flex min-h-[36px] max-w-full cursor-pointer items-center gap-[8px] rounded-[18px] border px-[14px] py-[8px] text-left text-[13px] leading-[18px] font-semibold sm:whitespace-nowrap"
+            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+          >
+            <SlidersHorizontal className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: SOFT }} />
+            <span>{route.label} in {program} · {useGpa ? `${gpaLabel} GPA` : "GPA off"} · {profile.states[0] ?? HOME_STATE_NAME}</span>
+          </button>
           {saved.size > 0 && (
-            <button type="button" onClick={onShowSaved} className="dm-link ml-auto flex cursor-pointer items-center gap-[2px] font-bold" style={{ color: SOFT }}>
+            <button type="button" onClick={onShowSaved} className="dm-link flex cursor-pointer items-center gap-[2px] text-[13px] leading-[18px] font-bold whitespace-nowrap" style={{ color: SOFT }}>
               Saved · {saved.size} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
             </button>
           )}
-        </p>
+        </div>
       </section>
 
       {shown.length === 0 && (

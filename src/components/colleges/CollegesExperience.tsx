@@ -183,7 +183,10 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
            pill on the right. Phones use the top bar above instead. */}
         <div className="hidden w-full items-center justify-between gap-[var(--space-6)] md:flex">
           <div className="flex flex-col gap-[var(--space-2)]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore Schools</h1>
+            {/* "Explore", not "Explore Schools": the Schools tab right under it
+               already says which section this is, and the repeated word was
+               one more text tier in an over-stacked header (11 Sept 2026). */}
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
             <ExploreSectionTabs active="colleges" />
           </div>
           <ForYouBrowseToggle tab={view} onTab={setView} />

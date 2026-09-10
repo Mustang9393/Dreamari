@@ -6943,3 +6943,17 @@ visible without horizontal scrolling.
   word or band overflow on Explore Browse or Home.
 Gate: eslint + tsc clean. Verified 375x812 and desktop; /career/hairstylist
 and /career/sheet-metal-worker render full pages. Not pushed.
+
+## 2026-09-11 · Explore Schools header: one row instead of five text tiers
+Direct feedback (desktop screenshot): "too many text elements so close
+together". The header stacked page title, section tabs, "Schools for X",
+the inputs caption and the first row header before any card.
+- Desktop title is "Explore" (same as Careers); the Schools tab under it
+  already names the section.
+- `ForYouSchools` header is one row: "Schools for <career v>" left, and one
+  quiet chip right (sliders icon + "Bachelor's degree in Finance · 3.7 GPA ·
+  New Jersey") that opens the Why these schools? sheet, where those inputs
+  are edited. Saved · n sits beside it when there are saves. On phones the
+  chip wraps under the heading and to two lines.
+- Column gap 32 -> 40px so the header and the rails breathe like Careers.
+Gate clean; verified 1280x800 and 375x812. Not pushed.
