@@ -8,7 +8,7 @@ import type { StepProps } from "./steps";
 // <input type=range> drives everything (keyboard + screen-reader + touch for free);
 // the visuals are custom-painted around it: a gradient fill that grows with the
 // value, tick dots that light as the thumb passes them, a glowing thumb, and
-// clickable stop labels that jump the slider. Discrete stops, one per COST_STOPS entry (7 as of 2026-09-03).
+// clickable stop labels that jump the slider. Discrete stops, one per COST_STOPS entry (6 as of 2026-09-10).
 
 const AMBER = "var(--color-world-business-money-office)";
 
@@ -29,7 +29,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
       <CardHud percent={percent} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-      <QuestionHeading sprite={sprite} title="How much would you consider spending on your education after high school?" />
+      <QuestionHeading sprite={sprite} title="What’s your yearly school budget?" subtitle="Choose what feels realistic for you." />
 
       <div
         className={`rounded-[var(--radius-lg)] border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
@@ -78,7 +78,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
             max={COST_STOPS.length - 1}
             step={1}
             value={value}
-            aria-label="How much would you consider spending on your education after high school?"
+            aria-label="What’s your yearly school budget?"
             aria-valuetext={COST_STOPS[value]}
             onChange={(e) => setIndex(Number(e.target.value))}
             className="absolute inset-0 w-full cursor-pointer opacity-0"
@@ -106,13 +106,12 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
           {(
             // two-line breaks of COST_STOPS, in the same order (one entry per stop)
             [
-              ["As low as", "possible"],
-              ["$25,000", "or less"],
-              ["$50,000", "or less"],
-              ["$100,000", "or less"],
-              ["Over $100,000", "for the right path"],
-              ["Cost is not a", "major factor for me"],
-              ["I’m not", "sure yet"],
+              ["$25K", "or less"],
+              ["$50K", "or less"],
+              ["$75K", "or less"],
+              ["$100K", "or less"],
+              ["Cost isn’t a", "major factor"],
+              ["I’m not", "sure"],
             ] as const
           ).map(([top, bottom], i) => {
             const isActive = touched && i === index;

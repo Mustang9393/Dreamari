@@ -6525,3 +6525,12 @@ Verified desktop: Investment Banking -> Bachelor's -> Finance, 21 schools,
 1 reach / 1 target / 14 safety / 2 two-year starts. Next: Saved as a
 decision board (My plan strip, #1 school), miles from home once schools have
 coordinates, Browse all category shelves.
+
+### 10 Sept 2026 -- Build cost question is a yearly budget
+
+Per Slack (10 Sept 2026): the question is now "What’s your yearly school
+budget?" with helper "Choose what feels realistic for you." and six stops:
+$25K or less / $50K or less / $75K or less / $100K or less / Cost isn’t a
+major factor / I’m not sure (`COST_STOPS` in build/types.ts; labels and
+aria text in CostStep.tsx). The old wording left it unclear whether the
+figure meant one year or all of school. Nothing else reads costIndex.

@@ -85,14 +85,16 @@ export const EDUCATION_OPTIONS: { title: string }[] = [
 ];
 
 // Slider stop labels, in track order. Index -1 = untouched ("Select a range").
+// A YEARLY budget (Slack, 10 Sept 2026): the old wording left it unclear
+// whether the number meant one year, two, or all of school; one clear frame
+// works across 4-year colleges, community colleges and trade schools.
 export const COST_STOPS = [
-  "As low as possible",
-  "$25,000 or less",
-  "$50,000 or less",
-  "$100,000 or less",
-  "Over $100,000 for the right path",
-  "Cost is not a major factor for me",
-  "I’m not sure yet",
+  "$25K or less",
+  "$50K or less",
+  "$75K or less",
+  "$100K or less",
+  "Cost isn’t a major factor",
+  "I’m not sure",
 ];
 
 export const GRADE_OPTIONS = ["8th grade", "9th grade", "10th grade", "11th grade", "12th grade", "College", "Other"];
