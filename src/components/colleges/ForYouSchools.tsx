@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { ChevronRight, HelpCircle, X } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
@@ -159,11 +158,6 @@ export function ForYouSchools({
           <div className="flex flex-col gap-[4px]">
             {heading(g.label, g.list.length)}
             {g.note && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{g.note}</p>}
-            {g.key === "all" && (
-              <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>
-                Want to see how likely each one is for you? <Link href="/profile?tab=settings" className="dm-link font-bold" style={{ color: SOFT }}>Add your GPA</Link>{" "}and we&rsquo;ll sort them.
-              </p>
-            )}
           </div>
           <ul className={grid}>{visible(g.key, g.list).map(card)}</ul>
           {showAll(g.key, g.list)}
