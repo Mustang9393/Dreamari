@@ -84,7 +84,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
       <CardHud percent={percent} almostDone={almostDone} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-      <QuestionHeading sprite={sprite} title="Where are you open to going?" subtitle="Choose 1 state." />
+      <QuestionHeading sprite={sprite} title="Where are you open to going to school?" subtitle="Choose 1 state." />
 
       {/* Map | List segmented toggle. */}
       <div
