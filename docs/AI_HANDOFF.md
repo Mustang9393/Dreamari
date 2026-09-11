@@ -7566,3 +7566,4 @@ Verified locally: both POSTs 200, sent and survey states render.
   recommendation copy is the prototype's and says "your school".
 - Maisha's prototype went blank mid-review; Engagement and Impact pages not
   yet read.
+- Callouts (15 / 44 / 30) removed again: not on the reference and they read as small numbers (direct feedback).

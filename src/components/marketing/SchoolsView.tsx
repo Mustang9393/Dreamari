@@ -10,9 +10,6 @@ import { DemoRequestForm } from "./DemoRequestForm";
 import { DO_COPY, DOMark } from "./DreamOpportunity";
 import { PartnerLogoGrid } from "./PartnerTicker";
 import { AudienceIllustration, BuildIllustration, ConnectIllustration, DashboardIllustration, ExploreIllustration, Grad, HERO_CAREERS, HeroIllustration, ImmerseIllustration, MatchIllustration, SkillsTicker, type HeroCareerSlug } from "./SchoolsIllustrations";
-import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
-import { INTEREST_WORLDS } from "@/components/build/types";
-import { COLLEGES } from "@/components/colleges/data";
 import { useRevealOnScroll } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
 
@@ -234,13 +231,6 @@ function StageGallery() {
   );
 }
 
-// Three real counts, the reference's spec callouts: number, caption.
-const CALLOUTS = [
-  { n: INTEREST_WORLDS.length, k: "career worlds", note: "from Health & Medicine to Driving, Flying & Shipping" },
-  { n: ALL_CATALOG_CAREERS.length, k: "careers to explore", note: "pay, education, daily life and pathways" },
-  { n: COLLEGES.length, k: "colleges and trade schools", note: "cost, admissions and the programs that fit" },
-];
-
 // ---------------------------------------------------------------------------
 // The view
 // ---------------------------------------------------------------------------
@@ -338,17 +328,6 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
             <div className="mt-12 sm:mt-14">
               <StageGallery />
             </div>
-          </Reveal>
-          <Reveal>
-            <ul className="mt-16 grid grid-cols-1 gap-8 border-t pt-12 sm:grid-cols-3 sm:gap-10" style={{ borderColor: "var(--border)" }}>
-              {CALLOUTS.map((c) => (
-                <li key={c.k} className="flex flex-col">
-                  <span className="text-[clamp(48px,5vw,72px)] leading-none font-extrabold tracking-[-0.03em] tabular-nums"><Grad>{c.n}</Grad></span>
-                  <span className="mt-3 text-[17px] leading-tight font-bold" style={{ color: "var(--foreground)" }}>{c.k}</span>
-                  <span className="mt-1.5 max-w-[26ch] text-[14.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{c.note}</span>
-                </li>
-              ))}
-            </ul>
           </Reveal>
         </div>
       </section>
