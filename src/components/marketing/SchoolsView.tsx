@@ -378,17 +378,6 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
               <p className="mt-5 max-w-[560px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", textWrap: "pretty" }}>
                 See how Dreamari can support career exploration, skill development, and student guidance in your school or organization.
               </p>
-              <ul className="mt-8 flex flex-wrap gap-x-7 gap-y-3">
-                {[
-                  { label: "Quick setup", dot: "#f0b429" },
-                  { label: "Custom onboarding", dot: "#22d3ee" },
-                ].map((item) => (
-                  <li key={item.label} className="flex items-center gap-2.5 text-[14.5px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>
-                    <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: item.dot }} />
-                    {item.label}
-                  </li>
-                ))}
-              </ul>
             </Reveal>
           </div>
           <Reveal className="lg:col-span-7">

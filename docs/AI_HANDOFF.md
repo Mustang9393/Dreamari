@@ -7513,3 +7513,4 @@ the first submit, never a multi-step "Next" before it.
   Env vars to set on Vercel: DEMO_REQUEST_WEBHOOK or RESEND_API_KEY (+
   DEMO_REQUEST_FROM on a verified domain), DEMO_REQUEST_TO.
 Verified locally: both POSTs 200, sent and survey states render.
+- Demo section: the reference's "Quick setup" / "Custom onboarding" bullets removed (direct feedback: they read as nothing).
