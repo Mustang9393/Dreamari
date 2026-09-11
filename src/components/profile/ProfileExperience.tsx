@@ -1046,14 +1046,14 @@ function Top3Tab({
               <div className="mt-[var(--space-1)] grid grid-cols-2 gap-[var(--space-2)]">
                 <Link
                   href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
-                  aria-label={`Play a Day in the Life: ${career.title}`}
-                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border py-[4px] pr-[10px] pl-[5px] text-[13px] leading-[15px] font-bold"
+                  aria-label={`Play ${career.title}`}
+                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
                   style={{ background: `color-mix(in srgb, ${accent} 20%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, color: "var(--foreground)" }}
                 >
                   <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: accent, borderColor: "rgba(255,255,255,0.35)" }}>
                     <Play className="ml-[2px] h-[14px] w-[14px]" fill="currentColor" style={{ color: "#fff" }} aria-hidden />
                   </span>
-                  <span className="min-w-0">Play a Day in the Life</span>
+                  <span className="min-w-0 truncate">Play</span>
                 </Link>
                 <Link
                   href={`/career/${id}`}
