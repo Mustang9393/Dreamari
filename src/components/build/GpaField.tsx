@@ -5,7 +5,7 @@ import { ChevronDown, Check, X } from "lucide-react";
 import { GPA_BELOW, GPA_HIGHER, GPA_NOT_USED, GPA_SCALE } from "./types";
 import styles from "./GpaField.module.css";
 
-const choices = [GPA_BELOW, ...GPA_SCALE.slice(1, -1), GPA_HIGHER];
+const choices = [GPA_HIGHER, ...GPA_SCALE.slice(1, -1).reverse(), GPA_BELOW];
 const normalize = (value: string) => value === "2.0" ? GPA_BELOW : value === "4.0" ? GPA_HIGHER : value;
 
 /** Exact answers stay out of the form until requested. The native dialog

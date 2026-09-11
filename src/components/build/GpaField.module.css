@@ -21,7 +21,13 @@
 .boundary[aria-pressed="true"] .check { display: block; }
 .trigger:focus-visible, .choice:focus-visible, .close:focus-visible, .optOut input:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 3px; }
 @media (max-width: 639px) {
-  .dialog { left: 12px; top: auto; bottom: 12px; width: calc(100vw - 24px); max-height: calc(100dvh - 24px); border-radius: 24px; }
+  /* No longer forced to the bottom of the screen (top: auto; bottom: 12px)
+   * -- that always docked the picker at the very bottom regardless of
+   * where the GPA field actually sat on the page (direct feedback:
+   * "goes to the bottom of the screens... we should bring it up"). It
+   * now uses the same anchored-below-the-field --picker-top as desktop,
+   * just with mobile's own width/radius. */
+  .dialog { left: 12px; width: calc(100vw - 24px); max-height: calc(100dvh - 24px); border-radius: 24px; }
   .panel { padding: 20px 20px max(20px, env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) { .choice { transition: none; } }
