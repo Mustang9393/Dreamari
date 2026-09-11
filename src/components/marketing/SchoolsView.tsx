@@ -28,6 +28,14 @@ type SchoolsViewProps = {
 // ---------------------------------------------------------------------------
 
 const AUDIENCES = ["Schools", "School Districts", "Nonprofits", "Educational Institutions"];
+// The reference's per-audience copy, verbatim (dashes to commas), switching
+// with the tab alongside the graphic (direct feedback, 11 Sept 2026).
+const AUDIENCE_COPY: Record<string, { title: string; body: string }> = {
+  Schools: { title: "Give every student a clearer path forward.", body: "Help students explore their options, connect learning to careers, and plan their next steps, with visibility for the educators guiding them." },
+  "School Districts": { title: "Bring career readiness to every school.", body: "Support a shared approach to career exploration and planning, with student progress reporting across your district." },
+  Nonprofits: { title: "Turn career exposure into ongoing exploration.", body: "Extend your programming with interactive career experiences. Track participation and progress to show the work your program makes possible." },
+  "Educational Institutions": { title: "Connect education to what comes next.", body: "Help learners connect their interests and studies to career possibilities, professional insights, and practical next steps." },
+};
 
 type Stage = { n: string; title: string; line: string; detail: string[]; href: string; linkLabel: string; art: ReactNode };
 
@@ -295,12 +303,16 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
                moves the copy (direct feedback, 11 Sept 2026). */}
             <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-16">
               <div className="lg:col-span-5 lg:pt-[68px]">
-                <h3 className="text-[clamp(24px,2.2vw,30px)] leading-[1.15] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
-                  Give every student a clearer path forward.
-                </h3>
-                <p className="mt-4 max-w-[44ch] text-[17px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-                  Help students explore their options, connect learning to careers, and plan their next steps, with visibility for the educators guiding them.
-                </p>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div key={audience} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+                    <h3 className="text-[clamp(24px,2.2vw,30px)] leading-[1.15] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+                      {AUDIENCE_COPY[audience].title}
+                    </h3>
+                    <p className="mt-4 max-w-[44ch] text-[17px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+                      {AUDIENCE_COPY[audience].body}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
               </div>
               <div className="lg:col-span-7">
                 <div className="mb-5"><Chips id="audience-tab" label="Who Dreamari is built for" items={AUDIENCES} value={audience} onChange={setAudience} /></div>

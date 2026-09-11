@@ -419,7 +419,7 @@ export function NonprofitIllustration() {
 
 // Educational institutions: what students save next, majors and colleges.
 const TOP_MAJORS = [["Computer Science", 41], ["Business Administration", 36], ["Nursing / Health Sciences", 33], ["Psychology", 29], ["Criminal Justice", 24]] as const;
-const TOP_COLLEGES = [["UCLA", 28], ["Howard University", 24], ["New York University", 22], ["UT Austin", 19], ["Spelman College", 17]] as const;
+const TOP_CAREERS = [["Investment Banker", 52], ["Software Engineer", 47], ["Entrepreneur / Business Owner", 38], ["Registered Nurse", 35], ["Psychologist", 31]] as const;
 
 function RankList({ title, rows }: { title: string; rows: readonly (readonly [string, number])[] }) {
   return (
@@ -442,11 +442,11 @@ export function InstitutionIllustration() {
   return (
     <Panel>
       <Fit base={600}>
-        <div role="img" aria-label="Career + College Insights: top saved majors led by Computer Science and Business Administration, and top saved colleges led by UCLA and Howard University." className="flex flex-col gap-5 px-7 pt-14 pb-7">
-          <OrgHead title="Career + College Insights" note="Most popular majors and colleges saved by students" />
+        <div role="img" aria-label="Career + College Insights: top saved majors led by Computer Science and Business Administration, and top saved careers led by Investment Banker and Software Engineer." className="flex flex-col gap-5 px-7 pt-14 pb-7">
+          <OrgHead title="Career + College Insights" note="Majors and careers most often saved by students" />
           <div className="grid grid-cols-2 gap-4">
             <RankList title="Top saved majors" rows={TOP_MAJORS} />
-            <RankList title="Top saved colleges" rows={TOP_COLLEGES} />
+            <RankList title="Top saved careers" rows={TOP_CAREERS} />
           </div>
         </div>
       </Fit>
