@@ -258,17 +258,26 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
           </p>
         </div>
       </div>
-      {/* "Learn more", dead center of the CARD -- a fixed point, the same
-         on every card. Centering it in the gap between the top chips and
-         the scrim instead (tried first) put it at a different spot on
-         every card, since that gap shrinks whenever a title wraps to two
-         lines (direct feedback, 12 Sept 2026: "this causes its position
-         to shift where career titles are two lines"). z-[2], above the
-         scrim, so it's never hidden behind it regardless of where the
-         scrim's own top edge lands for a given title. */}
+      {/* "Learn more" needs a DIFFERENT anchor per breakpoint -- the grid
+         itself changes shape (2 cols x 3 rows on mobile, 3 cols x 2 rows
+         from sm up), so a mobile card is much shorter, relative to its
+         width, than a desktop one. One fixed value can't read right on
+         both: a top offset small enough to clear a two-line title on a
+         short real-phone card (screenshotted, direct feedback, 12 Sept
+         2026) sits awkwardly close to the top row on a desktop card
+         that's twice as tall. Below sm: a fixed distance from the top
+         edge, decoupled entirely from the scrim (which is bottom-anchored
+         and grows upward when a title wraps), so it can't collide with a
+         two-line title regardless of how tall that makes the scrim. At sm
+         and up, where the card has real height to spare, dead center
+         reads fine (confirmed on desktop before this mobile-specific
+         issue came up) and stays a single fixed point either way -- unlike
+         centering in the gap between the top chips and the scrim, tried
+         first, which shifted per-card since that gap shrinks on a
+         two-line title. z-[2] keeps it above the scrim regardless. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2 rounded-[var(--radius-sm)] px-1.5 py-[2px] text-[8px] font-semibold whitespace-nowrap backdrop-blur-md sm:px-2 sm:py-[3px] sm:text-[9px]"
+        className="pointer-events-none absolute top-11 left-1/2 z-[2] -translate-x-1/2 rounded-[var(--radius-sm)] px-1.5 py-[2px] text-[8px] font-semibold whitespace-nowrap backdrop-blur-md sm:top-1/2 sm:-translate-y-1/2 sm:px-2 sm:py-[3px] sm:text-[9px]"
         style={{ background: "color-mix(in srgb, var(--color-night-background) 45%, transparent)", color: "rgba(255,255,255,0.92)" }}
       >
         Learn more
