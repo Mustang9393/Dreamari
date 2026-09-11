@@ -252,7 +252,7 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
         <div className="flex flex-1 items-center justify-center">
           <span
             aria-hidden
-            className="rounded-[var(--radius-sm)] border px-2 py-[3px] text-[9px] font-bold tracking-[0.05em] whitespace-nowrap uppercase backdrop-blur-md sm:px-2.5 sm:py-1 sm:text-[10.5px]"
+            className="rounded-[var(--radius-sm)] border px-1.5 py-[2px] text-[8px] font-semibold whitespace-nowrap backdrop-blur-md sm:px-2 sm:py-[3px] sm:text-[9px]"
             style={{ background: "color-mix(in srgb, var(--color-night-background) 60%, transparent)", borderColor: "rgba(255,255,255,0.32)", color: "rgba(255,255,255,0.92)" }}
           >
             Learn more
