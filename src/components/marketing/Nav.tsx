@@ -144,7 +144,12 @@ export function Nav({ view, onSchoolsClick }: NavProps) {
 
         {/* Links stay desktop-only (same 900px tier as before — below that there's no
            room without wrapping, and the page is a single scroll anyway). */}
-        <nav className="hidden gap-[28px] text-[14px] font-semibold min-[900px]:flex" style={{ color: "var(--muted-foreground)" }}>
+        <nav className="hidden items-center gap-[28px] text-[14px] font-semibold min-[900px]:flex" style={{ color: "var(--muted-foreground)" }}>
+          {schools && (
+            <span className="rounded-[6px] px-2 py-1 text-[11px] font-bold tracking-[0.12em] uppercase" style={{ background: "color-mix(in srgb, var(--foreground) 6%, transparent)", color: "var(--muted-foreground)" }}>
+              For educators
+            </span>
+          )}
           {links.map((link) => (
             <Link key={link.label} href={link.href} className="transition-colors hover:[color:var(--foreground)]">
               {link.label}

@@ -92,7 +92,7 @@ export function MarketingApp() {
         <SchoolsView view={view} onChangeView={setView} />
       </main>
 
-      <Footer />
+      <Footer view={view} />
     </div>
   );
 }

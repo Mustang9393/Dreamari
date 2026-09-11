@@ -342,9 +342,11 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           <Reveal>
             <SectionHead title="Grounded in career research. Connected to industry." lede="Career exploration informed by established resources, public occupational data, and insights from professionals at leading companies." />
           </Reveal>
-          {/* Research: the three sources, visible, one tile each. */}
+          {/* Research: the three sources, visible, one tile each, under the
+             reference's own label. */}
           <Reveal>
-            <ul className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <h3 className="mt-12 text-[clamp(22px,2vw,26px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>Explore our sources</h3>
+            <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {SOURCES.map((src) => (
                 <li key={src.what} className="flex flex-col gap-2 rounded-[20px] border bg-white p-6" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
                   <span className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>{src.what}</span>
