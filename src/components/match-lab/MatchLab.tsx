@@ -22,6 +22,7 @@ import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { DECK, MAX_SLOTS, type Career } from "./data";
+import { MatchVersionToggle } from "./VersionToggle";
 
 // v3 PROTOTYPE — the match flow, rebuilt from the user's wireframe
 // (MATCH FLOW.html) + Figma template 3241-9530, in the design system's own
@@ -521,6 +522,8 @@ export function MatchLab() {
               {remaining} remaining
             </span>
           </div>
+
+          <MatchVersionToggle current="A" className="mb-2 self-center" />
 
           {/* ---- the three slots ---- */}
           <div className="mb-3 flex flex-none items-center gap-2">

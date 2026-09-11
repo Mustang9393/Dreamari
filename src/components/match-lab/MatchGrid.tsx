@@ -17,6 +17,7 @@ import { playMilestoneChime } from "@/components/build/sound";
 import { picksParam, writePicks } from "@/lib/picks";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { DECK, MAX_SLOTS, type Career } from "./data";
+import { MatchVersionToggle } from "./VersionToggle";
 
 // ---------------------------------------------------------------------------
 // EXPERIMENT (11 Sept 2026, not wired into the real flow, no push): a grid
@@ -102,12 +103,19 @@ export function MatchGrid() {
                 <BackButton fallback="/flow" />
                 <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
               </span>
-              <span
-                className="flex flex-none items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
-                style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
-              >
-                <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 8px ${SUCCESS}` }} />
-                {selected.length} of {MAX_SLOTS}
+              {/* The A/B toggle sits beside the counter chip, not on its own
+                 row -- this page has zero spare vertical room (it's tuned to
+                 fit the viewport with no scroll), so any new row would bring
+                 the scrollbar straight back. */}
+              <span className="flex flex-none items-center gap-2">
+                <MatchVersionToggle current="B" />
+                <span
+                  className="flex flex-none items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
+                  style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
+                >
+                  <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 8px ${SUCCESS}` }} />
+                  {selected.length} of {MAX_SLOTS}
+                </span>
               </span>
             </div>
             <p className="mb-2.5 flex-none px-1 text-[12.5px] leading-[16px] font-medium text-[var(--color-night-muted-foreground)]">
