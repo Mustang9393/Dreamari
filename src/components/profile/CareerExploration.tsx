@@ -26,13 +26,13 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
   const logged = loggedActivity(careerId, careerTitle, picks.ids);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  // Rows added from the dropdown but not yet dated. They live in the store
-  // with today's date so nothing is lost if the student walks away; the
-  // editor opens on the first one so the required date is right there.
+  // Rows added from the dropdown start undated (Joshua, 11 Sept 2026: the
+  // date is typed, never pre-filled with today); the editor opens on the
+  // first one so the one required field is right there.
   const addTypes = (types: ExperienceTypeId[]) => {
     let first: string | null = null;
     for (const type of types) {
-      const e = addExperience({ careerId, type, date: new Date().toISOString().slice(0, 10), where: "", notes: "", feeling: null });
+      const e = addExperience({ careerId, type, date: "", where: "", notes: "", feeling: null });
       first ??= e.id;
     }
     setMenuOpen(false);
@@ -129,7 +129,8 @@ function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle:
 }
 
 /** One experience: a concise row (what · date · where · feeling) that opens
- *  into the four fields on tap. Only the date is required. */
+ *  into four short fields on tap (Joshua, 11 Sept 2026: loggable in under
+ *  30 seconds). Only the date is required, marked with an asterisk. */
 function ExperienceRow({ e, editing, onEdit, onDone }: { e: Experience; editing: boolean; onEdit: () => void; onDone: () => void }) {
   const summary = [shortDate(e.date), e.where, e.feeling].filter(Boolean).join(" · ");
   return (
@@ -149,19 +150,19 @@ function ExperienceRow({ e, editing, onEdit, onDone }: { e: Experience; editing:
       {editing && (
         <div data-print-hide className="flex flex-col gap-[10px] border-t px-[12px] py-[12px]" style={{ borderColor: "var(--rule)" }}>
           <label className="flex flex-col gap-[4px] text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>
-            Date <span className="font-semibold" style={{ color: "var(--ink-faint)" }}>(required)</span>
+            <span>Date<span aria-hidden style={{ color: "var(--primary)" }}>*</span><span className="sr-only"> (required)</span></span>
             <input type="date" required value={e.date} onChange={(ev) => updateExperience(e.id, { date: ev.target.value })} className={FIELD} style={fieldStyle} />
           </label>
           <label className="flex flex-col gap-[4px] text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>
-            Where or with whom
-            <input type="text" value={e.where} placeholder="“Mercy Hospital” or “my aunt, a nurse”" onChange={(ev) => updateExperience(e.id, { where: ev.target.value })} className={FIELD} style={fieldStyle} />
+            Where or with whom?
+            <input type="text" value={e.where} placeholder="Company, school, or person" onChange={(ev) => updateExperience(e.id, { where: ev.target.value })} className={FIELD} style={fieldStyle} />
           </label>
           <label className="flex flex-col gap-[4px] text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>
-            Tell us more
-            <textarea rows={2} value={e.notes} placeholder="What did you do? What surprised you?" onChange={(ev) => updateExperience(e.id, { notes: ev.target.value })} className={`${FIELD} resize-y`} style={fieldStyle} />
+            What did you do?
+            <input type="text" value={e.notes} onChange={(ev) => updateExperience(e.id, { notes: ev.target.value })} className={FIELD} style={fieldStyle} />
           </label>
           <fieldset className="flex flex-col gap-[6px]">
-            <legend className="text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>Did this change how you feel about this career?</legend>
+            <legend className="text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>How did this affect your interest?</legend>
             <div className="grid grid-cols-3 gap-[6px]">
               {FEELINGS.map((f: Feeling) => {
                 const on = e.feeling === f;

@@ -7577,3 +7577,13 @@ Verified locally: both POSTs 200, sent and survey states render.
   program needs. Audience tabs now: Schools = caseload, Districts = progress
   by school, Nonprofits = impact report, Institutions = saved majors and
   colleges.
+
+## 2026-09-11 · Career Exploration: "Add your own" in under 30 seconds (Joshua, Slack)
+Per experience, in order: "Date*" (asterisk only, no "(required)"; rows start
+undated so the student types the date, nothing pre-fills today), "Where or
+with whom?" with placeholder "Company, school, or person", "What did you
+do?" as one short optional text box ("Tell us more" and "What surprised
+you?" removed), "How did this affect your interest?" with More interested /
+About the same / Less interested, then Done (enabled once a date is set).
+Row summary, Career Report rows and print output unchanged.
+Verified on the Investment Banking report's 03 Career Exploration section.
