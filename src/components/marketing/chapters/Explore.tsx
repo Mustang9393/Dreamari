@@ -27,13 +27,13 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 type BrowseItem = { photo: string; title: string; world: string };
 
 const BROWSE_TOP5: BrowseItem[] = [
-  { photo: "/images/app/poster-asset-manager.png", title: "Asset Manager", world: "Business & Money" },
-  { photo: "/images/app/poster-accountant.png", title: "Accountant", world: "Business & Money" },
-  { photo: "/images/app/poster-fashion-buyer.png", title: "Fashion Buyer", world: "Business & Money" },
-  { photo: "/images/app/poster-food-scientist.png", title: "Food Scientist", world: "Farming, Animals & Nature" },
-  { photo: "/images/app/poster-video-game-designer.png", title: "Video Game Designer", world: "Tech & Engineering" },
-  { photo: "/images/app/poster-art-director.png", title: "Art Director", world: "Arts, Media & Sport" },
-  { photo: "/images/app/poster-nurse-anesthetist.png", title: "Nurse Anesthetist", world: "Health & Medicine" },
+  { photo: "/images/app/poster-asset-manager.webp", title: "Asset Manager", world: "Business & Money" },
+  { photo: "/images/app/poster-accountant.webp", title: "Accountant", world: "Business & Money" },
+  { photo: "/images/app/poster-fashion-buyer.webp", title: "Fashion Buyer", world: "Business & Money" },
+  { photo: "/images/app/poster-food-scientist.webp", title: "Food Scientist", world: "Farming, Animals & Nature" },
+  { photo: "/images/app/poster-video-game-designer.webp", title: "Video Game Designer", world: "Tech & Engineering" },
+  { photo: "/images/app/poster-art-director.webp", title: "Art Director", world: "Arts, Media & Sport" },
+  { photo: "/images/app/poster-nurse-anesthetist.webp", title: "Nurse Anesthetist", world: "Health & Medicine" },
 ];
 
 // Poster-title typeface per world, mirroring the Browse Cards component:

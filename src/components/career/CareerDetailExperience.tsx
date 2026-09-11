@@ -110,9 +110,9 @@ export function Figure({ children, accent }: { children: React.ReactNode; accent
 // ---- Section shells -------------------------------------------------------
 
 // Always-open section: heading row (with an optional control) over content.
-export function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+export function Section({ id, title, action, children }: { id?: string; title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
+    <section id={id} className="flex w-full scroll-mt-[124px] flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
       {/* the title row is ruled off edge to edge (direct feedback): the line
          runs through the panel's padding to touch both borders */}
       <div className="-mx-[var(--space-5)] flex flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -128,7 +128,7 @@ export function Section({ title, action, children }: { title: string; action?: R
 // alone (direct feedback: no caption under it); open, the content.
 export function Folded({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <section className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={PANEL}>
+    <section id={id} className="flex w-full scroll-mt-[124px] flex-col rounded-[var(--radius-lg)] border" style={PANEL}>
       <button
         type="button"
         aria-expanded={open}
@@ -534,9 +534,17 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            feedback): one plain paragraph before the facts. */}
         {vm.scenario && <p className={`${SMALL} -mt-[var(--space-2)] max-w-[62ch]`} style={{ color: "var(--muted-foreground)" }}>{vm.scenario}</p>}
 
+        {/* Section chips (UX audit, 11 Sept 2026): the page is ten sections
+           long; these stick under the header and jump to each one. Additive,
+           no content moves. */}
+        <nav aria-label="Sections" className="sticky top-[56px] z-20 -mx-5 flex gap-[8px] overflow-x-auto px-5 py-[8px] [scrollbar-width:none] md:top-[64px] md:-mx-[var(--space-14)] md:px-[var(--space-14)]" style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
+          {[["#facts", "Facts"], ["#pay", "Pay"], ["#ladder", "Ladder"], ["#education", "Education"]].map(([href, label]) => (
+            <a key={href} href={href} className="dm-quiet flex-none rounded-full border px-[14px] py-[7px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{label}</a>
+          ))}
+        </nav>
         {/* Quick facts: one strip, internal dividers, label over figure. */}
         {vm.facts.length > 0 && (
-          <section aria-label="Quick facts" className={`grid grid-cols-2 rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : vm.facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
+          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] grid-cols-2 rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : vm.facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
             {vm.facts.map((fact, i) => (
               <div
                 key={fact.label}
@@ -591,6 +599,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {vm.payByState && (
           <Section
+            id="pay"
             title={vm.payByState.title ?? "Pay by state"}
             action={
               <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
@@ -636,7 +645,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         )}
 
         {vm.ladder.length > 0 && (
-          <Section title="Career ladder">
+          <Section id="ladder" title="Career ladder">
             <ol className="flex flex-col">
               {vm.ladder.map((rung) => (
                 <Rung key={rung.number} rung={rung} accent={accent} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />

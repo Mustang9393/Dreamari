@@ -7234,3 +7234,34 @@ cleared; browsers may still show old photos until a hard refresh.
   are already reachable, and "More schools for your path" holds schools with
   no acceptance rate (or open admission), where GPA plays no part.
 - Changelog emailed to chandu.mp.14@gmail.com from the same account.
+
+## 2026-09-11 · UX audit fixes, approved subset (demo flow untouched)
+Report: https://claude.ai/code/artifact/3298cc86-cadd-4749-97b8-76f68b885089
+- App shell: `LiveRegion` (one polite region; `announce()` helper) and a
+  focus-only `SkipLink` in layout.tsx. Match announces save/pass/undo and the
+  completed Top 3; school cards announce Save, Compare and Not for me;
+  Profile already had its own region for the primary change.
+- Match deck keyboard: ArrowLeft passes, ArrowRight likes, ArrowUp/Down
+  scroll the card. Off while a sheet is open or a field has focus.
+- Home "Continue Learning" cards and Play glossary cards collapsed to a 2px
+  line on phones: size classes were on HoverBeam, whose own h-full won.
+  Size now lives on a plain wrapper; HoverBeam fills it.
+- Hit areas: mobile For You / Browse All tabs, "Why this school?", "Not for
+  me", "View all activity", carousel dots and pause all have 30-44px boxes
+  via negative margins; visible size unchanged.
+- Report salary keeps its dollar sign ("$361,000 a year").
+- `UndoToast` (6s, Undo, announced): after "Not for me" on a school and
+  "Remove from Top 3" in Profile.
+- Career detail: sticky section chips (Facts, Pay, Ladder, Education) under
+  the header; `Section` and `Folded` take ids with scroll margin.
+- Play locked cards: cover at 80% opacity and a solid "Soon" chip; colour
+  kept per 9 Sept feedback.
+- Location step opens on List when the viewport is under 700px tall.
+- Posters: 62 PNGs (89 MB) converted to WebP at 840px wide (4 MB), all
+  source references updated, PNGs removed.
+- Audit correction: Play, Connect and Profile already reserve room above the
+  fixed bottom nav (measured); no change made there.
+Not changed on purpose: any copy, demo flags, Student/Enterprise toggle,
+Connect card signals, splashes, Home hero eyebrow.
+Verified: Home cards 304x190, glossary cards 267x150, arrow keys and live
+text in Match, skip link, chips scroll on Career detail, both undo toasts.

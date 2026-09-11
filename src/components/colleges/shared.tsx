@@ -6,6 +6,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowLeftRight, Bookmark, Check, ChevronDown, ChevronRight, GraduationCap, Landmark, MapPin } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { OpenCue } from "@/components/app/PosterCard";
+import { announce } from "@/components/app/LiveRegion";
 import { SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, milesFromHome, milesLabel, type College } from "./data";
 
@@ -344,7 +345,7 @@ export function SchoolCard({
         </span>
       </span>
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
-      <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
+      <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={() => { onSave(); announce(saved ? `Removed ${c.name} from saved` : `Saved ${c.name}`); }} size={36} /></span>
 
       <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[12px] px-[16px] pt-[118px] pb-[14px]">
         {/* mark, name and place, over the blurred tail of the photo */}
@@ -387,7 +388,7 @@ export function SchoolCard({
 
         {why && (
           <div className="pointer-events-auto relative z-20">
-            <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link flex cursor-pointer items-center gap-[3px] text-[13px] font-bold" style={{ color: SOFT }}>
+            <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link -my-[10px] flex cursor-pointer items-center gap-[3px] py-[10px] text-[13px] font-bold" style={{ color: SOFT }}>
               Why this school? <ChevronDown className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-180" : ""}`} aria-hidden />
             </button>
             {showWhy && <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{why}</p>}
@@ -401,10 +402,10 @@ export function SchoolCard({
         {(onCompare || onDismiss) && (
           <div className="pointer-events-auto relative z-20 mt-auto flex items-center justify-between gap-[8px] pt-[2px]">
             {onDismiss ? (
-              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); }} className="dm-link cursor-pointer text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.62)" }}>Not for me</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.62)" }}>Not for me</button>
             ) : <span />}
             {onCompare && (
-              <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[12.5px] font-bold" style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 28%, transparent)`, color: "#fff" } : ghost}>
+              <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); announce(compared ? `Removed ${c.name} from compare` : `Comparing ${c.name}`); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[12.5px] font-bold" style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 28%, transparent)`, color: "#fff" } : ghost}>
                 <ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
               </button>
             )}

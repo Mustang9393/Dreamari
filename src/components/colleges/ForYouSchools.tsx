@@ -12,6 +12,7 @@ import { BIG, PANEL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SchoolCard, SOFT } from "./shared";
 import { COLLEGES } from "./data";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { UndoToast } from "@/components/app/UndoToast";
 import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, targetGpaFor, type Route, type SchoolMatch } from "./pathway";
 
 // Explore Schools, "For you". The Replit's architecture, delivered leaner
@@ -80,12 +81,15 @@ export function ForYouSchools({
     }, 0);
     return () => window.clearTimeout(t);
   }, []);
+  const [undoHidden, setUndoHidden] = useState<{ slug: string; name: string } | null>(null);
+  const writeHidden = (next: Set<string>) => { try { window.localStorage.setItem(HIDDEN_KEY, JSON.stringify([...next])); } catch {} };
   const dismiss = (slug: string) => {
-    setHidden((cur) => {
-      const next = new Set(cur).add(slug);
-      try { window.localStorage.setItem(HIDDEN_KEY, JSON.stringify([...next])); } catch {}
-      return next;
-    });
+    setHidden((cur) => { const next = new Set(cur).add(slug); writeHidden(next); return next; });
+    const name = COLLEGES.find((c) => c.slug === slug)?.name ?? "that school";
+    setUndoHidden({ slug, name });
+  };
+  const restore = (slug: string) => {
+    setHidden((cur) => { const next = new Set(cur); next.delete(slug); writeHidden(next); return next; });
   };
   // close any open menu on outside click / Escape
   useEffect(() => {
@@ -289,6 +293,8 @@ export function ForYouSchools({
           Why these schools? <ChevronRight className="h-4 w-4" aria-hidden />
         </button>
       )}
+
+      {undoHidden && <UndoToast key={undoHidden.slug} message={`Hidden ${undoHidden.name}`} onUndo={() => restore(undoHidden.slug)} onClose={() => setUndoHidden(null)} />}
 
       {why && (
         <WhySheet

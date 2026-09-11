@@ -50,7 +50,7 @@ export const DECK: Career[] = [
     workStyle: "Fast Pace · Large Deal Crew · High Stakes Project Sprints",
     pathway: "4-Year Bachelor's in Finance/Economics + Summer Analyst Pipeline",
     tradeoff: "The pay is real and so are the hours.",
-    photo: "/images/app/poster-investment-banking-v3.png",
+    photo: "/images/app/poster-investment-banking-v3.webp",
   },
   {
     id: "private-equity",
@@ -67,7 +67,7 @@ export const DECK: Career[] = [
     workStyle: "Deep Focus · Very Small Team · Long Projects Over Fast Deals",
     pathway: "4-Year Bachelor's in Finance/Economics, usually after banking experience",
     tradeoff: "Fewer, deeper projects than banking, and far fewer seats.",
-    photo: "/images/app/poster-private-equity.png",
+    photo: "/images/app/poster-private-equity.webp",
   },
   {
     id: "software-engineer",
@@ -85,7 +85,7 @@ export const DECK: Career[] = [
     workStyle: "Deep Focus · Small Squad · Review and Iterate",
     pathway: "4-Year CS Degree, or a Bootcamp plus a Portfolio",
     tradeoff: "You can enter without a degree, but you never stop learning.",
-    photo: "/images/app/poster-software-engineer.png",
+    photo: "/images/app/poster-software-engineer.webp",
   },
   {
     id: "data-scientist",
@@ -103,7 +103,7 @@ export const DECK: Career[] = [
     workStyle: "Deep Focus · Small Analytics Team · Project-Based Sprints",
     pathway: "4-Year Bachelor's in Statistics/CS/Data Science, sometimes a Master's",
     tradeoff: "The tools change fast, and so does what counts as a modern skill set.",
-    photo: "/images/app/poster-data-scientist.png",
+    photo: "/images/app/poster-data-scientist.webp",
   },
   {
     id: "fashion-buyer",
@@ -120,7 +120,7 @@ export const DECK: Career[] = [
     workStyle: "Fast Pace · Small Buying Team · Seasonal Deadlines",
     pathway: "4-Year Bachelor's in Fashion Merchandising, Business, or a related field",
     tradeoff: "You shape what people wear, and the seasons never really stop.",
-    photo: "/images/app/poster-fashion-buyer.png",
+    photo: "/images/app/poster-fashion-buyer.webp",
   },
   {
     id: "game-designer",
@@ -138,7 +138,7 @@ export const DECK: Career[] = [
     workStyle: "Creative Bursts · Cross-Functional Team · Iterate and Playtest",
     pathway: "4-Year Degree in Game Design/CS, or a strong self-made portfolio",
     tradeoff: "Making games is real work, even when the subject is play.",
-    photo: "/images/app/poster-game-designer.png",
+    photo: "/images/app/poster-game-designer.webp",
   },
 ];
 

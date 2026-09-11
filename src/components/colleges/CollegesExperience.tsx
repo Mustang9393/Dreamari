@@ -151,7 +151,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         <button
           type="button"
           onClick={() => setView("foryou")}
-          className="dm-link cursor-pointer text-[14px] font-bold tracking-wide uppercase whitespace-nowrap"
+          className="dm-link -my-[12px] cursor-pointer py-[12px] text-[14px] font-bold tracking-wide uppercase whitespace-nowrap"
           style={{ fontFamily: "var(--font-body)", color: view === "foryou" ? "var(--foreground)" : "var(--muted-foreground)" }}
         >
           For You
@@ -159,7 +159,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         <button
           type="button"
           onClick={() => setView("browse")}
-          className="dm-link cursor-pointer text-[14px] font-bold tracking-wide uppercase whitespace-nowrap"
+          className="dm-link -my-[12px] cursor-pointer py-[12px] text-[14px] font-bold tracking-wide uppercase whitespace-nowrap"
           style={{ fontFamily: "var(--font-body)", color: view === "browse" ? "var(--foreground)" : "var(--muted-foreground)" }}
         >
           Browse All

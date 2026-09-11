@@ -656,7 +656,10 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
       >
         {cover ? (
           <>
-            <Image src={cover} alt="" fill sizes="(max-width: 640px) 45vw, 200px" className="object-cover" />
+            {/* Colour kept (direct feedback, 9 Sept 2026), but eased to 80%
+               so a locked card reads as not-yet rather than tappable (UX
+               audit, 11 Sept 2026). */}
+            <Image src={cover} alt="" fill sizes="(max-width: 640px) 45vw, 200px" className="object-cover opacity-80" />
             <span
               aria-hidden
               className="absolute inset-0"
@@ -668,7 +671,7 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
             {icon}
           </span>
         )}
-        <span className="relative flex items-center gap-[5px] text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <span className="relative flex w-fit items-center gap-[5px] rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ color: "var(--foreground)", background: "rgba(5,8,20,0.6)" }}>
           <Lock className="h-[12px] w-[12px]" aria-hidden />
           Soon
         </span>
@@ -743,15 +746,20 @@ function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; titl
   }
 
   return (
-    <HoverBeam strength={0.8} className={`flex-none ${SHELF_W} ${SHELF_HEIGHT}`}>
+    // Size on this plain box, HoverBeam fills it: with the size classes on
+    // HoverBeam its own h-full won and the card collapsed to a line on
+    // phones (direct feedback, 11 Sept 2026).
+    <div className={`flex-none ${SHELF_W} ${SHELF_HEIGHT}`}>
+    <HoverBeam strength={0.8}>
     <Link
       href={`/play/glossary/${game.careerSlug}`}
-      className="dm-tap group relative block h-full w-full overflow-hidden rounded-[var(--radius-lg)] border"
+      className={`dm-tap group relative block h-full w-full overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
     >
       {art}
     </Link>
     </HoverBeam>
+    </div>
   );
 }
 

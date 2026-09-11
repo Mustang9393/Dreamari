@@ -301,7 +301,7 @@ function ReportDocument({
           <dl className="grid gap-[14px] sm:grid-cols-2" data-keep-together>
             <Fact label="What You Do" value={report.glance.whatYouDo} className="sm:col-span-2" />
             <Fact label="Potential Employers" value={report.glance.employers.slice(0, 3).join(", ")} />
-            <Fact label="U.S. Median Salary" value={`${report.salary.median.replace(/^\$/, "")} a year`} />
+            <Fact label="U.S. Median Salary" value={`${report.salary.median} a year`} />
           </dl>
         </ReportSection>
 

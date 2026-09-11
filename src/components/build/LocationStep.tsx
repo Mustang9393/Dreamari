@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import usaMapModule from "@svg-maps/usa";
 import { CardHud, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, QuestionHeading, StepFooter } from "./ui";
 import type { StepProps } from "./steps";
@@ -50,6 +50,13 @@ const GREEN = "var(--color-world-food-farming-nature)";
 
 export function LocationStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite, onSkip }: StepProps) {
   const [view, setView] = useState<"map" | "list">("map");
+  // Short phones (Safari with its bars up) open on the list: 50 state labels
+  // at 6px is the hard way in (UX audit, 11 Sept 2026). After paint, so the
+  // server and first client render agree.
+  useEffect(() => {
+    const t = window.setTimeout(() => { if (window.innerHeight < 700) setView("list"); }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
   const selected = state.state;
   const svgRef = useRef<SVGSVGElement | null>(null);
   // Label anchor per state, measured from the real rendered path bounds (the path

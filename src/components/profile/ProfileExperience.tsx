@@ -5,6 +5,7 @@
 import Image from "next/image";
 import { studentAvatarSrc } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { UndoToast } from "@/components/app/UndoToast";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -356,10 +357,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     setSwapCandidate(null);
   }
 
+  const [undoRemove, setUndoRemove] = useState<{ ids: string[]; focus: string | null; title: string } | null>(null);
   function removeFromTop3(id: string) {
+    const before = { ids: top3, focus: chosenPrimaryId, title: careerById(id)?.title ?? "that career" };
     const next = top3.filter((item) => item !== id);
     setTop3(next);
     if (chosenPrimaryId === id) setFocusId(null); // back to the strongest match
+    setUndoRemove(before);
   }
 
 
@@ -720,6 +724,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       <div className="no-print">
         <MobileNav active="Profile" />
       </div>
+
+      {undoRemove && <UndoToast key={undoRemove.title} message={`Removed ${undoRemove.title} from your Top 3`} onUndo={() => setEdits({ ids: undoRemove.ids, focus: undoRemove.focus })} onClose={() => setUndoRemove(null)} />}
 
       {/* ---- Swap sheet ---- */}
       {swapCandidate && (

@@ -7,6 +7,7 @@ import { ChevronRight, BookOpen, GraduationCap, Laptop, RotateCcw, Sparkles, Thu
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
+import { announce } from "@/components/app/LiveRegion";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { primeAudioOnFirstGesture } from "@/components/flow/aurora/feedback";
@@ -181,6 +182,7 @@ export function MatchLab() {
     // A pass had no feedback at all -- the soft select tick (not the CTA ding,
     // which is reserved for a like) marks it as a deliberate, registered choice.
     dispatchAuroraPulse("select");
+    announce(`Passed on ${top.title}`);
     setHistory((h) => [...h, { type: "pass", career: top, prevDeckIndex: deckIndex }]);
     setExiting({ id: top.id, dir: -1 });
     setTimeout(advance, 380);
@@ -199,6 +201,7 @@ export function MatchLab() {
     // origin the pulse launches from screen center, where the card is.
     dispatchAuroraPulse("cta", e);
     const slot = liked.length;
+    announce(slot + 1 === MAX_SLOTS ? `Saved ${top.title}. Your Top 3 is complete.` : `Saved ${top.title}. ${slot + 1} of ${MAX_SLOTS}.`);
     setHistory((h) => [...h, { type: "like", career: top, prevDeckIndex: deckIndex }]);
     setLiked((l) => [...l, top]);
     flyToSlot(top, slot);
@@ -240,6 +243,7 @@ export function MatchLab() {
     // Undo reads as a deliberate step back: the soft tick, and the slot that
     // just changed pops so the eye is drawn to what came back.
     dispatchAuroraPulse("select");
+    announce(`Undo. ${entry.career.title} is back on the deck.`);
     if (entry.type === "like") popSlots(liked.findIndex((c) => c.id === entry.career.id));
     if (entry.type === "swap") popSlots(entry.slot);
     setHistory((h) => h.slice(0, -1));
@@ -387,6 +391,28 @@ export function MatchLab() {
   useEffect(() => {
     dragLive.current = { like, pass, exiting: !!exiting };
   });
+  // Keyboard path for the deck (UX audit, 11 Sept 2026): left passes, right
+  // likes, up and down scroll the card's details. Additive; pointer flow is
+  // untouched. Off while a sheet is open or a field has focus.
+  const sheetsOpen = decisionOpen || manageOpen || !!swapFor;
+  useEffect(() => {
+    if (sheetsOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.key === "ArrowLeft") { e.preventDefault(); dragLive.current.pass(); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); dragLive.current.like(); }
+      else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        const scroller = cardRef.current?.querySelector<HTMLElement>("[data-card-scroller]");
+        if (!scroller) return;
+        e.preventDefault();
+        scroller.scrollBy({ top: e.key === "ArrowDown" ? 140 : -140, behavior: "smooth" });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sheetsOpen]);
   // A REAL scroll of the top card's own scroller ends the scroll-up nudge,
   // whatever produced it -- wheel, trackpad, grab-drag or touch. The touch
   // handler below only caught touch moves, so on desktop the nudge kept

@@ -186,7 +186,7 @@ function CareerHeader() {
       <SpaceGround opacity={0.55} />
       <div className="relative flex-1 overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "#0e0c20", textShadow: CARD_TEXT_SHADOW, clipPath: "inset(0 round var(--radius-lg))" }}>
         <span className="absolute inset-y-0 right-0 w-[52%] overflow-hidden rounded-[inherit]">
-          <Image src={profile?.photo ?? "/images/app/poster-investment-banking-v3.png"} alt="" fill sizes="520px" className="object-cover" style={{ objectPosition: "50% 12%" }} priority />
+          <Image src={profile?.photo ?? "/images/app/poster-investment-banking-v3.webp"} alt="" fill sizes="520px" className="object-cover" style={{ objectPosition: "50% 12%" }} priority />
           <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
         </span>
         <span className="absolute inset-0 overflow-hidden rounded-[inherit]"><CardProgressiveBlur size="52%" /></span>

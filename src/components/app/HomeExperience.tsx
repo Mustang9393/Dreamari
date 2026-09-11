@@ -297,7 +297,7 @@ function HeroBanner() {
            photo is clear. */}
         <HeroPanel
           active={panel === (SHOW_DAILY_DROP ? 2 : 1)}
-          photo="/images/app/poster-drone-pilot.png"
+          photo="/images/app/poster-drone-pilot.webp"
           focus="50% 20%"
           eyebrow="TRENDING NOW"
           eyebrowColor="var(--accent-subtle)"
@@ -345,7 +345,7 @@ function HeroBanner() {
               aria-label={`Panel ${index + 1}`}
               aria-current={panel === index}
               onClick={() => setPanel(index)}
-              className="dm-quiet relative h-[14px] w-[26px] cursor-pointer"
+              className="dm-quiet relative -my-[8px] h-[30px] w-[26px] cursor-pointer"
             >
               <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.28)" }}>
                 {panel === index && (
@@ -361,7 +361,7 @@ function HeroBanner() {
           aria-label={paused ? "Resume carousel" : "Pause carousel"}
           aria-pressed={paused}
           onClick={() => setPaused((value) => !value)}
-          className="dm-link flex h-6 cursor-pointer items-center justify-center gap-[4px]"
+          className="dm-link -mx-[8px] -my-[4px] flex h-8 min-w-[32px] cursor-pointer items-center justify-center gap-[4px] px-[8px]"
         >
           {paused ? (
             <span aria-hidden className="ml-[2px] block border-y-[5px] border-l-[8px] border-y-transparent" style={{ borderLeftColor: "var(--foreground)" }} />
@@ -434,8 +434,12 @@ function ActivityCard({ activity }: { activity: Activity }) {
     // the known-good sm size; if three of those don't fit the row, the
     // section's own overflow-x-auto (unchanged) takes over instead of
     // squeezing them, the same graceful fallback the row already uses below md.
-    <HoverBeam strength={0.8} className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-auto md:w-auto md:min-w-[304px] md:flex-1 md:aspect-[360/212]">
-    <Link href={href} className="dm-tap group relative flex h-full w-full overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
+    // The size lives on this plain box; HoverBeam's own h-full then fills
+    // it. Putting the size classes on HoverBeam let its built-in h-full win
+    // and the card collapsed to a 2px line on phones (UX audit, 11 Sept 2026).
+    <div className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-auto md:w-auto md:min-w-[304px] md:flex-1 md:aspect-[360/212]">
+    <HoverBeam strength={0.8}>
+    <Link href={href} className="dm-tap group relative flex h-full min-h-[190px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:min-h-[212px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
       <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
       <span aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 flex size-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}>
@@ -458,6 +462,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
       </span>
     </Link>
     </HoverBeam>
+    </div>
   );
 }
 
@@ -495,7 +500,7 @@ export function HomeExperience() {
             <h2 className="min-w-0 flex-1 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Continue Learning & Playing
             </h2>
-            <Link href="/play" className="dm-link mt-[2px] flex-none text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+            <Link href="/play" className="dm-link -my-[12px] mt-[2px] flex-none py-[12px] text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
               <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>
             </Link>
           </div>

@@ -15,40 +15,40 @@ const C = (title: string, world: string, photo: string, salary?: string): Catalo
 
 // "Careers Picked for You" (Home) — 14 posters in the design's order.
 export const HOME_PICKS: CatalogCareer[] = [
-  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.png"),
-  C("Accountant", "Business & Money", "/images/app/poster-accountant.png"),
-  C("Private Equity", "Business & Money", "/images/app/poster-private-equity.png"),
-  C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking-v3.png"),
-  C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
-  C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
-  C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.png"),
-  C("Video Game Designer", "Tech & Engineering", "/images/app/poster-video-game-designer.png"),
-  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.png"),
-  C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.png"),
-  C("Farm & Ranch Manager", "Farming, Animals & Nature", "/images/app/poster-farm-ranch-manager.png"),
-  C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.png"),
-  C("Electrician", "Building & Construction", "/images/app/poster-electrician.png"),
-  C("Roofer", "Building & Construction", "/images/app/poster-roofer.png"),
-  C("Truck Driver", "Driving, Flying & Shipping", "/images/app/poster-truck-driver.png"),
-  C("Registered Nurse", "Health & Medicine", "/images/app/poster-registered-nurse.png"),
-  C("School Counselor", "Counseling & Social Work", "/images/app/poster-school-counselor.png"),
-  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller.png"),
-  C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.png"),
-  C("Animator", "Arts, Media & Sport", "/images/app/poster-animator.png"),
-  C("HR Manager", "Business & Money", "/images/app/poster-hr-manager.png"),
-  C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
+  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.webp"),
+  C("Accountant", "Business & Money", "/images/app/poster-accountant.webp"),
+  C("Private Equity", "Business & Money", "/images/app/poster-private-equity.webp"),
+  C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking-v3.webp"),
+  C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.webp"),
+  C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.webp"),
+  C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.webp"),
+  C("Video Game Designer", "Tech & Engineering", "/images/app/poster-video-game-designer.webp"),
+  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.webp"),
+  C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.webp"),
+  C("Farm & Ranch Manager", "Farming, Animals & Nature", "/images/app/poster-farm-ranch-manager.webp"),
+  C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.webp"),
+  C("Electrician", "Building & Construction", "/images/app/poster-electrician.webp"),
+  C("Roofer", "Building & Construction", "/images/app/poster-roofer.webp"),
+  C("Truck Driver", "Driving, Flying & Shipping", "/images/app/poster-truck-driver.webp"),
+  C("Registered Nurse", "Health & Medicine", "/images/app/poster-registered-nurse.webp"),
+  C("School Counselor", "Counseling & Social Work", "/images/app/poster-school-counselor.webp"),
+  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller.webp"),
+  C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.webp"),
+  C("Animator", "Arts, Media & Sport", "/images/app/poster-animator.webp"),
+  C("HR Manager", "Business & Money", "/images/app/poster-hr-manager.webp"),
+  C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.webp"),
 ];
 
 // Explore-Browse rails — content, titles, and order per Joshua (2026-08-21).
 // Rail 1 (merged Recommended + Because-You-Liked; content + order per
 // Joshua 2026-08-21): "Recommended Because You Liked Business & Money".
 export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
-  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.png"),
-  C("Private Equity", "Business & Money", "/images/app/poster-private-equity-v2.png"),
-  C("Quant", "Business & Money", "/images/app/poster-quant.png"),
-  C("Accountant", "Business & Money", "/images/app/poster-accountant.png"),
-  C("Management Analyst", "Business & Money", "/images/app/poster-management-analyst.png"),
-  C("Administrative Assistant", "Business & Money", "/images/app/poster-administrative-assistant.png"),
+  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.webp"),
+  C("Private Equity", "Business & Money", "/images/app/poster-private-equity-v2.webp"),
+  C("Quant", "Business & Money", "/images/app/poster-quant.webp"),
+  C("Accountant", "Business & Money", "/images/app/poster-accountant.webp"),
+  C("Management Analyst", "Business & Money", "/images/app/poster-management-analyst.webp"),
+  C("Administrative Assistant", "Business & Money", "/images/app/poster-administrative-assistant.webp"),
 ];
 
 // "Top 5 Trending Careers Among Gen Z" (runs to 6). Congruence fix: the
@@ -56,23 +56,23 @@ export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
 // photo — replaced with Mika's Emergency Medicine Doctor / Nurse
 // Anesthetist so every image shows its own career.
 export const BROWSE_TRENDING: CatalogCareer[] = [
-  C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
-  C("Emergency Medicine Doctor", "Health & Medicine", "/images/app/poster-emergency-medicine-doctor.png"),
-  C("Nurse Anesthetist", "Health & Medicine", "/images/app/poster-nurse-anesthetist.png"),
-  C("Lawyer", "Law, Safety & Justice", "/images/app/poster-lawyer.png"),
-  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot.png"),
-  C("Therapist", "Counseling & Social Work", "/images/app/poster-therapist.png"),
+  C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.webp"),
+  C("Emergency Medicine Doctor", "Health & Medicine", "/images/app/poster-emergency-medicine-doctor.webp"),
+  C("Nurse Anesthetist", "Health & Medicine", "/images/app/poster-nurse-anesthetist.webp"),
+  C("Lawyer", "Law, Safety & Justice", "/images/app/poster-lawyer.webp"),
+  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot.webp"),
+  C("Therapist", "Counseling & Social Work", "/images/app/poster-therapist.webp"),
 ];
 
 // Rail headed "Tech & Engineering" — tech/engineering careers only (the
 // frame's farming+building fill was a design-file quirk, corrected per user).
 export const BROWSE_WORLD_RAIL: CatalogCareer[] = [
-  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.png"),
-  C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.png"),
-  C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.png"),
-  C("Database Architect", "Tech & Engineering", "/images/app/poster-database-architect.png"),
-  C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.png"),
-  C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.png"),
+  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.webp"),
+  C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.webp"),
+  C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.webp"),
+  C("Database Architect", "Tech & Engineering", "/images/app/poster-database-architect.webp"),
+  C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.webp"),
+  C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.webp"),
 ];
 
 // Trades rail (Slack "Trades Tab Update", 11 Sept 2026): the six new trade
@@ -82,15 +82,15 @@ export const BROWSE_WORLD_RAIL: CatalogCareer[] = [
 // row directly below; the same face twice on one screen clashed. Lighting
 // Technician opens the row above, so it is not first here either.
 export const BROWSE_TRADES: CatalogCareer[] = [
-  C("Hairstylist", "Personal Care & Community Services", "/images/app/poster-hairstylist.png"),
-  C("Electrician", "Building & Construction", "/images/app/poster-electrician.png"),
-  C("Sheet Metal Worker", "Building & Construction", "/images/app/poster-sheet-metal-worker.png"),
-  C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.png"),
-  C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.png"),
-  C("Forklift Operator", "Driving, Flying & Shipping", "/images/app/poster-forklift-operator.png"),
-  C("Roofer", "Building & Construction", "/images/app/poster-roofer.png"),
-  C("Truck Driver", "Driving, Flying & Shipping", "/images/app/poster-truck-driver.png"),
-  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.png"),
+  C("Hairstylist", "Personal Care & Community Services", "/images/app/poster-hairstylist.webp"),
+  C("Electrician", "Building & Construction", "/images/app/poster-electrician.webp"),
+  C("Sheet Metal Worker", "Building & Construction", "/images/app/poster-sheet-metal-worker.webp"),
+  C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.webp"),
+  C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.webp"),
+  C("Forklift Operator", "Driving, Flying & Shipping", "/images/app/poster-forklift-operator.webp"),
+  C("Roofer", "Building & Construction", "/images/app/poster-roofer.webp"),
+  C("Truck Driver", "Driving, Flying & Shipping", "/images/app/poster-truck-driver.webp"),
+  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.webp"),
 ];
 
 // Careers You Might Not Know — content + order per Joshua 2026-08-21.
@@ -101,24 +101,24 @@ export const BROWSE_TRADES: CatalogCareer[] = [
 // are on screen before any horizontal scroll (only one poster is fully
 // visible on a phone). Nothing that was here before was removed.
 export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
-  C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.png"),
-  C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.png"),
-  C("Sound Engineering Technician", "Arts, Media & Sport", "/images/app/poster-sound-engineering-technician.png"),
-  C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.png"),
-  C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.png"),
-  C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.png"),
-  C("Drone Pilot", "Driving, Flying & Shipping", "/images/app/poster-drone-pilot.png"),
-  C("Jewelry Designer", "Factories & Making Things", "/images/app/poster-jewelry-designer.png"),
+  C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.webp"),
+  C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.webp"),
+  C("Sound Engineering Technician", "Arts, Media & Sport", "/images/app/poster-sound-engineering-technician.webp"),
+  C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.webp"),
+  C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.webp"),
+  C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.webp"),
+  C("Drone Pilot", "Driving, Flying & Shipping", "/images/app/poster-drone-pilot.webp"),
+  C("Jewelry Designer", "Factories & Making Things", "/images/app/poster-jewelry-designer.webp"),
 ];
 
 export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
-  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.png", "$137K"),
-  C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.png", "$559K"),
-  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.png", "$227K"),
-  C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.png", "$148K"),
-  C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.png", "$496K"),
-  C("Public Relations Manager", "Business & Money", "/images/app/poster-public-relations-manager.png", "$146K"),
-  C("Veterinarian", "Farming, Animals & Nature", "/images/app/poster-veterinarian.png", "$130K"),
+  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.webp", "$137K"),
+  C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.webp", "$559K"),
+  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.webp", "$227K"),
+  C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.webp", "$148K"),
+  C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.webp", "$496K"),
+  C("Public Relations Manager", "Business & Money", "/images/app/poster-public-relations-manager.webp", "$146K"),
+  C("Veterinarian", "Farming, Animals & Nature", "/images/app/poster-veterinarian.webp", "$130K"),
 ];
 
 // Every catalogued career, deduped by title, for lookups that need to search
@@ -168,7 +168,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     // The BROWSE Images-2 IB files are 198x297 thumbnails -- too small for a
     // full-screen reel card. This poster IS the unified IB browse-card art
     // (the hi-res founder image), so the reel uses it instead.
-    photo: "/images/app/poster-investment-banking-v3.png",
+    photo: "/images/app/poster-investment-banking-v3.webp",
     major: "Finance, Economics, or Accounting",
     mainSkills: "Working with Numbers · Attention to Detail · Clear Writing · Calm Under Deadline",
   },
@@ -178,7 +178,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
     matchLabel: "STRONG MATCH",
     description: "Registered nurses keep patients safe and are the person actually at the bedside all shift.",
     salary: "$94K",
-    photo: "/images/app/poster-registered-nurse.png",
+    photo: "/images/app/poster-registered-nurse.webp",
     major: "Nursing, Biology, or Public Health",
     mainSkills: "Calm Under Pressure · Noticing Small Changes · Explaining Simply · Stamina",
   },

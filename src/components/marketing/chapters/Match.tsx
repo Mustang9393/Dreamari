@@ -26,7 +26,7 @@ import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
 const CARDS = [
   {
     key: "ops",
-    photo: "/images/app/poster-management-analyst.png",
+    photo: "/images/app/poster-management-analyst.webp",
     title: "Management Analyst",
     blurb: "Figures out how a business can run better, then makes it happen.",
     salary: "$99K",
@@ -38,7 +38,7 @@ const CARDS = [
     // cache busting (this URL family has been overwritten in place before and
     // cached optimizer renditions kept showing the old photo). ONE shared v3
     // file now serves Explore, Match Lab, Profile and this chapter.
-    photo: "/images/app/poster-investment-banking-v3.png",
+    photo: "/images/app/poster-investment-banking-v3.webp",
     title: "Investment Banking",
     blurb: "Helps big companies raise money and buy other companies.",
     salary: "$361K",
@@ -49,7 +49,7 @@ const CARDS = [
     // the founder-supplied "Private Equity.png"; blurb/salary from the app's
     // canonical Private Equity Analyst copy in catalog.ts.
     key: "pe",
-    photo: "/images/app/poster-private-equity.png",
+    photo: "/images/app/poster-private-equity.webp",
     title: "Private Equity",
     blurb: "Helps investors buy, improve, and sell companies for long-term returns.",
     salary: "$250K",

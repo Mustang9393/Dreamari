@@ -69,7 +69,7 @@ export const CAREER_PROFILES: Record<string, CareerProfile> = {
     slug: "carpenter",
     title: "Carpenter",
     world: "Building & Construction",
-    photo: "/images/app/poster-carpenter.png",
+    photo: "/images/app/poster-carpenter.webp",
     summary: "Builds the wooden frames and structures of buildings.",
     scenario: "Imagine framing a house in three weeks. Every wall you set has to be exactly square, or every wall after it is wrong.",
     facts: [

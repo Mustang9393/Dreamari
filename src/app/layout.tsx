@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
 import { ScrollReset } from "@/components/app/ScrollReset";
+import { LiveRegion } from "@/components/app/LiveRegion";
+import { SkipLink } from "@/components/app/SkipLink";
 import { ThemeBoot } from "@/components/app/theme";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import "./globals.css";
@@ -49,9 +51,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
+        <SkipLink />
         <ThemeBoot />
         <ErrorReporter />
         <ScrollReset />
+        <LiveRegion />
         {children}
       </body>
     </html>

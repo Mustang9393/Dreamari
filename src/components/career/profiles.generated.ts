@@ -16,7 +16,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "asset-management",
     "title": "Asset Manager",
     "world": "Business & Money",
-    "photo": "/images/app/poster-asset-manager.png",
+    "photo": "/images/app/poster-asset-manager.webp",
     "summary": "Invests other people's money to grow it over time.",
     "scenario": "Imagine a retirement fund trusting you with $2 billion. Every morning the market opens and your calls are on the line.",
     "facts": [
@@ -212,7 +212,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "accountant",
     "title": "Accountant",
     "world": "Business & Money",
-    "photo": "/images/app/poster-accountant.png",
+    "photo": "/images/app/poster-accountant.webp",
     "summary": "Keeps the money records straight and makes sure taxes and reports are right.",
     "scenario": "Imagine it is April 10th and a company's tax return is due in five days. Every number has to tie out.",
     "facts": [
@@ -408,7 +408,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "private-equity",
     "title": "Private Equity",
     "world": "Business & Money",
-    "photo": "/images/app/poster-private-equity.png",
+    "photo": "/images/app/poster-private-equity.webp",
     "summary": "Buys companies, improves them, and sells them for a profit.",
     "scenario": "Imagine your fund buys a struggling chain of 40 stores. Three years from now it has to be worth twice as much.",
     "facts": [
@@ -600,7 +600,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "investment-banking",
     "title": "Investment Banking",
     "world": "Business & Money",
-    "photo": "/images/app/poster-investment-banking-v3.png",
+    "photo": "/images/app/poster-investment-banking-v3.webp",
     "summary": "Helps companies raise money and buy or sell businesses.",
     "scenario": "Imagine a hospital company wants to build 100 new hospitals but does not have the money. You find the investors and put the deal together.",
     "facts": [
@@ -791,7 +791,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "data-scientist",
     "title": "Data Scientist",
     "world": "Tech & Engineering",
-    "photo": "/images/app/poster-data-scientist.png",
+    "photo": "/images/app/poster-data-scientist.webp",
     "summary": "Turns piles of data into answers companies act on.",
     "scenario": "Imagine 40 million app users and one question from the CEO: why did they stop opening it last week?",
     "facts": [
@@ -987,7 +987,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "software-engineer",
     "title": "Software Engineer",
     "world": "Tech & Engineering",
-    "photo": "/images/app/poster-software-engineer.png",
+    "photo": "/images/app/poster-software-engineer.webp",
     "summary": "Builds and improves the apps and systems people use every day.",
     "scenario": "Imagine your code shipping to 10 million phones tonight. One bug and every one of them sees it.",
     "facts": [
@@ -1182,7 +1182,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "ui-ux-designer",
     "title": "UI/UX Designer",
     "world": "Tech & Engineering",
-    "photo": "/images/app/poster-uiux-designer.png",
+    "photo": "/images/app/poster-uiux-designer.webp",
     "summary": "Designs how apps look and how they feel to use.",
     "scenario": "Imagine watching five strangers try your checkout screen and every one of them taps the wrong button.",
     "facts": [
@@ -1373,7 +1373,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "video-game-designer",
     "title": "Video Game Designer",
     "world": "Tech & Engineering",
-    "photo": "/images/app/poster-video-game-designer.png",
+    "photo": "/images/app/poster-video-game-designer.webp",
     "summary": "Designs the rules, levels and moments that make a game fun.",
     "scenario": "Imagine 200 playtesters quitting your level at the same jump. You have a week to fix it before the demo.",
     "facts": [
@@ -1565,7 +1565,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "cyber-security",
     "title": "Cyber Security",
     "world": "Tech & Engineering",
-    "photo": "/images/app/poster-cyber-security.png",
+    "photo": "/images/app/poster-cyber-security.webp",
     "summary": "Protects computer systems and data from attacks.",
     "scenario": "Imagine an alert at 2 a.m.: someone is inside the network. You have minutes to find them before they find the customer data.",
     "facts": [
@@ -1761,7 +1761,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "food-scientist",
     "title": "Food Scientist",
     "world": "Farming, Animals & Nature",
-    "photo": "/images/app/poster-food-scientist.png",
+    "photo": "/images/app/poster-food-scientist.webp",
     "summary": "Figures out how to make food safer, tastier and last longer.",
     "scenario": "Imagine a new snack that tastes perfect in the lab but goes stale in 9 days on the shelf. You have to get it to 90.",
     "facts": [
@@ -1956,7 +1956,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "farm-and-ranch-manager",
     "title": "Farm & Ranch Manager",
     "world": "Farming, Animals & Nature",
-    "photo": "/images/app/poster-farm-ranch-manager.png",
+    "photo": "/images/app/poster-farm-ranch-manager.webp",
     "summary": "Runs the land, animals and crews that produce our food.",
     "scenario": "Imagine a frost warning at 11 p.m. and 400 acres of young corn. What you decide tonight is the whole year's income.",
     "facts": [
@@ -2148,7 +2148,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "agricultural-technician",
     "title": "Agricultural Technician",
     "world": "Farming, Animals & Nature",
-    "photo": "/images/app/poster-agricultural-technician.png",
+    "photo": "/images/app/poster-agricultural-technician.webp",
     "summary": "Runs the tests and field trials that make farms and food better.",
     "scenario": "Imagine 300 soil samples on your bench by Friday, and a grower waiting on the results to decide what to plant.",
     "facts": [
@@ -2340,7 +2340,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "electrician",
     "title": "Electrician",
     "world": "Building & Construction",
-    "photo": "/images/app/poster-electrician.png",
+    "photo": "/images/app/poster-electrician.webp",
     "summary": "Installs and fixes the wiring that powers buildings.",
     "scenario": "Imagine a hospital wing going live Monday and 2,000 connections that all have to be right. One loose wire and the lights go out in surgery.",
     "facts": [
@@ -2533,7 +2533,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "roofer",
     "title": "Roofer",
     "world": "Building & Construction",
-    "photo": "/images/app/poster-roofer.png",
+    "photo": "/images/app/poster-roofer.webp",
     "summary": "Installs and repairs the roofs that keep buildings dry.",
     "scenario": "Imagine a storm coming Thursday and a school roof half torn off. Your crew has three days.",
     "facts": [
@@ -2718,7 +2718,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "truck-driver",
     "title": "Truck Driver",
     "world": "Driving, Flying & Shipping",
-    "photo": "/images/app/poster-truck-driver.png",
+    "photo": "/images/app/poster-truck-driver.webp",
     "summary": "Moves the goods that fill every store shelf across the country.",
     "scenario": "Imagine 40,000 pounds behind you, 600 miles to go, and a delivery window that closes at 6 a.m.",
     "facts": [
@@ -2900,7 +2900,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "registered-nurse",
     "title": "Registered Nurse",
     "world": "Health & Medicine",
-    "photo": "/images/app/poster-registered-nurse.png",
+    "photo": "/images/app/poster-registered-nurse.webp",
     "summary": "Keeps patients safe and is the person actually at the bedside all shift.",
     "scenario": "Imagine six patients, one code blue, and a family asking you what happens next. All at 3 a.m.",
     "facts": [
@@ -3093,7 +3093,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "school-counselor",
     "title": "School Counselor",
     "world": "Counseling & Social Work",
-    "photo": "/images/app/poster-school-counselor.png",
+    "photo": "/images/app/poster-school-counselor.webp",
     "summary": "Helps students through school, college plans and hard days.",
     "scenario": "Imagine a junior in your office who just said they are not going to college because nobody in their family did. You have 20 minutes.",
     "facts": [
@@ -3283,7 +3283,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "air-traffic-controller",
     "title": "Air Traffic Controller",
     "world": "Driving, Flying & Shipping",
-    "photo": "/images/app/poster-air-traffic-controller.png",
+    "photo": "/images/app/poster-air-traffic-controller.webp",
     "summary": "Keeps planes safely apart in the sky and on the runway.",
     "scenario": "Imagine 14 planes on your screen, a thunderstorm closing one runway, and every pilot waiting for your voice.",
     "facts": [
@@ -3471,7 +3471,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "sports-medicine-doctor",
     "title": "Sports Medicine Doctor",
     "world": "Health & Medicine",
-    "photo": "/images/app/poster-sports-medicine-doctor.png",
+    "photo": "/images/app/poster-sports-medicine-doctor.webp",
     "summary": "Treats athletes' injuries and gets them safely back in the game.",
     "scenario": "Imagine a point guard down with a knee injury and a playoff game in nine days. Everyone wants a yes. Your job is the honest answer.",
     "facts": [
@@ -3663,7 +3663,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "animator",
     "title": "Animator",
     "world": "Arts, Media & Sport",
-    "photo": "/images/app/poster-animator.png",
+    "photo": "/images/app/poster-animator.webp",
     "summary": "Brings characters and scenes to life frame by frame.",
     "scenario": "Imagine a 4-second shot of a character laughing. It takes you two weeks, and the audience never thinks about it once. That is the point.",
     "facts": [
@@ -3854,7 +3854,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "hr-manager",
     "title": "HR Manager",
     "world": "Business & Money",
-    "photo": "/images/app/poster-hr-manager.png",
+    "photo": "/images/app/poster-hr-manager.webp",
     "summary": "Hires, supports and looks after the people who make a company run.",
     "scenario": "Imagine 40 open roles, a layoff rumor on Slack, and a new manager who needs coaching by Friday.",
     "facts": [
@@ -4045,7 +4045,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "game-designer",
     "title": "Game Designer",
     "world": "Tech & Engineering",
-    "photo": "/images/app/poster-game-designer.png",
+    "photo": "/images/app/poster-game-designer.webp",
     "summary": "Designs the systems and rules that make a game worth playing.",
     "scenario": "Imagine a game economy where players found a trick that prints gold. Ten thousand of them are using it by lunch.",
     "facts": [
@@ -4237,7 +4237,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "quant",
     "title": "Quant",
     "world": "Business & Money",
-    "photo": "/images/app/poster-quant.png",
+    "photo": "/images/app/poster-quant.webp",
     "summary": "Uses math and code to find patterns in markets and trade on them.",
     "scenario": "Imagine a model that is right 51 percent of the time. At a million trades a day, that 1 percent is the whole business.",
     "facts": [
@@ -4430,7 +4430,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "management-analyst",
     "title": "Management Analyst",
     "world": "Business & Money",
-    "photo": "/images/app/poster-management-analyst.png",
+    "photo": "/images/app/poster-management-analyst.webp",
     "summary": "Studies how a company works and recommends how to do it better.",
     "scenario": "Imagine a hospital losing $4 million a year on scheduling. You have eight weeks to find out why and fix it.",
     "facts": [
@@ -4620,7 +4620,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "administrative-assistant",
     "title": "Administrative Assistant",
     "world": "Business & Money",
-    "photo": "/images/app/poster-administrative-assistant.png",
+    "photo": "/images/app/poster-administrative-assistant.webp",
     "summary": "Keeps an office and its people organized and on time.",
     "scenario": "Imagine three executives, one shared calendar, and a board meeting that moved to tomorrow. You are the one who makes it work.",
     "facts": [
@@ -4807,7 +4807,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "emergency-medicine-doctor",
     "title": "Emergency Medicine Doctor",
     "world": "Health & Medicine",
-    "photo": "/images/app/poster-emergency-medicine-doctor.png",
+    "photo": "/images/app/poster-emergency-medicine-doctor.webp",
     "summary": "Treats whoever comes through the ER doors, whatever is wrong.",
     "scenario": "Imagine a chest pain, a broken arm and a car crash arriving in the same ten minutes. You decide who is first.",
     "facts": [
@@ -4999,7 +4999,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "nurse-anesthetist",
     "title": "Nurse Anesthetist",
     "world": "Health & Medicine",
-    "photo": "/images/app/poster-nurse-anesthetist.png",
+    "photo": "/images/app/poster-nurse-anesthetist.webp",
     "summary": "Puts patients to sleep for surgery and keeps them safe until they wake up.",
     "scenario": "Imagine a patient's blood pressure dropping mid-surgery while the surgeon keeps working. Every second is yours to manage.",
     "facts": [
@@ -5189,7 +5189,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "lawyer",
     "title": "Lawyer",
     "world": "Law, Safety & Justice",
-    "photo": "/images/app/poster-lawyer.png",
+    "photo": "/images/app/poster-lawyer.webp",
     "summary": "Advises people and companies on the law and argues for them.",
     "scenario": "Imagine a client who will lose their house if you lose Tuesday's hearing. You have 400 pages to know cold.",
     "facts": [
@@ -5380,7 +5380,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "airline-pilot",
     "title": "Airline Pilot",
     "world": "Driving, Flying & Shipping",
-    "photo": "/images/app/poster-airline-pilot.png",
+    "photo": "/images/app/poster-airline-pilot.webp",
     "summary": "Flies passengers and cargo safely from one airport to another.",
     "scenario": "Imagine 180 people behind you, a line of thunderstorms ahead, and a decision to make in the next two minutes.",
     "facts": [
@@ -5569,7 +5569,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "therapist",
     "title": "Therapist",
     "world": "Counseling & Social Work",
-    "photo": "/images/app/poster-therapist.png",
+    "photo": "/images/app/poster-therapist.webp",
     "summary": "Helps people work through anxiety, grief, relationships and hard seasons.",
     "scenario": "Imagine a client who has not slept in a week finally saying the thing they came to say. Your next sentence matters.",
     "facts": [
@@ -5760,7 +5760,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "database-architect",
     "title": "Database Architect",
     "world": "Tech & Engineering",
-    "photo": "/images/app/poster-database-architect.png",
+    "photo": "/images/app/poster-database-architect.webp",
     "summary": "Designs how a company stores and finds its most important data.",
     "scenario": "Imagine Black Friday traffic hitting a database you designed. If it holds, nobody notices. If it does not, everyone does.",
     "facts": [
@@ -5950,7 +5950,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "sound-engineering-technician",
     "title": "Sound Engineering Technician",
     "world": "Arts, Media & Sport",
-    "photo": "/images/app/poster-sound-engineering-technician.png",
+    "photo": "/images/app/poster-sound-engineering-technician.webp",
     "summary": "Records, mixes and runs the sound for music, film and live shows.",
     "scenario": "Imagine 20,000 people in an arena and the lead vocal mic cutting out on the first chorus. You have one bar to fix it.",
     "facts": [
@@ -6141,7 +6141,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "drone-pilot",
     "title": "Drone Pilot",
     "world": "Driving, Flying & Shipping",
-    "photo": "/images/app/poster-drone-pilot.png",
+    "photo": "/images/app/poster-drone-pilot.webp",
     "summary": "Flies drones for filming, inspections, mapping and deliveries.",
     "scenario": "Imagine a bridge inspection 200 feet up in a crosswind, with an engineer watching your feed for a crack the size of a pencil.",
     "facts": [
@@ -6329,7 +6329,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "jewelry-designer",
     "title": "Jewelry Designer",
     "world": "Factories & Making Things",
-    "photo": "/images/app/poster-jewelry-designer.png",
+    "photo": "/images/app/poster-jewelry-designer.webp",
     "summary": "Designs and makes rings, necklaces and pieces people keep for life.",
     "scenario": "Imagine an engagement ring due Saturday. The stone is set, the band is polished, and you see a scratch no one else would notice.",
     "facts": [
@@ -6520,7 +6520,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "pediatric-surgeon",
     "title": "Pediatric Surgeon",
     "world": "Health & Medicine",
-    "photo": "/images/app/poster-pediatric-surgeon.png",
+    "photo": "/images/app/poster-pediatric-surgeon.webp",
     "summary": "Operates on children, from newborns to teenagers.",
     "scenario": "Imagine a newborn weighing four pounds and a surgery where the margin for error is measured in millimeters.",
     "facts": [
@@ -6712,7 +6712,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "purchasing-manager",
     "title": "Purchasing Manager",
     "world": "Business & Money",
-    "photo": "/images/app/poster-purchasing-manager.png",
+    "photo": "/images/app/poster-purchasing-manager.webp",
     "summary": "Decides what a company buys, from whom, and at what price.",
     "scenario": "Imagine a supplier calling to say the parts your factory needs tomorrow are stuck at a port. You have four hours.",
     "facts": [
@@ -6902,7 +6902,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "cardiologist",
     "title": "Cardiologist",
     "world": "Health & Medicine",
-    "photo": "/images/app/poster-cardiologist.png",
+    "photo": "/images/app/poster-cardiologist.webp",
     "summary": "Diagnoses and treats problems with the heart.",
     "scenario": "Imagine reading a stress test at 7 a.m. and seeing the pattern that means this patient needs a stent today, not next month.",
     "facts": [
@@ -7094,7 +7094,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "public-relations-manager",
     "title": "Public Relations Manager",
     "world": "Business & Money",
-    "photo": "/images/app/poster-public-relations-manager.png",
+    "photo": "/images/app/poster-public-relations-manager.webp",
     "summary": "Shapes how the public sees a company or person.",
     "scenario": "Imagine a product recall trending on social media by 9 a.m. Your statement goes out at 10 and every reporter is quoting it.",
     "facts": [
@@ -7284,7 +7284,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "veterinarian",
     "title": "Veterinarian",
     "world": "Farming, Animals & Nature",
-    "photo": "/images/app/poster-veterinarian.png",
+    "photo": "/images/app/poster-veterinarian.webp",
     "summary": "Cares for animals' health, from checkups to surgery.",
     "scenario": "Imagine a golden retriever that swallowed a sock and an owner in tears. You have an X-ray and a decision to make.",
     "facts": [
@@ -7476,7 +7476,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "hairstylist",
     "title": "Hairstylist",
     "world": "Personal Care & Community Services",
-    "photo": "/images/app/poster-hairstylist.png",
+    "photo": "/images/app/poster-hairstylist.webp",
     "summary": "Cuts, colors and styles hair, and builds a list of clients who come back.",
     "scenario": "Imagine a bride in your chair at 7 a.m., photos at 10, and a color correction that has to look perfect under sunlight.",
     "facts": [
@@ -7665,7 +7665,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "sheet-metal-worker",
     "title": "Sheet Metal Worker",
     "world": "Building & Construction",
-    "photo": "/images/app/poster-sheet-metal-worker.png",
+    "photo": "/images/app/poster-sheet-metal-worker.webp",
     "summary": "Makes and installs the metal ducts, roofs and panels that buildings run on.",
     "scenario": "Imagine a data center that needs 600 feet of ductwork bent, fitted and sealed before the servers arrive. Every joint you make either holds air or leaks it.",
     "facts": [
@@ -7858,7 +7858,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "forestry-technician",
     "title": "Forestry Technician",
     "world": "Farming, Animals & Nature",
-    "photo": "/images/app/poster-forestry-technician.png",
+    "photo": "/images/app/poster-forestry-technician.webp",
     "summary": "Measures, protects and manages forests, from timber counts to fire prevention.",
     "scenario": "Imagine walking 8 miles of ridge line with a GPS and a tape, tagging trees and checking for beetle damage before a fire season that starts in three weeks.",
     "facts": [
@@ -8051,7 +8051,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "forklift-operator",
     "title": "Forklift Operator",
     "world": "Driving, Flying & Shipping",
-    "photo": "/images/app/poster-forklift-operator.png",
+    "photo": "/images/app/poster-forklift-operator.webp",
     "summary": "Moves pallets and freight through warehouses, docks and factories.",
     "scenario": "Imagine 40 trailers due out by midnight, a scanner telling you which pallet goes where, and aisles just wide enough for your forks.",
     "facts": [
@@ -8240,7 +8240,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "slug": "lighting-technician",
     "title": "Lighting Technician",
     "world": "Arts, Media & Sport",
-    "photo": "/images/app/poster-lighting-technician.png",
+    "photo": "/images/app/poster-lighting-technician.webp",
     "summary": "Rigs, focuses and runs the lights for concerts, film sets, theater and live events.",
     "scenario": "Imagine a 40 foot truss going up at 6 a.m., 200 fixtures to hang and focus, and doors opening for 12,000 people at 7 p.m.",
     "facts": [

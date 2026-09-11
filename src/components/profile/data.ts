@@ -110,7 +110,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     id: "investment-banking",
     title: "Investment Banking",
     world: "Business & Money",
-    photo: "/images/app/poster-investment-banking-v3.png",
+    photo: "/images/app/poster-investment-banking-v3.webp",
     photoFocus: "50% 40%",
     match: 91,
     receipts: [
@@ -177,7 +177,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     id: "airline-pilot",
     title: "Airline Pilot",
     world: "Driving, Flying & Shipping",
-    photo: "/images/app/poster-airline-pilot-alt.png",
+    photo: "/images/app/poster-airline-pilot-alt.webp",
     photoFocus: "50% 72%",
     match: 75,
     receipts: [
@@ -258,7 +258,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     id: "private-equity",
     title: "Private Equity",
     world: "Business & Money",
-    photo: "/images/app/poster-private-equity.png",
+    photo: "/images/app/poster-private-equity.webp",
     match: 88,
     receipts: [
       { kind: "watched", value: "Liked", label: "For You likes" },
@@ -312,7 +312,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     id: "software-engineer",
     title: "Software Engineer",
     world: "Tech & Engineering",
-    photo: "/images/app/poster-software-engineer.png",
+    photo: "/images/app/poster-software-engineer.webp",
     match: 84,
     receipts: [{ kind: "scenario", value: "Pass", label: "Debugging scenario" }, { kind: "saved", value: "2", label: "Careers saved" }],
     routes: [
@@ -340,7 +340,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     id: "registered-nurse",
     title: "Registered Nurse",
     world: "Health & Medicine",
-    photo: "/images/app/poster-registered-nurse.png",
+    photo: "/images/app/poster-registered-nurse.webp",
     match: 78,
     receipts: [{ kind: "scenario", value: "Pass", label: "Triage scenario" }, { kind: "saved", value: "2", label: "Health careers saved" }],
     routes: [
@@ -368,7 +368,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     id: "asset-management",
     title: "Asset Management",
     world: "Business & Money",
-    photo: "/images/app/poster-asset-management.png",
+    photo: "/images/app/poster-asset-management.webp",
     match: 80,
     receipts: [{ kind: "saved", value: "Saved", label: "From the Browse rail" }, { kind: "sim", value: "1x", label: "Markets mini game" }],
     routes: [
@@ -388,7 +388,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     id: "food-scientist",
     title: "Food Scientist",
     world: "Farming, Animals & Nature",
-    photo: "/images/app/poster-food-scientist.png",
+    photo: "/images/app/poster-food-scientist.webp",
     match: 73,
     receipts: [{ kind: "watched", value: "Liked", label: "In the match deck" }, { kind: "sim", value: "1x", label: "Breakdown read" }],
     routes: [
@@ -408,7 +408,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     id: "data-scientist",
     title: "Data Scientist",
     world: "Tech & Engineering",
-    photo: "/images/app/poster-data-scientist.png",
+    photo: "/images/app/poster-data-scientist.webp",
     match: 80,
     receipts: [{ kind: "watched", value: "Liked", label: "In the match deck" }, { kind: "sim", value: "1x", label: "Breakdown read" }],
     routes: [
@@ -428,7 +428,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     id: "fashion-buyer",
     title: "Fashion Buyer",
     world: "Business & Money",
-    photo: "/images/app/poster-fashion-buyer.png",
+    photo: "/images/app/poster-fashion-buyer.webp",
     match: 75,
     receipts: [{ kind: "watched", value: "Liked", label: "In the match deck" }, { kind: "sim", value: "1x", label: "Breakdown read" }],
     routes: [
@@ -448,7 +448,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
     id: "game-designer",
     title: "Game Designer",
     world: "Tech & Engineering",
-    photo: "/images/app/poster-game-designer.png",
+    photo: "/images/app/poster-game-designer.webp",
     match: 78,
     receipts: [{ kind: "watched", value: "Liked", label: "In the match deck" }, { kind: "sim", value: "1x", label: "Breakdown read" }],
     routes: [

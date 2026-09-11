@@ -50,7 +50,7 @@ const popAt = (delay: number): Transition => ({
 const DROP_CAREER = {
   title: "Ethical Hacker",
   world: "Tech & Engineering",
-  photo: "/images/app/poster-cyber-security.png",
+  photo: "/images/app/poster-cyber-security.webp",
 };
 // Match taxonomy: strong | stretch | wildcard (wildcards get the foil)
 const DROP_TIER: "strong" | "stretch" | "wildcard" = "wildcard";
