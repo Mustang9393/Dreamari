@@ -7432,3 +7432,17 @@ SchoolsView now mirrors the reference section for section, nothing extra:
 Removed: highlights carousel, stats band, FAQ, testimonials shell, outcomes
 disclosure, OrganizationBand photo, sticky stage column. Nav "Why Dreamari"
 now points at #why-dreamari as on the reference.
+- Same day, second pass (direct feedback: "match light mode to light mode,
+  remove sharp corners from graphics, simplify everything a lot more"):
+  every composition now renders in the app's LIGHT token scope
+  (`marketing-v2 theme-light` on Frame, Product, Phone, the Connect and
+  educator cards), rounded and contained (no run-offs or clipped edges), and
+  with fewer elements. Hero: one light phone with the Match deck and three
+  bubbles (91% match, Top 3 saved, verified analyst); the tablet, profile
+  card and two bubbles are gone. Audiences: `PathPreview`, the light Profile
+  overview (Top 3 / Plan / Report / Do this next). Explore: one rail of three
+  posters. Data: pay by state only, poster amber fills on the light map.
+  Connect: one thread card with the community line above it. Educators:
+  `EducatorArt`, counselor photo with the student's "Logged in Dreamari" rows
+  (real data from careerExploration.ts) centred on its right; the profile
+  ProgressArt is retired. Immerse stays a photo scene.

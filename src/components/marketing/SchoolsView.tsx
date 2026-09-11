@@ -8,8 +8,8 @@ import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
 import { DO_COPY, DOMark } from "./DreamOpportunity";
 import { PartnerLogoGrid } from "./PartnerTicker";
-import { Grad, HeroShowcase, SchoolsPreview, SkillsTicker } from "./SchoolsShowcase";
-import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, ImmerseArt, MatchArt, ProgressArt } from "./SchoolsVisuals";
+import { Grad, HeroShowcase, PathPreview, SkillsTicker } from "./SchoolsShowcase";
+import { BuildArt, ConnectArt, DataArt, EducatorArt, ExploreArt, Frame, ImmerseArt, MatchArt } from "./SchoolsVisuals";
 import { useRevealOnScroll } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
 
@@ -112,7 +112,6 @@ const STAGES: Stage[] = [
     href: "/connect",
     linkLabel: "See Connect in the app",
     art: <ConnectArt />,
-    bare: true,
   },
 ];
 
@@ -297,7 +296,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </p>
               </div>
               <div className="lg:col-span-7">
-                <SchoolsPreview />
+                <PathPreview />
               </div>
             </div>
           </Reveal>
@@ -347,9 +346,9 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           </Reveal>
           <Reveal>
             <div className="mt-14 sm:mt-20">
-              <ProgressArt />
+              <EducatorArt />
               <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                Shown: a student&apos;s own progress (Top 3, plan, Career Report) as it ships today. The educator dashboard that reads this across a caseload is in development.
+                Shown: one student&apos;s logged activity, as it ships in the Career Report today. The educator dashboard that reads this across a caseload is in development.
               </p>
             </div>
           </Reveal>

@@ -2,19 +2,17 @@
 
 import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
-import { BookOpen, Bookmark, Gamepad2, Heart, MessagesSquare, Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { BookOpen, Bookmark, Check, Gamepad2, Heart, MessagesSquare, Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
-import { BROWSE_BECAUSE_LIKED, BROWSE_TRENDING } from "@/components/app/catalog";
+import { BROWSE_BECAUSE_LIKED } from "@/components/app/catalog";
 import { MatchRing } from "@/components/app/MatchRing";
-import { PosterCard, RankedPosterCard } from "@/components/app/PosterCard";
+import { PosterCard } from "@/components/app/PosterCard";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { INTEREST_WORLDS } from "@/components/build/types";
 import { CardHud, ChipGrid, Citation, QuestionHeading } from "@/components/build/ui";
 import { Figure, Section } from "@/components/career/CareerDetailExperience";
-import { CAREER_EXTRAS } from "@/components/career/data";
 import { PayMap } from "@/components/career/PayMap";
 import { careerProfile } from "@/components/career/profiles";
-import { CommunityCard } from "@/components/connect/CommunityCard";
 import { COMMUNITIES, PROS, THREADS } from "@/components/connect/data";
 import { Avatar, Card, CompanyChip, VerifiedBadge } from "@/components/connect/primitives";
 import { DECK } from "@/components/match-lab/data";
@@ -23,7 +21,7 @@ import { IB_LEVEL_1 } from "@/components/play/ib-level-1";
 import { OptionButton, Question } from "@/components/play/interactions";
 import { PROFILE_CAREERS, STUDENT } from "@/components/profile/data";
 import { studentAvatarSrc } from "@/lib/avatar";
-import { OverviewTab } from "@/components/profile/ProfileExperience";
+import { loggedActivity, shortDate } from "@/lib/careerExploration";
 import { DOMark } from "./DreamOpportunity";
 
 // ---------------------------------------------------------------------------
@@ -80,15 +78,15 @@ export const PHOTOS = {
  *  reads as more of the same dark stage, never a separate box. */
 export function Frame({ className = "", style, children }: { className?: string; style?: CSSProperties; children: ReactNode }) {
   return (
-    // marketing-v2 re-enters the app's dark token scope (tokens.css defines
-    // Semantic.Dark on that class) the same way Product does below -- without
-    // it, var(--background) here resolves to the Schools page's OWN light
-    // background (#f4f7ff), which is the exact light "window" this replaced.
+    // marketing-v2 + theme-light re-enters the app's LIGHT token scope
+    // (tokens.css), so every product piece inside renders the way the app's
+    // light mode does: light surfaces on the light page (direct feedback,
+    // 11 Sept 2026: "match light mode to light mode"). Rounded, contained,
+    // one soft shadow; nothing runs off the edge any more.
     <div
-      className={`marketing-v2 relative isolate overflow-hidden rounded-[28px] ${className}`}
-      style={{ background: "var(--background)", color: "var(--foreground)", boxShadow: SHADOW, ...style }}
+      className={`marketing-v2 theme-light relative isolate overflow-hidden rounded-[28px] border ${className}`}
+      style={{ background: "#ffffff", color: "var(--foreground)", borderColor: "rgba(5,7,15,0.08)", boxShadow: SHADOW, ...style }}
     >
-      <SpaceGround />
       {children}
     </div>
   );
@@ -96,7 +94,7 @@ export function Frame({ className = "", style, children }: { className?: string;
 
 /** A faint wash of a stage's world colour, top-left, under everything. */
 export function Wash({ accent }: { accent: string }) {
-  return <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(110% 80% at 18% 0%, color-mix(in srgb, ${accent} 18%, transparent), transparent 62%)` }} />;
+  return <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(110% 80% at 18% 0%, color-mix(in srgb, ${accent} 10%, transparent), transparent 62%)` }} />;
 }
 
 /** A dark product surface. Absolutely positioned by the caller (so it can run
@@ -117,8 +115,8 @@ function Product({ label, base = 420, floor = 0.55, ceiling = 1.15, live = false
     <div
       role={live ? "group" : "img"}
       aria-label={label}
-      className={`marketing-v2 absolute overflow-hidden ${bare ? "" : "rounded-[22px] border"} ${className}`}
-      style={{ containerType: "inline-size", color: "var(--foreground)", ...(bare ? {} : { borderColor: "rgba(255,255,255,0.1)", background: "var(--background)", boxShadow: SHADOW }), ...style }}
+      className={`marketing-v2 theme-light absolute overflow-hidden ${bare ? "" : "rounded-[22px] border"} ${className}`}
+      style={{ containerType: "inline-size", color: "var(--foreground)", ...(bare ? {} : { borderColor: "rgba(5,7,15,0.08)", background: "#ffffff", boxShadow: SHADOW }), ...style }}
     >
       {live ? (
         <div className={flow ? "relative" : "absolute inset-0 flex flex-col"} style={scale}>{children}</div>
@@ -245,7 +243,6 @@ export function BuildArt() {
   return (
     <>
       <Wash accent="var(--world-tech-engineering-design)" />
-      <span aria-hidden className="pointer-events-none absolute top-[-18%] left-1/2 h-[55%] w-[110%] -translate-x-1/2 rounded-full blur-[48px]" style={{ background: "radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--world-tech-engineering-design) 32%, transparent), color-mix(in srgb, var(--hero-accent-purple) 70%, transparent) 50%, transparent 78%)" }} />
       <Product bare label="Build, the first question: What sounds interesting? Choose up to 2. Business and Money and Tech and Engineering are chosen, from the fifteen career worlds. Harvard FAS Mignone and O*NET Interest Profiler." base={460} floor={0.6} ceiling={1.05} className="top-[10%] right-[9%] bottom-[8%] left-[9%]">
         <div className="relative" style={{ padding: mu(4) }}>
           <div style={{ zoom: "var(--mu)" }}>
@@ -270,7 +267,7 @@ export function MatchArt() {
   return (
     <>
       <Wash accent="var(--world-business-money-office)" />
-      <Product bare label={`Match: Find your Top 3, one slot filled. The card shows ${career.title}, ${career.salary}, employers ${career.employers}, with Pass and Like buttons.`} base={420} floor={0.6} ceiling={1.15} flow className="top-[14%] right-[11%] left-[11%]">
+      <Product bare label={`Match: Find your Top 3, one slot filled. The card shows ${career.title}, ${career.salary}, employers ${career.employers}, with Pass and Like buttons.`} base={640} floor={0.5} ceiling={1} flow className="top-[5%] right-[8%] left-[8%]">
         <div className="relative flex flex-col items-center" style={{ padding: `${mu(16)} ${mu(18)} ${mu(18)}`, gap: mu(14) }}>
           <div className="flex w-full items-center justify-between">
             <p className="font-bold" style={{ fontFamily: "var(--font-display)", fontSize: mu(14), color: "var(--foreground)" }}>Find your Top 3</p>
@@ -305,35 +302,26 @@ export function MatchArt() {
 // Explore: the Browse page's first rail with the real PosterCards, running
 // off the right edge the way a rail does. Pills recreate FilterPill.
 export function ExploreArt() {
-  const pills = ["All", "Business & Money", "Tech & Engineering", "Health & Medicine"];
+  const pills = ["All", "Business & Money", "Tech & Engineering"];
   return (
     <>
       <Wash accent="var(--world-food-farming-nature)" />
-      <Product bare label={`Explore: the rail 'Recommended Because You Liked Business and Money' with poster cards for ${BROWSE_BECAUSE_LIKED.slice(0, 4).map((c) => c.title).join(", ")} and more.`} base={560} floor={0.55} ceiling={1.2} className="top-[10%] right-[-18%] bottom-[-10%] left-[6%]">
-        <div className="relative" style={{ padding: mu(24) }}>
-          <div className="flex flex-col gap-[var(--space-5)]" style={{ zoom: "var(--mu)" }}>
+      <Product bare label={`Explore: the rail 'Recommended Because You Liked Business and Money' with poster cards for ${BROWSE_BECAUSE_LIKED.slice(0, 3).map((c) => c.title).join(", ")}.`} base={680} floor={0.5} ceiling={1} className="top-[8%] right-[6%] bottom-[6%] left-[6%]">
+        <div className="relative" style={{ padding: mu(20) }}>
+          <div className="flex flex-col gap-[var(--space-4)]" style={{ zoom: "var(--mu)" }}>
             <div className="flex gap-[8px]">
               {pills.map((label, i) => (
-                <span key={label} className="flex-none rounded-[100px] border px-[14px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", background: i === 1 ? "var(--primary)" : "var(--glass-surface-1)", borderColor: i === 1 ? "var(--primary)" : "var(--glass-border)", color: i === 1 ? "var(--primary-foreground)" : "var(--foreground)" }}>
+                <span key={label} className="flex-none rounded-[100px] border px-[14px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", background: i === 1 ? "var(--primary)" : "transparent", borderColor: i === 1 ? "var(--primary)" : "var(--border)", color: i === 1 ? "#ffffff" : "var(--foreground)" }}>
                   {label}
                 </span>
               ))}
             </div>
-            <h2 className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Recommended Because You Liked Business &amp; Money
             </h2>
-            <div className="flex gap-[var(--space-6)] pt-1">
-              {BROWSE_BECAUSE_LIKED.slice(0, 5).map((career) => (
+            <div className="flex gap-[16px] pt-1">
+              {BROWSE_BECAUSE_LIKED.slice(0, 3).map((career) => (
                 <PosterCard key={career.title} career={career} />
-              ))}
-            </div>
-            {/* the Browse page's second rail, as it ships: ranked, with the numeral behind each card */}
-            <h2 className="pt-[var(--space-3)] text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-              Top 5 Trending Careers Among Gen Z
-            </h2>
-            <div className="flex gap-[24px]">
-              {BROWSE_TRENDING.slice(0, 4).map((career, i) => (
-                <RankedPosterCard key={career.title} career={career} rank={i + 1} />
               ))}
             </div>
           </div>
@@ -401,60 +389,57 @@ export function ImmerseArt() {
 // used to have was very likely why its stat tiles' `backdrop-filter` was
 // rendering as flat colour instead of a blur (direct feedback, 7 Sept 2026).
 export function ConnectArt() {
-  const community = COMMUNITIES.find((c) => c.id === "business-money") ?? COMMUNITIES[1];
   const thread = THREADS.find((t) => t.id === "t-ib-hours") ?? THREADS[0];
   const answer = thread.responses.find((r) => r.kind === "answer" && r.primary);
   const pro = PROS.find((p) => answer?.kind === "answer" && p.id === answer.proId) ?? PROS[2];
+  const community = COMMUNITIES.find((c) => c.id === "business-money") ?? COMMUNITIES[1];
   const accent = WORLD_COLORS[community.world];
   return (
-    <div
-      className="relative mx-auto w-full max-w-[440px] pb-[26%]"
-      role="img"
-      aria-label={`Connect: the ${community.name} community with ${community.students} students, ${community.activePros} professionals and companies including ${community.professionalsFrom.slice(0, 3).join(", ")}. ${thread.handle}, ${thread.grade}, asks '${thread.title}'. ${pro.name}, ${pro.role} at ${pro.org}, answers.`}
-    >
-      <div aria-hidden inert className="marketing-v2 relative">
-        <CommunityCard community={community} joined onOpen={noop} onJoin={noop} />
-      </div>
-      <div aria-hidden inert className="marketing-v2 absolute right-[-8%] bottom-0 w-[72%]" style={{ filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.45))" }}>
-        {/* A fully opaque backing behind Card -- the app's own frosted-glass
-           surface, correct where it sits over a plain background, but this
-           card sits over ANOTHER card, and the blur revealed and blended the
-           community card's text into it. The backing terminates the blur on
-           solid colour so nothing shows through. */}
-        <span aria-hidden className="absolute inset-0 rounded-[var(--radius-lg)]" style={{ background: "var(--background)" }} />
-        <Card accent={accent} className="marketing-v2 relative">
-          <div className="flex items-center justify-between gap-[var(--space-3)]">
-            <span className="flex min-w-0 items-center gap-[8px]">
-              <Avatar name={thread.handle} size={26} />
-              <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
-              <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
-            </span>
-            <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
-          </div>
-          <h3 className="mt-[12px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
-          <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <span className="flex items-center gap-[5px]"><ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful}</span>
-            <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {thread.comments ?? thread.responses.length} comments</span>
-          </div>
-          <div className="mt-[14px] border-t pt-[14px]" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
-            <div className="flex items-center gap-[8px]">
-              <Avatar name={pro.name} size={30} />
-              <span className="flex min-w-0 flex-col">
-                <span className="flex items-center gap-[5px] text-[13px] leading-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                  <span className="truncate">{pro.name}</span>
-                  <VerifiedBadge size={14} />
-                </span>
-                <span className="flex items-center gap-[6px] text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-                  <span className="truncate">{pro.role}</span>
-                  <CompanyChip name={pro.org} tone="surface" size="sm" />
-                </span>
+    <>
+      <Wash accent={accent} />
+      <div
+        role="img"
+        aria-label={`Connect: in the ${community.name} community, ${thread.handle}, ${thread.grade}, asks '${thread.title}'. ${pro.name}, ${pro.role} at ${pro.org}, answers.`}
+        className="absolute inset-0 flex items-center justify-center p-[7%]"
+      >
+        <div aria-hidden inert className="marketing-v2 theme-light w-full max-w-[420px]">
+          <span className="mb-3 inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1.5 text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <span className="size-2 rounded-full" style={{ background: accent }} /> {community.name} · {community.students} students · {community.activePros} professionals
+          </span>
+          <Card accent={accent} className="marketing-v2 theme-light relative" >
+            <div className="flex items-center justify-between gap-[var(--space-3)]">
+              <span className="flex min-w-0 items-center gap-[8px]">
+                <Avatar name={thread.handle} size={26} />
+                <span className="flex-none text-[12px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
+                <span className="min-w-0 truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· {thread.grade}{thread.location ? ` · ${thread.location}` : ""}</span>
               </span>
+              <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{thread.postedAgo}</span>
             </div>
-            <p className="mt-[8px] line-clamp-3 text-[13.5px] leading-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 92%, transparent)" }}>{answer?.kind === "answer" ? answer.body : ""}</p>
-          </div>
-        </Card>
+            <h3 className="mt-[12px] text-[16px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{thread.title}&rdquo;</h3>
+            <div className="mt-[12px] flex items-center gap-[var(--space-5)] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span className="flex items-center gap-[5px]"><ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {thread.helpful}</span>
+              <span className="flex items-center gap-[5px]"><MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {thread.comments ?? thread.responses.length} comments</span>
+            </div>
+            <div className="mt-[14px] border-t pt-[14px]" style={{ borderColor: "var(--glass-border)" }}>
+              <div className="flex items-center gap-[8px]">
+                <Avatar name={pro.name} size={30} />
+                <span className="flex min-w-0 flex-col">
+                  <span className="flex items-center gap-[5px] text-[13px] leading-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                    <span className="truncate">{pro.name}</span>
+                    <VerifiedBadge size={14} />
+                  </span>
+                  <span className="flex items-center gap-[6px] text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+                    <span className="truncate">{pro.role}</span>
+                    <CompanyChip name={pro.org} tone="surface" size="sm" />
+                  </span>
+                </span>
+              </div>
+              <p className="mt-[8px] line-clamp-3 text-[13.5px] leading-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 92%, transparent)" }}>{answer?.kind === "answer" ? answer.body : ""}</p>
+            </div>
+          </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -463,42 +448,45 @@ export function ConnectArt() {
 // (OverviewTab: the Top Three / Plan / Report bento and Do this next).
 // ---------------------------------------------------------------------------
 
-export function ProgressArt() {
+export function EducatorArt() {
   const focus = PROFILE_CAREERS[0];
-  const tasks = focus.plan.flatMap((horizon) => horizon.tasks);
-  const complete = tasks.filter((task) => task.doneByDefault).length;
-  const planProgress = () => ({ complete, total: tasks.length, pct: Math.round((complete / Math.max(tasks.length, 1)) * 100) });
+  const logged = loggedActivity(focus.id, focus.title, [focus.id]);
   return (
-    <div className="relative mx-auto w-full pb-[38%] sm:pb-[30%]">
-      <div className="relative aspect-[16/11] overflow-hidden rounded-[28px] sm:aspect-[16/9]" style={{ boxShadow: SHADOW }}>
-        <Image src={PHOTOS.educators} alt="" fill sizes="(max-width: 1024px) 100vw, 720px" className="object-cover" style={{ objectPosition: "50% 88%" }} />
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,7,15,0.42) 0%, rgba(5,7,15,0.06) 45%, transparent 70%)" }} />
+    <div className="relative mx-auto flex w-full max-w-[1040px] flex-col gap-5 sm:block">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-[28px] sm:aspect-[2/1]" style={{ boxShadow: SHADOW }}>
+        <Image src={PHOTOS.educators} alt="" fill sizes="(max-width: 1100px) 100vw, 1040px" className="object-cover" style={{ objectPosition: "30% 70%" }} />
       </div>
-      <Product
-        label={`${STUDENT.name}'s Profile overview: ${focus.match}% match with ${focus.title}, My Top Three 2 of 3 chosen, My Plan ${complete} of ${tasks.length} steps, Career Report, and Do this next with Explore and Play actions`}
-        base={560}
-        floor={0.6}
-        ceiling={1}
-        flow
-        className="right-[-3%] bottom-0 w-[92%] sm:right-[-3%] sm:w-[80%] lg:right-[-4%] lg:w-[78%]"
+      <div
+        role="img"
+        aria-label={`${STUDENT.name}, ${STUDENT.grade}: logged in Dreamari, ${logged.map((l) => l.text).join("; ")}`}
+        className="marketing-v2 theme-light w-full max-w-[440px] rounded-[24px] border bg-white sm:absolute sm:top-1/2 sm:right-[5%] sm:w-[44%] sm:-translate-y-1/2"
+        style={{ borderColor: "rgba(5,7,15,0.08)", boxShadow: SHADOW, color: "var(--foreground)" }}
       >
-        <SpaceGround />
-        <div className="relative" style={{ padding: mu(18) }}>
-          <div className="flex flex-col gap-[var(--space-4)]" style={{ zoom: "var(--mu)" }}>
-            <div className="flex items-center justify-between gap-[var(--space-3)]">
-              <div className="flex items-center gap-[12px]">
-                <Image src={studentAvatarSrc(STUDENT.name.split(" ")[0])} alt="" width={96} height={96} className="size-[48px] rounded-full border-2 object-cover" style={{ borderColor: "rgba(255,255,255,0.9)" }} />
-                <span className="flex flex-col">
-                  <span className="text-[20px] leading-[24px] font-extrabold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</span>
-                  <span className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.school} · {STUDENT.grade} · #1 {focus.title}</span>
-                </span>
-              </div>
-              <MatchRing score={focus.match} size={44} />
-            </div>
-            <OverviewTab focus={focus} planProgress={planProgress} top3Count={2} onGoTop3={noop} onGoPlan={noop} onGoReport={noop} onGoLocker={noop} />
+        <div aria-hidden inert className="flex flex-col gap-4 p-5 sm:p-6">
+          <div className="flex items-center gap-3">
+            <Image src={studentAvatarSrc(STUDENT.name.split(" ")[0])} alt="" width={88} height={88} className="size-[44px] flex-none rounded-full object-cover" />
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate text-[16px] leading-[20px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</span>
+              <span className="truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT.grade} · #1 {focus.title}</span>
+            </span>
+            <span className="ml-auto"><MatchRing score={focus.match} size={40} /></span>
+          </div>
+          <div>
+            <p className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Logged in Dreamari</p>
+            <ul className="mt-2 flex flex-col">
+              {logged.map((item, i) => (
+                <li key={item.text} className={`flex items-start gap-3 py-2.5 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "var(--glass-border)" }}>
+                  <span className="mt-[3px] flex size-[16px] flex-none items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#fff" }}><Check style={{ width: 10, height: 10 }} strokeWidth={3.5} aria-hidden /></span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-[14px] leading-[19px] font-semibold">{item.text}</span>
+                    <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{shortDate(item.date)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-      </Product>
+      </div>
     </div>
   );
 }
@@ -511,29 +499,19 @@ export function ProgressArt() {
 export function DataArt() {
   const slug = "investment-banking";
   const profile = careerProfile(slug);
-  const accent = WORLD_COLORS["Business & Money"];
-  const rungs = (CAREER_EXTRAS[slug]?.ladder ?? []).filter((r) => r.salary !== "-");
+  // the light token for this world is darkened for text contrast (#825900),
+  // which turns map fills brown; fills take the poster amber, text the token
+  const accent = "#f0b429";
   const typical = profile?.facts.find((f) => f.label === "Typical pay")?.value ?? "$361,000/year";
   const rows = [...(profile?.payByState.yourStates ?? []), ...(profile?.payByState.best ?? [])];
   return (
-    <Frame className="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5]">
+    <Frame className="aspect-[4/5] sm:aspect-[5/4]">
       <Wash accent={accent} />
-      <Product bare live label="Investment Banking data from the career page: pay by state across the United States, and the career ladder" base={660} floor={0.6} ceiling={1} className="top-[7%] right-[-6%] bottom-[-8%] left-[7%]">
-        <div className="relative" style={{ padding: mu(18) }}>
+      <Product bare live label="Investment Banking pay by state across the United States, from the career page" base={620} floor={0.6} ceiling={1} className="inset-[7%]">
+        <div className="relative">
           <div className="flex flex-col gap-[var(--space-4)]" style={{ zoom: "var(--mu)" }}>
             <Section title={profile?.payByState.title ?? "Pay by state"} action={<span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Typical pay <Figure accent={accent}>{typical}</Figure></span>}>
               <PayMap typical={typical} rows={rows} yourState={profile?.payByState.yourStates?.[0]?.state} accent={accent} seed={slug} />
-            </Section>
-            <Section title="Career ladder">
-              <ul className="-mt-[var(--space-2)] flex flex-col">
-                {rungs.map((rung, i) => (
-                  <li key={rung.number} className={`grid items-center gap-[var(--space-4)] py-[11px] ${i > 0 ? "border-t" : ""}`} style={{ gridTemplateColumns: "28px minmax(0,1fr) auto", borderColor: "var(--glass-border)" }}>
-                    <span className="text-center text-[16px] font-bold tabular-nums" style={{ fontFamily: "var(--font-display)", backgroundImage: `linear-gradient(180deg, ${accent}, color-mix(in srgb, ${accent} 60%, #000))`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{rung.number}</span>
-                    <span className="min-w-0 truncate text-[15px] leading-[22px] font-semibold">{rung.jobTitle}</span>
-                    <Figure accent={accent}>{rung.salary}</Figure>
-                  </li>
-                ))}
-              </ul>
             </Section>
           </div>
         </div>
