@@ -301,7 +301,9 @@ const UNDERLINE_INPUT =
 function SelectField({ label, options, value, placeholder, onChange }: { label: string; options: string[]; value: string; placeholder: string; onChange: (next: string) => void }) {
   return (
     <div>
-      <p className="mb-2 text-[11px] font-bold tracking-wide text-[var(--color-night-muted-foreground)]">{label}</p>
+      {/* Bigger -- a field title, not a tiny caption (direct feedback,
+         11 Sept 2026: "'Grade' and 'GPA' should be larger titles"). */}
+      <p className="mb-2 text-[15px] font-extrabold" style={{ color: "var(--color-night-foreground)" }}>{label}</p>
       <div className="relative">
         <select
           value={value}
@@ -360,23 +362,30 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
              its own full-width slider below (direct feedback, 11 Sept
              2026), so a lone select no longer shares a row with anything. */}
           <SelectField label="Grade" options={GRADE_OPTIONS} value={state.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
+          {/* The reassurance line now lives inside GpaField itself, right
+             under its "GPA" label (direct feedback, 11 Sept 2026). */}
           <GpaField value={state.gpa} onChange={(gpa) => { react(); patch({ gpa }); }} />
+          {/* A real label, not just a placeholder -- Zip Code was the one
+             field on this card with no persistent title once Grade/GPA
+             grew theirs, and it started reading as easy to miss (direct
+             feedback, 11 Sept 2026). */}
           <div>
-            <p className="mt-1.5 text-[11px] font-medium text-[var(--color-night-muted-foreground)] opacity-80">
-              Your GPA does not define you. It just helps us find realistic schools.
-            </p>
+            <p className="mb-2 text-[15px] font-extrabold" style={{ color: "var(--color-night-foreground)" }}>Zip Code</p>
+            <input
+              className={UNDERLINE_INPUT}
+              style={{ borderBottomColor: "var(--color-glass-stroke)" }}
+              // A real example, not the label repeated (direct feedback,
+              // 11 Sept 2026) -- now that the field has its own title
+              // above it, the placeholder can actually show the format.
+              placeholder="10001"
+              aria-label="Zip code"
+              inputMode="numeric"
+              maxLength={5}
+              value={state.zipCode}
+              onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })}
+              autoComplete="postal-code"
+            />
           </div>
-          <input
-            className={UNDERLINE_INPUT}
-            style={{ borderBottomColor: "var(--color-glass-stroke)" }}
-            placeholder="Zip Code"
-            aria-label="Zip code"
-            inputMode="numeric"
-            maxLength={5}
-            value={state.zipCode}
-            onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })}
-            autoComplete="postal-code"
-          />
           <SelectField
             label="How far would you go for school?"
             options={TRAVEL_DISTANCE_OPTIONS}

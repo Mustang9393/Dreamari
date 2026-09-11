@@ -7738,3 +7738,40 @@ hover/wait loop).
   instead of a separate, unexplained control (direct feedback: "do they
   seem too different and confusing?"). Selected-chip text is white, not
   the old near-black tuned for an amber fill.
+
+## 2026-09-12 · GPA slider: simplified after repeated clipping (direct feedback)
+Several rounds of direct feedback in one session; final state:
+- The scale's two ends ARE "2.0 or below" and "4.0 or higher" (drag all
+  the way to an edge to pick it, not separate chips). Every tenth between
+  is a real tick on the ruler, tallest at the whole numbers, medium at the
+  halves, faint between -- that density, not a caption, signals the
+  answer wants a decimal.
+- "GPA" title, the current answer inline right beside it (e.g. "GPA 3.7"),
+  and a compact checkbox for "My school does not use GPA" all share one
+  row. Checking it dims and disables the scale below (`disabled` on the
+  range input too); unchecking it clears back to no answer. One merged,
+  always-shown line under that row covers both the drag instruction and
+  the reassurance copy ("Drag to set your exact GPA. It doesn't define
+  you, it just helps us find realistic schools." -- no em dash).
+- Removed: the floating value pill that used to chase the thumb. It was
+  the actual source of the repeated edge-clipping (a ~90px-wide pill needs
+  a much bigger edge reservation than a 24px thumb does) and, per direct
+  feedback, added clutter for no real gain once the answer already shows
+  in the title row. The thumb's own glow is now a slim 3px ring rather
+  than a wide spread, so one small shared inset (`px-4`, the track, its
+  ticks and the end labels all use it) comfortably clears it with no
+  reservation math -- verified with no clipping at 375px width, both
+  scale ends, screenshotted.
+- Root cause of "still cropping" despite earlier bigger paddings: it
+  wasn't really about padding size. `flex-1 flex-col overflow-y-auto`
+  (every Build step's scroll wrapper) forces `overflow-x` to `auto` too
+  per the CSS spec's mixed-overflow rule, and the OLD wide floating pill
+  (needed ~90px clearance) kept exceeding whatever local padding it was
+  given. Confirmed via computed-style walk of the DOM. Removing the pill
+  removed the problem at its root instead of continuing to guess bigger
+  numbers.
+- Same color/gradual-gradient fix as the tuition slider: blue into the
+  app's own violet accent, not blue-to-amber.
+- Zip Code and "How far would you go for school?" got the same bigger
+  field-title treatment as Grade/GPA; Zip Code's placeholder is now a real
+  example ("10001") instead of repeating the label.

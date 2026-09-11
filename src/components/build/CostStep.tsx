@@ -43,8 +43,11 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
            asks for a range, so saying "select a range" twice more was pure noise.
            Untouched, the readout mirrors the thumb's resting stop in muted ink and
            Next stays disabled until the student actually moves it. */}
+        {/* Bigger (direct feedback, 11 Sept 2026: "the copy for the budget
+           slider is also a little too small") -- this readout is the
+           answer to the question above it, not a caption. */}
         <p
-          className="text-lg font-extrabold transition-colors sm:text-xl"
+          className="text-xl font-extrabold transition-colors sm:text-2xl"
           style={{ color: touched ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)" }}
         >
           {COST_STOPS[value]}
@@ -127,14 +130,18 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
                 key={COST_STOPS[i]}
                 type="button"
                 onClick={() => setIndex(i)}
-                className={`absolute top-0 max-w-[76px] text-[10.5px] leading-tight font-semibold transition-colors sm:max-w-[96px] sm:text-[11.5px] ${
+                // Bigger (direct feedback, 11 Sept 2026: "'$25K or less'
+                // etc are too small") -- wider max-width to match, so the
+                // longer labels ("Cost isn't a major factor") still wrap
+                // to two lines instead of overflowing.
+                className={`absolute top-0 max-w-[92px] text-[12.5px] leading-tight font-bold transition-colors sm:max-w-[112px] sm:text-[13.5px] ${
                   isFirst ? "text-left" : isLast ? "text-right" : "-translate-x-1/2 text-center"
                 }`}
                 style={{
                   left: isLast ? undefined : `${stopPercent}%`,
                   right: isLast ? 0 : undefined,
-                  color: isActive ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 78%, transparent)",
-                  opacity: isActive ? 1 : 0.8,
+                  color: isActive ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 90%, transparent)",
+                  opacity: isActive ? 1 : 0.9,
                 }}
               >
                 {top}

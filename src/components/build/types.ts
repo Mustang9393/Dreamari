@@ -108,7 +108,7 @@ export const TRAVEL_DISTANCE_OPTIONS = ["Within 25 miles", "Within 50 miles", "W
 // single number can't hold.
 export const GPA_SCALE: string[] = Array.from({ length: 21 }, (_, i) => (2 + i * 0.1).toFixed(1));
 export const GPA_HIGHER = "4.0 or higher";
-export const GPA_BELOW = "Below 2.0";
+export const GPA_BELOW = "2.0 or below";
 export const GPA_NOT_USED = "My school does not use GPA";
 /** The flat list, highest first -- for any plain dropdown still using one
  *  (Settings, the college list's edit sheet); GpaField below is Build's own
