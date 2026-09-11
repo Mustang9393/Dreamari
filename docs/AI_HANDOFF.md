@@ -7286,3 +7286,16 @@ REPORT_SECTIONS updated; Where this comes from covers it.
 - Print / Download preview: controls carry data-print-hide; rows stay.
   Counselor Review tab is a form, not the document, so nothing to add there.
 Copy is Joshua's verbatim. Section titles for 04-06 unchanged from before.
+
+## 2026-09-11 · One backdrop everywhere (Schools read lighter than Careers)
+Direct feedback: "explore schools tab is using a different background than
+the careers page". Root cause, found by sampling rendered pixels headlessly:
+CollegesExperience and CollegeDetailExperience layered a second copy of
+background-space.svg on top of AppBackdrop (which already carries it), and
+CareerDetailExperience rendered AppBackdrop twice plus a third copy of the
+sheet. The stacked translucent nebulae lifted the whole field (top-left
+25,39,73 became 37,50,82). Removed the extras; every app screen now renders
+exactly one AppBackdrop. Verified: Explore Careers, Schools (both faces),
+College detail, Career detail, Home, Play and Profile sample identical
+background values at four probe points. Home's data-space-backdrop div is
+its star-dot decor, not a second sheet, left as is.

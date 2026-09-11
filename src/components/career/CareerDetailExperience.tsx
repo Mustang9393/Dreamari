@@ -413,14 +413,11 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      {/* Same ground as Home, Explore, Profile and Connect: one AppBackdrop,
+         which already carries the space sheet. This page used to stack two
+         backdrops plus a third copy of the sheet, so it read lighter than
+         every other screen. */}
       <AppBackdrop />
-      <AppBackdrop />
-      {/* Same ground as Home, Explore, Profile and Connect: the color stack
-         plus the space backdrop, never a flat black page. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element -- decorative backdrop, same element the other app screens use */}
-        <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
-      </div>
       <div className="no-print">
         <DesktopNavigation active="Explore" />
       </div>

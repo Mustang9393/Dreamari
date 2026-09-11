@@ -134,11 +134,10 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      {/* One backdrop only. AppBackdrop already carries the space sheet; a
+         second copy layered here made Schools read lighter and bluer than
+         Explore Careers (direct feedback, 11 Sept 2026). */}
       <AppBackdrop />
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
-      </div>
       <DesktopNavigation active="Explore" />
       <FirstVisitSplash surface="schools" />
       {/* Mobile top tabs: the same bar Explore Careers has (FOR YOU /

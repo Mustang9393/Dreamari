@@ -94,10 +94,6 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
       <AppBackdrop />
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
-      </div>
       <DesktopNavigation active="Explore" />
       <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
         <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/colleges" /><Wordmark /></span>
