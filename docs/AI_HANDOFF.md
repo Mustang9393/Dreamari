@@ -7446,3 +7446,42 @@ now points at #why-dreamari as on the reference.
   `EducatorArt`, counselor photo with the student's "Logged in Dreamari" rows
   (real data from careerExploration.ts) centred on its right; the profile
   ProgressArt is retired. Immerse stays a photo scene.
+
+## 2026-09-11 · Schools landing: from-scratch graphics, exact reference copy (not pushed)
+Direct feedback in one sitting: "start entirely from scratch, generate new
+graphics", "use exact copy from the replit, no em dashes", "remove eyebrows,
+remove the stage icons", "CTAs consistent with our design system, fields too
+pill shaped", "reduce nested boxes", "left/centre alignment awkward", "no
+percentage matches, don't drift from the app", "check the counselor
+dashboard prototype and draw conclusions", "100x polish, animations, glass,
+scroll effects".
+- `SchoolsIllustrations.tsx` replaces SchoolsVisuals/SchoolsShowcase (both
+  deleted). Fixed bright palette, Panel (glass, 28px) / Tile / Pill / Donut /
+  Initials primitives, `Fit` zooms each fixed-width design into its column.
+  Hero: three floating cards (Investment Banker career, My Top 3 with "Your
+  Strongest Match", Amara Okafor's verified answer) with scroll parallax and
+  staggered entrance, no panel. Stages (inside Learn more): Build chips,
+  Match card stack with Pass/Like, Explore posters, Immerse question over the
+  reception photo, Connect thread card. No app components, no screenshots.
+- Counselor dashboard prototype (web-app-prototype-maishak.replit.app) read in
+  full: Overview (Student Status, Postsecondary Plans, Career Pathways),
+  Students caseload (Roadmap %, status, milestone review states), Milestone
+  Tracker, Review Queue (Approve / Request Changes), Student Progress (summary
+  by grade, CSV/PDF), Career + College Insights (recommendations, top saved
+  careers/majors/colleges). Its vocabulary and sample figures are used
+  verbatim; the designs are ours. Audience tabs now sit above the graphic
+  they change and each shows a different composition: Schools = Students
+  caseload, Districts = Student Progress by grade, Nonprofits = Insights
+  recommendation + top saved careers, Institutions = top saved majors and
+  colleges. Educators = Overview donuts + Review Queue. All labelled
+  Illustrative preview (the reference's label).
+- View: reference order and copy verbatim (dashes to commas); no eyebrows,
+  no icon tiles; "01 Build" number + name; flat `solid`/`outline` button
+  variants (12px, no glow) added to MarketingButton for this page only; form
+  has no nested box, 10px fields, the reference's placeholders, org type
+  defaults to School, students served is a text field; demo section is two
+  columns (copy left, form right) with a soft glow; all section heads left
+  aligned; aurora blobs drift behind the hero; tab highlight slides
+  (layoutId); Learn more expands with height animation; stage cards lift on
+  hover; bars, rings and rows draw in on scroll (framer-motion whileInView).
+Next: user review, then push.

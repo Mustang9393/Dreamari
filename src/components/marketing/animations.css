@@ -279,3 +279,10 @@
 .mkt-marquee { animation: mkt-marquee 38s linear infinite; }
 .mkt-marquee:hover { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) { .mkt-marquee { animation: none; } }
+
+/* Schools hero aurora: two soft blobs that drift very slowly behind the glass. */
+@keyframes mkt-drift-a { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,30px) scale(1.06); } }
+@keyframes mkt-drift-b { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-50px,20px) scale(1.08); } }
+.mkt-drift-a { animation: mkt-drift-a 18s ease-in-out infinite; }
+.mkt-drift-b { animation: mkt-drift-b 22s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .mkt-drift-a, .mkt-drift-b { animation: none; } }

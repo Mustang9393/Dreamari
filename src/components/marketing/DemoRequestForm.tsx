@@ -12,7 +12,6 @@ export const DEMO_REQUEST_TO = "chandu.mp.14@gmail.com";
 
 // Field set and option labels are the reference site's (dreamari-educator-website.replit.app).
 const ORG_TYPES = ["School", "School District", "Nonprofit", "Educational Organization / Institution"] as const;
-const STUDENT_BANDS = ["Under 500", "500 to 2,000", "2,000 to 10,000", "More than 10,000"] as const;
 
 type Fields = {
   firstName: string;
@@ -24,11 +23,11 @@ type Fields = {
   students: string;
 };
 
-const EMPTY: Fields = { firstName: "", lastName: "", email: "", organization: "", role: "", orgType: "", students: "" };
+const EMPTY: Fields = { firstName: "", lastName: "", email: "", organization: "", role: "", orgType: "School", students: "" };
 
 const FIELD =
-  "w-full rounded-xl border px-4 py-3 text-[15px] leading-snug outline-none transition-[box-shadow,border-color] duration-150 focus:[border-color:var(--primary)] focus:[box-shadow:0_0_0_3px_color-mix(in_srgb,var(--primary)_22%,transparent)]";
-const FIELD_STYLE = { background: "#ffffff", borderColor: "var(--border)", color: "var(--foreground)" } as const;
+  "w-full rounded-[10px] border px-3.5 py-[11px] text-[15px] leading-snug outline-none transition-[box-shadow,border-color] duration-150 placeholder:[color:var(--muted-foreground)] placeholder:opacity-60 focus:[border-color:var(--primary)] focus:[box-shadow:0_0_0_3px_color-mix(in_srgb,var(--primary)_18%,transparent)]";
+const FIELD_STYLE = { background: "#ffffff", borderColor: "rgba(5,7,15,0.16)", color: "var(--foreground)" } as const;
 
 // Native <select> with the browser arrow replaced by one chevron (the same
 // lucide ChevronDown the Disclosure uses), drawn as a background image so the
@@ -46,7 +45,7 @@ const SELECT_STYLE = {
 
 function Label({ htmlFor, children }: { htmlFor: string; children: string }) {
   return (
-    <label htmlFor={htmlFor} className="mb-1.5 block text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+    <label htmlFor={htmlFor} className="mb-1.5 block text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>
       {children}
     </label>
   );
@@ -79,8 +78,7 @@ export function DemoRequestForm() {
     return (
       <div
         role="status"
-        className="flex flex-col items-start gap-4 rounded-2xl border p-6 sm:p-8"
-        style={{ background: "#ffffff", borderColor: "var(--border)" }}
+        className="flex flex-col items-start gap-4"
       >
         <span
           className="flex h-11 w-11 items-center justify-center rounded-full"
@@ -113,37 +111,30 @@ export function DemoRequestForm() {
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-4 rounded-2xl border p-5 sm:grid-cols-2 sm:gap-5 sm:p-7"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--border)" }}
-    >
+    <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
       <div>
         <Label htmlFor="demo-first">First name</Label>
-        <input id="demo-first" name="firstName" required autoComplete="given-name" className={FIELD} style={FIELD_STYLE} value={fields.firstName} onChange={set("firstName")} />
+        <input id="demo-first" name="firstName" required autoComplete="given-name" placeholder="Jane" className={FIELD} style={FIELD_STYLE} value={fields.firstName} onChange={set("firstName")} />
       </div>
       <div>
         <Label htmlFor="demo-last">Last name</Label>
-        <input id="demo-last" name="lastName" required autoComplete="family-name" className={FIELD} style={FIELD_STYLE} value={fields.lastName} onChange={set("lastName")} />
+        <input id="demo-last" name="lastName" required autoComplete="family-name" placeholder="Doe" className={FIELD} style={FIELD_STYLE} value={fields.lastName} onChange={set("lastName")} />
       </div>
       <div>
         <Label htmlFor="demo-email">Work email</Label>
-        <input id="demo-email" name="email" type="email" required autoComplete="email" className={FIELD} style={FIELD_STYLE} value={fields.email} onChange={set("email")} />
+        <input id="demo-email" name="email" type="email" required autoComplete="email" placeholder="jane@school.edu" className={FIELD} style={FIELD_STYLE} value={fields.email} onChange={set("email")} />
       </div>
       <div>
         <Label htmlFor="demo-org">Organization name</Label>
-        <input id="demo-org" name="organization" required autoComplete="organization" className={FIELD} style={FIELD_STYLE} value={fields.organization} onChange={set("organization")} />
+        <input id="demo-org" name="organization" required autoComplete="organization" placeholder="Westfield High School" className={FIELD} style={FIELD_STYLE} value={fields.organization} onChange={set("organization")} />
       </div>
       <div>
         <Label htmlFor="demo-role">Your role</Label>
-        <input id="demo-role" name="role" required autoComplete="organization-title" placeholder="Counselor, principal, program director" className={`${FIELD} placeholder:[color:var(--muted-foreground)] placeholder:opacity-70`} style={FIELD_STYLE} value={fields.role} onChange={set("role")} />
+        <input id="demo-role" name="role" required autoComplete="organization-title" placeholder="Counselor, principal, program director" className={FIELD} style={FIELD_STYLE} value={fields.role} onChange={set("role")} />
       </div>
       <div>
         <Label htmlFor="demo-type">Organization type</Label>
         <select id="demo-type" name="orgType" required className={SELECT} style={SELECT_STYLE} value={fields.orgType} onChange={set("orgType")}>
-          <option value="" disabled>
-            Choose one
-          </option>
           {ORG_TYPES.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -153,19 +144,10 @@ export function DemoRequestForm() {
       </div>
       <div className="sm:col-span-2">
         <Label htmlFor="demo-students">Number of students served</Label>
-        <select id="demo-students" name="students" required className={SELECT} style={SELECT_STYLE} value={fields.students} onChange={set("students")}>
-          <option value="" disabled>
-            Choose a range
-          </option>
-          {STUDENT_BANDS.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
+        <input id="demo-students" name="students" inputMode="numeric" placeholder="e.g. 500" className={FIELD} style={FIELD_STYLE} value={fields.students} onChange={set("students")} />
       </div>
-      <div className="flex flex-col gap-3 pt-1 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
-        <MarketingButton variant="primary" size="lg" type="submit">
+      <div className="flex flex-col gap-3 pt-2 sm:col-span-2">
+        <MarketingButton variant="solid" size="lg" type="submit" className="w-full">
           Request a demo
         </MarketingButton>
         <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>

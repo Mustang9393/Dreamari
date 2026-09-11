@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
-type Variant = "primary" | "ghost";
+type Variant = "primary" | "ghost" | "solid" | "outline";
 
 const VARIANT_STYLE: Record<Variant, React.CSSProperties> = {
   primary: {
@@ -13,6 +13,20 @@ const VARIANT_STYLE: Record<Variant, React.CSSProperties> = {
     background: "var(--glass-surface-1)",
     border: "1px solid var(--border)",
     color: "var(--foreground)",
+  },
+  // The app's own button language for the Schools page (direct feedback,
+  // 11 Sept 2026: CTAs "not consistent with our design system"): flat
+  // primary, 12px corners, no glow; outline is white with a hairline.
+  solid: {
+    background: "var(--primary)",
+    color: "#ffffff",
+    borderRadius: "var(--radius-md)",
+  },
+  outline: {
+    background: "#ffffff",
+    border: "1px solid rgba(5,7,15,0.14)",
+    color: "var(--foreground)",
+    borderRadius: "var(--radius-md)",
   },
 };
 
