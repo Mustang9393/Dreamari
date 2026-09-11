@@ -7567,3 +7567,13 @@ Verified locally: both POSTs 200, sent and survey states render.
 - Maisha's prototype went blank mid-review; Engagement and Impact pages not
   yet read.
 - Callouts (15 / 44 / 30) removed again: not on the reference and they read as small numbers (direct feedback).
+- Prototype came back; read Platform Engagement (MAU/WAU/DAU, logins by
+  month, students needing intervention), My Impact (shareable report with
+  Print / Share / Generate Principal or District Report, headline rates,
+  Platform-Facilitated Student Engagement block, ASCA alignment), Counselor
+  Connect (announcements with read rates, student questions) and Productivity
+  Suite (draft recommendation letters, meeting briefs). Nonprofits tab is now
+  the My Impact report (its figures verbatim): the funder-facing artefact a
+  program needs. Audience tabs now: Schools = caseload, Districts = progress
+  by school, Nonprofits = impact report, Institutions = saved majors and
+  colleges.

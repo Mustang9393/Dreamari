@@ -367,41 +367,49 @@ export function DistrictIllustration() {
   );
 }
 
-// Nonprofits: Career + College Insights, the recommendation that turns what
-// students save into a real-world connection.
+// Nonprofits: the My Impact report, the page a program shares with funders
+// and partners. Its own headline figures and its "Platform-Facilitated
+// Student Engagement" block, verbatim from the prototype.
+const IMPACT_STATS = [
+  { k: "Total Caseload", v: "120", of: "students across 3 schools" },
+  { k: "On-Track Rate", v: "86%", of: "of caseload on pace" },
+  { k: "Postsecondary Plans", v: "66%", of: "students with declared plan" },
+];
+const ENGAGEMENT = [
+  { n: "852", k: "Career Simulations Completed" },
+  { n: "1,101", k: "Careers Saved to Profiles" },
+  { n: "1,246", k: "Colleges Saved by Students" },
+  { n: "410", k: "Community Contributions" },
+];
+
 export function NonprofitIllustration() {
-  const actions = [
-    "Invite an investment banking professional or Wall Street firm representative to your school for a career talk",
-    "Schedule a visit to a financial district campus, trading floor, or investment firm",
-    "Explore a CTE Finance & Business pathway or dual-enrollment finance course",
-  ];
   return (
     <Panel>
       <Fit base={600}>
-        <div role="img" aria-label="Career + College Insights for a nonprofit cohort of 45 students across 3 schools: 43% have saved Investment Banker as a top career, with three recommended actions, and the top saved careers." className="flex flex-col gap-5 px-7 pt-14 pb-7">
-          <OrgHead title="Career + College Insights" note="Fall cohort · 45 students across 3 schools" />
+        <div role="img" aria-label="My Impact report for a nonprofit program: 120 students across 3 schools, 86% on-track rate, 66% with a postsecondary plan; platform engagement of 852 career simulations completed, 1,101 careers saved, 1,246 colleges saved and 410 community contributions; Print, Share and Generate Report." className="flex flex-col gap-5 px-7 pt-14 pb-7">
+          <OrgHead title="My Impact" note="Reporting Period: August 2023 to January 2024" right={<span className="flex gap-1.5"><Pill>Print</Pill><Pill>Share</Pill><Pill tone="blue">Generate Report</Pill></span>} />
+          <ul className="grid grid-cols-3 gap-3">
+            {IMPACT_STATS.map((st, i) => (
+              <motion.li key={st.k} variants={rise} custom={i} initial="hidden" whileInView="show" viewport={VIEW}>
+                <Tile className="flex h-full flex-col gap-1 p-4" style={{ boxShadow: "none" }}>
+                  <span className="text-[26px] leading-none font-extrabold tabular-nums tracking-[-0.02em]" style={{ color: INK }}>{st.v}</span>
+                  <span className="mt-1 text-[12.5px] font-bold" style={{ color: INK }}>{st.k}</span>
+                  <span className="text-[11px] font-semibold" style={{ color: INK2 }}>{st.of}</span>
+                </Tile>
+              </motion.li>
+            ))}
+          </ul>
           <div className="rounded-[18px] p-5" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--surface) 88%, #2f6bf2), color-mix(in srgb, var(--surface) 88%, #a855f7))" }}>
-            <Caps color={VIOLET}>Dreamari recommendation</Caps>
-            <p className="mt-2 text-[17px] leading-[23px] font-extrabold tracking-[-0.01em]" style={{ color: INK }}>43% of students have saved Investment Banker as a top career</p>
-            <ul className="mt-3 flex flex-col gap-2">
-              {actions.map((t, i) => (
-                <motion.li key={t} className="flex gap-2.5 text-[13px] leading-[19px] font-medium" style={{ color: INK }} variants={rise} custom={i} initial="hidden" whileInView="show" viewport={VIEW}>
-                  <span className="mt-[7px] size-1.5 flex-none rounded-full" style={{ background: VIOLET }} />{t}
+            <Caps color={VIOLET}>Platform-Facilitated Student Engagement</Caps>
+            <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3">
+              {ENGAGEMENT.map((e, i) => (
+                <motion.li key={e.k} className="flex items-baseline gap-2.5" variants={rise} custom={i} initial="hidden" whileInView="show" viewport={VIEW}>
+                  <span className="text-[22px] leading-none font-extrabold tabular-nums tracking-[-0.02em]" style={{ color: INK }}>{e.n}</span>
+                  <span className="text-[12.5px] leading-snug font-semibold" style={{ color: INK2 }}>{e.k}</span>
                 </motion.li>
               ))}
             </ul>
-          </div>
-          <div>
-            <span className="text-[13px] font-bold" style={{ color: INK }}>Top saved careers</span>
-            <ul className="mt-2 flex flex-col gap-2">
-              {[["Investment Banker", 52, AMBER], ["Software Engineer", 47, "#6366f1"], ["Entrepreneur / Business Owner", 38, VIOLET], ["Registered Nurse", 35, TEAL]].map(([label, n, color], i) => (
-                <li key={String(label)} className="grid items-center gap-3" style={{ gridTemplateColumns: "190px 1fr 28px" }}>
-                  <span className="truncate text-[12.5px] font-semibold" style={{ color: INK }}>{label}</span>
-                  <span className="h-[8px] overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}><motion.span className="block h-full rounded-full" initial={{ width: 0 }} whileInView={{ width: `${(Number(n) / 52) * 100}%` }} viewport={VIEW} transition={{ duration: 1, ease: EASE, delay: 0.3 + i * 0.08 }} style={{ background: color as string }} /></span>
-                  <span className="text-right text-[12px] font-bold tabular-nums" style={{ color: INK2 }}>{n}</span>
-                </li>
-              ))}
-            </ul>
+            <p className="mt-3 text-[11.5px] leading-relaxed" style={{ color: INK2 }}>All engagement activity was generated by students in the program through the Dreamari platform during this reporting period.</p>
           </div>
         </div>
       </Fit>
