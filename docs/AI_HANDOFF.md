@@ -7864,3 +7864,13 @@ Every entry point into Match (BuildFlowExperience finishing or skipping,
 Profile's two "start swiping" links, ReportChooser's empty state) already
 routes to `/match-lab`, so the toggle there covers all of them without
 touching each call site. Direct user instruction: pushed to main (bb617ba).
+
+## 2026-09-12 · GPA picker: order reversed, no longer bottom-docked on mobile
+
+Direct feedback on the compact GPA picker (2026-09-12 entry above):
+4.0 or higher now leads the grid, descending to 2.0 or below at the end
+(reversed the `choices` array in GpaField.tsx). The mobile media query's
+forced `top: auto; bottom: 12px` -- which pinned the picker to the very
+bottom of the screen regardless of where the field sat on the page --
+is gone; mobile now uses the same anchored-below-the-field
+`--picker-top` positioning as desktop. Pushed to main (388e445).
