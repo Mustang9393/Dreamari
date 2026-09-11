@@ -234,20 +234,32 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
       }}
     >
       <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 46vw, 280px" className="object-cover" draggable={false} />
-      {/* "Learn more", dead center on the photo -- the chevron-after-world-label
-         read as "tap into Business & Money" instead of "tap this card"
-         (direct feedback, 12 Sept 2026), and a corner icon tested as unclear
-         before that. Centered text names the action outright and can't be
-         misread as belonging to any one chip. Sized down on mobile (the
-         base size) since the shortest cards are ~166px tall there; sm: steps
-         back up once there's room. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute top-[64%] left-1/2 z-[1] -translate-x-1/2 -translate-y-1/2 rounded-[var(--radius-sm)] border px-2 py-[3px] text-[9px] font-bold tracking-[0.05em] whitespace-nowrap uppercase backdrop-blur-md sm:px-2.5 sm:py-1 sm:text-[10.5px]"
-        style={{ background: "color-mix(in srgb, var(--color-night-background) 60%, transparent)", borderColor: "rgba(255,255,255,0.32)", color: "rgba(255,255,255,0.92)" }}
-      >
-        Learn more
-      </span>
+      {/* "Learn more" lives in a flex column that reserves a fixed zone at
+         the top (clear of the salary/select chips) and a fixed zone at the
+         bottom (clear of the scrim, which is a constant height now that the
+         title always reserves 2 lines -- see minHeight below), then centers
+         the chip in WHATEVER space is left between them. Two earlier
+         attempts were pixel offsets from one edge only, and both broke on
+         a real device: percent-from-top landed on top of two-line titles
+         (and sat behind the scrim's equal z-index, so it was invisible
+         there too), and a fixed px-from-bottom then landed too high and
+         collided with the top-row chips on a real phone's shorter actual
+         card height (screenshotted, direct feedback, 12 Sept 2026). This
+         reserves both ends instead of guessing one distance, so it holds
+         at any card height. z-[2] keeps it above the scrim regardless. */}
+      <div className="pointer-events-none absolute inset-0 z-[2] flex flex-col">
+        <div className="h-11 flex-none" aria-hidden />
+        <div className="flex flex-1 items-center justify-center">
+          <span
+            aria-hidden
+            className="rounded-[var(--radius-sm)] border px-2 py-[3px] text-[9px] font-bold tracking-[0.05em] whitespace-nowrap uppercase backdrop-blur-md sm:px-2.5 sm:py-1 sm:text-[10.5px]"
+            style={{ background: "color-mix(in srgb, var(--color-night-background) 60%, transparent)", borderColor: "rgba(255,255,255,0.32)", color: "rgba(255,255,255,0.92)" }}
+          >
+            Learn more
+          </span>
+        </div>
+        <div className="h-[125px] flex-none" aria-hidden />
+      </div>
       {/* scrim + title */}
       <div
         className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center gap-1 px-2 pt-14 pb-3 text-center uppercase"
@@ -256,7 +268,27 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
             "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-night-background) 55%, transparent) 34%, color-mix(in srgb, var(--color-night-background) 82%, transparent) 60%, var(--color-night-background) 100%)",
         }}
       >
-        <p style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 17, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.02em", color: "var(--color-night-foreground)" }}>
+        <p
+          style={{
+            fontFamily: career.font,
+            fontWeight: career.fontWeight,
+            fontSize: 17,
+            lineHeight: 1.15,
+            letterSpacing: career.letterSpacing ?? "0.02em",
+            color: "var(--color-night-foreground)",
+            // Every title reserves the same 2-line box (not just the ones
+            // that actually wrap), so the scrim itself is a constant height
+            // across all 6 cards -- otherwise the "Learn more" chip above
+            // it clears a one-line title's shorter scrim but sits on top of
+            // a two-line title's taller one. Flex-centered so a one-line
+            // title still sits in the middle of that box instead of
+            // pinned to its top.
+            minHeight: "2.3em",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           {career.title}
         </p>
         <p className="text-[9px] font-semibold tracking-[0.06em]" style={{ color: career.color }}>
