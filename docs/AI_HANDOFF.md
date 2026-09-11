@@ -7600,9 +7600,10 @@ Verified on the Investment Banking report's 03 Career Exploration section.
   disc marks the primary career, no text chip), world + title, one clamped
   description line pair, then "Play a Day in the Life" (this career's
   simulation via `simulationFor`, else "Day in the Life coming soon" to
-  `/play?focus=<id>`), the three reserved facts, Employers & schools fold, a
-  rule, then "Get Career Report" (filled glass, opens the Report tab with
-  that career as focus) over "Learn more" (ghost, `/career/<id>`).
+  `/play?focus=<id>`), the three reserved facts (no rule under Play),
+  Employers & schools fold, "Learn more" (ghost, `/career/<id>`) right where
+  the reading stops, then a rule and "Get Career Report" apart at the foot
+  (filled glass, opens the Report tab with that career as focus).
 - "Your Strongest Match" / "Make my primary" removed from the body. The
   kebab has two items: Remove from Top 3, Make My Primary. The primary
   career renders in the first card (sort by `focusId`).

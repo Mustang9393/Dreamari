@@ -1046,7 +1046,7 @@ function Top3Tab({
               </Link>
 
 
-              <dl className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-2)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+              <dl className="flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]">
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
@@ -1057,24 +1057,23 @@ function Top3Tab({
 
               <MoreFactsAccordion facts={moreFacts} accent={accent} />
 
-              {/* Where the reading ends: Get Career Report first, filled
-                 glass (the student's own read on this career, which nothing
-                 else offers; "Get", not "View"; the card already names the
-                 career), then Learn more as a ghost to this career's page
-                 (reference the facts above already preview). A rule above
-                 separates the two from the Employers & schools fold. */}
-              <div className="mt-auto flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
-                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-3)" }}>
+              {/* Learn more sits right where the reading stops (direct
+                 feedback, 11 Sept 2026): a ghost to this career's page. Get
+                 Career Report stands apart at the foot, filled glass: the
+                 student's own read on this career ("Get", not "View"; the
+                 card already names the career). */}
+              <Link
+                href={`/career/${id}`}
+                aria-label={`Learn more about ${career.title}`}
+                className="dm-quiet flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
+                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "transparent" }}
+              >
+                <span className="min-w-0 truncate">Learn more</span> <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
+              </Link>
+              <div className="mt-auto border-t pt-[var(--space-3)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-3)" }}>
                   Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
                 </button>
-                <Link
-                  href={`/career/${id}`}
-                  aria-label={`Learn more about ${career.title}`}
-                  className="dm-quiet flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
-                  style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "transparent" }}
-                >
-                  <span className="min-w-0 truncate">Learn more</span> <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
-                </Link>
               </div>
             </div>
           </div>
