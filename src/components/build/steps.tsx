@@ -292,7 +292,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
   );
 }
 
-// Grade/GPA as dropdowns (per feedback: pill walls read as information
+// Grade and travel as dropdowns (per feedback: pill walls read as information
 // overload on the profile step). Native <select> = keyboard/screen-reader
 // support for free; glass styling matches the flow's inputs.
 function SelectField({ label, options, value, placeholder, onChange }: { label: string; options: string[]; value: string; placeholder: string; onChange: (next: string) => void }) {
@@ -351,7 +351,7 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-5 sm:pt-8">
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">
