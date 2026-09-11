@@ -7492,3 +7492,5 @@ Next: user review, then push.
   Industry = one Dream Opportunity block: mark, "Built by the team behind
   Dream Opportunity" and its line, then the partner wall, then the 12-years
   closing line.
+- Demo request address is product@dreamopportunity.org (mailto target and the
+  note under the button); the personal address is gone (direct instruction).
