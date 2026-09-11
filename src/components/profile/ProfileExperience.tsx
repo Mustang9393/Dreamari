@@ -931,13 +931,14 @@ function Top3Tab({
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
         const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
         // Split by criticality (direct feedback): the three decision facts
-        // stay on the card at RESERVED row heights, so all three columns
-        // align 1:1 whatever wraps; employers + schools fold into a
-        // collapsed-by-default accordion below them.
+        // stay on the card (clamped, not height-reserved: a one-line
+        // Education left a hole above Years in school, direct feedback 11
+        // Sept 2026); employers + schools fold into a collapsed-by-default
+        // accordion below them.
         const facts = [
-          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1 md:min-h-[18px]" },
-          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2 md:min-h-[36px]" },
-          { label: "Years in school", value: route.duration, lines: "line-clamp-1 md:min-h-[18px]" },
+          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1" },
+          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2" },
+          { label: "Years in school", value: route.duration, lines: "line-clamp-1" },
         ];
         const moreFacts = [
           { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
@@ -1027,8 +1028,8 @@ function Top3Tab({
             <div className="relative flex flex-1 flex-col gap-[var(--space-2)] p-[var(--space-4)]">
               {/* Tight rhythm throughout (direct feedback, 11 Sept 2026: the
                  cards were getting long, and a reserved title height left a
-                 hole under one-line titles). Title and description clamp
-                 rather than reserve; the facts still reserve their rows. */}
+                 hole under one-line titles). Everything clamps rather than
+                 reserves height. */}
               <span className="flex min-w-0 flex-col gap-[1px]">
                 {/* World name carries the accent, never the career title. */}
                 <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
