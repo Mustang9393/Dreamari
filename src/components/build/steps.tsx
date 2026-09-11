@@ -12,7 +12,6 @@ import { awardDreamScore, peekDreamScoreAfter } from "@/lib/dreamScore";
 import {
   EDUCATION_OPTIONS,
   ENERGY_OPTIONS,
-  GPA_OPTIONS,
   GRADE_OPTIONS,
   TRAVEL_DISTANCE_OPTIONS,
   INTEREST_WORLDS,
@@ -20,6 +19,7 @@ import {
   TEAM_OPTIONS,
   type BuildState,
 } from "./types";
+import { GpaField } from "./GpaField";
 
 // Every user-facing string here is verbatim from docs/BUILD_FLOW_SPEC.md. Layout
 // follows the Figma Build Flow card structure: HUD (progress) at the card's top,
@@ -356,10 +356,11 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <SelectField label="Grade" options={GRADE_OPTIONS} value={state.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
-            <SelectField label="GPA" options={GPA_OPTIONS} value={state.gpa} placeholder="Select" onChange={(gpa) => { react(); patch({ gpa }); }} />
-          </div>
+          {/* Grade alone in what used to be a two-column row: GPA moved to
+             its own full-width slider below (direct feedback, 11 Sept
+             2026), so a lone select no longer shares a row with anything. */}
+          <SelectField label="Grade" options={GRADE_OPTIONS} value={state.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
+          <GpaField value={state.gpa} onChange={(gpa) => { react(); patch({ gpa }); }} />
           <div>
             <p className="mt-1.5 text-[11px] font-medium text-[var(--color-night-muted-foreground)] opacity-80">
               Your GPA does not define you. It just helps us find realistic schools.

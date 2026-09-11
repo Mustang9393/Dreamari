@@ -7666,3 +7666,33 @@ Verified on the Investment Banking report's 03 Career Exploration section.
   together without invalidating PosterCard's px-based title-fit math, the
   same technique the Schools landing's `Fit` uses. Home's own poster rows
   share `.poster-row` but not this class and are untouched.
+
+## 2026-09-12 · Build's GPA question: a slider, not a dropdown (Joshua)
+Per feedback: "we want really accurate, to the decimal level" -- a band like
+"3.5 to 3.9" was only ever a proxy pathway.ts's parseGpa averaged down to a
+single number anyway. Options are now every tenth from 2.0 to 4.0 (21
+stops) plus the three answers a number can't hold, kept verbatim: "4.0 or
+higher", "Below 2.0", "My school does not use GPA".
+
+Rather than a 24-row dropdown, `GpaField` (new,
+`src/components/build/GpaField.tsx`) is a real `<input type=range>` styled
+like CostStep's tuition slider (gradient fill, glowing thumb, tick dots at
+the whole numbers, all under custom paint) -- drag or arrow keys land on an
+exact decimal, no typing, no long list. The three special answers are chips
+under the slider; picking one shows in the readout exactly like a dragged
+number would, and moving the slider again always wins. Untouched, the thumb
+rests muted at the scale's midpoint (3.0) without actually selecting it --
+`state.gpa` stays "" until a real interaction, so Next stays gated exactly
+as before.
+
+`GPA_OPTIONS` (types.ts) is still exported as a flat, highest-first list for
+the two other GPA dropdowns that didn't ask to change (Settings, the
+college list's "Edit your list" sheet) -- they now offer the same decimal
+precision, just still as a plain list. Flagging: those two got longer (24
+rows) as a side effect; worth the same GpaField treatment if that becomes a
+complaint, but out of scope for this ask.
+
+Verified via lint/tsc and hand-checked the scale in Node (21 clean tenths,
+2.0 to 4.0, no float drift, midpoint 3.0); not re-clicked through the full
+8-step Build flow to the Profile screen per direct request (stop the
+hover/wait loop).

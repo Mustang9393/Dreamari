@@ -101,15 +101,19 @@ export const GRADE_OPTIONS = ["8th grade", "9th grade", "10th grade", "11th grad
 
 export const TRAVEL_DISTANCE_OPTIONS = ["Within 25 miles", "Within 50 miles", "Within 100 miles", "Anywhere around your preferred state"];
 
-export const GPA_OPTIONS = [
-  "4.0 or higher",
-  "3.5 to 3.9",
-  "3.0 to 3.4",
-  "2.5 to 2.9",
-  "2.0 to 2.4",
-  "Below 2.0",
-  "My school does not use GPA",
-];
+// Precise, to the decimal (direct feedback, 11 Sept 2026: "we want really
+// accurate, to the decimal level" -- a band like "3.5 to 3.9" was only ever
+// a rough proxy for the school-matching math in pathway.ts). Every tenth
+// from 2.0 to 4.0 (GpaField's slider stops), plus the three answers a
+// single number can't hold.
+export const GPA_SCALE: string[] = Array.from({ length: 21 }, (_, i) => (2 + i * 0.1).toFixed(1));
+export const GPA_HIGHER = "4.0 or higher";
+export const GPA_BELOW = "Below 2.0";
+export const GPA_NOT_USED = "My school does not use GPA";
+/** The flat list, highest first -- for any plain dropdown still using one
+ *  (Settings, the college list's edit sheet); GpaField below is Build's own
+ *  richer control for this same data and does not read this constant. */
+export const GPA_OPTIONS = [GPA_HIGHER, ...[...GPA_SCALE].reverse(), GPA_BELOW, GPA_NOT_USED];
 
 export const PATH_OPTIONS: { id: "college" | "trades" | "both"; title: string; subtitle: string }[] = [
   { id: "college", title: "College", subtitle: "Majors & degrees" },
