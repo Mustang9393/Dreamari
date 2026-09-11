@@ -5,7 +5,11 @@ import { useConfirmGlow } from "./confirmPulse";
 import { playGpaTick } from "./sound";
 import { GPA_BELOW, GPA_HIGHER, GPA_NOT_USED, GPA_SCALE } from "./types";
 
-const AMBER = "var(--color-world-business-money-office)";
+// A gradual gradient (direct feedback, 11 Sept 2026: "blue to yellow...
+// too far apart and not gradual") -- brand blue into the app's own violet
+// accent, adjacent hues rather than opposite ones, the same pairing the
+// marketing page's own headline gradient uses.
+const ACCENT = "var(--color-accent-purple)";
 const SPECIALS: readonly string[] = [GPA_HIGHER, GPA_BELOW, GPA_NOT_USED];
 // Where the thumb rests, muted, before the student has touched it or chosen
 // a special answer -- the scale's midpoint, not an actual selection.
@@ -34,9 +38,12 @@ function tickWeight(scaleValue: string): "major" | "half" | "minor" {
  *  the feedback is not proper") -- the answer sits exactly where the eye
  *  and the finger already are, and follows the drag. The three answers a
  *  single number can't hold -- below the scale, above it, "we don't grade
- *  that way" -- are chips underneath; picking one shows in that same pill,
- *  and the ruler goes quiet underneath it until the slider is touched
- *  again, which always wins back. */
+ *  that way" -- are chips underneath, under their own small "Or" (direct
+ *  feedback, 11 Sept 2026: without it, three buttons under a slider read
+ *  as a separate, confusing control rather than alternate answers to the
+ *  same question). Picking one shows in that same pill, and the ruler
+ *  goes quiet underneath it until the slider is touched again, which
+ *  always wins back. */
 export function GpaField({ value, onChange }: { value: string; onChange: (next: string) => void }) {
   const numericIndex = GPA_SCALE.indexOf(value);
   const numeric = numericIndex !== -1;
@@ -75,7 +82,7 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
             style={{
               left: numeric ? `clamp(34px, ${fraction * 100}%, calc(100% - 34px))` : "50%",
               background: "var(--color-night-card, #12142a)",
-              borderColor: numeric ? AMBER : "var(--color-glass-stroke)",
+              borderColor: numeric ? ACCENT : "var(--color-glass-stroke)",
               color: "var(--color-night-foreground)",
             }}
           >
@@ -95,8 +102,8 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
           className="absolute top-1/2 left-0 h-2.5 -translate-y-1/2 rounded-full transition-[width] duration-200"
           style={{
             width: numeric ? `${fraction * 100}%` : "0%",
-            background: `linear-gradient(90deg, var(--color-brand-500), ${AMBER})`,
-            boxShadow: numeric ? `0 0 14px 0 color-mix(in srgb, ${AMBER} 45%, transparent)` : "none",
+            background: `linear-gradient(90deg, var(--color-brand-500), ${ACCENT})`,
+            boxShadow: numeric ? `0 0 14px 0 color-mix(in srgb, ${ACCENT} 45%, transparent)` : "none",
           }}
         />
         {/* The ruler: one tick per tenth. */}
@@ -115,7 +122,7 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
                   top: "50%",
                   width: weight === "minor" ? 1.5 : 2,
                   height,
-                  background: lit ? AMBER : weight === "minor" ? "color-mix(in srgb, var(--color-glass-stroke) 65%, transparent)" : "var(--color-glass-stroke)",
+                  background: lit ? ACCENT : weight === "minor" ? "color-mix(in srgb, var(--color-glass-stroke) 65%, transparent)" : "var(--color-glass-stroke)",
                   opacity: lit ? 1 : weight === "minor" ? 0.6 : 0.9,
                 }}
               />
@@ -140,11 +147,11 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
           style={{
             left: `${fraction * 100}%`,
             background: numeric ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 55%, transparent)",
-            borderColor: numeric ? AMBER : "var(--color-glass-stroke)",
+            borderColor: numeric ? ACCENT : "var(--color-glass-stroke)",
             boxShadow: glowing
-              ? `0 0 0 9px color-mix(in srgb, ${AMBER} 38%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
+              ? `0 0 0 9px color-mix(in srgb, ${ACCENT} 38%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
               : numeric
-                ? `0 0 0 6px color-mix(in srgb, ${AMBER} 22%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
+                ? `0 0 0 6px color-mix(in srgb, ${ACCENT} 22%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
                 : "0 4px 12px rgba(0,0,0,0.4)",
           }}
         />
@@ -156,7 +163,14 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
         <span>4.0</span>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      {/* A one-word bridge (direct feedback, 11 Sept 2026: do the chips read
+         as part of this same question, or as a separate, confusing thing?)
+         -- without it, three buttons appearing under a slider with no
+         connective copy read as their own unrelated control. */}
+      <p className="mt-3 mb-1.5 text-center text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--color-night-muted-foreground)" }}>
+        Or
+      </p>
+      <div className="flex flex-wrap justify-center gap-2">
         {SPECIALS.map((option) => {
           const isSelected = value === option;
           return (
@@ -167,9 +181,9 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
               onClick={() => onChange(option)}
               className="cursor-pointer rounded-full border px-3 py-1.5 text-[12.5px] font-bold transition-colors"
               style={{
-                background: isSelected ? AMBER : "var(--color-glass-surface-2)",
-                borderColor: isSelected ? AMBER : "var(--color-glass-stroke)",
-                color: isSelected ? "#1a1200" : "var(--color-night-muted-foreground)",
+                background: isSelected ? ACCENT : "var(--color-glass-surface-2)",
+                borderColor: isSelected ? ACCENT : "var(--color-glass-stroke)",
+                color: isSelected ? "#ffffff" : "var(--color-night-muted-foreground)",
               }}
             >
               {option}

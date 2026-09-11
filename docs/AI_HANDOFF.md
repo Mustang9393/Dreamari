@@ -7720,3 +7720,21 @@ hover/wait loop).
   not re-clicked through Build's 8 steps to drag it live, per direct
   request to stop the hover/wait-heavy testing loop. Worth an actual drag
   test on a real device for feel/volume once convenient.
+
+## 2026-09-12 · Slider polish: gradual color, Apple-style click, chips read as part of the question
+- Both sliders (CostStep's tuition slider, GpaField): the fill gradient was
+  brand blue straight to the amber world color, ~180 degrees apart on the
+  wheel ("too far apart and not gradual"). Now blue into the app's own
+  violet accent (`--color-accent-purple`), the same adjacent pairing the
+  marketing page's headline gradient already uses. Renamed the local
+  `AMBER` const to `ACCENT` in both files; every tick/thumb/glow color
+  follows it.
+- `playGpaTick` (sound.ts): redone as a genuine click, not a tone --
+  14ms, square wave, ~3.3-3.9kHz (treble, "like Apple's time picker"),
+  almost all attack and no sustain, instead of the earlier 26ms triangle
+  tone in the 640-980Hz range that read as a pitched "boop".
+- GpaField: the three special chips now sit under a small centered "Or"
+  label, so they read as alternate answers to the same GPA question
+  instead of a separate, unexplained control (direct feedback: "do they
+  seem too different and confusing?"). Selected-chip text is white, not
+  the old near-black tuned for an amber fill.

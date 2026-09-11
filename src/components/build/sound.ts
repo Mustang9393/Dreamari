@@ -60,11 +60,14 @@ export function playXpRise(durationMs: number) {
   });
 }
 
-// GPA slider: one short, dry, mechanical "tick" per tenth crossed while
-// dragging (direct feedback, 11 Sept 2026: "that tick tick smooth sound
-// when scrolling") -- pitch climbs gently across the 2.0-4.0 scale (a
-// little under a major sixth) so a higher GPA ticks a touch brighter,
-// never sharp or musical. Fires once per step change, from a real
+// GPA slider: one short, crisp, treble click per tenth crossed while
+// dragging (direct feedback, 11 Sept 2026: "how Apple's time picker etc
+// sound... more of a treble high sound like a satisfying clicking") --
+// almost all attack and next to no sustain (14ms total), pitched well up
+// where a mechanical click actually lives rather than the warmer tone a
+// bell/chime uses; a square wave for the extra harmonic edge. A hint of
+// pitch keeps direction (higher GPA ticks a hair brighter) without turning
+// it into a melody. Fires once per step change, from a real
 // pointer/keyboard interaction only.
 export function playGpaTick(index: number, totalSteps: number) {
   const ctx = getAudioContext();
@@ -72,7 +75,7 @@ export function playGpaTick(index: number, totalSteps: number) {
   whenRunning(ctx, (running) => {
     const now = running.currentTime;
     const t = totalSteps <= 1 ? 0 : index / (totalSteps - 1);
-    const freq = 640 + t * 340;
-    tone(running, freq, now, 0.026, 0.15, "triangle");
+    const freq = 3300 + t * 600;
+    tone(running, freq, now, 0.014, 0.2, "square");
   });
 }

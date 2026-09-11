@@ -10,7 +10,11 @@ import type { StepProps } from "./steps";
 // value, tick dots that light as the thumb passes them, a glowing thumb, and
 // clickable stop labels that jump the slider. Discrete stops, one per COST_STOPS entry (6 as of 2026-09-10).
 
-const AMBER = "var(--color-world-business-money-office)";
+// A gradual gradient (direct feedback, 11 Sept 2026: "blue to yellow...
+// too far apart and not gradual") -- brand blue into the app's own violet
+// accent, adjacent hues rather than opposite ones, the same pairing the
+// marketing page's own headline gradient uses.
+const ACCENT = "var(--color-accent-purple)";
 
 export function CostStep({ state, patch, onBack, onNext, react, percent, sprite, onSkip }: StepProps) {
   const index = state.costIndex;
@@ -53,8 +57,8 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
             className="absolute top-1/2 left-0 h-2 -translate-y-1/2 rounded-full transition-[width] duration-200"
             style={{
               width: `calc(${fraction * 100}% )`,
-              background: `linear-gradient(90deg, var(--color-brand-500), ${AMBER})`,
-              boxShadow: touched ? `0 0 14px 0 color-mix(in srgb, ${AMBER} 45%, transparent)` : "none",
+              background: `linear-gradient(90deg, var(--color-brand-500), ${ACCENT})`,
+              boxShadow: touched ? `0 0 14px 0 color-mix(in srgb, ${ACCENT} 45%, transparent)` : "none",
             }}
           />
           {/* Tick dots at each stop, lit once passed. */}
@@ -66,7 +70,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
                 style={{
                   left: `${(i / (COST_STOPS.length - 1)) * 100}%`,
                   top: "50%",
-                  background: touched && i <= value ? AMBER : "var(--color-glass-stroke)",
+                  background: touched && i <= value ? ACCENT : "var(--color-glass-stroke)",
                 }}
               />
             ))}
@@ -89,11 +93,11 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
             style={{
               left: `${fraction * 100}%`,
               background: touched ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 70%, transparent)",
-              borderColor: touched ? AMBER : "var(--color-glass-stroke)",
+              borderColor: touched ? ACCENT : "var(--color-glass-stroke)",
               boxShadow: glowing
-                ? `0 0 0 9px color-mix(in srgb, ${AMBER} 38%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
+                ? `0 0 0 9px color-mix(in srgb, ${ACCENT} 38%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
                 : touched
-                  ? `0 0 0 6px color-mix(in srgb, ${AMBER} 22%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
+                  ? `0 0 0 6px color-mix(in srgb, ${ACCENT} 22%, transparent), 0 4px 12px rgba(0,0,0,0.4)`
                   : "0 4px 12px rgba(0,0,0,0.4)",
             }}
           />
