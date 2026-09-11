@@ -7825,3 +7825,21 @@ px-6, px-4, px-3) failed to fix:
 User approved replacing the GPA slider with a compact exact-value picker after reviewing the local form. `GpaField.tsx` now opens a native modal dialog styled as a desktop popover or mobile bottom sheet, with 21 choices: 2.0 or below, each tenth from 2.1 through 3.9, and 4.0 or higher. No answer is preselected. Existing bare 2.0/4.0 values display as their inclusive boundaries. A separate native no-GPA checkbox keeps the field footprint stable, shows Not applicable, and restores the prior answer when unchecked. Profile Basics is top anchored within its existing scroll region. Other Build screens and their effects are unchanged.
 
 Validation: targeted ESLint, TypeScript, and tokens:check passed. Inspected desktop and 375×812 mobile layouts in localhost:3000/flow; selected 3.7 and both endpoints; verified opt-out/restore and Escape focus return. Native dialog supplies focus containment and inert background; values support arrow, Home, and End navigation. No deployment or commit. This replaces the earlier slider design decisions above by direct user instruction. Next step: user review of local Profile Basics.
+
+## 2026-09-12 · Profile: "Do this next" copy trim
+
+Dropped "and save your Top 3" from the Explore line in Profile's "Do this
+next" card (`ProfileExperience.tsx`); it now reads "Explore 10 Finance
+Careers". Direct user instruction. The matching line in the finance
+roadmap plan (`profile/data.ts`, verbatim from Joshua Pierce) was left
+untouched -- the user named only the "Do this next" section.
+
+Validation: targeted ESLint and TypeScript passed. Committed and pushed
+to main (bf452c1).
+
+Separately, in progress and NOT committed or pushed: `MatchGrid.tsx`
+(`src/components/match-lab/`) and its route (`src/app/match-grid/`), an
+experimental grid-based alternative to the swipe-card Match flow, reusing
+the same DECK data and picks handoff as the live `MatchLab.tsx`. Explicit
+user instruction: local-only, no push, until asked. Do not commit these
+alongside unrelated work.
