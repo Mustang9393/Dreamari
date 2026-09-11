@@ -29,7 +29,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
       <CardHud percent={percent} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-      <QuestionHeading sprite={sprite} title="What’s your yearly school budget?" subtitle="Choose what feels realistic for you." />
+      <QuestionHeading sprite={sprite} title="How much are you comfortable spending on tuition each year?" subtitle="Choose what feels realistic for you." />
 
       <div
         className={`rounded-[var(--radius-lg)] border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
@@ -78,7 +78,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
             max={COST_STOPS.length - 1}
             step={1}
             value={value}
-            aria-label="What’s your yearly school budget?"
+            aria-label="How much are you comfortable spending on tuition each year?"
             aria-valuetext={COST_STOPS[value]}
             onChange={(e) => setIndex(Number(e.target.value))}
             className="absolute inset-0 w-full cursor-pointer opacity-0"
