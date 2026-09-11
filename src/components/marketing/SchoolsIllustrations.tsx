@@ -75,11 +75,12 @@ export function Grad({ children, className = "" }: { children: ReactNode; classN
 // Primitives
 // ---------------------------------------------------------------------------
 
-/** Designs are laid out at a fixed width and zoomed to fit their column. */
-function Fit({ base, children, className = "" }: { base: number; children: ReactNode; className?: string }) {
+/** Designs are laid out at a fixed width and zoomed to fit their column.
+ *  The floor keeps a 700px composition inside a 320px phone column. */
+function Fit({ base, min = 0.4, children, className = "" }: { base: number; min?: number; children: ReactNode; className?: string }) {
   return (
     <div className={`relative w-full ${className}`} style={{ containerType: "inline-size" }}>
-      <div className="mx-auto" style={{ width: base, zoom: `clamp(0.5, calc(100cqw / ${base}px), 1)` }}>
+      <div className="mx-auto" style={{ width: base, zoom: `clamp(${min}, calc(100cqw / ${base}px), 1)` }}>
         {children}
       </div>
     </div>
@@ -171,62 +172,72 @@ export function HeroIllustration({ career = "investment-banking" }: { career?: H
   const answer = thread.responses.find((r) => r.kind === "answer" && r.primary);
   const pro = PROS.find((p) => answer?.kind === "answer" && p.id === answer.proId) ?? PROS[0];
   const top3 = PROFILE_CAREERS.slice(0, 3).map((c) => c.title);
+  const label = `Three cards: the ${pick.title} career with typical pay ${pay}; the student's Top 3 with ${top3[0]} as the strongest match; ${pro.name}, ${pro.role} at ${pro.org}, answering a student's question.`;
+  // The three cards. On a phone they are a horizontal snap row at card size;
+  // from sm up, the 1040px composition zoomed to its column.
+  const cards = [
+    <motion.div key="career" style={{ y: yA }} variants={rise} custom={0} initial="hidden" whileInView="show" viewport={VIEW}>
+    <Tile className="overflow-hidden">
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={pick.slug} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+          <Poster src={pick.photo} title={pick.title} world={pick.world} className="aspect-[4/3] rounded-b-none" style={{ boxShadow: "none" }} />
+          <div className="grid grid-cols-2 gap-3 p-4">
+            <div className="flex flex-col gap-0.5"><Caps>Typical pay</Caps><span className="text-[17px] font-extrabold tabular-nums" style={{ color: INK }}>{pay.replace(/\/year$/, "")}<span className="text-[12px] font-bold" style={{ color: INK2 }}>/year</span></span></div>
+            <div className="flex flex-col gap-0.5"><Caps>Typical degree</Caps><span className="text-[17px] font-extrabold" style={{ color: INK }}>{degree}</span></div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    </Tile>
+    </motion.div>,
+    <motion.div key="top3" style={{ y: yB }} variants={rise} custom={1} initial="hidden" whileInView="show" viewport={VIEW} className="sm:-translate-y-[18px]">
+    <Tile className="flex flex-col gap-4 p-6">
+      <div className="flex items-center justify-between">
+        <span className="text-[16px] font-extrabold" style={{ color: INK }}>My Top 3</span>
+        <span className="flex gap-1.5">{[true, true, true].map((f, i) => <span key={i} className="size-3 rounded-full" style={{ background: f ? AMBER : "transparent", boxShadow: `inset 0 0 0 2px ${f ? AMBER : "var(--ill-line)"}` }} />)}</span>
+      </div>
+      <ul className="flex flex-col gap-2.5">
+        {top3.map((t, i) => (
+          <li key={t} className="flex items-center gap-3 rounded-[14px] px-3.5 py-3" style={{ background: i === 0 ? "var(--ill-tint)" : SOFT }}>
+            <span className="flex size-6 flex-none items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: i === 0 ? BLUE : "var(--ill-line)", color: i === 0 ? "#fff" : INK2 }}>{i + 1}</span>
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate text-[14px] font-bold" style={{ color: INK }}>{t}</span>
+              {i === 0 && <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: BLUE }}>Your Strongest Match</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <span className="inline-flex items-center justify-center gap-1.5 rounded-[10px] px-4 py-2.5 text-[13px] font-bold" style={{ background: INK, color: "var(--surface)" }}>Compare My Top 3</span>
+    </Tile>
+    </motion.div>,
+    <motion.div key="connect" style={{ y: yC }} variants={rise} custom={2} initial="hidden" whileInView="show" viewport={VIEW}>
+    <Tile className="flex flex-col gap-4 p-5">
+      <div className="flex items-center gap-3">
+        <Initials name={pro.name} size={44} from={VIOLET} to={ROSE} />
+        <span className="flex min-w-0 flex-col">
+          <span className="flex items-center gap-1.5 text-[15px] font-extrabold" style={{ color: INK }}><span className="truncate">{pro.name}</span><Verified /></span>
+          <span className="truncate text-[12.5px] font-semibold" style={{ color: INK2 }}>{pro.role}</span>
+        </span>
+      </div>
+      <span className="marketing-v2 theme-light self-start"><CompanyChip name={pro.org} tone="surface" size="sm" /></span>
+      <p className="text-[13.5px] leading-[20px] font-medium" style={{ color: INK }}>&ldquo;{thread.title}&rdquo;</p>
+      <p className="line-clamp-3 text-[13px] leading-[19px]" style={{ color: INK2 }}>{answer?.kind === "answer" ? answer.body : ""}</p>
+      <span className="mt-auto inline-flex items-center gap-1.5 self-start rounded-[10px] px-4 py-2 text-[12.5px] font-bold text-white" style={{ background: BLUE }}>Ask a question <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden /></span>
+    </Tile>
+    </motion.div>,
+  ];
   return (
-    <Fit base={1040}>
-        <div ref={ref} role="img" aria-label={`Three cards: the ${pick.title} career with typical pay ${pay}; the student's Top 3 with ${top3[0]} as the strongest match; ${pro.name}, ${pro.role} at ${pro.org}, answering a student's question.`} className="grid grid-cols-3 items-end gap-7 px-2 pt-6 pb-4">
-          {/* career */}
-          <motion.div style={{ y: yA }} variants={rise} custom={0} initial="hidden" whileInView="show" viewport={VIEW}>
-          <Tile className="overflow-hidden">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div key={pick.slug} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: "easeOut" }}>
-                <Poster src={pick.photo} title={pick.title} world={pick.world} className="aspect-[4/3] rounded-b-none" style={{ boxShadow: "none" }} />
-                <div className="grid grid-cols-2 gap-3 p-4">
-                  <div className="flex flex-col gap-0.5"><Caps>Typical pay</Caps><span className="text-[17px] font-extrabold tabular-nums" style={{ color: INK }}>{pay.replace(/\/year$/, "")}<span className="text-[12px] font-bold" style={{ color: INK2 }}>/year</span></span></div>
-                  <div className="flex flex-col gap-0.5"><Caps>Typical degree</Caps><span className="text-[17px] font-extrabold" style={{ color: INK }}>{degree}</span></div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </Tile>
-          </motion.div>
-          {/* Top 3 */}
-          <motion.div style={{ y: yB }} variants={rise} custom={1} initial="hidden" whileInView="show" viewport={VIEW} className="-translate-y-[18px]">
-          <Tile className="flex flex-col gap-4 p-6">
-            <div className="flex items-center justify-between">
-              <span className="text-[16px] font-extrabold" style={{ color: INK }}>My Top 3</span>
-              <span className="flex gap-1.5">{[true, true, true].map((f, i) => <span key={i} className="size-3 rounded-full" style={{ background: f ? AMBER : "transparent", boxShadow: `inset 0 0 0 2px ${f ? AMBER : "var(--ill-line)"}` }} />)}</span>
-            </div>
-            <ul className="flex flex-col gap-2.5">
-              {top3.map((t, i) => (
-                <li key={t} className="flex items-center gap-3 rounded-[14px] px-3.5 py-3" style={{ background: i === 0 ? "var(--ill-tint)" : SOFT }}>
-                  <span className="flex size-6 flex-none items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: i === 0 ? BLUE : "var(--ill-line)", color: i === 0 ? "#fff" : INK2 }}>{i + 1}</span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-[14px] font-bold" style={{ color: INK }}>{t}</span>
-                    {i === 0 && <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: BLUE }}>Your Strongest Match</span>}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <span className="inline-flex items-center justify-center gap-1.5 rounded-[10px] px-4 py-2.5 text-[13px] font-bold" style={{ background: INK, color: "var(--surface)" }}>Compare My Top 3</span>
-          </Tile>
-          </motion.div>
-          {/* connect */}
-          <motion.div style={{ y: yC }} variants={rise} custom={2} initial="hidden" whileInView="show" viewport={VIEW}>
-          <Tile className="flex flex-col gap-4 p-5">
-            <div className="flex items-center gap-3">
-              <Initials name={pro.name} size={44} from={VIOLET} to={ROSE} />
-              <span className="flex min-w-0 flex-col">
-                <span className="flex items-center gap-1.5 text-[15px] font-extrabold" style={{ color: INK }}><span className="truncate">{pro.name}</span><Verified /></span>
-                <span className="truncate text-[12.5px] font-semibold" style={{ color: INK2 }}>{pro.role}</span>
-              </span>
-            </div>
-            <span className="marketing-v2 theme-light self-start"><CompanyChip name={pro.org} tone="surface" size="sm" /></span>
-            <p className="text-[13.5px] leading-[20px] font-medium" style={{ color: INK }}>&ldquo;{thread.title}&rdquo;</p>
-            <p className="line-clamp-3 text-[13px] leading-[19px]" style={{ color: INK2 }}>{answer?.kind === "answer" ? answer.body : ""}</p>
-            <span className="mt-auto inline-flex items-center gap-1.5 self-start rounded-[10px] px-4 py-2 text-[12.5px] font-bold text-white" style={{ background: BLUE }}>Ask a question <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden /></span>
-          </Tile>
-          </motion.div>
-        </div>
-    </Fit>
+    <div ref={ref} role="img" aria-label={label}>
+      <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pt-6 pb-4 sm:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-hidden>
+        {cards.map((card, i) => (
+          <div key={i} className="w-[82%] flex-none snap-center">{card}</div>
+        ))}
+      </div>
+      <div className="hidden sm:block" aria-hidden>
+        <Fit base={1040}>
+          <div className="grid grid-cols-3 items-end gap-7 px-2 pt-6 pb-4">{cards}</div>
+        </Fit>
+      </div>
+    </div>
   );
 }
 
