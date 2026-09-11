@@ -78,19 +78,17 @@ export const BROWSE_WORLD_RAIL: CatalogCareer[] = [
 // Trades rail (Slack "Trades Tab Update", 11 Sept 2026): the six new trade
 // posters plus the trades already in the catalog, so skilled trades read as
 // a first-class row rather than an afterthought. Not a separate tab.
-// Order: Air Traffic Controller is last because it also opens the Typical Pay
-// row directly below; the same face twice on one screen clashed. Lighting
-// Technician opens the row above, so it is not first here either.
+// Order and membership per Joshua (Slack, 12 Sept 2026): the seven below,
+// in this order. Roofer and Truck Driver stay in the catalog (Home) but are
+// no longer in this row.
 export const BROWSE_TRADES: CatalogCareer[] = [
-  C("Hairstylist", "Personal Care & Community Services", "/images/app/poster-hairstylist.webp"),
   C("Electrician", "Building & Construction", "/images/app/poster-electrician.webp"),
-  C("Sheet Metal Worker", "Building & Construction", "/images/app/poster-sheet-metal-worker.webp"),
+  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.webp"),
   C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.webp"),
   C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.webp"),
+  C("Sheet Metal Worker", "Building & Construction", "/images/app/poster-sheet-metal-worker.webp"),
   C("Forklift Operator", "Driving, Flying & Shipping", "/images/app/poster-forklift-operator.webp"),
-  C("Roofer", "Building & Construction", "/images/app/poster-roofer.webp"),
-  C("Truck Driver", "Driving, Flying & Shipping", "/images/app/poster-truck-driver.webp"),
-  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.webp"),
+  C("Hairstylist", "Personal Care & Community Services", "/images/app/poster-hairstylist.webp"),
 ];
 
 // Careers You Might Not Know — content + order per Joshua 2026-08-21.
