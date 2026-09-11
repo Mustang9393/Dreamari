@@ -1375,6 +1375,15 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
    row's own padding utilities; the negative margins give the room back so the
    layout does not move (direct feedback, 7 Sept 2026: cards clipped at the top). */
 .poster-row.poster-row { padding-top: 44px; padding-bottom: 80px; margin-top: -24px; margin-bottom: -60px; }
+
+/* Explore > Browse only (direct feedback, 11 Sept 2026: "scale down the
+   cards... proportionally... especially in explore page"). One zoom scales
+   the whole row -- cards, gaps, padding, photos, type -- together, so
+   nothing needs its own responsive width or re-measured title-fit math.
+   Home's rails share .poster-row but not this class, so they're untouched. */
+@media (max-width: 639px) {
+  .explore-poster-row { zoom: 0.78; }
+}
 .poster-card { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, box-shadow 0.26s ease 0s; transform-origin: center; will-change: transform; }
 .poster-card .poster-photo { transition: transform 0.6s ease; }
 /* Dead center, always -- the pop-in only ever animates opacity/scale, never

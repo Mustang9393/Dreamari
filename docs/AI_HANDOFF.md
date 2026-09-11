@@ -7636,3 +7636,33 @@ Verified on the Investment Banking report's 03 Career Exploration section.
   opens the full-screen player with sound. Order unchanged: Mars, JPMorgan
   Chase London Office Tour, EY, AT&T, WildBrain, Kellogg's.
 - The rail moved from last to directly above "Typical Pay: $100K +".
+
+## 2026-09-12 · Explore video cards: real square, hover sound, shared mute; Browse scales down on phones
+- Lean-back cards resized from a true square (316/324 cut the baked-in
+  titles) to 276 x 316... final: 276 x 368, a little squarer than the
+  poster rail's 210 x 297 but not a true square (direct feedback: square
+  crops clipped the video titles).
+- Lead card (Mars) now plays once on scroll-into-view then rests on its
+  cover, instead of looping -- it was pulling the eye every time it
+  scrolled back on screen.
+- Every card now plays WITH SOUND on hover/focus if the shared "device
+  sound" preference is unmuted (`src/components/app/videoSound.ts`,
+  localStorage `dreamari-video-sound-muted`, one on/off choice for every
+  card on the page, persisted). If the browser rejects an unmuted autoplay
+  from a hover (real gesture required in most browsers), it falls back to
+  a silent preview for that attempt only -- the shared preference itself
+  is untouched, and a real click on the badge always works. Scroll-
+  triggered lead-card autoplay is always muted (no gesture behind it).
+  Fixed a real bug along the way: the `<video>` had a bare `muted` JSX
+  attribute (always `true`), which is a React-controlled property -- any
+  re-render (including the one the mute toggle itself triggers) was
+  silently re-muting playback. Now `muted={elMuted}`.
+- Badge is a real toggle once a clip is playing (Volume2/VolumeX,
+  aria-pressed), not decorative.
+- Explore > Browse rails (every `Rail` plus `TrendingRail`, so every
+  poster row, Typical Pay, Videos Inside Leading Companies) scale down
+  together on phones via `.explore-poster-row` (zoom: 0.78 under 640px,
+  globals.css) -- one zoom on the row scales cards, gaps, padding and type
+  together without invalidating PosterCard's px-based title-fit math, the
+  same technique the Schools landing's `Fit` uses. Home's own poster rows
+  share `.poster-row` but not this class and are untouched.
