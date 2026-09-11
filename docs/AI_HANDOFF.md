@@ -7321,3 +7321,22 @@ note per school.
 Manifest regenerated (30 photos, 25 marks). Verified on all four detail
 pages. Licences are school media for demo use; production needs permission
 or a licensed replacement, same caveat as the other 26.
+
+## 2026-09-11 · College detail header: photo no longer dimmed
+Direct feedback: header images "too dim". Removed the flat rgba(12,16,35,0.34)
+wash over the whole photo. Phones (title sits on the photo) keep the
+progressive blur and a firm bottom fade (0.92 to transparent at 74%). From md
+the photo is on the right and the title on the panel, so only a light foot
+gradient (0.7 to transparent at 58%) remains. From md the photo is now
+FULL BLEED across the header (direct feedback: "make the image more
+dominant"): the progressive blur (direction left, 62%) frosts its left half
+under the title and a left-to-right fade (0.82 to transparent at 76%) keeps
+the type legible. Nothing is clipped, so no seam; an earlier pass with a
+half-width photo and a painted edge left a visible stroke. Header height is
+unchanged (320 from md); instead the cover crop anchors at 50% 38% (campus
+subjects sit in the upper middle) via a new `position` prop on
+CollegePicture, with HEADER_FOCUS per-school overrides (Sinte Gleska 50% 82%
+so the students in regalia stay in frame). The page column is 1040 with
+md:px-8, matching Career detail; it was 960 and read narrow next to the
+taller photo. Checked Mount Marty, Rutgers, Princeton and Sinte Gleska on
+desktop, Princeton and Sinte Gleska on a phone.

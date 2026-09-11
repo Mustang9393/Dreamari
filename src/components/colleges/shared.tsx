@@ -68,13 +68,13 @@ export function useTopSchool(): [string | null, (slug: string | null) => void] {
 
 /** The picture at the top of a card or a page: the campus photo when we have
  *  one, otherwise a quiet colour field with the college's mark. */
-export function CollegePicture({ c, sizes, priority = false, className = "" }: { c: College; sizes: string; priority?: boolean; className?: string }) {
+export function CollegePicture({ c, sizes, priority = false, className = "", position }: { c: College; sizes: string; priority?: boolean; className?: string; /** CSS object-position for the cover crop; default centre */ position?: string }) {
   const img = collegeImage(c);
   const mark = collegeMark(c);
   return (
     <span className={`relative block overflow-hidden ${className}`} style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 22%, #0e0c20) 100%)" }} aria-hidden>
       {img ? (
-        <Image src={img} alt="" fill sizes={sizes} priority={priority} className="object-cover" />
+        <Image src={img} alt="" fill sizes={sizes} priority={priority} className="object-cover" style={position ? { objectPosition: position } : undefined} />
       ) : mark ? (
         <Image src={mark} alt="" fill sizes="120px" className="object-contain p-[18%] opacity-90" />
       ) : (

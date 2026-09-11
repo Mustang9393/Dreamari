@@ -67,6 +67,13 @@ function Reveal({ label, children }: { label: string; children: React.ReactNode 
   );
 }
 
+/** Per-school focal point for the wide desktop header crop, where the
+ *  default (a little above centre) would lose the subject. */
+const HEADER_FOCUS: Record<string, string> = {
+  // the three students in regalia stand at the foot of the Multipurpose Center
+  "sinte-gleska-university": "50% 82%",
+};
+
 export function CollegeDetailExperience({ slug }: { slug: string }) {
   const c = collegeBySlug(slug);
   const [tab, setTab] = useState<Tab>("overview");
@@ -100,7 +107,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
         <QuickLinksMenu />
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[960px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:pt-[var(--space-10)]">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]">
         <div className="hidden md:block"><BackButton fallback="/colleges" /></div>
 
         {/* header: the photo runs behind the whole card on phones; from md it
@@ -108,15 +115,27 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
         <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...PANEL, background: "#0e0c20" }}>
           <div className="absolute inset-0" aria-hidden>
             <CollegePicture c={c} sizes="100vw" priority className="absolute inset-0 h-full w-full md:hidden" />
-            <span className="absolute inset-y-0 right-0 hidden w-[52%] md:block">
-              <CollegePicture c={c} sizes="560px" priority className="absolute inset-0 h-full w-full" />
-              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.5) 28%, transparent 60%)" }} />
+            {/* Full bleed from md (direct feedback, 11 Sept 2026: "make the
+               image more dominant"): the photo covers the whole header, the
+               progressive blur frosts its left half under the title and a
+               soft left-to-right fade keeps the type legible. No seam, since
+               nothing is clipped. */}
+            <span className="absolute inset-0 hidden md:block">
+              {/* campus photos carry their subject in the upper middle (buildings,
+                 spires) with lawn or parking below, so the wide crop anchors a
+                 little above centre instead of taking a taller header */}
+              <CollegePicture c={c} sizes="1100px" priority position={HEADER_FOCUS[c.slug] ?? "50% 38%"} className="absolute inset-0 h-full w-full" />
+              <CardProgressiveBlur direction="left" size="62%" />
+              <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(14,12,32,0.82) 0%, rgba(14,12,32,0.62) 30%, rgba(14,12,32,0.2) 56%, transparent 76%)" }} />
             </span>
-            <CardProgressiveBlur size="58%" />
-            {/* a flat dim over the whole photo, then a heavy bottom gradient:
-               bright campuses (Princeton) were washing out the title */}
-            <span className="absolute inset-0" style={{ background: "rgba(12,16,35,0.34)" }} />
-            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.78) 30%, rgba(12,16,35,0.4) 56%, rgba(12,16,35,0.1) 78%, transparent 100%)" }} />
+            {/* Legibility without dimming the campus (direct feedback, 11 Sept
+               2026: header photos "too dim"). No flat wash any more. Phones,
+               where the title sits on the photo, keep a firm bottom fade and
+               the progressive blur; from md the photo is on the right and
+               the title on the panel, so only a light foot gradient stays. */}
+            <span className="md:hidden"><CardProgressiveBlur size="58%" /></span>
+            <span className="absolute inset-0 md:hidden" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.7) 28%, rgba(12,16,35,0.3) 52%, transparent 74%)" }} />
+            <span className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.7) 0%, rgba(12,16,35,0.3) 30%, transparent 58%)" }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[60%]">
