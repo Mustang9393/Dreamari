@@ -18,7 +18,7 @@ const LINKS = [
 // quick-links, no "Get started" into the student flow. Anchors match the
 // section ids in SchoolsView.
 const SCHOOLS_LINKS = [
-  { label: "Why Dreamari", href: "#why" },
+  { label: "Why Dreamari", href: "#why-dreamari" },
   { label: "Student Experience", href: "#student-experience" },
   { label: "For Your Organization", href: "#organization" },
 ];

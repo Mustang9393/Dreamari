@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Quote } from "lucide-react";
+import { ArrowUpRight, BookOpen, Briefcase, ChevronDown, Compass, LineChart, Map, MessageSquare, Target, Users } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
-import { Disclosure } from "./Disclosure";
-import { DO_COPY } from "./DreamOpportunity";
+import { DO_COPY, DOMark } from "./DreamOpportunity";
 import { PartnerLogoGrid } from "./PartnerTicker";
-import { Grad, HeroShowcase, Highlights, StatBand } from "./SchoolsShowcase";
-import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, ImmerseArt, MatchArt, OrganizationBand, ProgressArt } from "./SchoolsVisuals";
-import { useRevealOnScroll, useScrollActiveStage } from "./scrollHooks";
+import { Grad, HeroShowcase, SchoolsPreview, SkillsTicker } from "./SchoolsShowcase";
+import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, ImmerseArt, MatchArt, ProgressArt } from "./SchoolsVisuals";
+import { useRevealOnScroll } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
 
 type SchoolsViewProps = {
@@ -20,28 +19,25 @@ type SchoolsViewProps = {
 };
 
 // ---------------------------------------------------------------------------
-// Content. Every visual below is a composition of the product's own
-// components (SchoolsVisuals.tsx) filling its frame, never a cropped
-// screenshot (rule since 7 Sept 2026). The copy in each composition is the
-// app's real copy and data. Where a screen does not exist yet (the educator
-// dashboard) the caption says so.
+// Structure and copy follow the reference site section for section
+// (dreamari-educator-website.replit.app, the named copy source; re-confirmed
+// 11 Sept 2026: "follow the structure and content from this"). Seven
+// sections: hero with the skills ticker, audiences, five stages, educators,
+// sources with the Dream Opportunity row, demo. Nothing else. Every visual is
+// a composition of the product's own components (SchoolsVisuals /
+// SchoolsShowcase), never a cropped screenshot.
 // ---------------------------------------------------------------------------
 
-// Copy is the reference site's, verbatim (dreamari-educator-website.replit.app,
-// named as the copy source, 6 Sept 2026). The tabs carry titles only there.
 const AUDIENCES = ["Schools", "School Districts", "Nonprofits", "Educational Institutions"];
 
 type Stage = {
   n: string;
   title: string;
+  Icon: typeof Compass;
   line: string;
   detail: string[];
   href: string;
   linkLabel: string;
-  // The stage's composition: a full-frame piece with its own colour wash,
-  // unless `bare` -- Connect's is its own self-sized photo-plus-card, like
-  // HeroVisual/ProgressArt, and wrapping it in the dark Frame bezel again
-  // would recreate the exact "frame around the photo" nesting this avoids.
   art: ReactNode;
   bare?: boolean;
 };
@@ -50,6 +46,7 @@ const STAGES: Stage[] = [
   {
     n: "01",
     title: "Build",
+    Icon: Compass,
     line: "Students build their profile through a short academic and personality assessment.",
     detail: [
       "Fifteen career worlds, from Health & Medicine to Driving, Flying & Shipping, chosen with a tap.",
@@ -63,6 +60,7 @@ const STAGES: Stage[] = [
   {
     n: "02",
     title: "Match",
+    Icon: Target,
     line: "Discover college majors, schools, and careers aligned with each student's profile.",
     detail: [
       "Each card carries the employers who hire for it and the median salary.",
@@ -76,6 +74,7 @@ const STAGES: Stage[] = [
   {
     n: "03",
     title: "Explore",
+    Icon: Map,
     line: "Expand students' horizons with careers they may never have considered.",
     detail: [
       "Career worlds and poster cards a student actually wants to open.",
@@ -89,6 +88,7 @@ const STAGES: Stage[] = [
   {
     n: "04",
     title: "Immerse",
+    Icon: Briefcase,
     line: "Experience a day on the job while practicing skills for postsecondary education and the workforce.",
     detail: [
       "Investment Banking is the first simulation; more careers follow.",
@@ -102,6 +102,7 @@ const STAGES: Stage[] = [
   {
     n: "05",
     title: "Connect",
+    Icon: Users,
     line: "Connect directly with professionals at some of the world's leading companies.",
     detail: [
       "Communities by industry, each with students, professionals and companies.",
@@ -116,13 +117,11 @@ const STAGES: Stage[] = [
 ];
 
 const EDUCATOR_FEATURES = [
-  { title: "Understand their direction", body: "See the careers and pathways students are exploring." },
-  { title: "Follow their progress", body: "Track milestones, submissions, and completed activities." },
-  { title: "Keep students moving", body: "Share announcements and communicate about next steps." },
-  { title: "Show your progress", body: "Report on engagement, career exploration, and planning milestones." },
+  { Icon: Map, title: "Understand their direction", body: "See the careers and pathways students are exploring." },
+  { Icon: LineChart, title: "Follow their progress", body: "Track milestones, submissions, and completed activities." },
+  { Icon: MessageSquare, title: "Keep students moving", body: "Share announcements and communicate about next steps." },
+  { Icon: Target, title: "Show your progress", body: "Report on engagement, career exploration, and planning milestones." },
 ];
-
-const OUTCOMES = ["Career readiness", "College readiness", "Student engagement", "Postsecondary planning", "Resume completion", "Career exploration", "Professional networking"];
 
 const SOURCES = [
   { what: "Job descriptions and skills", from: "O*NET OnLine (USDOL/ETA)" },
@@ -130,63 +129,38 @@ const SOURCES = [
   { what: "Interest profile", from: "Harvard FAS Mignone and the O*NET Interest Profiler" },
 ];
 
-const FAQ = [
-  {
-    q: "How do we roll Dreamari out to students?",
-    a: "Dreamari runs in the browser on any device, so there is nothing to install. We work with your team on how students sign in and how classes or cohorts are set up. Rostering integrations are on the roadmap; tell us what your district uses when you request a demo.",
-  },
-  {
-    q: "How is student data handled? Most of our students are minors.",
-    a: "Dreamari is designed for students in grades 9 to 12, so FERPA and COPPA shape how it is built. We collect only what the product needs, and student information is not used for advertising. Your privacy and legal teams can review the details with us during evaluation, and the data terms are agreed with each organization.",
-  },
-  {
-    q: "How is this different from a career-interest quiz?",
-    a: "A quiz ends with a list. Dreamari starts with one, then lets students look at real pay and pathway data, work a day in the job in a simulation, and talk to people who do it. What comes out is a saved Top 3, a plan and a Career Report a counselor can act on.",
-  },
-  {
-    q: "What does onboarding look like for staff?",
-    a: "Counselors and teachers use the same app students do, so there is little to learn. We provide a walkthrough for your team and materials you can hand to students. The educator dashboard adds caseload and reporting views as it ships.",
-  },
-  {
-    q: "How long does it take to launch?",
-    a: "Most of the work is on your side: deciding which grades or cohorts start, and how students sign in. Because there is nothing to install, a pilot can begin as soon as those decisions are made. We scope a timeline with you during the demo.",
-  },
-  {
-    q: "What does it cost?",
-    a: "Pricing depends on the size of your organization and the number of students served. We do not publish a rate card. Request a demo and we will put together a proposal for your organization.",
-  },
-];
-
 // ---------------------------------------------------------------------------
 // Building blocks
 // ---------------------------------------------------------------------------
 
-// One fade-and-rise per section, fired once. The student site's chapters do
-// the same, so the two audiences share a motion vocabulary.
 function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
   const [ref, revealed] = useRevealOnScroll<HTMLDivElement>();
   return (
-    <div
-      ref={ref}
-      className={`transition-[opacity,transform] duration-700 ease-out ${className}`}
-      style={{ opacity: revealed ? 1 : 0, transform: revealed ? "translateY(0)" : "translateY(20px)" }}
-    >
+    <div ref={ref} className={`transition-[opacity,transform] duration-700 ease-out ${className}`} style={{ opacity: revealed ? 1 : 0, transform: revealed ? "translateY(0)" : "translateY(20px)" }}>
       {children}
     </div>
   );
 }
 
-// Section heading pair. Strict hierarchy: the h2 is the biggest thing in the
-// section, the lede sits under it at body-plus size, and there is no eyebrow.
-function SectionHead({ id, title, lede, align = "left" }: { id?: string; title: string; lede?: string; align?: "left" | "center" }) {
+// The reference's small mono caps line above a heading.
+function Eyebrow({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <p className={`text-[12.5px] font-semibold tracking-[0.14em] uppercase ${className}`} style={{ fontFamily: "var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)", color: "var(--primary)" }}>
+      {children}
+    </p>
+  );
+}
+
+// Strict hierarchy: the h2 is the biggest thing in the section, the lede under it.
+function SectionHead({ id, title, lede, align = "left", size = "md" }: { id?: string; title: string; lede?: string; align?: "left" | "center"; size?: "md" | "lg" }) {
   const centered = align === "center";
   return (
     <div className={`max-w-[760px] ${centered ? "mx-auto text-center" : ""}`}>
-      <h2 id={id} className="text-[clamp(28px,3.2vw,40px)] leading-[1.08] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+      <h2 id={id} className={`${size === "lg" ? "text-[clamp(32px,4vw,52px)]" : "text-[clamp(28px,3.2vw,40px)]"} leading-[1.08] font-extrabold tracking-[-0.015em]`} style={{ color: "var(--foreground)", textWrap: "balance" }}>
         {title}
       </h2>
       {lede && (
-        <p className={`mt-4 text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed ${centered ? "mx-auto max-w-[620px]" : "max-w-[620px]"}`} style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+        <p className={`mt-4 text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed ${centered ? "mx-auto max-w-[640px]" : "max-w-[620px]"}`} style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
           {lede}
         </p>
       )}
@@ -194,100 +168,62 @@ function SectionHead({ id, title, lede, align = "left" }: { id?: string; title: 
   );
 }
 
-function Caption({ children }: { children: ReactNode }) {
+// A soft icon tile, the reference's visual for stages, features and sources.
+function IconTile({ Icon, size = 48 }: { Icon: typeof Compass; size?: number }) {
   return (
-    <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-      {children}
-    </p>
+    <span className="flex flex-none items-center justify-center rounded-[14px]" style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 9%, white)", color: "var(--primary)" }}>
+      <Icon style={{ width: size * 0.42, height: size * 0.42 }} strokeWidth={2} aria-hidden />
+    </span>
   );
 }
 
-function StageCopy({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
+// One stage card: tile, "01 Build" (number and name at equal weight, one line,
+// direct feedback 7 Sept 2026), the line, and Learn more. Learn more opens the
+// stage's composition with its three detail lines and the link into the app,
+// so the graphics live where a reader asked for them instead of repeating
+// down the page.
+function StageCard({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
+  const panelId = `stage-${stage.n}-more`;
   return (
-    <div>
-      {/* The number and the name carry equal weight, one line, both caps
-         (direct feedback, 7 Sept 2026): sequence is information, so it reads
-         as part of the name, not a small label above it. */}
-      <h3 className="flex items-baseline gap-3 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.01em] uppercase" style={{ color: "var(--foreground)" }}>
-        <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
-        {stage.title}
-      </h3>
-      <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-        {stage.line}
-      </p>
-      <div className="mt-5 max-w-[520px]">
-        <Disclosure id={`stage-${stage.n}`} title="What students do" size="sm" open={open} onToggle={onToggle}>
-          <ul className="flex flex-col gap-2.5">
-            {stage.detail.map((d) => (
-              <li key={d} className="flex gap-3 text-[14px] leading-relaxed" style={{ color: "var(--foreground)" }}>
-                <span aria-hidden className="mt-[9px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--primary)" }} />
-                <span>{d}</span>
-              </li>
-            ))}
-          </ul>
-          <Link href={stage.href} className="mt-4 inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
-            {stage.linkLabel}
-            <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-          </Link>
-        </Disclosure>
-      </div>
-    </div>
-  );
-}
-
-// Mobile/tablet: one stage, one normal-flow row, copy stacked above its own
-// card. Below lg the sticky column (StickyStages, below) isn't shown at all --
-// a pinned side-by-side layout needs the width to read as two columns, and
-// forcing it onto a narrow screen is exactly the kind of "ugly" a zig-zag
-// was trying (and failing) to avoid. A plain stack can't desync from itself
-// either way, so it stays the simple, safe fallback.
-function StageRowMobile({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
-  return (
-    <li className="flex flex-col items-center gap-8 py-10 sm:py-12">
-      <Reveal className="w-full">
-        <StageCopy stage={stage} open={open} onToggle={onToggle} />
-      </Reveal>
-      <Reveal className="flex w-full justify-center">
-        {stage.bare ? stage.art : <Frame className="aspect-[4/5] w-full max-w-[420px] sm:aspect-[5/4]">{stage.art}</Frame>}
-      </Reveal>
-    </li>
-  );
-}
-
-// Desktop: the sticky column back, done right this time. A single
-// IntersectionObserver-driven "active" index (useScrollActiveStage) tracks
-// which stage's copy is centered in the viewport as the reader scrolls --
-// not a timer, so the graphic literally cannot show a stage the reader isn't
-// reading (the bug that got this pattern pulled on 7 Sept 2026). The right
-// column stacks all five cards in one sticky box and crossfades opacity
-// between them; the left column is plain document flow, one generous row per
-// stage so each graphic gets a real dwell instead of flashing past.
-function StickyStages({ openStages, toggleStage }: { openStages: Set<string>; toggleStage: (n: string) => void }) {
-  const [setRef, active] = useScrollActiveStage(STAGES.length);
-  return (
-    <div className="hidden lg:grid lg:grid-cols-12 lg:gap-14">
-      <ol className="lg:col-span-5">
-        {STAGES.map((stage, i) => (
-          <li key={stage.n} ref={setRef(i)} className="flex min-h-[62vh] flex-col justify-center py-12">
-            <StageCopy stage={stage} open={openStages.has(stage.n)} onToggle={() => toggleStage(stage.n)} />
-          </li>
-        ))}
-      </ol>
-      <div className="lg:col-span-7">
-        <div className="sticky top-24 flex h-[min(560px,70vh)] items-center justify-center">
-          {STAGES.map((stage, i) => (
-            <div
-              key={stage.n}
-              aria-hidden={active !== i}
-              className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out"
-              style={{ opacity: active === i ? 1 : 0, pointerEvents: active === i ? "auto" : "none" }}
-            >
-              {stage.bare ? stage.art : <Frame className="aspect-[4/5] h-full sm:aspect-[5/4] lg:aspect-[4/5]">{stage.art}</Frame>}
-            </div>
-          ))}
+    <li className="rounded-[20px] border bg-white" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
+      <div className="grid gap-5 p-6 sm:grid-cols-[auto_150px_1fr] sm:items-start sm:gap-8 sm:p-8">
+        <IconTile Icon={stage.Icon} />
+        <h3 className="flex items-baseline gap-2 text-[20px] leading-tight font-extrabold tracking-[-0.01em] uppercase" style={{ color: "var(--foreground)" }}>
+          <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
+          {stage.title}
+        </h3>
+        <div>
+          <p className="text-[clamp(17px,1.2vw,20px)] leading-snug" style={{ color: "var(--foreground)", textWrap: "pretty" }}>{stage.line}</p>
+          <button type="button" aria-expanded={open} aria-controls={panelId} onClick={onToggle} className="mt-4 inline-flex cursor-pointer items-center gap-1 text-[14px] font-bold" style={{ color: "var(--primary)" }}>
+            Learn more
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${open ? "rotate-180" : ""}`} strokeWidth={2.5} aria-hidden />
+          </button>
         </div>
       </div>
-    </div>
+      <div id={panelId} hidden={!open} className="border-t px-6 pt-6 pb-6 sm:px-8 sm:pb-8" style={{ borderColor: "var(--border)" }}>
+        {open && (
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12">
+            <ul className="flex flex-col gap-3 lg:col-span-5">
+              {stage.detail.map((d) => (
+                <li key={d} className="flex gap-3 text-[15px] leading-relaxed" style={{ color: "var(--foreground)" }}>
+                  <span aria-hidden className="mt-[10px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                  <span>{d}</span>
+                </li>
+              ))}
+              <li className="pt-1">
+                <Link href={stage.href} className="inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
+                  {stage.linkLabel}
+                  <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                </Link>
+              </li>
+            </ul>
+            <div className="flex justify-center lg:col-span-7">
+              {stage.bare ? stage.art : <Frame className="aspect-[4/5] w-full max-w-[420px] sm:aspect-[5/4] sm:max-w-[560px]">{stage.art}</Frame>}
+            </div>
+          </div>
+        )}
+      </div>
+    </li>
   );
 }
 
@@ -296,47 +232,27 @@ function StickyStages({ openStages, toggleStage }: { openStages: Set<string>; to
 // ---------------------------------------------------------------------------
 
 export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
-  const [openStages, setOpenStages] = useState<Set<string>>(() => new Set());
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [outcomesOpen, setOutcomesOpen] = useState(false);
-
-  const toggleStage = (n: string) =>
-    setOpenStages((s) => {
-      const next = new Set(s);
-      if (next.has(n)) next.delete(n);
-      else next.add(n);
-      return next;
-    });
+  const [openStage, setOpenStage] = useState<string | null>(null);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
 
   return (
     <div>
-      {/* ---- Hero ---------------------------------------------------------- */}
-      <section id="why" className="relative scroll-mt-24 overflow-hidden px-6 pt-[clamp(112px,14vh,160px)]">
-        {/* Same soft blue glow the student hero carries, kept faint on the light
-           ground so the page reads as one family, not a template swap. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-64 -right-48 h-[720px] w-[720px] rounded-full blur-[16px]"
-          style={{ background: "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--primary) 16%, transparent), color-mix(in srgb, var(--hero-accent-purple) 55%, transparent) 45%, transparent 70%)" }}
-        />
-        <div className="relative mx-auto max-w-[1240px] pb-10 sm:pb-16">
-          <div className="mb-8 flex justify-center sm:mb-10">
+      {/* ---- 1. Hero ------------------------------------------------------- */}
+      <section className="relative overflow-hidden px-6 pt-[clamp(104px,13vh,150px)]">
+        <div aria-hidden className="pointer-events-none absolute -top-64 -right-48 h-[720px] w-[720px] rounded-full blur-[16px]" style={{ background: "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--primary) 16%, transparent), color-mix(in srgb, var(--hero-accent-purple) 55%, transparent) 45%, transparent 70%)" }} />
+        <div className="relative mx-auto max-w-[1240px]">
+          <div className="mb-10 flex justify-center sm:mb-12">
             <AudienceToggle view={view} onChange={onChangeView} />
           </div>
-          {/* Centred stack, the product-page shape (11 Sept 2026): the headline
-             carries the page's one gradient, the product floats below it. */}
-          <div className="mx-auto flex max-w-[920px] flex-col items-center text-center">
-            <h1
-              className="text-[clamp(40px,5vw,72px)] leading-[1.02] font-extrabold tracking-[-0.025em]"
-              style={{ color: "var(--foreground)", textWrap: "balance" }}
-            >
+          <div className="max-w-[880px]">
+            <Eyebrow>College &amp; career readiness</Eyebrow>
+            <h1 className="mt-4 text-[clamp(40px,5vw,68px)] leading-[1.02] font-extrabold tracking-[-0.025em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
               Help students discover their direction, <Grad>and build the skills to pursue it.</Grad>
             </h1>
             <p className="mt-6 max-w-[640px] text-[clamp(17px,0.7vw+13px,21px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-              Bring personalized career exploration, day-in-the-life simulations, and professional connections to your students.
-              Give educators the insights to guide their next steps.
+              Bring personalized career exploration, day-in-the-life simulations, and professional connections to your students. Give educators the insights to guide their next steps.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <MarketingButton variant="primary" size="lg" href="#demo">
                 Request a demo
               </MarketingButton>
@@ -348,268 +264,191 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
               For schools, districts, nonprofits, and educational institutions.
             </p>
           </div>
-          <div className="mt-12 sm:mt-16 lg:mt-20">
+          <div className="mt-14 sm:mt-20">
             <HeroShowcase />
           </div>
         </div>
-      </section>
-
-      {/* ---- Highlights ------------------------------------------------------ */}
-      <section aria-labelledby="highlights-heading" className="pt-6 sm:pt-10">
-        <div className="mx-auto max-w-[1200px] px-6">
-          <Reveal>
-            <SectionHead id="highlights-heading" title="The highlights." />
-          </Reveal>
-        </div>
-        <div className="mt-8 sm:mt-10">
-          <Highlights items={STAGES.map((s) => ({ key: s.n, title: `${s.n} ${s.title}`, line: s.line, art: s.art, bare: s.bare }))} />
+        <div className="mt-16 sm:mt-24">
+          <SkillsTicker />
         </div>
       </section>
 
-      {/* ---- Audience strip ------------------------------------------------- */}
-      <section aria-labelledby="audience-heading" className="px-6 pt-4 sm:pt-8">
+      {/* ---- 2. Audiences --------------------------------------------------- */}
+      <section id="organization" className="scroll-mt-24 border-b px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)", background: "var(--hero-mid)" }}>
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <SectionHead id="audience-heading" align="center" title="Built for the students you serve." />
+            <SectionHead align="center" size="lg" title="Built for the students you serve." />
+            <ul className="mx-auto mt-10 flex max-w-full flex-wrap justify-center gap-1 rounded-[16px] border bg-white p-1.5" style={{ borderColor: "var(--border)", width: "fit-content" }}>
+              {AUDIENCES.map((a, i) => (
+                <li key={a} className="rounded-[11px] px-4 py-2 text-[15px] font-semibold sm:px-5" style={i === 0 ? { background: "color-mix(in srgb, var(--primary) 10%, white)", color: "var(--primary)" } : { color: "var(--foreground)" }}>
+                  {a}
+                </li>
+              ))}
+            </ul>
           </Reveal>
-          <ul className="mx-auto mt-8 grid max-w-[960px] grid-cols-2 border-y sm:mt-10 lg:grid-cols-4" style={{ borderColor: "var(--border)" }}>
-            {AUDIENCES.map((a, i) => (
-              <li
-                key={a}
-                className={`py-5 text-center text-[16px] font-bold sm:py-6 sm:text-[17px] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t lg:border-t-0" : ""} ${i === 2 ? "lg:border-l" : ""}`}
-                style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
-              >
-                {a}
-              </li>
-            ))}
-          </ul>
           <Reveal>
-            <div className="mx-auto mt-10 max-w-[720px] text-center sm:mt-12">
-              <h3 className="text-[clamp(22px,2vw,28px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
-                Give every student a clearer path forward.
-              </h3>
-              <p className="mt-3 text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-                Help students explore their options, connect learning to careers, and plan their next steps, with visibility for the educators guiding them.
+            <div className="mt-14 grid grid-cols-1 items-center gap-12 lg:mt-20 lg:grid-cols-12 lg:gap-16">
+              <div className="lg:col-span-5">
+                <h3 className="text-[clamp(26px,2.6vw,36px)] leading-[1.1] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+                  Give every student a clearer path forward.
+                </h3>
+                <p className="mt-5 max-w-[46ch] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+                  Help students explore their options, connect learning to careers, and plan their next steps, with visibility for the educators guiding them.
+                </p>
+              </div>
+              <div className="lg:col-span-7">
+                <SchoolsPreview />
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ---- 3. Five stages -------------------------------------------------- */}
+      <section id="student-experience" className="scroll-mt-24 px-6 py-20 sm:py-28">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <Eyebrow>Build. Match. Explore. Immerse. Connect.</Eyebrow>
+            <div className="mt-4">
+              <SectionHead size="lg" title="Five steps toward a clearer future." />
+            </div>
+          </Reveal>
+          <ol className="mt-12 flex flex-col gap-4 sm:mt-16">
+            {STAGES.map((stage) => (
+              <Reveal key={stage.n}>
+                <StageCard stage={stage} open={openStage === stage.n} onToggle={() => setOpenStage(openStage === stage.n ? null : stage.n)} />
+              </Reveal>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ---- 4. Educators ---------------------------------------------------- */}
+      <section className="border-y px-6 py-20 sm:py-28" style={{ borderColor: "color-mix(in srgb, var(--primary) 12%, transparent)", background: "color-mix(in srgb, var(--primary) 4%, white)" }}>
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <span className="inline-flex rounded-full border px-3.5 py-1.5 text-[13px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 30%, transparent)", color: "var(--primary)", background: "white" }}>
+              For educators
+            </span>
+            <div className="mt-6">
+              <SectionHead size="lg" title="Know where students are. See where to help." lede="Bring student interests, activity, and progress into one dashboard to support more informed guidance." />
+            </div>
+          </Reveal>
+          <Reveal>
+            <ul className="mt-12 grid grid-cols-1 gap-x-12 gap-y-10 sm:grid-cols-2 lg:max-w-[880px]">
+              {EDUCATOR_FEATURES.map((f) => (
+                <li key={f.title}>
+                  <IconTile Icon={f.Icon} size={44} />
+                  <h3 className="mt-4 text-[18px] font-bold" style={{ color: "var(--foreground)" }}>{f.title}</h3>
+                  <p className="mt-1.5 max-w-[40ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{f.body}</p>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+          <Reveal>
+            <div className="mt-14 sm:mt-20">
+              <ProgressArt />
+              <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                Shown: a student&apos;s own progress (Top 3, plan, Career Report) as it ships today. The educator dashboard that reads this across a caseload is in development.
               </p>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* ---- Five stages ---------------------------------------------------- */}
-      <section id="student-experience" className="scroll-mt-24 px-6 pt-20 pb-6 sm:pt-28 lg:pb-16">
+      {/* ---- 5. Sources + Dream Opportunity ----------------------------------- */}
+      <section id="why-dreamari" className="scroll-mt-24 px-6 py-20 sm:py-28">
         <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <SectionHead title="Five steps toward a clearer future." />
-          </Reveal>
-          <ol className="mt-4 divide-y sm:mt-8 lg:hidden" style={{ borderColor: "var(--border)" }}>
-            {STAGES.map((stage) => (
-              <StageRowMobile key={stage.n} stage={stage} open={openStages.has(stage.n)} onToggle={() => toggleStage(stage.n)} />
-            ))}
-          </ol>
-          <div className="mt-4">
-            <StickyStages openStages={openStages} toggleStage={toggleStage} />
-          </div>
-        </div>
-      </section>
-
-      {/* ---- By the numbers --------------------------------------------------- */}
-      <section aria-label="Dreamari by the numbers" className="px-6 py-16 sm:py-24">
-        <div className="mx-auto max-w-[1200px]">
-          <Reveal>
-            <StatBand />
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ---- Educators ------------------------------------------------------ */}
-      <section className="px-6 py-20 sm:py-28" style={{ background: "var(--hero-mid)" }}>
-        <div className="mx-auto max-w-[1200px]">
-          <Reveal>
-            <SectionHead title="Know where students are. See where to help." lede="Bring student interests, activity, and progress into one dashboard to support more informed guidance." />
-          </Reveal>
-          <Reveal>
-            <div className="mt-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14">
-              <ul className="lg:col-span-5">
-                {EDUCATOR_FEATURES.map((f, i) => (
-                  <li key={f.title} className={`py-5 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "color-mix(in srgb, var(--foreground) 14%, transparent)" }}>
-                    <h3 className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>
-                      {f.title}
-                    </h3>
-                    <p className="mt-1 text-[14.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                      {f.body}
-                    </p>
-                  </li>
-                ))}
-                <li className="pt-5">
-                  <Disclosure id="outcomes" title="Outcomes you will be able to report on" size="sm" open={outcomesOpen} onToggle={() => setOutcomesOpen((o) => !o)}>
-                    <ul className="flex flex-wrap gap-2">
-                      {OUTCOMES.map((o) => (
-                        <li key={o} className="rounded-full border px-3 py-1.5 text-[13px] font-semibold" style={{ borderColor: "var(--border)", color: "var(--foreground)", background: "#ffffff" }}>
-                          {o}
-                        </li>
-                      ))}
-                    </ul>
-                  </Disclosure>
-                </li>
-              </ul>
-              <div className="lg:col-span-7">
-                <ProgressArt />
-                <Caption>
-                  Shown: a student&apos;s own progress (Top 3, plan, Career Report) as it ships today. The educator dashboard that reads this across a caseload is in development.
-                </Caption>
-              </div>
+            <div className="flex justify-center">
+              <IconTile Icon={BookOpen} size={56} />
+            </div>
+            <div className="mt-6">
+              <SectionHead align="center" size="lg" title="Grounded in career research. Connected to industry." lede="Career exploration informed by established resources, public occupational data, and insights from professionals at leading companies." />
             </div>
           </Reveal>
-        </div>
-      </section>
-
-      {/* ---- Data credibility ----------------------------------------------- */}
-      <section className="px-6 py-20 sm:py-28">
-        <div className="mx-auto max-w-[1200px]">
           <Reveal>
-            <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14">
-              <div className="lg:col-span-6">
-                <SectionHead
-                  title="Grounded in career research. Connected to industry."
-                  lede="Career exploration informed by established resources, public occupational data, and insights from professionals at leading companies."
-                />
-                <ul className="mt-8 max-w-[560px]">
+            <div className="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
+              <div className="rounded-[24px] border bg-white p-6 sm:p-8 lg:col-span-6" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
+                <div className="flex justify-center">
+                  <button type="button" aria-expanded={sourcesOpen} aria-controls="sources-list" onClick={() => setSourcesOpen((o) => !o)} className="inline-flex cursor-pointer items-center gap-1.5 rounded-[12px] border px-4 py-2.5 text-[14px] font-bold" style={{ borderColor: "var(--border)", color: "var(--foreground)", background: "white" }}>
+                    Explore our sources
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${sourcesOpen ? "rotate-180" : ""}`} strokeWidth={2.5} aria-hidden />
+                  </button>
+                </div>
+                <ul id="sources-list" hidden={!sourcesOpen} className="mt-6">
                   {SOURCES.map((s, i) => (
                     <li key={s.what} className={`flex flex-col gap-0.5 py-3.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "var(--border)" }}>
-                      <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-                        {s.what}
-                      </span>
-                      <span className="text-[14px] sm:text-right" style={{ color: "var(--muted-foreground)" }}>
-                        {s.from}
-                      </span>
+                      <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{s.what}</span>
+                      <span className="text-[14px] sm:text-right" style={{ color: "var(--muted-foreground)" }}>{s.from}</span>
                     </li>
                   ))}
+                  <li className="pt-3 text-[13.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                    A Career Report supports a conversation with a counselor; it is not a decision or a prediction.
+                  </li>
                 </ul>
-                <p className="mt-6 max-w-[56ch] text-[14px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                  A Career Report supports a conversation with a counselor; it is not a decision or a prediction.
-                </p>
+                <div className="mt-8 flex flex-col gap-5 border-t pt-8 sm:flex-row sm:items-center sm:gap-7" style={{ borderColor: "var(--border)" }}>
+                  <DOMark className="h-16 w-16 flex-none sm:h-20 sm:w-20" />
+                  <div>
+                    <h3 className="text-[19px] font-bold" style={{ color: "var(--foreground)" }}>Built by the team behind Dream Opportunity</h3>
+                    <p className="mt-1 max-w-[46ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>A global nonprofit connecting students with professionals at leading companies.</p>
+                  </div>
+                </div>
               </div>
               <div className="lg:col-span-6">
                 <DataArt />
-                <Caption>Pay by state and career ladder, from the Investment Banking detail page.</Caption>
               </div>
             </div>
           </Reveal>
-        </div>
-      </section>
-
-      {/* ---- Built by Dream Opportunity ------------------------------------- */}
-      <section id="organization" className="scroll-mt-24 border-t px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)" }}>
-        <div className="mx-auto max-w-[1200px]">
+          {/* One partner display on this page, inside the Dream Opportunity
+             section, marks in full brand colour (Joshua Pierce, 6 Sept 2026). */}
           <Reveal>
-            <OrganizationBand />
-            <div className="mt-8 sm:mt-10">
-              <SectionHead align="center" title={DO_COPY.heading} lede={DO_COPY.lead} />
-            </div>
-          </Reveal>
-          <Reveal>
-            {/* Original partner composition, in its supplied brand colors. */}
-            <div className="mx-auto mt-10 max-w-[1100px] rounded-[24px] border bg-white p-6 sm:mt-12 sm:p-10 lg:p-12" style={{ borderColor: "color-mix(in srgb, var(--foreground) 10%, transparent)", boxShadow: "0 32px 70px -34px rgba(5,7,15,0.35), 0 2px 6px -2px rgba(5,7,15,0.12)" }}>
+            <div className="mx-auto mt-12 max-w-[1100px] rounded-[24px] border bg-white p-6 sm:p-10 lg:p-12" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
               <PartnerLogoGrid tone="light" />
             </div>
-          </Reveal>
-          <Reveal>
-            <p className="mx-auto mt-10 max-w-[720px] text-center text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed sm:mt-12" style={{ color: "var(--foreground)", textWrap: "pretty" }}>
+            <p className="mx-auto mt-8 max-w-[720px] text-center text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
               {DO_COPY.close}
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* ---- FAQ ------------------------------------------------------------ */}
-      <section className="px-6 py-20 sm:py-28" style={{ background: "var(--hero-mid)" }}>
-        <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
-          <div className="lg:col-span-4">
-            <Reveal>
-              <SectionHead title="Questions schools ask." lede="Short answers here. Longer ones in the demo." />
-            </Reveal>
-          </div>
-          <div className="lg:col-span-8">
-            <Reveal>
-              <div className="border-b" style={{ borderColor: "var(--border)" }}>
-                {FAQ.map((f, i) => (
-                  <Disclosure key={f.q} id={`faq-${i}`} title={f.q} open={openFaq === i} onToggle={() => setOpenFaq(openFaq === i ? null : i)}>
-                    <p className="max-w-[64ch] text-[15.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                      {f.a}
-                    </p>
-                  </Disclosure>
-                ))}
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ---- Testimonials (shell) ------------------------------------------- */}
-      <section className="px-6 py-20 sm:py-28">
+      {/* ---- 6. Demo ----------------------------------------------------------- */}
+      <TrustLine className="pt-4 pb-4" />
+      <section id="demo" className="scroll-mt-24 px-6 py-20 sm:py-28" style={{ background: "#05070f" }}>
         <div className="mx-auto max-w-[1200px]">
-          <Reveal>
-            <SectionHead title="Results from partner schools." />
-          </Reveal>
-          <Reveal>
-            <div
-              className="mt-10 flex flex-col items-start gap-5 rounded-[24px] border p-8 sm:flex-row sm:items-center sm:gap-8 sm:p-10"
-              style={{ borderColor: "var(--border)", background: "#ffffff", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}
-            >
-              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--primary)" }}>
-                <Quote className="h-5 w-5" strokeWidth={2.5} aria-hidden />
-              </span>
-              <div>
-                <h3 className="text-[19px] font-bold" style={{ color: "var(--foreground)" }}>
-                  Case studies coming soon.
-                </h3>
-                <p className="mt-1 max-w-[52ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                  Ask for references when you request a demo.
-                </p>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ---- Demo request --------------------------------------------------- */}
-      {/* Credibility lines before the closing CTA, with the partner logo row
-         under them, as asked (Joshua Pierce, Slack, 6 Sept 2026). The row was
-         held until the partner list was confirmed; it is now the real set. */}
-      <TrustLine />
-      <div className="px-6 pb-8 sm:pb-10">
-      </div>
-
-      <section id="demo" className="scroll-mt-24 border-t px-6 py-20 sm:py-28" style={{ borderColor: "var(--border)" }}>
-        <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
-          <div className="lg:col-span-5">
+          <div className="max-w-[760px]">
             <Reveal>
-              <SectionHead
-                title="A clearer direction. Skills for what comes next."
-                lede="See how Dreamari can support career exploration, skill development, and student guidance in your school or organization."
-              />
-              <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
-                {["Quick setup", "Custom onboarding"].map((item) => (
-                  <li key={item} className="flex items-center gap-2.5 text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-                    <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: "var(--primary)" }} />
-                    {item}
+              <h2 className="text-[clamp(32px,4vw,52px)] leading-[1.08] font-extrabold tracking-[-0.015em]" style={{ color: "#ffffff", textWrap: "balance" }}>
+                A clearer direction. Skills for what comes next.
+              </h2>
+              <p className="mt-5 max-w-[560px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", textWrap: "pretty" }}>
+                See how Dreamari can support career exploration, skill development, and student guidance in your school or organization.
+              </p>
+              <ul className="mt-8 flex flex-wrap gap-x-7 gap-y-3">
+                {[
+                  { label: "Quick setup", dot: "var(--world-business-money-office)" },
+                  { label: "Custom onboarding", dot: "#22d3ee" },
+                ].map((item) => (
+                  <li key={item.label} className="flex items-center gap-2.5 text-[14.5px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>
+                    <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: item.dot }} />
+                    {item.label}
                   </li>
                 ))}
               </ul>
             </Reveal>
           </div>
-          <div className="lg:col-span-7">
-            <Reveal>
+          <Reveal>
+            <div className="mx-auto mt-14 max-w-[640px] rounded-[24px] bg-white p-6 sm:p-8" style={{ boxShadow: "0 40px 90px -40px rgba(0,0,0,0.7)" }}>
               <h3 className="text-[clamp(22px,2vw,28px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
                 See Dreamari in action.
               </h3>
-              <p className="mt-2 mb-6 text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+              <p className="mt-2 mb-6 text-[15.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
                 Tell us a little about your organization so we can tailor your demo.
               </p>
               <DemoRequestForm />
-            </Reveal>
-          </div>
+            </div>
+          </Reveal>
         </div>
       </section>
     </div>

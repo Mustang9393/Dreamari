@@ -1,19 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, FileText, Sparkles } from "lucide-react";
-import { useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
+import { Briefcase, FileText, GraduationCap, MessageSquare, Sparkles, Target, Users, Waypoints } from "lucide-react";
+import type { CSSProperties, ReactNode } from "react";
 import { MatchRing } from "@/components/app/MatchRing";
-import { INTEREST_WORLDS } from "@/components/build/types";
 import { COLLEGES } from "@/components/colleges/data";
+import { SchoolCard } from "@/components/colleges/shared";
 import { PROS } from "@/components/connect/data";
 import { Avatar, CompanyChip, VerifiedBadge } from "@/components/connect/primitives";
 import { DECK } from "@/components/match-lab/data";
 import { CardBody as MatchCardBody } from "@/components/match-lab/MatchLab";
 import { PROFILE_CAREERS, STUDENT } from "@/components/profile/data";
 import { studentAvatarSrc } from "@/lib/avatar";
-import { PARTNER_COUNT } from "./PartnerTicker";
 import { CareerHeader, Frame, SHADOW } from "./SchoolsVisuals";
 
 // ---------------------------------------------------------------------------
@@ -195,112 +193,63 @@ export function HeroShowcase() {
 }
 
 // ---------------------------------------------------------------------------
-// Highlights: tall cards on a snap track, arrows and dots underneath.
+// Skills ticker under the hero: the reference site's seven chips, looping.
 // ---------------------------------------------------------------------------
 
-export type Highlight = { key: string; title: string; line: string; art: ReactNode; bare?: boolean };
+const SKILLS: { label: string; Icon: typeof Sparkles }[] = [
+  { label: "Personalized discovery", Icon: Sparkles },
+  { label: "College & career pathways", Icon: GraduationCap },
+  { label: "Day-in-the-life simulations", Icon: Briefcase },
+  { label: "Critical thinking", Icon: Target },
+  { label: "Decision-making", Icon: Waypoints },
+  { label: "Communication & teamwork", Icon: MessageSquare },
+  { label: "Professional connections", Icon: Users },
+];
 
-export function Highlights({ items }: { items: Highlight[] }) {
-  const trackRef = useRef<HTMLUListElement>(null);
-  const [active, setActive] = useState(0);
-
-  function onScroll() {
-    const track = trackRef.current;
-    if (!track) return;
-    const centre = track.scrollLeft + track.clientWidth / 2;
-    let best = 0;
-    let bestDistance = Infinity;
-    Array.from(track.children).forEach((child, i) => {
-      const el = child as HTMLElement;
-      const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - centre);
-      if (d < bestDistance) { bestDistance = d; best = i; }
-    });
-    setActive(best);
-  }
-
-  function go(index: number) {
-    const track = trackRef.current;
-    if (!track) return;
-    const clamped = Math.max(0, Math.min(items.length - 1, index));
-    const el = track.children[clamped] as HTMLElement | undefined;
-    if (!el) return;
-    track.scrollTo({ left: el.offsetLeft - (track.clientWidth - el.offsetWidth) / 2, behavior: "smooth" });
-  }
-
-  const arrow = "flex size-10 cursor-pointer items-center justify-center rounded-full border transition-colors hover:[background:color-mix(in_srgb,var(--foreground)_6%,white)] disabled:cursor-default disabled:opacity-35";
-  const arrowStyle: CSSProperties = { borderColor: "var(--border)", background: "#ffffff", color: "var(--foreground)" };
-
+export function SkillsTicker() {
+  const row = [...SKILLS, ...SKILLS];
   return (
-    <div>
-      <ul
-        ref={trackRef}
-        onScroll={onScroll}
-        className="mkt-track flex snap-x snap-mandatory gap-5 overflow-x-auto px-[max(24px,calc((100vw-1200px)/2))] pt-2 pb-6"
-        aria-label="Highlights"
-      >
-        {items.map((item) => (
-          <li key={item.key} className="w-[min(86vw,400px)] flex-none snap-center">
-            <Frame className="aspect-[4/5]">
-              <div className="absolute inset-x-0 top-0 z-10 p-7">
-                <h3 className="text-[24px] leading-[1.15] font-extrabold tracking-[-0.01em]" style={{ color: "#fff", textWrap: "balance" }}>{item.title}</h3>
-                <p className="mt-2.5 max-w-[30ch] text-[15px] leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", textWrap: "pretty" }}>{item.line}</p>
-              </div>
-              <span aria-hidden className="absolute inset-x-0 top-0 z-[5] h-[46%]" style={{ background: "linear-gradient(to bottom, var(--background) 30%, transparent 100%)" }} />
-              {item.bare ? (
-                <div className="absolute inset-x-6 top-[42%] bottom-0 flex items-start justify-center" style={{ zoom: 0.78 }}>{item.art}</div>
-              ) : (
-                <div className="absolute inset-x-0 top-[40%] bottom-0">{item.art}</div>
-              )}
-            </Frame>
+    <div className="relative overflow-hidden border-y py-4" style={{ borderColor: "var(--border)", maskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)", WebkitMaskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)" }} aria-label="What students build">
+      <ul className="mkt-marquee flex w-max items-center gap-10 pr-10">
+        {row.map(({ label, Icon }, i) => (
+          <li key={`${label}-${i}`} aria-hidden={i >= SKILLS.length} className="flex flex-none items-center gap-2.5 text-[15px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>
+            <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden style={{ color: "var(--primary)" }} />
+            {label}
           </li>
         ))}
       </ul>
-      <div className="mt-2 flex items-center justify-center gap-4">
-        <div className="flex items-center gap-2 rounded-full border px-3 py-2" style={{ borderColor: "var(--border)", background: "#ffffff" }} role="tablist" aria-label="Highlight">
-          {items.map((item, i) => (
-            <button
-              key={item.key}
-              type="button"
-              role="tab"
-              aria-selected={active === i}
-              aria-label={item.title}
-              onClick={() => go(i)}
-              className="h-2 cursor-pointer rounded-full transition-all duration-300"
-              style={{ width: active === i ? 22 : 8, background: active === i ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 22%, transparent)" }}
-            />
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <button type="button" aria-label="Previous" disabled={active === 0} onClick={() => go(active - 1)} className={arrow} style={arrowStyle}><ChevronLeft className="h-5 w-5" strokeWidth={2.5} aria-hidden /></button>
-          <button type="button" aria-label="Next" disabled={active === items.length - 1} onClick={() => go(active + 1)} className={arrow} style={arrowStyle}><ChevronRight className="h-5 w-5" strokeWidth={2.5} aria-hidden /></button>
-        </div>
-      </div>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Stat tiles: real counts from the product's own data, never typed in.
+// Audiences preview: the Explore Schools rail with three real school cards
+// (photo, mark, program chip, acceptance / price / distance), running off the
+// frame's right edge the way the rail does in the app.
 // ---------------------------------------------------------------------------
 
-export function StatBand() {
-  const stats = [
-    { n: String(INTEREST_WORLDS.length), k: "career worlds", note: "from Health & Medicine to Driving, Flying & Shipping" },
-    { n: String(ALL_CATALOG_CAREERS.length), k: "careers to explore", note: "pay, education, daily life and pathways" },
-    { n: String(COLLEGES.length), k: "colleges and trade schools", note: "with cost, admissions and the programs that fit" },
-    { n: String(PARTNER_COUNT), k: "partner companies", note: "behind Dream Opportunity's network" },
-  ];
+const PREVIEW_SCHOOLS = ["the-college-of-new-jersey", "rutgers-university-new-brunswick", "new-jersey-institute-of-technology"];
+const PREVIEW_PROGRAM: Record<string, string> = { "the-college-of-new-jersey": "Business Administration", "rutgers-university-new-brunswick": "Finance", "new-jersey-institute-of-technology": "Business Administration" };
+
+export function SchoolsPreview() {
+  const schools = PREVIEW_SCHOOLS.map((slug) => COLLEGES.find((c) => c.slug === slug)).filter((c): c is NonNullable<typeof c> => Boolean(c));
   return (
-    <ul className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-x-10">
-      {stats.map((s) => (
-        <li key={s.k} className="flex flex-col">
-          <span className="text-[clamp(52px,6vw,88px)] leading-none font-extrabold tracking-[-0.03em] tabular-nums" style={{ fontFamily: "var(--font-display)" }}>
-            <Grad>{s.n}</Grad>
-          </span>
-          <span className="mt-3 text-[17px] leading-tight font-bold" style={{ color: "var(--foreground)" }}>{s.k}</span>
-          <span className="mt-1.5 max-w-[24ch] text-[14px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{s.note}</span>
-        </li>
-      ))}
-    </ul>
+    <Frame className="aspect-[4/5] w-full sm:aspect-[5/4]">
+      <div aria-hidden inert className="absolute inset-y-0 left-[7%] right-[-34%] flex flex-col justify-center gap-[18px]" style={{ containerType: "inline-size" }}>
+        <div className="flex items-baseline gap-2">
+          <p className="text-[22px] leading-[26px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            <span style={{ color: "var(--muted-foreground)" }}>Schools for </span>Investment Banking
+          </p>
+        </div>
+        <p className="-mt-[10px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Target <span style={{ color: "var(--muted-foreground)" }}>(4)</span></p>
+        <ul className="flex gap-[16px]">
+          {schools.map((c) => (
+            <li key={c.slug} className="w-[300px] flex-none">
+              <SchoolCard c={c} saved={false} onSave={() => {}} compared={false} program={PREVIEW_PROGRAM[c.slug]} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Frame>
   );
 }

@@ -7405,3 +7405,30 @@ Copy unchanged. `CareerHeader` exported from SchoolsVisuals for the tablet.
 Next slices proposed: stage chapters as eyebrow + gradient headline + tile
 carousels of the three detail lines; a sticky local sub-nav; a "pick a
 career" gallery that swaps the showcase's career.
+
+## 2026-09-11 · Schools landing rebuilt to the reference (not pushed)
+Direct feedback on the product-page pass: "copy is repeating, sections are
+repeating, follow the structure and content from dreamari-educator-website".
+SchoolsView now mirrors the reference section for section, nothing extra:
+1. Hero: eyebrow "College & career readiness", headline (gradient on its
+   second half), lede, CTAs, audience line; the floating device showcase as
+   the illustrative preview; the seven-chip skills ticker (`SkillsTicker`).
+2. #organization: "Built for the students you serve." with the four
+   audiences as a segmented strip; "Give every student a clearer path
+   forward." beside `SchoolsPreview` (three real Explore Schools cards).
+3. #student-experience: eyebrow "Build. Match. Explore. Immerse. Connect.",
+   heading, five stage cards (tile, "01 Build", line, Learn more). Learn more
+   opens the stage's composition with its three detail lines and app link.
+4. Educators: "For educators" pill, heading, lede, four features with icon
+   tiles, ProgressArt with its caption (dashboard still in development).
+5. #why-dreamari: book tile, heading, lede; card with "Explore our sources"
+   (the three sources) and the Dream Opportunity row from the reference
+   ("Built by the team behind Dream Opportunity", one line); DataArt beside
+   it; the partner wall under (Joshua's one display per page) with
+   DO_COPY.close as its caption. DO_COPY.heading and .lead are no longer
+   rendered here; flagged to the user.
+6. Demo: TrustLine, then the dark section with heading, lede, Quick setup /
+   Custom onboarding dots, and the form card.
+Removed: highlights carousel, stats band, FAQ, testimonials shell, outcomes
+disclosure, OrganizationBand photo, sticky stage column. Nav "Why Dreamari"
+now points at #why-dreamari as on the reference.

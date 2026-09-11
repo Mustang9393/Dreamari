@@ -272,3 +272,10 @@
 /* Carousel track: scrollbar hidden, snap per card. */
 .mkt-track { scrollbar-width: none; -ms-overflow-style: none; }
 .mkt-track::-webkit-scrollbar { display: none; }
+
+/* Skills ticker under the Schools hero: one track, two copies, moves half its
+   width and loops. Pauses on hover so a chip can be read. */
+@keyframes mkt-marquee { to { transform: translateX(-50%); } }
+.mkt-marquee { animation: mkt-marquee 38s linear infinite; }
+.mkt-marquee:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .mkt-marquee { animation: none; } }
