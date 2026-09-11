@@ -483,35 +483,40 @@ export function CareerReportDocument({
 }
 
 // ---- The report surface: one document, four views on top of it ----
-// Share, Counselor Review and Download are TABS above the report (the Aug 29
-// doc), not toolbar buttons opening sheets. "Report" is the document itself.
+// Share is the one visible action; Counselor Review, Download and History
+// sit behind a "More" menu, and there is no "Report" button while the report
+// is what you are looking at (Joshua Pierce, Slack, 11 Sept 2026: the five
+// visible tabs were distracting). Opening a secondary view swaps the bar for
+// its name and a way back.
 
-const REPORT_TABS = [
-  { id: "report", label: "Report" },
-  { id: "share", label: "Share" },
+const MORE_VIEWS = [
   { id: "counselor", label: "Counselor Review" },
   { id: "download", label: "Download" },
   { id: "history", label: "History" },
 ] as const;
-type ReportTabId = (typeof REPORT_TABS)[number]["id"];
+type ReportTabId = "report" | "share" | (typeof MORE_VIEWS)[number]["id"];
+const VIEW_LABEL: Record<ReportTabId, string> = { report: "Report", share: "Share", counselor: "Counselor Review", download: "Download", history: "History" };
 
 export function CareerReportView(props: ReportViewProps) {
   const { student, career } = props;
   const report = reportV2(career.id);
   const [tab, setTab] = useState<ReportTabId>("report");
+  const [moreOpen, setMoreOpen] = useState(false);
   // Every share / print keeps a version automatically; History lists them.
   const keep = (label: string) => {
     if (props.history) recordReportVersion(label, props.history.snapshot());
   };
+  useEffect(() => {
+    if (!moreOpen) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setMoreOpen(false); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [moreOpen]);
   // The report used to accent itself with the career's own world colour,
   // which put amber/olive tones on the Business & Money reports — "just not
   // easy on the eyes" (direct feedback, 5 Sept 2026). Every --primary/
   // --accent-subtle reference below now resolves to the app's own ambient
-  // Dreamari blue with no local override, since that's already what those
-  // tokens are at the root in both themes — a local override here used to
-  // redeclare --primary in terms of itself ({ "--primary": "var(--primary)" }),
-  // which is a cyclic custom-property reference and computes as invalid,
-  // silently falling back to inherited (dark) text instead of blue.
+  // Dreamari blue with no local override.
 
   if (!report) {
     return (
@@ -522,72 +527,71 @@ export function CareerReportView(props: ReportViewProps) {
     );
   }
 
+  const chip = "dm-quiet flex min-h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[13.5px] leading-[17px] font-bold whitespace-nowrap";
+  const chipStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       {/* App chrome, never printed */}
       <div data-print-hide className="no-print flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)]">
-        <div
-          role="tablist"
-          aria-label="Career report views"
-          onKeyDown={(event) => {
-            const order = REPORT_TABS.map((item) => item.id);
-            const index = order.indexOf(tab);
-            let next: ReportTabId | null = null;
-            if (event.key === "ChevronRight") next = order[(index + 1) % order.length];
-            if (event.key === "ChevronLeft") next = order[(index + order.length - 1) % order.length];
-            if (next) {
-              event.preventDefault();
-              setTab(next);
-              document.getElementById(`report-tab-${next}`)?.focus();
-            }
-          }}
-          className="flex max-w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] border p-[var(--space-1)] [scrollbar-width:none]"
-          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
-        >
-          {REPORT_TABS.map((item) => (
-            <button
-              key={item.id}
-              id={`report-tab-${item.id}`}
-              type="button"
-              role="tab"
-              aria-selected={tab === item.id}
-              aria-controls={`report-panel-${item.id}`}
-              tabIndex={tab === item.id ? 0 : -1}
-              onClick={() => setTab(item.id)}
-              className="dm-quiet min-h-[40px] flex-none cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[13.5px] leading-[17px] font-bold whitespace-nowrap"
-              style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
-            >
-              {item.label}
+        {tab === "report" ? (
+          <>
+            <button type="button" onClick={() => setTab("share")} className={`${chip} border-transparent`} style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+              <Send className="h-[15px] w-[15px]" aria-hidden /> Share
             </button>
-          ))}
-        </div>
+            <div className="relative">
+              <button type="button" aria-haspopup="menu" aria-expanded={moreOpen} aria-label="More report actions" onClick={() => setMoreOpen((o) => !o)} className={chip} style={chipStyle}>
+                <span aria-hidden className="text-[16px] leading-none tracking-[0.1em]">•••</span> More
+              </button>
+              {moreOpen && (
+                <>
+                  <button type="button" aria-label="Close menu" onClick={() => setMoreOpen(false)} className="fixed inset-0 z-40 cursor-default" />
+                  <div role="menu" aria-label="More report actions" className="absolute left-0 z-50 mt-2 flex min-w-[200px] flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}>
+                    {MORE_VIEWS.map((item) => (
+                      <button key={item.id} type="button" role="menuitem" onClick={() => { setMoreOpen(false); setTab(item.id); }} className="dm-quiet flex cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] py-[10px] text-left text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={() => setTab("report")} className={chip} style={chipStyle}>
+              <ChevronRight className="h-[15px] w-[15px] rotate-180" aria-hidden /> Report
+            </button>
+            <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{VIEW_LABEL[tab]}</span>
+          </>
+        )}
         <span className="text-[11.5px] font-bold sm:ml-auto" style={{ color: "var(--muted-foreground)" }}>Updated {props.updatedLabel}</span>
       </div>
 
       {tab === "report" && (
-        <div role="tabpanel" id="report-panel-report" aria-labelledby="report-tab-report" className="flex flex-col gap-[var(--space-4)]">
+        <div id="report-panel-report" className="flex flex-col gap-[var(--space-4)]">
           <ReportDocument student={student} career={career} report={report} reportDate={REPORT_DATE} />
           {/* Keyed so a focus swap re-reads the right career's saved answers. */}
           <ReflectionCard key={career.id} careerId={career.id} careerTitle={career.title} />
         </div>
       )}
       {tab === "share" && (
-        <div role="tabpanel" id="report-panel-share" aria-labelledby="report-tab-share">
+        <section id="report-panel-share" aria-label="Share">
           <ShareTab onShared={keep} />
-        </div>
+        </section>
       )}
       {tab === "counselor" && (
-        <div role="tabpanel" id="report-panel-counselor" aria-labelledby="report-tab-counselor">
+        <section id="report-panel-counselor" aria-label="Counselor Review">
           <CounselorReviewTab />
-        </div>
+        </section>
       )}
       {tab === "download" && (
-        <div role="tabpanel" id="report-panel-download" aria-labelledby="report-tab-download">
+        <section id="report-panel-download" aria-label="Download">
           <DownloadTab student={student} career={career} report={report} onPrinted={() => keep("Printed")} />
-        </div>
+        </section>
       )}
       {tab === "history" && (
-        <div role="tabpanel" id="report-panel-history" aria-labelledby="report-tab-history">
+        <section id="report-panel-history" aria-label="History">
           <HistoryTab
             history={props.history}
             onPrint={(snapshot) => {
@@ -600,7 +604,7 @@ export function CareerReportView(props: ReportViewProps) {
               setTab("share");
             }}
           />
-        </div>
+        </section>
       )}
     </div>
   );

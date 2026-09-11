@@ -7587,3 +7587,10 @@ you?" removed), "How did this affect your interest?" with More interested /
 About the same / Less interested, then Done (enabled once a date is set).
 Row summary, Career Report rows and print output unchanged.
 Verified on the Investment Banking report's 03 Career Exploration section.
+
+## 2026-09-11 · Career Report: Share + More (Joshua, Slack); Careers | Schools
+- The five visible report tabs are gone. On the report: a primary Share
+  button and a "••• More" menu (Counselor Review, Download, History). No
+  duplicate Report button. Inside a secondary view the bar becomes
+  "‹ Report" plus the view's name. Panels unchanged. `CareerReport.tsx`.
+- Explore tab strip separator "/" is now "|" (Joshua). `chrome.tsx`.

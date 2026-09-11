@@ -86,7 +86,7 @@ export function ExploreSectionTabs({ active }: { active: "careers" | "colleges" 
         const pulsing = nudge && section.key === "colleges" && !isActive;
         return (
           <span key={section.key} className="flex items-center gap-[var(--space-4)]">
-            {i > 0 && <span aria-hidden style={{ color: "var(--glass-border)" }}>/</span>}
+            {i > 0 && <span aria-hidden style={{ color: "var(--glass-border)" }}>|</span>}
             <button
               type="button"
               role="tab"
