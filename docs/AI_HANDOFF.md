@@ -7850,3 +7850,17 @@ Update to the entry above: the user asked to push everything, including
 Match grid. `MatchGrid.tsx` and its `/match-grid` route are now committed
 and on main (c06e35a) -- no longer local-only. Still does not touch
 `/match-lab` or `MatchLab.tsx`; both routes exist side by side.
+
+## 2026-09-12 · Match: A/B toggle, live
+
+Added `VersionToggle.tsx` -- a small A/B pill in the header of both
+`/match-lab` (A, swipe deck) and `/match-grid` (B, grid). Clicking the
+inactive letter navigates to the other route. Placed in MatchLab's own
+row (it has vertical room); in MatchGrid it sits inline beside the "X of
+3" counter chip instead of its own row, since that page is tuned to fit
+the viewport with zero scroll and a new row would reintroduce it.
+
+Every entry point into Match (BuildFlowExperience finishing or skipping,
+Profile's two "start swiping" links, ReportChooser's empty state) already
+routes to `/match-lab`, so the toggle there covers all of them without
+touching each call site. Direct user instruction: pushed to main (bb617ba).
