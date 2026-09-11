@@ -7775,3 +7775,46 @@ Several rounds of direct feedback in one session; final state:
 - Zip Code and "How far would you go for school?" got the same bigger
   field-title treatment as Grade/GPA; Zip Code's placeholder is now a real
   example ("10001") instead of repeating the label.
+
+## 2026-09-12 · GPA field: real root cause of the clipping found and fixed
+Repeated direct feedback across many rounds; final state, and the actual
+bug behind "still cropping" that every earlier padding increase (px-9,
+px-6, px-4, px-3) failed to fix:
+
+- **Root cause**: `TRACK_INSET` was a Tailwind padding CLASS on the
+  track's parent div, but the track/tick/thumb elements are `position:
+  absolute` with percentage `left`/`width`. Per the CSS spec, an absolute
+  child's percentage offsets resolve against the padding BOX's origin,
+  which coincides with the border-box corner when there's no border --
+  the parent's padding VALUE has no effect on that math at all. So every
+  "add more padding" attempt was cosmetically plausible but functionally
+  inert; the thumb was always positioned at literal 0%/100% of the outer
+  box regardless of the padding number. Fixed by computing real pixel
+  insets directly on each absolutely positioned element instead (`SAFE`
+  constant, `travelLeft()` helper, explicit `left`/`right` in px, nested
+  `calc()` for the fill width and tick/thumb positions) -- verified by
+  reading actual `getBoundingClientRect()` values against the real
+  clipping ancestor before calling it fixed this time, at both ends of
+  the scale.
+- The readout chip's own glow (a box-shadow blur) was separately clipped
+  on the right, since the chip sits flush at the row's own right edge
+  with no reserved margin -- cut the blur from 16px to 8px and gave the
+  chip a small `mr-1`.
+- Layout, per several rounds of direct feedback: "My school does not use
+  GPA" is a compact checkbox right next to the "GPA" title (not at the
+  row's far edge); checking it removes the whole slider block from the
+  DOM (not just dims it), so its space collapses; unchecking it restores
+  a blank scale. The live answer is a square "slot" chip in line with the
+  track, to its right -- a real flex sibling, never an edge-tracking
+  overlay, so it structurally cannot clip. A plain tenth shows as one big
+  number; "2.0 or below"/"4.0 or higher" split into a big "2.0"/"4.0" over
+  a smaller "or below"/"or higher". The chip's fill is the same blue-to-
+  violet gradient the track uses, in white, for more energy than a dark
+  slot read as ("not vibrant enough"). The instructional/reassurance
+  sentence moved out of the field entirely, to one centered italic line
+  above the Skip button. End labels ("2.0 or below" / "3.0" / "4.0 or
+  higher") sit flush at the true track edges and read muted, not full
+  brightness.
+- Zip Code is now a boxed field like Grade/GPA/travel-distance, not the
+  page's only underline input; its placeholder is a real example
+  ("10001").

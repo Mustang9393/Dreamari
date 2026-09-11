@@ -292,9 +292,6 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
   );
 }
 
-const UNDERLINE_INPUT =
-  "w-full border-0 border-b bg-transparent px-0 py-2.5 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors placeholder:text-[var(--color-night-muted-foreground)] placeholder:opacity-70 focus:border-[var(--color-brand-400)]";
-
 // Grade/GPA as dropdowns (per feedback: pill walls read as information
 // overload on the profile step). Native <select> = keyboard/screen-reader
 // support for free; glass styling matches the flow's inputs.
@@ -371,9 +368,13 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
              feedback, 11 Sept 2026). */}
           <div>
             <p className="mb-2 text-[15px] font-extrabold" style={{ color: "var(--color-night-foreground)" }}>Zip Code</p>
+            {/* A boxed field like Grade/GPA's own boxes, not the lone
+               underline input on the card (direct feedback, 11 Sept 2026:
+               "since everything else is a box, lets make the zip code
+               line also a box type input like the others"). */}
             <input
-              className={UNDERLINE_INPUT}
-              style={{ borderBottomColor: "var(--color-glass-stroke)" }}
+              className={`w-full rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors placeholder:text-[var(--color-night-muted-foreground)] placeholder:opacity-70 focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
+              style={{ background: GLASS_PANEL_BG, borderColor: state.zipCode ? "var(--color-brand-400)" : GLASS_PANEL_BORDER, color: "var(--color-night-foreground)" }}
               // A real example, not the label repeated (direct feedback,
               // 11 Sept 2026) -- now that the field has its own title
               // above it, the placeholder can actually show the format.
@@ -396,6 +397,12 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
         </div>
       </GlassCard>
       </div>
+      {/* Moved out of the GPA field and centered here, right above Skip
+         (direct feedback, 11 Sept 2026) -- reassurance for the whole
+         step, not copy crowding one field's own controls. */}
+      <p className="pt-1 text-center text-[13px] font-medium italic" style={{ color: "var(--color-night-muted-foreground)" }}>
+        Your GPA doesn&apos;t define you. It just helps us find realistic schools.
+      </p>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!valid} nextLabel={<span className="inline-flex items-center gap-[6px]">Finish<ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>} onSkip={onSkip} />
     </div>
   );
