@@ -7299,3 +7299,25 @@ exactly one AppBackdrop. Verified: Explore Careers, Schools (both faces),
 College detail, Career detail, Home, Play and Profile sample identical
 background values at four probe points. Home's data-space-backdrop div is
 its star-dot decor, not a second sheet, left as is.
+
+## 2026-09-11 · Real campus photos for the last four stand-ins
+Direct feedback: "find proper images for colleges with stand-in images" and
+"sisseton wahpeton college doesn't look like it has a real image". Commons
+has nothing for any of them, so these come from the schools' own media
+(user approved web downloads); credits.json records source, licence and a
+note per school.
+- Mitchell Technical College: aerial of the Mitchell campus, frame from the
+  college's own drone video (mitchelltech.edu is behind a Cloudflare wall
+  for non-US traffic; its pages were read through the Wayback Machine and
+  hold no exterior still). Replaces the Corn Palace.
+- Mount Marty University: aerial of Bishop Marty Memorial Chapel from
+  mountmarty.edu. Replaces the Meridian Bridge.
+- Sinte Gleska University: the tipi-shaped Multipurpose Center with three
+  students in regalia, cropped to 3:2 from the portrait original on
+  sintegleska.edu. Replaces the prairie sunset.
+- Sisseton Wahpeton College: the drummer sculptures on the main building,
+  Angela J. Smith on Flickr (CC BY-NC-ND 2.0, via Openverse). Replaces the
+  site's decorative post-img.png.
+Manifest regenerated (30 photos, 25 marks). Verified on all four detail
+pages. Licences are school media for demo use; production needs permission
+or a licensed replacement, same caveat as the other 26.

@@ -15,7 +15,7 @@
     "photoUrl": "https://commons.wikimedia.org/wiki/File:Old_Main,_University_of_South_Dakota.jpg",
     "mark": "https://upload.wikimedia.org/wikipedia/en/thumb/3/31/University_of_South_Dakota_seal.svg/250px-University_of_South_Dakota_seal.svg.png",
     "wikipedia": "https://en.wikipedia.org/wiki/University_of_South_Dakota",
-    "summary": "The University of South Dakota (USD) is a public research university in Vermillion, South Dakota, United States. Established by the Dakota Territory legislature in 1862, 27 years before the establishment of the state of South Dakota, USD is the flagship university of South Dakota and the state's oldest public university. It occupies a 274 acres (1.11 km2) campus located in southeastern South Dakota, approximately 63 miles (101 km) south of Sioux Falls, 39 miles (63 km) northwest of Sioux City, Iowa, and north of the Missouri River."
+    "summary": "The University of South Dakota (USD) is a public research university in Vermillion, South Dakota, United States. Established by the Dakota Territory legislature in 1862, 27 years before the establishment of the state of South Dakota, USD is the flagship university of South Dakota and the state's oldest public university. It occupies a 274 acres (1.11\u00a0km2) campus located in southeastern South Dakota, approximately 63 miles (101\u00a0km) south of Sioux Falls, 39 miles (63\u00a0km) northwest of Sioux City, Iowa, and north of the Missouri River."
   },
   "southeast-technical-college": {
     "mark": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Southeast_Tech.jpg/3840px-Southeast_Tech.jpg",
@@ -45,11 +45,11 @@
     "summary": "Dakota State University (DSU) is a public university in Madison, South Dakota, United States. The school was founded in 1881 as a normal school, or teacher training school. Education is still the university's heritage mission, but a signature mission of technology was added by the state legislature in 1984 to specialize in \"programs in computer management, computer information systems, and other related undergraduate and graduate programs\"."
   },
   "mitchell-technical-college": {
-    "photo": "Corn Palace 0286.jpg",
-    "photoLicense": "CC BY-SA 4.0",
-    "photoAuthor": "Chris Light",
-    "photoUrl": "https://commons.wikimedia.org/wiki/File:Corn_Palace_0286.jpg",
-    "photoNote": "Town landmark; the college publishes no fetchable campus photo"
+    "photo": "Mitchell Tech Drone Video (frame)",
+    "photoLicense": "School media (all rights reserved; demo use)",
+    "photoAuthor": "Mitchell Technical College",
+    "photoUrl": "https://www.youtube.com/watch?v=73NsJQ-4y0Y",
+    "photoNote": "Aerial of the Mitchell campus from the college's own drone video; mitchelltech.edu blocks non-US traffic and publishes no exterior still"
   },
   "augustana-university": {
     "photo": "Old Augustana.jpg",
@@ -67,12 +67,12 @@
     "photoUrl": "https://commons.wikimedia.org/wiki/File:South_Dakota_School_of_Mines_and_Technology.jpg",
     "mark": "https://upload.wikimedia.org/wikipedia/en/a/a3/South_dakota_mines_seal.png",
     "wikipedia": "https://en.wikipedia.org/wiki/South_Dakota_School_of_Mines_and_Technology",
-    "summary": "The South Dakota School of Mines & Technology is a public university in Rapid City, South Dakota, United States. It is governed by the South Dakota Board of Regents and was founded in 1885. South Dakota Mines offers bachelor's, master’s, and doctoral degrees."
+    "summary": "The South Dakota School of Mines & Technology is a public university in Rapid City, South Dakota, United States. It is governed by the South Dakota Board of Regents and was founded in 1885. South Dakota Mines offers bachelor's, master\u2019s, and doctoral degrees."
   },
   "black-hills-state-university": {
     "mark": "https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Black_Hills_State_University_seal.svg/250px-Black_Hills_State_University_seal.svg.png",
     "wikipedia": "https://en.wikipedia.org/wiki/Black_Hills_State_University",
-    "summary": "Black Hills State University (BHSU) is a public university in Spearfish, South Dakota, United States. Close to 4,000 students attend classes at its 123-acre (50 ha) campus in Spearfish, with a satellite campus in Rapid City which is shared with South Dakota State University, and through distance offerings. BHSU is governed by the South Dakota Board of Regents.",
+    "summary": "Black Hills State University (BHSU) is a public university in Spearfish, South Dakota, United States. Close to 4,000 students attend classes at its 123-acre (50\u00a0ha) campus in Spearfish, with a satellite campus in Rapid City which is shared with South Dakota State University, and through distance offerings. BHSU is governed by the South Dakota Board of Regents.",
     "photo": "Meier Hall and Yellow Jacket Student Union - BHSU - Spearfish (52475063505).jpg",
     "photoLicense": "CC BY 2.0",
     "photoAuthor": "Tony Webster",
@@ -107,11 +107,11 @@
     "photoUrl": "https://commons.wikimedia.org/wiki/File:Western_Dakota_Technical_College.jpg"
   },
   "mount-marty-university": {
-    "photo": "Yankton View.jpg",
-    "photoLicense": "CC BY-SA 3.0",
-    "photoAuthor": "Anderc99",
-    "photoUrl": "https://commons.wikimedia.org/wiki/File:Yankton_View.jpg",
-    "photoNote": "Yankton's Meridian Bridge; no campus photo is published"
+    "photo": "marty-20220830-0038-2.jpg",
+    "photoLicense": "School website (all rights reserved; demo use)",
+    "photoAuthor": "Mount Marty University",
+    "photoUrl": "https://www.mountmarty.edu/globalassets/backend-reconstruction/marty-20220830-0038-2.jpg",
+    "photoNote": "Aerial of Bishop Marty Memorial Chapel and the Yankton campus, from mountmarty.edu"
   },
   "kairos-university": {
     "photo": "SiouxFallsSeminaryCampus.jpg",
@@ -120,7 +120,7 @@
     "photoUrl": "https://commons.wikimedia.org/wiki/File:SiouxFallsSeminaryCampus.jpg",
     "mark": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/SiouxFallsSeminaryCampus.jpg/3840px-SiouxFallsSeminaryCampus.jpg",
     "wikipedia": "https://en.wikipedia.org/wiki/Kairos_University",
-    "summary": "Kairos University is a private theological university headquartered in Sioux Falls, South Dakota, United States. It is both a higher education institution and the institutional hub of a global theological education network, connecting partner schools and ministries in a collaborative system of competency-based theological education (CBTE). The university traces its origins to 1858. In its present form, Kairos includes five legacy partner institutions, with Sioux Falls Seminary—the accredited entity—being renamed Kairos University in 2021. While interdenominational in scope, Kairos retains an affiliation with the North American Baptist Conference."
+    "summary": "Kairos University is a private theological university headquartered in Sioux Falls, South Dakota, United States. It is both a higher education institution and the institutional hub of a global theological education network, connecting partner schools and ministries in a collaborative system of competency-based theological education (CBTE). The university traces its origins to 1858. In its present form, Kairos includes five legacy partner institutions, with Sioux Falls Seminary\u2014the accredited entity\u2014being renamed Kairos University in 2021. While interdenominational in scope, Kairos retains an affiliation with the North American Baptist Conference."
   },
   "dakota-wesleyan-university": {
     "mark": "https://upload.wikimedia.org/wikipedia/en/4/4e/321px_The_Seal_of_Dakota_Wesleyan_University_1904-Present.png",
@@ -149,12 +149,12 @@
   "sinte-gleska-university": {
     "mark": "https://upload.wikimedia.org/wikipedia/en/a/a9/Sinte_Gleska_University_logo.jpg",
     "wikipedia": "https://en.wikipedia.org/wiki/Sinte_Gleska_University",
-    "summary": "Sinte Gleska University (SGU) is a public tribal land-grant university in Mission, South Dakota, on the Rosebud Indian Reservation. It is a Brulé Lakota Indian Reservation home to the Sicangu. SGU has an enrollment of 828 full and part-time students. It is regionally accredited by the Higher Learning Commission.",
-    "photo": "Sandhill Cranes at Sunset Huron Wetland Management District South Dakota (52905084378).jpg",
-    "photoLicense": "Public domain",
-    "photoAuthor": "USFWS Mountain Prairie",
-    "photoUrl": "https://commons.wikimedia.org/wiki/File:Sandhill_Cranes_at_Sunset_Huron_Wetland_Management_District_South_Dakota_(52905084378).jpg",
-    "photoNote": "Regional landscape; the university publishes no campus photo"
+    "summary": "Sinte Gleska University (SGU) is a public tribal land-grant university in Mission, South Dakota, on the Rosebud Indian Reservation. It is a Brul\u00e9 Lakota Indian Reservation home to the Sicangu. SGU has an enrollment of 828 full and part-time students. It is regionally accredited by the Higher Learning Commission.",
+    "photo": "SGU Multipurpose Center with students in regalia",
+    "photoLicense": "School website (all rights reserved; demo use)",
+    "photoAuthor": "Sinte Gleska University",
+    "photoUrl": "https://static.wixstatic.com/media/588900_af02063e76074b50a4f9707744b7e441~mv2.jpg",
+    "photoNote": "Cropped from the portrait original on sintegleska.edu"
   },
   "paul-mitchell-the-school-rapid-city": {
     "photo": "Rapid City Skyline (2022).jpg",
@@ -166,10 +166,11 @@
     "mark": "https://upload.wikimedia.org/wikipedia/en/1/19/Sisseton_Wahpeton_College.png",
     "wikipedia": "https://en.wikipedia.org/wiki/Sisseton_Wahpeton_College",
     "summary": "Sisseton Wahpeton College (SWC) is a public tribal land-grant college of the Sisseton Wahpeton Oyate on the Lake Traverse Reservation in South Dakota. It was established in 1979 and serves the Dakota people and the general public. SWC has an average enrollment of about 250 students, of whom more than 80% are tribal members. It has both vocational and academic programs, which includes \ncertificates, associate degrees, and bachelor's degrees as well as articulation arrangements with other universities and colleges so that students can transfer for continued studies.",
-    "photo": "post-img.png",
-    "photoLicense": "School website (all rights reserved; demo use)",
-    "photoAuthor": "",
-    "photoUrl": "https://www.swcollege.edu/newswcollege/wp-content/uploads/2021/06/post-img.png"
+    "photo": "Sisseton Wahpeton College (drummer sculptures on the main building)",
+    "photoLicense": "CC BY-NC-ND 2.0",
+    "photoAuthor": "Angela J. Smith",
+    "photoUrl": "https://www.flickr.com/photos/71055656@N00/14842704874",
+    "photoNote": "Flickr, via Openverse"
   },
   "rutgers-university-new-brunswick": {
     "photo": "Clock on the campus of Rutgers University (2012).jpg",
@@ -178,7 +179,7 @@
     "photoUrl": "https://commons.wikimedia.org/wiki/File:Clock_on_the_campus_of_Rutgers_University_(2012).jpg",
     "mark": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Rutgers_University_seal.svg/330px-Rutgers_University_seal.svg.png",
     "wikipedia": "https://en.wikipedia.org/wiki/Rutgers_University%E2%80%93New_Brunswick",
-    "summary": "Rutgers University–New Brunswick is the largest campus of Rutgers University, a public land-grant research university consisting of three major campuses in New Jersey. It is located primarily in New Brunswick and Piscataway. It is the oldest campus of the university, the others being in Camden and Newark. The New Brunswick campus is composed of several smaller campuses that are some distances away from each other: College Avenue, Busch, Livingston, Cook, and Douglass, the latter two sometimes referred to as \"Cook/Douglass\", as they are adjacent and intertwined. All of these campuses lie along State Route 18. Rutgers–New Brunswick also includes several buildings in downtown New Brunswick. It is classified among \"R1: Doctoral Universities – Very high research activity\". The New Brunswick campuses include 19 undergraduate, graduate, and professional schools."
+    "summary": "Rutgers University\u2013New Brunswick is the largest campus of Rutgers University, a public land-grant research university consisting of three major campuses in New Jersey. It is located primarily in New Brunswick and Piscataway. It is the oldest campus of the university, the others being in Camden and Newark. The New Brunswick campus is composed of several smaller campuses that are some distances away from each other: College Avenue, Busch, Livingston, Cook, and Douglass, the latter two sometimes referred to as \"Cook/Douglass\", as they are adjacent and intertwined. All of these campuses lie along State Route 18. Rutgers\u2013New Brunswick also includes several buildings in downtown New Brunswick. It is classified among \"R1: Doctoral Universities \u2013 Very high research activity\". The New Brunswick campuses include 19 undergraduate, graduate, and professional schools."
   },
   "the-college-of-new-jersey": {
     "photo": "TCNJ The College of New Jersey fountain.JPG",
@@ -201,7 +202,7 @@
   "bergen-community-college": {
     "mark": "https://upload.wikimedia.org/wikipedia/en/4/43/Bergen_Community_College_Logo.jpg",
     "wikipedia": "https://en.wikipedia.org/wiki/Bergen_Community_College",
-    "summary": "Bergen Community College is a public community college in Bergen County, New Jersey. It was founded in 1965 and opened in 1968. As of November 2021, it is the largest community college in the state, with campuses in Paramus, Hackensack, and Lyndhurst and 13,352 students enrolled in degree programs, as well as approximately 5,800 in continuing and adult education programs. Federal data rank Bergen graduates first in earning the highest salaries among their peers from the state's 19 two-year institutions, and even out-earning peers from some four-year colleges. Bergen has graduated more than half a million students with associate degrees and certificates since its founding in 1968.",
+    "summary": "Bergen Community College is a public community college in Bergen County, New Jersey. It was founded in 1965 and opened in 1968. As of November\u00a02021, it is the largest community college in the state, with campuses in Paramus, Hackensack, and Lyndhurst and 13,352 students enrolled in degree programs, as well as approximately 5,800 in continuing and adult education programs. Federal data rank Bergen graduates first in earning the highest salaries among their peers from the state's 19 two-year institutions, and even out-earning peers from some four-year colleges. Bergen has graduated more than half a million students with associate degrees and certificates since its founding in 1968.",
     "photo": "Pitkin-Header.jpg",
     "photoLicense": "School website (all rights reserved; demo use)",
     "photoAuthor": "",
@@ -220,7 +221,7 @@
     "photoUrl": "https://commons.wikimedia.org/wiki/File:MSU_College_Hall.jpg",
     "mark": "https://upload.wikimedia.org/wikipedia/en/8/88/Montclair_st_univ_seal.png",
     "wikipedia": "https://en.wikipedia.org/wiki/Montclair_State_University",
-    "summary": "Montclair State University (Montclair) is a public research university in Montclair, New Jersey, United States. Parts of the campus extend into Clifton and into Little Falls. As of June 2024, there were 22,570 total enrolled students: 18,062 undergraduate students and 4,508 graduate students. It is classified among \"R2: Doctoral Universities – High research activity\". The campus covers approximately 252 acres (1.02 km2). The university offers more than 300 majors, minors, and concentrations."
+    "summary": "Montclair State University (Montclair) is a public research university in Montclair, New Jersey, United States. Parts of the campus extend into Clifton and into Little Falls. As of June 2024, there were 22,570 total enrolled students: 18,062 undergraduate students and 4,508 graduate students. It is classified among \"R2: Doctoral Universities \u2013 High research activity\". The campus covers approximately 252 acres (1.02\u00a0km2). The university offers more than 300 majors, minors, and concentrations."
   },
   "new-jersey-institute-of-technology": {
     "photo": "NJIT-Eberhardt-Hall.jpg",
@@ -247,7 +248,7 @@
     "photoUrl": "https://commons.wikimedia.org/wiki/File:Bunce_Hall_-03-_(50872029178).png",
     "mark": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/Rowan_University_seal.svg/330px-Rowan_University_seal.svg.png",
     "wikipedia": "https://en.wikipedia.org/wiki/Rowan_University",
-    "summary": "Rowan University is a public research university in Glassboro, New Jersey, United States. Founded in 1923 as Glassboro Normal School on a 25-acre (10 ha) site donated by 107 residents, the school was known as Glassboro State College from 1958 until 1992 and Rowan College of New Jersey from 1992 to 1997. It also operates a medical campus in Stratford, and medical and academic campuses in Camden."
+    "summary": "Rowan University is a public research university in Glassboro, New Jersey, United States. Founded in 1923 as Glassboro Normal School on a 25-acre (10\u00a0ha) site donated by 107 residents, the school was known as Glassboro State College from 1958 until 1992 and Rowan College of New Jersey from 1992 to 1997. It also operates a medical campus in Stratford, and medical and academic campuses in Camden."
   },
   "kean-university": {
     "photo": "Kean Hall, Kean University.jpg",
