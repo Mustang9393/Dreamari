@@ -1235,7 +1235,7 @@ export function OverviewTab({
       <section aria-labelledby="next-title" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)]" style={{ background: INSET.background }}>
         <h3 id="next-title" className="px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-2)] text-[12px] font-bold tracking-[1.4px] uppercase sm:px-[var(--space-5)] sm:pt-[var(--space-5)]" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
         {[
-          { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers and save your Top 3" },
+          { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers" },
           { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Day in the Life of an Investment Banker Simulation" },
         ].map((line, index, list) => (
           <Fragment key={line.verb}>
