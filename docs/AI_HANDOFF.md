@@ -7265,3 +7265,24 @@ Not changed on purpose: any copy, demo flags, Student/Enterprise toggle,
 Connect card signals, splashes, Home hero eyebrow.
 Verified: Home cards 304x190, glossary cards 267x150, arrow keys and live
 text in Match, skip link, chips scroll on Career detail, both undo toasts.
+
+## 2026-09-12 · Career Report: 03 Career Exploration (Joshua, Slack)
+ONE commit, revertable with `git revert`. New files `src/lib/careerExploration.ts`
+(store, types, EXPERIENCE_TYPES, logged-activity derivation) and
+`src/components/profile/CareerExploration.tsx` (section body); CareerReport.tsx
+inserts the section after 02 and renumbers 04 Majors, 05 Pathways, 06 Schools;
+REPORT_SECTIONS updated; Where this comes from covers it.
+- Left "Logged in Dreamari": tinted, stronger border, check on every row;
+  read only. Demo career shows Joshua's three example rows; other careers
+  derive "Saved X as a career goal" from picks; else the empty-state line.
+- Right "Add your own": "Add something you did" opens a checkbox list of
+  the 11 types; Add creates one row per checked type (dated today, editor
+  opens on the first). Row tap opens Date (required), Where or with whom,
+  Tell us more, and the three feeling buttons; edit and delete per row.
+  Rows read "Type / date · where · feeling / notes" so they scan in a PDF.
+- Hours: `EXPERIENCE_TYPES[].hours` flags job shadow and internship and
+  `Experience.hours` is reserved, so the field is a one-line add later
+  (Maisha: WBL tracked separately in v2, summary surfaced here).
+- Print / Download preview: controls carry data-print-hide; rows stay.
+  Counselor Review tab is a form, not the document, so nothing to add there.
+Copy is Joshua's verbatim. Section titles for 04-06 unchanged from before.

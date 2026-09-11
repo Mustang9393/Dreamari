@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { AlertCircle, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2 } from "lucide-react";
 import { deleteReportVersion, formatVersionTime, recordReportVersion, reportHistorySnapshot, sameSnapshot, serverReportHistorySnapshot, subscribeReportHistory, type ReportSnapshot } from "@/lib/reportHistory";
 import type { ProfileCareer } from "./data";
+import { CareerExplorationBody } from "./CareerExploration";
 import {
   ACADEMIC_RECORD,
   COURSE_SUGGESTIONS,
@@ -33,9 +34,12 @@ export const REPORT_SECTIONS = [
   // Order and names per direct feedback, 5 Sept 2026.
   { id: "glance", n: 1, label: "Overview" },
   { id: "courses", n: 2, label: "High School Classes" },
-  { id: "majors", n: 3, label: "College Majors" },
-  { id: "education", n: 4, label: "College Pathways" },
-  { id: "colleges", n: 5, label: "Schools" },
+  // Career Exploration (Joshua Pierce, Slack, 12 Sept 2026): directly after
+  // High School Classes; everything below shifts by one.
+  { id: "exploration", n: 3, label: "Career Exploration" },
+  { id: "majors", n: 4, label: "College Majors" },
+  { id: "education", n: 5, label: "College Pathways" },
+  { id: "colleges", n: 6, label: "Schools" },
 ] as const;
 
 
@@ -327,8 +331,13 @@ function ReportDocument({
           </ul>
         </ReportSection>
 
-        {/* 03 — 3 College Majors to Consider */}
-        <ReportSection id={`${idPrefix}majors`} n={3} title="3 College Majors to Consider" icon={BookOpen}>
+        {/* 03 — Career Exploration (Joshua Pierce, Slack, 12 Sept 2026). */}
+        <ReportSection id={`${idPrefix}exploration`} n={3} title="Career Exploration" icon={Check}>
+          <CareerExplorationBody careerId={career.id} careerTitle={career.title} idPrefix={idPrefix} />
+        </ReportSection>
+
+        {/* 04 — 3 College Majors to Consider */}
+        <ReportSection id={`${idPrefix}majors`} n={4} title="3 College Majors to Consider" icon={BookOpen}>
           <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3 sm:gap-[14px]" data-keep-together>
             {report.majors.map((major) => (
               <div key={major.name} className="flex items-center gap-[9px] rounded-[var(--radius-sm)] border px-[14px] py-[14px] sm:px-[16px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
@@ -339,10 +348,10 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* 04 — College Pathways. Every route gets the same row (CEO, 4 Sept: the
+        {/* 05 — College Pathways. Every route gets the same row (CEO, 4 Sept: the
            lone accented tile had no reason a student could see). The most
            common path leads and carries a small tag; the rest follow. */}
-        <ReportSection id={`${idPrefix}education`} n={4} title="College Pathways" icon={GraduationCap}>
+        <ReportSection id={`${idPrefix}education`} n={5} title="College Pathways" icon={GraduationCap}>
           <div data-keep-together>
             {/* no subhead: the section title says Education and the first card
                says Most common (direct feedback: no copy that repeats the obvious) */}
@@ -360,10 +369,10 @@ function ReportDocument({
           </div>
         </ReportSection>
 
-        {/* 05 — Schools */}
+        {/* 06 — Schools */}
         <ReportSection
           id={`${idPrefix}colleges`}
-          n={5}
+          n={6}
           title="Schools"
           icon={Building2}
           action={
@@ -434,6 +443,7 @@ function ReportDocument({
             ))}
           </ul>
           <p className="mt-[12px] max-w-[64ch] text-[13px] leading-[19px]" style={{ color: "var(--ink-faint)" }}>
+            Career Exploration lists what Dreamari recorded from the student&apos;s own activity in the app and what the student added themselves; entries the student added are self-reported.
             Prepared by the student with Dreamari. It supports a conversation with a counselor; it is not a decision or a prediction.
             Employers are examples of who hires for this work, not job openings.
             Reach, Target and Safety are indicative bands to guide research, not predictions of admission. Salary figures describe people already
