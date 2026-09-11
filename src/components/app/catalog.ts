@@ -95,14 +95,12 @@ export const BROWSE_TRADES: CatalogCareer[] = [
 // (His earlier 8-career list still lacks images for Flavor Chemist, Beauty
 // Product Developer, Ethical Hacker, Animal Nutrition Scientist, Game QA
 // Tester, Shopper Insights Analyst, Genetic Counselor.)
-// Trades are also mixed into the rows below, in the first positions so they
-// are on screen before any horizontal scroll (only one poster is fully
-// visible on a phone). Nothing that was here before was removed.
+// Back to Joshua's original six (Slack, 12 Sept 2026: "please have it be
+// what it was before"); the two trades briefly mixed in here live in the
+// Skilled Trades row.
 export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
-  C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.webp"),
   C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.webp"),
   C("Sound Engineering Technician", "Arts, Media & Sport", "/images/app/poster-sound-engineering-technician.webp"),
-  C("Forestry Technician", "Farming, Animals & Nature", "/images/app/poster-forestry-technician.webp"),
   C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.webp"),
   C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.webp"),
   C("Drone Pilot", "Driving, Flying & Shipping", "/images/app/poster-drone-pilot.webp"),
