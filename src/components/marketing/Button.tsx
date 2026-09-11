@@ -23,8 +23,8 @@ const VARIANT_STYLE: Record<Variant, React.CSSProperties> = {
     borderRadius: "var(--radius-md)",
   },
   outline: {
-    background: "#ffffff",
-    border: "1px solid rgba(5,7,15,0.14)",
+    background: "var(--surface, #ffffff)",
+    border: "1px solid var(--border)",
     color: "var(--foreground)",
     borderRadius: "var(--radius-md)",
   },

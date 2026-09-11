@@ -16,7 +16,7 @@ const STUDENT_BANDS = ["Under 500", "500 to 2,000", "2,000 to 10,000", "More tha
 
 const FIELD =
   "w-full rounded-[10px] border px-3.5 py-[11px] text-[15px] leading-snug outline-none transition-[box-shadow,border-color] duration-150 placeholder:[color:var(--muted-foreground)] placeholder:opacity-60 focus:[border-color:var(--primary)] focus:[box-shadow:0_0_0_3px_color-mix(in_srgb,var(--primary)_18%,transparent)]";
-const FIELD_STYLE = { background: "#ffffff", borderColor: "rgba(5,7,15,0.16)", color: "var(--foreground)" } as const;
+const FIELD_STYLE = { background: "var(--surface, #ffffff)", borderColor: "var(--border)", color: "var(--foreground)" } as const;
 
 function Label({ htmlFor, children }: { htmlFor: string; children: string }) {
   return (
@@ -40,7 +40,7 @@ function Choices({ label, options, value, onChange }: { label: string; options: 
               aria-pressed={on}
               onClick={() => onChange(on ? "" : o)}
               className="cursor-pointer rounded-[10px] border px-3.5 py-2 text-[14px] font-semibold transition-colors"
-              style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#fff" } : { background: "#fff", borderColor: "rgba(5,7,15,0.16)", color: "var(--foreground)" }}
+              style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#fff" } : { background: "var(--surface, #ffffff)", borderColor: "var(--border)", color: "var(--foreground)" }}
             >
               {o}
             </button>

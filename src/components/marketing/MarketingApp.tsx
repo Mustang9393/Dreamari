@@ -11,6 +11,22 @@ import { StudentFinalCTA } from "./FinalCTAs";
 
 export function MarketingApp() {
   const [view, setView] = useState<"student" | "schools">("student");
+  // Schools view theme (direct instruction, 11 Sept 2026: a light/dark switch
+  // the page reacts to). Light by default; the choice persists per browser.
+  const [schoolsTheme, setSchoolsTheme] = useState<"light" | "dark">("light");
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("dreamari-schools-theme");
+      if (saved === "dark" || saved === "light") setTimeout(() => setSchoolsTheme(saved), 0);
+    } catch {}
+  }, []);
+  function toggleSchoolsTheme() {
+    setSchoolsTheme((t) => {
+      const next = t === "light" ? "dark" : "light";
+      try { window.localStorage.setItem("dreamari-schools-theme", next); } catch {}
+      return next;
+    });
+  }
 
   // The phone pager (globals.css: html { scroll-snap-type: y mandatory } under
   // 768px) is built for the student landing, whose hero, chapters and footer
@@ -29,7 +45,7 @@ export function MarketingApp() {
   }, [view]);
 
   return (
-    <div className={`relative ${view === "schools" ? "theme-light" : ""}`}>
+    <div className={`relative ${view === "schools" && schoolsTheme === "light" ? "theme-light" : ""}`}>
       {/* Ambient page-wide backdrop — per direct feedback the whole page read as flat,
          too-black once you scrolled past Hero's own gradient (that one fades fully to
          var(--background) by its bottom edge, per ChapterShell's "no per-chapter
@@ -74,7 +90,7 @@ export function MarketingApp() {
         />
       )}
 
-      <Nav view={view} onSchoolsClick={() => setView("schools")} />
+      <Nav view={view} onSchoolsClick={() => setView("schools")} onStudentClick={() => setView("student")} theme={schoolsTheme} onToggleTheme={toggleSchoolsTheme} />
 
       {/* Both views stay mounted (toggled with `hidden`, not conditionally rendered) so
           the mascot's rAF loop, IntersectionObservers, and scroll listeners don't tear
@@ -89,7 +105,7 @@ export function MarketingApp() {
       </main>
 
       <main hidden={view !== "schools"}>
-        <SchoolsView view={view} onChangeView={setView} />
+        <SchoolsView view={view} onChangeView={setView} theme={schoolsTheme} />
       </main>
 
       <Footer view={view} />

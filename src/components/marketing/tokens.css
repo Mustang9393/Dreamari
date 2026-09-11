@@ -7,6 +7,16 @@
    explicit direction, without clobbering those global names for /flow, /home,
    /career-report, or /onboarding. */
 .marketing-v2 {
+  /* Schools page surfaces and illustration inks (11 Sept 2026): the page
+     and its drawn graphics follow the theme switch. Dark values here, light
+     in the theme-light block below. */
+  --surface: #11142a;
+  --ill-ink: #f4f6ff;
+  --ill-ink2: #a3a9c7;
+  --ill-line: rgba(255, 255, 255, 0.1);
+  --ill-soft: rgba(255, 255, 255, 0.05);
+  --ill-panel: rgba(17, 20, 42, 0.86);
+  --ill-tint: rgba(47, 107, 242, 0.18);
   /* ---- Semantic colors (Semantic.Dark) ---- */
   --background: #05070f; /* neutral.900 */
   --foreground: #f4f7ff; /* neutral.50 */
@@ -251,6 +261,13 @@ html.light .marketing-v2.themeable [data-signal-wash] {
 .marketing-v2 .theme-light,
 .marketing-v2.theme-light,
 html.light .marketing-v2.themeable {
+  --surface: #ffffff;
+  --ill-ink: #05070f;
+  --ill-ink2: #4a4f6d;
+  --ill-line: rgba(5, 7, 15, 0.08);
+  --ill-soft: #f4f6fd;
+  --ill-panel: rgba(255, 255, 255, 0.86);
+  --ill-tint: #eaf0ff;
   --background: #f4f7ff; /* neutral.50 */
   --foreground: #05070f; /* neutral.900 */
   --card: #d8dbe8; /* neutral.100 */

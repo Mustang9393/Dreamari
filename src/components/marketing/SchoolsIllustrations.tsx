@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowRight, Briefcase, Check, GraduationCap, MessageSquare, Sparkles, Target, ThumbsUp, Users, Waypoints, X } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, type CSSProperties, type ReactNode } from "react";
+import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { CompanyChip } from "@/components/connect/primitives";
 import { PROS, THREADS } from "@/components/connect/data";
 import { IB_LEVEL_1 } from "@/components/play/ib-level-1";
@@ -21,10 +22,10 @@ import { PROFILE_CAREERS } from "@/components/profile/data";
 // the reference site's own label.
 // ---------------------------------------------------------------------------
 
-export const INK = "#05070f";
-export const INK2 = "#4a4f6d";
-export const LINE = "rgba(5,7,15,0.08)";
-export const SOFT = "#f4f6fd";
+export const INK = "var(--ill-ink)";
+export const INK2 = "var(--ill-ink2)";
+export const LINE = "var(--ill-line)";
+export const SOFT = "var(--ill-soft)";
 export const BLUE = "#2f6bf2";
 export const VIOLET = "#7d5cff";
 export const AMBER = "#f0b429";
@@ -76,9 +77,9 @@ function Fit({ base, children, className = "" }: { base: number; children: React
 /** The stage a composition sits on: white, 28px corners, one soft shadow. */
 export function Panel({ children, className = "", style, label = true }: { children: ReactNode; className?: string; style?: CSSProperties; label?: boolean }) {
   return (
-    <div className={`relative overflow-hidden rounded-[28px] border ${className}`} style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(246,247,253,0.92) 100%)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderColor: "rgba(255,255,255,0.7)", boxShadow: `${PANEL_SHADOW}, inset 0 1px 0 rgba(255,255,255,0.9)`, ...style }}>
+    <div className={`relative overflow-hidden rounded-[28px] border ${className}`} style={{ background: "var(--ill-panel)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderColor: "var(--ill-line)", boxShadow: PANEL_SHADOW, ...style }}>
       {label && (
-        <span className="pointer-events-none absolute top-5 right-6 z-10 flex items-center gap-1.5 text-[10.5px] font-bold tracking-[0.14em] uppercase" style={{ color: "rgba(74,79,109,0.7)" }}>
+        <span className="pointer-events-none absolute top-5 right-6 z-10 flex items-center gap-1.5 text-[10.5px] font-bold tracking-[0.14em] uppercase" style={{ color: INK2 }}>
           <Sparkles className="h-3 w-3" strokeWidth={2.5} aria-hidden /> Illustrative preview
         </span>
       )}
@@ -89,7 +90,7 @@ export function Panel({ children, className = "", style, label = true }: { child
 
 function Tile({ children, className = "", style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
   return (
-    <div className={`rounded-[20px] border bg-white ${className}`} style={{ borderColor: LINE, boxShadow: TILE_SHADOW, ...style }}>
+    <div className={`rounded-[20px] border ${className}`} style={{ background: "var(--surface)", borderColor: LINE, boxShadow: TILE_SHADOW, ...style }}>
       {children}
     </div>
   );
@@ -103,8 +104,8 @@ function Pill({ children, tone = "soft", style }: { children: ReactNode; tone?: 
   const tones: Record<string, CSSProperties> = {
     soft: { background: SOFT, color: INK, border: `1px solid ${LINE}` },
     blue: { background: BLUE, color: "#fff" },
-    green: { background: "#dcfce7", color: "#166534" },
-    ink: { background: INK, color: "#fff" },
+    green: { background: "color-mix(in srgb, #22c55e 18%, var(--surface))", color: INK },
+    ink: { background: INK, color: "var(--surface)" },
   };
   return <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold whitespace-nowrap" style={{ ...tones[tone], ...style }}>{children}</span>;
 }
@@ -130,7 +131,8 @@ function Poster({ src, title, world, className = "", style }: { src: string; tit
   return (
     <div className={`relative overflow-hidden rounded-[18px] ${className}`} style={{ boxShadow: TILE_SHADOW, ...style }}>
       <Image src={src} alt="" fill sizes="400px" className="object-cover" />
-      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,7,15,0.82) 0%, rgba(5,7,15,0.25) 45%, transparent 70%)" }} />
+      <CardProgressiveBlur size="46%" />
+      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,7,15,0.78) 0%, rgba(5,7,15,0.2) 45%, transparent 70%)" }} />
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-4">
         <span className="text-[17px] leading-[20px] font-extrabold tracking-[-0.01em] text-white" style={{ textWrap: "balance" }}>{title}</span>
         <span className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: AMBER }}>{world}</span>
@@ -171,12 +173,12 @@ export function HeroIllustration() {
           <Tile className="flex flex-col gap-4 p-6">
             <div className="flex items-center justify-between">
               <span className="text-[16px] font-extrabold" style={{ color: INK }}>My Top 3</span>
-              <span className="flex gap-1.5">{[true, true, true].map((f, i) => <span key={i} className="size-3 rounded-full" style={{ background: f ? AMBER : "transparent", boxShadow: `inset 0 0 0 2px ${f ? AMBER : "rgba(5,7,15,0.18)"}` }} />)}</span>
+              <span className="flex gap-1.5">{[true, true, true].map((f, i) => <span key={i} className="size-3 rounded-full" style={{ background: f ? AMBER : "transparent", boxShadow: `inset 0 0 0 2px ${f ? AMBER : "var(--ill-line)"}` }} />)}</span>
             </div>
             <ul className="flex flex-col gap-2.5">
               {top3.map((t, i) => (
-                <li key={t} className="flex items-center gap-3 rounded-[14px] px-3.5 py-3" style={{ background: i === 0 ? "#eaf0ff" : SOFT }}>
-                  <span className="flex size-6 flex-none items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: i === 0 ? BLUE : "#dfe3f0", color: i === 0 ? "#fff" : INK2 }}>{i + 1}</span>
+                <li key={t} className="flex items-center gap-3 rounded-[14px] px-3.5 py-3" style={{ background: i === 0 ? "var(--ill-tint)" : SOFT }}>
+                  <span className="flex size-6 flex-none items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: i === 0 ? BLUE : "var(--ill-line)", color: i === 0 ? "#fff" : INK2 }}>{i + 1}</span>
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-[14px] font-bold" style={{ color: INK }}>{t}</span>
                     {i === 0 && <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: BLUE }}>Your Strongest Match</span>}
@@ -184,7 +186,7 @@ export function HeroIllustration() {
                 </li>
               ))}
             </ul>
-            <span className="inline-flex items-center justify-center gap-1.5 rounded-[10px] px-4 py-2.5 text-[13px] font-bold" style={{ background: INK, color: "#fff" }}>Compare My Top 3</span>
+            <span className="inline-flex items-center justify-center gap-1.5 rounded-[10px] px-4 py-2.5 text-[13px] font-bold" style={{ background: INK, color: "var(--surface)" }}>Compare My Top 3</span>
           </Tile>
           </motion.div>
           {/* connect */}
@@ -225,13 +227,13 @@ const AT_RISK = ROSE;
 
 function StatusChip({ status }: { status: "On Track" | "Needs Attention" | "At Risk" }) {
   const tone = status === "On Track" ? ON_TRACK : status === "Needs Attention" ? ATTENTION : AT_RISK;
-  return <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${tone} 14%, white)`, color: `color-mix(in srgb, ${tone} 65%, ${INK})` }}><span className="size-1.5 rounded-full" style={{ background: tone }} />{status}</span>;
+  return <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${tone} 16%, var(--surface))`, color: `color-mix(in srgb, ${tone} 70%, ${INK})` }}><span className="size-1.5 rounded-full" style={{ background: tone }} />{status}</span>;
 }
 
 type ReviewState = "Approved" | "Pending Review" | "Changes Requested" | "In Progress" | "Not Started";
 function ReviewChip({ state }: { state: ReviewState }) {
   const tone = state === "Approved" ? GREEN : state === "Pending Review" ? VIOLET : state === "Changes Requested" ? ROSE : state === "In Progress" ? BLUE : INK2;
-  return <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${tone} 12%, white)`, color: `color-mix(in srgb, ${tone} 70%, ${INK})` }}>{state}</span>;
+  return <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${tone} 14%, var(--surface))`, color: `color-mix(in srgb, ${tone} 72%, ${INK})` }}>{state}</span>;
 }
 
 /** Multi-segment ring, drawn in when in view. */
@@ -244,7 +246,7 @@ function Donut({ segments, size = 120, stroke = 14, children }: { segments: { va
   return (
     <span className="relative inline-flex flex-none items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(5,7,15,0.06)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--ill-line)" strokeWidth={stroke} />
         {segments.map((seg, i) => {
           const len = (seg.value / total) * c;
           return <motion.circle key={i} cx={size / 2} cy={size / 2} r={r} fill="none" stroke={seg.color} strokeWidth={stroke} strokeLinecap="round" initial={{ strokeDasharray: `0 ${c}` }} whileInView={{ strokeDasharray: `${Math.max(0, len - 3)} ${c}` }} viewport={VIEW} transition={{ duration: 1.1, ease: EASE, delay: 0.2 + i * 0.1 }} strokeDashoffset={-starts[i]} />;
@@ -288,7 +290,7 @@ export function SchoolIllustration() {
               <motion.li key={st.name} className="grid items-center gap-x-3 px-3 py-3" style={{ gridTemplateColumns: TABLE_COLS, borderColor: LINE }} variants={rise} custom={i * 0.6} initial="hidden" whileInView="show" viewport={VIEW}>
                 <span className="flex min-w-0 items-center gap-2.5"><Initials name={st.name} size={28} from={i % 2 ? TEAL : BLUE} to={i % 2 ? BLUE : VIOLET} /><span className="flex min-w-0 flex-col"><span className="truncate text-[13px] font-bold" style={{ color: INK }}>{st.name}</span><span className="truncate text-[11px] font-semibold" style={{ color: INK2 }}>{st.track}</span></span></span>
                 <span className="text-[13px] font-semibold tabular-nums" style={{ color: INK }}>{st.grade}</span>
-                <span className="flex items-center gap-2"><span className="h-[6px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(5,7,15,0.06)" }}><motion.span className="block h-full rounded-full" initial={{ width: 0 }} whileInView={{ width: `${st.roadmap}%` }} viewport={VIEW} transition={{ duration: 1, ease: EASE, delay: 0.2 + i * 0.08 }} style={{ background: BLUE }} /></span><span className="w-[34px] text-right text-[12px] font-bold tabular-nums" style={{ color: INK }}>{st.roadmap}%</span></span>
+                <span className="flex items-center gap-2"><span className="h-[6px] flex-1 overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}><motion.span className="block h-full rounded-full" initial={{ width: 0 }} whileInView={{ width: `${st.roadmap}%` }} viewport={VIEW} transition={{ duration: 1, ease: EASE, delay: 0.2 + i * 0.08 }} style={{ background: BLUE }} /></span><span className="w-[34px] text-right text-[12px] font-bold tabular-nums" style={{ color: INK }}>{st.roadmap}%</span></span>
                 <span><StatusChip status={st.status} /></span>
                 <span><ReviewChip state={st.report} /></span>
               </motion.li>
@@ -319,7 +321,7 @@ export function DistrictIllustration() {
             {BY_GRADE.map((g, i) => (
               <li key={g.grade} className="grid items-center gap-4" style={{ gridTemplateColumns: "80px 1fr 110px" }}>
                 <span className="text-[13px] font-bold" style={{ color: INK }}>{g.grade}</span>
-                <span className="flex h-[14px] overflow-hidden rounded-full" style={{ background: "rgba(5,7,15,0.06)" }}>
+                <span className="flex h-[14px] overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}>
                   {[[g.onTrack, ON_TRACK], [g.attention, ATTENTION], [g.risk, AT_RISK]].map(([n, color], j) => (
                     <motion.span key={j} className="block h-full" initial={{ width: 0 }} whileInView={{ width: `${(Number(n) / g.total) * 100}%` }} viewport={VIEW} transition={{ duration: 1, ease: EASE, delay: 0.15 + i * 0.08 + j * 0.05 }} style={{ background: color as string }} />
                   ))}
@@ -353,7 +355,7 @@ export function NonprofitIllustration() {
       <Fit base={600}>
         <div role="img" aria-label="Career + College Insights: 43% of students have saved Investment Banker as a top career, with three recommended actions, and the top saved careers." className="flex flex-col gap-5 px-7 pt-14 pb-7">
           <OrgHead title="Career + College Insights" note="What students are exploring, saving, and aspiring toward" />
-          <div className="rounded-[18px] p-5" style={{ background: "linear-gradient(135deg, #eef1ff, #f6f0ff)" }}>
+          <div className="rounded-[18px] p-5" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--surface) 88%, #2f6bf2), color-mix(in srgb, var(--surface) 88%, #a855f7))" }}>
             <Caps color={VIOLET}>Dreamari recommendation</Caps>
             <p className="mt-2 text-[17px] leading-[23px] font-extrabold tracking-[-0.01em]" style={{ color: INK }}>43% of students have saved Investment Banker as a top career</p>
             <ul className="mt-3 flex flex-col gap-2">
@@ -370,7 +372,7 @@ export function NonprofitIllustration() {
               {[["Investment Banker", 52, AMBER], ["Software Engineer", 47, "#6366f1"], ["Entrepreneur / Business Owner", 38, VIOLET], ["Registered Nurse", 35, TEAL]].map(([label, n, color], i) => (
                 <li key={String(label)} className="grid items-center gap-3" style={{ gridTemplateColumns: "190px 1fr 28px" }}>
                   <span className="truncate text-[12.5px] font-semibold" style={{ color: INK }}>{label}</span>
-                  <span className="h-[8px] overflow-hidden rounded-full" style={{ background: "rgba(5,7,15,0.06)" }}><motion.span className="block h-full rounded-full" initial={{ width: 0 }} whileInView={{ width: `${(Number(n) / 52) * 100}%` }} viewport={VIEW} transition={{ duration: 1, ease: EASE, delay: 0.3 + i * 0.08 }} style={{ background: color as string }} /></span>
+                  <span className="h-[8px] overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}><motion.span className="block h-full rounded-full" initial={{ width: 0 }} whileInView={{ width: `${(Number(n) / 52) * 100}%` }} viewport={VIEW} transition={{ duration: 1, ease: EASE, delay: 0.3 + i * 0.08 }} style={{ background: color as string }} /></span>
                   <span className="text-right text-[12px] font-bold tabular-nums" style={{ color: INK2 }}>{n}</span>
                 </li>
               ))}
@@ -447,7 +449,7 @@ export function BuildIllustration() {
         <div role="img" aria-label="Build: What sounds interesting? Choose up to 2. Business & Money and Tech & Engineering are chosen from six career worlds shown. 13% complete." className="flex flex-col gap-5 p-7">
           <div className="flex items-center justify-between gap-4">
             <Caps color={BLUE}>Build</Caps>
-            <span className="flex items-center gap-2 text-[12px] font-bold tabular-nums" style={{ color: INK2 }}><span className="h-[6px] w-[120px] overflow-hidden rounded-full" style={{ background: "rgba(5,7,15,0.08)" }}><span className="block h-full w-[13%] rounded-full" style={{ background: BLUE }} /></span>13% complete</span>
+            <span className="flex items-center gap-2 text-[12px] font-bold tabular-nums" style={{ color: INK2 }}><span className="h-[6px] w-[120px] overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}><span className="block h-full w-[13%] rounded-full" style={{ background: BLUE }} /></span>13% complete</span>
           </div>
           <div className="flex items-center gap-4">
             <Image src="/images/dreamy/v2/dreamy-curious.png" alt="" width={144} height={144} className="size-[72px] flex-none object-contain" />
@@ -455,7 +457,7 @@ export function BuildIllustration() {
           </div>
           <ul className="grid grid-cols-2 gap-2.5">
             {BUILD_WORLDS.map((w) => (
-              <li key={w.label} className="flex items-center gap-2.5 rounded-[14px] border px-3.5 py-3 text-[13.5px] font-bold" style={w.on ? { background: `color-mix(in srgb, ${w.color} 14%, white)`, borderColor: `color-mix(in srgb, ${w.color} 55%, white)`, color: INK } : { background: "#fff", borderColor: LINE, color: INK }}>
+              <li key={w.label} className="flex items-center gap-2.5 rounded-[14px] border px-3.5 py-3 text-[13.5px] font-bold" style={w.on ? { background: `color-mix(in srgb, ${w.color} 16%, var(--surface))`, borderColor: `color-mix(in srgb, ${w.color} 55%, var(--surface))`, color: INK } : { background: "var(--surface)", borderColor: LINE, color: INK }}>
                 <span className="size-2.5 flex-none rounded-full" style={{ background: w.color }} />
                 <span className="truncate">{w.label}</span>
                 {w.on && <Check className="ml-auto h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: w.color }} />}
@@ -475,13 +477,14 @@ export function MatchIllustration() {
         <div role="img" aria-label="Match: Find your Top 3, one of three slots filled. The card shows Investment Banker, hired by JPMorgan Chase and Goldman Sachs, $361K median salary, with Pass and Like buttons." className="flex flex-col items-center gap-5 p-2">
           <div className="flex w-full items-center justify-between">
             <span className="text-[15px] font-extrabold" style={{ color: INK }}>Find your Top 3</span>
-            <span className="flex gap-1.5">{[true, false, false].map((f, i) => <span key={i} className="size-3.5 rounded-full" style={{ background: f ? AMBER : "transparent", boxShadow: `inset 0 0 0 2px ${f ? AMBER : "rgba(5,7,15,0.18)"}` }} />)}</span>
+            <span className="flex gap-1.5">{[true, false, false].map((f, i) => <span key={i} className="size-3.5 rounded-full" style={{ background: f ? AMBER : "transparent", boxShadow: `inset 0 0 0 2px ${f ? AMBER : "var(--ill-line)"}` }} />)}</span>
           </div>
           <motion.div className="relative h-[330px] w-[250px]" animate={{ y: [0, -6, 0], rotate: [0, -0.6, 0] }} transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}>
-            <span aria-hidden className="absolute inset-0 rounded-[22px]" style={{ transform: "translateY(-14px) scale(0.94)", background: "#dfe3f0" }} />
+            <span aria-hidden className="absolute inset-0 rounded-[22px]" style={{ transform: "translateY(-14px) scale(0.94)", background: "var(--ill-soft)" }} />
             <div className="absolute inset-0 overflow-hidden rounded-[22px]" style={{ boxShadow: TILE_SHADOW }}>
               <Image src={POSTERS.ib} alt="" fill sizes="500px" className="object-cover" />
-              <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,7,15,0.85) 0%, rgba(5,7,15,0.2) 45%, transparent 65%), linear-gradient(to bottom, rgba(5,7,15,0.45), transparent 30%)" }} />
+              <CardProgressiveBlur size="42%" />
+              <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,7,15,0.8) 0%, rgba(5,7,15,0.18) 45%, transparent 65%), linear-gradient(to bottom, rgba(5,7,15,0.45), transparent 30%)" }} />
               <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-2 p-3">
                 <span className="truncate rounded-full px-2.5 py-1 text-[10.5px] font-bold text-white" style={{ background: "rgba(5,7,15,0.55)" }}>JPMorgan Chase · Goldman Sachs</span>
                 <span className="flex-none rounded-full px-2.5 py-1 text-[10.5px] font-bold" style={{ background: "#dcfce7", color: "#166534" }}>$361K median</span>
@@ -493,7 +496,7 @@ export function MatchIllustration() {
             </div>
           </motion.div>
           <div className="flex items-center gap-5">
-            <span className="flex size-12 items-center justify-center rounded-full border bg-white" style={{ borderColor: LINE, color: INK, boxShadow: TILE_SHADOW }}><X className="h-5 w-5" strokeWidth={2.5} aria-hidden /></span>
+            <span className="flex size-12 items-center justify-center rounded-full border" style={{ background: "var(--surface)", borderColor: LINE, color: INK, boxShadow: TILE_SHADOW }}><X className="h-5 w-5" strokeWidth={2.5} aria-hidden /></span>
             <span className="flex size-12 items-center justify-center rounded-full text-white" style={{ background: BLUE, boxShadow: "0 12px 26px -10px rgba(47,107,242,0.7)" }}><ThumbsUp className="h-5 w-5" strokeWidth={2.5} aria-hidden /></span>
           </div>
         </div>
@@ -528,7 +531,8 @@ export function ImmerseIllustration() {
   return (
     <Panel label={false} className="aspect-[5/4]" style={{ background: INK }}>
       <Image src="/images/play/ib/locations/reception.webp" alt="" fill sizes="700px" className="object-cover" style={{ objectPosition: "50% 30%" }} />
-      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,7,15,0.9) 0%, rgba(5,7,15,0.5) 45%, rgba(5,7,15,0.1) 75%)" }} />
+      <CardProgressiveBlur size="70%" />
+      <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,7,15,0.82) 0%, rgba(5,7,15,0.4) 45%, rgba(5,7,15,0.08) 75%)" }} />
       <div role="img" aria-label={`Investment Banker simulation, Level ${level.n} ${level.role}. ${choice?.question ?? "Day 1: What should you do first?"} ${choice?.choices.map((c) => c.label).join(", ") ?? ""}. The best answer is marked.`} className="absolute inset-0 flex flex-col justify-between p-6">
           <span className="self-start rounded-full px-3.5 py-1.5 text-[11px] font-bold tracking-[0.08em] text-white uppercase" style={{ background: "rgba(255,255,255,0.14)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>Investment Banker · Level {level.n} · {level.role}</span>
           <Tile className="flex flex-col gap-3 p-5" style={{ borderColor: "transparent" }}>
@@ -538,7 +542,7 @@ export function ImmerseIllustration() {
               {(choice?.choices ?? []).map((c, i) => {
                 const best = c.tier === "best";
                 return (
-                  <li key={c.id} className="flex items-center gap-3 rounded-[12px] border px-3.5 py-2.5 text-[13.5px] font-semibold" style={best ? { background: "#dcfce7", borderColor: "#86efac", color: "#14532d" } : { background: "#fff", borderColor: LINE, color: INK }}>
+                  <li key={c.id} className="flex items-center gap-3 rounded-[12px] border px-3.5 py-2.5 text-[13.5px] font-semibold" style={best ? { background: "color-mix(in srgb, #22c55e 18%, var(--surface))", borderColor: "color-mix(in srgb, #22c55e 45%, var(--surface))", color: INK } : { background: "var(--surface)", borderColor: LINE, color: INK }}>
                     <span className="flex size-6 flex-none items-center justify-center rounded-full text-[11px] font-extrabold" style={best ? { background: GREEN, color: "#fff" } : { background: SOFT, color: INK2 }}>{best ? <Check className="h-3.5 w-3.5" strokeWidth={3.5} aria-hidden /> : i + 1}</span>
                     <span>{c.label}</span>
                   </li>
@@ -623,12 +627,12 @@ export function DashboardIllustration() {
             <Tile className="flex flex-col gap-4 p-5" style={{ boxShadow: "none" }}>
               <span className="text-[13.5px] font-extrabold" style={{ color: INK }}>Postsecondary Plans</span>
               <div className="flex items-center gap-4">
-                <Donut segments={[{ value: 79, color: BLUE }, { value: 41, color: "#d9ddec" }]} size={104} stroke={12}>
+                <Donut segments={[{ value: 79, color: BLUE }, { value: 41, color: "var(--ill-line)" }]} size={104} stroke={12}>
                   <span className="flex flex-col items-center leading-none"><span className="text-[22px] font-extrabold tabular-nums tracking-[-0.02em]" style={{ color: INK }}>79</span><span className="mt-1 text-[10px] font-semibold" style={{ color: INK2 }}>have a plan</span></span>
                 </Donut>
                 <ul className="flex min-w-0 flex-1 flex-col gap-1.5 text-[12px] font-semibold" style={{ color: INK }}>
                   <li className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: BLUE }} />With Plan <span className="ml-auto tabular-nums" style={{ color: INK2 }}>79</span></li>
-                  <li className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: "#d9ddec" }} />Undecided <span className="ml-auto tabular-nums" style={{ color: INK2 }}>41</span></li>
+                  <li className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: "var(--ill-line)" }} />Undecided <span className="ml-auto tabular-nums" style={{ color: INK2 }}>41</span></li>
                 </ul>
               </div>
             </Tile>
@@ -637,11 +641,11 @@ export function DashboardIllustration() {
             <div className="flex items-center justify-between"><span className="text-[13.5px] font-extrabold" style={{ color: INK }}>Review Queue</span><span className="text-[12px] font-semibold" style={{ color: INK2 }}>Pending Reviews (15)</span></div>
             <ul className="flex flex-col divide-y" style={{ borderColor: LINE }}>
               {QUEUE.slice(0, 3).map((q, i) => (
-                <motion.li key={q.name + q.item} className="grid items-center gap-3 py-2.5" style={{ gridTemplateColumns: "minmax(170px,1.4fr) minmax(0,1fr) auto auto" }} variants={rise} custom={i * 0.6} initial="hidden" whileInView="show" viewport={VIEW}>
+                <motion.li key={q.name + q.item} className="grid items-center gap-3 py-2.5" style={{ gridTemplateColumns: "minmax(150px,1fr) minmax(150px,1fr) auto auto" }} variants={rise} custom={i * 0.6} initial="hidden" whileInView="show" viewport={VIEW}>
                   <span className="flex min-w-0 items-center gap-2.5"><Initials name={q.name} size={28} from={i % 2 ? VIOLET : BLUE} to={i % 2 ? ROSE : VIOLET} /><span className="flex min-w-0 flex-col"><span className="truncate text-[13px] font-bold" style={{ color: INK }}>{q.name}</span><span className="text-[11px] font-semibold" style={{ color: INK2 }}>Grade {q.grade}</span></span></span>
                   <span className="flex min-w-0 flex-col"><span className="truncate text-[12.5px] font-semibold" style={{ color: INK }}>{q.item}</span><span className="text-[11px] font-bold" style={{ color: q.priority === "Urgent" ? AT_RISK : q.priority === "High" ? ATTENTION : INK2 }}>{q.priority}</span></span>
                   <span><ReviewChip state={q.state} /></span>
-                  <span className="flex gap-1.5"><span className="rounded-[8px] px-2.5 py-1.5 text-[11px] font-bold text-white" style={{ background: GREEN }}>Approve</span><span className="rounded-[8px] border px-2.5 py-1.5 text-[11px] font-bold" style={{ borderColor: LINE, color: INK }}>Request Changes</span></span>
+                  <span className="flex gap-1.5"><span className="rounded-[8px] px-2.5 py-1.5 text-[11px] font-bold text-white" style={{ background: GREEN }}>Approve</span><span className="rounded-[8px] border px-2.5 py-1.5 text-[11px] font-bold whitespace-nowrap" style={{ borderColor: LINE, color: INK }}>Changes</span></span>
                 </motion.li>
               ))}
             </ul>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, ChevronDown, LineChart, Map, MessageSquare, Target } from "lucide-react";
+import { ArrowUpRight, ChevronDown, LineChart, Map, MessageSquare, Sparkles, Target, Zap } from "lucide-react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { useState, type ReactNode } from "react";
 import { AudienceToggle } from "./AudienceToggle";
@@ -16,6 +16,7 @@ import { TrustLine } from "./TrustLine";
 type SchoolsViewProps = {
   view: "student" | "schools";
   onChangeView: (view: "student" | "schools") => void;
+  theme?: "light" | "dark";
 };
 
 // ---------------------------------------------------------------------------
@@ -117,6 +118,17 @@ const SOURCES = [
 // Building blocks
 // ---------------------------------------------------------------------------
 
+// The reference's eyebrows and pill, as one designed chip (direct feedback,
+// 11 Sept 2026: include them, design them better than mono caps).
+function Eyebrow({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 8%, var(--surface))", borderColor: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>
+      <span aria-hidden className="size-1.5 rounded-full" style={{ background: "var(--primary)" }} />
+      {children}
+    </span>
+  );
+}
+
 const RISE: Variants = { hidden: { opacity: 0, y: 22 }, show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } } };
 
 function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -150,7 +162,7 @@ function SectionHead({ id, title, lede, align = "left", wide = false }: { id?: s
 function StageCard({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
   const panelId = `stage-${stage.n}-more`;
   return (
-    <li className="rounded-[20px] border bg-white transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:[box-shadow:0_18px_40px_-24px_rgba(5,7,15,0.25)]" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
+    <li className="rounded-[20px] border backdrop-blur-[18px] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:[box-shadow:0_18px_40px_-24px_rgba(5,7,15,0.25)]" style={{ background: "color-mix(in srgb, var(--surface) 84%, transparent)", borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
       <div className="grid gap-5 p-6 sm:grid-cols-[140px_1fr] sm:items-start sm:gap-8 sm:p-8">
         <h3 className="flex items-baseline gap-2.5 text-[22px] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
           <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
@@ -195,7 +207,7 @@ function StageCard({ stage, open, onToggle }: { stage: Stage; open: boolean; onT
 // The view
 // ---------------------------------------------------------------------------
 
-export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
+export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsViewProps) {
   const [openStage, setOpenStage] = useState<string | null>(null);
   const [audience, setAudience] = useState(AUDIENCES[0]);
 
@@ -212,6 +224,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
             <AudienceToggle view={view} onChange={onChangeView} />
           </motion.div>
           <motion.div className="max-w-[820px]" initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}>
+            <motion.div variants={RISE} className="mb-5"><Eyebrow>College &amp; career readiness</Eyebrow></motion.div>
             <motion.h1 variants={RISE} className="text-[clamp(38px,4.6vw,60px)] leading-[1.04] font-extrabold tracking-[-0.025em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
               Help students discover their direction, <Grad>and build the skills to pursue it.</Grad>
             </motion.h1>
@@ -259,7 +272,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </p>
               </div>
               <div className="lg:col-span-7">
-                <div role="tablist" aria-label="Who Dreamari is built for" className="mb-5 flex max-w-full flex-wrap gap-1 rounded-[14px] border bg-white p-1" style={{ borderColor: "var(--border)", width: "fit-content" }}>
+                <div role="tablist" aria-label="Who Dreamari is built for" className="mb-5 flex max-w-full flex-wrap gap-1 rounded-[14px] border p-1 backdrop-blur-[16px]" style={{ background: "color-mix(in srgb, var(--surface) 72%, transparent)", borderColor: "var(--border)", width: "fit-content" }}>
                   {AUDIENCES.map((a) => {
                     const selected = audience === a;
                     return (
@@ -272,7 +285,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                         className="relative cursor-pointer rounded-[10px] px-3.5 py-2 text-[14px] font-semibold transition-colors duration-300"
                         style={{ color: selected ? "var(--primary)" : "var(--foreground)" }}
                       >
-                        {selected && <motion.span layoutId="audience-tab" aria-hidden className="absolute inset-0 rounded-[10px]" style={{ background: "color-mix(in srgb, var(--primary) 10%, white)" }} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+                        {selected && <motion.span layoutId="audience-tab" aria-hidden className="absolute inset-0 rounded-[10px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))" }} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
                         <span className="relative">{a}</span>
                       </button>
                     );
@@ -295,6 +308,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section id="student-experience" className="scroll-mt-24 px-6 py-24 sm:py-32">
         <div className="mx-auto max-w-[1100px]">
           <Reveal>
+            <div className="mb-5"><Eyebrow>Build. Match. Explore. Immerse. Connect.</Eyebrow></div>
             <SectionHead title="Five steps toward a clearer future." />
           </Reveal>
           <ol className="mt-12 flex flex-col gap-4 sm:mt-16">
@@ -308,9 +322,10 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       </section>
 
       {/* ---- 4. Educators ---------------------------------------------------- */}
-      <section className="border-y px-6 py-24 sm:py-32" style={{ borderColor: "color-mix(in srgb, var(--primary) 12%, transparent)", background: "color-mix(in srgb, var(--primary) 4%, white)" }}>
+      <section className="border-y px-6 py-24 sm:py-32" style={{ borderColor: "color-mix(in srgb, var(--primary) 12%, transparent)", background: "color-mix(in srgb, var(--primary) 5%, var(--background))" }}>
         <div className="mx-auto max-w-[1100px]">
           <Reveal>
+            <div className="mb-5"><Eyebrow>For educators</Eyebrow></div>
             <SectionHead title="Know where students are. See where to help." lede="Bring student interests, activity, and progress into one dashboard to support more informed guidance." wide />
           </Reveal>
           <Reveal>
@@ -318,7 +333,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
               <ul className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1 lg:gap-y-7">
                 {EDUCATOR_FEATURES.map((f) => (
                   <li key={f.title} className="flex gap-4">
-                    <span className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: "color-mix(in srgb, var(--primary) 9%, white)", color: "var(--primary)" }}>
+                    <span className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))", color: "var(--primary)" }}>
                       <f.Icon className="h-5 w-5" strokeWidth={2} aria-hidden />
                     </span>
                     <div>
@@ -348,7 +363,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
             <h3 className="mt-12 text-[clamp(22px,2vw,26px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>Explore our sources</h3>
             <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {SOURCES.map((src) => (
-                <li key={src.what} className="flex flex-col gap-2 rounded-[20px] border bg-white p-6" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
+                <li key={src.what} className="flex flex-col gap-2 rounded-[20px] border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
                   <span className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>{src.what}</span>
                   <span className="text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{src.from}</span>
                 </li>
@@ -359,7 +374,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
              partner display on this page, marks in full brand colour (Joshua
              Pierce, 6 Sept 2026). */}
           <Reveal>
-            <div className="mt-6 rounded-[24px] border bg-white p-6 sm:p-10" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
+            <div className="mt-6 rounded-[24px] border p-6 sm:p-10" style={{ background: "var(--surface)", borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-7">
                 <DOMark className="h-16 w-16 flex-none sm:h-20 sm:w-20" />
                 <div>
@@ -368,7 +383,7 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                 </div>
               </div>
               <div className="mt-8 border-t pt-8" style={{ borderColor: "var(--border)" }}>
-                <PartnerLogoGrid tone="light" />
+                <PartnerLogoGrid tone={theme === "dark" ? "dark" : "light"} />
               </div>
               <p className="mt-8 max-w-[720px] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
                 {DO_COPY.close}
@@ -391,10 +406,25 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
               <p className="mt-5 max-w-[560px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", textWrap: "pretty" }}>
                 See how Dreamari can support career exploration, skill development, and student guidance in your school or organization.
               </p>
+              {/* the reference's two setup points as glass cards (direct
+                 feedback: they blended in with no prominence) */}
+              <ul className="mt-8 grid grid-cols-2 gap-3 sm:max-w-[440px]">
+                {[
+                  { Icon: Zap, label: "Quick setup", tone: "#f0b429" },
+                  { Icon: Sparkles, label: "Custom onboarding", tone: "#22d3ee" },
+                ].map((item) => (
+                  <li key={item.label} className="flex items-center gap-3 rounded-[16px] border p-4 backdrop-blur-[14px]" style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.12)" }}>
+                    <span className="flex size-10 flex-none items-center justify-center rounded-[12px]" style={{ background: `color-mix(in srgb, ${item.tone} 18%, transparent)`, color: item.tone }}>
+                      <item.Icon className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+                    </span>
+                    <span className="text-[15px] leading-snug font-bold text-white">{item.label}</span>
+                  </li>
+                ))}
+              </ul>
             </Reveal>
           </div>
           <Reveal className="lg:col-span-7">
-            <div className="rounded-[24px] bg-white p-6 sm:p-8" style={{ boxShadow: "0 40px 90px -40px rgba(0,0,0,0.7)" }}>
+            <div className="rounded-[24px] border p-6 sm:p-8" style={{ background: "var(--surface)", borderColor: "var(--border)", boxShadow: "0 40px 90px -40px rgba(0,0,0,0.7)" }}>
               <h3 className="text-[24px] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
                 See Dreamari in action.
               </h3>

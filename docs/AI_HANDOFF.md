@@ -7517,3 +7517,24 @@ Verified locally: both POSTs 200, sent and survey states render.
 - Audiences section: heading spans the width; the two columns lock to the same top edge and the graphic column has a fixed height (600px from lg), so switching tabs never moves the copy (direct feedback). Caseload table widened so the review chips fit.
 - Educators section: copy and the four features (icon badges back, as on the reference) left, a compact dashboard (Student Status, Postsecondary Plans, Review Queue) right, same locked-top pattern as Audiences (direct feedback: the left copy / right graphic pattern works).
 - Reference parity: nav carries the small "For educators" label before the links on the Schools view; the footer on that view combines the reference's ("Discover, don't guess." under the mark, an Explore column: Student Experience / For Your Organization / Request a demo) with our Company column (Why Dreamari, About, Contact -> product@); "Explore our sources" is back as the heading over the three source tiles.
+
+## 2026-09-11 · Schools landing: theme switch, fuller hamburger, final polish
+- Light/dark switch in the nav (Schools view only), persisted in
+  localStorage `dreamari-schools-theme`, light by default. MarketingApp
+  applies `theme-light` only when light; otherwise the marketing-v2 dark
+  tokens apply. New tokens in tokens.css for both themes: `--surface`,
+  `--ill-ink`, `--ill-ink2`, `--ill-line`, `--ill-soft`, `--ill-panel`,
+  `--ill-tint`. Every illustration ink and surface, every card, tab pill,
+  field, outline button and the form card read those vars; the partner wall
+  switches to white marks in dark. Checked both themes end to end.
+- Hamburger: one list for every menu (Home, Explore, Find a school, Build,
+  Match, Play, Connect, My Profile, Sign Up) plus "Connect as" (Student,
+  Event attendee, Volunteer, Partner, Staff) and a For students / For schools
+  switch. Same list on the student view.
+- Back by request, redesigned: the eyebrows ("College & career readiness",
+  "Build. Match. Explore. Immerse. Connect.") and the "For educators" pill as
+  one Eyebrow chip (dot + bold, tinted, not mono caps); "Quick setup" and
+  "Custom onboarding" as two glass cards with icons in the demo section.
+- Glass: tab pill and stage cards frost over the page; progressive blur
+  (CardProgressiveBlur) under the poster titles, the Match card and the
+  Immerse scene. Review Queue item column widened, second button "Changes".

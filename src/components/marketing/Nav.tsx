@@ -6,6 +6,9 @@ import { useEffect, useState, useRef } from "react";
 type NavProps = {
   view: "student" | "schools";
   onSchoolsClick: () => void;
+  onStudentClick?: () => void;
+  theme?: "light" | "dark";
+  onToggleTheme?: () => void;
 };
 
 const LINKS = [
@@ -25,14 +28,27 @@ const SCHOOLS_LINKS = [
 
 // Demo quick-links (v3): jump straight into the interactive prototypes without
 // scrolling for a CTA — Build = the profile flow, Match = the match-flow lab.
+// One list for every hamburger (direct instruction, 11 Sept 2026): the app's
+// QuickLinksMenu set and this one merged, so the same doors open from
+// anywhere.
 const QUICK_LINKS = [
   { label: "Home", href: "/home" },
   { label: "Explore", href: "/explore" },
+  { label: "Find a school", href: "/colleges" },
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-lab" },
   { label: "Play", href: "/play" },
   { label: "Connect", href: "/connect" },
   { label: "My Profile", href: "/profile" },
+  { label: "Sign Up", href: "/signup" },
+];
+// Connect, seen as each role (the app's own demo entry points).
+const CONNECT_AS = [
+  { label: "Student", href: "/connect" },
+  { label: "Event attendee", href: "/connect?tab=events&as=attendee" },
+  { label: "Volunteer", href: "/connect?dashboard=pro-okafor&as=pro" },
+  { label: "Partner", href: "/connect?partner=JPMorgan%20Chase&as=partner" },
+  { label: "Staff", href: "/connect?admin=1&as=admin" },
 ];
 
 // Re-imagined per direct feedback ("it doesn't need to be this complicated...
@@ -51,7 +67,7 @@ const QUICK_LINKS = [
 // glassy pop, hairline border, soft shadow. `fixed` rather than sticky because the
 // island isn't a bar owning a slice of layout — it hovers; the hero's own top
 // padding clears it.
-export function Nav({ view, onSchoolsClick }: NavProps) {
+export function Nav({ view, onSchoolsClick, onStudentClick, theme = "light", onToggleTheme }: NavProps) {
   const schools = view === "schools";
   const links = schools ? SCHOOLS_LINKS : LINKS;
   const cta = schools ? { label: "Request a demo", href: "#demo" } : { label: "Get started", href: "/flow" };
@@ -146,7 +162,7 @@ export function Nav({ view, onSchoolsClick }: NavProps) {
            room without wrapping, and the page is a single scroll anyway). */}
         <nav className="hidden items-center gap-[28px] text-[14px] font-semibold min-[900px]:flex" style={{ color: "var(--muted-foreground)" }}>
           {schools && (
-            <span className="rounded-[6px] px-2 py-1 text-[11px] font-bold tracking-[0.12em] uppercase" style={{ background: "color-mix(in srgb, var(--foreground) 6%, transparent)", color: "var(--muted-foreground)" }}>
+            <span className="rounded-[6px] px-2 py-1 text-[11px] font-bold tracking-[0.12em] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--foreground) 6%, transparent)", color: "var(--muted-foreground)" }}>
               For educators
             </span>
           )}
@@ -163,6 +179,22 @@ export function Nav({ view, onSchoolsClick }: NavProps) {
         </nav>
 
         <div className="flex items-center gap-2">
+          {schools && onToggleTheme && (
+            <button
+              type="button"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              aria-pressed={theme === "dark"}
+              onClick={onToggleTheme}
+              className="flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
+              style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+            >
+              {theme === "dark" ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" /></svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+              )}
+            </button>
+          )}
           <Link
             href={cta.href}
             className="rounded-xl px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
@@ -204,7 +236,7 @@ export function Nav({ view, onSchoolsClick }: NavProps) {
         {/* Mobile menu panel */}
         {menuOpen && (
           <div
-            className="absolute top-[calc(100%+8px)] right-0 flex w-60 flex-col gap-1 rounded-2xl border p-2"
+            className="absolute top-[calc(100%+8px)] right-0 flex max-h-[min(78vh,720px)] w-64 flex-col gap-1 overflow-y-auto rounded-2xl border p-2"
             style={{
               background: "color-mix(in srgb, var(--background) 97%, var(--foreground))",
               backdropFilter: "blur(18px) saturate(1.6)",
@@ -213,18 +245,30 @@ export function Nav({ view, onSchoolsClick }: NavProps) {
               boxShadow: "0 16px 40px -16px rgba(0,0,0,0.6)",
             }}
           >
-            {!schools &&
-              QUICK_LINKS.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="rounded-xl px-4 py-2.5 text-[14px] font-bold"
-                  style={{ color: "var(--primary-tint)", background: "var(--glass-surface-1)" }}
-                >
-                  {link.label}
-                </Link>
-              ))}
+            <div className="px-4 pt-2 pb-1 text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Open the app</div>
+            {QUICK_LINKS.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-xl px-4 py-2 text-[14px] font-bold"
+                style={{ color: "var(--primary-tint)", background: "var(--glass-surface-1)" }}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="px-4 pt-3 pb-1 text-[11px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Connect as</div>
+            {CONNECT_AS.map((link) => (
+              <Link key={link.label} href={link.href} onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-1.5 text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>
+                {link.label}
+              </Link>
+            ))}
+            <div className="mx-4 my-2 border-t" style={{ borderColor: "var(--glass-border)" }} />
+            {schools && onStudentClick && (
+              <button type="button" onClick={() => { setMenuOpen(false); onStudentClick(); }} className="rounded-xl px-4 py-2.5 text-left text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                For students
+              </button>
+            )}
             {links.map((link) => (
               <Link key={link.label} href={link.href} onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2.5 text-[14px] font-semibold min-[900px]:hidden" style={{ color: "var(--foreground)" }}>
                 {link.label}
