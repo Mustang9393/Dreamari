@@ -204,24 +204,42 @@ export function MatchGrid() {
 
 function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: number; onOpen: () => void; onToggle: (origin?: { clientX: number; clientY: number }) => void }) {
   const isSelected = rank > 0;
-  // Same hover as Explore's own cards (app.css .dm-tap): a 1px lift and a
-  // tight shadow, no scale -- done via whileHover rather than the CSS class
-  // itself, since Framer Motion already owns this element's transform for
-  // whileTap and would fight a plain CSS :hover transform. The selection
-  // ring (the ring around a picked card) has to survive into the hover
-  // shadow too, or hovering a selected card would flash it away.
+  // Same hover LANGUAGE as Explore's browse cards (PosterCard.tsx /
+  // .poster-card in globals.css): lift, scale, the photo eases in, a dark
+  // dim washes over it -- everything except OpenCue's center chevron,
+  // which doesn't belong here (direct feedback, 12 Sept 2026: "without the
+  // icon that shows up"). The MAGNITUDE is toned down from poster-card's
+  // own -10px/1.09 though: that card lives in a horizontally-scrolling
+  // rail with 24-57px between cards, so it can grow past its own box and
+  // rely on z-index to read cleanly. This one sits in a packed 2x3/3x2
+  // grid with only a 10-16px gap on every side, so the same magnitude
+  // would visibly lap onto the neighboring card -- these smaller values
+  // keep the total growth under half that gap (direct feedback, 12 Sept
+  // 2026: "make sure no overlapping or clipping happens on hover"),
+  // confirmed with getBoundingClientRect against the sibling cards' edges.
+  // Framer Motion owns this element's transform for the layoutId morph
+  // into the detail modal, so the lift/scale/shadow go through
+  // whileHover rather than a plain CSS :hover rule, which framer's own
+  // inline transform would just override. The photo zoom and dim wash
+  // are plain elements framer doesn't touch, so those use ordinary
+  // group-hover CSS, same mechanism as poster-card's own .poster-photo.
   const ringShadow = isSelected ? `0 0 0 2px color-mix(in srgb, ${career.color} 55%, transparent), ` : "";
   return (
     <motion.div
       layoutId={`match-card-${career.id}`}
-      className="relative h-full w-full min-h-0 cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left"
+      className="group relative h-full w-full min-h-0 cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left"
       style={{
         borderColor: isSelected ? career.color : "var(--color-glass-border)",
         boxShadow: isSelected ? `${ringShadow}0 14px 30px -14px rgba(0,0,0,0.6)` : "0 8px 20px -14px rgba(0,0,0,0.5)",
       }}
       whileTap={{ scale: 0.97 }}
-      whileHover={{ y: -1, boxShadow: `${ringShadow}0 6px 16px -12px rgba(0,0,0,0.85)` }}
-      transition={{ duration: 0.16, ease: "easeOut" }}
+      whileHover={{
+        y: -3,
+        scale: 1.02,
+        zIndex: 5,
+        boxShadow: `${ringShadow}0 18px 34px -14px rgba(0,0,0,0.75), 0 0 0 1px color-mix(in srgb, var(--color-accent-purple) 70%, transparent)`,
+      }}
+      transition={{ duration: 0.26, ease: [0.2, 0.8, 0.2, 1] }}
       onClick={onOpen}
       role="button"
       tabIndex={0}
@@ -233,7 +251,21 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
         }
       }}
     >
-      <Image src={career.photo} alt="" fill sizes="(max-width: 640px) 46vw, 280px" className="object-cover" draggable={false} />
+      <Image
+        src={career.photo}
+        alt=""
+        fill
+        sizes="(max-width: 640px) 46vw, 280px"
+        className="object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.03]"
+        draggable={false}
+      />
+      {/* Dim wash, same as poster-card's .poster-dim -- fades in on hover,
+         no icon on top of it here. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100"
+        style={{ background: "rgba(5,8,20,0.32)" }}
+      />
       {/* Scrim + title: a normal flex child sized by its own content (not
          a fixed reserve), so it's exactly as tall as the actual title
          needs -- it grows upward from the bottom when the title wraps to
