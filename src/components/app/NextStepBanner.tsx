@@ -19,6 +19,7 @@ export function NextStepBanner({
   ariaLabel = eyebrow || text,
   emphasis = "quiet",
   calm = false,
+  beamDuration,
 }: {
   /** small uppercase line above the text; omit or pass "" for just the text */
   eyebrow?: string;
@@ -35,6 +36,8 @@ export function NextStepBanner({
   emphasis?: "quiet" | "priority";
   /** beam ring only: no wash, no sheen (direct feedback, 11 Sept 2026: "lose the shimmer") */
   calm?: boolean;
+  /** seconds per lap of the ring; overrides the emphasis default (1.8 priority, 3.2 quiet) */
+  beamDuration?: number;
 }) {
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
@@ -63,7 +66,7 @@ export function NextStepBanner({
   if (priority) {
     return (
       <div>
-      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={1.8} strength={1}>
+      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={beamDuration ?? 1.8} strength={beamDuration ? 0.75 : 1}>
         <aside aria-label={ariaLabel} className="relative overflow-hidden rounded-[var(--radius-lg)]" style={{ background: "var(--inset-surface)" }}>
           {/* Priority used to be a solid blue-purple gradient fill -- the one
              saturated block on an otherwise dark page, and it read as
@@ -101,7 +104,7 @@ export function NextStepBanner({
   }
   return (
     <div>
-    <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.2} strength={0.7}>
+    <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={beamDuration ?? 3.2} strength={0.7}>
       <aside aria-label={ariaLabel} className="relative overflow-hidden rounded-[var(--radius-lg)]" style={{ background: "var(--inset-surface)" }}>
         {/* BorderBeam (border-beam npm package) rides the border; the wash
            +sheen below run on their own slower, unrelated cycle so they

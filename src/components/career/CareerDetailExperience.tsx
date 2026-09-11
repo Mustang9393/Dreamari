@@ -534,10 +534,16 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         {/* Section chips (UX audit, 11 Sept 2026): the page is ten sections
            long; these stick under the header and jump to each one. Additive,
            no content moves. */}
-        <nav aria-label="Sections" className="sticky top-[56px] z-20 -mx-5 flex gap-[8px] overflow-x-auto px-5 py-[8px] [scrollbar-width:none] md:top-[64px] md:-mx-[var(--space-14)] md:px-[var(--space-14)]" style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
-          {[["#facts", "Facts"], ["#pay", "Pay"], ["#ladder", "Ladder"], ["#education", "Education"]].map(([href, label]) => (
-            <a key={href} href={href} className="dm-quiet flex-none rounded-full border px-[14px] py-[7px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{label}</a>
-          ))}
+        {/* Compact (direct feedback, 11 Sept 2026: "much taller than it
+           needs to be"): no full-width bar. One small segmented strip that
+           hugs its four links, with its own blur so it stays legible while
+           it sticks; the nav row itself is transparent. */}
+        <nav aria-label="Sections" className="sticky top-[56px] z-20 flex md:top-[64px]">
+          <div className="flex max-w-full gap-[2px] overflow-x-auto rounded-full border p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--background) 70%, var(--glass-surface-2))", borderColor: "var(--glass-border)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+            {[["#facts", "Facts"], ["#pay", "Pay"], ["#ladder", "Ladder"], ["#education", "Education"]].map(([href, label]) => (
+              <a key={href} href={href} className="dm-quiet flex-none rounded-full px-[11px] py-[4px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{label}</a>
+            ))}
+          </div>
         </nav>
         {/* Quick facts: one strip, internal dividers, label over figure. */}
         {vm.facts.length > 0 && (

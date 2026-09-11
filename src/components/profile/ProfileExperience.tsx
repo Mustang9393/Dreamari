@@ -13,7 +13,8 @@ import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Plane, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { simulationFor } from "@/components/play/games";
+import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
@@ -828,19 +829,19 @@ const BAND_ORDER: Record<string, number> = { Target: 0, Reach: 1, Safety: 2 };
 function MoreFactsAccordion({ facts, accent }: { facts: { label: string; value: string }[]; accent: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex flex-col border-t pt-[var(--space-3)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+    <div className="flex flex-col border-t pt-[var(--space-1)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
-        className="dm-quiet flex min-h-[36px] w-full cursor-pointer items-center justify-between gap-[8px] px-[4px] text-[12px] font-bold tracking-[0.6px] uppercase"
+        className="dm-quiet flex min-h-[32px] w-full cursor-pointer items-center justify-between gap-[8px] px-[4px] text-[12px] font-bold tracking-[0.6px] uppercase"
         style={{ color: "var(--muted-foreground)" }}
       >
         Employers & schools
         <ChevronDown className={`h-4 w-4 flex-none transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden />
       </button>
       {open && (
-        <dl className="flex flex-col gap-[var(--space-3)] pt-[var(--space-2)] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]">
+        <dl className="flex flex-col gap-[var(--space-2)] pt-[var(--space-2)] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]">
           {facts.map((fact) => (
             <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
               <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
@@ -891,6 +892,8 @@ function Top3Tab({
         Icon={Compass}
         emphasis="priority"
         calm
+        // slower ring (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
+        beamDuration={5}
         // demo: comes back every visit; remembered once the demo flag is off
         storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
       />
@@ -911,11 +914,13 @@ function Top3Tab({
          tint per the design language, never a solid color block. Copy is
          unchanged from the stacked version. */}
       <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] md:grid-cols-3">
-      {top3.map((id) => {
+      {/* The primary career takes the first card (Joshua, 11 Sept 2026). */}
+      {[...top3].sort((a, b) => Number(b === focusId) - Number(a === focusId)).map((id) => {
         const career = careerById(id)!;
         const report = reportV2(id);
         const route = chosenRoute(career);
         const isFocus = focusId === id;
+        const sim = simulationFor(id);
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
         const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
         // Split by criticality (direct feedback): the three decision facts
@@ -940,18 +945,30 @@ function Top3Tab({
               // strength), so #1 reads in that world's color; unfocused
               // cards keep the quieter 35% border tint.
               borderColor: isFocus ? accent : `color-mix(in srgb, ${accent} 35%, var(--glass-border))`,
-              background: isFocus ? `color-mix(in srgb, ${accent} 9%, var(--glass-surface-1))` : "var(--glass-surface-1)",
+              // A darker step than glass-surface-1, still translucent and blurred
+              // (direct feedback, 11 Sept 2026: "a little too transparent").
+              background: isFocus ? `color-mix(in srgb, ${accent} 10%, var(--inset-surface))` : "var(--inset-surface)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
             }}
           >
             {/* The photo carries the card: a wide cover clipped by the card's
                own radius, not a floating thumbnail square. The rank rides
                quietly on the photo corner instead of its own chip row. */}
-            <div className="relative aspect-[4/3] w-full flex-none overflow-hidden rounded-t-[inherit]">
+            <div className="relative aspect-[16/10] w-full flex-none overflow-hidden rounded-t-[inherit]">
               {/* Per-photo focal point (data.ts photoFocus): each poster's
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
               <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
-              <div className="absolute top-[6px] right-[6px]">
+              {isFocus && (
+                // The one marker of the primary career: a star disc on the
+                // photo (Joshua, 11 Sept 2026: the text chips go), so the
+                // Report and Plan tabs still visibly follow this card.
+                <span role="img" aria-label={primaryChosen ? "My primary career" : "Your strongest match"} className="absolute bottom-[10px] left-[10px] z-[2] flex size-[30px] items-center justify-center rounded-full border backdrop-blur-[8px]" style={{ background: "rgba(5,8,20,0.6)", borderColor: `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))`, color: accent }}>
+                  <Star className="h-3.5 w-3.5" fill="currentColor" aria-hidden />
+                </span>
+              )}
+              <div className="absolute top-[6px] right-[6px] z-[3]">
                 <button
                   type="button"
                   aria-label={`More options for ${career.title}`}
@@ -974,6 +991,18 @@ function Top3Tab({
                       >
                       Remove from Top 3
                       </button>
+                      {/* Two options (Joshua, 11 Sept 2026). Make My Primary
+                         moves the career into the first card; it is the only
+                         place for it (direct feedback: no hover cue). */}
+                      {!isFocus && (
+                        <button
+                          type="button"
+                          onClick={() => { setMenuFor(null); setFocusId(id); }}
+                          className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
+                        >
+                          <Star className="h-3.5 w-3.5" aria-hidden /> Make My Primary
+                        </button>
+                      )}
                     </div>
                   </>
                 )}
@@ -988,32 +1017,36 @@ function Top3Tab({
               <span className="absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
             </span>
 
-            <div className="relative flex flex-1 flex-col gap-[var(--space-4)] p-[var(--space-5)]">
-              {/* Every block below reserves its height at lg (the 3-up
-                 layout), so the three cards' sections line up 1:1 whatever
-                 wraps -- a two-line description next to a three-line one
-                 was making whole cards run long (direct feedback). */}
-              <div className="flex flex-col gap-[var(--space-3)]">
-                <span className="flex min-w-0 flex-col gap-[1px]">
-                  {/* World name carries the accent, never the career title. */}
-                  <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                  <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2 md:min-h-[52px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+            <div className="relative flex flex-1 flex-col gap-[var(--space-2)] p-[var(--space-4)]">
+              {/* Tight rhythm throughout (direct feedback, 11 Sept 2026: the
+                 cards were getting long, and a reserved title height left a
+                 hole under one-line titles). Title and description clamp
+                 rather than reserve; the facts still reserve their rows. */}
+              <span className="flex min-w-0 flex-col gap-[1px]">
+                {/* World name carries the accent, never the career title. */}
+                <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
+                <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+              </span>
+              <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
+              {/* The card answers one question (Joshua + direct feedback,
+                 11 Sept 2026): test this career, or learn more about it?
+                 Play is above the fold, right under the job description, in
+                 the Play cards' own badge language (disc + glyph) with words:
+                 this career's own simulation, or its Coming soon card. */}
+              <Link
+                href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
+                aria-label={sim ? `Play the ${career.title} simulation` : `${career.title} simulation, coming soon in Play`}
+                className="dm-tap mt-[var(--space-1)] flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border pr-[12px] pl-[5px] text-[14px] font-bold"
+                style={{ background: `color-mix(in srgb, ${accent} ${sim ? 20 : 9}%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} ${sim ? 55 : 28}%, var(--glass-border))`, color: "var(--foreground)" }}
+              >
+                <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: sim ? accent : "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)" }}>
+                  {sim ? <Play className="ml-[2px] h-[14px] w-[14px]" fill="currentColor" style={{ color: "#fff" }} aria-hidden /> : <Lock className="h-[13px] w-[13px]" style={{ color: "#fff" }} aria-hidden />}
                 </span>
-                {isFocus ? (
-                  <span className="flex h-[36px] w-fit flex-none items-center gap-[4px] rounded-[var(--radius-md)] px-[12px] text-[14px] font-semibold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: accent }}>
-                    <Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My Primary Career" : "Your Strongest Match"}
-                  </span>
-                ) : (
-                  // Solid, not a ghost: it blended into the card's facts (direct feedback, 11 Sept 2026).
-                  <button type="button" onClick={() => setFocusId(id)} className="dm-solid flex h-[36px] w-fit flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[14px] text-[13px] font-bold whitespace-nowrap" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-                    <Star className="h-3 w-3" aria-hidden /> Make my primary
-                  </button>
-                )}
-              </div>
+                <span className="min-w-0 truncate">{sim ? "Play a Day in the Life" : "Day in the Life coming soon"}</span>
+              </Link>
 
-              <p className="text-[14px] leading-[19px] font-medium md:line-clamp-2 md:min-h-[38px]" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
 
-              <dl className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+              <dl className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-2)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
@@ -1024,9 +1057,25 @@ function Top3Tab({
 
               <MoreFactsAccordion facts={moreFacts} accent={accent} />
 
-              <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-link mt-auto flex min-h-[44px] w-fit cursor-pointer items-center gap-[4px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-                View Career Report <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-              </button>
+              {/* Where the reading ends: Get Career Report first, filled
+                 glass (the student's own read on this career, which nothing
+                 else offers; "Get", not "View"; the card already names the
+                 career), then Learn more as a ghost to this career's page
+                 (reference the facts above already preview). A rule above
+                 separates the two from the Employers & schools fold. */}
+              <div className="mt-auto flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-3)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-3)" }}>
+                  Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
+                </button>
+                <Link
+                  href={`/career/${id}`}
+                  aria-label={`Learn more about ${career.title}`}
+                  className="dm-quiet flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
+                  style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "transparent" }}
+                >
+                  <span className="min-w-0 truncate">Learn more</span> <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
+                </Link>
+              </div>
             </div>
           </div>
         );
@@ -1046,22 +1095,6 @@ function Top3Tab({
         </button>
       )}
       </div>
-
-      {/* The obvious next action after saving a Top 3 (Joshua Pierce, Slack,
-         5 Sept 2026): play the #1 career's simulation. Build > Match > Play,
-         the landing page's own order. Routes to the Investment Banking
-         simulation for now; the dynamic #1 routing is a later step. */}
-      {top3.length > 0 && (
-        <NextStepBanner
-          emphasis="priority"
-          eyebrow="Your next step"
-          text="Play the Day in the Life for your primary career."
-          ctaLabel="Play"
-          href="/play?focus=investment-banking"
-          Icon={Gamepad2}
-          storageKey="dreamari:top3-next-step-dismissed"
-        />
-      )}
 
     </div>
   );

@@ -7594,3 +7594,32 @@ Verified on the Investment Banking report's 03 Career Exploration section.
   duplicate Report button. Inside a secondary view the bar becomes
   "‹ Report" plus the view's name. Panels unchanged. `CareerReport.tsx`.
 - Explore tab strip separator "/" is now "|" (Joshua). `chrome.tsx`.
+
+## 2026-09-11 · Top 3 cards answer "test it or learn more?" (Joshua + direct feedback)
+- Card order inside `Top3Tab` (`ProfileExperience.tsx`): photo (kebab; a star
+  disc marks the primary career, no text chip), world + title, one clamped
+  description line pair, then "Play a Day in the Life" (this career's
+  simulation via `simulationFor`, else "Day in the Life coming soon" to
+  `/play?focus=<id>`), the three reserved facts, Employers & schools fold, a
+  rule, then "Get Career Report" (filled glass, opens the Report tab with
+  that career as focus) over "Learn more" (ghost, `/career/<id>`).
+- "Your Strongest Match" / "Make my primary" removed from the body. The
+  kebab has two items: Remove from Top 3, Make My Primary. The primary
+  career renders in the first card (sort by `focusId`).
+- Surface is `--inset-surface` with a 14px blur (was glass-surface-1: too
+  transparent). Tighter rhythm: body gap space-2, padding space-4, 16/10
+  photo. Reserved title/description heights dropped (they left a hole under
+  one-line titles). Cards 728px to 701px at 800px wide.
+- Bottom "Play" nudge removed (Play is on the cards). Top Explore nudge kept,
+  beam slowed to 5s via new `beamDuration` prop on `NextStepBanner`, calm.
+- Career detail: the sticky Facts / Pay / Ladder / Education bar is now one
+  32px segmented strip hugging its links (own blur), no full-width bar.
+- Verified: links map to `/play/investment-banking`, `/career/<id>`, Report
+  tab; Make My Primary from the Airline Pilot menu moved it to card one.
+- Not done: beam on the active career card (asked to hold).
+
+## 2026-09-11 · Schools landing at phone width
+- `Fit` floor 0.5 to 0.4 so the 700px dashboard and 560px Immerse compositions
+  fit a 325px column. Hero: on phones the three cards are a horizontal snap
+  row at card size (`sm:hidden`); from sm the 1040px zoomed grid. No element
+  overflows 375px except clipped decorative blobs and the marquee.
