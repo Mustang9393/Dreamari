@@ -37,10 +37,12 @@ import { DECK, MAX_SLOTS, type Career } from "./data";
 
 const SWIPE_COMMIT_PX = 100;
 
-// Gesture guide is first-visit-only (progress kept in localStorage under
-// guideProgressKey). Set to true only for a live demo where the hint must
-// replay on every reload; flipped back to false 5 Sept 2026 per direct request.
-const DEMO_ALWAYS_SHOW_GUIDE = false;
+// Gesture guide replays on EVERY open of the Match Lab while this is true
+// (direct request, 11 Sept 2026: Joshua was not seeing it; the per-session
+// memory below had hidden it after the first tab). Progress within one
+// mount still ends it (a real gesture stops the walk). Flip back to false
+// for the per-session rule when the demo period ends.
+const DEMO_ALWAYS_SHOW_GUIDE = true;
 
 const GUIDE_ORDER = ["up", "right", "left"] as const;
 // The welcome splash teaches no gestures (option 1, 11 Sept 2026), so the
