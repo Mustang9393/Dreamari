@@ -7494,3 +7494,22 @@ Next: user review, then push.
   closing line.
 - Demo request address is product@dreamopportunity.org (mailto target and the
   note under the button); the personal address is gone (direct instruction).
+
+## 2026-09-11 · Demo request: two steps, backend delivery
+Direct instruction: fewer fields, no mail app, the backend receives and
+sends. Research (Brixon, Tiller Digital, Reform, Unbounce thank-you-page
+guides) agrees: 3 to 4 low-friction fields first, qualifying questions after
+the first submit, never a multi-step "Next" before it.
+- `DemoRequestForm`: step 1 = Your name, Work email, Organization name, one
+  button. Step 2 = "Request sent. We will be in touch at <email> within one
+  business day." plus three chip questions (Your role, Organization type,
+  Number of students served) with Send / Skip. Both steps POST to
+  `/api/demo-request` with one client id so the inbox can pair them.
+- `src/app/api/demo-request/route.ts`: validates, then delivers via
+  DEMO_REQUEST_WEBHOOK (Google Apps Script web app on the team's Sheet:
+  append row + email), else RESEND_API_KEY (Resend REST, to
+  DEMO_REQUEST_TO, default product@dreamopportunity.org), else logs to the
+  Vercel function log. Always returns ok so the page never dead-ends.
+  Env vars to set on Vercel: DEMO_REQUEST_WEBHOOK or RESEND_API_KEY (+
+  DEMO_REQUEST_FROM on a verified domain), DEMO_REQUEST_TO.
+Verified locally: both POSTs 200, sent and survey states render.
