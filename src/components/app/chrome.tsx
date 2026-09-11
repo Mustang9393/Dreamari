@@ -189,9 +189,54 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
   );
 }
 
+/** The one menu every screen shares: the app's pages, the Connect demo
+ *  roles, and the theme choice. The landing pages' hamburger renders this
+ *  same panel (direct instruction, 11 Sept 2026: identical menus everywhere,
+ *  theme toggle inside the menu). `extra` lets a page add its own rows on top. */
+export function QuickLinksPanel({ onNavigate, extra, className = "" }: { onNavigate?: () => void; extra?: React.ReactNode; className?: string }) {
+  const { theme, toggle } = useGlobalTheme();
+  return (
+    <div className={`flex flex-col gap-[2px] ${className}`}>
+      {extra}
+      {QUICK_LINKS.map((link) => (
+        <Link
+          key={link.label}
+          href={link.href}
+          onClick={onNavigate}
+          className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2h,10px)] text-[13px] leading-[18px] font-semibold tracking-[0.08em] uppercase transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+          style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+        >
+          {link.label}
+        </Link>
+      ))}
+      <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Connect demo · view as</span>
+      {DEMO_LINKS.map((link) => (
+        <Link
+          key={link.label}
+          href={link.href}
+          onClick={onNavigate}
+          className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+          style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+        >
+          {link.label}
+        </Link>
+      ))}
+      {/* Theme choice rides in the same menu on every screen */}
+      <button
+        type="button"
+        onClick={toggle}
+        className="dm-quiet mt-[2px] flex cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border-t px-[var(--space-4)] py-[var(--space-2h,10px)] pt-[12px] text-left text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+        style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", borderColor: "var(--glass-border)" }}
+      >
+        {theme === "dark" ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />}
+        {theme === "dark" ? "Light mode" : "Dark mode"}
+      </button>
+    </div>
+  );
+}
+
 export function QuickLinksMenu({ className, align = "right" }: { className?: string; align?: "left" | "right" }) {
   const [open, setOpen] = useState(false);
-  const { theme, toggle } = useGlobalTheme();
   // the backdrop handles taps outside; scrolling away or Escape closes it too
   useEffect(() => {
     if (!open) return;
@@ -217,44 +262,12 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
         <>
           <button type="button" aria-label="Close quick links" onClick={() => setOpen(false)} className="fixed inset-0 z-40 cursor-default" />
           <nav
-            className={`filters-reveal absolute z-50 mt-2 flex min-w-[180px] flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px] ${align === "left" ? "left-0" : "right-0"}`}
+            className={`filters-reveal absolute z-50 mt-2 min-w-[180px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px] ${align === "left" ? "left-0" : "right-0"}`}
             /* near-solid: the old glass-surface let page content bleed through
                and made rows illegible in both themes */
             style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}
           >
-            {QUICK_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2h,10px)] text-[13px] leading-[18px] font-semibold tracking-[0.08em] uppercase transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
-                style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Connect demo · view as</span>
-            {DEMO_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
-                style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {/* Theme choice rides in the same menu on every app screen */}
-            <button
-              type="button"
-              onClick={toggle}
-              className="dm-quiet mt-[2px] flex cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border-t px-[var(--space-4)] py-[var(--space-2h,10px)] pt-[12px] text-left text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
-              style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", borderColor: "var(--glass-border)" }}
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />}
-              {theme === "dark" ? "Light mode" : "Dark mode"}
-            </button>
+            <QuickLinksPanel onNavigate={() => setOpen(false)} />
           </nav>
         </>
       )}

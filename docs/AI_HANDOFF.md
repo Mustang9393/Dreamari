@@ -7538,3 +7538,31 @@ Verified locally: both POSTs 200, sent and survey states render.
 - Glass: tab pill and stage cards frost over the page; progressive blur
   (CardProgressiveBlur) under the poster titles, the Match card and the
   Immerse scene. Review Queue item column widened, second button "Changes".
+
+## 2026-09-11 · Schools landing: shared menu + global theme, Apple patterns from the iPhone Duo page
+- One hamburger everywhere: `QuickLinksPanel` (app/chrome.tsx) is the menu body
+  for the app's QuickLinksMenu AND the landing Nav (both views). App pages,
+  "Connect demo · view as", and the theme toggle as the last row. The landing
+  adds its section links (small screens) and the For students / For schools
+  switch above. The standalone sun/moon button is gone.
+- Theme is the app's global one (`dreamari-theme`, html.light/dark). New
+  `setGlobalTheme(theme, persist)` and `hasSavedTheme()` in app/theme.tsx.
+  MarketingApp sets light on the Schools view and dark on the student view
+  when no theme is saved (not persisted); a saved choice always wins.
+- Motion read from the reference DOM, not screenshots: chip groups drive a
+  scroll-snap gallery (smooth scroll to the card), chip highlight recolours
+  in ~0.25s, panels fade in 0.3 to 0.4s ease-out, reveals are short fades.
+- Stages: `StageGallery`, chips "01 Build" to "05 Connect" over a snap track
+  of five slides (line, three points, app link, illustration); scrolling
+  moves the chip; dots below. Stacked cards and Learn more removed.
+- Hero: three chips under the cards switch the career card (Investment
+  Banker / Nurse Anesthetist / Software Engineer) with a 0.3s fade; pay and
+  degree from each career page (`HERO_CAREERS`, `HeroIllustration({career})`).
+- Callouts at the end of the stages section: 15 career worlds, 44 careers,
+  30 colleges and trade schools, counted from the data.
+- Audiences: Districts is now Student Progress rolled up by school (six
+  schools, prototype status vocabulary, illustrative figures); Nonprofits is
+  framed as a cohort across three schools. Relevance caveat: the nonprofit
+  recommendation copy is the prototype's and says "your school".
+- Maisha's prototype went blank mid-review; Engagement and Impact pages not
+  yet read.

@@ -18,6 +18,27 @@ function applyTheme(theme: GlobalTheme) {
   root.classList.toggle("light", theme === "light");
 }
 
+/** Set the theme for this page view; persist only when the user chose it. */
+export function setGlobalTheme(theme: GlobalTheme, persist = false) {
+  applyTheme(theme);
+  if (persist) {
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // private browsing etc.
+    }
+  }
+}
+
+export function hasSavedTheme(): boolean {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY);
+    return v === "light" || v === "dark";
+  } catch {
+    return false;
+  }
+}
+
 export function currentTheme(): GlobalTheme {
   return document.documentElement.classList.contains("light") ? "light" : "dark";
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BuiltByStamp } from "./DreamOpportunity";
+import { hasSavedTheme, setGlobalTheme, useGlobalTheme } from "@/components/app/theme";
 import { Footer } from "./Footer";
 import { Hero } from "./Hero";
 import { HowItWorks } from "./HowItWorks";
@@ -11,22 +12,15 @@ import { StudentFinalCTA } from "./FinalCTAs";
 
 export function MarketingApp() {
   const [view, setView] = useState<"student" | "schools">("student");
-  // Schools view theme (direct instruction, 11 Sept 2026: a light/dark switch
-  // the page reacts to). Light by default; the choice persists per browser.
-  const [schoolsTheme, setSchoolsTheme] = useState<"light" | "dark">("light");
+  // Theme is the app's global one (the menu's toggle, persisted as
+  // dreamari-theme). The Schools view renders light unless the visitor has
+  // chosen a theme; the student landing is art-directed dark.
+  const { theme } = useGlobalTheme();
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem("dreamari-schools-theme");
-      if (saved === "dark" || saved === "light") setTimeout(() => setSchoolsTheme(saved), 0);
-    } catch {}
-  }, []);
-  function toggleSchoolsTheme() {
-    setSchoolsTheme((t) => {
-      const next = t === "light" ? "dark" : "light";
-      try { window.localStorage.setItem("dreamari-schools-theme", next); } catch {}
-      return next;
-    });
-  }
+    if (hasSavedTheme()) return;
+    setGlobalTheme(view === "schools" ? "light" : "dark");
+  }, [view]);
+  const schoolsTheme = theme;
 
   // The phone pager (globals.css: html { scroll-snap-type: y mandatory } under
   // 768px) is built for the student landing, whose hero, chapters and footer
@@ -90,7 +84,7 @@ export function MarketingApp() {
         />
       )}
 
-      <Nav view={view} onSchoolsClick={() => setView("schools")} onStudentClick={() => setView("student")} theme={schoolsTheme} onToggleTheme={toggleSchoolsTheme} />
+      <Nav view={view} onSchoolsClick={() => setView("schools")} onStudentClick={() => setView("student")} />
 
       {/* Both views stay mounted (toggled with `hidden`, not conditionally rendered) so
           the mascot's rAF loop, IntersectionObservers, and scroll listeners don't tear

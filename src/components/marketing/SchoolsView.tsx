@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, ChevronDown, LineChart, Map, MessageSquare, Sparkles, Target, Zap } from "lucide-react";
+import { ArrowUpRight, LineChart, Map, MessageSquare, Sparkles, Target, Zap } from "lucide-react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { AudienceToggle } from "./AudienceToggle";
 import { MarketingButton } from "./Button";
 import { DemoRequestForm } from "./DemoRequestForm";
 import { DO_COPY, DOMark } from "./DreamOpportunity";
 import { PartnerLogoGrid } from "./PartnerTicker";
-import { AudienceIllustration, BuildIllustration, ConnectIllustration, DashboardIllustration, ExploreIllustration, Grad, HeroIllustration, ImmerseIllustration, MatchIllustration, SkillsTicker } from "./SchoolsIllustrations";
+import { AudienceIllustration, BuildIllustration, ConnectIllustration, DashboardIllustration, ExploreIllustration, Grad, HERO_CAREERS, HeroIllustration, ImmerseIllustration, MatchIllustration, SkillsTicker, type HeroCareerSlug } from "./SchoolsIllustrations";
+import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
+import { INTEREST_WORLDS } from "@/components/build/types";
+import { COLLEGES } from "@/components/colleges/data";
 import { useRevealOnScroll } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
 
@@ -156,59 +159,94 @@ function SectionHead({ id, title, lede, align = "left", wide = false }: { id?: s
   );
 }
 
-// One stage card, the reference's: tile, STAGE 01 over the name, the line,
-// Learn more. Learn more opens the stage's illustration with three detail
-// lines and the link into the app.
-function StageCard({ stage, open, onToggle }: { stage: Stage; open: boolean; onToggle: () => void }) {
-  const panelId = `stage-${stage.n}-more`;
+// A row of chips that pick one item, the reference product pages' tabnav:
+// the highlight slides between chips, the panel they drive follows.
+function Chips({ items, value, onChange, label, id }: { items: string[]; value: string; onChange: (v: string) => void; label: string; id: string }) {
   return (
-    <li className="rounded-[20px] border backdrop-blur-[18px] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:[box-shadow:0_18px_40px_-24px_rgba(5,7,15,0.25)]" style={{ background: "color-mix(in srgb, var(--surface) 84%, transparent)", borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
-      <div className="grid gap-5 p-6 sm:grid-cols-[140px_1fr] sm:items-start sm:gap-8 sm:p-8">
-        <h3 className="flex items-baseline gap-2.5 text-[22px] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>
-          <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
-          {stage.title}
-        </h3>
-        <div>
-          <p className="text-[17px] leading-relaxed" style={{ color: "var(--foreground)", textWrap: "pretty" }}>{stage.line}</p>
-          <button type="button" aria-expanded={open} aria-controls={panelId} onClick={onToggle} className="mt-4 inline-flex cursor-pointer items-center gap-1 text-[14px] font-bold" style={{ color: "var(--primary)" }}>
-            Learn more
-            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${open ? "rotate-180" : ""}`} strokeWidth={2.5} aria-hidden />
+    <div role="tablist" aria-label={label} className="flex max-w-full flex-wrap gap-1 rounded-[14px] border p-1 backdrop-blur-[16px]" style={{ background: "color-mix(in srgb, var(--surface) 72%, transparent)", borderColor: "var(--border)", width: "fit-content" }}>
+      {items.map((item) => {
+        const selected = value === item;
+        return (
+          <button key={item} type="button" role="tab" aria-selected={selected} onClick={() => onChange(item)} className="relative cursor-pointer rounded-[10px] px-3.5 py-2 text-[14px] font-semibold transition-colors duration-300" style={{ color: selected ? "var(--primary)" : "var(--foreground)" }}>
+            {selected && <motion.span layoutId={id} aria-hidden className="absolute inset-0 rounded-[10px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))" }} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+            <span className="relative">{item}</span>
           </button>
-        </div>
-      </div>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div id={panelId} key="panel" className="overflow-hidden" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-          <div className="grid grid-cols-1 items-center gap-8 border-t px-6 pt-6 pb-6 sm:px-8 sm:pb-8 lg:grid-cols-12 lg:gap-12" style={{ borderColor: "var(--border)" }}>
-            <ul className="flex flex-col gap-3 lg:col-span-5">
-              {stage.detail.map((d) => (
-                <li key={d} className="flex gap-3 text-[15px] leading-relaxed" style={{ color: "var(--foreground)" }}>
-                  <span aria-hidden className="mt-[10px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--primary)" }} />
-                  <span>{d}</span>
-                </li>
-              ))}
-              <li className="pt-1">
-                <Link href={stage.href} className="inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
+        );
+      })}
+    </div>
+  );
+}
+
+// The five stages as one chip-driven gallery (the reference product pages'
+// pattern, direct feedback 11 Sept 2026): chips smooth-scroll a snap track,
+// scrolling the track moves the chip. Each slide carries the stage's line,
+// its three detail points, the link into the app and its illustration.
+function StageGallery() {
+  const trackRef = useRef<HTMLUListElement>(null);
+  const [active, setActive] = useState(0);
+  function onScroll() {
+    const track = trackRef.current;
+    if (!track) return;
+    const i = Math.round(track.scrollLeft / track.clientWidth);
+    if (i !== active) setActive(Math.max(0, Math.min(STAGES.length - 1, i)));
+  }
+  function go(i: number) {
+    const track = trackRef.current;
+    if (!track) return;
+    track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" });
+    setActive(i);
+  }
+  return (
+    <div>
+      <Chips id="stage-chip" label="Stage" items={STAGES.map((st) => `${st.n} ${st.title}`)} value={`${STAGES[active].n} ${STAGES[active].title}`} onChange={(v) => go(STAGES.findIndex((st) => `${st.n} ${st.title}` === v))} />
+      <ul ref={trackRef} onScroll={onScroll} className="mkt-track mt-6 flex snap-x snap-mandatory overflow-x-auto scroll-smooth" aria-label="Five steps">
+        {STAGES.map((stage, i) => (
+          <li key={stage.n} aria-hidden={active !== i} className="w-full flex-none snap-center">
+            <div className="grid grid-cols-1 items-center gap-8 rounded-[24px] border p-6 backdrop-blur-[18px] lg:grid-cols-12 lg:gap-12 lg:p-10" style={{ background: "color-mix(in srgb, var(--surface) 84%, transparent)", borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
+              <div className="lg:col-span-5">
+                <h3 className="flex items-baseline gap-2.5 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)" }}>
+                  <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
+                  {stage.title}
+                </h3>
+                <p className="mt-4 text-[17px] leading-relaxed" style={{ color: "var(--foreground)", textWrap: "pretty" }}>{stage.line}</p>
+                <ul className="mt-5 flex flex-col gap-3">
+                  {stage.detail.map((d) => (
+                    <li key={d} className="flex gap-3 text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                      <span aria-hidden className="mt-[10px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={stage.href} tabIndex={active === i ? 0 : -1} className="mt-5 inline-flex items-center gap-1 text-[14px] font-bold transition-colors hover:[color:var(--primary)]" style={{ color: "var(--foreground)" }}>
                   {stage.linkLabel}
                   <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                 </Link>
-              </li>
-            </ul>
-            <div className="mx-auto w-full max-w-[560px] lg:col-span-7">{stage.art}</div>
-          </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </li>
+              </div>
+              <div className="mx-auto w-full max-w-[560px] lg:col-span-7">{stage.art}</div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 flex items-center justify-center gap-2" aria-hidden>
+        {STAGES.map((st, i) => <span key={st.n} className="h-1.5 rounded-full transition-all duration-300" style={{ width: active === i ? 22 : 8, background: active === i ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 22%, transparent)" }} />)}
+      </div>
+    </div>
   );
 }
+
+// Three real counts, the reference's spec callouts: number, caption.
+const CALLOUTS = [
+  { n: INTEREST_WORLDS.length, k: "career worlds", note: "from Health & Medicine to Driving, Flying & Shipping" },
+  { n: ALL_CATALOG_CAREERS.length, k: "careers to explore", note: "pay, education, daily life and pathways" },
+  { n: COLLEGES.length, k: "colleges and trade schools", note: "cost, admissions and the programs that fit" },
+];
 
 // ---------------------------------------------------------------------------
 // The view
 // ---------------------------------------------------------------------------
 
 export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsViewProps) {
-  const [openStage, setOpenStage] = useState<string | null>(null);
+  const [heroCareer, setHeroCareer] = useState<HeroCareerSlug>("investment-banking");
   const [audience, setAudience] = useState(AUDIENCES[0]);
 
   return (
@@ -244,7 +282,10 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
             </motion.p>
           </motion.div>
           <div className="mt-14 sm:mt-20">
-            <HeroIllustration />
+            <HeroIllustration career={heroCareer} />
+            <div className="mt-8 flex justify-center">
+              <Chips id="hero-career" label="Career shown" items={HERO_CAREERS.map((c) => c.title)} value={HERO_CAREERS.find((c) => c.slug === heroCareer)?.title ?? ""} onChange={(v) => { const c = HERO_CAREERS.find((x) => x.title === v); if (c) setHeroCareer(c.slug); }} />
+            </div>
           </div>
         </div>
         <div className="mt-16 sm:mt-24">
@@ -272,25 +313,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
                 </p>
               </div>
               <div className="lg:col-span-7">
-                <div role="tablist" aria-label="Who Dreamari is built for" className="mb-5 flex max-w-full flex-wrap gap-1 rounded-[14px] border p-1 backdrop-blur-[16px]" style={{ background: "color-mix(in srgb, var(--surface) 72%, transparent)", borderColor: "var(--border)", width: "fit-content" }}>
-                  {AUDIENCES.map((a) => {
-                    const selected = audience === a;
-                    return (
-                      <button
-                        key={a}
-                        type="button"
-                        role="tab"
-                        aria-selected={selected}
-                        onClick={() => setAudience(a)}
-                        className="relative cursor-pointer rounded-[10px] px-3.5 py-2 text-[14px] font-semibold transition-colors duration-300"
-                        style={{ color: selected ? "var(--primary)" : "var(--foreground)" }}
-                      >
-                        {selected && <motion.span layoutId="audience-tab" aria-hidden className="absolute inset-0 rounded-[10px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))" }} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
-                        <span className="relative">{a}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <div className="mb-5"><Chips id="audience-tab" label="Who Dreamari is built for" items={AUDIENCES} value={audience} onChange={setAudience} /></div>
                 <div className="relative lg:h-[600px]">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div key={audience} className="lg:absolute lg:inset-x-0 lg:top-0" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
@@ -311,13 +334,22 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
             <div className="mb-5"><Eyebrow>Build. Match. Explore. Immerse. Connect.</Eyebrow></div>
             <SectionHead title="Five steps toward a clearer future." />
           </Reveal>
-          <ol className="mt-12 flex flex-col gap-4 sm:mt-16">
-            {STAGES.map((stage) => (
-              <Reveal key={stage.n}>
-                <StageCard stage={stage} open={openStage === stage.n} onToggle={() => setOpenStage(openStage === stage.n ? null : stage.n)} />
-              </Reveal>
-            ))}
-          </ol>
+          <Reveal>
+            <div className="mt-12 sm:mt-14">
+              <StageGallery />
+            </div>
+          </Reveal>
+          <Reveal>
+            <ul className="mt-16 grid grid-cols-1 gap-8 border-t pt-12 sm:grid-cols-3 sm:gap-10" style={{ borderColor: "var(--border)" }}>
+              {CALLOUTS.map((c) => (
+                <li key={c.k} className="flex flex-col">
+                  <span className="text-[clamp(48px,5vw,72px)] leading-none font-extrabold tracking-[-0.03em] tabular-nums"><Grad>{c.n}</Grad></span>
+                  <span className="mt-3 text-[17px] leading-tight font-bold" style={{ color: "var(--foreground)" }}>{c.k}</span>
+                  <span className="mt-1.5 max-w-[26ch] text-[14.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{c.note}</span>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
         </div>
       </section>
 

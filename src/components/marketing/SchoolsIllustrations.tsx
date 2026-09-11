@@ -8,7 +8,9 @@ import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { CompanyChip } from "@/components/connect/primitives";
 import { PROS, THREADS } from "@/components/connect/data";
 import { IB_LEVEL_1 } from "@/components/play/ib-level-1";
+import { careerProfile } from "@/components/career/profiles";
 import { PROFILE_CAREERS } from "@/components/profile/data";
+import { AnimatePresence } from "framer-motion";
 
 // ---------------------------------------------------------------------------
 // Illustrations for the Schools page, drawn from scratch for the light page
@@ -44,6 +46,16 @@ const POSTERS = {
   swe: "/images/app/poster-software-engineer.webp",
   nurse: "/images/app/poster-nurse-anesthetist.webp",
 };
+
+/** The careers the hero can show (the reference page's "Take a closer look"
+ *  selector, applied to the career card). Pay and degree come from the
+ *  career pages' own facts. */
+export const HERO_CAREERS = [
+  { slug: "investment-banking", title: "Investment Banker", world: "Business & Money", photo: POSTERS.ib },
+  { slug: "nurse-anesthetist", title: "Nurse Anesthetist", world: "Health & Medicine", photo: POSTERS.nurse },
+  { slug: "software-engineer", title: "Software Engineer", world: "Tech & Engineering", photo: POSTERS.swe },
+] as const;
+export type HeroCareerSlug = (typeof HERO_CAREERS)[number]["slug"];
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 /** Rise-and-fade for a group's children, staggered; plays once when in view. */
@@ -145,8 +157,12 @@ function Poster({ src, title, world, className = "", style }: { src: string; tit
 // 1. Hero: three things a student gets, side by side. Career, Match, Connect.
 // ---------------------------------------------------------------------------
 
-export function HeroIllustration() {
+export function HeroIllustration({ career = "investment-banking" }: { career?: HeroCareerSlug }) {
   const ref = useRef<HTMLDivElement>(null);
+  const pick = HERO_CAREERS.find((c) => c.slug === career) ?? HERO_CAREERS[0];
+  const profile = careerProfile(pick.slug);
+  const pay = profile?.facts.find((f) => f.label === "Typical pay")?.value ?? "";
+  const degree = profile?.facts.find((f) => f.label === "Typical degree")?.value ?? "";
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const yA = useTransform(scrollYProgress, [0, 1], [36, -36]);
   const yB = useTransform(scrollYProgress, [0, 1], [60, -60]);
@@ -157,15 +173,19 @@ export function HeroIllustration() {
   const top3 = PROFILE_CAREERS.slice(0, 3).map((c) => c.title);
   return (
     <Fit base={1040}>
-        <div ref={ref} role="img" aria-label={`Three cards: the Investment Banker career with typical pay $361,000 a year; the student's Top 3 with ${top3[0]} as the strongest match; ${pro.name}, ${pro.role} at ${pro.org}, answering a student's question.`} className="grid grid-cols-3 items-end gap-7 px-2 pt-6 pb-4">
+        <div ref={ref} role="img" aria-label={`Three cards: the ${pick.title} career with typical pay ${pay}; the student's Top 3 with ${top3[0]} as the strongest match; ${pro.name}, ${pro.role} at ${pro.org}, answering a student's question.`} className="grid grid-cols-3 items-end gap-7 px-2 pt-6 pb-4">
           {/* career */}
           <motion.div style={{ y: yA }} variants={rise} custom={0} initial="hidden" whileInView="show" viewport={VIEW}>
           <Tile className="overflow-hidden">
-            <Poster src={POSTERS.ib} title="Investment Banker" world="Business & Money" className="aspect-[4/3] rounded-b-none" style={{ boxShadow: "none" }} />
-            <div className="grid grid-cols-2 gap-3 p-4">
-              <div className="flex flex-col gap-0.5"><Caps>Typical pay</Caps><span className="text-[17px] font-extrabold tabular-nums" style={{ color: INK }}>$361,000<span className="text-[12px] font-bold" style={{ color: INK2 }}>/year</span></span></div>
-              <div className="flex flex-col gap-0.5"><Caps>Typical degree</Caps><span className="text-[17px] font-extrabold" style={{ color: INK }}>Bachelor&apos;s</span></div>
-            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={pick.slug} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+                <Poster src={pick.photo} title={pick.title} world={pick.world} className="aspect-[4/3] rounded-b-none" style={{ boxShadow: "none" }} />
+                <div className="grid grid-cols-2 gap-3 p-4">
+                  <div className="flex flex-col gap-0.5"><Caps>Typical pay</Caps><span className="text-[17px] font-extrabold tabular-nums" style={{ color: INK }}>{pay.replace(/\/year$/, "")}<span className="text-[12px] font-bold" style={{ color: INK2 }}>/year</span></span></div>
+                  <div className="flex flex-col gap-0.5"><Caps>Typical degree</Caps><span className="text-[17px] font-extrabold" style={{ color: INK }}>{degree}</span></div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </Tile>
           </motion.div>
           {/* Top 3 */}
@@ -302,39 +322,44 @@ export function SchoolIllustration() {
   );
 }
 
-// School Districts: Student Progress, the summary by grade with export.
-const BY_GRADE = [
-  { grade: "Grade 9", total: 30, onTrack: 27, attention: 2, risk: 1 },
-  { grade: "Grade 10", total: 30, onTrack: 27, attention: 2, risk: 1 },
-  { grade: "Grade 11", total: 30, onTrack: 23, attention: 6, risk: 1 },
-  { grade: "Grade 12", total: 30, onTrack: 26, attention: 1, risk: 3 },
+// School Districts: Student Progress rolled up by school. The prototype's
+// school selector and its status vocabulary (On Track / Needs Attention /
+// At Risk), applied across a district; figures illustrative.
+const BY_SCHOOL = [
+  { school: "Lincoln High School", total: 120, onTrack: 103, attention: 11, risk: 6 },
+  { school: "Westfield High School", total: 410, onTrack: 322, attention: 61, risk: 27 },
+  { school: "Cranford High School", total: 380, onTrack: 281, attention: 68, risk: 31 },
+  { school: "Summit High School", total: 330, onTrack: 262, attention: 44, risk: 24 },
+  { school: "Union High School", total: 620, onTrack: 421, attention: 132, risk: 67 },
+  { school: "Plainfield High School", total: 540, onTrack: 350, attention: 121, risk: 69 },
 ];
 
 export function DistrictIllustration() {
+  const totals = BY_SCHOOL.reduce((t, r) => ({ total: t.total + r.total, onTrack: t.onTrack + r.onTrack, attention: t.attention + r.attention, risk: t.risk + r.risk }), { total: 0, onTrack: 0, attention: 0, risk: 0 });
   return (
     <Panel>
       <Fit base={600}>
-        <div role="img" aria-label="Student Progress: summary by grade for Lincoln High School, 120 students, 103 on track, 11 needing attention, 6 at risk, exportable as CSV or PDF." className="flex flex-col gap-5 px-7 pt-14 pb-7">
-          <OrgHead title="Student Progress" note="Lincoln High School · 2023-2024" right={<span className="flex gap-1.5"><Pill>CSV</Pill><Pill>PDF</Pill></span>} />
-          <span className="text-[13px] font-bold" style={{ color: INK }}>Summary by grade</span>
+        <div role="img" aria-label={`Student Progress for Union County Public Schools: ${BY_SCHOOL.length} high schools, ${totals.total} students, ${totals.onTrack} on track, ${totals.attention} needing attention, ${totals.risk} at risk, exportable as CSV or PDF.`} className="flex flex-col gap-5 px-7 pt-14 pb-7">
+          <OrgHead title="Student Progress" note={`Union County Public Schools · ${BY_SCHOOL.length} high schools · 2023-2024`} right={<span className="flex gap-1.5"><Pill>CSV</Pill><Pill>PDF</Pill></span>} />
+          <span className="text-[13px] font-bold" style={{ color: INK }}>Summary by school</span>
           <ul className="flex flex-col gap-3">
-            {BY_GRADE.map((g, i) => (
-              <li key={g.grade} className="grid items-center gap-4" style={{ gridTemplateColumns: "80px 1fr 110px" }}>
-                <span className="text-[13px] font-bold" style={{ color: INK }}>{g.grade}</span>
+            {BY_SCHOOL.map((g, i) => (
+              <li key={g.school} className="grid items-center gap-4" style={{ gridTemplateColumns: "168px 1fr 92px" }}>
+                <span className="flex min-w-0 flex-col"><span className="truncate text-[13px] font-bold" style={{ color: INK }}>{g.school}</span><span className="text-[11px] font-semibold" style={{ color: INK2 }}>{g.total} students</span></span>
                 <span className="flex h-[14px] overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}>
                   {[[g.onTrack, ON_TRACK], [g.attention, ATTENTION], [g.risk, AT_RISK]].map(([n, color], j) => (
-                    <motion.span key={j} className="block h-full" initial={{ width: 0 }} whileInView={{ width: `${(Number(n) / g.total) * 100}%` }} viewport={VIEW} transition={{ duration: 1, ease: EASE, delay: 0.15 + i * 0.08 + j * 0.05 }} style={{ background: color as string }} />
+                    <motion.span key={j} className="block h-full" initial={{ width: 0 }} whileInView={{ width: `${(Number(n) / g.total) * 100}%` }} viewport={VIEW} transition={{ duration: 1, ease: EASE, delay: 0.15 + i * 0.07 + j * 0.05 }} style={{ background: color as string }} />
                   ))}
                 </span>
-                <span className="text-right text-[12px] font-semibold tabular-nums" style={{ color: INK2 }}>{g.onTrack} · {g.attention} · {g.risk}</span>
+                <span className="text-right text-[12.5px] font-bold tabular-nums" style={{ color: INK }}>{Math.round((g.onTrack / g.total) * 100)}% <span className="font-semibold" style={{ color: INK2 }}>on track</span></span>
               </li>
             ))}
           </ul>
           <div className="flex flex-wrap items-center gap-4 border-t pt-4 text-[12px] font-semibold" style={{ borderColor: LINE, color: INK2 }}>
-            <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: ON_TRACK }} />On Track 103</span>
-            <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: ATTENTION }} />Needs Attention 11</span>
-            <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: AT_RISK }} />At Risk 6</span>
-            <span className="ml-auto font-bold" style={{ color: INK }}>120 students</span>
+            <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: ON_TRACK }} />On Track {totals.onTrack}</span>
+            <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: ATTENTION }} />Needs Attention {totals.attention}</span>
+            <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: AT_RISK }} />At Risk {totals.risk}</span>
+            <span className="ml-auto font-bold" style={{ color: INK }}>{totals.total.toLocaleString()} students</span>
           </div>
         </div>
       </Fit>
@@ -353,8 +378,8 @@ export function NonprofitIllustration() {
   return (
     <Panel>
       <Fit base={600}>
-        <div role="img" aria-label="Career + College Insights: 43% of students have saved Investment Banker as a top career, with three recommended actions, and the top saved careers." className="flex flex-col gap-5 px-7 pt-14 pb-7">
-          <OrgHead title="Career + College Insights" note="What students are exploring, saving, and aspiring toward" />
+        <div role="img" aria-label="Career + College Insights for a nonprofit cohort of 45 students across 3 schools: 43% have saved Investment Banker as a top career, with three recommended actions, and the top saved careers." className="flex flex-col gap-5 px-7 pt-14 pb-7">
+          <OrgHead title="Career + College Insights" note="Fall cohort · 45 students across 3 schools" />
           <div className="rounded-[18px] p-5" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--surface) 88%, #2f6bf2), color-mix(in srgb, var(--surface) 88%, #a855f7))" }}>
             <Caps color={VIOLET}>Dreamari recommendation</Caps>
             <p className="mt-2 text-[17px] leading-[23px] font-extrabold tracking-[-0.01em]" style={{ color: INK }}>43% of students have saved Investment Banker as a top career</p>
