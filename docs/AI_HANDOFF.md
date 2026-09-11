@@ -7379,3 +7379,8 @@ in credits.json (`mark`, `markLicense`, `markNote`):
   purple sampled from their share image.
 All are school media for demo use. Manifest regenerated (30 photos, 30
 marks); the monogram fallback in MarkBadge stays for any future school.
+
+## 2026-09-11 · College detail: back button inside the header
+Desktop back moved from its own row above the card to the header's top-left
+corner over the photo (glass circle), matching the phone's back + wordmark
+row; the photo is now the first thing on the page.

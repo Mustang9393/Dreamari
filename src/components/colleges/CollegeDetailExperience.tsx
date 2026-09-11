@@ -108,11 +108,14 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]">
-        <div className="hidden md:block"><BackButton fallback="/colleges" /></div>
 
         {/* header: the photo runs behind the whole card on phones; from md it
            sits on the right half and fades into the panel toward the text */}
         <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...PANEL, background: "#0e0c20" }}>
+          {/* desktop back sits inside the header over the photo, like the
+             phone's back + wordmark row, instead of on its own row above
+             the card (direct feedback, 11 Sept 2026) */}
+          <span className="absolute top-[16px] left-[16px] z-20 hidden md:block"><BackButton fallback="/colleges" /></span>
           <div className="absolute inset-0" aria-hidden>
             <CollegePicture c={c} sizes="100vw" priority className="absolute inset-0 h-full w-full md:hidden" />
             {/* Full bleed from md (direct feedback, 11 Sept 2026: "make the
