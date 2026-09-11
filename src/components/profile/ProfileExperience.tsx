@@ -66,6 +66,11 @@ function careerById(id: string | null): ProfileCareer | null {
 // The fill is the career report's paper (#1e2431) at a little transparency so
 // it stays in the glass family: a darker, sunken step inside the tab card.
 const INSET = { background: "var(--inset-surface)", borderColor: "var(--inset-border)" } as const;
+/** Brighter frosted glass for the Top 3 cards' Learn more / Get Career Report
+ *  (direct feedback, 11 Sept 2026): white at 14% over the blur, nothing dark
+ *  underneath (a glass-surface-3 layer read as black), a lighter edge and a
+ *  hairline highlight on top. */
+const FROST = { background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.22)", color: "var(--foreground)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)" } as const;
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Covers a student can pick for their header: six rendered materials (fluted
@@ -826,18 +831,20 @@ const BAND_ORDER: Record<string, number> = { Target: 0, Reach: 1, Safety: 2 };
 /** The Top 3 card's collapsed-by-default drawer for the not-as-critical
  *  facts (employers, schools) -- keeps the three cards' visible sections
  *  aligned 1:1 while the detail stays one tap away (direct feedback). */
-function MoreFactsAccordion({ facts, accent }: { facts: { label: string; value: string }[]; accent: string }) {
+function MoreFactsAccordion({ facts }: { facts: { label: string; value: string }[] }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex flex-col border-t pt-[var(--space-1)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
+    <div className="flex flex-col">
+      {/* text-left: a button centres its text by default, which showed the
+         moment the label wrapped (direct feedback, 11 Sept 2026). */}
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
-        className="dm-quiet flex min-h-[32px] w-full cursor-pointer items-center justify-between gap-[8px] px-[4px] text-[12px] font-bold tracking-[0.6px] uppercase"
+        className="dm-quiet flex min-h-[32px] w-full cursor-pointer items-center justify-between gap-[8px] px-[4px] text-left text-[12px] font-bold tracking-[0.6px] uppercase"
         style={{ color: "var(--muted-foreground)" }}
       >
-        Employers & schools
+        <span>Employers &amp; schools</span>
         <ChevronDown className={`h-4 w-4 flex-none transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden />
       </button>
       {open && (
@@ -1036,13 +1043,13 @@ function Top3Tab({
               <Link
                 href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
                 aria-label={sim ? `Play the ${career.title} simulation` : `${career.title} simulation, coming soon in Play`}
-                className="dm-tap mt-[var(--space-1)] flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border pr-[12px] pl-[5px] text-[14px] font-bold"
+                className="dm-tap mt-[var(--space-1)] flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
                 style={{ background: `color-mix(in srgb, ${accent} ${sim ? 20 : 9}%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} ${sim ? 55 : 28}%, var(--glass-border))`, color: "var(--foreground)" }}
               >
                 <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: sim ? accent : "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)" }}>
                   {sim ? <Play className="ml-[2px] h-[14px] w-[14px]" fill="currentColor" style={{ color: "#fff" }} aria-hidden /> : <Lock className="h-[13px] w-[13px]" style={{ color: "#fff" }} aria-hidden />}
                 </span>
-                <span className="min-w-0 truncate">{sim ? "Play a Day in the Life" : "Day in the Life coming soon"}</span>
+                <span className="min-w-0 leading-[17px]">{sim ? "Play a Day in the Life" : "Day in the Life coming soon"}</span>
               </Link>
 
 
@@ -1055,23 +1062,24 @@ function Top3Tab({
                 ))}
               </dl>
 
-              <MoreFactsAccordion facts={moreFacts} accent={accent} />
+              <MoreFactsAccordion facts={moreFacts} />
 
               {/* Learn more sits right where the reading stops (direct
-                 feedback, 11 Sept 2026): a ghost to this career's page. Get
+                 feedback, 11 Sept 2026): filled glass, this career's page. Get
                  Career Report stands apart at the foot, filled glass: the
                  student's own read on this career ("Get", not "View"; the
                  card already names the career). */}
               <Link
                 href={`/career/${id}`}
                 aria-label={`Learn more about ${career.title}`}
-                className="dm-quiet flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
-                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "transparent" }}
+                className="dm-tap mt-[var(--space-1)] flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
+                style={FROST}
               >
                 <span className="min-w-0 truncate">Learn more</span> <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
               </Link>
-              <div className="mt-auto border-t pt-[var(--space-3)]" style={{ borderColor: `color-mix(in srgb, ${accent} 25%, var(--glass-border))` }}>
-                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-3)" }}>
+              {/* No rules anywhere in the card (direct feedback, 11 Sept 2026). */}
+              <div className="mt-auto pt-[var(--space-1)]">
+                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={FROST}>
                   Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
                 </button>
               </div>

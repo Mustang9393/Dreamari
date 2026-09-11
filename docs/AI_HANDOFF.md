@@ -7601,9 +7601,11 @@ Verified on the Investment Banking report's 03 Career Exploration section.
   description line pair, then "Play a Day in the Life" (this career's
   simulation via `simulationFor`, else "Day in the Life coming soon" to
   `/play?focus=<id>`), the three reserved facts (no rule under Play),
-  Employers & schools fold, "Learn more" (ghost, `/career/<id>`) right where
-  the reading stops, then a rule and "Get Career Report" apart at the foot
-  (filled glass, opens the Report tab with that career as focus).
+  Employers & schools fold, "Learn more" (`/career/<id>`) right where the
+  reading stops, then "Get Career Report" apart at the foot (opens the
+  Report tab with that career as focus). Both buttons are the bright `FROST`
+  fill (white 14% over blur); no rules anywhere in the card; the fold label
+  is left-aligned (buttons centre text by default).
 - "Your Strongest Match" / "Make my primary" removed from the body. The
   kebab has two items: Remove from Top 3, Make My Primary. The primary
   career renders in the first card (sort by `focusId`).
