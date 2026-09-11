@@ -7359,3 +7359,8 @@ one shared placeholder. No new elements in the header.
   our label, not from Joshua's brief (the panel itself implements the
   brief's career -> route -> program -> school chain from the Replit
   reference, 10 Sept). Eyebrow removed, panel kept.
+- Follow-up (same day): stacking the mark above the name still moved the mark
+  up and down with the name's line count. The mark now sits BESIDE the name
+  as a 44px profile picture, centred on the name + place block; the block
+  reserves two name lines and two place lines (77) and sits at its foot, so
+  rows align and the place line wraps instead of truncating.

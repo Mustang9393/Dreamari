@@ -362,19 +362,23 @@ export function SchoolCard({
 
       <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[12px] px-[16px] pt-[118px] pb-[14px]">
         {/* mark, name and place, over the blurred tail of the photo */}
-        {/* Room for mark + two-line name + place (48 + 10 + 42 + 3 + 16) is
-           reserved on the whole group and the group sits at its foot, so a
-           long name never pushes the rest of the card down relative to its
-           neighbours AND the mark-to-name gap is the same on every card
-           (direct feedback, 11 Sept 2026: reserving the lines on the name
-           alone left a blank line under the mark on one-line names). */}
-        <div className="flex min-h-[119px] flex-col justify-end gap-[10px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
-          <MarkBadge c={c} size={48} />
-          <div className="flex flex-col gap-[3px]">
-            <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
-            <p className="flex min-w-0 items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
-              <MapPin className="h-[12px] w-[12px] flex-none" aria-hidden /><span className="truncate">{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}</span>
-            </p>
+        {/* Mark beside the name like a profile picture, centred on the
+           name + place block, so the mark-to-name relationship is identical
+           whether the name runs one line or two (direct feedback, 11 Sept
+           2026: stacking it above made the gap or the mark's height vary).
+           The block reserves two name lines and sits at its foot, so rows
+           still align across cards. */}
+        <div className="flex min-h-[77px] flex-col justify-end" style={{ textShadow: CARD_TEXT_SHADOW }}>
+          <div className="flex items-center gap-[10px]">
+            <MarkBadge c={c} size={44} />
+            <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+              <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
+              {/* wraps rather than truncates; the block above reserves the
+                 second line (two name lines + two place lines = 77) */}
+              <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
+                <MapPin className="mr-[4px] inline-block h-[12px] w-[12px] align-[-1px]" aria-hidden />{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}
+              </p>
+            </div>
           </div>
         </div>
 
