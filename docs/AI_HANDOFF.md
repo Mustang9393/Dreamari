@@ -7340,3 +7340,11 @@ so the students in regalia stay in frame). The page column is 1040 with
 md:px-8, matching Career detail; it was 960 and read narrow next to the
 taller photo. Checked Mount Marty, Rutgers, Princeton and Sinte Gleska on
 desktop, Princeton and Sinte Gleska on a phone.
+
+## 2026-09-11 · College detail: the mark on the title line
+Direct feedback: marks "more visible" without cluttering the header. MarkBadge
+now sits inline with the h1 from sm (64px; 52px stacked above the name on
+phones so long names keep the column), takes a `ring="light"` translucent
+white ring for sitting on the full-bleed photo, and the five schools with no
+mark get a per-school tinted monogram (hue hashed from the slug) instead of
+one shared placeholder. No new elements in the header.

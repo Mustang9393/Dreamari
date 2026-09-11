@@ -138,9 +138,17 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             <span className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.7) 0%, rgba(12,16,35,0.3) 30%, transparent 58%)" }} />
           </div>
           <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
-            <div className="flex flex-col gap-[var(--space-3)] md:max-w-[60%]">
-              <MarkBadge c={c} size={52} />
-              <h1 className="text-[34px] leading-[38px] font-extrabold text-balance sm:text-[44px] sm:leading-[48px]" style={{ ...DISPLAY, color: "#fff" }}>{c.name}</h1>
+            <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
+              {/* the mark sits on the title line, same weight as the type
+                 (direct feedback, 11 Sept 2026: marks more visible, header
+                 no busier); a light ring reads on sky and brick alike */}
+              <div className="flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-center sm:gap-[var(--space-4)]">
+                {/* phones stack the badge above the name so a long name keeps
+                   the full column width; inline from sm */}
+                <span className="sm:hidden"><MarkBadge c={c} size={52} ring="light" /></span>
+                <span className="hidden sm:block"><MarkBadge c={c} size={64} ring="light" /></span>
+                <h1 className="text-[34px] leading-[38px] font-extrabold text-balance sm:text-[44px] sm:leading-[48px]" style={{ ...DISPLAY, color: "#fff" }}>{c.name}</h1>
+              </div>
               <p className={LABEL} style={{ color: "rgba(255,255,255,0.85)" }}>{c.city}, {c.stateName}</p>
               <ul className="flex flex-wrap gap-[6px]" aria-label="About this college" style={{ textShadow: "none" }}>
                 {[SIZE_WORD[c.size], ...tags(c)].map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "rgba(255,255,255,0.14)", color: "#fff" }}>{t}</li>)}

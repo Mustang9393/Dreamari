@@ -102,14 +102,27 @@ export function SaveButton({ on, onToggle, size = 40 }: { on: boolean; onToggle:
 
 /** The college's mark on a white disc: seals and logos were drawn for
  *  white paper, so they read there; a letter stands in when we have none. */
-export function MarkBadge({ c, size = 44 }: { c: College; size?: number }) {
+/** Deterministic hue per school, so the monogram fallbacks (five of thirty
+ *  have no mark) read as five different schools, not one placeholder. */
+function slugHue(slug: string) {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) % 360;
+  return h;
+}
+
+export function MarkBadge({ c, size = 44, ring = "dark" }: { c: College; size?: number; /** "light": translucent white ring for sitting on a photo */ ring?: "dark" | "light" }) {
   const mark = collegeMark(c);
+  const ringColor = ring === "light" ? "rgba(255,255,255,0.55)" : "#0e0c20";
   return (
-    <span className="relative flex flex-none items-center justify-center overflow-hidden rounded-full border-2" style={{ width: size, height: size, background: "#fff", borderColor: "#0e0c20", boxShadow: "0 6px 18px -6px rgba(0,0,0,0.6)" }} aria-hidden>
+    <span
+      className="relative flex flex-none items-center justify-center overflow-hidden rounded-full border-2"
+      style={{ width: size, height: size, background: mark ? "#fff" : `hsl(${slugHue(c.slug)} 42% 30%)`, borderColor: ringColor, boxShadow: "0 6px 18px -6px rgba(0,0,0,0.6)" }}
+      aria-hidden
+    >
       {mark ? (
         <Image src={mark} alt="" fill sizes={`${size * 2}px`} className="object-contain p-[12%]" />
       ) : (
-        <span className="text-[18px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#0e0c20" }}>{c.name[0]}</span>
+        <span className="leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", fontSize: Math.round(size * 0.42), color: "#fff" }}>{c.name[0]}</span>
       )}
     </span>
   );
