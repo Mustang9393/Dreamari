@@ -7364,3 +7364,18 @@ one shared placeholder. No new elements in the header.
   as a 44px profile picture, centred on the name + place block; the block
   reserves two name lines and two place lines (77) and sits at its foot, so
   rows align and the place line wraps instead of truncating.
+
+## 2026-09-11 · Brandmarks for the last five schools (30 of 30 now)
+Direct feedback: find the missing logos beyond Commons. Sources per school
+in credits.json (`mark`, `markLicense`, `markNote`):
+- Mitchell Technical College: M emblem cropped from the en.wikipedia
+  wordmark (fair use); the school's site blocks non-US traffic.
+- Mount Marty University: shield from mountmarty.edu (90 Years banner).
+- Middlesex College: MC monogram from the site header SVG, recoloured from
+  white to navy so it reads on the white badge.
+- Paul Mitchell The School Rapid City: PM schools app icon, fetched through
+  the Wayback Machine (the site returns 403 to scripts).
+- Stewart School: the S icon from stewartschool.edu on a disc of the brand
+  purple sampled from their share image.
+All are school media for demo use. Manifest regenerated (30 photos, 30
+marks); the monogram fallback in MarkBadge stays for any future school.

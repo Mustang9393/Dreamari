@@ -49,7 +49,10 @@
     "photoLicense": "School media (all rights reserved; demo use)",
     "photoAuthor": "Mitchell Technical College",
     "photoUrl": "https://www.youtube.com/watch?v=73NsJQ-4y0Y",
-    "photoNote": "Aerial of the Mitchell campus from the college's own drone video; mitchelltech.edu blocks non-US traffic and publishes no exterior still"
+    "photoNote": "Aerial of the Mitchell campus from the college's own drone video; mitchelltech.edu blocks non-US traffic and publishes no exterior still",
+    "mark": "https://en.wikipedia.org/wiki/File:Mitchell_Technical_College_logo.png",
+    "markNote": "M emblem cropped from the wordmark on en.wikipedia (fair use); mitchelltech.edu blocks non-US traffic",
+    "markLicense": "School media (all rights reserved; demo use)"
   },
   "augustana-university": {
     "photo": "Old Augustana.jpg",
@@ -111,7 +114,10 @@
     "photoLicense": "School website (all rights reserved; demo use)",
     "photoAuthor": "Mount Marty University",
     "photoUrl": "https://www.mountmarty.edu/globalassets/backend-reconstruction/marty-20220830-0038-2.jpg",
-    "photoNote": "Aerial of Bishop Marty Memorial Chapel and the Yankton campus, from mountmarty.edu"
+    "photoNote": "Aerial of Bishop Marty Memorial Chapel and the Yankton campus, from mountmarty.edu",
+    "mark": "https://www.mountmarty.edu/globalassets/90-website-shiel.png",
+    "markNote": "Shield from mountmarty.edu (carries the 90 Years banner)",
+    "markLicense": "School media (all rights reserved; demo use)"
   },
   "kairos-university": {
     "photo": "SiouxFallsSeminaryCampus.jpg",
@@ -144,7 +150,10 @@
     "photo": "Downtown Sioux Falls and Falls Park.jpg",
     "photoLicense": "CC BY-SA 4.0",
     "photoAuthor": "Maxpower2727",
-    "photoUrl": "https://commons.wikimedia.org/wiki/File:Downtown_Sioux_Falls_and_Falls_Park.jpg"
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Downtown_Sioux_Falls_and_Falls_Park.jpg",
+    "mark": "https://static.wixstatic.com/media/d34dac_7c9753d01a02457c9b7fe6ae9bb318c2~mv2.png",
+    "markNote": "S icon from stewartschool.edu set on a disc of the brand purple sampled from their share image",
+    "markLicense": "School media (all rights reserved; demo use)"
   },
   "sinte-gleska-university": {
     "mark": "https://upload.wikimedia.org/wikipedia/en/a/a9/Sinte_Gleska_University_logo.jpg",
@@ -160,7 +169,10 @@
     "photo": "Rapid City Skyline (2022).jpg",
     "photoLicense": "CC BY-SA 4.0",
     "photoAuthor": "WeaponizingArchitecture",
-    "photoUrl": "https://commons.wikimedia.org/wiki/File:Rapid_City_Skyline_(2022).jpg"
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Rapid_City_Skyline_(2022).jpg",
+    "mark": "https://paulmitchell.edu/apple-touch-icon.png",
+    "markNote": "PM schools app icon (via the Wayback Machine; paulmitchell.edu returns 403 to scripts)",
+    "markLicense": "School media (all rights reserved; demo use)"
   },
   "sisseton-wahpeton-college": {
     "mark": "https://upload.wikimedia.org/wikipedia/en/1/19/Sisseton_Wahpeton_College.png",
@@ -212,7 +224,10 @@
     "photo": "Raritan Arsenal Building 118.jpg",
     "photoLicense": "CC BY-SA 2.0",
     "photoAuthor": "Adam Moss",
-    "photoUrl": "https://commons.wikimedia.org/wiki/File:Raritan_Arsenal_Building_118.jpg"
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Raritan_Arsenal_Building_118.jpg",
+    "mark": "https://middlesexcollege.edu/wp-content/themes/middlesex-college/assets/images/svg/logo-white.svg",
+    "markNote": "MC monogram cropped from the site header SVG, recoloured from white to navy #123a6d for the white badge",
+    "markLicense": "School media (all rights reserved; demo use)"
   },
   "montclair-state-university": {
     "photo": "MSU College Hall.jpg",
