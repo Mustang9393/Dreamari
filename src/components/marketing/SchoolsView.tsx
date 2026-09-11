@@ -9,7 +9,8 @@ import { DemoRequestForm } from "./DemoRequestForm";
 import { Disclosure } from "./Disclosure";
 import { DO_COPY } from "./DreamOpportunity";
 import { PartnerLogoGrid } from "./PartnerTicker";
-import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, HeroVisual, ImmerseArt, MatchArt, OrganizationBand, ProgressArt } from "./SchoolsVisuals";
+import { Grad, HeroShowcase, Highlights, StatBand } from "./SchoolsShowcase";
+import { BuildArt, ConnectArt, DataArt, ExploreArt, Frame, ImmerseArt, MatchArt, OrganizationBand, ProgressArt } from "./SchoolsVisuals";
 import { useRevealOnScroll, useScrollActiveStage } from "./scrollHooks";
 import { TrustLine } from "./TrustLine";
 
@@ -318,39 +319,50 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           className="pointer-events-none absolute -top-64 -right-48 h-[720px] w-[720px] rounded-full blur-[16px]"
           style={{ background: "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--primary) 16%, transparent), color-mix(in srgb, var(--hero-accent-purple) 55%, transparent) 45%, transparent 70%)" }}
         />
-        <div className="relative mx-auto max-w-[1200px] pb-14 sm:pb-20">
-          <div className="mb-10 flex justify-center sm:mb-14">
+        <div className="relative mx-auto max-w-[1240px] pb-10 sm:pb-16">
+          <div className="mb-8 flex justify-center sm:mb-10">
             <AudienceToggle view={view} onChange={onChangeView} />
           </div>
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-6">
-              <h1
-                className="text-[clamp(40px,4.6vw,64px)] leading-[1.02] font-extrabold tracking-[-0.02em]"
-                style={{ color: "var(--foreground)", textWrap: "balance" }}
-              >
-                Help students discover their direction, and build the skills to pursue it.
-              </h1>
-              <p className="mt-5 max-w-[540px] text-[clamp(17px,0.7vw+13px,20px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-                Bring personalized career exploration, day-in-the-life simulations, and professional connections to your students.
-                Give educators the insights to guide their next steps.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <MarketingButton variant="primary" size="lg" href="#demo">
-                  Request a demo
-                </MarketingButton>
-                <MarketingButton variant="ghost" size="lg" href="#student-experience">
-                  Explore the platform
-                </MarketingButton>
-              </div>
-              <p className="mt-8 text-[13.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                For schools, districts, nonprofits, and educational institutions.
-              </p>
+          {/* Centred stack, the product-page shape (11 Sept 2026): the headline
+             carries the page's one gradient, the product floats below it. */}
+          <div className="mx-auto flex max-w-[920px] flex-col items-center text-center">
+            <h1
+              className="text-[clamp(40px,5vw,72px)] leading-[1.02] font-extrabold tracking-[-0.025em]"
+              style={{ color: "var(--foreground)", textWrap: "balance" }}
+            >
+              Help students discover their direction, <Grad>and build the skills to pursue it.</Grad>
+            </h1>
+            <p className="mt-6 max-w-[640px] text-[clamp(17px,0.7vw+13px,21px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+              Bring personalized career exploration, day-in-the-life simulations, and professional connections to your students.
+              Give educators the insights to guide their next steps.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <MarketingButton variant="primary" size="lg" href="#demo">
+                Request a demo
+              </MarketingButton>
+              <MarketingButton variant="ghost" size="lg" href="#student-experience">
+                Explore the platform
+              </MarketingButton>
             </div>
-            <div className="lg:col-span-6 lg:pl-8">
-              <HeroVisual />
-              <Caption>Career Detail for Investment Banking, as it ships in the app today.</Caption>
-            </div>
+            <p className="mt-6 text-[13.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+              For schools, districts, nonprofits, and educational institutions.
+            </p>
           </div>
+          <div className="mt-12 sm:mt-16 lg:mt-20">
+            <HeroShowcase />
+          </div>
+        </div>
+      </section>
+
+      {/* ---- Highlights ------------------------------------------------------ */}
+      <section aria-labelledby="highlights-heading" className="pt-6 sm:pt-10">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <Reveal>
+            <SectionHead id="highlights-heading" title="The highlights." />
+          </Reveal>
+        </div>
+        <div className="mt-8 sm:mt-10">
+          <Highlights items={STAGES.map((s) => ({ key: s.n, title: `${s.n} ${s.title}`, line: s.line, art: s.art, bare: s.bare }))} />
         </div>
       </section>
 
@@ -398,6 +410,15 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           <div className="mt-4">
             <StickyStages openStages={openStages} toggleStage={toggleStage} />
           </div>
+        </div>
+      </section>
+
+      {/* ---- By the numbers --------------------------------------------------- */}
+      <section aria-label="Dreamari by the numbers" className="px-6 py-16 sm:py-24">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <StatBand />
+          </Reveal>
         </div>
       </section>
 

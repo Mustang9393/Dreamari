@@ -259,3 +259,16 @@
   100% { opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .mkt-console-card [class*="mkt-win-flash"] { display: none; } }
+
+/* ---------- Schools showcase (11 Sept 2026): feature bubbles and devices drift
+   on their own slow bob, each offset by --d so the cluster never moves as one
+   block. Pure translate: these are UI objects, not a soft body like the mascot. */
+@keyframes mkt-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(calc(var(--amp, 10px) * -1)); }
+}
+.mkt-bob { animation: mkt-bob var(--dur, 6s) ease-in-out infinite; animation-delay: var(--d, 0s); }
+@media (prefers-reduced-motion: reduce) { .mkt-bob { animation: none; } }
+/* Carousel track: scrollbar hidden, snap per card. */
+.mkt-track { scrollbar-width: none; -ms-overflow-style: none; }
+.mkt-track::-webkit-scrollbar { display: none; }

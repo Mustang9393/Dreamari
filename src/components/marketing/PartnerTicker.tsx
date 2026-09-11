@@ -79,3 +79,6 @@ export function PartnerLogoGrid({ className = "", tone = "dark" }: { className?:
     </div>
   );
 }
+
+/** How many partner marks the wall shows; the Schools stats band reads it. */
+export const PARTNER_COUNT = PARTNERS.length;

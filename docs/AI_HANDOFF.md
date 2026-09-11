@@ -7384,3 +7384,24 @@ marks); the monogram fallback in MarkBadge stays for any future school.
 Desktop back moved from its own row above the card to the header's top-left
 corner over the photo (glass circle), matching the phone's back + wordmark
 row; the photo is now the first thing on the page.
+
+## 2026-09-11 · Schools landing, product-page pass (slice 1, not pushed)
+Reference: Apple's Watch SE 3 and iPhone 18 Pro pages (structure, graphics,
+interactions). New `SchoolsShowcase.tsx`:
+- Hero is a centred stack (toggle, gradient headline via `Grad`, lede, CTAs)
+  with `HeroShowcase` below: Career Detail on a tablet-sized glass card, the
+  Match deck on a phone bezel (`Phone`), the student's profile card, and five
+  feature bubbles (+100 XP, 91% match ring, Top 3 saved, a verified JPMorgan
+  analyst, Career Report ready) drifting on `mkt-bob`. Every piece is a real
+  component with real data; no screenshots. Phones show the phone and the
+  bubbles only.
+- "The highlights." carousel (`Highlights`): the five stage compositions as
+  tall 4:5 cards on a snap track with copy on top, dots and prev/next arrows.
+  The page itself never auto-scrolls.
+- `StatBand`: 15 career worlds, 44 careers, 30 colleges and trade schools,
+  50 partner companies, all counted from the data at build time (new
+  `PARTNER_COUNT` export in PartnerTicker).
+Copy unchanged. `CareerHeader` exported from SchoolsVisuals for the tablet.
+Next slices proposed: stage chapters as eyebrow + gradient headline + tile
+carousels of the three detail lines; a sticky local sub-nav; a "pick a
+career" gallery that swaps the showcase's career.

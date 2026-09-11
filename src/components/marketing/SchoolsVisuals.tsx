@@ -177,7 +177,7 @@ export function HeroVisual() {
 // one faithful recreation on the page: the poster photo on the right fading
 // into the card, CardProgressiveBlur and the header's own scrims, the title in
 // the world's poster face, the actions, the scenario line and two quick facts.
-function CareerHeader() {
+export function CareerHeader() {
   const profile = careerProfile("investment-banking");
   const accent = WORLD_COLORS["Business & Money"];
   const facts = (profile?.facts ?? []).slice(0, 2);
