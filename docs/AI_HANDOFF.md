@@ -7485,3 +7485,10 @@ scroll effects".
   (layoutId); Learn more expands with height animation; stage cards lift on
   hover; bars, rings and rows draw in on scroll (framer-motion whileInView).
 Next: user review, then push.
+- Follow-up: the sources section regrouped by the heading's two claims
+  (direct feedback: "grouping and ordering seems weird"). Research = the
+  three sources as visible tiles (the reference's "Explore our sources"
+  toggle is gone; hiding the sources behind a button left an empty card).
+  Industry = one Dream Opportunity block: mark, "Built by the team behind
+  Dream Opportunity" and its line, then the partner wall, then the 12-years
+  closing line.

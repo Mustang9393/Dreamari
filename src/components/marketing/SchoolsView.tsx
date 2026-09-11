@@ -195,7 +195,6 @@ function StageCard({ stage, open, onToggle }: { stage: Stage; open: boolean; onT
 
 export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
   const [openStage, setOpenStage] = useState<string | null>(null);
-  const [sourcesOpen, setSourcesOpen] = useState(false);
   const [audience, setAudience] = useState(AUDIENCES[0]);
 
   return (
@@ -332,40 +331,36 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
           <Reveal>
             <SectionHead title="Grounded in career research. Connected to industry." lede="Career exploration informed by established resources, public occupational data, and insights from professionals at leading companies." />
           </Reveal>
+          {/* Research: the three sources, visible, one tile each. */}
           <Reveal>
-            <div className="mt-12 max-w-[760px] rounded-[24px] border bg-white p-6 sm:p-8" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
-              <div className="flex">
-                <button type="button" aria-expanded={sourcesOpen} aria-controls="sources-list" onClick={() => setSourcesOpen((o) => !o)} className="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-md)] border px-4 py-2.5 text-[14.5px] font-bold" style={{ borderColor: "rgba(5,7,15,0.14)", color: "var(--foreground)", background: "white" }}>
-                  Explore our sources
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${sourcesOpen ? "rotate-180" : ""}`} strokeWidth={2.5} aria-hidden />
-                </button>
-              </div>
-              <ul id="sources-list" hidden={!sourcesOpen} className="mt-6">
-                {SOURCES.map((s, i) => (
-                  <li key={s.what} className={`flex flex-col gap-0.5 py-3.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "var(--border)" }}>
-                    <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{s.what}</span>
-                    <span className="text-[14px] sm:text-right" style={{ color: "var(--muted-foreground)" }}>{s.from}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-8 flex flex-col gap-5 border-t pt-8 sm:flex-row sm:items-center sm:gap-7" style={{ borderColor: "var(--border)" }}>
+            <ul className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {SOURCES.map((src) => (
+                <li key={src.what} className="flex flex-col gap-2 rounded-[20px] border bg-white p-6" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
+                  <span className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>{src.what}</span>
+                  <span className="text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{src.from}</span>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+          {/* Industry: Dream Opportunity and its partners, one block. The one
+             partner display on this page, marks in full brand colour (Joshua
+             Pierce, 6 Sept 2026). */}
+          <Reveal>
+            <div className="mt-6 rounded-[24px] border bg-white p-6 sm:p-10" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-7">
                 <DOMark className="h-16 w-16 flex-none sm:h-20 sm:w-20" />
                 <div>
-                  <h3 className="text-[19px] font-bold" style={{ color: "var(--foreground)" }}>Built by the team behind Dream Opportunity</h3>
-                  <p className="mt-1 max-w-[46ch] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>A global nonprofit connecting students with professionals at leading companies.</p>
+                  <h3 className="text-[clamp(22px,2vw,26px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>Built by the team behind Dream Opportunity</h3>
+                  <p className="mt-1.5 max-w-[56ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>A global nonprofit connecting students with professionals at leading companies.</p>
                 </div>
               </div>
+              <div className="mt-8 border-t pt-8" style={{ borderColor: "var(--border)" }}>
+                <PartnerLogoGrid tone="light" />
+              </div>
+              <p className="mt-8 max-w-[720px] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+                {DO_COPY.close}
+              </p>
             </div>
-          </Reveal>
-          {/* One partner display on this page, inside the Dream Opportunity
-             section, marks in full brand colour (Joshua Pierce, 6 Sept 2026). */}
-          <Reveal>
-            <div className="mt-10 rounded-[24px] border bg-white p-6 sm:p-10" style={{ borderColor: "var(--border)", boxShadow: "0 2px 6px -2px rgba(5,7,15,0.08)" }}>
-              <PartnerLogoGrid tone="light" />
-            </div>
-            <p className="mt-8 max-w-[720px] text-[15px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
-              {DO_COPY.close}
-            </p>
           </Reveal>
         </div>
       </section>
