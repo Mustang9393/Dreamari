@@ -593,16 +593,6 @@ export function ConnectIllustration() {
 // 4. Educators: the dashboard Overview and the Review Queue.
 // ---------------------------------------------------------------------------
 
-const PATHWAYS = [
-  { label: "Technology", n: 24, color: "#6366f1" },
-  { label: "Healthcare", n: 21, color: TEAL },
-  { label: "Finance & Business", n: 18, color: AMBER },
-  { label: "Skilled Trades", n: 16, color: BLUE },
-  { label: "Education", n: 15, color: VIOLET },
-  { label: "Arts & Media", n: 14, color: ROSE },
-  { label: "Law & Government", n: 12, color: CYAN },
-];
-
 const QUEUE = [
   { name: "Marcus Thompson", grade: 11, item: "Resume Draft", priority: "Normal", state: "Pending Review", due: "Due Jan 20" },
   { name: "Jamal Washington", grade: 9, item: "Career Report", priority: "High", state: "Pending Review", due: "Due Jan 18" },
@@ -613,43 +603,32 @@ const QUEUE = [
 export function DashboardIllustration() {
   return (
     <Panel>
-      <Fit base={1040}>
-        <div role="img" aria-label="Counselor dashboard Overview for Lincoln High School: Student Status 86% on track (103 on track, 11 need attention, 6 at risk); Postsecondary Plans, 79 with a plan and 41 undecided; Career Pathways across 120 students led by Technology; and a Review Queue of student submissions awaiting approval." className="flex flex-col gap-6 px-8 pt-14 pb-8">
-          <OrgHead title="Overview" note="Welcome back, Sarah. Here's your caseload at a glance." right={<span className="flex gap-1.5"><Pill>Lincoln High School</Pill><Pill>All grades</Pill></span>} />
-          <div className="grid grid-cols-3 gap-4">
+      <Fit base={640}>
+        <div role="img" aria-label="Counselor dashboard Overview for Lincoln High School: Student Status 86% on track (103 on track, 11 need attention, 6 at risk); Postsecondary Plans, 79 with a plan and 41 undecided; and a Review Queue of student submissions awaiting approval." className="flex flex-col gap-5 px-7 pt-14 pb-7">
+          <OrgHead title="Overview" note="Lincoln High School · 120 students" right={<Pill>All grades</Pill>} />
+          <div className="grid grid-cols-2 gap-4">
             <Tile className="flex flex-col gap-4 p-5" style={{ boxShadow: "none" }}>
               <span className="text-[13.5px] font-extrabold" style={{ color: INK }}>Student Status</span>
-              <div className="flex items-center gap-5">
-                <Donut segments={[{ value: 103, color: ON_TRACK }, { value: 11, color: ATTENTION }, { value: 6, color: AT_RISK }]} size={112} stroke={13}>
-                  <span className="flex flex-col items-center leading-none"><span className="text-[24px] font-extrabold tabular-nums tracking-[-0.02em]" style={{ color: INK }}>86%</span><span className="mt-1 text-[10.5px] font-semibold" style={{ color: INK2 }}>on track</span></span>
+              <div className="flex items-center gap-4">
+                <Donut segments={[{ value: 103, color: ON_TRACK }, { value: 11, color: ATTENTION }, { value: 6, color: AT_RISK }]} size={104} stroke={12}>
+                  <span className="flex flex-col items-center leading-none"><span className="text-[22px] font-extrabold tabular-nums tracking-[-0.02em]" style={{ color: INK }}>86%</span><span className="mt-1 text-[10px] font-semibold" style={{ color: INK2 }}>on track</span></span>
                 </Donut>
-                <ul className="flex flex-col gap-2 text-[12.5px] font-semibold" style={{ color: INK }}>
-                  <li className="flex items-center gap-2"><span className="size-2.5 rounded-full" style={{ background: ON_TRACK }} />On Track <span className="ml-auto pl-3 tabular-nums" style={{ color: INK2 }}>103</span></li>
-                  <li className="flex items-center gap-2"><span className="size-2.5 rounded-full" style={{ background: ATTENTION }} />Needs Attention <span className="ml-auto pl-3 tabular-nums" style={{ color: INK2 }}>11</span></li>
-                  <li className="flex items-center gap-2"><span className="size-2.5 rounded-full" style={{ background: AT_RISK }} />At Risk <span className="ml-auto pl-3 tabular-nums" style={{ color: INK2 }}>6</span></li>
+                <ul className="flex min-w-0 flex-1 flex-col gap-1.5 text-[12px] font-semibold" style={{ color: INK }}>
+                  <li className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: ON_TRACK }} />On Track <span className="ml-auto tabular-nums" style={{ color: INK2 }}>103</span></li>
+                  <li className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: ATTENTION }} />Needs Attention <span className="ml-auto tabular-nums" style={{ color: INK2 }}>11</span></li>
+                  <li className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: AT_RISK }} />At Risk <span className="ml-auto tabular-nums" style={{ color: INK2 }}>6</span></li>
                 </ul>
               </div>
             </Tile>
             <Tile className="flex flex-col gap-4 p-5" style={{ boxShadow: "none" }}>
               <span className="text-[13.5px] font-extrabold" style={{ color: INK }}>Postsecondary Plans</span>
-              <div className="flex items-center gap-5">
-                <Donut segments={[{ value: 79, color: BLUE }, { value: 41, color: "#d9ddec" }]} size={112} stroke={13}>
-                  <span className="flex flex-col items-center leading-none"><span className="text-[24px] font-extrabold tabular-nums tracking-[-0.02em]" style={{ color: INK }}>79</span><span className="mt-1 text-[10.5px] font-semibold" style={{ color: INK2 }}>have a plan</span></span>
+              <div className="flex items-center gap-4">
+                <Donut segments={[{ value: 79, color: BLUE }, { value: 41, color: "#d9ddec" }]} size={104} stroke={12}>
+                  <span className="flex flex-col items-center leading-none"><span className="text-[22px] font-extrabold tabular-nums tracking-[-0.02em]" style={{ color: INK }}>79</span><span className="mt-1 text-[10px] font-semibold" style={{ color: INK2 }}>have a plan</span></span>
                 </Donut>
-                <ul className="flex flex-col gap-2 text-[12.5px] font-semibold" style={{ color: INK }}>
-                  <li className="flex items-center gap-2"><span className="size-2.5 rounded-full" style={{ background: BLUE }} />With Plan <span className="ml-auto pl-3 tabular-nums" style={{ color: INK2 }}>79</span></li>
-                  <li className="flex items-center gap-2"><span className="size-2.5 rounded-full" style={{ background: "#d9ddec" }} />Undecided <span className="ml-auto pl-3 tabular-nums" style={{ color: INK2 }}>41</span></li>
-                </ul>
-              </div>
-            </Tile>
-            <Tile className="flex flex-col gap-4 p-5" style={{ boxShadow: "none" }}>
-              <span className="text-[13.5px] font-extrabold" style={{ color: INK }}>Career Pathways</span>
-              <div className="flex items-center gap-5">
-                <Donut segments={PATHWAYS.map((p) => ({ value: p.n, color: p.color }))} size={112} stroke={13}>
-                  <span className="flex flex-col items-center leading-none"><span className="text-[24px] font-extrabold tabular-nums tracking-[-0.02em]" style={{ color: INK }}>120</span><span className="mt-1 text-[10.5px] font-semibold" style={{ color: INK2 }}>students</span></span>
-                </Donut>
-                <ul className="flex flex-col gap-1 text-[11.5px] font-semibold" style={{ color: INK }}>
-                  {PATHWAYS.slice(0, 5).map((p) => <li key={p.label} className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: p.color }} />{p.label}<span className="ml-auto pl-3 tabular-nums" style={{ color: INK2 }}>{p.n}</span></li>)}
+                <ul className="flex min-w-0 flex-1 flex-col gap-1.5 text-[12px] font-semibold" style={{ color: INK }}>
+                  <li className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: BLUE }} />With Plan <span className="ml-auto tabular-nums" style={{ color: INK2 }}>79</span></li>
+                  <li className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: "#d9ddec" }} />Undecided <span className="ml-auto tabular-nums" style={{ color: INK2 }}>41</span></li>
                 </ul>
               </div>
             </Tile>
@@ -657,14 +636,12 @@ export function DashboardIllustration() {
           <Tile className="flex flex-col gap-3 p-5" style={{ boxShadow: "none" }}>
             <div className="flex items-center justify-between"><span className="text-[13.5px] font-extrabold" style={{ color: INK }}>Review Queue</span><span className="text-[12px] font-semibold" style={{ color: INK2 }}>Pending Reviews (15)</span></div>
             <ul className="flex flex-col divide-y" style={{ borderColor: LINE }}>
-              {QUEUE.map((q, i) => (
-                <motion.li key={q.name + q.item} className="grid items-center gap-4 py-2.5" style={{ gridTemplateColumns: "1.4fr 1.3fr 0.7fr 1fr 0.8fr auto" }} variants={rise} custom={i * 0.6} initial="hidden" whileInView="show" viewport={VIEW}>
+              {QUEUE.slice(0, 3).map((q, i) => (
+                <motion.li key={q.name + q.item} className="grid items-center gap-3 py-2.5" style={{ gridTemplateColumns: "minmax(170px,1.4fr) minmax(0,1fr) auto auto" }} variants={rise} custom={i * 0.6} initial="hidden" whileInView="show" viewport={VIEW}>
                   <span className="flex min-w-0 items-center gap-2.5"><Initials name={q.name} size={28} from={i % 2 ? VIOLET : BLUE} to={i % 2 ? ROSE : VIOLET} /><span className="flex min-w-0 flex-col"><span className="truncate text-[13px] font-bold" style={{ color: INK }}>{q.name}</span><span className="text-[11px] font-semibold" style={{ color: INK2 }}>Grade {q.grade}</span></span></span>
-                  <span className="truncate text-[13px] font-semibold" style={{ color: INK }}>{q.item}</span>
-                  <span className="text-[12px] font-bold" style={{ color: q.priority === "Urgent" ? AT_RISK : q.priority === "High" ? ATTENTION : INK2 }}>{q.priority}</span>
+                  <span className="flex min-w-0 flex-col"><span className="truncate text-[12.5px] font-semibold" style={{ color: INK }}>{q.item}</span><span className="text-[11px] font-bold" style={{ color: q.priority === "Urgent" ? AT_RISK : q.priority === "High" ? ATTENTION : INK2 }}>{q.priority}</span></span>
                   <span><ReviewChip state={q.state} /></span>
-                  <span className="text-[12px] font-semibold tabular-nums" style={{ color: INK2 }}>{q.due}</span>
-                  <span className="flex gap-1.5"><span className="rounded-[8px] px-3 py-1.5 text-[11.5px] font-bold text-white" style={{ background: GREEN }}>Approve</span><span className="rounded-[8px] border px-3 py-1.5 text-[11.5px] font-bold" style={{ borderColor: LINE, color: INK }}>Request Changes</span></span>
+                  <span className="flex gap-1.5"><span className="rounded-[8px] px-2.5 py-1.5 text-[11px] font-bold text-white" style={{ background: GREEN }}>Approve</span><span className="rounded-[8px] border px-2.5 py-1.5 text-[11px] font-bold" style={{ borderColor: LINE, color: INK }}>Request Changes</span></span>
                 </motion.li>
               ))}
             </ul>

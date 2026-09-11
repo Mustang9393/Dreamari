@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight, ChevronDown, LineChart, Map, MessageSquare, Target } from "lucide-react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { useState, type ReactNode } from "react";
 import { AudienceToggle } from "./AudienceToggle";
@@ -98,11 +98,13 @@ const STAGES: Stage[] = [
   },
 ];
 
+// Icon badges as on the reference (direct feedback, 11 Sept 2026: they
+// make the hierarchy clearer here).
 const EDUCATOR_FEATURES = [
-  { title: "Understand their direction", body: "See the careers and pathways students are exploring." },
-  { title: "Follow their progress", body: "Track milestones, submissions, and completed activities." },
-  { title: "Keep students moving", body: "Share announcements and communicate about next steps." },
-  { title: "Show your progress", body: "Report on engagement, career exploration, and planning milestones." },
+  { Icon: Map, title: "Understand their direction", body: "See the careers and pathways students are exploring." },
+  { Icon: LineChart, title: "Follow their progress", body: "Track milestones, submissions, and completed activities." },
+  { Icon: MessageSquare, title: "Keep students moving", body: "Share announcements and communicate about next steps." },
+  { Icon: Target, title: "Show your progress", body: "Report on engagement, career exploration, and planning milestones." },
 ];
 
 const SOURCES = [
@@ -309,21 +311,26 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section className="border-y px-6 py-24 sm:py-32" style={{ borderColor: "color-mix(in srgb, var(--primary) 12%, transparent)", background: "color-mix(in srgb, var(--primary) 4%, white)" }}>
         <div className="mx-auto max-w-[1100px]">
           <Reveal>
-            <SectionHead title="Know where students are. See where to help." lede="Bring student interests, activity, and progress into one dashboard to support more informed guidance." />
+            <SectionHead title="Know where students are. See where to help." lede="Bring student interests, activity, and progress into one dashboard to support more informed guidance." wide />
           </Reveal>
           <Reveal>
-            <ul className="mt-12 grid grid-cols-1 gap-x-12 gap-y-8 sm:grid-cols-2 lg:max-w-[880px]">
-              {EDUCATOR_FEATURES.map((f) => (
-                <li key={f.title} className="border-t pt-5" style={{ borderColor: "var(--border)" }}>
-                  <h3 className="text-[19px] font-bold" style={{ color: "var(--foreground)" }}>{f.title}</h3>
-                  <p className="mt-1.5 max-w-[40ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{f.body}</p>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-          <Reveal>
-            <div className="mt-14 sm:mt-20">
-              <DashboardIllustration />
+            <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-16">
+              <ul className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1 lg:gap-y-7">
+                {EDUCATOR_FEATURES.map((f) => (
+                  <li key={f.title} className="flex gap-4">
+                    <span className="flex size-11 flex-none items-center justify-center rounded-[12px]" style={{ background: "color-mix(in srgb, var(--primary) 9%, white)", color: "var(--primary)" }}>
+                      <f.Icon className="h-5 w-5" strokeWidth={2} aria-hidden />
+                    </span>
+                    <div>
+                      <h3 className="text-[18px] leading-snug font-bold" style={{ color: "var(--foreground)" }}>{f.title}</h3>
+                      <p className="mt-1 max-w-[38ch] text-[15.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{f.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <div className="lg:col-span-7">
+                <DashboardIllustration />
+              </div>
             </div>
           </Reveal>
         </div>

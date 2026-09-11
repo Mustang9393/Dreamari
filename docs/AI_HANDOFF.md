@@ -7515,3 +7515,4 @@ the first submit, never a multi-step "Next" before it.
 Verified locally: both POSTs 200, sent and survey states render.
 - Demo section: the reference's "Quick setup" / "Custom onboarding" bullets removed (direct feedback: they read as nothing).
 - Audiences section: heading spans the width; the two columns lock to the same top edge and the graphic column has a fixed height (600px from lg), so switching tabs never moves the copy (direct feedback). Caseload table widened so the review chips fit.
+- Educators section: copy and the four features (icon badges back, as on the reference) left, a compact dashboard (Student Status, Postsecondary Plans, Review Queue) right, same locked-top pattern as Audiences (direct feedback: the left copy / right graphic pattern works).
