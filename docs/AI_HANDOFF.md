@@ -7843,3 +7843,10 @@ experimental grid-based alternative to the swipe-card Match flow, reusing
 the same DECK data and picks handoff as the live `MatchLab.tsx`. Explicit
 user instruction: local-only, no push, until asked. Do not commit these
 alongside unrelated work.
+
+## 2026-09-12 · Match grid: pushed
+
+Update to the entry above: the user asked to push everything, including
+Match grid. `MatchGrid.tsx` and its `/match-grid` route are now committed
+and on main (c06e35a) -- no longer local-only. Still does not touch
+`/match-lab` or `MatchLab.tsx`; both routes exist side by side.
