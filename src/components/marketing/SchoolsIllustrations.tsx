@@ -265,7 +265,7 @@ function OrgHead({ title, note, right }: { title: string; note: string; right?: 
 }
 
 // Schools: the counselor's caseload, the Students page.
-const TABLE_COLS = "182px 44px 112px 126px 1fr";
+const TABLE_COLS = "184px 44px 112px 132px minmax(140px,1fr)";
 const CASELOAD = [
   { name: "Emma Rodriguez", grade: 12, track: "Technology", roadmap: 92, status: "On Track", report: "Approved" },
   { name: "Marcus Thompson", grade: 11, track: "Healthcare", roadmap: 78, status: "On Track", report: "Approved" },
@@ -277,7 +277,7 @@ const CASELOAD = [
 export function SchoolIllustration() {
   return (
     <Panel>
-      <Fit base={640}>
+      <Fit base={700}>
         <div role="img" aria-label="Students: the counselor's caseload at Lincoln High School, 120 students, each with grade, roadmap percent, status and Career Report review state." className="flex flex-col gap-5 px-7 pt-14 pb-7">
           <OrgHead title="Students" note="Lincoln High School · 120 students" right={<Pill>All grades</Pill>} />
           <div className="grid gap-x-3 px-3 text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ gridTemplateColumns: TABLE_COLS, color: INK2 }}>

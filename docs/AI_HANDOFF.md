@@ -7514,3 +7514,4 @@ the first submit, never a multi-step "Next" before it.
   DEMO_REQUEST_FROM on a verified domain), DEMO_REQUEST_TO.
 Verified locally: both POSTs 200, sent and survey states render.
 - Demo section: the reference's "Quick setup" / "Custom onboarding" bullets removed (direct feedback: they read as nothing).
+- Audiences section: heading spans the width; the two columns lock to the same top edge and the graphic column has a fixed height (600px from lg), so switching tabs never moves the copy (direct feedback). Caseload table widened so the review chips fit.

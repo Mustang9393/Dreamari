@@ -126,10 +126,10 @@ function Reveal({ children, className = "" }: { children: ReactNode; className?:
   );
 }
 
-function SectionHead({ id, title, lede, align = "left" }: { id?: string; title: string; lede?: string; align?: "left" | "center" }) {
+function SectionHead({ id, title, lede, align = "left", wide = false }: { id?: string; title: string; lede?: string; align?: "left" | "center"; wide?: boolean }) {
   const centered = align === "center";
   return (
-    <div className={`max-w-[760px] ${centered ? "mx-auto text-center" : ""}`}>
+    <div className={`${wide ? "max-w-[980px]" : "max-w-[760px]"} ${centered ? "mx-auto text-center" : ""}`}>
       <h2 id={id} className="text-[clamp(32px,4vw,52px)] leading-[1.08] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
         {title}
       </h2>
@@ -241,20 +241,22 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
       <section id="organization" className="scroll-mt-24 border-b px-6 py-24 sm:py-32" style={{ borderColor: "var(--border)", background: "var(--hero-mid)" }}>
         <div className="mx-auto max-w-[1100px]">
           <Reveal>
-            <SectionHead title="Built for the students you serve." />
+            <SectionHead title="Built for the students you serve." wide />
           </Reveal>
           <Reveal>
-            <div className="mt-12 grid grid-cols-1 items-center gap-12 lg:mt-16 lg:grid-cols-12 lg:gap-16">
-              <div className="lg:col-span-5">
-                <h3 className="text-[clamp(26px,2.6vw,36px)] leading-[1.1] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+            {/* Locked layout: both columns start at the same top edge and the
+               graphic column has one fixed height, so switching tabs never
+               moves the copy (direct feedback, 11 Sept 2026). */}
+            <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-16">
+              <div className="lg:col-span-5 lg:pt-[68px]">
+                <h3 className="text-[clamp(24px,2.2vw,30px)] leading-[1.15] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
                   Give every student a clearer path forward.
                 </h3>
-                <p className="mt-5 max-w-[46ch] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+                <p className="mt-4 max-w-[44ch] text-[17px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
                   Help students explore their options, connect learning to careers, and plan their next steps, with visibility for the educators guiding them.
                 </p>
               </div>
               <div className="lg:col-span-7">
-                {/* the tabs sit with the graphic they change */}
                 <div role="tablist" aria-label="Who Dreamari is built for" className="mb-5 flex max-w-full flex-wrap gap-1 rounded-[14px] border bg-white p-1" style={{ borderColor: "var(--border)", width: "fit-content" }}>
                   {AUDIENCES.map((a) => {
                     const selected = audience === a;
@@ -274,11 +276,13 @@ export function SchoolsView({ view, onChangeView }: SchoolsViewProps) {
                     );
                   })}
                 </div>
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div key={audience} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
-                    <AudienceIllustration audience={audience} />
-                  </motion.div>
-                </AnimatePresence>
+                <div className="relative lg:h-[600px]">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div key={audience} className="lg:absolute lg:inset-x-0 lg:top-0" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+                      <AudienceIllustration audience={audience} />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           </Reveal>
