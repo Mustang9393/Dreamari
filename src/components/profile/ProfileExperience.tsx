@@ -1075,7 +1075,7 @@ function Top3Tab({
                 className="dm-tap mt-[var(--space-1)] flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
                 style={FROST}
               >
-                <span className="min-w-0 truncate">Learn more</span> <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
+                <span className="min-w-0 truncate">Learn more</span> <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
               </Link>
               {/* No rules anywhere in the card (direct feedback, 11 Sept 2026). */}
               <div className="mt-auto pt-[var(--space-1)]">
