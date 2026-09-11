@@ -7696,3 +7696,27 @@ Verified via lint/tsc and hand-checked the scale in Node (21 clean tenths,
 2.0 to 4.0, no float drift, midpoint 3.0); not re-clicked through the full
 8-step Build flow to the Profile screen per direct request (stop the
 hover/wait loop).
+
+## 2026-09-12 · GPA slider redesign: feedback follows the thumb, a ruler, a tick sound (direct feedback)
+- The live GPA readout is no longer a static line above the slider ("off
+  to the side... feedback is not proper"). It's now a pill that floats
+  directly over the thumb, following the drag (clamped off the card
+  edges), so the number lands exactly where the eye and the finger already
+  are. A special answer shows in the same pill, centered, while the slider
+  itself visibly parks (fill and ticks go dim, no glow) since it isn't the
+  mechanism behind that answer.
+- The track is now a real ruler: one tick per tenth, tallest/brightest at
+  the whole numbers, medium at the halves, faint in between -- this, not a
+  caption, is what signals the answer wants a decimal and not just the
+  nearest whole number ("show that decimals are a required accuracy...
+  without causing clutter").
+- `playGpaTick` (sound.ts): a short, dry click on every tenth crossed while
+  dragging or arrow-keying, pitch climbing gently across the scale ("that
+  tick tick smooth sound when scrolling"). Fires once per real step change
+  only (a ref guards against firing on prop-driven re-renders, e.g.
+  returning to this step with a stored value).
+- Verified via lint/tsc and by hand-checking the tick-weight classification
+  in the reasoning above (3 major / 2 half / 16 minor across the 21 stops);
+  not re-clicked through Build's 8 steps to drag it live, per direct
+  request to stop the hover/wait-heavy testing loop. Worth an actual drag
+  test on a real device for feel/volume once convenient.

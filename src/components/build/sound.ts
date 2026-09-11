@@ -1,4 +1,4 @@
-import { bellTone, getAudioContext, whenRunning } from "@/components/flow/aurora/feedback";
+import { bellTone, getAudioContext, tone, whenRunning } from "@/components/flow/aurora/feedback";
 
 // Progress "level-up" chime — a warm three-note rising arpeggio. Played when the
 // progress bar grows; distinct from the select tick and CTA ding so filling the bar
@@ -57,5 +57,22 @@ export function playXpRise(durationMs: number) {
       osc.start(now);
       osc.stop(now + dur + 0.2);
     }
+  });
+}
+
+// GPA slider: one short, dry, mechanical "tick" per tenth crossed while
+// dragging (direct feedback, 11 Sept 2026: "that tick tick smooth sound
+// when scrolling") -- pitch climbs gently across the 2.0-4.0 scale (a
+// little under a major sixth) so a higher GPA ticks a touch brighter,
+// never sharp or musical. Fires once per step change, from a real
+// pointer/keyboard interaction only.
+export function playGpaTick(index: number, totalSteps: number) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  whenRunning(ctx, (running) => {
+    const now = running.currentTime;
+    const t = totalSteps <= 1 ? 0 : index / (totalSteps - 1);
+    const freq = 640 + t * 340;
+    tone(running, freq, now, 0.026, 0.15, "triangle");
   });
 }
