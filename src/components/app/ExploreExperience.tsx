@@ -191,7 +191,7 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
 
       {/* Rail order + content per Joshua (2026-08-21): merged recommended
          rail, then Tech, Top 5, Might Not Know, Skilled Trades (added 11
-         Sept 2026), Typical Pay. `contents` keeps
+         Sept 2026), Videos, Typical Pay. `contents` keeps
          this div out of main's flex layout (the rails still lay out as if
          they were main's own direct children) while giving seq-reveal
          something to stagger the rails' entrance from off of. */}
@@ -227,17 +227,18 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
           </Rail>
         )}
 
+        {/* CEO (4 Sept 2026): real clips from inside partner companies.
+           Moved directly above Typical Pay (Joshua, 11 Sept 2026), in the
+           Apple TV lean-back card shape; the lead card plays muted. */}
+        <Rail title="Videos Inside Leading Companies">
+          <CompanyVideoCards />
+        </Rail>
+
         {typicalPay.length > 0 && (
           <Rail title="Typical Pay: $100K +">
             <PosterRail careers={typicalPay} />
           </Rail>
         )}
-
-        {/* CEO (4 Sept 2026): real clips from inside partner companies,
-           under Typical Pay. All video; each card opens its clip. */}
-        <Rail title="Videos Inside Leading Companies">
-          <CompanyVideoCards />
-        </Rail>
       </div>
     </>
   );

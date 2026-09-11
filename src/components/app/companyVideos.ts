@@ -1,6 +1,6 @@
 // "Videos Inside Leading Companies" (CEO, 4 Sept 2026): real clips shot
-// inside partner companies, the last rail on Explore > Browse, under
-// Typical Pay. `company` must match a COMPANY_MARKS key for the logo to
+// inside partner companies, the rail on Explore > Browse directly above
+// Typical Pay (moved 11 Sept 2026). `company` must match a COMPANY_MARKS key for the logo to
 // render; otherwise the chip sets the name in type until a brand-compliant
 // mark is registered (see docs/BRAND_MARKS.md).
 export type CompanyVideo = {

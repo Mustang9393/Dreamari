@@ -7626,3 +7626,13 @@ Verified on the Investment Banking report's 03 Career Exploration section.
   fit a 325px column. Hero: on phones the three cards are a horizontal snap
   row at card size (`sm:hidden`); from sm the 1040px zoomed grid. No element
   overflows 375px except clipped decorative blobs and the marquee.
+
+## 2026-09-11 · Explore videos rail: lean-back cards above Typical Pay (Joshua)
+- `CompanyVideoCards` is the Apple TV "Lean Back & Watch" shape: 248 x 330
+  cards (posters stay 210 x 297), covers cropped toward their top third so
+  the baked titles survive, the lead card (Mars) plays its clip muted on a
+  loop while on screen with a mute badge, the others preview muted on
+  hover; the clip title fades in only while a card is playing. Tap still
+  opens the full-screen player with sound. Order unchanged: Mars, JPMorgan
+  Chase London Office Tour, EY, AT&T, WildBrain, Kellogg's.
+- The rail moved from last to directly above "Typical Pay: $100K +".

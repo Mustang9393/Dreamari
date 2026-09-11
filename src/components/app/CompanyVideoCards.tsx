@@ -1,63 +1,101 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Play, X } from "lucide-react";
+import { Play, VolumeX, X } from "lucide-react";
 import { LetterMark } from "@/components/connect/primitives";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 
-/** "Videos Inside Leading Companies" (Explore > Browse, under Typical Pay):
- *  the same 210 x 297 poster shape as every other Browse rail card, with a
- *  designed cover (title baked into the image itself) as the poster, the
- *  company's mark on the scrim and a small play badge in the top-right
- *  corner. Tapping a card opens the clip full screen with sound; nothing
- *  plays in the rail. Rendered inside Browse's Rail, which owns the
+/** "Videos Inside Leading Companies" (Explore > Browse, directly above
+ *  Typical Pay since 11 Sept 2026): the Apple TV "Lean Back & Watch" shape
+ *  (direct reference, 11 Sept 2026). Cards are wider than the poster rail's
+ *  210 x 297 but deliberately not much taller, so the row reads as one more
+ *  rail rather than a hero. The first card plays its clip muted on a loop
+ *  with a mute badge, the way the reference's lead card does; the others
+ *  show their designed cover and preview muted on hover. The company mark
+ *  sits on the scrim; the clip's title fades in only while a card is
+ *  playing (the covers already carry their own titles). Tap opens the clip
+ *  full screen with sound. Rendered inside Browse's Rail, which owns the
  *  horizontal scroller. */
 export function CompanyVideoCards() {
   const [open, setOpen] = useState<CompanyVideo | null>(null);
   return (
     <>
-      {COMPANY_VIDEOS.map((item) => (
-        <button
-          key={item.video}
-          type="button"
-          onClick={() => setOpen(item)}
-          className="dm-tap group relative h-[297px] w-[210px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left"
-          style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
-        >
-          <span className="sr-only">Play {item.company} {item.title}</span>
-          <Image src={item.poster} alt="" fill sizes="210px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
-          {/* A big center badge sat right over the subject's face on nearly
-             every cover (direct feedback, 5 Sept 2026: "especially the
-             people"). Docked top-right instead, small, the way a duration
-             badge sits on a video thumbnail elsewhere — every cover's top
-             corners are clear, and the frame's actual subject stays visible. */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute top-[10px] right-[10px] flex size-[34px] items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110"
-            style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
-          >
-            <Play className="ml-[2px] h-[15px] w-[15px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
-          </span>
-          {/* Every cover now bakes its own title in (direct feedback, 5 Sept
-             2026: "the text is in the thumbnail... just have the logo and no
-             title"), so the scrim only carries the company mark, sized down
-             to match — a full title-height scrim under just a logo read as
-             too much dead dark space. */}
-          <span aria-hidden className="absolute inset-x-0 bottom-0 flex px-[14px] pt-[26px] pb-[12px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
-            {/* LetterMark: every brand's LETTERS are exactly 15px tall and share
-               a baseline; flourishes (EY's beam, Kellogg's descenders, the
-               AT&T globe) hang outside that box, so no mark reads bigger
-               because its file has more air or ornament in it. Ink follows
-               the scrim's own title colour (light mode's scrim goes near-
-               white, so a hardcoded white mark disappeared into it). */}
-            <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="var(--poster-title)" letterHeight={15} /></span>
-          </span>
-        </button>
+      {COMPANY_VIDEOS.map((item, index) => (
+        <LeanBackCard key={item.video} item={item} lead={index === 0} onOpen={() => setOpen(item)} />
       ))}
       {open && <VideoLightbox item={open} onClose={() => setOpen(null)} />}
     </>
+  );
+}
+
+function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolean; onOpen: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  // The lead card autoplays once it is on screen and rests when it scrolls
+  // away, so a phone is not decoding a clip nobody can see.
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !lead) return;
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) el.play().catch(() => {});
+      else el.pause();
+    }, { threshold: 0.4 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [lead]);
+  const preview = (on: boolean) => {
+    if (lead) return;
+    const el = videoRef.current;
+    if (!el) return;
+    if (on) el.play().catch(() => {});
+    else { el.pause(); el.currentTime = 0; }
+  };
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      onMouseEnter={() => preview(true)}
+      onMouseLeave={() => preview(false)}
+      onFocus={() => preview(true)}
+      onBlur={() => preview(false)}
+      className="dm-tap group relative h-[330px] w-[248px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left"
+      style={{ borderColor: "var(--color-glass-border-raised)", background: "#000" }}
+    >
+      <span className="sr-only">Play {item.company} {item.title}</span>
+      {/* Cover under the clip: the 9:16 art cropped toward its top third,
+         where every cover's title and mark sit. */}
+      <Image src={item.poster} alt="" fill sizes="248px" className={`object-cover transition-[opacity,transform] duration-700 ease-out group-hover:scale-[1.03] ${playing ? "opacity-0" : "opacity-100"}`} style={{ objectPosition: "50% 30%" }} />
+      <video
+        ref={videoRef}
+        src={item.video}
+        muted
+        loop
+        playsInline
+        preload={lead ? "auto" : "none"}
+        onPlaying={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        aria-hidden
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
+        style={{ objectPosition: "50% 30%" }}
+      />
+      {/* Top-right badge: a mute glyph while the clip is playing (the
+         reference's lead card), a play glyph otherwise. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute top-[10px] right-[10px] flex size-[34px] items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110"
+        style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+      >
+        {playing ? <VolumeX className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} /> : <Play className="ml-[2px] h-[15px] w-[15px]" fill="currentColor" style={{ color: "#FFFFFF" }} />}
+      </span>
+      {/* Scrim: the company mark always; the clip's title only while the
+         cover (which bakes its own title in) has faded out for the video. */}
+      <span aria-hidden className="absolute inset-x-0 bottom-0 flex flex-col gap-[6px] px-[14px] pt-[40px] pb-[13px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+        <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="var(--poster-title)" letterHeight={15} /></span>
+        <span className={`text-[14px] leading-[18px] font-semibold transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`} style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
+      </span>
+    </button>
   );
 }
 
