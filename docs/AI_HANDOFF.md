@@ -7348,3 +7348,14 @@ phones so long names keep the column), takes a `ring="light"` translucent
 white ring for sitting on the full-bleed photo, and the five schools with no
 mark get a per-school tinted monogram (hue hashed from the slug) instead of
 one shared placeholder. No new elements in the header.
+
+## 2026-09-11 · School cards: even mark-to-name gap; fit panel eyebrow gone
+- SchoolCard reserved two name lines on the name box (bottom-aligned), so a
+  one-line name left a blank line under the mark while a two-line name sat
+  tight (direct feedback: "inconsistent gaps"). The reservation now sits on
+  the whole mark + name + place group (min-h 119, justify-end): rows still
+  align across cards and the mark-to-name gap is constant.
+- College detail "Why <school> fits you" panel: the "Your path" eyebrow was
+  our label, not from Joshua's brief (the panel itself implements the
+  brief's career -> route -> program -> school chain from the Replit
+  reference, 10 Sept). Eyebrow removed, panel kept.

@@ -362,15 +362,16 @@ export function SchoolCard({
 
       <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[12px] px-[16px] pt-[118px] pb-[14px]">
         {/* mark, name and place, over the blurred tail of the photo */}
-        <div className="flex flex-col gap-[10px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
+        {/* Room for mark + two-line name + place (48 + 10 + 42 + 3 + 16) is
+           reserved on the whole group and the group sits at its foot, so a
+           long name never pushes the rest of the card down relative to its
+           neighbours AND the mark-to-name gap is the same on every card
+           (direct feedback, 11 Sept 2026: reserving the lines on the name
+           alone left a blank line under the mark on one-line names). */}
+        <div className="flex min-h-[119px] flex-col justify-end gap-[10px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
           <MarkBadge c={c} size={48} />
           <div className="flex flex-col gap-[3px]">
-            {/* Two lines reserved for the name and one for the place, so a
-               long name never pushes the rest of the card down relative to
-               its neighbours (direct feedback, 11 Sept 2026). */}
-            <span className="flex min-h-[42px] items-end">
-              <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
-            </span>
+            <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
             <p className="flex min-w-0 items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
               <MapPin className="h-[12px] w-[12px] flex-none" aria-hidden /><span className="truncate">{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}</span>
             </p>

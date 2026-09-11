@@ -525,10 +525,9 @@ function YourPath({ c }: { c: NonNullable<ReturnType<typeof collegeBySlug>> }) {
   ];
   return (
     <section aria-labelledby="your-path" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ ...PANEL, borderColor: `color-mix(in srgb, ${ACCENT} 45%, var(--glass-border))` }}>
-      <div className="flex flex-col gap-[2px]">
-        <p className={LABEL} style={{ color: SOFT }}>Your path</p>
-        <h2 id="your-path" className={BIG}>Why {c.name} fits you</h2>
-      </div>
+      {/* no eyebrow: "Your path" was our label, not from the brief (direct
+         feedback, 11 Sept 2026) */}
+      <h2 id="your-path" className={BIG}>Why {c.name} fits you</h2>
       <dl className="grid gap-x-[var(--space-5)] gap-y-[8px] sm:grid-cols-2">
         {rows.map((r) => (
           <div key={r.label} className="flex items-baseline justify-between gap-[var(--space-3)] border-b pb-[6px]" style={{ borderColor: RULE }}>
