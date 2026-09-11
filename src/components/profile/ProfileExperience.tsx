@@ -1036,22 +1036,34 @@ function Top3Tab({
                 <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
               </span>
               <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
-              {/* The card answers one question (Joshua + direct feedback,
-                 11 Sept 2026): test this career, or learn more about it?
-                 Play is above the fold, right under the job description, in
-                 the Play cards' own badge language (disc + glyph) with words:
-                 this career's own simulation, or its Coming soon card. */}
-              <Link
-                href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
-                aria-label={sim ? `Play the ${career.title} simulation` : `${career.title} simulation, coming soon in Play`}
-                className="dm-tap mt-[var(--space-1)] flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
-                style={{ background: `color-mix(in srgb, ${accent} ${sim ? 20 : 9}%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} ${sim ? 55 : 28}%, var(--glass-border))`, color: "var(--foreground)" }}
-              >
-                <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: sim ? accent : "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.35)" }}>
-                  {sim ? <Play className="ml-[2px] h-[14px] w-[14px]" fill="currentColor" style={{ color: "#fff" }} aria-hidden /> : <Lock className="h-[13px] w-[13px]" style={{ color: "#fff" }} aria-hidden />}
-                </span>
-                <span className="min-w-0 leading-[17px]">{sim ? "Play a Day in the Life" : "Day in the Life coming soon"}</span>
-              </Link>
+              {/* The card answers one question (Joshua, 11 Sept 2026): test
+                 this career, or learn more about it? Play and Learn more side
+                 by side, above the fold. Play is in the Play cards' own badge
+                 language (disc + glyph); a career without its own game goes
+                 to the Play tab, focused on it, and says Play like the rest
+                 (Joshua: never "coming soon" in a demo). Learn more opens this
+                 career's page, the diagonal arrow for leaving the profile. */}
+              <div className="mt-[var(--space-1)] grid grid-cols-2 gap-[var(--space-2)]">
+                <Link
+                  href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
+                  aria-label={`Play ${career.title}`}
+                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
+                  style={{ background: `color-mix(in srgb, ${accent} 20%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, color: "var(--foreground)" }}
+                >
+                  <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: accent, borderColor: "rgba(255,255,255,0.35)" }}>
+                    <Play className="ml-[2px] h-[14px] w-[14px]" fill="currentColor" style={{ color: "#fff" }} aria-hidden />
+                  </span>
+                  <span className="min-w-0 truncate">Play</span>
+                </Link>
+                <Link
+                  href={`/career/${id}`}
+                  aria-label={`Learn more about ${career.title}`}
+                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
+                  style={FROST}
+                >
+                  <span className="min-w-0 truncate">Learn more</span> <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
+                </Link>
+              </div>
 
 
               <dl className="flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]">
@@ -1065,20 +1077,8 @@ function Top3Tab({
 
               <MoreFactsAccordion facts={moreFacts} />
 
-              {/* Learn more sits right where the reading stops (direct
-                 feedback, 11 Sept 2026): filled glass, this career's page. Get
-                 Career Report stands apart at the foot, filled glass: the
-                 student's own read on this career ("Get", not "View"; the
-                 card already names the career). */}
-              <Link
-                href={`/career/${id}`}
-                aria-label={`Learn more about ${career.title}`}
-                className="dm-tap mt-[var(--space-1)] flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
-                style={FROST}
-              >
-                <span className="min-w-0 truncate">Learn more</span> <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
-              </Link>
-              {/* No rules anywhere in the card (direct feedback, 11 Sept 2026). */}
+              {/* Get Career Report apart at the foot; no rules anywhere in
+                 the card (direct feedback, 11 Sept 2026). */}
               <div className="mt-auto pt-[var(--space-1)]">
                 <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={FROST}>
                   Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />

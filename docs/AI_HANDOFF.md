@@ -7598,12 +7598,12 @@ Verified on the Investment Banking report's 03 Career Exploration section.
 ## 2026-09-11 · Top 3 cards answer "test it or learn more?" (Joshua + direct feedback)
 - Card order inside `Top3Tab` (`ProfileExperience.tsx`): photo (kebab; a star
   disc marks the primary career, no text chip), world + title, one clamped
-  description line pair, then "Play a Day in the Life" (this career's
-  simulation via `simulationFor`, else "Day in the Life coming soon" to
-  `/play?focus=<id>`), the three reserved facts (no rule under Play),
-  Employers & schools fold, "Learn more" (`/career/<id>`) right where the
-  reading stops, then "Get Career Report" apart at the foot (opens the
-  Report tab with that career as focus). Both buttons are the bright `FROST`
+  description, then Play and Learn more side by side (Joshua: never
+  "coming soon" in a demo; a career without its own game goes to
+  `/play?focus=<id>` and still says Play; Learn more is `/career/<id>`
+  with the diagonal arrow), the three clamped facts, Employers & schools
+  fold, then "Get Career Report" apart at the foot (opens the Report tab
+  with that career as focus). Both buttons are the bright `FROST`
   fill (white 14% over blur); no rules anywhere in the card; the fold label
   is left-aligned (buttons centre text by default).
 - "Your Strongest Match" / "Make my primary" removed from the body. The
