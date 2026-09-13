@@ -8004,3 +8004,150 @@ outstanding: Play, Colleges, Career Report, Profile, and Connect's own
 rail-shaped sections haven't been audited yet.
 
 Pushed to main (370c9a4).
+
+## 2026-09-13 · Schools landing: Match illustration redesigned (grid, then carousel), not pushed
+
+`MatchIllustration` (`src/components/marketing/SchoolsIllustrations.tsx`) previously
+depicted the dormant swipe-card Match UI -- flagged in the "Match: Option B is the
+only flow now" entry above as "out of scope for this pass." Redesigned this session,
+in stages, all direct instruction:
+
+- First pass: a static 3-card grid mirroring `/match-grid`'s real cards (salary chip,
+  +/rank select circle, small "Learn more" tag), replacing the single swipe card.
+- Second pass: rebuilt as an interactive carousel reusing the exact fanned-deck
+  mechanic from `PlayHub.tsx`'s `MobileDeck` (Play tab's Career Simulations rail) --
+  an `order` array of ids rotating front-to-back, `advance()`/`back()` with the same
+  spring physics and off-screen fly/slide transitions -- but with Prev/Next arrow
+  buttons flanking the stack (not just gesture + one idle hint) and the front card
+  still real drag-to-swipe on touch.
+- Content went back and forth: briefly switched to importing the live 6-career
+  `DECK` from `match-lab/data.ts` for perfect parity with `/match-grid`, then
+  reverted by direct instruction -- this illustration is deliberately NOT a mirror
+  of the match-lab data module; its own local `MATCH_CARDS` constant (Investment
+  Banker, Private Equity Analyst, Software Engineer -- the same three it has shown
+  all session) is the source of truth for it, not `DECK`.
+- Stack spread increased (34px / 0.09 scale step, up from PlayHub's own 16px/0.06)
+  and the deck's own box widened by the extra step room, so the peeking cards are
+  actually visible instead of sitting under the side arrow buttons.
+
+Validation: targeted `tsc --noEmit` and ESLint clean. Could NOT verify live in the
+real dev server this whole session -- another local session's `next dev` held
+Next's machine-wide single-dev-server lock throughout (confirmed this is a
+machine-wide lock, not per-directory: it blocked a server started from an isolated
+git worktree too). Verified instead with throwaway static/vanilla-JS mockups
+reproducing the exact markup, spacing and interaction logic (screenshotted each
+time, not saved anywhere). Added a `dreamari-schools` (port 3005) entry to
+`.claude/launch.json` for whenever a real dev server is free to check this in the
+browser for real.
+
+Not committed, not pushed, per standing instruction (this session doesn't push
+without explicit go-ahead). Recommended next step: once a dev server is available,
+open the Schools view (audience toggle on `/`) and confirm `MatchIllustration` for
+real -- spread/peek visibility, the arrow buttons, and the drag-to-swipe gesture on
+an actual touch device or emulated mobile viewport, not just the vanilla-JS
+approximation.
+
+**Update, same day, from a second session working in parallel (dreamari-d9):** that
+session had its own dev server free and verified the carousel live in the browser
+(Schools landing, Enterprise toggle, Match chapter) -- so the real-device check
+above is done. It also extracted the "Learn more" bullets into a small
+`MatchDetailSection` helper (cosmetic only, same single "What You'd Do" section,
+still no modal) and independently ran the same DECK-import-then-revert experiment
+described above, landing on the same conclusion: local `MATCH_CARDS`, not the
+match-lab data module. The two sessions' versions converged to the same shape; no
+conflict, nothing further to reconcile at that point.
+
+**Second update, same day:** the card CONTENT above was still wrong. Direct
+correction: this illustration's "old illustration" reference point is the Student
+landing page's own Match chapter (`MatchChapter`/`MatchDemo`/`CARDS` in
+`marketing/chapters/Match.tsx`), not `/match-grid` and not an invented set. Its
+three cards, reused verbatim (confirmed against that file directly): Management
+Analyst ($99K, `poster-management-analyst.webp`, "Figures out how a business can
+run better, then makes it happen.", major Business & Management), Investment
+Banking ($361K, `poster-investment-banking-v3.webp`, "Helps big companies raise
+money and buy other companies.", major Business & Management), Private Equity
+($250K, `poster-private-equity.webp`, "Helps investors buy, improve, and sell
+companies for long-term returns.", major Finance or Economics). `MATCH_CARDS` now
+matches this exactly (id/title/photo/blurb/salary/major).
+
+Also removed per direct instruction ("NO other info are there on the cards"): the
+salary chip on the card face and the +/rank select circle -- this illustration
+doesn't carry Top-3/save semantics, that belongs to the real match screen only.
+The "Learn more" pill became "Tap to see details" (info icon + text, glass pill),
+matching `Match.tsx`'s own flip-card affordance exactly. The inline reveal (still
+no modal) now shows blurb + Median Salary + College Major rows, mirroring that
+chapter's flip-card back face instead of "What You'd Do" bullets.
+
+Both sessions have now read `marketing/chapters/Match.tsx` directly and confirmed
+`MATCH_CARDS` matches it. Still not committed, not pushed.
+
+## 2026-09-13 · Correction: wrong page entirely -- reverted Enterprise, fixed the Student page instead
+
+The whole thread above (this file's redesign, then reusing `Match.tsx`'s cards) was
+on the wrong page. `SchoolsIllustrations.tsx`'s `MatchIllustration` is the
+Enterprise/Schools page (`SchoolsView.tsx`, audience toggle labeled "Enterprise" but
+internally `view === "schools"`) -- direct instruction: it "should feel more like
+the others on there" (Build/Explore/Immerse/Connect: richer, info-dense mockups),
+not a literal copy of the Student page's real cards. **Reverted** it back to what
+it had before this whole detour: `MATCH_CARDS` = Investment Banker ($361K
+median)/Private Equity Analyst ($250K median)/Software Engineer ($136K median),
+the salary chip, the "Find your Top 3" header + save-circle/rank mechanic, the
+"Learn more" pill, and the "What You'd Do" bullet reveal -- all restored verbatim.
+Lint/tsc clean, verified live (Enterprise toggle, Match chapter).
+
+The actual task all along was the **Student landing page**'s own Match chapter
+(`marketing/chapters/Match.tsx`) -- direct instruction: "we're just fixing the
+inconsistency with the swipe to like thing now that that's sunsetted" (the real
+app's Match flow is `/match-grid`, tap-based, since Option B -- swipe-to-like in
+this demo no longer matches how Match actually works). Reworked `MatchDemo`:
+
+- Removed entirely: the pointer-drag swipe-commit logic (`onCardPointerDown/Move/
+  Up/Cancel`, `dragX`, `SWIPE_COMMIT_PX`), the guided one-directional tutorial
+  (Operations pass-only / Investment Banking like-only), the Like/Pass circular
+  buttons, the mid-drag "Like"/"Pass" intent badges, and the "Swipe left/right..."
+  hint copy.
+- Card data model changed from a depleting `stack` (cards removed as you pass) to
+  a rotating `order` array of all three keys -- Prev and Next just reorder it, so
+  every card (including Private Equity, previously "peek-only, not reachable") is
+  always reachable in both directions.
+- Added: Prev/Next chevron buttons below the card (same position Pass/Like used
+  to occupy, so they don't cover the photo -- an overlaid button row was already
+  rejected once per an earlier comment in this file). The BorderBeam nudge that
+  used to alternate between Pass and Like now stays on the Next button, guiding
+  the "next logical action" of paging through the deck.
+- A small "+" badge on the card (top-left, mirroring the existing "Tap to see
+  details" pill's corner-badge treatment on the opposite side) is the new match
+  action, replacing swipe-right/Like -- tapping it flies the card up and triggers
+  the same "You're matched!" celebration + auto-advance-to-Play as before.
+- Tap-to-flip (the info panel showing blurb/salary/major) is unchanged -- still a
+  plain click on the card, just simplified from the old tap-vs-drag pointer-move
+  distance check to a plain `onClick` now that there's no drag to distinguish from.
+
+Lint/tsc clean. Verified live end-to-end: flip, Next (unflips + pages to
+Investment Banking), tap "+" (fly-up, "You're matched!", auto-scrolls to Play),
+"Try again" (resets to Management Analyst, unmatched). Not committed, not pushed.
+
+## 2026-09-13 · Match.tsx polish: fanned stack, bigger "+" badge, beam moves to it on IB
+
+Same-day follow-up, direct instruction. The peeking-card stack was vertical
+(translateY); changed to the same horizontal fanned-deck mechanic as the Play
+tab's mobile deck (`MobileDeck` in `PlayHub.tsx`), spread out wider (34px/0.09
+vs its own 16px/0.06 -- "spread out more like we decided earlier," matching the
+step values already settled on for the Enterprise carousel/PlayHub feedback).
+Each card is now `calc(100% - 68px)` wide instead of full-width, anchored
+`left:0` with a right-center transform origin on the peeking cards, so
+translating right by depth fans them out to the right; content/data unchanged.
+
+The "+" match badge ("isn't very obvious, it needs to look better"): bigger
+(34px vs 26px), a real border-2 ring, stronger/more opaque background, its own
+drop shadow -- but the glyph itself stays plain white, not tinted in
+`WORLD_COLOR` ("Dont color the plus"), so emphasis comes from the ring/beam,
+not the icon color. On Investment Banking specifically, wrapped it in the same
+`BorderBeam` + `mkt-scale-pulse` nudge language the Next button uses, and Next's
+own nudge now turns off exactly when `top.key === "iba"` (nudge hands off from
+"page forward" to "complete the match" once the intended card is showing).
+
+Lint/tsc clean. Verified live: fanned spread renders correctly at rest and while
+paging, "+" reads as an obvious button now, beam is on Next by default and
+switches to the "+" once Investment Banking is the front card, match flow still
+fires correctly from the "+". Not committed, not pushed.
