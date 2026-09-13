@@ -7901,3 +7901,36 @@ Direct instruction: this replaces the old 5-section breakdown as a quick
 populated for all 6 careers.
 
 Pushed to main (3917dc9).
+
+## 2026-09-13 · Connect: volunteer profile split into 2 tabs
+
+Direct instruction (Catchafire reference, mocked up in Replit): reduce
+information density on the volunteer profile without losing content.
+Applied to BOTH places a volunteer profile renders -- ProProfileView
+(student-facing, ProProfile.tsx) and ProDashboardView's "My Profile" tab
+(the volunteer's own self-view, ProDashboard.tsx) -- since the written
+spec's header list ("...Views, Followers, Likes, personal quote, and
+Follow button") matched ProProfileView exactly, while the supplied
+mockup screenshots showed the self-view (Edit Profile, "Volunteer
+Dashboard" active in nav). Confirmed with the user rather than guessing
+which one.
+
+New shared `OverviewSection` (exported from ProProfile.tsx): About Me
+(pro.journey, previously unused), Experience (Current Company, Previous
+Company from pro.priorRole -- singular; the data model has one prior
+role per person, not a list), Education (kept the existing school-logo
+badge treatment), I Can Help With, 2 Communities + View all. Both files
+import and render the identical component so the two screens can't
+drift apart.
+
+Ask Me & Posts combines each screen's existing Ask Me + Posts panels
+under one section with an Answers | Posts toggle -- no functionality
+changed, just regrouped (the dashboard's real routed-question-answering
+flow, the student view's read-only answered list + composer).
+
+ProDashboardView's header gained the tier badge / stats row / quote it
+was missing (ProProfileView already had these) plus a visual-only Edit
+Profile button (no edit flow built -- out of scope).
+
+Verified in the browser: both screens, all tab combinations, desktop and
+mobile. Pushed to main (164ae60).
