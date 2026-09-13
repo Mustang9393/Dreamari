@@ -141,6 +141,25 @@ function HeroAction({ children, onClick }: { children: React.ReactNode; onClick?
   );
 }
 
+/** A rail's "see everything" action, styled as an obviously-tappable chip
+ *  rather than a bare underlined link (direct feedback, 13 Sept 2026) --
+ *  same background/border/color as the tag chips elsewhere in the app, so
+ *  it reads as a control, not a caption. One shared component so "View all
+ *  in Play" and "Explore All Careers" can never drift into two different
+ *  colors again (they'd landed as white and blue). */
+function RailCta({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="dm-quiet inline-flex flex-none items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] py-[7px] text-[13px] leading-[17px] font-bold whitespace-nowrap"
+      style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)", borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--glass-border))", background: "color-mix(in srgb, var(--accent-subtle) 12%, transparent)" }}
+    >
+      {children}
+      <ChevronRight size={14} strokeWidth={2.75} aria-hidden />
+    </Link>
+  );
+}
+
 // The hero flight, scaled to its panel: Dreamy ~24% of the panel width
 // (clamped 96-200px), trail proportional so it always crosses a good run of
 // the frame before bleeding off the top-right corner. The cloud stays fully
@@ -437,7 +456,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
     // The size lives on this plain box; HoverBeam's own h-full then fills
     // it. Putting the size classes on HoverBeam let its built-in h-full win
     // and the card collapsed to a 2px line on phones (UX audit, 11 Sept 2026).
-    <div className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-auto md:w-auto md:min-w-[304px] md:flex-1 md:aspect-[360/212]">
+    <div className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-auto md:w-auto md:min-w-[360px] md:flex-1 md:aspect-[360/212]">
     <HoverBeam strength={0.8}>
     <Link href={href} className="dm-tap group relative flex h-full min-h-[190px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:min-h-[212px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
@@ -495,7 +514,7 @@ export function HomeExperience() {
         <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Home</h1>
         <HeroBanner />
 
-        <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-5)]">
+        <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
           {/* The feature name lives in the CTA's own words instead of a
              separate label above the title (direct instruction, 13 Sept
              2026: "instead of adding more labels" -- the CTA already links
@@ -505,9 +524,7 @@ export function HomeExperience() {
             <h2 className="min-w-0 flex-1 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Continue Where You Left Off
             </h2>
-            <Link href="/play" className="dm-link -my-[12px] mt-[2px] flex-none py-[12px] text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-              <span className="inline-flex items-center gap-[6px]">View all in Play<ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>
-            </Link>
+            <RailCta href="/play">View all in Play</RailCta>
           </div>
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {ACTIVITIES.map((activity) => (
@@ -519,7 +536,7 @@ export function HomeExperience() {
         {/* Mirrors Explore Browse-All's "Recommended for You" rail (same
            title, subtitle, and cards — one source of truth), replacing the
            old "Careers Picked for You" per user direction. */}
-        <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-6)]">
+        <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-3)]">
           {/* "Explore All Careers" already names the feature by itself, so
              the title doesn't need to repeat "Explore" too -- one mention,
              in the part of the row a student is going to read anyway. */}
@@ -533,14 +550,7 @@ export function HomeExperience() {
                   Based on your interests
                 </p>
               </div>
-              <a
-                href="/explore?tab=browse"
-                className="dm-link inline-flex flex-none items-center gap-[6px] text-[13px] leading-[18px] font-semibold"
-                style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}
-              >
-                Explore All Careers
-                <ChevronRight size={14} strokeWidth={2.75} aria-hidden />
-              </a>
+              <RailCta href="/explore?tab=browse">Explore All Careers</RailCta>
             </div>
           </div>
           <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
@@ -566,7 +576,7 @@ export function HomeExperience() {
            two short -- CSS Grid's default row-stretch only reaches a direct
            grid child, so it has to sit on the Link itself, not just the
            grid container. */}
-        <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-5)]">
+        <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-3)]">
           <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             Your Next Moves
           </h2>

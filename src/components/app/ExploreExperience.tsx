@@ -87,7 +87,7 @@ export function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; o
 // rails are untouched.
 function Rail({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <section aria-label={title} className="flex w-full flex-col gap-[var(--space-5)]">
+    <section aria-label={title} className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="flex flex-col gap-[var(--space-1)]">
         <h2 className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           {title}
@@ -117,7 +117,7 @@ function PosterRail({ careers }: { careers: CatalogCareer[] }) {
 function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
   const router = useRouter();
   return (
-    <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[20px]">
+    <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[var(--space-3)]">
       <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         Top 5 Trending Careers Among Gen Z
       </h2>
