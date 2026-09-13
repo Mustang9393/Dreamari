@@ -6,7 +6,7 @@ import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
-import { OverviewSection, PANEL, Panel, PanelRow, RULE, RoleLine, SignalRow, signals } from "./ProProfile";
+import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, SubTabs, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 
 // The professional volunteer's own Connect (DREAMARI CONNECT 2.pdf, section 1
@@ -96,12 +96,6 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
   const [showAnswered, setShowAnswered] = useState(false);
   const posts = INSIGHTS.filter((i) => i.proId === pro.id);
   const myCommunities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
-  // Same tier badge and "public views" estimate as the student-facing profile
-  // header (ProProfileView), so a volunteer sees the identical numbers on
-  // both -- no reason My Profile should undercount what students see.
-  const tier = volunteerTier(pro);
-  const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
-  const views = Math.round(pro.studentsReached * 3.8);
   const series = useMemo(() => demoSeries(`${pro.id}-${range}`, RANGE[range].days, RANGE[range].base), [pro.id, range]);
 
   // the month's numbers, scaled from this volunteer's totals (demo)
@@ -175,53 +169,25 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
         <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
 
-      {/* who this is, then the two jobs as tabs (the Replit's My Profile /
-         My Impact). The stats/quote row below matches the student-facing
-         profile's own header verbatim (direct instruction, 13 Sept 2026) --
-         a volunteer sees the identical Views/Followers/Likes/quote students
-         do, Edit Profile standing in for Follow since this is their own
-         page. */}
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-        <div className="flex items-center gap-[12px]">
-          <Avatar name={pro.name} size={52} />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[4px]">
-              <h1 className="flex items-center gap-[6px] text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={16} /></h1>
-              {tier && (
-                <span className="inline-flex items-center gap-[5px] rounded-[6px] border px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)", borderColor: "var(--glass-border)" }} title={tier.note}>
-                  <TierIcon className="h-[12px] w-[12px]" aria-hidden style={{ color: accent }} /> {tier.name} volunteer
-                </span>
-              )}
-            </div>
-            <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}><RoleLine pro={pro} /></p>
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link mt-[4px] flex cursor-pointer items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>See my profile as students do <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
-          </div>
-        </div>
-        <div className="flex items-center gap-[var(--space-3)]">
-          <QuietCta size="sm" onClick={() => dispatchAuroraPulse("cta")}>
-            <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
-          </QuietCta>
-          <Segmented<Tab> ariaLabel="Dashboard section" value={tab} onChange={setTab} options={[{ key: "profile", label: "My Profile" }, { key: "impact", label: "My Impact" }]} />
-        </div>
+      {/* The identity card is the exact same component ProProfileView uses
+         (direct feedback, 13 Sept 2026: a from-scratch header built here
+         came out "completely wrong" -- plain text with none of the
+         gradient-cover-photo card treatment). Edit Profile standing in for
+         Follow, since this is the volunteer's own page; My Profile / My
+         Impact sits above it, the same row shape as ProProfileView's own
+         back+action row. */}
+      <div className="flex flex-wrap items-center justify-end gap-[var(--space-3)]">
+        <QuietCta size="sm" onClick={() => dispatchAuroraPulse("cta")}>
+          <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
+        </QuietCta>
+        <Segmented<Tab> ariaLabel="Dashboard section" value={tab} onChange={setTab} options={[{ key: "profile", label: "My Profile" }, { key: "impact", label: "My Impact" }]} />
       </div>
 
-      <div className="flex flex-col gap-[var(--space-3)]">
-        <dl className="flex flex-wrap items-center gap-y-[var(--space-2)]">
-          {[
-            { value: views, label: "Views" },
-            { value: pro.followers, label: "Followers" },
-            { value: pro.totalLikes, label: "Likes" },
-          ].map((stat, index) => (
-            <div key={stat.label} className={`flex items-center pr-[var(--space-4)] ${index > 0 ? "border-l pl-[var(--space-4)]" : ""}`} style={{ borderColor: RULE }}>
-              <span className="flex flex-col">
-                <dd className="text-[18px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{formatCount(stat.value)}</dd>
-                <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stat.label}</dt>
-              </span>
-            </div>
-          ))}
-        </dl>
-        <p className="text-[15px] leading-[22px] italic" style={{ color: "var(--foreground)" }}>&ldquo;{pro.story}&rdquo;</p>
-      </div>
+      <ProfileHeaderCard pro={pro} showCoverControls />
+
+      <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link -mt-2 flex w-fit cursor-pointer items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
+        See my profile as students do <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+      </button>
 
       {tab === "profile" && (
         <>
@@ -236,7 +202,7 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
 
           {profileSection === "askme" && (
             <>
-              <Segmented<"answers" | "posts"> ariaLabel="Ask Me or Posts" value={askMeSection} onChange={setAskMeSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
+              <SubTabs<"answers" | "posts"> ariaLabel="Ask Me or Posts" value={askMeSection} onChange={setAskMeSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
 
               {askMeSection === "answers" && (
           /* Ask Me: the primary engagement mechanism. A direct student

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Bookmark, Briefcase, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
 import { Meter, Ring, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
@@ -252,24 +252,19 @@ export function OverviewSection({ pro, communities, onOpenCommunity, first = fal
       </ProfileCard>
 
       <ProfileCard id="experience-title" title="Experience">
-        <div className="flex items-start gap-[var(--space-3)]">
-          <span aria-hidden className="flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
-            <Briefcase className="h-4 w-4" style={{ color: "var(--muted-foreground)" }} />
-          </span>
-          <div className="flex min-w-0 flex-col gap-[2px]">
-            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Current Company</span>
-            <CompanyChip name={pro.org} tone="surface" size="md" />
-          </div>
+        {/* Same shape as Education below: a bold label line, then the value
+           underneath -- no separate icon tile (direct feedback, 13 Sept
+           2026: "remove the briefcase icon... use the same format as the
+           education section"). CompanyChip already carries the company's
+           own mark, so it does the job a tile icon was standing in for. */}
+        <div className="flex flex-col gap-[var(--space-2)]">
+          <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Current Company</span>
+          <CompanyChip name={pro.org} tone="surface" size="md" />
         </div>
         {pro.priorRole && (
-          <div className="flex items-start gap-[var(--space-3)]">
-            <span aria-hidden className="flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
-              <Briefcase className="h-4 w-4" style={{ color: "var(--muted-foreground)" }} />
-            </span>
-            <div className="flex min-w-0 flex-col gap-[2px]">
-              <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Previous Company</span>
-              <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{pro.priorRole}</span>
-            </div>
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Previous Company</span>
+            <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{pro.priorRole}</span>
           </div>
         )}
         {pro.education && (
@@ -531,6 +526,156 @@ function eduMarkSize(ratio: number) {
   return { width: Math.round(w), height: Math.round(h) };
 }
 
+/** The identity card, shared verbatim by both profile screens (direct
+ *  feedback, 13 Sept 2026: a from-scratch header built for the volunteer's
+ *  own self-view came out "completely wrong" -- plain text on the bare
+ *  page, none of the gradient-cover-photo card this one already was; the
+ *  fix is to never let the two headers diverge again). Cover photo with
+ *  the name on it, then role | company | tier badge on one wrapping line
+ *  (the tier badge moved here from beside the name -- direct feedback,
+ *  13 Sept 2026: "it sits oddly... move it to the position + company
+ *  row", so it wraps onto its own space instead of crowding a long name),
+ *  three shortened numbers, the story. `showCoverControls` is the only
+ *  thing that differs by screen: only the volunteer looking at their own
+ *  page can change it. */
+/** A lightweight second-level toggle -- underlined text, not a filled pill
+ *  -- for Answers | Posts inside the Ask Me & Posts tab. Reusing the same
+ *  pill-button Segmented for both the outer (Overview / Ask Me & Posts)
+ *  and inner toggle read as "too many toggles" stacked on top of each
+ *  other, same weight, same shape (direct feedback, 13 Sept 2026). The
+ *  outer one stays the prominent pill; this one is deliberately quieter,
+ *  so the page reads as one primary choice with a small secondary switch
+ *  underneath it, not two equal-weight tab bars. */
+export function SubTabs<K extends string>({ options, value, onChange, ariaLabel }: { options: { key: K; label: string }[]; value: K; onChange: (key: K) => void; ariaLabel: string }) {
+  return (
+    <div role="tablist" aria-label={ariaLabel} className="flex items-center gap-[var(--space-5)] border-b" style={{ borderColor: RULE }}>
+      {options.map((option) => {
+        const on = option.key === value;
+        return (
+          <button
+            key={option.key}
+            type="button"
+            role="tab"
+            aria-selected={on}
+            onClick={() => onChange(option.key)}
+            className="dm-quiet relative -mb-px cursor-pointer border-b-2 px-[2px] pb-[10px] text-[14px] font-bold"
+            style={{ borderColor: on ? "var(--primary)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function ProfileHeaderCard({ pro, following = false, showCoverControls = false }: { pro: Pro; following?: boolean; showCoverControls?: boolean }) {
+  const tier = volunteerTier(pro);
+  const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
+  const views = Math.round(pro.studentsReached * 3.8);
+  const ink = "#FFFFFF";
+  const soft = "rgba(255,255,255,0.78)";
+  const rule = "rgba(255,255,255,0.18)";
+  const coverKey = `dreamari:pro-cover:${pro.id}`;
+  const [cover, setCover] = useState(coverFor(pro.id));
+  const [coverOpen, setCoverOpen] = useState(false);
+  useEffect(() => {
+    // syncing with the browser's storage (an external system), which is what
+    // the set-state-in-effect rule exists to allow
+    try {
+      const saved = window.localStorage.getItem(coverKey);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved && PRO_COVERS.includes(saved)) setCover(saved);
+    } catch {}
+  }, [coverKey]);
+  const pickCover = (url: string) => {
+    setCover(url);
+    setCoverOpen(false);
+    try { window.localStorage.setItem(coverKey, url); } catch {}
+  };
+
+  return (
+    <section aria-label="Profile" className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
+      <div className="absolute inset-0" aria-hidden>
+        <Image src={cover} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%" }} priority />
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.82) 40%, rgba(12,16,35,0.3) 78%, rgba(12,16,35,0.08) 100%)" }} />
+      </div>
+      {/* the professional's own control; students see no controls here */}
+      {showCoverControls && (
+        <div className="absolute top-[var(--space-4)] right-[var(--space-4)] z-10 flex items-center rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
+          <button type="button" aria-label="Change cover photo" aria-expanded={coverOpen} onClick={() => setCoverOpen((o) => !o)} className="dm-quiet flex h-9 cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[14px] font-semibold" style={{ color: coverOpen ? PRO_ACCENT : "rgba(255,255,255,0.86)" }}>
+            <ImagePlus className="h-3.5 w-3.5" aria-hidden /> Cover
+          </button>
+        </div>
+      )}
+      {coverOpen && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ fontFamily: "var(--font-body)" }}>
+          <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+          <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+            <div className="flex items-center justify-between gap-[var(--space-3)]">
+              <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Cover photo</h3>
+              <button type="button" onClick={() => setCoverOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-[8px]">
+              {PRO_COVERS.map((url) => (
+                <button key={url} type="button" aria-label="Use this cover" aria-pressed={cover === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: cover === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
+                  <Image src={url} alt="" fill sizes="160px" className="object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] pt-[72px] sm:p-[var(--space-6)] sm:pt-[88px]">
+        <div className="flex flex-wrap items-center gap-[var(--space-4)] sm:gap-[var(--space-5)]">
+          <Avatar name={pro.name} size={96} />
+          <div className="min-w-0 flex-1">
+            <span className="flex items-center gap-[6px]">
+              <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
+              <VerifiedBadge size={18} />
+            </span>
+            <p className="mt-[6px] flex flex-wrap items-center gap-x-[8px] gap-y-[6px] text-[15px] leading-[20px] font-semibold" style={{ color: soft }}>
+              <span>{pro.role}</span>
+              <span aria-hidden style={{ color: rule }}>|</span>
+              <CompanyMark name={pro.org} ink={ink} height={13} />
+              {tier && (
+                <span className="inline-flex items-center gap-[5px] rounded-[6px] px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: "rgba(255,255,255,0.12)", color: ink, border: `1px solid ${rule}` }} title={tier.note}>
+                  <TierIcon className="h-[12px] w-[12px]" aria-hidden style={{ color: PRO_ACCENT }} /> {tier.name} volunteer
+                </span>
+              )}
+            </p>
+            {/* the three public numbers as one line with icons and
+               dividers, the reference's stat row -- ABOVE the quote
+               (direct feedback, 9 Sept 2026: "move the stats up before
+               the quote in the professional profiles too"). */}
+            <dl className="mt-[var(--space-4)] flex flex-wrap items-center gap-y-[var(--space-2)]">
+              {[
+                { value: views, label: "Views" },
+                { value: pro.followers + (following ? 1 : 0), label: "Followers" },
+                { value: pro.totalLikes, label: "Likes" },
+              ].map((stat, index) => (
+                <div key={stat.label} className={`flex items-center pr-[var(--space-4)] ${index > 0 ? "border-l pl-[var(--space-4)]" : ""}`} style={{ borderColor: rule }}>
+                  <span className="flex flex-col">
+                    <dd className="text-[18px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: ink }}>{shortCount(stat.value)}</dd>
+                    <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: soft }}>{stat.label}</dt>
+                  </span>
+                </div>
+              ))}
+            </dl>
+            {/* The pull-quote belongs in the header, not buried under Ask
+               Me/Posts/Communities (direct feedback, 9 Sept 2026: "this
+               quote was supposed to be in the header, it was moved down,
+               please move it back up"). */}
+            <p className="mt-[var(--space-4)] text-[15px] leading-[22px] italic" style={{ color: ink }}>&ldquo;{pro.story}&rdquo;</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function ProProfileView({
   pro,
   follows,
@@ -561,32 +706,6 @@ export function ProProfileView({
   const [section, setSection] = useState<"overview" | "askme">("overview");
   const [askSection, setAskSection] = useState<"answers" | "posts">("answers");
   const following = !!follows[pro.id];
-  const tier = volunteerTier(pro);
-  const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
-  // views of the profile and its answers, the public number IG and TikTok lead with
-  const views = Math.round(pro.studentsReached * 3.8);
-  const ink = "#FFFFFF";
-  const soft = "rgba(255,255,255,0.78)";
-  const rule = "rgba(255,255,255,0.18)";
-  // The professional's own cover choice (their page, their identity). Kept
-  // per person in the browser until profiles carry it server-side.
-  const coverKey = `dreamari:pro-cover:${pro.id}`;
-  const [cover, setCover] = useState(coverFor(pro.id));
-  const [coverOpen, setCoverOpen] = useState(false);
-  useEffect(() => {
-    // syncing with the browser's storage (an external system), which is what
-    // the set-state-in-effect rule exists to allow
-    try {
-      const saved = window.localStorage.getItem(coverKey);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (saved && PRO_COVERS.includes(saved)) setCover(saved);
-    } catch {}
-  }, [coverKey]);
-  const pickCover = (url: string) => {
-    setCover(url);
-    setCoverOpen(false);
-    try { window.localStorage.setItem(coverKey, url); } catch {}
-  };
 
   return (
     <>
@@ -608,91 +727,7 @@ export function ProProfileView({
         </div>
       </div>
 
-      {/* Identity, in the student profile's own language: a personal cover
-         photo with the name on it (never the company's colours), the tier by
-         the name, role and company mark, Follow, three shortened numbers,
-         the story, then what was verified. */}
-      <section aria-label="Profile" className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
-        <div className="absolute inset-0" aria-hidden>
-          <Image src={cover} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%" }} priority />
-          <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.82) 40%, rgba(12,16,35,0.3) 78%, rgba(12,16,35,0.08) 100%)" }} />
-        </div>
-        {/* the professional's own controls, the student header's Cover button
-           in the same corner; students see no controls here */}
-        {onOpenDashboard && (
-          <div className="absolute top-[var(--space-4)] right-[var(--space-4)] z-10 flex items-center rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
-            <button type="button" aria-label="Change cover photo" aria-expanded={coverOpen} onClick={() => setCoverOpen((o) => !o)} className="dm-quiet flex h-9 cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[14px] font-semibold" style={{ color: coverOpen ? PRO_ACCENT : "rgba(255,255,255,0.86)" }}>
-              <ImagePlus className="h-3.5 w-3.5" aria-hidden /> Cover
-            </button>
-          </div>
-        )}
-        {coverOpen && (
-          <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ fontFamily: "var(--font-body)" }}>
-            <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
-            <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-              <div className="flex items-center justify-between gap-[var(--space-3)]">
-                <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Cover photo</h3>
-                <button type="button" onClick={() => setCoverOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                  <X className="h-4 w-4" aria-hidden />
-                </button>
-              </div>
-              <div className="grid grid-cols-3 gap-[8px]">
-                {PRO_COVERS.map((url) => (
-                  <button key={url} type="button" aria-label="Use this cover" aria-pressed={cover === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: cover === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
-                    <Image src={url} alt="" fill sizes="160px" className="object-cover" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-        <div className="relative flex flex-col gap-[var(--space-5)] p-[var(--space-5)] pt-[72px] sm:p-[var(--space-6)] sm:pt-[88px]">
-          <div className="flex flex-wrap items-center gap-[var(--space-4)] sm:gap-[var(--space-5)]">
-            <Avatar name={pro.name} size={96} />
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
-                <span className="flex items-center gap-[6px]">
-                  <h1 className="text-[24px] leading-[29px] font-extrabold text-balance sm:text-[26px] sm:leading-[31px]" style={{ fontFamily: "var(--font-display)", color: ink }}>{pro.name}</h1>
-                  <VerifiedBadge size={18} />
-                </span>
-                {tier && (
-                  <span className="inline-flex items-center gap-[5px] rounded-[6px] px-[8px] py-[3px] text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ background: "rgba(255,255,255,0.12)", color: ink, border: `1px solid ${rule}` }} title={tier.note}>
-                    <TierIcon className="h-[12px] w-[12px]" aria-hidden style={{ color: PRO_ACCENT }} /> {tier.name} volunteer
-                  </span>
-                )}
-              </div>
-              <p className="mt-[6px] flex flex-wrap items-center gap-x-[8px] gap-y-[4px] text-[15px] leading-[20px] font-semibold" style={{ color: soft }}>
-                <span>{pro.role}</span>
-                <span aria-hidden style={{ color: rule }}>|</span>
-                <CompanyMark name={pro.org} ink={ink} height={13} />
-              </p>
-              {/* the three public numbers as one line with icons and
-                 dividers, the reference's stat row -- ABOVE the quote
-                 (direct feedback, 9 Sept 2026: "move the stats up before
-                 the quote in the professional profiles too"). */}
-              <dl className="mt-[var(--space-4)] flex flex-wrap items-center gap-y-[var(--space-2)]">
-                {[
-                  { value: views, label: "Views" },
-                  { value: pro.followers + (following ? 1 : 0), label: "Followers" },
-                  { value: pro.totalLikes, label: "Likes" },
-                ].map((stat, index) => (
-                  <div key={stat.label} className={`flex items-center pr-[var(--space-4)] ${index > 0 ? "border-l pl-[var(--space-4)]" : ""}`} style={{ borderColor: rule }}>
-                    <span className="flex flex-col">
-                      <dd className="text-[18px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: ink }}>{shortCount(stat.value)}</dd>
-                      <dt className="text-[12px] leading-[16px] font-semibold" style={{ color: soft }}>{stat.label}</dt>
-                    </span>
-                  </div>
-                ))}
-              </dl>
-              {/* The pull-quote belongs in the header, not buried under Ask
-                 Me/Posts/Communities (direct feedback, 9 Sept 2026: "this
-                 quote was supposed to be in the header, it was moved down,
-                 please move it back up"). */}
-              <p className="mt-[var(--space-4)] text-[15px] leading-[22px] italic" style={{ color: ink }}>&ldquo;{pro.story}&rdquo;</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ProfileHeaderCard pro={pro} following={following} showCoverControls={!!onOpenDashboard} />
 
       {/* My Profile's own inner structure (direct instruction, 13 Sept
          2026, the Catchafire reference): Overview (who they are) lands
@@ -708,14 +743,21 @@ export function ProProfileView({
       )}
 
       {section === "askme" && (
-        <div className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={CARD}>
-          <div className="p-[var(--space-5)] pb-0 sm:p-[var(--space-6)] sm:pb-0">
-            <Segmented<"answers" | "posts"> ariaLabel="Ask Me or Posts" value={askSection} onChange={setAskSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
-          </div>
+        <div className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={CARD}>
+          {/* A light underlined toggle, not another filled pill (direct
+             feedback, 13 Sept 2026: "too many toggles"): stacking two
+             same-weight pill bars read as two levels of tabbing before any
+             content. This is deliberately the quieter secondary choice
+             under Ask Me & Posts' own primary one above. */}
+          <SubTabs<"answers" | "posts"> ariaLabel="Ask Me or Posts" value={askSection} onChange={setAskSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
 
           {askSection === "answers" && (
-            /* no lede: "Ask Me" and the composer already say it (Chandu, 7 Sept 2026) */
-            <ProfileCard id="ask-title" title="Ask Me" side={
+            <div className="flex flex-col gap-[var(--space-4)]">
+              {/* The composer stands alone on its own row -- pairing it
+                 beside a big "Ask Me" heading (direct feedback, 13 Sept
+                 2026: "composition is also bad") fought it for width and
+                 read as two mismatched columns; the tab is already titled
+                 "Ask Me & Posts", so the heading was purely repeated text. */}
               <InlineAsk
                 joined
                 accent="var(--primary)"
@@ -725,7 +767,6 @@ export function ProProfileView({
                   onAsked?.(text);
                 }}
               />
-            }>
               {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
               {answers.length > 0 && (
                 <ul className="flex flex-col gap-[var(--space-3)]">
@@ -749,11 +790,16 @@ export function ProProfileView({
                   <button type="button" onClick={() => setAllAnswers((v) => !v)} aria-expanded={allAnswers} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allAnswers ? "Show less" : `View all ${answers.length}`} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
                 </div>
               )}
-            </ProfileCard>
+            </div>
           )}
 
           {askSection === "posts" && (
-            <ProfileCard id="posts-title" title="My Posts" aside={posts.length > 2 ? <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button> : undefined}>
+            <div className="flex flex-col gap-[var(--space-3)]">
+              {posts.length > 2 && (
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+                </div>
+              )}
               {posts.length > 0 ? (
                 <ul className="flex flex-col gap-[var(--space-3)]">
                   {(allPosts ? posts : posts.slice(0, 2)).map((insight) => {
@@ -769,7 +815,7 @@ export function ProProfileView({
               ) : (
                 <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>No posts yet.</p>
               )}
-            </ProfileCard>
+            </div>
           )}
         </div>
       )}
