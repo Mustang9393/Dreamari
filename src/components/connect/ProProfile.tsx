@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Fragment, useContext, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
 import { Meter, Ring, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
@@ -174,8 +174,11 @@ export function Panel({ id, title, aside, children, className = "" }: { id: stri
 // less moody): the shared panel glass with a touch of the brand blue in it
 const CARD = { ...PANEL, background: "color-mix(in srgb, var(--primary) 7%, var(--glass-surface-2))" } as const;
 export function ProfileCard({ id, title, lede, side, aside, first = false, children }: { id: string; title: string; lede?: string; side?: React.ReactNode; aside?: React.ReactNode; first?: boolean; children: React.ReactNode }) {
-  // one section of the single profile surface: ruled off from the one above,
-  // no box of its own (direct feedback, 7 Sept 2026: no card after card)
+  // One section of a single shared surface (OverviewSection's own wrapping
+  // CARD), ruled off from the section above rather than boxed on its own
+  // (direct feedback, 13 Sept 2026: "one whole surface and lines to divide
+  // info", not individual boxes). first suppresses the divider on the very
+  // top section, whose top edge is the wrapping card's own edge.
   return (
     <section aria-labelledby={id} className={`flex w-full flex-col gap-[var(--space-4)] p-[var(--space-5)] sm:p-[var(--space-6)] ${first ? "" : "border-t"}`} style={{ borderColor: RULE }}>
       <div className={`flex flex-col gap-[var(--space-3)] ${side ? "sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-5)]" : ""}`}>
@@ -244,10 +247,14 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
  *  Company" / "Previous Company" (14px bold) are subheadings; the actual
  *  values under them (13.5px) are body -- strictly smaller than the
  *  subheading above them, never sized by how important the fact is. */
-export function OverviewSection({ pro, communities, onOpenCommunity, first = false }: { pro: Pro; communities: Community[]; onOpenCommunity: (id: string) => void; first?: boolean }) {
+export function OverviewSection({ pro, communities, onOpenCommunity }: { pro: Pro; communities: Community[]; onOpenCommunity: (id: string) => void }) {
+  // Plain PANEL, not CARD: CARD's touch of brand blue was tuned for a small
+  // element (the Ask Me composer, a Posts entry), and read as too bright
+  // spread across this whole multi-section block (direct feedback, 13 Sept
+  // 2026) -- same glass, blur and border, just without the tint at this size.
   return (
-    <>
-      <ProfileCard id="about-me-title" title="About Me" first={first}>
+    <div className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={PANEL}>
+      <ProfileCard id="about-me-title" title="About Me" first>
         <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.journey ?? pro.story}</p>
       </ProfileCard>
 
@@ -255,11 +262,16 @@ export function OverviewSection({ pro, communities, onOpenCommunity, first = fal
         {/* Same shape as Education below: a bold label line, then the value
            underneath -- no separate icon tile (direct feedback, 13 Sept
            2026: "remove the briefcase icon... use the same format as the
-           education section"). CompanyChip already carries the company's
-           own mark, so it does the job a tile icon was standing in for. */}
-        <div className="flex flex-col gap-[var(--space-2)]">
+           education section"). The company's own mark sits inline with its
+           name (direct feedback, 13 Sept 2026: the CompanyChip pill was
+           stretching to the card's full width and looked odd; a bare mark
+           + name, the same row shape Education uses, does the job instead). */}
+        <div className="flex flex-col items-start gap-[var(--space-2)]">
           <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Current Company</span>
-          <CompanyChip name={pro.org} tone="surface" size="md" />
+          <span className="flex items-center gap-[var(--space-3)]">
+            <CompanyMark name={pro.org} ink="var(--foreground)" />
+            <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{pro.org}</span>
+          </span>
         </div>
         {pro.priorRole && (
           <div className="flex flex-col gap-[var(--space-2)]">
@@ -268,7 +280,7 @@ export function OverviewSection({ pro, communities, onOpenCommunity, first = fal
           </div>
         )}
         {pro.education && (
-          <div className="flex flex-col gap-[var(--space-2)]">
+          <div className="flex flex-col items-start gap-[var(--space-2)]">
             <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Education</span>
             {/* Each "; "-separated clause is its own row (Danielle Brooks:
                "B.S.N. University of Minnesota; M.S.N. Nurse Practitioner"),
@@ -276,8 +288,9 @@ export function OverviewSection({ pro, communities, onOpenCommunity, first = fal
                single line. A clause with a sourced school shows that
                school's own mark; one without (no school in the clause, or a
                school we couldn't source -- School of Motion, Art Center
-               College of Design, schoolMarks.ts) keeps the plain
-               GraduationCap tile so nothing goes visually blank. */}
+               College of Design, schoolMarks.ts) is just the plain text, no
+               icon tile (direct feedback, 13 Sept 2026: "remove icon for
+               educations as well"). */}
             {pro.education.split("; ").flatMap((segment) => {
               const matches = schoolsIn(segment);
               const rows = matches.length > 0 ? matches : [null];
@@ -285,7 +298,7 @@ export function OverviewSection({ pro, communities, onOpenCommunity, first = fal
                 const size = school ? eduMarkSize(school.ratio) : null;
                 return (
                   <span key={`${segment}-${school?.name ?? j}`} className="flex items-center gap-[var(--space-3)]">
-                    {school && size ? (
+                    {school && size && (
                       // White circle, not the dark glass tile (direct
                       // feedback, 8 Sept 2026: "white background, circle
                       // frames, some are not visible"): a seal is ink drawn
@@ -299,10 +312,6 @@ export function OverviewSection({ pro, communities, onOpenCommunity, first = fal
                       <span aria-hidden className="relative flex flex-none items-center justify-center rounded-full border" style={{ width: EDU_BADGE_D, height: EDU_BADGE_D, background: "#FFFFFF", borderColor: "var(--glass-border)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={`/images/connect/schools/${school.file}`} alt="" width={size.width} height={size.height} style={{ width: size.width, height: size.height, objectFit: "contain" }} />
-                      </span>
-                    ) : (
-                      <span aria-hidden className="flex size-[44px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
-                        <GraduationCap className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} />
                       </span>
                     )}
                     <span className="min-w-0 text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{segment}</span>
@@ -346,7 +355,7 @@ export function OverviewSection({ pro, communities, onOpenCommunity, first = fal
           </ul>
         </ProfileCard>
       )}
-    </>
+    </div>
   );
 }
 
@@ -563,7 +572,13 @@ export function SubTabs<K extends string>({ options, value, onChange, ariaLabel 
               role="tab"
               aria-selected={on}
               onClick={() => onChange(option.key)}
-              className="dm-quiet relative -mb-px cursor-pointer border-b-2 px-[2px] pb-[10px] text-[14px] font-bold"
+              // No dm-quiet here: that utility's hover wash falls back to a
+              // rounded box (border-radius from its @layer components rule)
+              // on any control without its own rounded-* class, which read
+              // as a stray pill under a tab that's supposed to be a flat
+              // underline (direct feedback, 13 Sept 2026: "still some sort
+              // of rounded corner thing"). Just the border-bottom itself.
+              className="relative -mb-px cursor-pointer border-b-2 px-[2px] pb-[10px] text-[14px] font-bold"
               style={{ borderColor: on ? "var(--primary)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
               {option.label}
@@ -744,7 +759,7 @@ export function ProProfileView({
 
       {section === "overview" && (
         <div className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={CARD}>
-          <OverviewSection pro={pro} communities={communities} onOpenCommunity={(id) => nav?.openBoard(id)} first />
+          <OverviewSection pro={pro} communities={communities} onOpenCommunity={(id) => nav?.openBoard(id)} />
         </div>
       )}
 

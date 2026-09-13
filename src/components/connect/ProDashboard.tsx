@@ -197,7 +197,7 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
           <Segmented<"overview" | "askme"> ariaLabel="Profile section" value={profileSection} onChange={setProfileSection} options={[{ key: "overview", label: "Overview" }, { key: "askme", label: "Ask Me & Posts" }]} />
 
           {profileSection === "overview" && (
-            <OverviewSection pro={pro} communities={myCommunities} onOpenCommunity={(id) => nav?.openBoard(id)} first />
+            <OverviewSection pro={pro} communities={myCommunities} onOpenCommunity={(id) => nav?.openBoard(id)} />
           )}
 
           {profileSection === "askme" && (

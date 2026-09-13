@@ -8151,3 +8151,50 @@ Lint/tsc clean. Verified live: fanned spread renders correctly at rest and while
 paging, "+" reads as an obvious button now, beam is on Next by default and
 switches to the "+" once Investment Banking is the front card, match flow still
 fires correctly from the "+". Not committed, not pushed.
+
+## 2026-09-13 · Connect profile (ProProfile.tsx/ProDashboard.tsx): Experience fixes, surfaces back
+
+Same-day follow-up, direct instruction, cross-checked against the Replit reference
+screenshots (Overview + Ask Me & Posts tabs) with a live visual pass, not just code:
+
+- `SubTabs`'s Answers/Posts underline was using `dm-quiet` for its hover state;
+  that utility's `@layer components` fallback (`border-radius: var(--radius-sm)`)
+  kicks in on any control without its own `rounded-*` class, so hovering painted
+  a rounded box behind the flat-line tab ("still some sort of rounded corner
+  thing"). Dropped `dm-quiet` entirely from that button -- just the border-bottom
+  now, no hover wash. (Confirmed empirically in the browser, not just by reading
+  the CSS, that a plain `hover:[color:...]` utility can't fix this either: it
+  never overrides a same-element inline `style` color regardless of pseudo-class,
+  which the codebase already works around elsewhere via `!important`.)
+- Current Company was a full-width `CompanyChip` pill -- root cause: its wrapping
+  `flex flex-col` container had no `items-start`, so flexbox's default
+  `align-items: stretch` forced the inline-flex chip to the column's full width.
+  Replaced with `CompanyMark` (bare logo, no chip/pill) + the company name as
+  text, in a row, the same shape Education already uses -- also added
+  `items-start` to both wrappers so this class of bug can't recur.
+- Education's fallback `GraduationCap` icon tile (for a school not in
+  `schoolMarks.ts`) removed entirely -- unmatched schools are just plain text
+  now, no icon tile, no blank-space placeholder.
+- Full visual re-check against the reference surfaced a real regression: since
+  a 7 Sept 2026 change, `ProfileCard` sections (About Me/Experience/I Can Help
+  With/Communities) had no surface of their own at all -- not even the single
+  shared surface that change's own comment described, just bare sections
+  divided by rule lines directly on the page background. Direct instruction:
+  restore ONE shared surface (not per-section boxes, tried and rejected first)
+  wrapping the whole `OverviewSection` stack, sections still divided by rule
+  lines inside it. `ProfileCard` itself is back to its pre-7-Sept shape
+  (padding + conditional `border-t`, `first` prop restored); `OverviewSection`
+  now wraps its `ProfileCard`s in one shared surface.
+- That wrapper first used `CARD` (the same tinted-blue glass as the Ask Me
+  composer/Posts panel) and read "too bright" -- not a rendering bug (checked
+  the live DOM: only one element had the background, no doubling/stacking),
+  just `CARD`'s brand-blue tint, tuned for a small element, reading stronger
+  spread across a whole multi-section block. Switched the wrapper to plain
+  `PANEL` (same glass/blur/border/shadow, no tint); `CARD` itself is untouched
+  and still used where it always was (Ask Me composer, Posts panel).
+
+Lint/tsc clean. Verified live on both `ProDashboardView` (own profile) and the
+public `ProProfileView` (same `OverviewSection`), for a volunteer with a
+matched school (Amara Okafor/University of Michigan, circle logo) and one
+without (Leo Fontaine/School of Motion, confirms the icon removal doesn't
+leave a ragged gap), and at a 375px mobile viewport. Not committed, not pushed.
