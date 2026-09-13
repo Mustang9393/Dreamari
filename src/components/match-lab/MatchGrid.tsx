@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Laptop, Plus, Sparkles, Wrench, X } from "lucide-react";
+import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Plus, Sparkles, X } from "lucide-react";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { announce } from "@/components/app/LiveRegion";
@@ -17,20 +17,19 @@ import { playMilestoneChime } from "@/components/build/sound";
 import { picksParam, writePicks } from "@/lib/picks";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { DECK, MAX_SLOTS, type Career } from "./data";
-import { MatchVersionToggle } from "./VersionToggle";
 
 // ---------------------------------------------------------------------------
-// EXPERIMENT (11 Sept 2026, not wired into the real flow, no push): a grid
-// instead of a swipe deck. Everyone is visible at once and every career's
-// full breakdown is a tap away, so a student who commits to a Top 3 early
-// never loses sight of the other five the way a finished swipe deck can bury
-// them. Selecting is a corner control; tapping the card itself opens the
-// same "Career Breakdown" the swipe deck reveals on scroll (Daily Work,
-// Skills & Subjects, Work Style, Pathway Fit, Future Tradeoff), morphing
-// straight out of the card via a shared layoutId so opening a detail feels
-// like the card itself expanding, not a new screen replacing it. Reuses the
-// same DECK data and the same picks handoff into Profile as the real
-// MatchLab, so this is a genuine drop-in alternative, not a mockup.
+// THE Match experience (13 Sept 2026): started as an A/B experiment against
+// the swipe deck (MatchLab.tsx, now dormant at /match-lab -- every entry
+// point into Match points here instead). A grid, not a swipe deck: every
+// career is visible at once, so a student who commits to a Top 3 early
+// never loses sight of the other five the way a finished swipe deck can
+// bury them. Selecting is a corner control; tapping the card itself opens a
+// short, decision-focused detail (What You'd Do / Good Fit If You Like /
+// School & Path -- see DetailModal below), morphing straight out of the
+// card via a shared layoutId so opening it feels like the card itself
+// expanding, not a new screen replacing it. Reuses the same DECK data and
+// the same picks handoff into Profile that MatchLab always did.
 // ---------------------------------------------------------------------------
 
 const SUCCESS = "var(--color-feedback-success)";
@@ -103,12 +102,7 @@ export function MatchGrid() {
                 <BackButton fallback="/flow" />
                 <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
               </span>
-              {/* The A/B toggle sits beside the counter chip, not on its own
-                 row -- this page has zero spare vertical room (it's tuned to
-                 fit the viewport with no scroll), so any new row would bring
-                 the scrollbar straight back. */}
               <span className="flex flex-none items-center gap-2">
-                <MatchVersionToggle current="B" />
                 <span
                   className="flex flex-none items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
                   style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
@@ -448,40 +442,28 @@ function DetailModal({
             </div>
           </div>
 
-          {/* breakdown */}
+          {/* Three sections, always in this order, every career (direct
+             instruction, 13 Sept 2026): this is a quick "is it worth a Top
+             3 slot?" read, not the full Career Report -- that lives
+             elsewhere for later. 8th-grade reading level, short bullets,
+             nothing here that needs a second read. */}
           <div className="flex flex-col px-5 pt-5 pb-6" style={{ background: "var(--color-night-card)" }}>
-            <p className={`${bricolage.className} mb-4 text-[11px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase`}>Career Breakdown</p>
+            <p className={`${bricolage.className} mb-4 text-[11px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase`}>At a Glance</p>
 
-            <BreakdownSection icon={<BookOpen className="h-4 w-4" />} color={career.color} label="Daily Work">
-              <p className="text-[15px] leading-[1.55] font-semibold text-[var(--color-night-foreground)]">{career.hook}</p>
+            <BreakdownSection icon={<BookOpen className="h-4 w-4" />} color={career.color} label="What You'd Do">
+              <BulletList items={career.whatYouDo} />
             </BreakdownSection>
 
             <BreakdownDivider />
 
-            <BreakdownSection icon={<Wrench className="h-4 w-4" />} color={career.color} label="Skills & Subjects">
-              <p className="text-[14px] leading-[1.6] font-medium text-[var(--color-night-foreground)]">{career.skills}</p>
-              <p className="mt-2.5 text-[9.5px] font-bold tracking-[0.1em] text-[var(--color-night-muted-foreground)] uppercase">Classes that help</p>
-              <p className="mt-1 text-[12.5px] leading-[1.55] font-medium text-[var(--color-night-muted-foreground)]">{career.classes}</p>
+            <BreakdownSection icon={<Sparkles className="h-4 w-4" />} color={career.color} label="Good Fit If You Like">
+              <BulletList items={career.goodFitIf} />
             </BreakdownSection>
 
             <BreakdownDivider />
 
-            <BreakdownSection icon={<Laptop className="h-4 w-4" />} color={career.color} label="Work Style">
-              <p className="text-[14px] leading-[1.6] font-medium text-[var(--color-night-foreground)]">{career.workStyle}</p>
-            </BreakdownSection>
-
-            <BreakdownDivider />
-
-            <BreakdownSection icon={<GraduationCap className="h-4 w-4" />} color={career.color} label="Pathway Fit">
-              <p className="text-[14px] leading-[1.6] font-medium text-[var(--color-night-foreground)]">{career.pathway}</p>
-            </BreakdownSection>
-
-            <BreakdownDivider />
-
-            <BreakdownSection icon={<Sparkles className="h-4 w-4" />} color={career.color} label="Future Tradeoff">
-              <p className="text-[13.5px] leading-[1.6] font-medium text-[var(--color-night-foreground)] italic" style={{ borderLeft: `3px solid color-mix(in srgb, ${career.color} 65%, transparent)`, paddingLeft: 12 }}>
-                {career.tradeoff}
-              </p>
+            <BreakdownSection icon={<GraduationCap className="h-4 w-4" />} color={career.color} label="School & Path">
+              <BulletList items={career.schoolPath} />
             </BreakdownSection>
           </div>
         </div>
@@ -527,4 +509,22 @@ function BreakdownSection({ icon, color, label, children }: { icon: React.ReactN
 
 function BreakdownDivider() {
   return <hr aria-hidden className="my-4 border-0" style={{ height: 1, background: "var(--color-glass-border)" }} />;
+}
+
+/** Every "At a Glance" section is 2-3 short bullets, never a paragraph --
+ * that's the whole point of the simplified detail (direct instruction, 13
+ * Sept 2026: "very short bullet points that scan well on vertical
+ * screens"). One shared list style so all three sections read as one
+ * system rather than three differently-formatted blocks. */
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {items.map((item) => (
+        <li key={item} className="flex items-start gap-2 text-[14.5px] leading-[1.5] font-medium text-[var(--color-night-foreground)]">
+          <span aria-hidden className="mt-[9px] size-1 flex-none rounded-full" style={{ background: "var(--color-night-muted-foreground)" }} />
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
 }

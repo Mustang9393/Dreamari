@@ -2,9 +2,9 @@ import { MatchGrid } from "@/components/match-lab/MatchGrid";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
-// EXPERIMENT ONLY — grid-based Top 3 picker, an alternative to the swipe-card
-// MatchLab. Lives at its own route so it never touches /match-lab. Local only:
-// do not push or deploy per direct instruction (12 Sept 2026).
+// THE Match route (13 Sept 2026): the grid-based Top 3 picker won the A/B
+// test against the swipe-card MatchLab, which is now dormant at
+// /match-lab. Every entry point into Match routes here.
 export default function MatchGridPage() {
   return (
     <main>

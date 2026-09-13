@@ -31,6 +31,18 @@ export type Career = {
   /** Future Tradeoff sub-card — PROTOTYPE copy drafted for the lab (the
    * wireframe had no tradeoff lines); replace with vetted taxonomy copy. */
   tradeoff: string;
+  /** The universal 3-section detail (direct instruction, 13 Sept 2026): NOT
+   * the full Career Report, and not the fields above either -- those stay
+   * for MatchLab (dormant, /match-lab), which still renders its own
+   * five-section breakdown from them. This is deliberately shorter, at an
+   * 8th-grade reading level, so a student can decide "interesting enough
+   * for my Top 3?" in a few seconds instead of reading a report. Every
+   * career carries the same three, in the same order, each 2-3 short
+   * bullets: what the day-to-day work actually is, the kind of person/
+   * interests it fits, and the usual school path into it. */
+  whatYouDo: string[];
+  goodFitIf: string[];
+  schoolPath: string[];
   photo: string;
 };
 
@@ -50,6 +62,9 @@ export const DECK: Career[] = [
     workStyle: "Fast Pace · Large Deal Crew · High Stakes Project Sprints",
     pathway: "4-Year Bachelor's in Finance/Economics + Summer Analyst Pipeline",
     tradeoff: "The pay is real and so are the hours.",
+    whatYouDo: ["Help companies raise money and make deals", "Build financial models and pitch decks"],
+    goodFitIf: ["Business", "Numbers", "Fast pace"],
+    schoolPath: ["4-year bachelor's degree", "Finance or Economics"],
     photo: "/images/app/poster-investment-banking-v3.webp",
   },
   {
@@ -67,6 +82,9 @@ export const DECK: Career[] = [
     workStyle: "Deep Focus · Very Small Team · Long Projects Over Fast Deals",
     pathway: "4-Year Bachelor's in Finance/Economics, usually after banking experience",
     tradeoff: "Fewer, deeper projects than banking, and far fewer seats.",
+    whatYouDo: ["Study companies a fund might buy", "Build the case for what it's worth"],
+    goodFitIf: ["Business", "Research", "Deep focus"],
+    schoolPath: ["4-year bachelor's degree", "Finance or Economics"],
     photo: "/images/app/poster-private-equity.webp",
   },
   {
@@ -85,6 +103,9 @@ export const DECK: Career[] = [
     workStyle: "Deep Focus · Small Squad · Review and Iterate",
     pathway: "4-Year CS Degree, or a Bootcamp plus a Portfolio",
     tradeoff: "You can enter without a degree, but you never stop learning.",
+    whatYouDo: ["Write and test code for apps and sites", "Fix bugs and make programs run better"],
+    goodFitIf: ["Problem solving", "Computers", "Detail work"],
+    schoolPath: ["4-year degree in Computer Science", "Or a coding bootcamp + portfolio"],
     photo: "/images/app/poster-software-engineer.webp",
   },
   {
@@ -103,6 +124,9 @@ export const DECK: Career[] = [
     workStyle: "Deep Focus · Small Analytics Team · Project-Based Sprints",
     pathway: "4-Year Bachelor's in Statistics/CS/Data Science, sometimes a Master's",
     tradeoff: "The tools change fast, and so does what counts as a modern skill set.",
+    whatYouDo: ["Turn messy data into charts and models", "Help companies decide what to do next"],
+    goodFitIf: ["Math", "Computers", "Solving puzzles"],
+    schoolPath: ["4-year bachelor's degree", "Statistics, CS, or Data Science"],
     photo: "/images/app/poster-data-scientist.webp",
   },
   {
@@ -120,6 +144,9 @@ export const DECK: Career[] = [
     workStyle: "Fast Pace · Small Buying Team · Seasonal Deadlines",
     pathway: "4-Year Bachelor's in Fashion Merchandising, Business, or a related field",
     tradeoff: "You shape what people wear, and the seasons never really stop.",
+    whatYouDo: ["Pick which clothes a store sells next", "Study sales data and trends"],
+    goodFitIf: ["Fashion", "Business", "Spotting trends"],
+    schoolPath: ["4-year bachelor's degree", "Fashion or Business"],
     photo: "/images/app/poster-fashion-buyer.webp",
   },
   {
@@ -138,6 +165,9 @@ export const DECK: Career[] = [
     workStyle: "Creative Bursts · Cross-Functional Team · Iterate and Playtest",
     pathway: "4-Year Degree in Game Design/CS, or a strong self-made portfolio",
     tradeoff: "Making games is real work, even when the subject is play.",
+    whatYouDo: ["Design levels and rules for games", "Test them and make them more fun"],
+    goodFitIf: ["Games", "Creativity", "Problem solving"],
+    schoolPath: ["4-year degree in Game Design or CS", "Or a strong portfolio"],
     photo: "/images/app/poster-game-designer.webp",
   },
 ];

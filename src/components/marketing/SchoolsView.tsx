@@ -59,10 +59,10 @@ const STAGES: Stage[] = [
     line: "Discover college majors, schools, and careers aligned with each student's profile.",
     detail: [
       "Each card carries the employers who hire for it and the median salary.",
-      "The back of the card shows the college major and pay, so a swipe is an informed one.",
+      "Tap a card to see the college major and daily work behind it, so every choice is an informed one.",
       "The saved Top 3 lands in the student's Profile and drives everything that follows.",
     ],
-    href: "/match-lab",
+    href: "/match-grid",
     linkLabel: "See Match in the app",
     art: <MatchIllustration />,
   },

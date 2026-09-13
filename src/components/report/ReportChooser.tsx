@@ -81,7 +81,7 @@ export function ReportChooser({ initialPicks }: { initialPicks: string[] }) {
 
       <main className="relative z-10 mx-auto flex w-full max-w-[880px] flex-1 flex-col items-center justify-center gap-[var(--space-8)] px-5 pt-[96px] pb-[var(--space-10)] md:px-8">
         {careers.length === 0 ? (
-          <EmptyState onGoMatch={() => router.push("/match-lab")} />
+          <EmptyState onGoMatch={() => router.push("/match-grid")} />
         ) : (
           <>
             <header className="flex flex-col items-center gap-[var(--space-2)] text-center">
@@ -147,7 +147,7 @@ function EmptyState({ onGoMatch }: { onGoMatch: () => void }) {
   return (
     <div className="flex flex-col items-center gap-[var(--space-4)] text-center">
       <h1 className="text-[28px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>No matches yet</h1>
-      <p className="max-w-[40ch] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Swipe right on up to three careers in Match, and they show up here to choose from.</p>
+      <p className="max-w-[40ch] text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Save up to three careers in Match, and they show up here to choose from.</p>
       <Button variant="primary" onClick={onGoMatch} type="button">
         Go to Match <ChevronRight className="h-4 w-4" aria-hidden />
       </Button>

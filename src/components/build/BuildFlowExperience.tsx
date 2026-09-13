@@ -65,7 +65,7 @@ export function BuildFlowExperience() {
   };
   const seeMatches = () => {
     persistAnswers();
-    router.push("/match-lab");
+    router.push("/match-grid");
   };
 
   // Unlock audio on the first real tap/keypress (iOS mutes Web Audio behind the
@@ -96,7 +96,7 @@ export function BuildFlowExperience() {
   const visitedAccents = useMemo(() => STAGES.slice(0, stageIndex).map((s) => STAGE_ACCENTS[s.id]).slice(-TRAIL_LENGTH), [stageIndex]);
 
   const dreamy = stageId in STAGE_DREAMY ? STAGE_DREAMY[stageId as keyof typeof STAGE_DREAMY] : null;
-  const skipToMatch = () => router.push("/match-lab");
+  const skipToMatch = () => router.push("/match-grid");
   const stepProps: StepProps = { state, patch, onNext: next, react, reactionNonce, percent: stage.percent, almostDone: stage.almostDone, sprite: dreamy?.sprite, onSkip: skipToMatch };
 
   let content: ReactNode = null;

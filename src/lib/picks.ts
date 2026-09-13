@@ -1,7 +1,7 @@
-// What the student carried out of Match: the careers they swiped right on, in
-// their own ranking, and which one they chose to start with in the report
-// chooser. There is no backend in the prototype, so localStorage IS the
-// handoff between /match-lab, /career-report and /profile.
+// What the student carried out of Match: the careers they saved to their Top
+// 3, in their own ranking, and which one they chose to start with in the
+// report chooser. There is no backend in the prototype, so localStorage IS
+// the handoff between /match-grid, /career-report and /profile.
 //
 // Career ids are the shared catalogue ids used by the match deck, the profile
 // (PROFILE_CAREERS / LOCKER_EXTRAS) and the reports (CAREER_REPORTS_V2) --
