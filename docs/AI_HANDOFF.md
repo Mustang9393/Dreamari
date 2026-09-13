@@ -7978,3 +7978,29 @@ border a screenshot showed on a question card was a hover-state
 artifact, not a bug -- confirmed by screenshotting the resting state.
 
 Pushed to main (e84d284).
+
+## 2026-09-13 · Home: chip CTAs, tablet card fix, rail spacing
+
+Direct feedback: "Explore All Careers" and "View all in Play" were two
+different colors (blue/white) and didn't read as tappable. New shared
+`RailCta` (HomeExperience.tsx) gives both the same tag-chip treatment.
+
+Found and fixed a real bug: on tablet widths, ActivityCard's wrapper
+used `md:min-w-[304px]` while the card itself enforces `sm:min-h-
+[212px]` -- a mismatch (the wrapper's own comment claimed it matched
+"the known-good sm size" of 360px, but the number written was 304).
+Aspect-ratio math on a 304px-wide wrapper computes 179px height, 33px
+short of the card's own min-height, so the card overflowed its wrapper
+and its bottom row rendered underneath the next section. Fixed:
+`md:min-w-[360px]`. Confirmed via getBoundingClientRect that wrapper
+and card heights now match exactly at every width tested.
+
+Tightened the gap between each section's title row and its cards
+(space-5/6 -> space-3) on Home's three sections, and normalized the
+same value in Explore's shared `Rail` and `TrendingRail` (ExploreExperience.tsx)
+so those rails read consistently with Home's. Direct feedback asked for
+this consistency across "all row sections everywhere" -- still
+outstanding: Play, Colleges, Career Report, Profile, and Connect's own
+rail-shaped sections haven't been audited yet.
+
+Pushed to main (370c9a4).
