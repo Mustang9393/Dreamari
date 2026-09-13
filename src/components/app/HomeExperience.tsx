@@ -515,15 +515,21 @@ export function HomeExperience() {
         <HeroBanner />
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
-          {/* The feature name lives in the CTA's own words instead of a
-             separate label above the title (direct instruction, 13 Sept
-             2026: "instead of adding more labels" -- the CTA already links
-             to the feature, so naming it there does the same wayfinding
-             job as a kicker would, with one less element on the page). */}
+          {/* Plain-text kicker, not a control (direct feedback, 14 Sept
+             2026): demo students don't already know what PLAY/EXPLORE mean
+             the way they know Netflix or Instagram's sections, so a quiet
+             always-visible label teaches the product's structure passively
+             -- a job the CTA below can't do on its own, since it's only
+             read by someone already about to click. Not a link itself
+             (no cursor pointer, no hover state): "how does anybody think of
+             clicking on a label" -- that affordance job stays with the CTA. */}
           <div className="flex items-start justify-between gap-[var(--space-4)]">
-            <h2 className="min-w-0 flex-1 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              Continue Where You Left Off
-            </h2>
+            <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
+              <CaptionLabel color="var(--accent-subtle)">PLAY</CaptionLabel>
+              <h2 className="min-w-0 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                Continue Where You Left Off
+              </h2>
+            </div>
             <RailCta href="/play">View all in Play</RailCta>
           </div>
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
@@ -537,12 +543,10 @@ export function HomeExperience() {
            title, subtitle, and cards — one source of truth), replacing the
            old "Careers Picked for You" per user direction. */}
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-3)]">
-          {/* "Explore All Careers" already names the feature by itself, so
-             the title doesn't need to repeat "Explore" too -- one mention,
-             in the part of the row a student is going to read anyway. */}
           <div className="flex flex-col gap-[var(--space-1)]">
             <div className="flex items-end justify-between gap-[var(--space-4)]">
               <div className="flex flex-col gap-[2px]">
+                <CaptionLabel color="var(--accent-subtle)">EXPLORE</CaptionLabel>
                 <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                   Recommended Careers
                 </h2>

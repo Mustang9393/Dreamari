@@ -8280,3 +8280,26 @@ just the first one. Verified live: dismissed it, navigated to /explore, back to
 report." -> "Compare careers. Follow your plan. Track your progress."; CTA
 "Explore my profile" -> "View My Profile". Title unchanged. Lint/tsc clean,
 verified live at /profile.
+
+## 2026-09-14 · Home: PLAY/EXPLORE kickers back, non-interactive this time
+
+Reverses part of the 13 Sept "instead of adding more labels" decision, per a
+Slack thread: demo students don't already know what PLAY/EXPLORE mean the way
+they know Netflix/Instagram's own sections, so the CTA alone (only read by
+someone already about to click) wasn't teaching the product's structure to
+everyone scanning the page. Re-added a small `CaptionLabel` ("PLAY"/"EXPLORE",
+`--accent-subtle`) above "Continue Where You Left Off" and "Recommended
+Careers" in `HomeExperience.tsx`.
+
+Difference from the original ask (13 Sept: "make the PLAY and EXPLORE labels
+clickable"): these are plain, non-interactive text -- no link, no cursor
+pointer, no hover state. Direct feedback: "how does anybody think of clicking
+on a label" -- a muted static tag doesn't read as tappable without added
+affordance, and adding that affordance undoes the "quiet" point of an ambient
+label. The `RailCta` chips ("View all in Play"/"Explore All Careers") remain
+the only actionable, obviously-clickable element in each row.
+
+Lint/tsc clean. Verified live: both labels render as plain `<p>` text (checked
+computed `cursor: auto` and no wrapping `<a>` in the DOM, not just visually).
+Not yet committed at time of writing -- pushing this alongside the handoff
+entry.
