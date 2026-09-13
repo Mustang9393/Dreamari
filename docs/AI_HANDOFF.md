@@ -7961,3 +7961,20 @@ entry above) --
   Briefcase icon tile.
 
 Pushed to main: Home (40b1592), Connect (050ab49).
+
+## 2026-09-13 · Home: kickers removed; Connect: SubTabs divider + density
+
+Home: reverted the PLAY/EXPLORE kicker labels from the previous entry --
+direct feedback favored naming the feature in the CTA text instead
+("Explore All Careers" already says Explore; "View all activity" became
+"View all in Play"), one fewer element on the page for the same
+wayfinding job. `SectionKicker` removed.
+
+Connect: `SubTabs` (shared, ProProfile.tsx) now shows a literal "|"
+between Answers and Posts instead of gap spacing, and confirmed the
+active tab's underline is a flat line. Tightened the Ask Me & Posts
+card's own padding/gaps (was reading as excess empty space). The blue
+border a screenshot showed on a question card was a hover-state
+artifact, not a bug -- confirmed by screenshotting the resting state.
+
+Pushed to main (e84d284).
