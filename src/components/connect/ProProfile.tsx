@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { Fragment, useContext, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
 import { Meter, Ring, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -548,21 +548,27 @@ function eduMarkSize(ratio: number) {
  *  underneath it, not two equal-weight tab bars. */
 export function SubTabs<K extends string>({ options, value, onChange, ariaLabel }: { options: { key: K; label: string }[]; value: K; onChange: (key: K) => void; ariaLabel: string }) {
   return (
-    <div role="tablist" aria-label={ariaLabel} className="flex items-center gap-[var(--space-5)] border-b" style={{ borderColor: RULE }}>
-      {options.map((option) => {
+    <div role="tablist" aria-label={ariaLabel} className="flex items-center gap-[10px] border-b" style={{ borderColor: RULE }}>
+      {options.map((option, index) => {
         const on = option.key === value;
         return (
-          <button
-            key={option.key}
-            type="button"
-            role="tab"
-            aria-selected={on}
-            onClick={() => onChange(option.key)}
-            className="dm-quiet relative -mb-px cursor-pointer border-b-2 px-[2px] pb-[10px] text-[14px] font-bold"
-            style={{ borderColor: on ? "var(--primary)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
-          >
-            {option.label}
-          </button>
+          <Fragment key={option.key}>
+            {/* a literal divider between the two choices instead of bare
+               whitespace (direct feedback, 13 Sept 2026), so "Answers |
+               Posts" reads as one related pair rather than two separate
+               floating labels */}
+            {index > 0 && <span aria-hidden style={{ color: RULE }}>|</span>}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => onChange(option.key)}
+              className="dm-quiet relative -mb-px cursor-pointer border-b-2 px-[2px] pb-[10px] text-[14px] font-bold"
+              style={{ borderColor: on ? "var(--primary)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+            >
+              {option.label}
+            </button>
+          </Fragment>
         );
       })}
     </div>
@@ -743,7 +749,7 @@ export function ProProfileView({
       )}
 
       {section === "askme" && (
-        <div className="flex w-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={CARD}>
+        <div className="flex w-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={CARD}>
           {/* A light underlined toggle, not another filled pill (direct
              feedback, 13 Sept 2026: "too many toggles"): stacking two
              same-weight pill bars read as two levels of tabbing before any
