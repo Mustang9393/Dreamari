@@ -8,7 +8,7 @@ import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
 import styles from "./WelcomeSplash.module.css";
 
-export type SplashSurface = "match" | "explore" | "schools" | "play" | "connect" | "profile";
+export type SplashSurface = "match" | "explore" | "play" | "connect" | "profile";
 
 type Scene = {
   sprite?: string;
@@ -41,20 +41,14 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
     tint: ["40, 140, 255", "30, 185, 170"],
     title: "EXPLORE",
-    // One sentence that names both halves (direct feedback, 11 Sept 2026);
-    // the Schools tab has its own welcome with the detail.
-    line: "Careers and schools: salary, education, daily life, and pathways.",
+    // Two labelled rows, one per half of Explore (direct feedback, 13 Sept
+    // 2026): the Schools tab's own separate welcome is redundant now that
+    // this one names Schools' detail directly, so that splash is removed.
+    rows: [
+      { text: <><strong>Careers:</strong> Salary, education, daily life, and pathways.</> },
+      { text: <><strong>Schools:</strong> Colleges, trade schools, programs, cost, and admissions.</> },
+    ],
     cta: "Start exploring",
-  },
-  // Schools has its own welcome (direct feedback, 10 Sept 2026): the page
-  // itself stays almost wordless, so the "what do I do here" lives here.
-  schools: {
-    sprite: "/images/dreamy/v2/splash/dreamy-glasses.webp",
-    tint: ["30, 185, 170", "40, 140, 255"],
-    title: "SCHOOLS",
-    // Joshua's Schools line (Slack, 10 Sept 2026), reinstated 11 Sept 2026.
-    line: "Colleges, trade schools, programs, cost, and admissions.",
-    cta: "See my schools",
   },
   play: {
     sprite: "/images/dreamy/v2/splash/dreamy-controller.webp", wide: true,

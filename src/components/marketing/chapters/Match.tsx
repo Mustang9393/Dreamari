@@ -289,36 +289,40 @@ function MatchDemo() {
                          obvious") -- solid dark glass, a bright ring, its own
                          shadow -- but the glyph itself stays plain white, not
                          tinted, so the ring/beam carries the emphasis instead.
-                         On Investment Banking (the deck's intended match) the
-                         beam nudge moves here from Next, below. */}
-                      <div
-                        className={`absolute ${card.key === "iba" ? "mkt-scale-pulse" : ""}`}
-                        style={{ top: "calc(var(--mu) * 10px)", left: "calc(var(--mu) * 10px)" }}
-                      >
-                        <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={card.key === "iba"}>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              selectTop();
-                            }}
-                            aria-label={`Match with ${card.title}`}
-                            className="flex items-center justify-center rounded-full border-2"
-                            style={{
-                              width: "calc(var(--mu) * 34px)",
-                              height: "calc(var(--mu) * 34px)",
-                              color: "#fff",
-                              background: "rgba(5,7,15,0.55)",
-                              borderColor: "rgba(255,255,255,0.7)",
-                              backdropFilter: "blur(6px)",
-                              WebkitBackdropFilter: "blur(6px)",
-                              boxShadow: "0 4px 14px -4px rgba(0,0,0,0.5)",
-                            }}
-                          >
-                            <Plus style={{ width: "calc(var(--mu) * 18px)", height: "calc(var(--mu) * 18px)" }} strokeWidth={2.8} aria-hidden />
-                          </button>
-                        </BorderBeam>
-                      </div>
+                         Investment Banking only (direct feedback, 13 Sept
+                         2026): the deck only has one real simulation behind it
+                         (Play always previews Investment Banking), so matching
+                         with Management Analyst or Private Equity landed on
+                         the wrong game and made the landing page's promise
+                         feel broken. Hiding the badge on the other two avoids
+                         both that mismatch and a busy "match anything" deck. */}
+                      {card.key === "iba" && (
+                        <div className="absolute mkt-scale-pulse" style={{ top: "calc(var(--mu) * 10px)", left: "calc(var(--mu) * 10px)" }}>
+                          <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                selectTop();
+                              }}
+                              aria-label={`Match with ${card.title}`}
+                              className="flex items-center justify-center rounded-full border-2"
+                              style={{
+                                width: "calc(var(--mu) * 34px)",
+                                height: "calc(var(--mu) * 34px)",
+                                color: "#fff",
+                                background: "rgba(5,7,15,0.55)",
+                                borderColor: "rgba(255,255,255,0.7)",
+                                backdropFilter: "blur(6px)",
+                                WebkitBackdropFilter: "blur(6px)",
+                                boxShadow: "0 4px 14px -4px rgba(0,0,0,0.5)",
+                              }}
+                            >
+                              <Plus style={{ width: "calc(var(--mu) * 18px)", height: "calc(var(--mu) * 18px)" }} strokeWidth={2.8} aria-hidden />
+                            </button>
+                          </BorderBeam>
+                        </div>
+                      )}
 
                       {/* Flip affordance (review request, round two: say it in
                          words) — a labeled glass pill in the DS caption style.

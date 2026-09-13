@@ -12,7 +12,6 @@ import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, 
 import { ACCENT, SchoolCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
 import { BrowseShelves } from "./BrowseShelves";
-import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
@@ -139,7 +138,9 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
          Explore Careers (direct feedback, 11 Sept 2026). */}
       <AppBackdrop />
       <DesktopNavigation active="Explore" />
-      <FirstVisitSplash surface="schools" />
+      {/* No welcome splash of its own here (direct feedback, 13 Sept 2026):
+         Explore's own splash now names Schools' detail directly, so a
+         second one on this tab was redundant. */}
       {/* Mobile top tabs: the same bar Explore Careers has (FOR YOU /
          BROWSE ALL as text tabs, icons at the right), so the two Explore
          screens read as one (direct feedback, 10 Sept 2026: "the toggles

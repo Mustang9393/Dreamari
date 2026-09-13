@@ -8198,3 +8198,44 @@ public `ProProfileView` (same `OverviewSection`), for a volunteer with a
 matched school (Amara Okafor/University of Michigan, circle logo) and one
 without (Leo Fontaine/School of Motion, confirms the icon removal doesn't
 leave a ragged gap), and at a 375px mobile viewport. Not committed, not pushed.
+
+## 2026-09-13 · Match.tsx (Student page): "+" match badge is Investment Banking only
+
+Direct instruction: the deck's "+" badge let a visitor "match" with any of the
+three cards, but Play only ever previews the Investment Banking simulation --
+matching with Management Analyst or Private Equity scrolled down to a game
+that wasn't the one just picked ("I can click management analyst and then the
+game is Investment Banking"), and having all three tappable made the intent
+of the section ("this leads somewhere real") feel unclear. The "+" badge, its
+`BorderBeam` nudge and `mkt-scale-pulse` wrapper now only render when
+`card.key === "iba"` -- Management Analyst and Private Equity keep their
+"Tap to see details" flip (still informational, unaffected), just no match
+action. Next's own beam nudge already only activated for `top.key !== "iba"`,
+so the handoff between "page forward" and "match" still works unchanged.
+
+Lint/tsc clean (a stray duplicate `</BorderBeam></div>` from the edit was
+caught by the JSX parser, not just visually). Verified live: badge hidden on
+Management Analyst and Private Equity, present on Investment Banking, tap
+still flips all three. Not committed, not pushed.
+
+## 2026-09-13 · Explore welcome splash names both halves; Schools tab's own splash removed
+
+Direct instruction. Explore's first-visit splash (`WelcomeSplash.tsx`, `SCENES.explore`)
+was one merged sentence ("Careers and schools: salary, education, daily life, and
+pathways."); replaced with two labelled rows -- `**Careers:** Salary, education,
+daily life, and pathways.` / `**Schools:** Colleges, trade schools, programs, cost,
+and admissions.` (the Schools line reused verbatim from what its own splash said).
+Since Explore's splash now states Schools' detail directly, its separate welcome on
+the Schools/colleges tab is redundant -- removed the `SCENES.schools` entry, the
+`"schools"` member of `SplashSurface`, and the `<FirstVisitSplash surface="schools" />`
+mount + now-unused import in `CollegesExperience.tsx`.
+
+Checked the Schools tab's own "pulse" nudge (`ExploreSectionTabs` in `chrome.tsx`,
+`SCHOOLS_TAB_NUDGE_KEY`) doesn't depend on the removed splash specifically -- it
+waits for *any* `[aria-labelledby^="splash-"]` dialog to clear via the generic
+`dreamari:welcome-done` event, which Explore's own (still-present) splash still
+fires, so that nudge is unaffected.
+
+Lint/tsc clean. Verified live: Explore's splash shows both labelled rows; the
+Schools/colleges tab now loads straight to its content, no splash, no console
+errors. Not committed, not pushed.
