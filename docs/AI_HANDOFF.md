@@ -8303,3 +8303,26 @@ Lint/tsc clean. Verified live: both labels render as plain `<p>` text (checked
 computed `cursor: auto` and no wrapping `<a>` in the DOM, not just visually).
 Not yet committed at time of writing -- pushing this alongside the handoff
 entry.
+
+## 2026-09-14 · Welcome splash: wider dialog instead of smaller text
+
+Explore's new "Schools:" row ("Colleges, trade schools, programs, cost, and
+admissions.") wrapped, leaving "admissions." alone on its own line. First pass
+shrank `.row`'s font-size (14px -> 12.5px) to force one line -- reverted per
+direct feedback: don't trade away readability/accessibility for a line-count
+preference if there's another way. Widened `.dialog`'s `max-width` instead
+(460px -> 520px) and kept the original 14px; `width: 100%` plus the scrim's
+own padding already cap the dialog on phones, so this only adds room on
+tablet/desktop, where the wrap was actually happening.
+
+Verified live at 3 affected scenes: Explore (both rows now one line each),
+`/match-grid` (title + all 3 rows one line each, a side benefit), `/connect`
+(icon rows unaffected) -- and re-checked at a 375px mobile viewport, where
+rows still wrap (not enough room at any reasonable text size) but wrap more
+evenly, not a lone orphaned word. No lint/tsc impact (CSS-module-only change).
+
+Also discussed, no change made: Connect's rows are left-aligned (icon rows
+need it -- centered multi-line text next to a fixed icon drifts out from
+under it) while Explore/match-grid's plain-text rows are centered (matches
+the centered sprite/title/CTA composition). Not an inconsistency to fix --
+direct feedback: leave both as they are.
