@@ -7874,3 +7874,30 @@ forced `top: auto; bottom: 12px` -- which pinned the picker to the very
 bottom of the screen regardless of where the field sat on the page --
 is gone; mobile now uses the same anchored-below-the-field
 `--picker-top` positioning as desktop. Pushed to main (388e445).
+
+## 2026-09-13 · Match: Option B is the only flow now
+
+Direct user instruction: the grid (Option B) won the A/B test. Removed
+the toggle entirely (`VersionToggle.tsx` deleted) and repointed every
+entry point into Match -- BuildFlowExperience (finish + skip),
+ProfileExperience (two "start swiping" links, copy updated), ReportChooser's
+empty state, the demo QUICK_LINKS nav menu, and the SchoolsView "How It
+Works" Match chapter (copy updated, its illustration still depicts the
+old swipe card -- flagged, not fixed, out of scope for this pass) -- from
+`/match-lab` to `/match-grid`.
+
+`MatchLab.tsx` and `/match-lab` are untouched and still fully working,
+just unlinked -- a deliberate revert path, not a deletion. Its own
+five-section breakdown still reads from the original Career fields
+(hook, skills, classes, workStyle, pathway, tradeoff), which are
+untouched.
+
+Also: the "Learn more" detail modal on `/match-grid` is now a universal
+3-section structure for all 6 careers -- What You'd Do / Good Fit If You
+Like / School & Path, 2-3 short bullets each, 8th-grade reading level.
+Direct instruction: this replaces the old 5-section breakdown as a quick
+"worth a Top 3 slot?" read, not a report. New `whatYouDo`/`goodFitIf`/
+`schoolPath` fields added to the `Career` type in `match-lab/data.ts` and
+populated for all 6 careers.
+
+Pushed to main (3917dc9).
