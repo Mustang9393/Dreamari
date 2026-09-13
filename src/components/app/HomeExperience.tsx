@@ -46,6 +46,37 @@ function CaptionLabel({ color, children }: { color: string; children: React.Reac
   );
 }
 
+/** Feature name as a small, clickable kicker; a plain-language section title
+ *  underneath it (direct instruction, 13 Sept 2026: "so students immediately
+ *  understand what each section connects to, without repeating the same
+ *  words" -- e.g. this replaces "Explore Recommended Careers", which said
+ *  Explore twice between the old heading and the section it belonged to).
+ *  The kicker is a navigational tag, not a content subheading -- the same
+ *  small-label-above-a-big-headline convention this page's own HeroPanel
+ *  already uses -- so its size sits outside the heading/subheading/body
+ *  scale rather than breaking it: within the actual content, the title is
+ *  still the biggest thing and any subtitle under it is strictly smaller. */
+function SectionKicker({ label, labelHref, title, subtitle, cta }: { label: string; labelHref: string; title: string; subtitle?: string; cta?: React.ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-[var(--space-4)]">
+      <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+        <Link href={labelHref} className="dm-link inline-flex w-fit items-center text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}>
+          {label}
+        </Link>
+        <h2 className="text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-[12px] leading-[16px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+            {subtitle}
+          </p>
+        )}
+      </div>
+      {cta}
+    </div>
+  );
+}
+
 /** One highlight panel: a feature card, not a banner (direct feedback,
  *  4 Sept 2026). The photo fills the whole card and pushes in slowly while
  *  the panel is showing; a progressive blur and a left-to-right dark ramp
@@ -496,14 +527,16 @@ export function HomeExperience() {
         <HeroBanner />
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-5)]">
-          <div className="flex items-start justify-between gap-[var(--space-4)]">
-            <h2 className="min-w-0 flex-1 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              Continue Learning & Playing
-            </h2>
-            <Link href="/play" className="dm-link -my-[12px] mt-[2px] flex-none py-[12px] text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-              <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>
-            </Link>
-          </div>
+          <SectionKicker
+            label="Play"
+            labelHref="/play"
+            title="Continue Where You Left Off"
+            cta={
+              <Link href="/play" className="dm-link -my-[12px] mt-[2px] flex-none py-[12px] text-[14px] leading-[20px] font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+                <span className="inline-flex items-center gap-[6px]">View all<span className="hidden sm:inline">activity</span><ChevronRight size={15} strokeWidth={2.75} aria-hidden /></span>
+              </Link>
+            }
+          />
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {ACTIVITIES.map((activity) => (
               <ActivityCard key={activity.kind === "sim" ? activity.sim.id : activity.href} activity={activity} />
@@ -515,16 +548,12 @@ export function HomeExperience() {
            title, subtitle, and cards — one source of truth), replacing the
            old "Careers Picked for You" per user direction. */}
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-6)]">
-          <div className="flex flex-col gap-[var(--space-1)]">
-            <div className="flex items-end justify-between gap-[var(--space-4)]">
-              <div className="flex flex-col gap-[2px]">
-                <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                  Explore Recommended Careers
-                </h2>
-                <p className="text-[12px] leading-[16px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                  Based on your interests
-                </p>
-              </div>
+          <SectionKicker
+            label="Explore"
+            labelHref="/explore?tab=browse"
+            title="Recommended Careers"
+            subtitle="Based on your interests"
+            cta={
               <a
                 href="/explore?tab=browse"
                 className="dm-link inline-flex flex-none items-center gap-[6px] text-[13px] leading-[18px] font-semibold"
@@ -533,8 +562,8 @@ export function HomeExperience() {
                 Explore All Careers
                 <ChevronRight size={14} strokeWidth={2.75} aria-hidden />
               </a>
-            </div>
-          </div>
+            }
+          />
           <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {BROWSE_BECAUSE_LIKED.map((career) => (
               <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
