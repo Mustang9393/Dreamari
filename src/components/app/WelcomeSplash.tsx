@@ -8,7 +8,7 @@ import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
 import styles from "./WelcomeSplash.module.css";
 
-export type SplashSurface = "match" | "explore" | "play" | "connect" | "profile";
+export type SplashSurface = "match" | "matchGrid" | "explore" | "play" | "connect" | "profile";
 
 type Scene = {
   sprite?: string;
@@ -27,6 +27,11 @@ type Scene = {
 // One introduction and one action. Keep the cinematic family resemblance,
 // but concentrate decoration above the instructions and give each gesture its own moment.
 const SCENES: Record<SplashSurface, Scene> = {
+  // Unused in the live app (13 Sept 2026): every entry point into Match now
+  // goes to /match-grid (see matchGrid below), so this only ever shows if
+  // someone reaches the dormant swipe-deck route (/match-lab) directly.
+  // Left as-is rather than repurposed, so that page keeps its own accurate
+  // gesture-appropriate copy if it's ever reactivated.
   match: {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
@@ -36,6 +41,21 @@ const SCENES: Record<SplashSurface, Scene> = {
     // real card.
     line: "Careers matched to you. Explore your options and save the 3 you like most.",
     cta: "Start Matching",
+  },
+  // Between the Build flow's "Congratulations" screen and the live
+  // /match-grid picker (direct instruction, 14 Sept 2026, Slack): explains
+  // the grid's own interaction (+ to save, tap for detail) and reassures
+  // that the six shown aren't the only careers out there.
+  matchGrid: {
+    sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
+    tint: ["100, 70, 255", "180, 40, 240"],
+    title: "FIND YOUR TOP 3",
+    rows: [
+      { text: "Tap + to save." },
+      { text: "Tap Learn more for details." },
+      { text: "More matches are waiting." },
+    ],
+    cta: "Start Exploring",
   },
   explore: {
     sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
@@ -74,8 +94,9 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-party.webp",
     tint: ["255, 160, 30", "255, 50, 100"],
     title: "PROFILE",
-    line: "Your Top 3, your plan, your report.",
-    cta: "Explore my profile",
+    // Copy update, 14 Sept 2026 (Slack, Chandu M P).
+    line: "Compare careers. Follow your plan. Track your progress.",
+    cta: "View My Profile",
   },
 };
 

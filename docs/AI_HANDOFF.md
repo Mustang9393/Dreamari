@@ -8239,3 +8239,44 @@ fires, so that nudge is unaffected.
 Lint/tsc clean. Verified live: Explore's splash shows both labelled rows; the
 Schools/colleges tab now loads straight to its content, no splash, no console
 errors. Not committed, not pushed.
+
+## 2026-09-14 · New explainer splash between Build's Congratulations screen and /match-grid
+
+Direct instruction (Slack, relayed): students went straight from the Build flow's
+"Congratulations! Your personalized career matches are ready" screen into the live
+"Find Your Top 3" grid (`/match-grid`, `MatchGrid.tsx`) with no explanation of the
+grid's own interaction (+ to save, tap for detail).
+
+Added a new `matchGrid` scene to the shared welcome-splash system
+(`WelcomeSplash.tsx`): title "FIND YOUR TOP 3" (echoing the grid's own H1), three
+rows ("Tap + to save.", "Tap Learn more for details.", "More matches are
+waiting."), CTA "Start Exploring". Mounted `<FirstVisitSplash surface="matchGrid" />`
+in `MatchGrid.tsx` itself (same pattern as Explore/Schools/Play), so it shows once
+per the existing first-visit/demo-session logic, then the real grid underneath is
+already rendered and revealed when it closes.
+
+Deliberately did NOT repurpose the existing (but currently orphaned) `SCENES.match`
+entry, even though its copy needed the same kind of update: `surface="match"` is
+still the dormant swipe-deck `MatchLab.tsx`'s (`/match-lab`) own splash, and that
+route is meant to stay untouched so it can be reactivated later with its own
+accurate (swipe-gesture) copy intact -- confirmed via a live check that `/match-lab`
+still shows its original "MATCH" splash unchanged.
+
+Lint/tsc clean. Verified live: `/match-grid` shows the new explainer, dismissing it
+reveals the real grid; `/match-lab`'s splash is untouched. Not committed, not pushed.
+
+**Same-day follow-up:** direct instruction -- "should fire when I come to the match
+screen from anywhere," not just once per session. Swapped `FirstVisitSplash`
+(localStorage/sessionStorage "seen" gating) for the lower-level `WelcomeSplash`
+directly, with `MatchGrid`'s own `useState(true)` controlling `open` -- since
+`MatchGrid` remounts fresh on every navigation to `/match-grid` regardless of
+where the visitor came from, this shows the explainer every single arrival, not
+just the first one. Verified live: dismissed it, navigated to /explore, back to
+/match-grid -- explainer fired again. Not committed, not pushed.
+
+## 2026-09-14 · Profile welcome splash copy (Slack, Chandu M P)
+
+`SCENES.profile` in `WelcomeSplash.tsx`: body copy "Your Top 3, your plan, your
+report." -> "Compare careers. Follow your plan. Track your progress."; CTA
+"Explore my profile" -> "View My Profile". Title unchanged. Lint/tsc clean,
+verified live at /profile.

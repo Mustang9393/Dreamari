@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Plus, Sparkles, X } from "lucide-react";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
+import { WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { announce } from "@/components/app/LiveRegion";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
@@ -39,6 +40,11 @@ export function MatchGrid() {
   const [selected, setSelected] = useState<string[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // Not a first-visit-only splash (direct instruction, 14 Sept 2026: "should
+  // fire when I come to the match screen from anywhere") -- every arrival at
+  // this screen, however a student got here, re-teaches the +/Learn more
+  // interaction rather than showing it once per session.
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
     if (!toast) return;
@@ -88,6 +94,7 @@ export function MatchGrid() {
         <BackgroundSpace />
         <AuroraBackground accent="#2f6bf2" visitedAccents={[]} finale={selected.length >= MAX_SLOTS} lightning={false} />
         <FlowChrome />
+        <WelcomeSplash surface="matchGrid" open={showIntro} onDone={() => setShowIntro(false)} />
 
         {/* Fixed to the viewport, not min-h-dvh -- every one of the 6 cards
            has to read as visible at once with zero scrolling (direct
