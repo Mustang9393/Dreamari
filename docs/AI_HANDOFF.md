@@ -7934,3 +7934,30 @@ Profile button (no edit flow built -- out of scope).
 
 Verified in the browser: both screens, all tab combinations, desktop and
 mobile. Pushed to main (164ae60).
+
+## 2026-09-13 · Home: label + title hierarchy; Connect: header/toggle fixes
+
+Home: Play and Explore rails now show a small clickable kicker (PLAY /
+EXPLORE, routes to that feature) above a plain-language title
+("Recommended Careers" instead of "Explore Recommended Careers"). New
+`SectionKicker` in HomeExperience.tsx. Your Next Moves unchanged.
+
+Connect: direct feedback on the just-shipped profile split (see the
+entry above) --
+
+- ProDashboardView's from-scratch header landed as plain text, none of
+  the gradient cover-photo card ProProfileView already had. Extracted
+  that card into a shared `ProfileHeaderCard` (ProProfile.tsx) -- both
+  screens render the identical component now, can't diverge again.
+- Tier badge moved from beside the name to the role | company line (was
+  crowding long names).
+- Two stacked same-weight pill toggles (Overview/Ask Me & Posts, then
+  Answers/Posts) read as "too many toggles". New `SubTabs` -- small
+  underlined text tabs -- for the inner choice; outer toggle stays the
+  one prominent pill.
+- Ask Me composer no longer sits beside a redundant "Ask Me" heading;
+  it's alone on its own row.
+- Current Company matches Education's label-then-value shape now, no
+  Briefcase icon tile.
+
+Pushed to main: Home (40b1592), Connect (050ab49).
