@@ -3,13 +3,13 @@
 import Image from "next/image";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Bookmark, Briefcase, Download, Eye, Gem, GraduationCap, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
-import { Meter, Ring } from "./viz";
+import { Meter, Ring, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
-import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Insight, type Pro, type Thread } from "./data";
+import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Community, type Insight, type Pro, type Thread } from "./data";
 import { CommunityCard } from "./CommunityCard";
 import { schoolsIn } from "./schoolMarks";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
@@ -224,6 +224,137 @@ export function PanelRow({ onClick, children, label }: { onClick: () => void; ch
   );
 }
 
+// ——— Overview (shared by both profile screens) ———
+
+/** The "who this person is" half of the profile, shared verbatim by the
+ *  student-facing read view (ProProfileView) and the volunteer's own
+ *  self-view (ProDashboardView's "My Profile" tab) -- same fields, same
+ *  order, same reading whichever side is looking (direct instruction, 13
+ *  Sept 2026: "break the profile into 2 tabs... Overview should be the
+ *  default landing tab"). A short bio (pro.journey -- unused until now;
+ *  pro.story is already the header's pull-quote, so this is the OTHER
+ *  short narrative field, not a duplicate), education, current company,
+ *  previous company (pro.priorRole -- the data model carries one prior
+ *  role, not a list, so this reads "Previous Company" singular rather
+ *  than inventing a fake multi-employer history), what they can help
+ *  with, and 2 of their communities.
+ *
+ *  Heading > subheading > body, top to bottom, no exceptions: each
+ *  ProfileCard's own title (22px) is the heading; "Education" / "Current
+ *  Company" / "Previous Company" (14px bold) are subheadings; the actual
+ *  values under them (13.5px) are body -- strictly smaller than the
+ *  subheading above them, never sized by how important the fact is. */
+export function OverviewSection({ pro, communities, onOpenCommunity, first = false }: { pro: Pro; communities: Community[]; onOpenCommunity: (id: string) => void; first?: boolean }) {
+  return (
+    <>
+      <ProfileCard id="about-me-title" title="About Me" first={first}>
+        <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.journey ?? pro.story}</p>
+      </ProfileCard>
+
+      <ProfileCard id="experience-title" title="Experience">
+        <div className="flex items-start gap-[var(--space-3)]">
+          <span aria-hidden className="flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
+            <Briefcase className="h-4 w-4" style={{ color: "var(--muted-foreground)" }} />
+          </span>
+          <div className="flex min-w-0 flex-col gap-[2px]">
+            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Current Company</span>
+            <CompanyChip name={pro.org} tone="surface" size="md" />
+          </div>
+        </div>
+        {pro.priorRole && (
+          <div className="flex items-start gap-[var(--space-3)]">
+            <span aria-hidden className="flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
+              <Briefcase className="h-4 w-4" style={{ color: "var(--muted-foreground)" }} />
+            </span>
+            <div className="flex min-w-0 flex-col gap-[2px]">
+              <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Previous Company</span>
+              <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{pro.priorRole}</span>
+            </div>
+          </div>
+        )}
+        {pro.education && (
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Education</span>
+            {/* Each "; "-separated clause is its own row (Danielle Brooks:
+               "B.S.N. University of Minnesota; M.S.N. Nurse Practitioner"),
+               so a second school never gets squeezed into the first row's
+               single line. A clause with a sourced school shows that
+               school's own mark; one without (no school in the clause, or a
+               school we couldn't source -- School of Motion, Art Center
+               College of Design, schoolMarks.ts) keeps the plain
+               GraduationCap tile so nothing goes visually blank. */}
+            {pro.education.split("; ").flatMap((segment) => {
+              const matches = schoolsIn(segment);
+              const rows = matches.length > 0 ? matches : [null];
+              return rows.map((school, j) => {
+                const size = school ? eduMarkSize(school.ratio) : null;
+                return (
+                  <span key={`${segment}-${school?.name ?? j}`} className="flex items-center gap-[var(--space-3)]">
+                    {school && size ? (
+                      // White circle, not the dark glass tile (direct
+                      // feedback, 8 Sept 2026: "white background, circle
+                      // frames, some are not visible"): a seal is ink drawn
+                      // for a light background -- most colored crests
+                      // survive on dark glass, but a single dark-ink seal
+                      // (Mayo Clinic's) nearly vanished on it, and Next's
+                      // <Image> was upscaling a couple of the smaller
+                      // sourced SVGs enough to look washed out. Raw <img> at
+                      // the file's own resolution on a fixed white circle
+                      // fixes both.
+                      <span aria-hidden className="relative flex flex-none items-center justify-center rounded-full border" style={{ width: EDU_BADGE_D, height: EDU_BADGE_D, background: "#FFFFFF", borderColor: "var(--glass-border)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={`/images/connect/schools/${school.file}`} alt="" width={size.width} height={size.height} style={{ width: size.width, height: size.height, objectFit: "contain" }} />
+                      </span>
+                    ) : (
+                      <span aria-hidden className="flex size-[44px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
+                        <GraduationCap className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} />
+                      </span>
+                    )}
+                    <span className="min-w-0 text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{segment}</span>
+                  </span>
+                );
+              });
+            })}
+          </div>
+        )}
+        <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: PRO_ACCENT }} /> {pro.verifiedBy}
+        </span>
+      </ProfileCard>
+
+      {pro.topics && pro.topics.length > 0 && (
+        <ProfileCard id="help-with-title" title="I Can Help With">
+          <div className="flex flex-wrap gap-[6px]">
+            {pro.topics.map((t) => (
+              <span key={t} className="rounded-[var(--radius-sm)] border px-[10px] py-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${PRO_ACCENT} 45%, var(--glass-border))`, color: PRO_ACCENT, background: `color-mix(in srgb, ${PRO_ACCENT} 12%, transparent)` }}>{t}</span>
+            ))}
+          </div>
+        </ProfileCard>
+      )}
+
+      {communities.length > 0 && (
+        <ProfileCard
+          id="communities-title"
+          title="Communities"
+          aside={
+            <button type="button" onClick={() => onOpenCommunity(communities[0].id)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              View all <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          }
+        >
+          <ul className="grid gap-[var(--space-4)] sm:grid-cols-2">
+            {communities.slice(0, 2).map((c) => (
+              <li key={c.id} className="h-full min-w-0">
+                <CommunityCard community={c} joined compact onOpen={() => onOpenCommunity(c.id)} onJoin={() => onOpenCommunity(c.id)} />
+              </li>
+            ))}
+          </ul>
+        </ProfileCard>
+      )}
+    </>
+  );
+}
+
 // ——— People to Follow (below the communities) ———
 
 /** A row of faces, no frames (direct feedback): the portrait is the card.
@@ -424,6 +555,11 @@ export function ProProfileView({
   const [asked, setAsked] = useState<{ id: string; title: string }[]>([]);
   const [allAnswers, setAllAnswers] = useState(false);
   const [allPosts, setAllPosts] = useState(false);
+  // Two tabs, not one long page (direct instruction, 13 Sept 2026, the
+  // Catchafire reference): Overview first, Ask Me & Posts (with its own
+  // Answers | Posts toggle) second. The header above stays put across both.
+  const [section, setSection] = useState<"overview" | "askme">("overview");
+  const [askSection, setAskSection] = useState<"answers" | "posts">("answers");
   const following = !!follows[pro.id];
   const tier = volunteerTier(pro);
   const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
@@ -558,146 +694,85 @@ export function ProProfileView({
         </div>
       </section>
 
-      {/* Ask Me: title and one line on the left, the composer on the right,
-         then the questions already answered as inset rows */}
-      <div className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={CARD}>
-      {/* no lede: "Ask Me" and the composer already say it (Chandu, 7 Sept 2026) */}
-      <ProfileCard id="ask-title" title="Ask Me" first side={
-        <InlineAsk
-          joined
-          accent="var(--primary)"
-          placeholder="Ask a question…"
-          onPost={(text) => {
-            setAsked((current) => [{ id: `${pro.id}-ama-${current.length}`, title: text }, ...current]);
-            onAsked?.(text);
-          }}
-        />
-      }>
-        {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-        {answers.length > 0 && (
-          <ul className="flex flex-col gap-[var(--space-3)]">
-            {/* one question at rest, the rest behind View all: shorter section */}
-            {(allAnswers ? answers : answers.slice(0, 1)).map((thread) => {
-              const s = signals(thread.views, thread.helpful, undefined);
-              return (
-                <InsetRow key={thread.id} onClick={() => nav?.openThread(thread.id)} label={thread.title}>
-                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{thread.title}</span>
-                  <span className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-                    <SignalRow {...s} accent={PRO_ACCENT} />
-                    <span className="flex items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "color-mix(in srgb, var(--color-feedback-success, #33c78c) 18%, transparent)", color: "var(--color-feedback-success, #33c78c)" }}><ShieldCheck className="h-3 w-3" aria-hidden /> Answered</span>
-                  </span>
-                </InsetRow>
-              );
-            })}
-          </ul>
-        )}
-        {answers.length > 1 && (
-          <div className="flex justify-end">
-            <button type="button" onClick={() => setAllAnswers((v) => !v)} aria-expanded={allAnswers} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allAnswers ? "Show less" : `View all ${answers.length}`} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
-          </div>
-        )}
-      </ProfileCard>
+      {/* My Profile's own inner structure (direct instruction, 13 Sept
+         2026, the Catchafire reference): Overview (who they are) lands
+         first; Ask Me & Posts (what they've done, with its own Answers |
+         Posts toggle) is the second tab. The header above stays visible
+         across both. */}
+      <Segmented<"overview" | "askme"> ariaLabel="Profile section" value={section} onChange={setSection} options={[{ key: "overview", label: "Overview" }, { key: "askme", label: "Ask Me & Posts" }]} />
 
-      {posts.length > 0 && (
-        <ProfileCard id="posts-title" title="My Posts" aside={posts.length > 2 ? <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button> : undefined}>
-          <ul className="flex flex-col gap-[var(--space-3)]">
-            {(allPosts ? posts : posts.slice(0, 2)).map((insight) => {
-              const s = signals(insight.views, insight.helpful, insight.saves);
-              return (
-                <InsetRow key={insight.id} onClick={() => nav?.openInsight(insight.id)} label={insight.title}>
-                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>
-                  <SignalRow {...s} accent={PRO_ACCENT} />
-                </InsetRow>
-              );
-            })}
-          </ul>
-        </ProfileCard>
+      {section === "overview" && (
+        <div className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={CARD}>
+          <OverviewSection pro={pro} communities={communities} onOpenCommunity={(id) => nav?.openBoard(id)} first />
+        </div>
       )}
 
-      {communities.length > 0 && (
-        <ProfileCard id="communities-title" title="Communities" aside={<button type="button" onClick={() => nav?.openBoard(communities[0].id)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}>
-          <ul className="grid gap-[var(--space-4)] sm:grid-cols-2">
-            {communities.map((c) => (
-              <li key={c.id} className="h-full min-w-0">
-                <CommunityCard community={c} joined compact onOpen={() => nav?.openBoard(c.id)} onJoin={() => nav?.openBoard(c.id)} />
-              </li>
-            ))}
-          </ul>
-        </ProfileCard>
-      )}
+      {section === "askme" && (
+        <div className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={CARD}>
+          <div className="p-[var(--space-5)] pb-0 sm:p-[var(--space-6)] sm:pb-0">
+            <Segmented<"answers" | "posts"> ariaLabel="Ask Me or Posts" value={askSection} onChange={setAskSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
+          </div>
 
-      <ProfileCard id="about-title" title="Experience">
-        {pro.priorRole && (
-          <div className="flex items-center gap-[var(--space-3)]">
-            <span aria-hidden className="flex size-[44px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
-              <Briefcase className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} />
-            </span>
-            <span className="flex min-w-0 flex-col gap-[1px]">
-              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Previously</span>
-              <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{pro.priorRole}</span>
-            </span>
-          </div>
-        )}
-        {pro.education && (
-          <div className="flex flex-col gap-[var(--space-2)]">
-            {/* Each "; "-separated clause is its own row (Danielle Brooks:
-               "B.S.N. University of Minnesota; M.S.N. Nurse Practitioner"),
-               so a second school never gets squeezed into the first row's
-               single line. A clause with a sourced school shows that
-               school's own mark; one without (no school in the clause, or a
-               school we couldn't source -- School of Motion, Art Center
-               College of Design, schoolMarks.ts) keeps the plain
-               GraduationCap tile so nothing goes visually blank. */}
-            {pro.education.split("; ").flatMap((segment, i) => {
-              const matches = schoolsIn(segment);
-              const rows = matches.length > 0 ? matches : [null];
-              return rows.map((school, j) => {
-                const first = i === 0 && j === 0;
-                const size = school ? eduMarkSize(school.ratio) : null;
-                return (
-                  <span key={`${segment}-${school?.name ?? j}`} className="flex items-center gap-[var(--space-3)]">
-                    {school && size ? (
-                      // White circle, not the dark glass tile (direct
-                      // feedback, 8 Sept 2026: "white background, circle
-                      // frames, some are not visible"): a seal is ink drawn
-                      // for a light background -- most colored crests
-                      // survive on dark glass, but a single dark-ink seal
-                      // (Mayo Clinic's) nearly vanished on it, and Next's
-                      // <Image> was upscaling a couple of the smaller
-                      // sourced SVGs enough to look washed out. Raw <img> at
-                      // the file's own resolution on a fixed white circle
-                      // fixes both.
-                      <span aria-hidden className="relative flex flex-none items-center justify-center rounded-full border" style={{ width: EDU_BADGE_D, height: EDU_BADGE_D, background: "#FFFFFF", borderColor: "var(--glass-border)" }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={`/images/connect/schools/${school.file}`} alt="" width={size.width} height={size.height} style={{ width: size.width, height: size.height, objectFit: "contain" }} />
-                      </span>
-                    ) : (
-                      <span aria-hidden className="flex size-[44px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}>
-                        <GraduationCap className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} />
-                      </span>
-                    )}
-                    <span className="flex min-w-0 flex-col gap-[1px]">
-                      {first && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Education</span>}
-                      <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{segment}</span>
-                    </span>
-                  </span>
-                );
-              });
-            })}
-          </div>
-        )}
-        {pro.topics && (
-          <div className="flex flex-wrap gap-[6px]">
-            {pro.topics.map((t) => (
-              <span key={t} className="rounded-[var(--radius-sm)] border px-[10px] py-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${PRO_ACCENT} 45%, var(--glass-border))`, color: PRO_ACCENT, background: `color-mix(in srgb, ${PRO_ACCENT} 12%, transparent)` }}>{t}</span>
-            ))}
-          </div>
-        )}
-        <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <ShieldCheck className="h-[13px] w-[13px]" aria-hidden style={{ color: PRO_ACCENT }} /> {pro.verifiedBy}
-        </span>
-      </ProfileCard>
-      </div>
+          {askSection === "answers" && (
+            /* no lede: "Ask Me" and the composer already say it (Chandu, 7 Sept 2026) */
+            <ProfileCard id="ask-title" title="Ask Me" side={
+              <InlineAsk
+                joined
+                accent="var(--primary)"
+                placeholder="Ask a question…"
+                onPost={(text) => {
+                  setAsked((current) => [{ id: `${pro.id}-ama-${current.length}`, title: text }, ...current]);
+                  onAsked?.(text);
+                }}
+              />
+            }>
+              {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+              {answers.length > 0 && (
+                <ul className="flex flex-col gap-[var(--space-3)]">
+                  {/* one question at rest, the rest behind View all: shorter section */}
+                  {(allAnswers ? answers : answers.slice(0, 1)).map((thread) => {
+                    const s = signals(thread.views, thread.helpful, undefined);
+                    return (
+                      <InsetRow key={thread.id} onClick={() => nav?.openThread(thread.id)} label={thread.title}>
+                        <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{thread.title}</span>
+                        <span className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+                          <SignalRow {...s} accent={PRO_ACCENT} />
+                          <span className="flex items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "color-mix(in srgb, var(--color-feedback-success, #33c78c) 18%, transparent)", color: "var(--color-feedback-success, #33c78c)" }}><ShieldCheck className="h-3 w-3" aria-hidden /> Answered</span>
+                        </span>
+                      </InsetRow>
+                    );
+                  })}
+                </ul>
+              )}
+              {answers.length > 1 && (
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => setAllAnswers((v) => !v)} aria-expanded={allAnswers} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allAnswers ? "Show less" : `View all ${answers.length}`} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+                </div>
+              )}
+            </ProfileCard>
+          )}
+
+          {askSection === "posts" && (
+            <ProfileCard id="posts-title" title="My Posts" aside={posts.length > 2 ? <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button> : undefined}>
+              {posts.length > 0 ? (
+                <ul className="flex flex-col gap-[var(--space-3)]">
+                  {(allPosts ? posts : posts.slice(0, 2)).map((insight) => {
+                    const s = signals(insight.views, insight.helpful, insight.saves);
+                    return (
+                      <InsetRow key={insight.id} onClick={() => nav?.openInsight(insight.id)} label={insight.title}>
+                        <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>
+                        <SignalRow {...s} accent={PRO_ACCENT} />
+                      </InsetRow>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>No posts yet.</p>
+              )}
+            </ProfileCard>
+          )}
+        </div>
+      )}
     </>
   );
 }
