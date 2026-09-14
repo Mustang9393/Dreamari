@@ -8782,12 +8782,12 @@ in-progress Resume Builder work:
    sense for a translucent layer. `PANEL` is shared by the public
    `ProProfileView` and the volunteer's own `ProDashboard` self-view, so
    both now match.
-2. New compact "Employee Groups" section under Education, inside the same
-   Experience `ProfileCard`: opt-in `Pro.employeeGroups?: string[]` (data.ts),
-   rendered as plain bordered pill badges (`OverviewSection` in
+2. New compact "Employee Resource Groups" section under Education, inside
+   the same Experience `ProfileCard`: opt-in `Pro.employeeGroups?: string[]`
+   (data.ts), rendered as plain bordered pill badges (`OverviewSection` in
    ProProfile.tsx), matching the "simple badges or rows" ask. Empty/omitted
-   for every pro except `pro-johnson` (Trevor Johnson), seeded with the
-   four example ERGs from the request so there's a real one to look at.
+   for every pro except `pro-johnson` (Trevor Johnson), seeded with 2 of the
+   4 example ERGs from the request so there's a real one to look at.
 
 Browser-verified live at `/connect?pro=pro-johnson`: badges render under
 Education exactly as specified, panel background confirmed via computed
@@ -8797,9 +8797,22 @@ style. ESLint + `tsc --noEmit` clean on both touched files.
 `--glass-surface-2` on purpose -- that one wasn't part of the complaint, and
 it already carries a primary tint tuned for a smaller element.
 
-**Follow-up:** checked the reference article the user linked
+**Follow-up 1:** checked the reference article the user linked
 (greatplacetowork.com/resources/blog/what-are-employee-resource-groups-ergs)
 -- "Employee Resource Groups" is the standard industry term (used the same
 way at EY, KPMG, Zillow, AT&T), so the section label changed from the
 shorter "Employee Groups" to that. Pushed to main (`6c61296` then this
 label fix) with explicit authorization.
+
+**Follow-up 2 (real mistake, caught in Slack):** the first seed used all 4
+of the request's example ERGs on `pro-johnson` -- including "Black
+Leadership Network" and "Latino Careers Network" -- on a demo pro whose own
+photo/name read as a white man, an incongruent, insensitive pairing that
+should never have shipped. Corrected to exactly 2, chosen to carry no
+race/gender presumption either way: "First Generation Professionals" (kept
+-- class-based, nothing a photo contradicts) and "Sustainability Network"
+(interest-based, per the reference article's own point that ERGs span
+"gender, ethnicity, religious affiliation, lifestyle, OR PROFESSIONAL
+INTEREST", not only protected-class identity). Added a note directly on the
+`employeeGroups` field in data.ts so a future seed doesn't repeat this.
+Pushed to main once verified live.
