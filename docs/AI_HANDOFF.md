@@ -9431,3 +9431,33 @@ already excluded from tracking by a prior, deliberate design decision
 Experience entry shows the placeholder-filled preview immediately, focusing
 "Where" pans the camera to it, typing updates the preview character-by-
 character. ESLint + `tsc --noEmit -p .` clean.
+
+### 14 Sept 2026 — Perf: Match grid's sticky continue bar, same blur fix
+
+Follow-up to the nav backdrop-blur fix, same session: "see if you can find
+what's causing the stutter and slow animations... see if we can fix them."
+Audited every `backdrop-filter`/`backdrop-blur` usage in the app for the
+same large-area + persistent-mount pattern that made the nav bars
+expensive. Found one more clear match: Match grid's sticky "continue" bar
+(`fixed inset-x-0 bottom-0`, full width, always mounted while browsing
+matches) ran `backdrop-blur-xl` (a heavy 24px blur) over a background that
+was already 88% opaque -- the blur was doing almost no visible work while
+still paying the full per-frame compositing cost. Dropped the blur, bumped
+opacity to 94% to keep it reading solid.
+
+Also audited and deliberately left alone: every other `backdrop-filter` in
+the app is on a small, card-level surface (badges, circular icon buttons,
+toasts, popovers) -- exactly what this codebase's own platform notes call
+the acceptable case ("reserve backdrop-blur for a few card-level
+surfaces"), not the large-area anti-pattern. `MatchLab.tsx` (the old swipe
+deck) has a few heavier ones too, but it's dormant -- no live entry point
+routes to it anymore (`MatchGrid.tsx`'s own header comment confirms this)
+-- so not worth the risk of touching unused code.
+
+Also checked `AuroraBackground.tsx` (the animated canvas background used
+across Build): canvas-based, not CSS blur, respects `prefers-reduced-
+motion`, and correctly cancels its `requestAnimationFrame` loop on
+unmount -- already built the right way, not a contributor here.
+
+`src/components/match-lab/MatchGrid.tsx`. ESLint + `tsc --noEmit -p .`
+clean, verified live (bar still reads solid, no blur).
