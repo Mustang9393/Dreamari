@@ -8619,3 +8619,26 @@ select different color/style/layout or preset templates." Two real gaps:
 (Print/Save PDF works today via `window.print()`, no doc-generation library
 added yet). Templates/scaling not yet pushed -- staged locally, everything
 else on this list already is.
+
+### 14 Sept 2026 — Shared progress lightning and idle nudges
+
+User requested richer effects, then directed us back to the older organic bolt
+shape and asked to publish. ProgressSpark now reuses the old 2–4 irregular-turn
+construction and 3px rounded white-hot stroke, enhanced with colored shoulders,
+small forks, bar-surface reflections and particles with drag/gravity. Each
+strike is generated once in pixel coordinates over the traversed span and
+changes only luminosity; no per-frame geometric scaling or rubbery morphing.
+Bloom is narrow and horizontal, and turns stay near the fill's centerline.
+
+SparkBar defaults to occasional idle nudges: randomized 10–18s checks after
+inactivity, shared cooldown, visible incomplete bars only. User activity,
+hidden pages and reduced motion suppress nudges. Reduced motion also suppresses
+fill flicker and width transitions. Growth captures the visible fill position
+for rapid repeated advances. One bounded canvas animation, DPR<=2, <=64
+particles; cleanup on unmount, visibility and preference changes.
+
+/progress-lab allows +20%, +2%, reset and theme review. No production nav link.
+Browser checked growth, mobile/light/dark variants and idle, no runtime errors.
+Targeted ESLint and tokens:check passed. Production build (including TypeScript and all page generation) passed.
+Release prepared from latest origin/main 2b45a1b; unrelated local schools edits
+remain in dreamari-partner-grid and are excluded. User authorized push live.

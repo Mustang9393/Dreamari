@@ -1,23 +1,8 @@
 "use client";
 
 import type { RefObject } from "react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-// The reference (studied frame-by-frame, not guessed at) isn't a small icon riding the
-// bar's tip -- it's a loose, hand-drawn-looking scribble that sweeps across the WHOLE
-// filled span, redrawing itself into a different squiggle a couple of times before
-// fading. A vector icon reads as flat/generic next to that; this instead generates a
-// jittered bezier path at random each time (same "randomize a few control points"
-// technique, at trigger time since this is a one-off celebration, not a persistent
-// asset that needs to look the same twice) and draws it on with the classic SVG
-// stroke-dasharray/dashoffset technique, which is what actually produces the "being
-// drawn" motion a real marker-scribble has.
-
-// Matches the spark's color to the bar's OWN gradient at the point it's celebrating,
-// rather than a fixed color unrelated to whatever the bar looks like on this step --
-// reads the same three tokens the bar's own linear-gradient uses (live, via
-// getComputedStyle, so it's correct in both themes and if the tokens ever change)
-// and interpolates them the same way a CSS linear-gradient would at that fraction.
 function hexToRgb(hex: string): [number, number, number] | null {
   const clean = hex.trim().replace("#", "");
   if (clean.length !== 6) return null;
@@ -46,137 +31,217 @@ export function barGradientColorAt(fraction: number): string {
   return f <= 0.5 ? mix(c1, c2, f / 0.5) : mix(c2, c3, (f - 0.5) / 0.5);
 }
 
-function jitterPath(width: number, height: number): string {
-  // Compact, angular "charge-up" zigzag -- sharp straight segments, not a flowing
-  // curve, and a small vertical swing relative to the available height (per direct
-  // feedback: the earlier multi-loop bezier scribble read as busy and traveled too
-  // much of the bar's height; this stays close to the centerline). Length can still
-  // span the full width -- only the shape's complexity and vertical reach shrink.
-  // Per direct feedback, the simplicity is right but it shouldn't be the SAME zigzag
-  // every time: turn count, spacing, amplitude, and the up/down sequence itself all
-  // vary now, while staying capped at a handful of turns so it never drifts back
-  // toward the busier scribble this replaced.
-  const amplitude = height * 0.32;
-  const midY = height / 2;
-  const turns = 2 + Math.floor(Math.random() * 3); // 2-4 direction changes
-  const pts: [number, number][] = [[0, midY]];
-  // Break-in-two-then-jitter for the X spacing (not perfectly even steps), and a
-  // fresh random up/down sign per turn (not a strict alternation) -- both keep the
-  // silhouette different call to call without adding more turns.
-  let lastDir = Math.random() < 0.5 ? 1 : -1;
-  for (let i = 1; i <= turns; i++) {
-    const evenX = (i / turns) * width;
-    const x = i === turns ? evenX : evenX + (Math.random() - 0.5) * (width / turns) * 0.5;
-    const dir = Math.random() < 0.35 ? lastDir : -lastDir;
-    lastDir = dir;
-    const y = midY + dir * amplitude * (0.55 + Math.random() * 0.6);
-    pts.push([x, y]);
-  }
-  pts.push([width, midY]);
-  return pts.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
-}
+type Particle = { x: number; y: number; vx: number; vy: number; age: number; life: number; size: number; glint: boolean };
 
-function ScribbleStroke({
-  d,
-  delayMs,
-  durationMs,
-  color,
-  gradientId,
-}: {
-  d: string;
-  delayMs: number;
-  durationMs: number;
-  color: string;
-  gradientId: string;
-}) {
-  const ref = useRef<SVGPathElement | null>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    // getTotalLength() needs the real rendered path, so the draw-on distance is
-    // measured, not guessed -- and driven via the Web Animations API rather than a
-    // static CSS @keyframes, since the length (and so the dashoffset start point) is
-    // different every time a fresh squiggle is generated.
-    const len = el.getTotalLength();
-    el.style.strokeDasharray = `${len}`;
-    const anim = el.animate(
-      [
-        { strokeDashoffset: len, opacity: 1, offset: 0 },
-        { strokeDashoffset: 0, opacity: 1, offset: 0.6 },
-        { strokeDashoffset: 0, opacity: 0, offset: 1 },
-      ],
-      { duration: durationMs, delay: delayMs, easing: "ease-out", fill: "forwards" },
-    );
-    return () => anim.cancel();
-  }, [d, delayMs, durationMs]);
-
-  return (
-    <path
-      ref={ref}
-      d={d}
-      fill="none"
-      stroke={`url(#${gradientId})`}
-      strokeWidth={3}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ opacity: 0, filter: `drop-shadow(0 0 4px ${color})` }}
-    />
-  );
-}
-
-export function ProgressSpark({
-  trackRef,
-  fromPercent,
-  toPercent,
-  color: colorOverride,
-}: {
+/** A short, localized discharge. Sprites are painted once per burst, then particles
+ * coast with drag and gravity. No per-frame React updates or persistent loop. */
+export function ProgressSpark({ trackRef, fromPercent, toPercent, color }: {
   trackRef: RefObject<HTMLDivElement | null>;
   fromPercent: number;
   toPercent: number;
-  /** The bar's own color at the celebrated point. Non-Build bars (SparkBar) pass
-      theirs; left out, this falls back to Build's three-stop gradient. */
   color?: string;
 }) {
-  const height = 26;
-  // Measuring the track's real pixel width -- and generating the jittered squiggle
-  // paths, which need that real width to jitter around -- both have to happen in an
-  // effect, not during render (reading a ref's .current while rendering is a React
-  // rule violation; a lazy useState initializer would only run once, before the real
-  // width is known, and never re-run when it is).
-  const [ready, setReady] = useState<{ leftPx: number; widthPx: number; paths: [string, string] } | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
-    const trackWidth = trackRef.current?.getBoundingClientRect().width ?? 0;
-    const widthPx = Math.max(24, ((toPercent - fromPercent) / 100) * trackWidth);
-    setReady({
-      leftPx: (fromPercent / 100) * trackWidth,
-      widthPx,
-      paths: [jitterPath(widthPx, height), jitterPath(widthPx, height)],
+    const canvas = canvasRef.current;
+    const track = trackRef.current;
+    if (!canvas || !track) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motion.matches || document.hidden || toPercent <= 0) return;
+    const width = track.getBoundingClientRect().width;
+    if (!width) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const height = 88;
+    const barHeight = track.getBoundingClientRect().height;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+    // Resolve inherited CSS custom properties on the actual canvas, including
+    // locally scoped accents used by the glossary and simulation screens.
+    canvas.style.color = color ?? barGradientColorAt(toPercent / 100);
+    const tint = getComputedStyle(canvas).color;
+    const white = getComputedStyle(document.documentElement).getPropertyValue("--color-neutral-0").trim() || "#fff";
+    const sprite = document.createElement("canvas");
+    sprite.width = sprite.height = 64;
+    const brush = sprite.getContext("2d")!;
+    const halo = brush.createRadialGradient(32, 32, 0, 32, 32, 32);
+    halo.addColorStop(0, white);
+    halo.addColorStop(0.09, white);
+    halo.addColorStop(0.23, tint);
+    halo.addColorStop(1, "transparent");
+    brush.fillStyle = halo;
+    brush.fillRect(0, 0, 64, 64);
+
+    const from = width * Math.max(0, Math.min(100, fromPercent)) / 100;
+    const to = width * Math.max(0, Math.min(100, toPercent)) / 100;
+    const idle = from === to;
+    const duration = idle ? 360 : 700;
+    // Each exposure is a new, fixed discharge between two positions the fill
+    // actually traversed. Longer gains add channel length/strikes, never scale
+    // a reusable symbol. Once born, a channel only changes luminosity.
+    const travel = Math.abs(to - from);
+    const position = (ms: number) => from + (to - from) *
+      (1 - Math.pow(1 - Math.min(ms / duration, 1), 3));
+    const strikeTimes = idle ? [0, 155] : travel < 16 ? [60, 230] : [65, 175, 310, 475];
+    const strikes = strikeTimes.map((birth, index) => {
+      const end = idle ? to : position(birth);
+      const span = idle ? 30 : Math.max(24, end - position(Math.max(0, birth - 120)));
+      const origin = Math.max(0, end - span);
+      const finish = end - origin < 16 ? Math.min(width, origin + 24) : end;
+      const length = finish - origin;
+      const amplitude = Math.min(6, Math.max(3, length * 0.07));
+      // Restore the older bolt's 2–4 loose, irregular turns: varied spacing,
+      // amplitude and direction, without the repeated hook of a bolt icon.
+      const turns = 2 + Math.floor(Math.random() * 3);
+      const points: [number, number][] = [[origin, height / 2]];
+      let direction = Math.random() < 0.5 ? 1 : -1;
+      for (let joint = 1; joint <= turns; joint++) {
+        const step = length / (turns + 1);
+        const px = origin + joint * step + (Math.random() - 0.5) * step * 0.5;
+        direction = Math.random() < 0.35 ? direction : -direction;
+        points.push([px, height / 2 + direction * amplitude * (0.55 + Math.random() * 0.6)]);
+      }
+      points.push([finish, height / 2]);
+      const main = new Path2D();
+      points.forEach(([px, py], i) => { if (i) main.lineTo(px, py); else main.moveTo(px, py); });
+      const fork = new Path2D();
+      const [fx, fy] = points[1 + Math.floor(Math.random() * turns)];
+      const sign = fy < height / 2 ? 1 : -1;
+      fork.moveTo(fx, fy);
+      fork.lineTo(fx + length * 0.08, fy - sign * 5);
+      fork.lineTo(fx + length * 0.2, fy - sign * 3);
+      fork.lineTo(fx + length * 0.28, fy - sign * 6);
+      return { birth, main, fork, origin, finish, contact: points[2], fired: false, power: idle ? 0.7 : 1 - index * 0.1 };
     });
-  }, [trackRef, fromPercent, toPercent]);
+    const particles: Particle[] = [];
+    let frame = 0;
+    let start = 0;
+    let previous = 0;
+    let emission = 0;
+    let stopped = false;
+    const stop = () => {
+      stopped = true;
+      cancelAnimationFrame(frame);
+      ctx.clearRect(0, 0, width, height);
+    };
+    const visibility = () => { if (document.hidden) stop(); };
+    const preference = () => { if (motion.matches) stop(); };
+    document.addEventListener("visibilitychange", visibility);
+    motion.addEventListener("change", preference);
 
-  const gradientId = useId();
+    function draw(now: number) {
+      if (stopped || !ctx) return;
+      if (!start) start = previous = now;
+      const elapsed = now - start;
+      const dt = Math.min((now - previous) / 1000, 0.032);
+      previous = now;
+      ctx.clearRect(0, 0, width, height);
+      const t = Math.min(elapsed / duration, 1);
+      // Same cubic ease-out as the fill: emitter stays attached to its leading edge.
+      const ease = 1 - Math.pow(1 - t, 3);
+      const x = from + (to - from) * ease;
+      const y = height / 2;
+      const energy = Math.pow(1 - t, 0.65);
+      const flicker = 0.84 + 0.1 * Math.sin(elapsed * 0.043) + 0.06 * Math.sin(elapsed * 0.097);
+      if (t < 1) {
+        emission += dt * (idle ? 22 : 65);
+        while (emission >= 1 && particles.length < 64) {
+          emission--;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 18 + Math.random() * (idle ? 35 : 85);
+          particles.push({ x, y, vx: Math.cos(angle) * speed - (idle ? 0 : 24),
+            vy: Math.sin(angle) * speed * 0.65 - 12, age: 0,
+            life: 0.25 + Math.random() * 0.4, size: 0.5 + Math.random() * 1.1,
+            glint: Math.random() > 0.8 });
+        }
+        // Broad bloom, hot nucleus and a thin anamorphic specular reflection.
+        ctx.globalAlpha = energy * flicker * (idle ? 0.45 : 0.8);
+        ctx.drawImage(sprite, x - 18, y - 6, 36, 12);
+        ctx.drawImage(sprite, x - 26, y - 2.5, 52, 5);
+        ctx.fillStyle = white;
+        ctx.beginPath(); ctx.ellipse(x, y, 2.5, Math.min(1.4, barHeight / 3), 0, 0, Math.PI * 2); ctx.fill();
+      }
+      // Animation-style exposure: instant contact, a short white-hot hold,
+      // then a colored afterimage. Channels stay pinned to their contact points.
+      // The next strike forms farther along the bar; nothing slides or deforms.
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.miterLimit = 3;
+      for (const strike of strikes) {
+        const age = elapsed - strike.birth;
+        if (age < 0 || age > 170) continue;
+        if (!strike.fired) {
+          strike.fired = true;
+          // Secondary debris leaves the fracture once, retaining its momentum
+          // after the electrical channel disappears.
+          for (let i = 0; i < (idle ? 3 : 6) && particles.length < 64; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 25 + Math.random() * 65;
+            particles.push({ x: strike.contact[0], y: strike.contact[1],
+              vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 15,
+              age: 0, life: 0.25 + Math.random() * 0.25,
+              size: 0.6 + Math.random() * 0.6, glint: i === 0 });
+          }
+        }
+        const exposure = age < 38 ? 1 : Math.exp(-(age - 38) / 42);
+        // The discharge illuminates the fill itself: a narrow reflected hot
+        // strip with feathered ends, exactly on the bar surface. Its surrounding
+        // bloom is horizontal, so the bolt reads as charge inside the material.
+        const reflection = ctx.createLinearGradient(strike.origin, 0, strike.finish, 0);
+        reflection.addColorStop(0, "transparent");
+        reflection.addColorStop(0.3, tint);
+        reflection.addColorStop(0.7, white);
+        reflection.addColorStop(1, "transparent");
+        ctx.fillStyle = reflection;
+        ctx.globalAlpha = exposure * strike.power * 0.8;
+        ctx.fillRect(strike.origin, height / 2 - barHeight / 2,
+          strike.finish - strike.origin, barHeight);
+        for (const [path, weight] of [[strike.main, 1], [strike.fork, 0.42]] as const) {
+          ctx.strokeStyle = tint;
+          ctx.lineWidth = 11 * weight;
+          ctx.globalAlpha = exposure * strike.power * 0.12; ctx.stroke(path);
+          ctx.lineWidth = 5.5 * weight;
+          ctx.globalAlpha = exposure * strike.power * 0.8; ctx.stroke(path);
+          ctx.strokeStyle = white;
+          ctx.lineWidth = 3 * weight;
+          ctx.globalAlpha = exposure * strike.power; ctx.stroke(path);
+        }
+      }
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.age += dt;
+        if (p.age >= p.life) { particles.splice(i, 1); continue; }
+        p.vx *= Math.exp(-3 * dt); p.vy += 70 * dt;
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        const alpha = Math.pow(1 - p.age / p.life, 1.5);
+        ctx.globalAlpha = alpha * 0.65;
+        const radius = p.size * 4;
+        ctx.drawImage(sprite, p.x - radius, p.y - radius, radius * 2, radius * 2);
+        ctx.globalAlpha = alpha; ctx.strokeStyle = tint; ctx.lineWidth = p.size * 0.7;
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.025, p.y - p.vy * 0.025); ctx.stroke();
+        ctx.fillStyle = white; ctx.fillRect(p.x - 0.5, p.y - 0.5, 1, 1);
+        if (p.glint) {
+          ctx.globalAlpha = alpha * Math.pow(Math.sin(Math.PI * p.age / p.life), 4);
+          ctx.fillRect(p.x - 3, p.y - 0.35, 6, 0.7);
+          ctx.fillRect(p.x - 0.35, p.y - 3, 0.7, 6);
+        }
+      }
+      ctx.globalAlpha = 1;
+      if (elapsed < duration || particles.length) frame = requestAnimationFrame(draw);
+      else ctx.clearRect(0, 0, width, height);
+    }
+    frame = requestAnimationFrame(draw);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", visibility);
+      motion.removeEventListener("change", preference);
+    };
+  }, [trackRef, fromPercent, toPercent, color]);
 
-  if (!ready) return null;
-  const { leftPx, widthPx: w, paths } = ready;
-  const color = colorOverride ?? barGradientColorAt(toPercent / 100);
-
-  return (
-    <svg
-      aria-hidden
-      className="pointer-events-none absolute top-1/2 -translate-y-1/2 overflow-visible"
-      style={{ left: leftPx, width: w, height }}
-      viewBox={`0 0 ${w} ${height}`}
-    >
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={color} />
-          <stop offset="50%" stopColor="#fff7d6" />
-          <stop offset="100%" stopColor={color} />
-        </linearGradient>
-      </defs>
-      <ScribbleStroke d={paths[0]} delayMs={0} durationMs={620} color={color} gradientId={gradientId} />
-      <ScribbleStroke d={paths[1]} delayMs={220} durationMs={620} color={color} gradientId={gradientId} />
-    </svg>
-  );
+  return <canvas ref={canvasRef} aria-hidden="true" data-spark-kind={fromPercent === toPercent ? "idle" : "growth"}
+    className="pointer-events-none absolute left-0 top-1/2 w-full -translate-y-1/2 motion-reduce:hidden"
+    style={{ height: 88 }} />;
 }
