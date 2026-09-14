@@ -9522,3 +9522,26 @@ are pre-existing and untouched by this change).
 `src/app/api/resume-tailor/route.ts` (new), `src/lib/resume.ts`,
 `src/components/resume/TailorScreen.tsx`,
 `src/components/resume/ResumeBuilderExperience.tsx`.
+
+## 15 Sep 2026 -- Match to a Job results moved into a modal, copy trimmed
+
+Direct feedback: "the dreamy stuff can be a modal, otherwise theres a lot
+of clutter... so many new things are being added to that last section."
+The analysis results (Dreamy line, score chips, suggestions,
+improvements, gaps) now open in a `ResumeModal` (the same in-place
+panel-swap pattern `ExperienceModal`/`EducationModal` already use, not a
+floating overlay) instead of stacking inline under the job description
+fields. Opens once per "Find Matching Skills" run; a "View Results"
+button reopens the same result without re-fetching. Still never fires on
+Save, so it doesn't reproduce the reference's nag-modal bug.
+
+Also trimmed copy per direct feedback: dropped the "Match to a Job"
+description line (redundant with the textarea's own placeholder),
+shortened the placeholder and error text.
+
+Verified live: seeded a resume, ran a job description through, modal
+opened with correct scores/suggestions, Back returned to the form with
+the draft intact, "View Results" reopened without a second API call.
+ESLint + `tsc --noEmit -p .` clean on `TailorScreen.tsx`.
+
+`src/components/resume/TailorScreen.tsx`.

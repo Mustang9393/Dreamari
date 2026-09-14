@@ -5,7 +5,7 @@ import { Check, Plus, Sparkles } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { addSkill, makeId, upsertVersion, type ResumeData, type ResumeSkills, type ResumeVersion } from "@/lib/resume";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
-import { CARD_CLASS, Field, INSET, TextInput, WizardFooter } from "./ui";
+import { CARD_CLASS, Field, INSET, ResumeModal, TextInput, WizardFooter } from "./ui";
 
 const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "", targetPosition: "", targetCompany: "", template: DEFAULT_RESUME_TEMPLATE };
 
@@ -120,6 +120,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
 
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<TailorAnalysis | null>(null);
+  const [showResults, setShowResults] = useState(false);
   const [analyzeError, setAnalyzeError] = useState(false);
   const [added, setAdded] = useState<Set<string>>(new Set());
 
@@ -151,6 +152,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
       const data = (await res.json()) as { ok: boolean } & Partial<TailorAnalysis>;
       if (data.ok && typeof data.matchScore === "number") {
         setAnalysis({ matchScore: data.matchScore, matchLabel: data.matchLabel ?? "", qualityScore: data.qualityScore ?? 0, suggestions: data.suggestions ?? [], gaps: data.gaps ?? [], improvements: data.improvements ?? [] });
+        setShowResults(true);
       } else {
         setAnalyzeError(true);
       }
@@ -168,6 +170,46 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
       : analysis.matchScore >= 45
         ? "You've got some good matches. ✨"
         : "A few more skills would help this land. ✨";
+
+  if (showResults && analysis) {
+    return (
+      <ResumeModal title="Job Match Results" onClose={() => setShowResults(false)}>
+        <DreamyGuide sprite="/images/dreamy/v2/dreamy-puzzle.png" line={dreamyLine} />
+
+        <div className="flex gap-[var(--space-3)]">
+          <ScoreChip label="Resume Quality" value={analysis.qualityScore} />
+          <ScoreChip label="Job Match" value={analysis.matchScore} sublabel={analysis.matchLabel} />
+        </div>
+
+        {analysis.suggestions.length > 0 && (
+          <div className="flex flex-col gap-[8px]">
+            <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Skills worth adding</span>
+            {analysis.suggestions.map((s) => (
+              <SuggestionRow
+                key={s.skill}
+                suggestion={s}
+                added={added.has(s.skill) || resume.skills[s.category].some((have) => have.toLowerCase() === s.skill.toLowerCase())}
+                onAdd={() => { addSkill(s.category, s.skill); setAdded((cur) => new Set(cur).add(s.skill)); }}
+              />
+            ))}
+          </div>
+        )}
+
+        {analysis.improvements.length > 0 && (
+          <div className="flex flex-col gap-[4px]">
+            <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Worth strengthening</span>
+            <ul className="flex flex-col gap-[3px] pl-[16px]" style={{ listStyleType: "disc", color: "var(--muted-foreground)" }}>
+              {analysis.improvements.map((tip) => <li key={tip} className="text-[12.5px]">{tip}</li>)}
+            </ul>
+          </div>
+        )}
+
+        {analysis.gaps.length > 0 && (
+          <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Not yet covered: {analysis.gaps.join(", ")}.</p>
+        )}
+      </ResumeModal>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
@@ -208,18 +250,15 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
       </Field>
 
       <div className={CARD_CLASS} style={INSET}>
-        <div className="flex flex-col gap-[2px]">
-          <span className="flex items-center gap-[6px] text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>
-            <Sparkles className="h-4 w-4 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden /> Match to a Job
-          </span>
-          <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Optional -- paste a real posting and this resume will line up with it: matching skills, a job-fit score, and what&apos;s still worth adding.</span>
-        </div>
+        <span className="flex items-center gap-[6px] text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>
+          <Sparkles className="h-4 w-4 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden /> Match to a Job
+        </span>
         <Field label="Job Description" htmlFor="tailor-jd">
           <textarea
             id="tailor-jd"
             value={draft.jobDescription}
             onChange={(e) => setDraft({ ...draft, jobDescription: e.target.value })}
-            placeholder="Paste the full job description here to line your resume up with it."
+            placeholder="Paste a job description to tailor this resume to it."
             rows={4}
             className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[14px] font-semibold outline-none focus:border-[var(--primary)]"
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
@@ -234,57 +273,18 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
           </Field>
         </div>
 
-        {draft.jobDescription.trim().length > 0 && !analysis && (
+        {draft.jobDescription.trim().length > 0 && (
           <button
             type="button"
-            onClick={findMatchingSkills}
+            onClick={analysis ? () => setShowResults(true) : findMatchingSkills}
             disabled={analyzing}
             className="dm-tap flex min-h-[44px] cursor-pointer items-center justify-center gap-[8px] self-start rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-70"
             style={{ background: "var(--primary)" }}
           >
-            <Sparkles className="h-4 w-4" aria-hidden /> {analyzing ? "Finding matches…" : "Find Matching Skills"}
+            <Sparkles className="h-4 w-4" aria-hidden /> {analyzing ? "Finding matches…" : analysis ? "View Results" : "Find Matching Skills"}
           </button>
         )}
-        {analyzeError && <p className="text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t match this job right now. You can still save without it.</p>}
-
-        {analysis && (
-          <div className="flex flex-col gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-            <DreamyGuide sprite="/images/dreamy/v2/dreamy-puzzle.png" line={dreamyLine} />
-
-            <div className="flex gap-[var(--space-3)]">
-              <ScoreChip label="Resume Quality" value={analysis.qualityScore} />
-              <ScoreChip label="Job Match" value={analysis.matchScore} sublabel={analysis.matchLabel} />
-            </div>
-
-            {analysis.suggestions.length > 0 && (
-              <div className="flex flex-col gap-[8px]">
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Skills worth adding</span>
-                {analysis.suggestions.map((s) => (
-                  <SuggestionRow
-                    key={s.skill}
-                    suggestion={s}
-                    added={added.has(s.skill) || resume.skills[s.category].some((have) => have.toLowerCase() === s.skill.toLowerCase())}
-                    onAdd={() => { addSkill(s.category, s.skill); setAdded((cur) => new Set(cur).add(s.skill)); }}
-                  />
-                ))}
-                <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Add the ones you actually have. Skills are only added to your profile -- never invented.</p>
-              </div>
-            )}
-
-            {analysis.improvements.length > 0 && (
-              <div className="flex flex-col gap-[4px]">
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Worth strengthening</span>
-                <ul className="flex flex-col gap-[3px] pl-[16px]" style={{ listStyleType: "disc", color: "var(--muted-foreground)" }}>
-                  {analysis.improvements.map((tip) => <li key={tip} className="text-[12.5px]">{tip}</li>)}
-                </ul>
-              </div>
-            )}
-
-            {analysis.gaps.length > 0 && (
-              <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Not yet covered by your profile: {analysis.gaps.join(", ")}.</p>
-            )}
-          </div>
-        )}
+        {analyzeError && <p className="text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t match this job. You can still save without it.</p>}
       </div>
 
       <WizardFooter onBack={onCancel} backLabel="Cancel" onNext={save} nextDisabled={!canSave} nextLabel="Save Resume" />
