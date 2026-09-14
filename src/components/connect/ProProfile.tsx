@@ -147,7 +147,17 @@ export function FollowButton({ following, onToggle, compact = false, dense = fal
 }
 
 // ——— the career page's section shell: frosted panel, title ruled edge to edge ———
-export const PANEL = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+// `var(--card)`, not a glass-surface tint (direct feedback, 15 Sept 2026:
+// "why does it look so whiteish? use the same surfaces as everywhere else"
+// -- a white-alpha overlay reads as hazy/bright no matter how low its own
+// opacity, because it's still white pixels on a dark page). `--card` is
+// Connect's established opaque floor for a section-level surface like this
+// one (see SectionSurface, primitives.tsx: "a real opaque surface, not
+// another translucent layer, so it reads as solid ground"); the same
+// pattern `dm-reply-composer` and thread rows already use elsewhere in
+// Connect. No backdrop-filter either -- that was tuned for a translucent
+// layer, and a solid fill doesn't need it.
+export const PANEL = { background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 export const RULE = "rgba(255,255,255,0.12)";
 
 export function Panel({ id, title, aside, children, className = "" }: { id: string; title: string; aside?: React.ReactNode; children: React.ReactNode; className?: string }) {
@@ -319,6 +329,20 @@ export function OverviewSection({ pro, communities, onOpenCommunity }: { pro: Pr
                 );
               });
             })}
+          </div>
+        )}
+        {pro.employeeGroups && pro.employeeGroups.length > 0 && (
+          // Another way to find a professional a student relates to, beyond
+          // topics/world (direct request, 15 Sept 2026): opt-in company ERGs,
+          // kept as compact badges rather than another icon-row list since
+          // there's often several of them and they're scanned, not read.
+          <div className="flex flex-col items-start gap-[var(--space-2)]">
+            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Employee Groups</span>
+            <div className="flex flex-wrap gap-[6px]">
+              {pro.employeeGroups.map((g) => (
+                <span key={g} className="rounded-[var(--radius-sm)] border px-[10px] py-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{g}</span>
+              ))}
+            </div>
           </div>
         )}
         <span className="flex items-center gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>

@@ -8763,3 +8763,36 @@ Browser checked growth, mobile/light/dark variants and idle, no runtime errors.
 Targeted ESLint and tokens:check passed. Production build (including TypeScript and all page generation) passed.
 Release prepared from latest origin/main 2b45a1b; unrelated local schools edits
 remain in dreamari-partner-grid and are excluded. User authorized push live.
+
+### 15 Sept 2026 — Connect volunteer profile: softer panel, Employee Groups (ERGs)
+
+Relayed from a Slack request (via Chandu), high priority, pushed ahead of the
+in-progress Resume Builder work:
+
+1. "About / Experience section is currently too bright" -- first pass moved
+   `PANEL` in `ProProfile.tsx` from `--glass-surface-2` to
+   `--glass-surface-1`, one step down the same white-alpha ramp; live
+   feedback ("why does it look so whiteish? use the same surfaces as
+   everywhere else") made clear that wasn't the actual fix -- a white-alpha
+   overlay reads hazy no matter how low its own opacity, since it's still
+   white pixels laid over a dark page. Switched instead to `var(--card)`,
+   the same opaque floor `SectionSurface` (primitives.tsx) and
+   `dm-reply-composer`/thread rows already use elsewhere in Connect, and
+   dropped the backdrop-filter blur + glass inset highlight that only made
+   sense for a translucent layer. `PANEL` is shared by the public
+   `ProProfileView` and the volunteer's own `ProDashboard` self-view, so
+   both now match.
+2. New compact "Employee Groups" section under Education, inside the same
+   Experience `ProfileCard`: opt-in `Pro.employeeGroups?: string[]` (data.ts),
+   rendered as plain bordered pill badges (`OverviewSection` in
+   ProProfile.tsx), matching the "simple badges or rows" ask. Empty/omitted
+   for every pro except `pro-johnson` (Trevor Johnson), seeded with the
+   four example ERGs from the request so there's a real one to look at.
+
+Browser-verified live at `/connect?pro=pro-johnson`: badges render under
+Education exactly as specified, panel background confirmed via computed
+style. ESLint + `tsc --noEmit` clean on both touched files.
+
+**Not touched:** `CARD` (Ask Me composer / Posts entries) still uses
+`--glass-surface-2` on purpose -- that one wasn't part of the complaint, and
+it already carries a primary tint tuned for a smaller element.
