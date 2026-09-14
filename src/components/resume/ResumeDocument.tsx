@@ -1,37 +1,56 @@
 "use client";
 
 import { Download } from "lucide-react";
-import type { CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { ResumeData } from "@/lib/resume";
-import { EXPERIENCE_TYPES } from "./data";
+import { EXPERIENCE_TYPES, RESUME_TEMPLATES, type ResumeTemplateId } from "./data";
 
-// The actual resume, rendered as a real document -- not a form summary. Reuses
-// the app's existing printable-document system (`.dm-report`, the same class
-// Career Report's export uses) for the structural/print behavior, but pins
-// the color tokens to its own print variant unconditionally (direct feedback,
-// 14 Sept 2026: "keep white background black text as it would be actually
-// sent") rather than the dark-on-screen default that `.dm-report` normally
-// shows -- a resume you'd send out doesn't have a dark mode, so what's on
-// screen here should always match the printed page, not the app theme.
-const PAPER_STYLE: CSSProperties = {
-  "--paper": "#ffffff",
-  "--paper-raised": "#ffffff",
-  "--paper-sunken": "#f5f5f5",
-  "--ink": "#000000",
-  "--ink-soft": "#2b2b2b",
-  "--ink-faint": "#555555",
-  "--rule": "#cccccc",
-  "--rule-strong": "#999999",
-} as CSSProperties;
+// The actual resume, rendered as a real document -- not a form summary.
+// Reuses the app's existing printable-document system (`.dm-report`, the
+// same class Career Report's export uses) for the print/structural behavior,
+// but pins the color tokens to its own print variant unconditionally (direct
+// feedback, 14 Sept 2026: "keep white background black text as it would be
+// actually sent") rather than the dark-on-screen default `.dm-report`
+// normally shows -- a resume you'd send out doesn't have a dark mode.
+
+// A real US Letter page at 96dpi, the same convention document editors use
+// for their own "page" canvas. The sheet is ALWAYS laid out at this exact
+// pixel size with real point-equivalent type (direct feedback, 14 Sept
+// 2026: "the scale layout etc needs to be realistic") -- ScaledSheet then
+// uniformly scales that fixed canvas down to fit whatever width it's given
+// (the full document view, or the wizard's narrower sidebar), so proportions
+// never lie about what actually prints.
+const PAGE_WIDTH = 816;
+const PAGE_HEIGHT = 1056;
+
+function templateFor(id: string) {
+  return RESUME_TEMPLATES.find((t) => t.id === id) ?? RESUME_TEMPLATES[0];
+}
+
+function paperStyle(templateId: string): CSSProperties {
+  const template = templateFor(templateId);
+  return {
+    "--paper": "#ffffff",
+    "--paper-raised": "#ffffff",
+    "--paper-sunken": "#f5f5f5",
+    "--ink": "#000000",
+    "--ink-soft": "#2b2b2b",
+    "--ink-faint": "#555555",
+    "--rule": "#cccccc",
+    "--rule-strong": "#999999",
+    "--accent": template.accent,
+    "--name-font": template.nameFont === "serif" ? "Georgia, 'Times New Roman', serif" : "var(--font-body, system-ui, sans-serif)",
+  } as CSSProperties;
+}
 
 function Rule() {
   return <div className="h-px w-full" style={{ background: "var(--rule)" }} />;
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-col gap-[6px]">
-      <span className="text-[12px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--ink)" }}>{children}</span>
+      <span className="text-[12px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--accent)" }}>{children}</span>
       <Rule />
     </div>
   );
@@ -46,7 +65,7 @@ function dateRange(start: string, end: string, current: boolean) {
   return `${from} – ${to}`;
 }
 
-export function ResumeDocument({ resume }: { resume: ResumeData }) {
+function ResumeSheetContent({ resume }: { resume: ResumeData }) {
   const fullName = `${resume.profile.firstName} ${resume.profile.lastName}`.trim() || "Your Name";
   const contactLine = [
     resume.profile.email,
@@ -57,20 +76,9 @@ export function ResumeDocument({ resume }: { resume: ResumeData }) {
   const totalSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length;
 
   return (
-    <article
-      data-doc="resume"
-      // Fixed US Letter aspect ratio on screen (direct feedback, 14 Sept
-      // 2026: the preview should already be sheet-sized, not grow with
-      // content) -- overflow scrolls inside that fixed box rather than
-      // stretching it. Printing must NOT inherit this: a resume longer than
-      // one page needs to paginate normally, so print: cancels both the
-      // ratio and the scroll clipping and lets the browser's own @page
-      // rule (app.css) do the pagination.
-      className="dm-report aspect-[8.5/11] w-full overflow-y-auto rounded-[var(--radius-lg)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-8)] print:aspect-auto print:h-auto print:overflow-visible"
-      style={PAPER_STYLE}
-    >
+    <>
       <header data-print-keep className="flex flex-col items-center text-center">
-        <h1 className="text-[24px] leading-[28px] font-extrabold tracking-[-0.01em] sm:text-[30px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{fullName}</h1>
+        <h1 className="text-[26px] leading-[30px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }}>{fullName}</h1>
         {contactLine.length > 0 && (
           <p className="mt-[8px] flex flex-wrap items-center justify-center gap-x-[8px] gap-y-[4px] text-[13px] font-semibold" style={{ color: "var(--ink-soft)" }}>
             {contactLine.map((part, i) => (
@@ -83,14 +91,14 @@ export function ResumeDocument({ resume }: { resume: ResumeData }) {
         )}
       </header>
 
-      <div className="mt-[28px] flex flex-col gap-[24px] sm:mt-[34px] sm:gap-[28px]">
+      <div className="mt-[28px] flex flex-col gap-[24px]">
         {resume.education.length > 0 && (
           <section className="flex flex-col gap-[14px]">
             <SectionLabel>Education</SectionLabel>
             <div className="flex flex-col gap-[14px]">
               {resume.education.map((edu) => (
                 <div key={edu.id} className="flex flex-col gap-[2px]">
-                  <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+                  <div className="flex items-baseline justify-between gap-[12px]">
                     <span className="text-[14.5px] font-bold" style={{ color: "var(--ink)" }}>{edu.schoolName}</span>
                     {edu.gradYear && <span className="flex-none text-[13px] font-semibold" style={{ color: "var(--ink-soft)" }}>{edu.gradYear}</span>}
                   </div>
@@ -115,7 +123,7 @@ export function ResumeDocument({ resume }: { resume: ResumeData }) {
                 const range = dateRange(exp.startDate, exp.endDate, exp.current);
                 return (
                   <div key={exp.id} className="flex flex-col gap-[4px]">
-                    <div className="flex items-baseline justify-between gap-[var(--space-3)]">
+                    <div className="flex items-baseline justify-between gap-[12px]">
                       <span className="text-[14.5px] font-bold" style={{ color: "var(--ink)" }}>
                         {exp.title}{exp.where && <span className="font-semibold" style={{ color: "var(--ink-soft)" }}> at {exp.where}</span>}
                       </span>
@@ -160,7 +168,7 @@ export function ResumeDocument({ resume }: { resume: ResumeData }) {
             <SectionLabel>Certifications</SectionLabel>
             <div className="flex flex-col gap-[10px]">
               {resume.certifications.map((cert) => (
-                <div key={cert.id} className="flex items-baseline justify-between gap-[var(--space-3)]">
+                <div key={cert.id} className="flex items-baseline justify-between gap-[12px]">
                   <span className="text-[13.5px]" style={{ color: "var(--ink-soft)" }}>
                     <span className="font-bold" style={{ color: "var(--ink)" }}>{cert.name}</span>
                     {cert.issuer && `, ${cert.issuer}`}
@@ -172,7 +180,53 @@ export function ResumeDocument({ resume }: { resume: ResumeData }) {
           </section>
         )}
       </div>
-    </article>
+    </>
+  );
+}
+
+/** Renders the fixed-size sheet at real dimensions, scaled to fit whatever
+ *  width its container offers -- the same technique document editors use
+ *  for their page preview, so what's on screen is proportionally identical
+ *  to a full-size page rather than an arbitrary content-sized box. */
+function ScaledSheet({ resume, templateId }: { resume: ResumeData; templateId: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => setScale(el.offsetWidth / PAGE_WIDTH);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef} className="print:hidden" style={{ width: "100%", height: scale ? PAGE_HEIGHT * scale : undefined, overflow: "hidden" }}>
+      <div
+        data-doc="resume"
+        className="dm-report overflow-hidden rounded-[var(--radius-lg)] p-[56px] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)]"
+        style={{ ...paperStyle(templateId), width: PAGE_WIDTH, height: PAGE_HEIGHT, transform: scale ? `scale(${scale})` : undefined, transformOrigin: "top left", visibility: scale ? "visible" : "hidden" }}
+      >
+        <ResumeSheetContent resume={resume} />
+      </div>
+    </div>
+  );
+}
+
+export function ResumeDocument({ resume, templateId = "classic" }: { resume: ResumeData; templateId?: string | ResumeTemplateId }) {
+  return (
+    <>
+      <ScaledSheet resume={resume} templateId={templateId} />
+      {/* Print gets its own natural-flow copy -- the scaled screen version
+         is a fixed 1-page box (print:hidden above), but a resume longer
+         than one page needs to paginate through the browser's own @page
+         rule (app.css) instead of being clipped to that box. */}
+      <article data-doc="resume-print" className="dm-report hidden rounded-[var(--radius-lg)] p-[var(--space-8)] print:block" style={paperStyle(templateId)}>
+        <ResumeSheetContent resume={resume} />
+      </article>
+    </>
   );
 }
 

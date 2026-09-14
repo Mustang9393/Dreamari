@@ -8587,6 +8587,35 @@ app.css) instead of getting clipped to a single fixed box. Verified both
 the full document view and the wizard's desktop sidebar preview render as
 a real sheet now regardless of how little or much content is in them.
 
+**Same-day follow-up 5:** "The preview isnt rendering how it will actually
+look, the scale layout etc needs to be realistic... i need to be able to
+select different color/style/layout or preset templates." Two real gaps:
+
+1. The sheet-sized fix from follow-up 4 used a fluid `aspect-[8.5/11] w-full`
+   box, which kept text at fixed px sizes regardless of how wide that box
+   rendered -- proportionally wrong in the wizard's narrower sidebar vs. the
+   full document view. Rewrote `ResumeDocument.tsx` to the technique real
+   document editors use: the resume renders once at true US Letter
+   dimensions (816x1056px, 96dpi) with real point-equivalent type, inside a
+   `ScaledSheet` that measures its container via `ResizeObserver` and
+   applies `transform: scale(containerWidth / 816)` -- so the SAME real
+   proportions show everywhere, just scaled uniformly, never stretched or
+   squashed. Printing gets its own separate natural-flow copy of the same
+   content (`print:hidden` on the scaled version, `hidden print:block` on
+   the plain one) so a resume over one page still paginates through the
+   browser's own `@page` rule instead of being clipped to the fixed canvas.
+2. Added resume templates (`RESUME_TEMPLATES` in `data.ts`): Classic
+   (pure black, the literal reference default -- "adhere to the same resume
+   format as the replit... offer different preset templates", so every
+   template keeps the exact same single-column structure and only the
+   accent color/name font changes), Navy, Forest (serif name), and
+   Charcoal & Gold. `ResumeVersion` gained a `template` field (plain string
+   in `resume.ts` to avoid a lib -> components import; validated against the
+   known list in `data.ts`/`ResumeDocument`). Picked via a swatch grid on
+   the Tailor screen, saved per resume version, so different tailored
+   resumes can carry different templates independently.
+
 **Not yet built** (next stages per the original plan): real `.docx` export
 (Print/Save PDF works today via `window.print()`, no doc-generation library
-added yet).
+added yet). Templates/scaling not yet pushed -- staged locally, everything
+else on this list already is.

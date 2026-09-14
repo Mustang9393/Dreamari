@@ -5,6 +5,7 @@ import { Suspense, useState, useSyncExternalStore, type ReactNode } from "react"
 import { Pencil, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
+import { DEFAULT_RESUME_TEMPLATE } from "./data";
 import { ExperienceModal } from "./ExperienceModal";
 import { PrintResumeButton, ResumeDocument } from "./ResumeDocument";
 import { TailorScreen } from "./TailorScreen";
@@ -57,7 +58,7 @@ function TopBar({ label, onClose, extra }: { label: string; onClose: () => void;
   );
 }
 
-function DocumentScreen({ resume, title, onBack, backLabel, editHref, router }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter> }) {
+function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, templateId }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter>; templateId: string }) {
   return (
     <Shell maxWidth={720}>
       <TopBar
@@ -80,7 +81,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router }: 
           </>
         }
       />
-      <ResumeDocument resume={resume} />
+      <ResumeDocument resume={resume} templateId={templateId} />
       <button
         type="button"
         data-print-hide
@@ -132,12 +133,13 @@ function ResumeBuilderInner() {
         backLabel="Back to Resumes"
         editHref={`/resume-builder?view=tailor&version=${activeVersion.id}`}
         router={router}
+        templateId={activeVersion.template}
       />
     );
   }
 
   if (view === "document") {
-    return <DocumentScreen resume={resume} title="Your Resume" onBack={backToProfile} backLabel="Back to Resumes" router={router} />;
+    return <DocumentScreen resume={resume} title="Your Resume" onBack={backToProfile} backLabel="Back to Resumes" router={router} templateId={DEFAULT_RESUME_TEMPLATE} />;
   }
 
   return (
@@ -184,6 +186,7 @@ function ResumeBuilderInner() {
                     educationIds: current.education.map((e) => e.id),
                     experienceIds: current.experience.map((e) => e.id),
                     jobDescription: "",
+                    template: DEFAULT_RESUME_TEMPLATE,
                   };
                   upsertVersion(version);
                   router.push(`/resume-builder?view=version&version=${version.id}`);
@@ -200,7 +203,7 @@ function ResumeBuilderInner() {
            same reactive resume state, so it updates as the student types. */}
         <div className="hidden lg:sticky lg:top-8 lg:flex lg:max-h-[calc(100dvh-64px)] lg:flex-col lg:gap-[var(--space-3)] lg:overflow-y-auto">
           <span className="flex-none text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Live Preview</span>
-          <ResumeDocument resume={resume} />
+          <ResumeDocument resume={resume} templateId={DEFAULT_RESUME_TEMPLATE} />
         </div>
       </div>
 

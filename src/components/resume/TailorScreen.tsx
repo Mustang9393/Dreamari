@@ -3,9 +3,40 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { makeId, upsertVersion, type ResumeData, type ResumeVersion } from "@/lib/resume";
+import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
 import { CARD_CLASS, Field, INSET, TextInput, WizardFooter } from "./ui";
 
-const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "" };
+const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "", template: DEFAULT_RESUME_TEMPLATE };
+
+function TemplatePicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-4">
+      {RESUME_TEMPLATES.map((t) => {
+        const selected = value === t.id;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => onChange(t.id)}
+            className="dm-tap flex cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left"
+            style={selected ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 10%, transparent)" } : { borderColor: "var(--glass-border)" }}
+          >
+            <div className="flex h-[52px] w-full flex-col gap-[4px] rounded-[6px] bg-white p-[8px]">
+              <div className="h-[6px] w-[60%] rounded-[2px]" style={{ background: t.accent, fontFamily: t.nameFont === "serif" ? "Georgia, serif" : undefined }} />
+              <div className="h-[3px] w-[85%] rounded-[2px]" style={{ background: t.accent, opacity: 0.35 }} />
+              <div className="h-[3px] w-[70%] rounded-[2px]" style={{ background: "#d0d0d0" }} />
+              <div className="h-[3px] w-[75%] rounded-[2px]" style={{ background: "#d0d0d0" }} />
+            </div>
+            <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
+              {selected && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+              {t.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function PickRow({ label, meta, checked, onToggle }: { label: string; meta?: string; checked: boolean; onToggle: () => void }) {
   return (
@@ -79,6 +110,12 @@ export function TailorScreen({ resume, initial, onCancel, onSaved }: { resume: R
           </div>
         )}
       </div>
+
+      <Field label="Template" htmlFor="tailor-template">
+        <div id="tailor-template">
+          <TemplatePicker value={draft.template} onChange={(template) => setDraft({ ...draft, template })} />
+        </div>
+      </Field>
 
       <Field label="Job Description (optional)" htmlFor="tailor-jd">
         <textarea

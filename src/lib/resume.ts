@@ -66,6 +66,9 @@ export type ResumeVersion = {
   educationIds: string[];
   experienceIds: string[];
   jobDescription: string;
+  /** A ResumeTemplateId (src/components/resume/data.ts) -- kept as a plain
+   *  string here so this data-layer file doesn't import from components/. */
+  template: string;
 };
 
 export type ResumeData = {
@@ -160,6 +163,7 @@ function normalizeVersions(value: unknown): ResumeVersion[] {
       educationIds: strings(v.educationIds),
       experienceIds: strings(v.experienceIds),
       jobDescription: str(v.jobDescription),
+      template: str(v.template) || "classic",
     }));
 }
 
