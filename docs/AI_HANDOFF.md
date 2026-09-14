@@ -8842,3 +8842,142 @@ data.ts for consistency (Genentech, CDC Foundation, HSBC, Spotify, etc.).
 Browser-verified live at `/connect`: all five cards show the exact
 requested counts. Pushed to main with explicit authorization ("push this
 first").
+
+### 15 Sept 2026 — Resume Builder: in-place drawer, per-field camera tracking
+
+Several rounds on the wizard's live-preview camera and the Education/
+Certification/Experience/Skills entry forms:
+
+1. **In-place drawer, not a floating modal.** `ResumeModal` (ui.tsx) used to
+   be a `Portal`-rendered `fixed inset-0` overlay -- first a centered card
+   over a 70% scrim, then (mid-session) a left-anchored drawer. Both floated
+   a second layer over the step's own card. Direct feedback after trying the
+   drawer: "the side bar doesn't cover the modal underneath, so it looks
+   cluttered sitting above each other." Rebuilt with no positioning at all --
+   `ResumeModal` is now a plain in-flow block, and each step
+   (`EducationStep`, `CertificationsStep`, the wizard's `stepIndex === 2`
+   branch, `SkillsStep`) swaps its OWN return value for the form and swaps
+   back on close/save, so only one thing is ever mounted in that card. The
+   live preview (a separate grid column) was never actually at risk either
+   way, but this also means it's never obscured or dimmed.
+2. **Per-field camera tracking.** `ScaledSheet` (ResumeDocument.tsx) now
+   takes an `activeField?: string | null` prop (`${entryId}:${fieldKind}`,
+   e.g. `mu1bzqw5-psc5:gradYear`, or `profile:name`/`profile:contact`/
+   `profile:bio` for Personal Info). Every field-bearing span in
+   EducationEntries/ExperienceEntries/CertificationEntries and the four
+   layout headers carries a matching `data-field`. `ResumeBuilderExperience`
+   owns the `activeField` state and a `track(kind)` helper in each modal
+   wires it to `onFocus` on the relevant `TextInput`s (no changes needed to
+   the shared `TextInput`/`SelectInput` -- `onFocus` already passed through
+   via existing prop spread). When a field is focused, the fit effect looks
+   for `[data-field]` first (both axes bound the scale, so the whole value
+   is visible, not just a line -- "show the entire paragraph... if we are on
+   that field"); otherwise it falls back to the focused section's fit
+   (Education/Experience/Skills/Certifications), and with neither, the full
+   page. Closing/saving a form clears `activeField`, which is *all* that
+   "fit the whole section before moving on" needed -- no separate state.
+3. **Field tracking on Personal Info too.** Originally `focusSection` was
+   `null` for step 0 on purpose (no useful whole-page zoom). Direct
+   feedback: field tracking should still work there once a specific field is
+   focused. The fit effect now looks up `activeField` across the whole sheet
+   independent of `focusSection`, and `zoomed`/`canToggleFit` key off
+   `contentZoom` being non-null rather than `focusSection` truthy, so step 0
+   zooms exactly when (and only when) a tracked field is actually focused.
+4. **Muted placeholders so an empty field doesn't zoom into blank space.**
+   New `ProfileName`/`ProfileBio` components and an updated `ContactLine`
+   render a faint italic placeholder ("Your Name", "Email · Phone · City,
+   State") when their field is empty, shown only in the wizard's cropped
+   preview (`placeholders`), matching the existing `EmptyHint` convention
+   used by every other section.
+5. **The zoom math itself, several corrections in sequence** (each one a
+   direct reaction to the previous, all in ScaledSheet):
+   - Section fit now measures the section's REAL text (walking non-empty
+     text nodes with a `Range`, not the section's own box) -- every section
+     wrapper and bullet `<li>` stretches to the full column width via flex
+     regardless of how short its text is, and a decorative full-width
+     `<Rule/>` compounded it, so box-based measurement always collapsed the
+     zoom to near 1x.
+   - `coverScale` (the `background-size: cover` idea) is a floor under the
+     zoom scale so the page always fully covers the frame -- fixes "a huge
+     blob space outside the doc" (actually a real gap where the container
+     showed through, not a rendering bug, for a section near the top of a
+     tall frame).
+   - Both tx and ty are clamped inside the page's own edges (`minTx`/`minTy`
+     derived from `coverScale`), a proper clamped pan-and-zoom rather than
+     blind centering -- "don't bring the whole document down to center for
+     Education... not just move everything to fit the width to the frame,
+     we zoom into the parts we're focused on."
+   - The old "reset to full page, then re-zoom" transition between sections
+     was removed per direct feedback (read as a jarring extra cut) --
+     `contentZoom` now updates directly and the existing CSS transition
+     (bumped 0.32s -> 0.38s) carries the pan/zoom as one continuous move. A
+     manual "fit to screen" icon toggle (top-right of the frame) lets the
+     student see the whole page anytime without losing the camera's place.
+6. **Dropped the SVG glass-refraction rim effect entirely.** Tried three
+   times this session (backdrop-filter: url() referencing an SVG filter --
+   poor cross-browser support, nothing rendered; then the same filter
+   applied directly and masked to a rim, which instead painted a visible
+   grey smear once combined with the dead-gap bug above). Retired for good
+   in favor of a plain dark bezel + two static light/sheen gradients, which
+   render reliably everywhere `GlassEdgeFilter` is gone, along with its
+   `<filter>` SVG and the duplicate-content rim layer.
+
+Browser-verified live: Education's graduation-year field (the original
+complaint -- "the year is sitting on the right margin") now pans/zooms
+correctly, confirmed via direct DOM measurement (`data-field` match,
+computed `tx`/`ty`) after working around a test-harness issue where
+`element.focus()` doesn't fire React's `onFocus` in this environment (a
+real click does) -- not a bug in the app. Personal Info's First/Last Name
+and the empty-state placeholders verified the same way. In-place swap
+verified with no overlap on Education, Certifications, and Skills.
+ESLint + `tsc --noEmit` clean across `src/components/resume/`.
+
+**Not yet done:** Experience's own fields (`ExperienceModal.tsx`) are wired
+with the identical `track()`/`data-field` pattern (where/title ->
+`:title`, location -> `:location`, dates -> `:dates`, each bullet ->
+`:bullet:N`) but not separately re-verified live this pass -- same code
+path as Education, already proven correct, but worth a spot check next
+session.
+
+### 15 Sept 2026 — College Details page: simplification pass
+
+Relayed from Slack, a straightforward copy/hierarchy trim of
+`CollegeDetailExperience.tsx` (design notes: `docs/COLLEGE_LOOKUP_AUDIT.md`
+§7, added this same round):
+
+1. Header: removed "Worth knowing" entirely; added Apply/Financial Aid as
+   two more header actions alongside Website (`EXTRA[slug].links.apply`/
+   `.aid`, already-real data that used to live only inside the Admissions/
+   Cost tabs) -- Financial Aid falls back to the net price calculator link
+   when a school has no dedicated aid page (Princeton, the exact example
+   in the request, is one of these). Apply/Financial Aid render only when
+   that college actually has the link -- no dead buttons. Save unchanged.
+2. Overview -> "Key Facts": renamed from "At a glance", 4 rows (Yearly
+   Cost, Acceptance Rate, Graduation Rate, Undergraduate Population), every
+   explanatory `note` dropped.
+3. Admissions: `d.require`/`d.consider` (already real per-college data, not
+   new) now render as two headed `DotList` groups, "Requirements" and
+   "Other Factors Considered", instead of a "Required"/"Looked at" value on
+   every row. Added a `FACTOR_LABEL` map trimming the copy uniformly across
+   every college's require/consider strings ("Your school record" ->
+   "School record", "Recommendations" -> "Recommendation letter", etc.)
+   rather than hand-editing 30 rows of data.ts. The inline "How to apply"
+   link was removed too -- redundant with the new header Apply button.
+   "Scores of students who got in" -> "Typical Scores", `RangeBar`
+   (progress-bar visualization) swapped for plain `Row`s ("SAT Reading:
+   740–780").
+4. Removed the "See it, then ask someone" folded section entirely (YouTube
+   campus tours + Ask a pro on Connect) -- sent students outside the app,
+   and implied Connect always has a pro from that exact school. `HoverBeam`/
+   `PlayCircle`/`MessagesSquare` imports and the `tourUrl`/`worth` locals
+   removed as unused. `SectionKey` narrowed from `"see" | "sources"` to
+   just `"sources"`.
+
+Browser-verified live at `/colleges/princeton-university` (the exact
+example in the request -- Website + Financial Aid render, Apply correctly
+absent since Princeton has no apply link; Key Facts, Requirements/Other
+Factors Considered, and Typical Scores all match) and
+`/colleges/augustana-university` (has a real apply link, confirms all
+three header actions render together, checked at desktop and mobile
+widths). ESLint + `tsc --noEmit` clean. Pushed to main with explicit
+authorization.

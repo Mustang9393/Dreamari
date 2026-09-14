@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Minus, Plus, ZoomIn, X } from "lucide-react";
+import { Download, Expand, Maximize2, Minimize2, Minus, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { ResumeData } from "@/lib/resume";
 import { Portal } from "@/components/profile/CareerReport";
@@ -100,15 +100,15 @@ function EducationEntries({ resume, tight }: { resume: ResumeData; tight?: boole
       {resume.education.map((edu) => (
         <div key={edu.id} className="flex flex-col gap-[2px]">
           <div className={tight ? "flex flex-col gap-[1px]" : "flex items-baseline justify-between gap-[12px]"}>
-            <span className="text-[14px] font-bold" style={{ color: "var(--ink)" }}>{edu.schoolName}</span>
-            {edu.gradYear && <span className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }}>{edu.gradYear}</span>}
+            <span data-field={`${edu.id}:schoolName`} className="text-[14px] font-bold" style={{ color: "var(--ink)" }}>{edu.schoolName}</span>
+            {edu.gradYear && <span data-field={`${edu.id}:gradYear`} className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }}>{edu.gradYear}</span>}
           </div>
           {(edu.cityState || edu.program || edu.gpa) && (
-            <span className="text-[12.5px]" style={{ color: "var(--ink-soft)" }}>
+            <span data-field={`${edu.id}:cityState`} className="text-[12.5px]" style={{ color: "var(--ink-soft)" }}>
               {[edu.cityState, edu.program && `${edu.program} Program`, edu.gpa && `GPA: ${edu.gpa}`].filter(Boolean).join(" · ")}
             </span>
           )}
-          {edu.honors.length > 0 && <span className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>{edu.honors.join(", ")}</span>}
+          {edu.honors.length > 0 && <span data-field={`${edu.id}:honors`} className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>{edu.honors.join(", ")}</span>}
         </div>
       ))}
     </div>
@@ -125,18 +125,18 @@ function ExperienceEntries({ resume }: { resume: ResumeData }) {
         return (
           <div key={exp.id} className="flex flex-col gap-[4px]">
             <div className="flex items-baseline justify-between gap-[12px]">
-              <span className="text-[14.5px] font-bold" style={{ color: "var(--ink)" }}>
+              <span data-field={`${exp.id}:title`} className="text-[14.5px] font-bold" style={{ color: "var(--ink)" }}>
                 {exp.title}{exp.where && <span className="font-semibold" style={{ color: "var(--ink-soft)" }}> at {exp.where}</span>}
               </span>
-              {range && <span className="flex-none text-[13px] font-semibold" style={{ color: "var(--ink-soft)" }}>{range}</span>}
+              {range && <span data-field={`${exp.id}:dates`} className="flex-none text-[13px] font-semibold" style={{ color: "var(--ink-soft)" }}>{range}</span>}
             </div>
             {(exp.location || kind) && (
-              <span className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>{[kind?.label, exp.location].filter(Boolean).join(" · ")}</span>
+              <span data-field={`${exp.id}:location`} className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>{[kind?.label, exp.location].filter(Boolean).join(" · ")}</span>
             )}
             {exp.bullets.filter((b) => b.trim()).length > 0 && (
               <ul className="mt-[2px] flex flex-col gap-[3px] pl-[18px]" style={{ listStyleType: "disc", color: "var(--ink-soft)" }}>
                 {exp.bullets.filter((b) => b.trim()).map((b, i) => (
-                  <li key={i} className="text-[13.5px] leading-[19px]">{b}</li>
+                  <li key={i} data-field={`${exp.id}:bullet:${i}`} className="text-[13.5px] leading-[19px]">{b}</li>
                 ))}
               </ul>
             )}
@@ -179,12 +179,12 @@ function CertificationEntries({ resume, tight }: { resume: ResumeData; tight?: b
         const range = dateRange(cert.issueDate, cert.expirationDate, false);
         return (
           <div key={cert.id} className={tight ? "flex flex-col gap-[1px]" : "flex items-baseline justify-between gap-[12px]"}>
-            <span className="text-[13px]" style={{ color: "var(--ink-soft)" }}>
+            <span data-field={`${cert.id}:name`} className="text-[13px]" style={{ color: "var(--ink-soft)" }}>
               <span className="font-bold" style={{ color: "var(--ink)" }}>{cert.name}</span>
               {cert.issuer && `, ${cert.issuer}`}
               {cert.credentialId && <span className="text-[12px]" style={{ color: "var(--ink-faint)" }}> · ID: {cert.credentialId}</span>}
             </span>
-            {range && <span className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }}>{range}</span>}
+            {range && <span data-field={`${cert.id}:dates`} className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }}>{range}</span>}
           </div>
         );
       })}
@@ -192,16 +192,29 @@ function CertificationEntries({ resume, tight }: { resume: ResumeData; tight?: b
   );
 }
 
-function ContactLine({ resume, align = "center" }: { resume: ResumeData; align?: "center" | "left" }) {
+// `data-field="profile:contact"` matches the Personal Info step's email/
+// phone/country/state/city inputs (direct feedback, 15 Sept 2026: field
+// tracking should work on the first page too). A placeholder line shows in
+// the wizard preview (`placeholders`) even with nothing typed yet, so
+// focusing one of those fields doesn't zoom the camera in on blank space
+// -- same "Nothing added yet" muted treatment as every other empty section.
+function ContactLine({ resume, align = "center", placeholders }: { resume: ResumeData; align?: "center" | "left"; placeholders?: boolean }) {
   const parts = [
     resume.profile.email,
     resume.profile.phone,
     [resume.profile.city, resume.profile.state].filter(Boolean).join(", "),
     resume.profile.country,
   ].filter(Boolean);
-  if (parts.length === 0) return null;
+  if (parts.length === 0) {
+    if (!placeholders) return null;
+    return (
+      <p data-field="profile:contact" className={`mt-[8px] text-[13px] italic ${align === "center" ? "text-center" : "text-left"}`} style={{ color: "var(--ink-faint)" }}>
+        Email · Phone · City, State
+      </p>
+    );
+  }
   return (
-    <p className={`mt-[8px] flex flex-wrap items-center gap-x-[8px] gap-y-[4px] text-[13px] font-semibold ${align === "center" ? "justify-center" : "justify-start"}`} style={{ color: "var(--ink-soft)" }}>
+    <p data-field="profile:contact" className={`mt-[8px] flex flex-wrap items-center gap-x-[8px] gap-y-[4px] text-[13px] font-semibold ${align === "center" ? "justify-center" : "justify-start"}`} style={{ color: "var(--ink-soft)" }}>
       {parts.map((part, i) => (
         <span key={i} className="flex items-center gap-[8px]">
           {i > 0 && <span aria-hidden style={{ color: "var(--ink-faint)" }}>·</span>}
@@ -214,6 +227,29 @@ function ContactLine({ resume, align = "center" }: { resume: ResumeData; align?:
 
 function fullNameOf(resume: ResumeData) {
   return `${resume.profile.firstName} ${resume.profile.lastName}`.trim() || "Your Name";
+}
+
+// Matches the First/Last Name inputs (`data-field="profile:name"`). Styled
+// muted/italic instead of the real accent-colored name whenever both are
+// still empty, so the placeholder ("Your Name") reads as a placeholder,
+// not as if the student already typed something.
+function ProfileName({ resume, className, style }: { resume: ResumeData; className: string; style: CSSProperties }) {
+  const hasName = resume.profile.firstName.trim().length > 0 || resume.profile.lastName.trim().length > 0;
+  return (
+    <h1 data-field="profile:name" className={className} style={hasName ? style : { ...style, color: "var(--ink-faint)", fontStyle: "italic" }}>
+      {fullNameOf(resume)}
+    </h1>
+  );
+}
+
+// Matches the Short Bio textarea (`data-field="profile:bio"`). Unlike the
+// other placeholders, bio has no natural fallback line to show muted --
+// omitting it out of the flow entirely (the pre-existing behavior) is fine
+// once the field-tracking fit falls back to framing the whole header
+// instead of a field that isn't there yet.
+function ProfileBio({ resume, className, style }: { resume: ResumeData; className: string; style: CSSProperties }) {
+  if (!resume.profile.bio.trim()) return null;
+  return <p data-field="profile:bio" className={className} style={style}>{resume.profile.bio.trim()}</p>;
 }
 
 // ---- Layouts -- same underlying content, four different arrangements. ----
@@ -234,11 +270,9 @@ function SingleColumnLayout({ resume, placeholders }: { resume: ResumeData; plac
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col items-center text-center">
-        <h1 className="text-[26px] leading-[30px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }}>{fullNameOf(resume)}</h1>
-        <ContactLine resume={resume} align="center" />
-        {resume.profile.bio.trim() && (
-          <p className="mt-[14px] max-w-[560px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }}>{resume.profile.bio.trim()}</p>
-        )}
+        <ProfileName resume={resume} className="text-[26px] leading-[30px] font-extrabold tracking-[-0.01em]" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }} />
+        <ContactLine resume={resume} align="center" placeholders={placeholders} />
+        <ProfileBio resume={resume} className="mt-[14px] max-w-[560px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
       </header>
       <div className="mt-[28px] flex flex-col gap-[24px]">
         {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel>Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
@@ -256,19 +290,27 @@ function SidebarLayout({ resume, placeholders }: { resume: ResumeData; placehold
     <div className="flex gap-[28px]">
       <aside data-section="profile" className="flex w-[210px] flex-none flex-col gap-[22px] rounded-[8px] p-[16px]" style={{ background: "var(--accent-tint)" }}>
         <div>
-          <h1 className="text-[19px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }}>{fullNameOf(resume)}</h1>
+          <ProfileName resume={resume} className="text-[19px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }} />
         </div>
-        <div className="flex flex-col gap-[4px] text-[12px] font-semibold" style={{ color: "var(--ink-soft)" }}>
-          {resume.profile.email && <span>{resume.profile.email}</span>}
-          {resume.profile.phone && <span>{resume.profile.phone}</span>}
-          {(resume.profile.city || resume.profile.state) && <span>{[resume.profile.city, resume.profile.state].filter(Boolean).join(", ")}</span>}
-          {resume.profile.country && <span>{resume.profile.country}</span>}
-        </div>
+        {resume.profile.email || resume.profile.phone || resume.profile.city || resume.profile.state || resume.profile.country ? (
+          <div data-field="profile:contact" className="flex flex-col gap-[4px] text-[12px] font-semibold" style={{ color: "var(--ink-soft)" }}>
+            {resume.profile.email && <span>{resume.profile.email}</span>}
+            {resume.profile.phone && <span>{resume.profile.phone}</span>}
+            {(resume.profile.city || resume.profile.state) && <span>{[resume.profile.city, resume.profile.state].filter(Boolean).join(", ")}</span>}
+            {resume.profile.country && <span>{resume.profile.country}</span>}
+          </div>
+        ) : placeholders ? (
+          <div data-field="profile:contact" className="flex flex-col gap-[2px] text-[12px] italic" style={{ color: "var(--ink-faint)" }}>
+            <span>Email</span>
+            <span>Phone</span>
+            <span>City, State</span>
+          </div>
+        ) : null}
         {(hasSkills || placeholders) && <div data-section="skills" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} stacked /> : <EmptyHint />}</div>}
         {(resume.certifications.length > 0 || placeholders) && <div data-section="certifications" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} tight /> : <EmptyHint />}</div>}
       </aside>
       <div className="flex min-w-0 flex-1 flex-col gap-[22px]">
-        {resume.profile.bio.trim() && <p className="text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }}>{resume.profile.bio.trim()}</p>}
+        <ProfileBio resume={resume} className="text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
         {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel>Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
         {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel>Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
@@ -281,11 +323,9 @@ function MinimalLayout({ resume, placeholders }: { resume: ResumeData; placehold
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col items-start text-left">
-        <h1 className="text-[24px] leading-[28px] font-semibold tracking-[0.01em]" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }}>{fullNameOf(resume)}</h1>
-        <ContactLine resume={resume} align="left" />
-        {resume.profile.bio.trim() && (
-          <p className="mt-[14px] max-w-[560px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }}>{resume.profile.bio.trim()}</p>
-        )}
+        <ProfileName resume={resume} className="text-[24px] leading-[28px] font-semibold tracking-[0.01em]" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }} />
+        <ContactLine resume={resume} align="left" placeholders={placeholders} />
+        <ProfileBio resume={resume} className="mt-[14px] max-w-[560px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
       </header>
       <div className="mt-[32px] flex flex-col gap-[28px]">
         {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
@@ -302,12 +342,10 @@ function BannerLayout({ resume, placeholders }: { resume: ResumeData; placeholde
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col gap-[4px]">
-        <h1 className="text-[30px] leading-[34px] font-bold" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }}>{fullNameOf(resume)}</h1>
-        <ContactLine resume={resume} align="left" />
+        <ProfileName resume={resume} className="text-[30px] leading-[34px] font-bold" style={{ fontFamily: "var(--name-font)", color: "var(--accent)" }} />
+        <ContactLine resume={resume} align="left" placeholders={placeholders} />
         <div className="mt-[10px] h-[4px] w-full rounded-full" style={{ background: "var(--accent)" }} />
-        {resume.profile.bio.trim() && (
-          <p className="mt-[10px] max-w-[600px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }}>{resume.profile.bio.trim()}</p>
-        )}
+        <ProfileBio resume={resume} className="mt-[10px] max-w-[600px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
       </header>
       <div className="mt-[24px] flex flex-col gap-[24px]">
         {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
@@ -327,28 +365,64 @@ function ResumeSheetContent({ resume, templateId, placeholders }: { resume: Resu
   return <SingleColumnLayout resume={resume} placeholders={placeholders} />;
 }
 
-const CROPPED_WINDOW_HEIGHT = 520;
-// Extra scale on top of fit-to-width when a section is focused -- enough to
-// read more easily, not so much the page's own side padding (56px at full
-// PAGE_WIDTH) stops covering the overflow once centered. Direct feedback,
-// 14 Sept 2026: "zoom in a bit more without making it look ugly."
-const SECTION_ZOOM_BOOST = 1.12;
+type ContentZoom = { scale: number; tx: number; ty: number };
+
+const CONTENT_PAD = 28;
+
+/** The real, tight horizontal extent of a section's TEXT -- not its box.
+ *  Every section wrapper stretches to fill the page column (flex layouts
+ *  do that by default), and bullet `<li>`s stretch the same way inside
+ *  their flex `<ul>`, so `offsetWidth` on either one is the column width
+ *  regardless of how short the actual words are; a decorative full-width
+ *  `<Rule/>` under a section heading makes even a text-node walk of the
+ *  wrong element lie the same way. Walking only non-empty TEXT NODES and
+ *  measuring each one's own Range rect sidesteps all of that -- a Range
+ *  around a text node (not an element) only ever reports the glyphs'
+ *  actual line-box rects, never a stretched container's. Coordinates come
+ *  back in CURRENT screen space (whatever transform is already applied),
+ *  so the caller un-scales/un-translates them back to the page's own
+ *  untransformed pixels. */
+function measureTextExtent(root: HTMLElement): { left: number; right: number } | null {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.textContent && n.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
+  });
+  const range = document.createRange();
+  let left = Infinity;
+  let right = -Infinity;
+  let node = walker.nextNode();
+  while (node) {
+    range.selectNodeContents(node);
+    const rect = range.getBoundingClientRect();
+    if (rect.width > 0 || rect.height > 0) {
+      left = Math.min(left, rect.left);
+      right = Math.max(right, rect.right);
+    }
+    node = walker.nextNode();
+  }
+  return Number.isFinite(left) ? { left, right } : null;
+}
 
 /** Renders the fixed-size sheet at real dimensions, scaled to fit whatever
  *  width its container offers -- the same technique document editors use
  *  for their page preview, so what's on screen is proportionally identical
  *  to a full-size page rather than an arbitrary content-sized box.
  *
- *  `cropped` + `focusSection` trades the usual "whole page, no scroll"
- *  window for a shorter scrollable one that auto-scrolls to (and zooms
- *  into) the section matching the active wizard step -- re-centering as
- *  the resume's own content changes, not just once per step. No
- *  `focusSection` (the first step) leaves the window at its natural resting
- *  position: the full header, margin included, nothing to scroll to yet. */
-function ScaledSheet({ resume, templateId, cropped, focusSection }: { resume: ResumeData; templateId: string; cropped?: boolean; focusSection?: string | null }) {
+ *  `cropped` + `focusSection` is a "camera" over that sheet: it fits the
+ *  focused section's own bounding box into the frame (centered both ways)
+ *  and re-fits continuously as that section's content grows (typing a
+ *  bullet, adding an entry). Moving to a different section pans/zooms the
+ *  camera straight there -- no reset-to-full-page interlude (direct
+ *  feedback, 15 Sept 2026: the reset read as a jarring extra cut; one
+ *  continuous camera move reads as a single motion instead). A manual
+ *  "fit to screen" toggle lets the student see the whole page any time
+ *  without losing the camera's place on the next step. No `focusSection`
+ *  (the first/last step) just shows the full page. */
+function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }: { resume: ResumeData; templateId: string; cropped?: boolean; focusSection?: string | null; activeField?: string | null }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
+  const [contentZoom, setContentZoom] = useState<ContentZoom | null>(null);
+  const [manualFit, setManualFit] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -360,62 +434,203 @@ function ScaledSheet({ resume, templateId, cropped, focusSection }: { resume: Re
     return () => ro.disconnect();
   }, []);
 
+  // A step change gets a fresh camera on the new section rather than
+  // staying parked on a manual "fit to screen" left over from a prior step.
   useEffect(() => {
-    if (!cropped || !focusSection || !scale) return;
-    const target = sheetRef.current?.querySelector(`[data-section="${focusSection}"]`);
-    target?.scrollIntoView({ behavior: "smooth", block: "start", inline: "center" });
-    // Re-centers as the section's own content grows/shrinks (a new bullet,
-    // another education entry), not only when the step itself changes --
-    // "I want the zoom to follow the updates."
-  }, [cropped, focusSection, scale, resume]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setManualFit(false);
+  }, [focusSection]);
 
-  const zoomed = cropped && !!focusSection;
-  const effectiveScale = scale ? scale * (zoomed ? SECTION_ZOOM_BOOST : 1) : null;
-  const fullHeight = scale ? PAGE_HEIGHT * scale : undefined;
-  const containerHeight = cropped ? CROPPED_WINDOW_HEIGHT : fullHeight;
-  // transform-origin stays top-left (matching the always-correct base fit),
-  // so a translateX shifts the now-wider box back by half the extra width
-  // it gained -- the same effect as center-anchored scaling, but derived in
-  // real container pixels instead of the element's own 816px-wide local
-  // space, which is what actually keeps it centered against the container.
-  const extraWidth = scale && zoomed ? scale * PAGE_WIDTH * (SECTION_ZOOM_BOOST - 1) : 0;
-  const transform = effectiveScale ? `translateX(${-extraWidth / 2}px) scale(${effectiveScale})` : undefined;
+  // Fits either the focused FIELD (while a drawer input for it is
+  // focused) or, failing that, the focused SECTION's real text into the
+  // available frame. Both width and height bound the scale so whichever
+  // axis is tighter wins (direct feedback, 15 Sept 2026: a wide line was
+  // getting cropped when only height drove it; a *dead gap* appeared when
+  // the fit was measured off each section's full-width box instead, since
+  // the box is always the whole column no matter how short its text is --
+  // the actual fix is measuring the real content, not guessing a
+  // compromise). Re-runs on every resume change so the frame follows
+  // content as it grows, and on every `activeField` change so the camera
+  // tracks field-by-field while a drawer is open (also direct feedback:
+  // "when I am on the graduation year input field, pan the zoom to show
+  // the year... the camera tracking all updates one by one, per field").
+  // Reads real DOM layout -- an external system, exactly what
+  // set-state-in-effect exists to allow.
+  useEffect(() => {
+    if (!cropped || !scale) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setContentZoom(null);
+      return;
+    }
+    const container = containerRef.current;
+    const root = sheetRef.current;
+    if (!container || !root) {
+      setContentZoom(null);
+      return;
+    }
+    // The field the drawer is currently focused on, if it exists in the
+    // rendered resume yet -- a brand new entry being added has nothing to
+    // find here until it's saved, which just falls back to the section fit
+    // below (still useful context while typing a new entry). Looked up
+    // across the WHOLE sheet, not scoped to `focusSection` -- Personal
+    // Info (step 0) has no section of its own (direct feedback, 14 Sept
+    // 2026: nothing to zoom to there by default), but its fields still
+    // live under `data-section="profile"` and should track like any other
+    // field once one is actually focused (direct feedback, 15 Sept 2026:
+    // "the tracking zoom and panning should also work for the first page").
+    const fieldTarget = activeField ? root.querySelector<HTMLElement>(`[data-field="${activeField}"]`) : null;
+    const sectionTarget = focusSection ? root.querySelector<HTMLElement>(`[data-section="${focusSection}"]`) : null;
+    const target = fieldTarget ?? sectionTarget;
+    if (!target) {
+      setContentZoom(null);
+      return;
+    }
+    const fieldMode = !!fieldTarget;
+
+    const extent = measureTextExtent(target);
+    if (!extent) {
+      setContentZoom(null);
+      return;
+    }
+    const availW = container.clientWidth;
+    const availH = container.clientHeight;
+    const containerRect = container.getBoundingClientRect();
+    // extent.left/right are in CURRENT on-screen pixels (whatever
+    // transform is already painted) -- un-scale/un-translate by that same
+    // transform to get back to the page's own untransformed pixels.
+    const currentScale = contentZoom?.scale ?? scale;
+    const currentTx = contentZoom?.tx ?? 0;
+    const contentLeft = (extent.left - containerRect.left - currentTx) / currentScale;
+    const contentWidth = Math.max((extent.right - extent.left) / currentScale, 40);
+    const heightFit = (availH - CONTENT_PAD * 2) / target.offsetHeight;
+    const widthFit = (availW - CONTENT_PAD * 2) / contentWidth;
+    // `coverScale` is the CSS `background-size: cover` idea: whatever
+    // scale the content wants, never drop below what it takes for the
+    // full page to cover the frame in both directions, so there's always
+    // real page at every edge and never a blank gap.
+    const coverScale = Math.max(availW / PAGE_WIDTH, availH / PAGE_HEIGHT);
+    // Section mode: height alone drives HOW MUCH we zoom in (direct
+    // feedback, 15 Sept 2026: width capping the scale meant sections near
+    // the top of the page barely zoomed at all). Field mode: BOTH axes
+    // bound the scale, so the one field's whole value -- a full paragraph,
+    // not just a line -- stays fully visible rather than cropping like a
+    // section can ("try and show the entire paragraph... if we are on
+    // that field").
+    const targetScale = fieldMode
+      ? Math.min(Math.max(Math.min(widthFit, heightFit), scale, coverScale), scale * 2.5, 1.8)
+      : Math.min(Math.max(heightFit, scale, coverScale), scale * 2.5, 1.8);
+    const centerLocalY = target.offsetTop + target.offsetHeight / 2;
+    const minTx = availW - PAGE_WIDTH * targetScale;
+    const minTy = availH - PAGE_HEIGHT * targetScale;
+    // Section mode anchors to the LEFT edge of the real text, not its
+    // center -- once zoomed in, a wide row (name left, date pinned far
+    // right) can't show both ends, and the left-aligned name/title is what
+    // identifies the section, so that stays in frame while the date runs
+    // off the right. Field mode centers instead: a single field's value is
+    // meant to be read whole, not anchored past an edge. Both modes clamp
+    // inside the page's own edges, so a short line never drags the whole
+    // page off-center to "center" itself.
+    const tx = fieldMode
+      ? Math.min(0, Math.max(minTx, availW / 2 - (contentLeft + contentWidth / 2) * targetScale))
+      : Math.min(0, Math.max(minTx, CONTENT_PAD - contentLeft * targetScale));
+    const ty = Math.min(0, Math.max(minTy, availH / 2 - centerLocalY * targetScale));
+    setContentZoom({ scale: targetScale, tx, ty });
+    // contentZoom itself is read only to invert the CURRENTLY-painted
+    // transform above, not as a trigger -- this effect already owns every
+    // update to it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cropped, focusSection, scale, resume, activeField]);
+
+  // `contentZoom` being non-null already means a real target was found
+  // (field or section) -- not gated on `focusSection` itself, since step
+  // 0 (Personal Info) has none by default but still zooms once a field on
+  // it is actually focused.
+  const zoomed = cropped && !!contentZoom && !manualFit;
+  const transform = zoomed && contentZoom
+    ? `translate(${contentZoom.tx}px, ${contentZoom.ty}px) scale(${contentZoom.scale})`
+    : scale
+      ? `scale(${scale})`
+      : undefined;
+  const containerHeight = cropped ? "100%" : scale ? PAGE_HEIGHT * scale : undefined;
+  const accent = templateFor(templateId).accent;
+  const canToggleFit = cropped && !!contentZoom;
 
   return (
     <div
-      className="relative overflow-hidden print:hidden"
+      className="relative min-w-0 overflow-hidden print:hidden"
       style={{
         width: "100%",
         height: containerHeight,
-        borderRadius: "var(--radius-lg)",
-        transition: "box-shadow 0.2s ease",
-        // The real iOS text-cursor loupe (confirmed against a live
-        // screenshot, 14 Sept 2026): no border stroke, no blur -- content
-        // inside stays sharp. What reads as "lens" is the elevation: a
-        // solid shape that visibly lifts off the page behind it via
-        // shadow alone. Shadow-only, no backdrop-filter, so it's free on
-        // a phone.
-        boxShadow: zoomed ? "0 26px 52px -14px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.4)" : undefined,
+        minWidth: 0,
+        minHeight: 0,
+        borderRadius: zoomed ? 28 : "var(--radius-lg)",
+        transition: "border-radius 0.25s ease, box-shadow 0.25s ease",
+        // A solid dark bezel (not a blur) plus a lifted shadow, matched
+        // against a real loupe photo (15 Sept 2026): the rim itself reads
+        // sharp against the page, the way an actual glass edge does.
+        boxShadow: zoomed
+          ? `0 30px 60px -16px rgba(0,0,0,0.55), 0 12px 28px -10px rgba(0,0,0,0.4), 0 0 0 2px rgba(20,20,20,0.55), 0 0 0 5px color-mix(in srgb, ${accent} 20%, transparent)`
+          : undefined,
       }}
     >
-      <div ref={containerRef} className="h-full w-full" style={{ overflowY: cropped ? "auto" : "hidden", overflowX: "hidden" }}>
+      <div ref={containerRef} className="relative h-full w-full overflow-hidden">
         <div
           ref={sheetRef}
           data-doc="resume"
           className="dm-report overflow-hidden rounded-[var(--radius-lg)] p-[56px] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)]"
-          style={{ ...paperStyle(templateId), width: PAGE_WIDTH, height: PAGE_HEIGHT, transform, transformOrigin: "top left", visibility: scale ? "visible" : "hidden" }}
+          style={{ ...paperStyle(templateId), width: PAGE_WIDTH, height: PAGE_HEIGHT, transform, transformOrigin: "top left", transition: "transform 0.38s cubic-bezier(0.3,0.1,0.2,1)", visibility: scale ? "visible" : "hidden" }}
         >
           <ResumeSheetContent resume={resume} templateId={templateId} placeholders={cropped} />
         </div>
+        {/* An SVG turbulence+displacement "glass" layer was tried here
+           three times over (14-15 Sept 2026) -- backdrop-filter: url(...)
+           referencing the filter (poor/no cross-browser support, nothing
+           rendered), then the same filter applied directly and masked to
+           a rim, which instead painted a large grey smear because the
+           frame wasn't fully covered by the page at the time (the fit-
+           scale bug fixed above) and a decorative full-width `<Rule/>`
+           was inflating what counted as "edge." Retired for good: a
+           bezel + shine reads as "glass" reliably in every browser, which
+           three attempts at real refraction did not. */}
+        {/* Light falling on the glass: a bright sheen toward the top-left
+           (the Figma glass panel's own default light angle) and a fainter
+           secondary reflection lower down. Plain static gradients, no
+           filter cost. */}
+        {zoomed && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: [
+                "radial-gradient(140% 90% at 18% 8%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 40%)",
+                "radial-gradient(90% 60% at 82% 96%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 45%)",
+                "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 10%, rgba(255,255,255,0) 88%, rgba(0,0,0,0.08) 100%)",
+              ].join(", "),
+            }}
+          />
+        )}
       </div>
+      {canToggleFit && (
+        <button
+          type="button"
+          data-print-hide
+          aria-label={manualFit ? "Zoom back to this section" : "Fit to screen"}
+          title={manualFit ? "Zoom back to this section" : "Fit to screen"}
+          onClick={() => setManualFit((v) => !v)}
+          className="dm-quiet absolute top-3 right-3 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border"
+          style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)", color: "var(--foreground)" }}
+        >
+          {manualFit ? <Expand className="h-3.5 w-3.5" aria-hidden /> : <Minimize2 className="h-3.5 w-3.5" aria-hidden />}
+        </button>
+      )}
     </div>
   );
 }
 
-export function ResumeDocument({ resume, templateId = "classic", cropped, focusSection }: { resume: ResumeData; templateId?: string | ResumeTemplateId; cropped?: boolean; focusSection?: string | null }) {
+export function ResumeDocument({ resume, templateId = "classic", cropped, focusSection, activeField }: { resume: ResumeData; templateId?: string | ResumeTemplateId; cropped?: boolean; focusSection?: string | null; activeField?: string | null }) {
   return (
     <>
-      <ScaledSheet resume={resume} templateId={templateId} cropped={cropped} focusSection={focusSection} />
+      <ScaledSheet resume={resume} templateId={templateId} cropped={cropped} focusSection={focusSection} activeField={activeField} />
       {/* Print gets its own natural-flow copy -- the scaled screen version
          is a fixed 1-page box (print:hidden above), but a resume longer
          than one page needs to paginate through the browser's own @page
@@ -463,7 +678,7 @@ export function ZoomResumeButton({ resume, templateId, title }: { resume: Resume
         className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
         style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
       >
-        <ZoomIn className="h-4 w-4" aria-hidden /> Zoom
+        <Maximize2 className="h-4 w-4" aria-hidden /> Full Screen
       </button>
       {open && (
         <Portal>

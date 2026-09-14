@@ -3,16 +3,15 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowUpRight, ChevronDown, MessagesSquare, PlayCircle } from "lucide-react";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
-import { HoverBeam } from "@/components/app/HoverBeam";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
-import { Donut, Ladder, RangeBar, SplitBar } from "./viz";
+import { Donut, Ladder, SplitBar } from "./viz";
 import { EXTRA } from "./extra";
 import { FIT_WORDS, fitFor, parseGpa, pathwayFor } from "./pathway";
 import { studentProfileSnapshot, serverStudentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
@@ -28,10 +27,13 @@ import { Segmented } from "@/components/connect/viz";
 const SIZE_WORD = { Small: "Small", Medium: "Mid-size", Large: "Big" } as const;
 // Horizontal tabs (direct feedback, 8 Sept 2026): one section of information
 // on screen at a time instead of one long page of accordions, easier to
-// follow on a phone and less "everything at once" overload. "See it, then
-// ask someone" and "Where these numbers come from" are cross-cutting, not
-// specific to one tab, so they stay outside the tab system, always visible
-// under whichever tab is open (unchanged foldable behavior).
+// follow on a phone and less "everything at once" overload. "Where these
+// numbers come from" is cross-cutting, not specific to one tab, so it stays
+// outside the tab system, always visible under whichever tab is open
+// (unchanged foldable behavior). "See it, then ask someone" (YouTube +
+// Connect) was removed entirely (direct feedback, 15 Sept 2026): it sent
+// students outside the app, and implied Connect always has a pro from that
+// exact school, which isn't guaranteed.
 type Tab = "overview" | "admissions" | "cost" | "academics" | "student" | "life";
 const TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
@@ -41,9 +43,25 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "student", label: "Student body" },
   { key: "life", label: "Campus life" },
 ];
-type SectionKey = "see" | "sources";
+type SectionKey = "sources";
 
-/** One tab's content: the same grounded panel "At a glance" already uses,
+// Same information the per-college `require`/`consider` data already
+// carries, just trimmed to match the admissions tab's own tighter copy
+// (direct feedback, 15 Sept 2026: "less copy... clearer hierarchy") --
+// "Your school record" reads fine in a sentence but is redundant as a list
+// item; "A personal essay" doesn't need the article. Applied uniformly
+// rather than hand-editing 30 colleges' worth of data.ts arrays.
+const FACTOR_LABEL: Record<string, string> = {
+  "Your school record": "School record",
+  "Recommendations": "Recommendation letter",
+  "An English test": "English test",
+  "A personal essay": "Personal essay",
+  "A demonstration of skills": "Demonstration of skills",
+  "Whether a relative went there": "Family connection or legacy",
+};
+const factorLabel = (s: string) => FACTOR_LABEL[s] ?? s;
+
+/** One tab's content: the same grounded panel "Key Facts" already uses,
  *  so a tab never reads as a lesser version of the page's own header
  *  section. */
 function TabPanel({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
@@ -95,8 +113,11 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
   const d = c.detail;
   const x = EXTRA[c.slug];
-  const worth = d?.worth ?? (c.flags?.includes("fewFinish") ? "Few finish, under a quarter within six years." : c.control === "For profit" ? "Run for profit." : null);
-  const tourUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${c.name} campus tour`)}`;
+  // Financial Aid falls back to the net price calculator when a school has
+  // no dedicated aid page but does have one of those (Princeton, for
+  // instance) -- still genuinely aid-relevant, not a mislabeled dead end.
+  const applyHref = x?.links.apply ?? null;
+  const aidHref = x?.links.aid ?? x?.links.calc ?? null;
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -161,6 +182,10 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   {x?.links.map ? <a href={x.links.map} target="_blank" rel="noreferrer" className="dm-link underline decoration-[rgba(255,255,255,0.35)] underline-offset-2">{d.address}</a> : d.address}
                 </p>
               )}
+              {/* Three primary actions plus Save (direct feedback, 15 Sept
+                 2026) -- Website is the one every school always has, so it
+                 keeps the animated beam; Apply/Financial Aid are real but
+                 secondary, a plain solid fill. */}
               <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
                 {c.website && (
                   // Solid ACCENT fill used to sit flush against the beam ring
@@ -168,9 +193,19 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   // Detail's solid CTAs elsewhere this session.
                   <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                   <a href={c.website} target="_blank" rel="noreferrer" className="dm-solid flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: `color-mix(in srgb, ${ACCENT} 22%, var(--glass-surface-2))`, borderColor: `color-mix(in srgb, ${ACCENT} 45%, transparent)`, color: "#fff" }}>
-                    Their website <ArrowUpRight className="h-4 w-4" aria-hidden />
+                    Website <ArrowUpRight className="h-4 w-4" aria-hidden />
                   </a>
                   </BorderBeam>
+                )}
+                {applyHref && (
+                  <a href={applyHref} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>
+                    Apply <ArrowUpRight className="h-4 w-4" aria-hidden />
+                  </a>
+                )}
+                {aidHref && (
+                  <a href={aidHref} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>
+                    Financial Aid <ArrowUpRight className="h-4 w-4" aria-hidden />
+                  </a>
                 )}
                 {/* "Make my #1" (the Replit's) is out until Profile has a
                    place to show a #1 school; a control that led nowhere read
@@ -181,29 +216,25 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           </div>
         </section>
 
-        {worth && (
-          <p className={`${SMALL} -mt-[var(--space-2)] max-w-[62ch]`} style={{ color: "var(--muted-foreground)" }}>
-            <strong className="font-bold" style={{ color: "var(--foreground)" }}>Worth knowing.</strong> {worth}
-          </p>
-        )}
-
         {/* Reached from Explore Schools "For you" (?route=<career>): why this
            school is on the student's path, before the general sections. */}
         <Suspense fallback={null}><YourPath c={c} /></Suspense>
 
         <Segmented ariaLabel="College section" value={tab} onChange={(k) => setTab(k)} options={TABS} grow />
 
-        {/* At a glance: the four answers a student came for, as rows. Setting
-           is already a chip in the header and the sticker price lives in What
-           it costs, so neither repeats here. */}
+        {/* Key Facts (was "At a glance", direct feedback, 15 Sept 2026: less
+           copy, faster to scan) -- the four numbers a student came for, no
+           explanatory sub-copy under any of them. Setting is already a chip
+           in the header and the sticker price lives in What it costs, so
+           neither repeats here. */}
         {tab === "overview" && (
-          <section aria-labelledby="glance-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
-            <h2 id="glance-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>At a glance</h2>
+          <section aria-labelledby="keyfacts-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
+            <h2 id="keyfacts-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>Key Facts</h2>
             <div className="pt-[var(--space-2)]">
-              <Row label="Cost for a year" note="what families pay after grants and scholarships" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
-              <Row label="Applicants who get in" note={c.applied ? `${c.applied.toLocaleString("en-US")} applied last year` : "open admission"} value={c.admitRate === null ? "All of them" : `${c.admitRate}%`} />
-              <Row label="Students who finish their degree" note="within six years, counting everyone who started" value={pct(c.finish)} />
-              <Row label="Undergraduates" note={d?.gradStudents ? `plus ${d.gradStudents.toLocaleString("en-US")} graduate students` : undefined} value={c.undergrads.toLocaleString("en-US")} last />
+              <Row label="Yearly Cost" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
+              <Row label="Acceptance Rate" value={c.admitRate === null ? "All of them" : `${c.admitRate}%`} />
+              <Row label="Graduation Rate" value={pct(c.finish)} />
+              <Row label="Undergraduate Population" value={c.undergrads.toLocaleString("en-US")} last />
             </div>
           </section>
         )}
@@ -217,31 +248,41 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
               ) : (
                 <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                   <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What they ask for</h3>
-                    <div className="mt-[var(--space-2)]">
-                      {d.require.map((r) => <Row key={r} label={r} value="Required" />)}
-                      {d.consider.map((r, i, arr) => <Row key={r} label={r} value="Looked at" tone="muted" last={i === arr.length - 1} />)}
-                    </div>
-                    {x?.links.apply && (
-                      <a href={x.links.apply} target="_blank" rel="noreferrer" className="dm-link mt-[var(--space-3)] flex w-fit items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>
-                        How to apply <ArrowUpRight className="h-4 w-4" aria-hidden />
-                      </a>
+                    {/* Two plain grouped lists instead of a "Required"/
+                       "Looked at" value repeated on every row (direct
+                       feedback, 15 Sept 2026) -- the heading says it once
+                       for the whole group. "How to apply" is gone too, now
+                       that Apply is one of the header's own actions --
+                       nothing said twice on the page. */}
+                    {d.require.length > 0 && (
+                      <div>
+                        <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Requirements</h3>
+                        <div className="mt-[var(--space-2)]"><DotList items={d.require.map(factorLabel)} accent={ACCENT} /></div>
+                      </div>
+                    )}
+                    {d.consider.length > 0 && (
+                      <div className={d.require.length > 0 ? "mt-[var(--space-5)]" : undefined}>
+                        <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Other Factors Considered</h3>
+                        <div className="mt-[var(--space-2)]"><DotList items={d.consider.map(factorLabel)} accent={ACCENT} /></div>
+                      </div>
                     )}
                   </div>
                   {d.scores && (
                     <div>
-                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Scores of students who got in</h3>
-                      <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The middle half of those who sent one. A lower score is not a no.</p>
+                      {/* Plain ranges, no progress bars (direct feedback, 15
+                         Sept 2026): "the ranges are the information students
+                         actually need." */}
+                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Typical Scores</h3>
                       <div className="mt-[var(--space-2)]">
                         {x?.satR && x.satM ? (
                           <>
-                            <RangeBar label="SAT reading" note={`${x.satR.sent}% of students sent SAT scores`} lo={x.satR.lo} hi={x.satR.hi} max={800} />
-                            <RangeBar label="SAT maths" lo={x.satM.lo} hi={x.satM.hi} max={800} last={!x.act} />
+                            <Row label="SAT Reading" value={`${x.satR.lo}–${x.satR.hi}`} />
+                            <Row label="SAT Math" value={`${x.satM.lo}–${x.satM.hi}`} last={!x.act} />
                           </>
                         ) : (
-                          <Row label="SAT" note={`out of 1600. ${d.scores.sentSat}% of students sent one`} value={d.scores.sat} last={!d.scores.act} />
+                          <Row label="SAT" value={d.scores.sat} last={!d.scores.act} />
                         )}
-                        {x?.act ? <RangeBar label="ACT" note={`${x.act.sent}% of students sent ACT scores`} lo={x.act.lo} hi={x.act.hi} max={36} last /> : d.scores.act && !x?.satR ? <Row label="ACT" note={d.scores.sentAct !== undefined ? `out of 36. ${d.scores.sentAct}% of students sent one` : "out of 36"} value={d.scores.act} last /> : null}
+                        {x?.act ? <Row label="ACT" value={`${x.act.lo}–${x.act.hi}`} last /> : d.scores.act && !x?.satR ? <Row label="ACT" value={d.scores.act} last /> : null}
                       </div>
                     </div>
                   )}
@@ -468,29 +509,6 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             )}
           </>
         )}
-
-        <Folded id="see" title="See it, then ask someone" open={open.has("see")} onToggle={() => toggle("see")}>
-          <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
-            <HoverBeam strength={0.8}>
-            <a href={tourUrl} target="_blank" rel="noreferrer" className="dm-tap flex items-start gap-[12px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-              <PlayCircle className="mt-[2px] h-6 w-6 flex-none" aria-hidden style={{ color: SOFT }} />
-              <span className="flex flex-col gap-[2px]">
-                <span className="text-[15px] leading-[20px] font-bold">Campus tours on YouTube</span>
-                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Real students, real campus. Opens outside Dreamari.</span>
-              </span>
-            </a>
-            </HoverBeam>
-            <HoverBeam strength={0.8}>
-            <Link href="/connect" className="dm-tap flex items-start gap-[12px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-              <MessagesSquare className="mt-[2px] h-6 w-6 flex-none" aria-hidden style={{ color: SOFT }} />
-              <span className="flex flex-col gap-[2px]">
-                <span className="text-[15px] leading-[20px] font-bold">Ask a pro on Connect</span>
-                <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Verified pros answer questions about where they studied.</span>
-              </span>
-            </Link>
-            </HoverBeam>
-          </div>
-        </Folded>
 
         <Folded id="sources" title="Where these numbers come from" open={open.has("sources")} onToggle={() => toggle("sources")}>
           <div>

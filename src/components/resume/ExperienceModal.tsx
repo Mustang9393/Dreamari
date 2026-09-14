@@ -10,7 +10,7 @@ type SubStep = "type" | "info" | "questions" | "lines";
 
 const EMPTY: ResumeExperience = { id: "", type: "job", where: "", title: "", location: "", startDate: "", endDate: "", current: false, bullets: [], aiAssisted: false };
 
-export function ExperienceModal({ initial, onClose, onSaved }: { initial: ResumeExperience | null; onClose: () => void; onSaved: (title: string) => void }) {
+export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus }: { initial: ResumeExperience | null; onClose: () => void; onSaved: (title: string) => void; onFieldFocus?: (field: string | null) => void }) {
   const [sub, setSub] = useState<SubStep>(initial ? "info" : "type");
   const [draft, setDraft] = useState<ResumeExperience>(initial ?? { ...EMPTY, id: makeId() });
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -18,6 +18,13 @@ export function ExperienceModal({ initial, onClose, onSaved }: { initial: Resume
   const [ownLines, setOwnLines] = useState(false);
   const [lineDraft, setLineDraft] = useState("");
   const [genError, setGenError] = useState(false);
+  // Matches the `data-field` markers ExperienceEntries puts on the live
+  // preview (ResumeDocument.tsx). The Questions step's answers don't map
+  // to a visible resume field (they only feed bullet generation), so
+  // there's nothing to track there -- the camera just keeps the section-
+  // level framing from the Info step until Lines has real bullets to pan to.
+  const track = (kind: string) => () => onFieldFocus?.(`${draft.id}:${kind}`);
+  const closeAndClear = () => { onFieldFocus?.(null); onClose(); };
 
   const infoValid = draft.where.trim().length > 0 && draft.title.trim().length > 0;
 
@@ -46,6 +53,7 @@ export function ExperienceModal({ initial, onClose, onSaved }: { initial: Resume
 
   function save() {
     upsertExperience(draft);
+    onFieldFocus?.(null);
     onSaved(draft.title);
   }
 
@@ -57,7 +65,7 @@ export function ExperienceModal({ initial, onClose, onSaved }: { initial: Resume
   };
 
   return (
-    <ResumeModal title={titleByStep[sub]} onClose={onClose} width={540}>
+    <ResumeModal title={titleByStep[sub]} onClose={closeAndClear}>
       {sub === "type" && (
         <div className="flex flex-col gap-[var(--space-3)]">
           {EXPERIENCE_TYPES.map(({ type, label, hint, Icon }) => (
@@ -86,20 +94,20 @@ export function ExperienceModal({ initial, onClose, onSaved }: { initial: Resume
       {sub === "info" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           <Field label="Where" htmlFor="exp-where" required>
-            <TextInput id="exp-where" value={draft.where} onChange={(v) => setDraft({ ...draft, where: v })} placeholder="e.g. Target, City Animal Shelter" />
+            <TextInput id="exp-where" value={draft.where} onChange={(v) => setDraft({ ...draft, where: v })} onFocus={track("title")} placeholder="e.g. Target, City Animal Shelter" />
           </Field>
           <Field label="Your Title / Role" htmlFor="exp-title" required>
-            <TextInput id="exp-title" value={draft.title} onChange={(v) => setDraft({ ...draft, title: v })} placeholder="e.g. Sales Associate" />
+            <TextInput id="exp-title" value={draft.title} onChange={(v) => setDraft({ ...draft, title: v })} onFocus={track("title")} placeholder="e.g. Sales Associate" />
           </Field>
           <Field label="Location (optional)" htmlFor="exp-location">
-            <TextInput id="exp-location" value={draft.location} onChange={(v) => setDraft({ ...draft, location: v })} placeholder="City, State" />
+            <TextInput id="exp-location" value={draft.location} onChange={(v) => setDraft({ ...draft, location: v })} onFocus={track("location")} placeholder="City, State" />
           </Field>
           <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
             <Field label="Start Date" htmlFor="exp-start">
-              <TextInput id="exp-start" value={draft.startDate} onChange={(v) => setDraft({ ...draft, startDate: v })} placeholder="e.g. June 2025" />
+              <TextInput id="exp-start" value={draft.startDate} onChange={(v) => setDraft({ ...draft, startDate: v })} onFocus={track("dates")} placeholder="e.g. June 2025" />
             </Field>
             <Field label="End Date" htmlFor="exp-end">
-              <TextInput id="exp-end" value={draft.endDate} onChange={(v) => setDraft({ ...draft, endDate: v })} placeholder="e.g. August 2025" disabled={draft.current} />
+              <TextInput id="exp-end" value={draft.endDate} onChange={(v) => setDraft({ ...draft, endDate: v })} onFocus={track("dates")} placeholder="e.g. August 2025" disabled={draft.current} />
             </Field>
           </div>
           <label className="flex cursor-pointer items-center gap-[8px] text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>
@@ -174,7 +182,7 @@ export function ExperienceModal({ initial, onClose, onSaved }: { initial: Resume
           <div className="flex flex-col gap-[var(--space-2)]">
             {draft.bullets.map((line, i) => (
               <div key={i} className="flex items-center gap-[var(--space-2)]">
-                <TextInput id={`exp-line-${i}`} value={line} onChange={(v) => setDraft((d) => ({ ...d, bullets: d.bullets.map((b, j) => (j === i ? v : b)) }))} placeholder="Describe what you did…" />
+                <TextInput id={`exp-line-${i}`} value={line} onChange={(v) => setDraft((d) => ({ ...d, bullets: d.bullets.map((b, j) => (j === i ? v : b)) }))} onFocus={track(`bullet:${i}`)} placeholder="Describe what you did…" />
                 <button type="button" aria-label="Remove line" onClick={() => setDraft((d) => ({ ...d, bullets: d.bullets.filter((_, j) => j !== i) }))} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
                   <Trash2 className="h-4 w-4" aria-hidden />
                 </button>

@@ -80,3 +80,34 @@ Prototype data in `src/components/colleges/data.ts`: 16 New Jersey and South Dak
 - College Scorecard search: https://collegescorecard.ed.gov/search/
 - BigFuture college search: https://bigfuture.collegeboard.org/college-search/filters
 - Wikimedia Commons API and Wikipedia REST summary API for imagery.
+
+## 7. Update, 15 Sept 2026 -- simplification pass
+
+Direct feedback (relayed via Slack) trimmed several of the decisions in §4
+further, in the same "less copy, clearer hierarchy" direction as the rest
+of Dreamari:
+
+- **"Worth knowing" removed from the header entirely**, not just moved --
+  it read as another paragraph to get through before the numbers start.
+- **Header actions are now Website / Apply / Financial Aid + Save**, not
+  Website / Compare alone -- Apply and Financial Aid were already real
+  data (`EXTRA[slug].links.apply`/`.aid`) surfaced only deep in the
+  Admissions/Cost tabs; they're a student's two most-needed next steps
+  after Website, so they moved to the header.
+- **"At a glance" is "Key Facts"**, four rows, no sub-copy under any of
+  them ("what families pay after grants and scholarships" etc. cut) --
+  the label plus a number is enough; detail lives in the tab that number
+  came from.
+- **Admissions' "What they ask for" is now two grouped lists**,
+  Requirements and Other Factors Considered, instead of a "Required"/
+  "Looked at" value repeated on every row -- the group heading says it
+  once. Score ranges (Typical Scores) dropped the progress-bar
+  visualization for plain "740-780" text -- "the ranges are the
+  information students actually need."
+- **"See it, then ask" is gone, not folded smaller.** Reasoning this time
+  went further than density: it sent students outside the app to YouTube
+  (bounce risk) and implied Connect always has a verified pro from that
+  *exact* school, which isn't guaranteed. Neither problem is solved by
+  making the section smaller.
+
+Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.

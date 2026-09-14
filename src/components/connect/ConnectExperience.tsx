@@ -2166,7 +2166,7 @@ function HomeView({
            "All communities" section. */
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Your communities">
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <SectionHead>Your Communities</SectionHead>
+            <SectionHead>Community Boards</SectionHead>
             {/* The card-style A/B switcher that sat here was a lab control in a
                student's face; the lane still rides ?cards= in the URL. This
                slot is the doc's joined count. */}
