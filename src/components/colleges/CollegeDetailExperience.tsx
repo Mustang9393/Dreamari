@@ -57,6 +57,15 @@ const FACTOR_LABEL: Record<string, string> = {
 };
 const factorLabel = (s: string) => FACTOR_LABEL[s] ?? s;
 
+// Same trim, applied to the government's own demographic category names
+// (direct feedback, 15 Sept 2026: shorter labels on the Student Body donut).
+const DEMO_LABEL: Record<string, string> = {
+  "Hispanic or Latino": "Hispanic / Latino",
+  "Black or African American": "Black",
+  "American Indian or Alaska Native": "American Indian / Alaska Native",
+};
+const demoLabel = (s: string) => DEMO_LABEL[s] ?? s;
+
 /** One tab's content: the same grounded panel "Key Facts" already uses,
  *  so a tab never reads as a lesser version of the page's own header
  *  section. */
@@ -415,21 +424,33 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             )}
 
             {tab === "student" && (
-            <TabPanel id="who-title" title="Who is there">
+            <TabPanel id="who-title" title="Who Goes Here?">
               <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{(c.undergrads + (d.gradStudents ?? 0)).toLocaleString("en-US")} students</h3>
-                  <div className="mt-[var(--space-1)]">
-                    {d.gradStudents ? <SplitBar title="Undergraduates and graduate students" a={{ label: "undergraduates", value: c.undergrads }} b={{ label: "graduate students", value: d.gradStudents }} /> : null}
-                    <SplitBar title="Full time and part time" a={{ label: "full time", value: d.fullTime }} b={{ label: "part time", value: d.partTime }} />
-                    <SplitBar title="Women and men, undergraduates" a={{ label: "women", value: Math.round((c.undergrads * d.women) / 100) }} b={{ label: "men", value: Math.round((c.undergrads * d.men) / 100) }} />
+                  {/* Plain rows, no bars (direct feedback, 15 Sept 2026) --
+                     full/part time are stored as headcounts, not a percent,
+                     so they're converted here rather than in the data. */}
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Enrollment</h3>
+                  <div className="mt-[var(--space-2)]">
+                    <Row label="Total students" value={(c.undergrads + (d.gradStudents ?? 0)).toLocaleString("en-US")} />
+                    <Row label="Undergraduate students" value={c.undergrads.toLocaleString("en-US")} />
+                    {d.gradStudents !== undefined && <Row label="Graduate students" value={d.gradStudents.toLocaleString("en-US")} />}
+                    <Row label="Full-time students" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}%`} />
+                    <Row label="Part-time students" value={`${Math.round((d.partTime / (d.fullTime + d.partTime)) * 100)}%`} />
+                    <Row label="Women" value={`${d.women}%`} />
+                    <Row label="Men" value={`${d.men}%`} last />
                   </div>
                 </div>
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Where undergraduates come from</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The government&apos;s categories. International means students on visas.</p>
+                  {/* The one visualization on this tab worth keeping (direct
+                     feedback, 15 Sept 2026) -- no explanatory paragraph, no
+                     raw headcount next to the percent, trimmed labels
+                     ("Hispanic / Latino", not "...or Latino"). Any real
+                     methodology note belongs under Where these numbers come
+                     from, not here. */}
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Student Demographics</h3>
                   <div className="mt-[var(--space-4)]">
-                    <Donut parts={d.makeup.map((m) => ({ label: m.label, pct: m.pct, n: m.n }))} />
+                    <Donut parts={d.makeup.map((m) => ({ label: demoLabel(m.label), pct: m.pct }))} />
                   </div>
                 </div>
               </div>

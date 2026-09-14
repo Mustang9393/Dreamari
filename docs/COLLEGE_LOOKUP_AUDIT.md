@@ -112,7 +112,7 @@ of Dreamari:
 
 Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.
 
-## 8. Update, 15 Sept 2026 -- Academics/Cost simplification, "fits you" retired
+## 8. Update, 15 Sept 2026 -- Academics/Cost/Student Body simplification, "fits you" retired
 
 Same direction, two more tabs:
 
@@ -131,5 +131,10 @@ Same direction, two more tabs:
   numbers (Full Price, Average Cost After Aid) plus plain tables -- "make
   ours even more concise" than even the U.S. News reference screenshot
   used as inspiration.
+- **§4's "Quick facts strip" (Really pay / Get in / Finish / Students) and
+  Who is There's `SplitBar`s are superseded on Student Body.** Enrollment
+  is a plain list now, not bars. The one visualization kept from the
+  original design is the demographics donut -- explicitly reconfirmed as
+  worth keeping, not retired like the others this round.
 
 Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.

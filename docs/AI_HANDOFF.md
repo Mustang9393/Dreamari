@@ -9070,3 +9070,33 @@ both the localStorage snapshot and the live wizard screen that Education/
 Experience reset to empty while First/Last Name still prefill from the
 account identity (Jordan Rivera, the demo student's own name -- not
 leftover resume data). ESLint + `tsc --noEmit` clean.
+
+### 15 Sept 2026 — College Details: Student Body simplification
+
+Third tab in this same simplification pass (design notes:
+`docs/COLLEGE_LOOKUP_AUDIT.md` §8):
+
+- **"Who is there" -> "Who Goes Here?"**, two plain sections instead of
+  bar-chart `SplitBar`s. **Enrollment**: Total/Undergraduate/Graduate
+  students as counts, Full-time/Part-time as percentages (converted from
+  the stored headcounts, `d.fullTime`/`d.partTime`, not stored as a
+  percent), Women/Men as the stored percentages. **Student Demographics**
+  keeps the `Donut` -- explicitly called out as worth keeping ("one of the
+  few visualizations here that genuinely makes the information easier to
+  understand") -- but drops the explanatory paragraph ("The government's
+  categories. International means students on visas.") and the raw
+  headcount next to each percent (`Donut`'s own `n` prop just isn't passed
+  at this call site; the shared component itself is untouched, still used
+  elsewhere). New `DEMO_LABEL` map trims "Hispanic or Latino" ->
+  "Hispanic / Latino", "Black or African American" -> "Black", same
+  pattern as `FACTOR_LABEL` from the Admissions round.
+- Confirmed nothing from the U.S. News reference (veteran %, demographics
+  "availability" indicators, clubs, housing, athletics, Greek life, ROTC)
+  was ever in this tab to begin with -- explicitly called out as things to
+  leave out, already true, no action needed.
+
+Browser-verified live at `/colleges/princeton-university`: every number
+matches (9,137 / 5,813 / 3,324 / 99% / 1% / 50% / 50%, demographics
+33/23/13/10/9/7 with trimmed labels), checked at mobile width. ESLint +
+`tsc --noEmit` clean. Not yet pushed -- batched with the Academics/Cost
+round above, same "not yet" hold.
