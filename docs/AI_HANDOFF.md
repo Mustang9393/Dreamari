@@ -9347,3 +9347,36 @@ Outer page margins were untouched -- already matching Home/Explore/Profile
 via the shared `Shell` component from an earlier pass today (see its own
 header comment). ESLint + `tsc --noEmit -p .` clean, verified live at both
 the `lg` desktop split and the mobile/tablet card grid.
+
+### 14 Sept 2026 — Perf: nav backdrop-blur and eager Link prefetch removed
+
+Direct feedback: "stuttering and slow loading... everywhere - animations,
+transitions, match grid etc." Investigated live on the production deploy
+(not localhost) via the browser's network log rather than guessing:
+
+- **DesktopNavigation's sticky top bar and MobileNav's fixed bottom bar**
+  both ran a 10px `backdrop-filter` across the full viewport width, on
+  every single page, permanently mounted (sticky/fixed) -- the exact
+  "large-area filter: blur()... exhausts GPU memory" anti-pattern this
+  codebase's own platform notes already warn against (see
+  `docs/handoff/README-FOR-USMAN.md`). A sticky/fixed blurred bar forces a
+  recomposite on every scroll frame, on every page, for the life of the
+  session. Replaced with the same near-solid fix already used for the
+  hamburger menus (22 Aug 2026, `8350ff8`: "glass surface let page content
+  bleed through and made rows illegible") -- `color-mix(in srgb,
+  var(--background) 96%, var(--foreground))`, no filter.
+- **The 5 nav Links (Home/Explore/Play/Connect/Profile) render on every
+  page** and had no explicit `prefetch` prop, so Next's default eager
+  prefetch was fetching all 5 routes' RSC payloads on every page load --
+  confirmed via the browser's network log on the live deploy, which showed
+  hundreds of repeated `?_rsc=...` requests to the same routes accumulating
+  over a normal browsing session. Set `prefetch={false}` on all of them; a
+  click still fetches instantly, it's just no longer speculative on every
+  page mount.
+
+`src/components/app/chrome.tsx`. ESLint + `tsc --noEmit -p .` clean,
+verified live (near-solid nav bar renders correctly, no visual
+regression). This doesn't touch the total image weight in `public/images/`
+(341MB across the repo) -- Next's own image pipeline is already serving
+correctly-sized/optimized versions per request, confirmed in the network
+log, so that's a repo-size concern rather than a runtime one.
