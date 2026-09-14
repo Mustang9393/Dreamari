@@ -73,6 +73,12 @@ export type ResumeVersion = {
   educationIds: string[];
   experienceIds: string[];
   jobDescription: string;
+  /** Optional context alongside the job description -- matches the
+   *  reference's own "Match to a Job" fields (direct feedback, 15 Sept
+   *  2026: "it asks for position, JD and company too"). Neither is
+   *  required; they sharpen the match analysis when filled in. */
+  targetPosition: string;
+  targetCompany: string;
   /** A ResumeTemplateId (src/components/resume/data.ts) -- kept as a plain
    *  string here so this data-layer file doesn't import from components/. */
   template: string;
@@ -170,6 +176,8 @@ function normalizeVersions(value: unknown): ResumeVersion[] {
       educationIds: strings(v.educationIds),
       experienceIds: strings(v.experienceIds),
       jobDescription: str(v.jobDescription),
+      targetPosition: str(v.targetPosition),
+      targetCompany: str(v.targetCompany),
       template: str(v.template) || "classic",
     }));
 }
@@ -252,6 +260,17 @@ export function isResumeEmpty(r: ResumeData): boolean {
 // Every step screen adds/edits/removes one entry at a time; centralizing the
 // splice logic here keeps that identical everywhere instead of re-derived
 // per screen.
+
+/** Adds one skill to a category, case-insensitively deduped -- the "Match
+ *  to a Job" suggestions add here, one click, no confirmation step (direct
+ *  feedback, 15 Sept 2026, mirroring the reference's own one-tap add). */
+export function addSkill(category: keyof ResumeSkills, skill: string): void {
+  const value = skill.trim();
+  if (!value) return;
+  const current = readResume();
+  if (current.skills[category].some((s) => s.toLowerCase() === value.toLowerCase())) return;
+  writeResume({ skills: { ...current.skills, [category]: [...current.skills[category], value] } });
+}
 
 export function upsertEducation(entry: ResumeEducation): void {
   const current = readResume();

@@ -9461,3 +9461,64 @@ unmount -- already built the right way, not a contributor here.
 
 `src/components/match-lab/MatchGrid.tsx`. ESLint + `tsc --noEmit -p .`
 clean, verified live (bar still reads solid, no blur).
+
+### 15 Sept 2026 — Resume Builder: "Match to a Job" actually works now
+
+Direct feedback: "where do we introduce tailoring the resume to a job
+description other than the edit selection thing at the end? We need to
+make that work, and make that part of the flow... refer the replit again
+to see how that actually works and what the output is/should be."
+
+The `jobDescription` field already existed on `ResumeVersion` and in
+`TailorScreen.tsx` -- it was purely decorative, stored but never read
+anywhere. Re-checked the Replit reference (signed in this time, since the
+first pass 401'd on every submit) and captured its real, authenticated
+`/api/resumes/generate` response: it runs two scores (a general resume
+"quality" score and a job-specific "match" score with a label), a
+skill-suggestion list grounded in the student's own experience bullets
+(never invented -- "Not in profile" / opt-in "+Add"), and a short honest
+gaps list for what the posting wants that the profile doesn't support yet.
+Also confirmed two things worth NOT copying: the reference asks for
+Job Description + Target Position + Target Company (all three, so we
+added the latter two), and its "good start" coaching modal is a genuine,
+reproducible bug -- it re-fires on every single submit instead of once.
+
+Built new:
+- `src/app/api/resume-tailor/route.ts` -- same AI-with-graceful-fallback
+  shape as `resume-bullets/route.ts`: calls Claude for real analysis when
+  `ANTHROPIC_API_KEY` is set (returns matchScore, qualityScore, skill
+  suggestions with a reason grounded in the student's own experience,
+  gaps, improvement tips), otherwise a keyword-overlap fallback against
+  our own `SKILL_CATEGORIES` list so the feature works with zero setup.
+  Verified both paths directly (curl) -- a bullet literally containing
+  "leadership" correctly surfaces a grounded suggestion; "teamwork"
+  (JD-relevant but not literally present) correctly lands as a gap instead
+  of a fabricated suggestion.
+- `ResumeVersion` gained `targetPosition`/`targetCompany` (string, both
+  optional) alongside the existing `jobDescription`.
+- `addSkill()` in `resume.ts` -- one-tap, case-insensitive-deduped add
+  straight to the student's actual skills list, no confirmation step.
+- `TailorScreen.tsx`: the job-description field now sits under a clear
+  "Match to a Job" heading explaining what it does (direct feedback,
+  15 Sept 2026: "optional by itself doesn't communicate that it's for
+  tailoring the resume") -- not just a bare "optional" field label. An
+  explicit "Find Matching Skills" button (not auto-fire-on-keystroke, to
+  keep API calls deliberate) shows results inline on the same screen, no
+  modal: a small `DreamyGuide` line (reusing the exact prominent-not-
+  afterthought treatment the wizard steps already use, per direct
+  feedback "like we did for build match play profile etc, but subtler"),
+  two compact score chips, suggestion rows with working Add buttons, a
+  short improvement-tips list, and a quiet gaps line. Never shows twice
+  uninvited and never blocks Save -- fixes the reference's own nag-modal
+  bug by construction rather than patching around it.
+
+Verified live: seeded a resume matching the reference's own test data,
+ran the same job description through both, got sensible/consistent
+scores and a correctly-grounded suggestion. ESLint + `tsc --noEmit -p .`
+clean on every touched file (the two other errors reported project-wide,
+`src/app/gate/page.tsx` and a warning cluster in `ConnectExperience.tsx`,
+are pre-existing and untouched by this change).
+
+`src/app/api/resume-tailor/route.ts` (new), `src/lib/resume.ts`,
+`src/components/resume/TailorScreen.tsx`,
+`src/components/resume/ResumeBuilderExperience.tsx`.

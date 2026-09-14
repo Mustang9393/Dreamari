@@ -271,6 +271,8 @@ function ResumeBuilderInner() {
                       educationIds: current.education.map((e) => e.id),
                       experienceIds: current.experience.map((e) => e.id),
                       jobDescription: "",
+                      targetPosition: "",
+                      targetCompany: "",
                       template: pickedTemplate ?? DEFAULT_RESUME_TEMPLATE,
                     };
                     upsertVersion(version);
