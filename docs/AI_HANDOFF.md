@@ -9287,3 +9287,33 @@ Three more direct-feedback rounds, same session:
 
 ESLint + `tsc --noEmit -p .` clean across all seven touched files. Not yet
 pushed.
+
+### 14 Sept 2026 — Princeton: real-data cross-check against a fresh Usman export
+
+User sent a second dataset (`colleges-sample.json`, 243 colleges — the
+original 200 plus 43 recognizable names including Princeton, added
+specifically so the team can check a layout against a college it can
+picture) and asked to update Princeton's data and flag anything else
+needing a fix.
+
+Cross-checked every field in Princeton's `data.ts`/`extra.ts` entry against
+this real export. Result: all of it was already accurate -- the original
+"fabricated" data was transcribed from the real live site back on 3 Sept
+and has held up. The one real discrepancy found: `gradsPerYear` was `2400`,
+real value is `2382` (source: `card.graduates`). Fixed. Photo (Nassau Hall,
+CC0, Wikimedia) and mark (real Princeton seal) were also already real and
+matched the new export's own Google-sourced campus photo choice closely
+enough not to need replacing.
+
+Also used this pass to re-verify, live in the browser, that the College
+Details notes from earlier today (`@Chandu M P` Slack messages on Header/
+Admissions/Cost, Academics, and Campus Life) are correctly implemented on
+Princeton's actual page: Website/Financial Aid header actions (no Apply --
+correctly hidden, Princeton's `applicationUrl` is null), Requirements/Other
+Factors Considered split, plain Typical Scores ranges, Academic Facts list
+with Undergraduate Research moved in, Popular Majors with degree-level
+tabs, and Campus Life's four sections (Housing/Activities & Organizations/
+Athletics/Opportunities) with no vague copy or progress bars. All confirmed
+matching the notes exactly.
+
+ESLint + `tsc --noEmit -p .` clean.

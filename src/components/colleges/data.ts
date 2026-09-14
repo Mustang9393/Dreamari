@@ -224,7 +224,7 @@ export const COLLEGES: College[] = [
   {
     slug: "princeton-university", name: "Princeton University", city: "Princeton", ...nj,
     level: "Bachelor's degrees", control: "Private", setting: "City", size: "Medium", undergrads: 5813,
-    netPrice: 6128, finish: 98, retention: 98, repay: 85, gradsPerYear: 2400, admission: "more", admitRate: 5, applied: 40468, photo: true, mark: true, website: "https://www.princeton.edu",
+    netPrice: 6128, finish: 98, retention: 98, repay: 85, gradsPerYear: 2382, admission: "more", admitRate: 5, applied: 40468, photo: true, mark: true, website: "https://www.princeton.edu",
     detail: {
       address: "1 Nassau Hall, Princeton, New Jersey", tuitionInState: 62400, tuitionOutState: 62400, fees: 288, housing: true, housingCost: 11910, foodCost: 8340,
       bands: [{ label: "Under $30,000", pay: 41 }, { label: "$30,000 to $48,000", pay: 352 }, { label: "$48,000 to $75,000", pay: 1217 }, { label: "$75,000 to $110,000", pay: 4478 }, { label: "Over $110,000", pay: 36094 }],
