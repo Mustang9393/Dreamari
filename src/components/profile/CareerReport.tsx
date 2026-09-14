@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AlertCircle, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2 } from "lucide-react";
 import { deleteReportVersion, formatVersionTime, recordReportVersion, reportHistorySnapshot, sameSnapshot, serverReportHistorySnapshot, subscribeReportHistory, type ReportSnapshot } from "@/lib/reportHistory";
 import type { ProfileCareer } from "./data";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import { CareerExplorationBody } from "./CareerExploration";
 import {
   ACADEMIC_RECORD,
@@ -168,43 +169,147 @@ const COMPARE_FIELDS: { key: string; label: string; get: (r: CareerReportV2["com
   { key: "next", label: "Still need to find out", get: (r) => r.investigate },
 ];
 
+// Rule lines are painted as inset box-shadows, never real borders: a real
+// `border` on a `position: sticky` cell inside `border-collapse: collapse`
+// is a known cross-browser rendering bug (Chrome and Safari both fail to
+// paint the sticky cell's background across the collapsed edge), leaving a
+// hairline gap at every seam that the column scrolling underneath shows
+// through -- exactly the "cracks" a student would see mid-scroll. Box-shadow
+// paints inside the cell's own box regardless of sticky/collapse, so the
+// seam is always fully opaque.
+const RULE_BOTTOM = "inset 0 -1px 0 0 var(--rule)";
+const RULE_BOTTOM_STRONG = "inset 0 -1px 0 0 var(--rule-strong)";
+// The elevation cues below (a soft shadow cast onto whatever scrolls
+// beneath a sticky edge) are what turn "this header/column happens to stay
+// in place" into "this is deliberately pinned above the rest" -- the same
+// frozen-row/frozen-column affordance spreadsheets and Notion use, and the
+// fix for a floating-looking header: a header that visibly casts a shadow
+// reads as anchored, not as a UI layer that lost track of the table below it.
+const EDGE_SHADOW_RIGHT = "6px 0 12px -8px rgba(0,0,0,0.45)";
+const EDGE_SHADOW_BOTTOM = "0 6px 12px -8px rgba(0,0,0,0.45)";
+// Every one of these is a single, already-opaque color-mix (never a
+// transparent color layered on top of another), so the sticky cells that
+// use them stay fully opaque -- the whole point of the fix above.
+const LABEL_BG = "color-mix(in srgb, var(--primary) 14%, var(--card))";
+const HEADER_BG = "var(--card)";
+const HEADER_BG_FOCUS = "color-mix(in srgb, var(--primary) 9%, var(--card))";
+// Non-sticky body cells don't have the collapse/opacity bug (nothing scrolls
+// underneath the top layer), so this is allowed to be a translucent wash
+// over the paper beneath -- zebra shading marks every other row for the
+// non-focus columns; the focus column's own wash is computed per-career
+// from `WORLD_COLORS` instead (see below), so a cell never needs both at
+// once.
+const ZEBRA_TINT = "color-mix(in srgb, var(--ink) 4%, transparent)";
+
 function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCareer; report: CareerReportV2 }[]; focusId: string }) {
-  // one table at every width: the factor column is tinted and pinned to the
-  // left, the careers scroll sideways under a finger, so a phone compares
-  // the same way a desktop does instead of stacking one career per block
-  const head = { background: "color-mix(in srgb, var(--primary) 12%, var(--card))" } as const;
+  // One table at every width: the factor column is tinted and pinned to the
+  // left, the header row is pinned to the top, and the careers scroll under
+  // a finger in both directions inside a single scroll surface -- a phone
+  // compares the same way a desktop does instead of stacking one career per
+  // block. A single scroller (rather than nesting a horizontal one inside a
+  // vertical one) is what lets `position: sticky` resolve `top`/`left`
+  // against the same box on every axis.
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [scrolledX, setScrolledX] = useState(false);
+  const [moreX, setMoreX] = useState(entries.length > 2);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      setScrolledX(el.scrollLeft > 2);
+      setMoreX(el.scrollWidth - el.scrollLeft - el.clientWidth > 2);
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, [entries.length]);
+
   return (
-    <div className="-mx-5 overflow-x-auto px-5 md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y", scrollbarWidth: "thin" }}>
-      <table className="w-full border-collapse text-left text-[13px]" style={{ minWidth: 120 + entries.length * 200 }}>
-        <caption className="sr-only">Comparison of your top {entries.length} careers across twelve factors</caption>
-        <thead>
-          <tr>
-            <th scope="col" className="sticky left-0 z-[1] w-[120px] min-w-[120px] border-b px-[12px] py-[10px] text-[12px] leading-[16px] font-bold tracking-[0.04em] uppercase md:w-[150px] md:min-w-[150px]" style={{ ...head, borderColor: "var(--rule-strong)", color: "var(--ink-faint)" }}>
-              Factor
-            </th>
-            {entries.map(({ career }) => (
-              <th key={career.id} scope="col" className="min-w-[200px] border-b px-[14px] py-[10px] align-bottom text-[15px] leading-[19px] font-extrabold md:text-[16px]" style={{ borderColor: "var(--rule-strong)", fontFamily: "var(--font-display)" }}>
-                {career.title}
-                {career.id === focusId && <span className="ml-[6px] align-middle text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--ink-faint)" }}>· current</span>}
+    <div className="relative h-full">
+      <div ref={scrollRef} className="h-full overflow-auto" style={{ touchAction: "pan-x pan-y", scrollbarWidth: "thin" }}>
+        <table className="w-full text-left text-[13px]" style={{ borderCollapse: "separate", borderSpacing: 0, minWidth: 136 + entries.length * 216 }}>
+          <caption className="sr-only">Comparison of your top {entries.length} careers across twelve factors</caption>
+          <thead>
+            <tr>
+              <th
+                scope="col"
+                className="sticky top-0 left-0 z-[3] w-[136px] min-w-[136px] px-[16px] py-[14px] text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase md:w-[160px] md:min-w-[160px]"
+                style={{ background: LABEL_BG, color: "var(--ink-faint)", boxShadow: [RULE_BOTTOM_STRONG, EDGE_SHADOW_RIGHT, EDGE_SHADOW_BOTTOM].join(", ") }}
+              >
+                Factor
               </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {COMPARE_FIELDS.map((field) => (
-            <tr key={field.key}>
-              <th scope="row" className="sticky left-0 z-[1] border-b px-[12px] py-[10px] align-top text-[12px] leading-[16px] font-bold tracking-[0.04em] uppercase" style={{ ...head, borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
-                {field.label}
-              </th>
-              {entries.map(({ career, report }) => (
-                <td key={career.id} className="border-b px-[14px] py-[10px] align-top leading-[18px]" style={{ borderColor: "var(--rule)" }}>
-                  {field.get(report.comparison)}
-                </td>
-              ))}
+              {entries.map(({ career }) => {
+                const isFocus = career.id === focusId;
+                // Same per-career accent as Top Three's own folder tabs and
+                // cards (`WORLD_COLORS`, keyed by Career World) -- color
+                // coding here means "each column keeps the identity it
+                // already has elsewhere," not a new palette invented for
+                // this one table.
+                const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+                return (
+                  <th
+                    key={career.id}
+                    scope="col"
+                    className="sticky top-0 z-[2] min-w-[216px] px-[18px] py-[14px] align-bottom"
+                    style={{ background: isFocus ? HEADER_BG_FOCUS : HEADER_BG, boxShadow: [`inset 0 3px 0 0 ${accent}`, RULE_BOTTOM_STRONG, EDGE_SHADOW_BOTTOM].join(", ") }}
+                  >
+                    <span className="flex flex-col gap-[4px]">
+                      {/* World name carries the accent, never the career
+                         title -- same rule as the folder cards. */}
+                      <span className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
+                      <span className="text-[15px] leading-[19px] font-extrabold md:text-[16px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{career.title}</span>
+                      {isFocus && (
+                        <span className="mt-[1px] inline-flex w-fit items-center rounded-full px-[8px] py-[2px] text-[10px] leading-[13px] font-bold tracking-[0.06em] uppercase" style={{ background: `color-mix(in srgb, ${accent} 22%, transparent)`, color: accent }}>
+                          Current
+                        </span>
+                      )}
+                    </span>
+                  </th>
+                );
+              })}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {COMPARE_FIELDS.map((field, index) => (
+              <tr key={field.key}>
+                <th
+                  scope="row"
+                  className="sticky left-0 z-[1] px-[16px] py-[14px] align-top text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase"
+                  style={{ background: LABEL_BG, color: "var(--ink-faint)", boxShadow: [RULE_BOTTOM, EDGE_SHADOW_RIGHT].join(", ") }}
+                >
+                  {field.label}
+                </th>
+                {entries.map(({ career, report }) => {
+                  const isFocus = career.id === focusId;
+                  const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+                  const background = isFocus ? `color-mix(in srgb, ${accent} 6%, transparent)` : index % 2 === 1 ? ZEBRA_TINT : "transparent";
+                  return (
+                    <td
+                      key={career.id}
+                      className="px-[18px] py-[14px] align-top leading-[19px]"
+                      style={{ background, boxShadow: RULE_BOTTOM, color: "var(--ink-soft)" }}
+                    >
+                      {field.get(report.comparison)}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* Fade + arrow cue on the trailing edge, same "there is more to see"
+         language as the profile's own tablist scroll indicator -- dropped
+         the instant there is nothing left to scroll to, and mirrored on the
+         leading edge once scrolling starts, so the cue never misrepresents
+         state in either direction. */}
+      <div aria-hidden className="pointer-events-none absolute top-0 bottom-0 left-[136px] w-[28px] transition-opacity duration-150 md:left-[160px]" style={{ opacity: scrolledX ? 1 : 0, background: "linear-gradient(to right, color-mix(in srgb, var(--paper) 85%, transparent), transparent)" }} />
+      <div aria-hidden className="pointer-events-none absolute top-0 right-0 bottom-0 w-[28px] transition-opacity duration-150" style={{ opacity: moreX ? 1 : 0, background: "linear-gradient(to left, color-mix(in srgb, var(--paper) 85%, transparent), transparent)" }} />
     </div>
   );
 }
@@ -218,7 +323,6 @@ export type ReportViewProps = {
   career: ProfileCareer;
   savedMajors: Set<string>;
   onToggleMajor: (name: string) => void;
-  onOpenEvidence: () => void;
   updatedLabel: string;
   /** Version history (Slack, 10 Sept 2026): the host hands over what shapes
    *  the report right now and how to put an older version back. */

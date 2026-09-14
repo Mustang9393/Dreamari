@@ -63,9 +63,33 @@ export function NextStepBanner({
   // Unwrapped, the banner stayed invisible forever inside a seq-reveal
   // page (Play: a 144px blank between Glossary Games and In the works,
   // direct feedback, 10 Sept 2026). The wrapper takes the reveal instead.
+  // The X used to sit inset inside the card's own corner, which forced the
+  // text/CTA row to reserve clearance for it -- on a narrow phone that
+  // clearance was enough to push the CTA onto its own line beneath the
+  // sentence, turning a compact one-line nudge into a tall stack (direct
+  // feedback, 14 Sept 2026: "looks really bad and taking up too much space
+  // vertically"). It's now a small circular badge attached to, and poking
+  // out past, the card's top-right corner instead -- outside the row
+  // entirely, so the row never has to make room for it and can keep text
+  // and CTA on one line at every width, matching the "Do this next" row on
+  // Overview. It has to live outside the `aside` (rendered as a sibling in
+  // the outer `relative` wrapper) because the `aside` clips its own
+  // overflow for the wash/sheen animation, which would cut the badge off
+  // wherever it pokes past the edge.
+  const dismissButton = (
+    <button
+      type="button"
+      onClick={dismiss}
+      aria-label={`Dismiss: ${eyebrow || text}`}
+      className="dm-quiet absolute -top-[10px] -right-[10px] z-10 flex size-[26px] cursor-pointer items-center justify-center rounded-full border"
+      style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--muted-foreground)", boxShadow: "0 4px 10px -4px rgba(0,0,0,0.5)" }}
+    >
+      <X className="h-3.5 w-3.5" aria-hidden />
+    </button>
+  );
   if (priority) {
     return (
-      <div>
+      <div className="relative">
       <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={beamDuration ?? 1.8} strength={beamDuration ? 0.75 : 1}>
         <aside aria-label={ariaLabel} className="relative overflow-hidden rounded-[var(--radius-lg)]" style={{ background: "var(--inset-surface)" }}>
           {/* Priority used to be a solid blue-purple gradient fill -- the one
@@ -79,31 +103,29 @@ export function NextStepBanner({
              cycle so they read as atmosphere, not a second competing beam. */}
           {!calm && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 45%, color-mix(in srgb, #7c5cff 10%, transparent) 80%, transparent 100%)", animation: "next-step-wash 5.2s ease-in-out infinite" }} />}
           {!calm && <span aria-hidden className="pointer-events-none absolute inset-y-0 w-[35%] motion-safe:animate-[next-step-sheen_5.4s_ease-in-out_infinite]" style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)" }} />}
-          <div className="relative flex flex-wrap items-center justify-start gap-[var(--space-3)] p-[var(--space-4)] sm:flex-nowrap sm:gap-[var(--space-4)] sm:p-[var(--space-5)] sm:pr-[52px]">
-            <span className="flex min-w-0 basis-full flex-col gap-[3px] sm:flex-1 sm:basis-auto">
-              {eyebrow && <span className="flex items-center gap-[7px] pr-[28px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase sm:pr-0" style={{ color: "var(--primary)" }}>
+          <div className="relative flex items-center gap-[var(--space-3)] p-[var(--space-4)] sm:gap-[var(--space-4)] sm:p-[var(--space-5)]">
+            <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+              {eyebrow && <span className="flex items-center gap-[7px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--primary)" }}>
                 <span aria-hidden className="relative flex size-[8px] flex-none">
                   {!calm && <span className="absolute inset-0 rounded-full motion-safe:animate-[next-step-dot_1.4s_ease-out_infinite]" style={{ background: "var(--primary)" }} />}
                   <span className="relative size-[8px] rounded-full" style={{ background: "var(--primary)" }} />
                 </span>
                 {eyebrow}
               </span>}
-              <span className={`text-[15px] leading-[21px] font-semibold ${eyebrow ? "" : "pr-[28px] sm:pr-0"}`} style={{ color: "var(--foreground)" }}>{text}</span>
+              <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{text}</span>
             </span>
             <Link href={href} className={`dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_2.2s_ease-out_infinite]"}`} style={{ background: "var(--primary)", color: "#FFFFFF" }}>
               {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
             </Link>
           </div>
-          <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow || text}`} className="dm-quiet absolute top-[8px] right-[8px] flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-            <X className="h-4 w-4" aria-hidden />
-          </button>
         </aside>
       </BorderBeam>
+      {dismissButton}
       </div>
     );
   }
   return (
-    <div>
+    <div className="relative">
     <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={beamDuration ?? 3.2} strength={0.7}>
       <aside aria-label={ariaLabel} className="relative overflow-hidden rounded-[var(--radius-lg)]" style={{ background: "var(--inset-surface)" }}>
         {/* BorderBeam (border-beam npm package) rides the border; the wash
@@ -112,26 +134,21 @@ export function NextStepBanner({
            competing with it (direct feedback, 9 Sept 2026). */}
         {!calm && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ background: "linear-gradient(110deg, color-mix(in srgb, var(--primary) 9%, transparent) 0%, transparent 45%, color-mix(in srgb, #7c5cff 7%, transparent) 80%, transparent 100%)", animation: "next-step-wash 6.5s ease-in-out infinite" }} />}
         {!calm && <span aria-hidden className="pointer-events-none absolute inset-y-0 w-[35%] motion-safe:animate-[next-step-sheen_7.5s_ease-in-out_infinite]" style={{ background: "linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)" }} />}
-        {/* one row: the words, the button, then the X at the far end, all on
-           the same centre line (the X used to float in the top-left corner) */}
-        <div className="relative flex flex-wrap items-center justify-start gap-[var(--space-3)] p-[var(--space-4)] sm:flex-nowrap sm:gap-[var(--space-4)] sm:p-[var(--space-5)] sm:pr-[52px]">
-          {/* phones: the sentence takes the full width and the button drops to
-             a line beneath it; from 640px everything sits on one line. The X
-             lives in the card's top-right corner (direct feedback, 10 Sept
-             2026), out of the row, so it never leaves a hole in the layout. */}
-          <span className="flex min-w-0 basis-full flex-col gap-[3px] sm:flex-1 sm:basis-auto">
-            {eyebrow && <span className="pr-[28px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase sm:pr-0" style={{ color: "var(--accent-subtle)" }}>{eyebrow}</span>}
-            <span className={`text-[15px] leading-[21px] font-semibold ${eyebrow ? "" : "pr-[28px] sm:pr-0"}`} style={{ color: "var(--foreground)" }}>{text}</span>
+        {/* One row, at every width, text and CTA together (direct feedback,
+           14 Sept 2026): the X no longer lives in this row at all (see the
+           corner badge below), so the row never has to reserve space for it. */}
+        <div className="relative flex items-center gap-[var(--space-3)] p-[var(--space-4)] sm:gap-[var(--space-4)] sm:p-[var(--space-5)]">
+          <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+            {eyebrow && <span className="text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--accent-subtle)" }}>{eyebrow}</span>}
+            <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{text}</span>
           </span>
           <Link href={href} className={`dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_3.2s_ease-out_infinite]"}`} style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
           </Link>
         </div>
-        <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow || text}`} className="dm-quiet absolute top-[8px] right-[8px] flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-          <X className="h-4 w-4" aria-hidden />
-        </button>
       </aside>
     </BorderBeam>
+    {dismissButton}
     </div>
   );
 }

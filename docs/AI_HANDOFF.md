@@ -38,6 +38,100 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-14 My Profile: persistence fix, Top 3 folder/grid redesign, comparison table rebuild (NOT PUSHED TO MAIN -- pushed to branch `profile-top3-redesign`, PR opened, user-authorized)
+
+Session-long redesign of the Profile section (`src/components/profile/ProfileExperience.tsx`,
+`CareerReport.tsx`, `data.ts`, new `src/lib/planState.ts`), done entirely in an isolated
+worktree per standing instruction (never touch the user's main checkout; no push until
+explicit sign-off). Six pieces of work, roughly in order:
+
+1. **Plan-state persistence, actually fixed.** `done` (plan checkboxes), `customTasks`,
+   `routeChoice`, and `savedMajors` used to reset on every reload -- three earlier attempts this
+   session (a `useState` lazy initializer, then a one-shot seed-effect ref guard, then a
+   `planHydrated` gate) all caused real bugs, the last one an infinite seed/write oscillation
+   confirmed live via injected debug logs. Fixed by abandoning "seed the external store into
+   `useState`, write it back via an effect" entirely, in favor of the same `edits`-over-`base`
+   overlay pattern `src/lib/picks.ts` already used for Top 3 picks: each field derives its real
+   value fresh every render as `xEdits ?? {...default, ...storedPlan.x}`, with no seeding effect
+   to race against. `src/lib/planState.ts` mirrors `picks.ts`'s shape exactly (same
+   snapshot-caching, `useSyncExternalStore` plumbing, `writePlanState` merge-on-write). Verified
+   live: checked a plan task, confirmed the `localStorage` write, reloaded twice, confirmed it
+   stayed checked with no oscillation -- same for a route choice (a different field shape, to
+   rule out the fix being narrow to one case).
+2. **Two "doesn't make sense" content bugs fixed**, both real bugs not copy changes: Overview's
+   and My Plan's "Do this next" banners were a hardcoded, always-Investment-Banking array
+   regardless of the student's actual focus career -- replaced with one shared `nextStep()`
+   resolver both locations call, so the two can't drift out of sync and the text is always
+   right for whichever career is actually focused. Private Equity's Glossary Games plan task
+   linked to `/play/glossary/investment-banking` (a 404 for that career) -- `FINANCE_PLAN` now
+   takes the career id and checks `hasGlossary()` before linking, falling back to `/play`.
+3. **Two dead-code features removed**: `EvidenceSheet` (fully built, never wired to any opener
+   -- the user decided not to build the trigger rather than ship it unreachable) and
+   `ReportOverlay` (a second, unreachable "export the report" screen duplicating the real,
+   reachable Download tab). Their state, handlers, and now-unused imports came out with them;
+   `planState.ts`'s `confirmedEvidence`/`hiddenEvidence` fields went too since nothing reads
+   them anymore.
+4. **Top 3 tab: responsive by breakpoint, not by device.** Below `lg`, one folder open at a
+   time behind colored tabs (this session's earlier work, kept as-is -- the user prefers it on
+   mobile AND tablet). At `lg`+, the exact same card content renders instead as three cards
+   side by side in a grid, because a real desktop viewport has room to show all three without
+   the clutter that motivated the folder in the first place -- capping the folder at a fixed
+   max-width regardless of viewport had instead left a wide empty gap on real desktop widths
+   (caught live from a screenshot). Both layouts call one shared `renderCard()` closure so they
+   can't drift apart. Card/tab coloring went through several rounds of live feedback and ended
+   here: the tab always shows its own Career-World accent (`WORLD_COLORS`, from
+   `@/components/app/worlds`) whether open or not; the card body underneath is always a flat
+   `var(--inset-surface)` regardless of who's primary (the star badge alone marks "primary" --
+   the surface doesn't need to repeat it, and Investment Banking/Private Equity now render
+   identically since they share a Career World). "Make My Primary" moved from a standalone
+   button on the card face into the kebab (3-dot) menu, since the desktop grid showing it on
+   two of three cards simultaneously was more chrome than the action's frequency justified.
+5. **Comparison table (`ComparisonTable` in `CareerReport.tsx`) rebuilt.** The old version
+   nested a horizontal-scroll `<div>` inside the modal's vertical-scroll `<div>` and used
+   `border-collapse: collapse` on a table with `position: sticky` cells -- a known cross-browser
+   bug where the sticky cell's background fails to paint across the collapsed border seam,
+   letting the column scrolling underneath show through in visible slivers (reproduced live,
+   confirmed the exact failure mode before fixing). Rebuilt as one scroll surface (so sticky
+   `top`/`left` resolve against the same box), `border-collapse: separate` with every rule
+   painted as an inset box-shadow instead of a real border, and elevation shadows on the sticky
+   header/column so they read as intentionally pinned rather than a rendering glitch. Added
+   color coding per the same `WORLD_COLORS` system as Top 3 (a colored top bar + World eyebrow
+   label per column, not a new palette), plus a scroll-fade edge cue matching the profile
+   tablist's existing one.
+6. **`NextStepBanner` (`src/components/app/NextStepBanner.tsx`) mobile layout fix.** Shared
+   component behind every "bridge between features" banner in the app (Top Three -> Play, Plan
+   -> Play, Resume -> Connect, etc.), so the fix applies everywhere it's used. On phones the
+   text used to force-wrap to full width, pushing the CTA onto its own line beneath it -- fixed
+   by dropping the `flex-wrap`/`basis-full` mobile branch entirely so text and CTA always share
+   one row (text wraps within its own column instead). The dismiss X moved from an inset corner
+   button (which existed only to explain the old layout's reserved padding) to a small circular
+   badge that pokes outside the card's own top-right corner, rendered as a sibling of the
+   `overflow-hidden` `<aside>` rather than a child of it -- inside, it would have been clipped
+   wherever it overlapped the edge.
+
+**Validated**: `npx tsc --noEmit` and `npx eslint --max-warnings 0` clean on every touched file
+after every change (repeated many times through the session, not just at the end). Live-verified
+in-browser at mobile (375px), tablet (768px) and desktop (1300px+) widths: persistence survives
+reload, Top 3 shows folders below `lg` and the grid above it with no width gap, the comparison
+table scrolls cleanly in both axes with no bleed-through, both `NextStepBanner` variants (quiet
+and priority) render one-line on mobile with the corner X. No console errors at any breakpoint
+tested. Two Turbopack Fast-Refresh cache corruptions hit mid-session (stale compiled module
+after a large multi-file edit) -- both resolved by `rm -rf .next` + restart, not a real code bug;
+if a dev server ever reports a `ReferenceError` for a variable that was just deleted from the
+source, check the source is actually clean before assuming the error is real.
+
+**Not done / open items, in priority order the user gave**: Resume tab was explicitly flagged
+mid-session as needing the user's own call (build a real lightweight version vs. pull back its
+CTAs) -- but the rebase onto `origin/main` (18 commits ahead) picked up what looks like a real,
+already-built Resume flow (`ResumeView` now shows "You haven't created a resume yet" / "Create
+My Resume" rather than the old "Coming soon" badge). **Check whether that already resolves this
+item before doing anything further here** -- it may already be done by someone else's work.
+Still open regardless: extend `pingTabs()` to fire on plan-task completion (currently only
+focus-swap and route-choice); "Compare all 3" placement and the comparison sheet's mobile
+scannability (color coding done, placement/scannability not addressed); a final pixel-level
+pass per tab (spacing/alignment), planned to happen live in-browser once everything above is
+confirmed settled.
+
 ### 2026-09-14 Connect: real logo marks for the 9 companies added to professionalsFrom (PUSHED TO MAIN, user-authorized, 482eb25)
 
 `professionalsFrom` in `src/components/connect/data.ts` was expanded across all

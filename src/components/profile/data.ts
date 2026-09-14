@@ -1,3 +1,5 @@
+import { hasGlossary } from "@/components/glossary/data";
+
 // Profile prototype data — PROTOTYPE COPY throughout (flagged), shaped by the
 // Career Intelligence Layer V3 doc:
 //  - routes are generated PER CAREER (doc 1.7's "important rule" — never a
@@ -82,8 +84,14 @@ const o = (id: string, label: string, action: PlanAction, href?: string): PlanTa
 
 // The finance roadmap, verbatim from Joshua Pierce (Slack, 5 Sept 2026).
 // Shared by every Business & Money finance career (IB and PE); the copy
-// speaks of "your #1 Career" so it reads right from either.
-const FINANCE_PLAN = (prefix: string): PlanHorizon[] => [
+// speaks of "your #1 Career" so it reads right from either. The Glossary
+// Games task used to hard-link every finance career to Investment Banking's
+// glossary specifically -- for Private Equity, whose glossary content
+// doesn't exist (`hasGlossary` is false), that pointed the task at a 404
+// (direct feedback, 14 Sept 2026: "things should make sense across
+// everything"). `careerId` lets the href resolve per career: the real
+// glossary route when one is authored, `/play` (always valid) otherwise.
+const FINANCE_PLAN = (prefix: string, careerId: string): PlanHorizon[] => [
   h(`${prefix}-1`, "Next 3 Months", "Foundation", [
     { ...t(`${prefix}-1-0`, "Build Profile", "Build", "/flow"), doneByDefault: true },
     t(`${prefix}-1-1`, "10 Finance Careers and save your Top 3", "Explore", "/explore?tab=browse"),
@@ -99,7 +107,7 @@ const FINANCE_PLAN = (prefix: string): PlanHorizon[] => [
   ]),
   h(`${prefix}-3`, "Professional Readiness", undefined, [
     t(`${prefix}-3-1`, "Complete your Resume for your #1 Career", "Build", "/profile?tab=resume"),
-    t(`${prefix}-3-2`, "Complete 3 Glossary Games for your #1 Career", "Play", "/play/glossary/investment-banking"),
+    t(`${prefix}-3-2`, "Complete 3 Glossary Games for your #1 Career", "Play", hasGlossary(careerId) ? `/play/glossary/${careerId}` : "/play"),
     t(`${prefix}-3-3`, "Ask 3 Professionals in your #1 Career for advice", "Connect", "/connect"),
     o(`${prefix}-3-4`, "Apply to 5 Internships, Programs, or Job Shadows", "Apply"),
   ]),
@@ -170,7 +178,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
       },
     ],
     plan: [
-      ...FINANCE_PLAN("ib"),
+      ...FINANCE_PLAN("ib", "investment-banking"),
     ],
   },
   {
@@ -300,7 +308,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
       },
     ],
     plan: [
-      ...FINANCE_PLAN("pe"),
+      ...FINANCE_PLAN("pe", "private-equity"),
     ],
   },
 ];

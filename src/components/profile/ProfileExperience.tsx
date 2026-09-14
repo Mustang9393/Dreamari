@@ -14,7 +14,7 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Plane, Play, Plus, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
@@ -25,16 +25,14 @@ import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
+import { planStateSnapshot, serverPlanStateSnapshot, subscribePlanState, writePlanState } from "@/lib/planState";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
 import {
   ACADEMIC_RECORD,
-  EVIDENCE,
-  EVIDENCE_KIND_LABEL,
   reportV2,
-  type EvidenceItem,
 } from "./report-data";
 
 // My Profile, round 2: scannable and visual. No paragraphs, no em dashes.
@@ -157,6 +155,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // then the demo default. Their own edits below layer on top of that.
   const fromHandoff = initialPicks.length > 0;
   const stored = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
+  // Plan checkmarks, custom steps, route choices, saved majors and evidence
+  // decisions used to be plain useState that reset on every reload (direct
+  // feedback, 14 Sept 2026: design this now, not "when there's a real
+  // backend"). Read once here the same way `stored` picks are, then seed
+  // each piece of state from it below.
+  const storedPlan = useSyncExternalStore(subscribePlanState, planStateSnapshot, serverPlanStateSnapshot);
   const [edits, setEdits] = useState<{ ids: string[]; focus: string | null } | null>(null);
   const base = useMemo(() => {
     // focus null means "no primary chosen yet": the strongest match stands
@@ -180,12 +184,65 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       return { ids: typeof next === "function" ? next(previous.ids) : next, focus: previous.focus };
     });
   const setFocusId = (id: string | null) => setEdits((current) => ({ ids: (current ?? base).ids, focus: id }));
-  const [routeChoice, setRouteChoice] = useState<Record<string, string>>({});
-  // Build is already behind the student when the plan first opens, so the
-  // steps marked doneByDefault start checked and no plan opens at 0%.
-  const [done, setDone] = useState<Record<string, string[]>>(() =>
-    Object.fromEntries(ALL_PROFILE_CAREERS.map((c) => [c.id, c.plan.flatMap((h) => h.tasks.filter((task) => task.doneByDefault).map((task) => task.id))])),
+  // Same `edits`-over-`base` shape as Top 3 picks above, extended to these
+  // six fields (direct feedback, 14 Sept 2026: design this now, not "when
+  // there's a real backend"). Each field's real value is derived fresh every
+  // render as `xEdits ?? {...default, ...storedPlan.x}` -- there is no
+  // seeding effect that copies the external store into a `useState`, so
+  // there is nothing for a write-effect to race against. `xEdits` starts
+  // `null` (nothing edited yet this session) and is the ONLY thing ever
+  // written to storage, exactly like `edits`/`writePicks` above. Two earlier
+  // attempts (a lazy `useState` initializer, then a seed-effect + hydration
+  // flag) both caused real bugs -- see the picks comment above for why a
+  // lazy initializer can't see post-hydration storage, and the seed-effect
+  // version specifically caused an infinite write/reseed oscillation because
+  // a sibling effect can't see another effect's setState within the same
+  // commit. This overlay shape has neither problem: it doesn't seed at all.
+  const doneDefault = useMemo(
+    // Build is already behind the student when the plan first opens, so the
+    // steps marked doneByDefault start checked and no plan opens at 0%.
+    () => Object.fromEntries(ALL_PROFILE_CAREERS.map((c) => [c.id, c.plan.flatMap((h) => h.tasks.filter((task) => task.doneByDefault).map((task) => task.id))])),
+    [],
   );
+  const [doneEdits, setDoneEdits] = useState<Record<string, string[]> | null>(null);
+  const done = doneEdits ?? { ...doneDefault, ...storedPlan.done };
+  const setDone = (next: Record<string, string[]> | ((current: Record<string, string[]>) => Record<string, string[]>)) =>
+    setDoneEdits((current) => {
+      const previous = current ?? { ...doneDefault, ...storedPlan.done };
+      return typeof next === "function" ? next(previous) : next;
+    });
+  useEffect(() => {
+    if (!doneEdits) return;
+    writePlanState({ done: doneEdits });
+  }, [doneEdits]);
+
+  const [customTasksEdits, setCustomTasksEdits] = useState<Record<string, PlanTask[]> | null>(null); // key: careerId:horizonId
+  const customTasks = customTasksEdits ?? { ...storedPlan.customTasks };
+  const setCustomTasks = (next: Record<string, PlanTask[]> | ((current: Record<string, PlanTask[]>) => Record<string, PlanTask[]>)) =>
+    setCustomTasksEdits((current) => {
+      const previous = current ?? { ...storedPlan.customTasks };
+      return typeof next === "function" ? next(previous) : next;
+    });
+  useEffect(() => {
+    if (!customTasksEdits) return;
+    writePlanState({ customTasks: customTasksEdits });
+  }, [customTasksEdits]);
+
+  const [routeChoiceEdits, setRouteChoiceEdits] = useState<Record<string, string> | null>(null);
+  // Memoized (unlike the other five overlays) because the ping effect below
+  // keys off this value by reference: a fresh object every render would fire
+  // that effect on every render, not just on an actual route change.
+  const routeChoice = useMemo(() => routeChoiceEdits ?? { ...storedPlan.routeChoice }, [routeChoiceEdits, storedPlan.routeChoice]);
+  const setRouteChoice = (next: Record<string, string> | ((current: Record<string, string>) => Record<string, string>)) =>
+    setRouteChoiceEdits((current) => {
+      const previous = current ?? { ...storedPlan.routeChoice };
+      return typeof next === "function" ? next(previous) : next;
+    });
+  useEffect(() => {
+    if (!routeChoiceEdits) return;
+    writePlanState({ routeChoice: routeChoiceEdits });
+  }, [routeChoiceEdits]);
+
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
@@ -238,14 +295,23 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     }
     pingTabs(["overview", "routes", "plan", "report"]);
   }, [routeChoice]);
-  const [reportOpen, setReportOpen] = useState(false);
-  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
-  // Student-owned report state. Local only: there is no persistence layer yet,
-  // so this resets on reload (documented in the handoff).
-  const [savedMajors, setSavedMajors] = useState<Set<string>>(new Set(["Finance"]));
-  const [confirmedEvidence, setConfirmedEvidence] = useState<Set<string>>(() => new Set(EVIDENCE.filter((item) => item.confirmed).map((item) => item.id)));
-  const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
+  // Saved majors persist via planState.ts the same edits-overlay way as
+  // `done`/`customTasks`/`routeChoice` above (direct feedback, 14 Sept 2026
+  // -- this used to reset on reload). "Finance" is the default for a
+  // student who hasn't saved one yet; a stored or edited value wins once
+  // they have.
+  const [savedMajorsEdits, setSavedMajorsEdits] = useState<Set<string> | null>(null);
+  const savedMajors = savedMajorsEdits ?? (storedPlan.savedMajors.length ? new Set(storedPlan.savedMajors) : new Set(["Finance"]));
+  const setSavedMajors = (next: Set<string> | ((current: Set<string>) => Set<string>)) =>
+    setSavedMajorsEdits((current) => {
+      const previous = current ?? (storedPlan.savedMajors.length ? new Set(storedPlan.savedMajors) : new Set(["Finance"]));
+      return typeof next === "function" ? next(previous) : next;
+    });
+  useEffect(() => {
+    if (!savedMajorsEdits) return;
+    writePlanState({ savedMajors: Array.from(savedMajorsEdits) });
+  }, [savedMajorsEdits]);
   // Covers are curated backgrounds only (CEO, 4 Sept): no career-poster
   // switch, no uploads (inappropriate-content risk). The real app should
   // carry about 40 strong options; the prototype ships six.
@@ -269,8 +335,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     setCoverOpen(false);
     try { window.localStorage.setItem(COVER_KEY, url); } catch {}
   };
-  const [customTasks, setCustomTasks] = useState<Record<string, PlanTask[]>>({}); // key: careerId:horizonId
-
   // Swapping a career or changing the focus here is a real choice too, so it
   // persists the way the chooser's did. Only actual edits are written -- a
   // first-time visitor looking at the demo default has not chosen anything.
@@ -312,18 +376,35 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     });
     return { complete, total, pct: total ? Math.round((complete / total) * 100) : 0 };
   };
-  const nextTask = (career: ProfileCareer): PlanTask | null => {
+  // One real "next step" for the whole page (direct feedback, 14 Sept 2026):
+  // Overview's "Do this next" strip and Plan's closing banner used to be two
+  // separately hand-written, hardcoded-to-Investment-Banking arrays -- wrong
+  // for the other two careers in this demo alone. Both now read this single
+  // resolver instead, so there is one source of truth for "what should this
+  // student do next," grounded in their actual focus career and real plan
+  // progress rather than a guess.
+  const nextStep = (career: ProfileCareer | null): { text: string; ctaLabel: string; href: string; Icon: LucideIcon } => {
+    if (!career || top3.length < 3) {
+      return { text: "More career matches are waiting.", ctaLabel: "Explore", href: "/explore", Icon: Compass };
+    }
     for (let index = 0; index < career.plan.length; index++) {
       if (!horizonUnlocked(career, index)) break;
-      const open = tasksFor(career, career.plan[index].id).find((task) => !doneSet(career.id).has(task.id));
-      if (open) return open;
+      const open = tasksFor(career, career.plan[index].id).find((task) => !doneSet(career.id).has(task.id) && task.href);
+      // Some task labels are already full sentences starting with their own
+      // verb ("Play the Aviation Maintenance mini game"), others are
+      // fragments that need the action prepended to read as one ("10
+      // Finance Careers and save your Top 3" -> "Explore 10 Finance..."):
+      // skip the prefix when the label already opens with it.
+      if (open) {
+        const text = open.label.toLowerCase().startsWith(open.action.toLowerCase()) ? open.label : `${open.action} ${open.label}`;
+        return { text, ctaLabel: open.action, href: open.href!, Icon: ACTION_ICON[open.action] };
+      }
     }
-    return null;
+    const sim = simulationFor(career.id);
+    return { text: `Play the Day in the Life of ${career.title}.`, ctaLabel: "Play", href: sim ? `/play/${sim.id}` : `/play?focus=${career.id}`, Icon: Gamepad2 };
   };
 
   const toggleMajor = (name: string) => setSavedMajors((current) => { const next = new Set(current); if (next.has(name)) next.delete(name); else next.add(name); return next; });
-  const toggleEvidenceConfirmed = (id: string) => setConfirmedEvidence((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
-  const hideEvidence = (id: string) => setHiddenEvidence((current) => new Set(current).add(id));
 
   function addCustomTask(careerId: string, horizonId: string, label: string) {
     const trimmed = label.trim();
@@ -630,7 +711,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             {tab === "overview" && (
             <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
               <OverviewTab
-                focus={focus} planProgress={planProgress} top3Count={top3.length}
+                focus={focus} planProgress={planProgress} top3Count={top3.length} step={nextStep(focus)}
                 onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
                 onGoLocker={() => setTab("locker")}
               />
@@ -658,7 +739,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <MyPlanTab
               focus={focus} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
               doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
-              removeCustomTask={removeCustomTask} onGoRoutes={() => setTab("routes")}
+              removeCustomTask={removeCustomTask} onGoRoutes={() => setTab("routes")} step={nextStep(focus)}
             />
           </div>
         )}
@@ -668,7 +749,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               student={{ name: STUDENT.name, grade: STUDENT.grade, school: STUDENT.school }}
               career={focus}
               savedMajors={savedMajors} onToggleMajor={toggleMajor}
-              onOpenEvidence={() => setEvidenceOpen(true)} updatedLabel="today"
+              updatedLabel="today"
               history={{
                 snapshot: () => ({ careerId: focus.id, careerTitle: focus.title, top3, focusId: focus.id, routeChoice, done, savedMajors: [...savedMajors] }),
                 // Putting a version back is the same as the student having
@@ -719,13 +800,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
       {compareOpen && (
         <CompareSheet careers={top3.map(careerById).filter(Boolean) as ProfileCareer[]} focusId={focus?.id ?? ""} onClose={() => setCompareOpen(false)} />
-      )}
-
-      {evidenceOpen && (
-        <EvidenceSheet
-          focus={focus} confirmed={confirmedEvidence} hidden={hiddenEvidence}
-          onToggleConfirmed={toggleEvidenceConfirmed} onHide={hideEvidence} onClose={() => setEvidenceOpen(false)}
-        />
       )}
 
       <div className="no-print">
@@ -812,9 +886,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           </div>
         </div>
       )}
-
-
-      {reportOpen && focus && <ReportOverlay career={focus} route={chosenRoute(focus)} progress={planProgress(focus)} next={nextTask(focus)} tasksFor={tasksFor} onClose={() => setReportOpen(false)} />}
     </div>
   );
 }
@@ -877,6 +948,16 @@ function Top3Tab({
   onGoReport: () => void;
 }) {
   const [menuFor, setMenuFor] = useState<string | null>(null);
+  // Which folder is pulled to the front, like a file cabinet -- three full
+  // cards side by side was "unnecessary clutter" once a student already
+  // knows them from Match, so only one shows at a time (direct feedback,
+  // 14 Sept 2026). This is deliberately separate from `focusId` (who's
+  // primary): clicking a tab just peeks at that folder; a dedicated button
+  // inside it is the only thing that changes who's primary. Falls back to
+  // the primary career if nothing's been opened yet, or the open one was
+  // removed from the top 3.
+  const [openIdState, setOpenIdState] = useState<string | null>(null);
+  const openId = openIdState && top3.includes(openIdState) ? openIdState : focusId;
 
   if (top3.length === 0) {
     return (
@@ -913,198 +994,304 @@ function Top3Tab({
         )}
       </div>
 
-      {/* Side by side from md: up (stacked on phones only, where three columns
-         would be unreadable), info running vertically inside each column --
-         side-by-side comparison per direct feedback ("much easier and
-         faster to skim, analyze and process"). Each card carries its own
-         career-world accent (border tint + ambient glow + labels) so the
-         three read as three different Career Worlds -- accent as glow and
-         tint per the design language, never a solid color block. Copy is
-         unchanged from the stacked version. */}
-      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] md:grid-cols-3">
-      {/* The primary career takes the first card (Joshua, 11 Sept 2026). */}
-      {[...top3].sort((a, b) => Number(b === focusId) - Number(a === focusId)).map((id) => {
-        const career = careerById(id)!;
-        const report = reportV2(id);
-        const route = chosenRoute(career);
-        const isFocus = focusId === id;
-        const sim = simulationFor(id);
-        const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
-        const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
-        // Split by criticality (direct feedback): the three decision facts
-        // stay on the card (clamped, not height-reserved: a one-line
-        // Education left a hole above Years in school, direct feedback 11
-        // Sept 2026); employers + schools fold into a collapsed-by-default
-        // accordion below them.
-        const facts = [
-          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1" },
-          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2" },
-          { label: "Years in school", value: route.duration, lines: "line-clamp-1" },
-        ];
-        const moreFacts = [
-          { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
-          { label: "Suggested schools", value: schools.length ? schools.join(" · ") : "Coming soon" },
-        ];
-        return (
-          <div
-            key={id}
-            className="relative flex h-full flex-col rounded-[var(--radius-lg)] border"
-            style={{
-              // The focus ring is the career's OWN world accent (full
-              // strength), so #1 reads in that world's color; unfocused
-              // cards keep the quieter 35% border tint.
-              borderColor: isFocus ? accent : `color-mix(in srgb, ${accent} 35%, var(--glass-border))`,
-              // A darker step than glass-surface-1, still translucent and blurred
-              // (direct feedback, 11 Sept 2026: "a little too transparent").
-              background: isFocus ? `color-mix(in srgb, ${accent} 10%, var(--inset-surface))` : "var(--inset-surface)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
-            }}
-          >
-            {/* The photo carries the card: a wide cover clipped by the card's
-               own radius, not a floating thumbnail square. The rank rides
-               quietly on the photo corner instead of its own chip row. */}
-            <div className="relative aspect-[16/10] w-full flex-none overflow-hidden rounded-t-[inherit]">
-              {/* Per-photo focal point (data.ts photoFocus): each poster's
-                 subject sits at a different height, so one shared crop puts
-                 faces at different heights across the row. */}
-              <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
-              {isFocus && (
-                // The one marker of the primary career: a star disc on the
-                // photo (Joshua, 11 Sept 2026: the text chips go), so the
-                // Report and Plan tabs still visibly follow this card.
-                <span role="img" aria-label={primaryChosen ? "My primary career" : "Your strongest match"} className="absolute bottom-[10px] left-[10px] z-[2] flex size-[30px] items-center justify-center rounded-full border backdrop-blur-[8px]" style={{ background: "rgba(5,8,20,0.6)", borderColor: `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))`, color: accent }}>
-                  <Star className="h-3.5 w-3.5" fill="currentColor" aria-hidden />
+      {/* Folders in a file cabinet below `lg`, not three cards side by side
+         (direct feedback, 14 Sept 2026: side-by-side was "unnecessary
+         clutter" once a student already knows these careers from Match) --
+         that complaint was about three full cards squeezed into a narrow
+         column, which is a mobile/tablet problem specifically. At `lg`+
+         there's enough width for all three at once with room to breathe, so
+         the same clutter never appears; capping the folder at
+         `md:max-w-[420px]` regardless left a wide, empty gap on real desktop
+         widths instead (caught live, 14 Sept 2026, from a screenshot). Both
+         layouts render the exact same card body via `renderCard` below, so
+         the two never drift out of sync with each other. One tab per saved
+         career, colored in its own Career World accent; only the open
+         folder's full card shows below, the others wait behind their tabs.
+         The primary tab carries a star -- the only persistent marker of
+         who's primary, matching the star that used to live on the card's
+         photo -- and stays there even while a different folder is open for
+         a look. Real folder tabs sit OUTSIDE and above the folder body, not
+         inset inside one card like a regular tab bar (direct feedback, 14
+         Sept 2026: inset tabs "looked like any regular tab" component) --
+         but they still have to read as one physically continuous object
+         with the body, not two shapes stitched together (the earlier,
+         separate-tabs attempt). Colour is no longer part of that continuity
+         (direct feedback, 14 Sept 2026: the tab and the body "have to be
+         different colors" -- the tab keeps its bold per-career accent
+         whether it's open or not, the body underneath stays a flat dark
+         surface regardless); what keeps the seam from reading as a gap
+         instead is everything else staying identical at the point of
+         contact: the SAME backdrop blur on both (a flat tab meeting a
+         glass body was the real source of "floating," not colour), a
+         negative margin overlapping the tab row 2px into the body so
+         there is no gap for antialiasing to show through, and one shared
+         drop-shadow on the whole assembly instead of a shadow per piece. */}
+      {(() => {
+        const renderCard = (id: string, roundedFull: boolean) => {
+          const career = careerById(id)!;
+          const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+          const report = reportV2(id);
+          const route = chosenRoute(career);
+          const isFocus = focusId === id;
+          const sim = simulationFor(id);
+          // The old dark card + gradient surface treatment (direct feedback,
+          // 14 Sept 2026: "the rest of the card has to follow the old dark
+          // card... surface treatment"), flat regardless of who's primary --
+          // the star badge already says "primary," so the surface itself
+          // doesn't need to repeat that with an extra tint (direct feedback:
+          // "investment banking should have the same colour scheme as
+          // private equity"). Colour still shows up per career, just as the
+          // corner glow gradient below rather than a flat wash across the
+          // whole card, and as the folder tab itself (which now DOESN'T
+          // match this on purpose -- see the tab strip below).
+          const openBg = "var(--inset-surface)";
+          const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
+          // Split by criticality (direct feedback): the three decision
+          // facts stay on the card (clamped, not height-reserved: a
+          // one-line Education left a hole above Years in school,
+          // direct feedback 11 Sept 2026); employers + schools fold
+          // into a collapsed-by-default accordion below them.
+          const facts = [
+            { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1" },
+            { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2" },
+            { label: "Years in school", value: route.duration, lines: "line-clamp-1" },
+          ];
+          const moreFacts = [
+            { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
+            { label: "Suggested schools", value: schools.length ? schools.join(" · ") : "Coming soon" },
+          ];
+          return (
+            <div
+              className={`relative z-0 flex h-full flex-col overflow-hidden transition-[background-color] duration-150 ${roundedFull ? "rounded-[var(--radius-lg)]" : "rounded-b-[var(--radius-lg)] rounded-tr-[var(--radius-lg)]"}`}
+              style={{ background: openBg, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}
+            >
+              {/* The photo is now a small identifying thumbnail, not a hero
+                 (direct feedback, 14 Sept 2026: the full-width photo was
+                 "dominating the screen" -- way too prominent now that only
+                 one folder shows at a time). It sits beside the title
+                 instead of above it. */}
+              <div className="relative flex items-start gap-[var(--space-3)] p-[var(--space-4)] pb-0">
+                <div className="relative size-[52px] flex-none overflow-hidden rounded-[var(--radius-md)]">
+                  {/* Per-photo focal point (data.ts photoFocus): each poster's
+                     subject sits at a different height. */}
+                  <Image src={career.photo} alt="" fill sizes="52px" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
+                  {isFocus && (
+                    // The one marker of the primary career on the card itself
+                    // (Joshua, 11 Sept 2026: the text chips go); the tab
+                    // carries the same star so it still reads while another
+                    // folder is open.
+                    <span role="img" aria-label={primaryChosen ? "My primary career" : "Your strongest match"} className="absolute right-[-3px] bottom-[-3px] z-[2] flex size-[18px] items-center justify-center rounded-full border" style={{ background: "rgba(5,8,20,0.75)", borderColor: `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))`, color: accent }}>
+                      <Star className="h-[9px] w-[9px]" fill="currentColor" aria-hidden />
+                    </span>
+                  )}
+                </div>
+                <span className="flex min-w-0 flex-1 flex-col gap-[1px] pt-[2px]">
+                  {/* World name carries the accent, never the career title. */}
+                  <span className="text-[11.5px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
+                  <span className="text-balance text-[17px] leading-[21px] font-extrabold sm:text-[19px] sm:leading-[23px]" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
                 </span>
-              )}
-              <div className="absolute top-[6px] right-[6px] z-[3]">
-                <button
-                  type="button"
-                  aria-label={`More options for ${career.title}`}
-                  aria-expanded={menuFor === id}
-                  onClick={() => setMenuFor(menuFor === id ? null : id)}
-                  className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full"
-                  style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)", backdropFilter: "blur(6px)", color: "var(--foreground)" }}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </button>
-                {menuFor === id && (
-                  <>
-                    <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setMenuFor(null)} />
-                    <div className="absolute top-[44px] right-0 z-[56] w-[200px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)" }}>
-                      <button
-                        type="button"
-                        onClick={() => { setMenuFor(null); onRemove(id); }}
-                        className="dm-quiet w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
-                        style={{ color: "var(--destructive)" }}
-                      >
-                      Remove from Top 3
-                      </button>
-                      {/* Two options (Joshua, 11 Sept 2026). Make My Primary
-                         moves the career into the first card; it is the only
-                         place for it (direct feedback: no hover cue). */}
-                      {!isFocus && (
+                <div className="relative flex-none">
+                  <button
+                    type="button"
+                    aria-label={`More options for ${career.title}`}
+                    aria-expanded={menuFor === id}
+                    onClick={() => setMenuFor(menuFor === id ? null : id)}
+                    className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full"
+                    style={{ color: "var(--muted-foreground)" }}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+                  {menuFor === id && (
+                    <>
+                      <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setMenuFor(null)} />
+                      <div className="absolute top-[44px] right-0 z-[56] w-[200px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)" }}>
+                        {/* Back in the kebab menu, off the card face (direct
+                           feedback, 14 Sept 2026): with all three cards
+                           visible at once on the desktop grid, a standalone
+                           button on every non-primary card added up to a
+                           lot of repeated chrome for a once-in-a-while
+                           action. */}
+                        {!isFocus && (
+                          <button
+                            type="button"
+                            onClick={() => { setMenuFor(null); setFocusId(id); }}
+                            className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
+                          >
+                            <Star className="h-3.5 w-3.5" aria-hidden /> Make My Primary
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => { setMenuFor(null); setFocusId(id); }}
-                          className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
+                          onClick={() => { setMenuFor(null); onRemove(id); }}
+                          className="dm-quiet w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
+                          style={{ color: "var(--destructive)" }}
                         >
-                          <Star className="h-3.5 w-3.5" aria-hidden /> Make My Primary
+                        Remove from Top 3
                         </button>
-                      )}
-                    </div>
-                  </>
-                )}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* The accent glow lives in its own clipped layer: the card itself
-               stays overflow-visible (the kebab menu must escape it), so the
-               blob is clipped here to the card's radius instead of bleeding
-               past the border. */}
-            <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-              <span className="absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
-            </span>
-
-            <div className="relative flex flex-1 flex-col gap-[var(--space-2)] p-[var(--space-4)]">
-              {/* Tight rhythm throughout (direct feedback, 11 Sept 2026: the
-                 cards were getting long, and a reserved title height left a
-                 hole under one-line titles). Everything clamps rather than
-                 reserves height. */}
-              <span className="flex min-w-0 flex-col gap-[1px]">
-                {/* World name carries the accent, never the career title. */}
-                <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+              {/* The accent glow lives in its own clipped layer: the card
+                 itself stays overflow-visible (the kebab menu must escape
+                 it), so the blob is clipped here instead of bleeding past
+                 the border. */}
+              <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                <span className="absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
               </span>
-              <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
-              {/* The card answers one question (Joshua, 11 Sept 2026): test
-                 this career, or learn more about it? Play and Learn more side
-                 by side, above the fold. Play is in the Play cards' own badge
-                 language (disc + glyph); a career without its own game goes
-                 to the Play tab, focused on it, and says Play like the rest
-                 (Joshua: never "coming soon" in a demo). Learn more opens this
-                 career's page, the diagonal arrow for leaving the profile. */}
-              <div className="mt-[var(--space-1)] grid grid-cols-2 gap-[var(--space-2)]">
-                <Link
-                  href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
-                  aria-label={`Play ${career.title}`}
-                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
-                  style={{ background: `color-mix(in srgb, ${accent} 20%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, color: "var(--foreground)" }}
-                >
-                  <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: accent, borderColor: "rgba(255,255,255,0.35)" }}>
-                    <Play className="ml-[2px] h-[14px] w-[14px]" fill="currentColor" style={{ color: "#fff" }} aria-hidden />
-                  </span>
-                  <span className="min-w-0 truncate">Play</span>
-                </Link>
-                <Link
-                  href={`/career/${id}`}
-                  aria-label={`Learn more about ${career.title}`}
-                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
-                  style={FROST}
-                >
-                  <span className="min-w-0 truncate">Learn more</span> <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
-                </Link>
-              </div>
 
+              <div className="relative flex flex-1 flex-col gap-[var(--space-2)] p-[var(--space-4)]">
+                <p className="text-[14px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
+                {/* The card answers one question (Joshua, 11 Sept 2026): test
+                   this career, or learn more about it? Play and Learn more
+                   side by side, above the fold. */}
+                <div className="mt-[var(--space-1)] grid grid-cols-2 gap-[var(--space-2)]">
+                  <Link
+                    href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
+                    aria-label={`Play ${career.title}`}
+                    className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
+                    style={{ background: `color-mix(in srgb, ${accent} 20%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, color: "var(--foreground)" }}
+                  >
+                    <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: accent, borderColor: "rgba(255,255,255,0.35)" }}>
+                      <Play className="ml-[2px] h-[14px] w-[14px]" fill="currentColor" style={{ color: "#fff" }} aria-hidden />
+                    </span>
+                    <span className="min-w-0 truncate">Play</span>
+                  </Link>
+                  <Link
+                    href={`/career/${id}`}
+                    aria-label={`Learn more about ${career.title}`}
+                    className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
+                    style={FROST}
+                  >
+                    <span className="min-w-0 truncate">Learn more</span> <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
+                  </Link>
+                </div>
 
-              <dl className="flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]">
-                {facts.map((fact) => (
-                  <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
-                    <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
-                    <dd className={`text-[14px] leading-[18px] font-semibold ${fact.lines}`}>{fact.value}</dd>
-                  </div>
-                ))}
-              </dl>
+                <dl className="flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]">
+                  {facts.map((fact) => (
+                    <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
+                      <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
+                      <dd className={`text-[14px] leading-[18px] font-semibold ${fact.lines}`}>{fact.value}</dd>
+                    </div>
+                  ))}
+                </dl>
 
-              <MoreFactsAccordion facts={moreFacts} />
+                <MoreFactsAccordion facts={moreFacts} />
 
-              {/* Get Career Report apart at the foot; no rules anywhere in
-                 the card (direct feedback, 11 Sept 2026). */}
-              <div className="mt-auto pt-[var(--space-1)]">
-                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={FROST}>
-                  Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
-                </button>
+                {/* Get Career Report apart at the foot; no rules anywhere in
+                   the card (direct feedback, 11 Sept 2026). */}
+                <div className="mt-auto pt-[var(--space-1)]">
+                  <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={FROST}>
+                    Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
+                  </button>
+                </div>
               </div>
             </div>
+          );
+        };
+
+        return (
+          <>
+          {/* Below `lg`: one folder open at a time, tabs above it. */}
+          <div className="flex flex-col md:max-w-[420px] lg:hidden" style={{ filter: "drop-shadow(0 14px 26px rgba(0,0,0,0.26))" }}>
+            <div role="tablist" aria-label="Your saved careers" className="relative z-[1] flex items-end pb-[2px]">
+              {top3.map((id, idx) => {
+                const career = careerById(id)!;
+                const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+                const isOpen = id === openId;
+                const isPrimary = id === focusId;
+                // Always its own world accent, open or not (direct feedback,
+                // 14 Sept 2026: "the rest of the component and the tab that
+                // sticks out have to be different colors... it should be
+                // blue when selected") -- the tab no longer borrows the
+                // body's flat dark surface just because it's the open one;
+                // taller height and full-opacity text are what mark "open"
+                // now, not a colour match.
+                const tabBg = `color-mix(in srgb, ${accent} 40%, var(--card))`;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isOpen}
+                    aria-label={`${career.title}${isPrimary ? ", primary" : ""}`}
+                    onClick={() => setOpenIdState(id)}
+                    // Plain rounded-top corners (direct feedback, 14 Sept
+                    // 2026, after several inclined-shape attempts all read
+                    // as "skewed" or "badly shaped" -- settled here, not
+                    // touching the shape again without exact reference
+                    // numbers). Sits ABOVE the body (taller when open,
+                    // shorter when not, both bottom-aligned via `items-end`
+                    // on the row -- never translated, so a receded tab
+                    // can't dip low enough to spill onto the body the way
+                    // a translateY offset did). No `dm-tap`: that shared
+                    // utility lifts on hover with its own shadow and
+                    // translateY, which would pop a tab off its flush seam
+                    // with the body on every hover; a plain colour shift
+                    // is enough of a hover cue here.
+                    className="group relative flex min-w-0 max-w-[132px] flex-1 cursor-pointer items-stretch justify-start overflow-hidden rounded-t-[10px] transition-[height,background-color,color] duration-150"
+                    style={{
+                      height: isOpen ? 42 : 34,
+                      marginLeft: idx === 0 ? 0 : -12,
+                      marginBottom: -2,
+                      zIndex: isOpen ? 10 : idx + 1,
+                      background: tabBg,
+                      backdropFilter: "blur(14px)",
+                      WebkitBackdropFilter: "blur(14px)",
+                      color: isOpen ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 60%, transparent)",
+                    }}
+                  >
+                    <span aria-hidden className="absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} />
+                    <span className="relative flex min-w-0 flex-1 items-center justify-center gap-[5px] px-[14px] text-[12px] font-bold sm:px-[16px] sm:text-[12.5px]">
+                      {isPrimary && <Star className="h-3 w-3 flex-none" fill="currentColor" aria-hidden style={{ color: isOpen ? accent : "color-mix(in srgb, var(--foreground) 60%, transparent)" }} />}
+                      <span className="min-w-0 truncate">{career.title}</span>
+                    </span>
+                  </button>
+                );
+              })}
+              {top3.length < 3 && (
+                <button
+                  type="button"
+                  onClick={onAdd}
+                  aria-label="Add a career"
+                  className="group relative flex h-[34px] w-[36px] flex-none cursor-pointer items-center justify-center self-end overflow-hidden rounded-t-[10px]"
+                  style={{
+                    marginLeft: -12,
+                    marginBottom: -2,
+                    background: "var(--card)",
+                    backdropFilter: "blur(14px)",
+                    WebkitBackdropFilter: "blur(14px)",
+                    color: "var(--accent-subtle)",
+                  }}
+                >
+                  <span aria-hidden className="absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} />
+                  <Plus className="relative h-4 w-4" />
+                </button>
+              )}
+            </div>
+            {renderCard(openId!, false)}
           </div>
+
+          {/* `lg`+: all three at once, side by side -- there's enough width
+             for every card to breathe, so the clutter that made a single
+             open folder worth building on narrow screens never shows up
+             here (caught live, 14 Sept 2026: capping the folder's width
+             instead just left the rest of a real desktop viewport empty).
+             No tablist needed since nothing is hidden; each card carries
+             its own primary star and its "Make My Primary" kebab item
+             exactly like the single open folder does below `lg`. */}
+          <div className="hidden lg:grid lg:grid-cols-3 lg:gap-[var(--space-4)]">
+            {top3.map((id) => (
+              <div key={id} style={{ filter: "drop-shadow(0 14px 26px rgba(0,0,0,0.26))" }}>
+                {renderCard(id, true)}
+              </div>
+            ))}
+          </div>
+          </>
         );
-      })}
-
-      {top3.length < 3 && (
-        <button
-          type="button"
-          onClick={onAdd}
-          className="dm-tap flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed"
-          style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
-        >
-          <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
-            <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
-          </span>
-          <span className="text-[15px] font-bold">Add a career</span>
-        </button>
-      )}
-      </div>
-
+      })()}
     </div>
   );
 }
@@ -1130,11 +1317,17 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
             <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
-        <div className="dm-report min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
+        {/* One scroll surface, not two nested ones: `ComparisonTable` pins its
+           own header row and factor column with `position: sticky`, which
+           only resolves `top`/`left` correctly against the single scrolling
+           ancestor it lives in directly (see the long comment on that
+           component for the rendering bug a second, nested scroller used to
+           cause). */}
+        <div className="dm-report min-h-0 flex-1">
           {entries.length > 1 ? (
             <ComparisonTable entries={entries} focusId={focusId} />
           ) : (
-            <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>Save at least two careers to your Top 3 and they will line up here.</p>
+            <p className="p-5 text-[14px]" style={{ color: "var(--ink-soft)" }}>Save at least two careers to your Top 3 and they will line up here.</p>
           )}
         </div>
       </div>
@@ -1147,12 +1340,13 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // hands off. Streaks and totals live at the bottom, not in the identity.
 
 export function OverviewTab({
-  focus, planProgress, top3Count,
+  focus, planProgress, top3Count, step,
   onGoTop3, onGoPlan, onGoReport, onGoLocker,
 }: {
   focus: ProfileCareer | null;
   planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
   top3Count: number;
+  step: { text: string; ctaLabel: string; href: string; Icon: LucideIcon };
   onGoTop3: () => void;
   onGoPlan: () => void;
   onGoReport: () => void;
@@ -1219,155 +1413,32 @@ export function OverviewTab({
         </HoverBeam>
       </section>
 
-      {/* Do this next (official copy, 5 Sept 2026): Explore leads (it is
-         where a new student starts); Play is the alternative for someone
-         with a #1 already. One shared card (not two standalone ones --
-         splitting it read as disintegrated, direct feedback, 9 Sept 2026),
-         holding two full-width list rows instead of a pill button sitting
-         mid-sentence: each row is the whole tap target, with an icon, the
-         verb plain in the sentence, and a solid CTA at the end matching
-         NextStepBanner. Hover fills only the row's own rect (dm-quiet, no radius of
-         its own) -- the section's overflow-hidden clips it to the card's
-         rounded corners, so the boundary still reads as one piece. The
-         border itself is BorderBeam (border-beam npm package), the same
-         one used on NextStepBanner -- no literal `border` class here, the
-         beam supplies the whole outline. */}
+      {/* Do this next: one real recommendation grounded in the student's
+         actual focus career and plan progress (direct feedback, 14 Sept
+         2026), not two hardcoded options that always named Investment
+         Banking specifically -- wrong for the other careers in this demo.
+         Same card/row/CTA treatment as before (BorderBeam outline, solid
+         CTA matching NextStepBanner), now holding a single row since
+         there's one genuine next step to point at, not two guesses. */}
       <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
       <section aria-labelledby="next-title" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)]" style={{ background: INSET.background }}>
         <h3 id="next-title" className="px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-2)] text-[12px] font-bold tracking-[1.4px] uppercase sm:px-[var(--space-5)] sm:pt-[var(--space-5)]" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
-        {[
-          { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers" },
-          { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Day in the Life of an Investment Banker Simulation" },
-        ].map((line, index, list) => (
-          <Fragment key={line.verb}>
-            {index > 0 && (
-              <div className="flex items-center gap-[10px] px-[var(--space-4)] sm:px-[var(--space-5)]" aria-hidden="true">
-                <span className="h-px flex-1" style={{ background: "var(--glass-border)" }} />
-                <span className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>or</span>
-                <span className="h-px flex-1" style={{ background: "var(--glass-border)" }} />
-              </div>
-            )}
-            <Link
-              href={line.href}
-              className={`dm-quiet group flex items-center justify-between gap-[var(--space-3)] rounded-none px-[var(--space-4)] py-[var(--space-3)] sm:px-[var(--space-5)] ${index === list.length - 1 ? "pb-[var(--space-4)] sm:pb-[var(--space-5)]" : ""}`}
-            >
-              {/* Plain sentence, verb uncoloured, and the action is a real
-                 button at the end -- the same solid CTA NextStepBanner's
-                 "Your next step" cards use -- instead of a gradient verb
-                 plus a "Let's go" that only appeared on hover (direct
-                 feedback, 10 Sept 2026: "uncolor the first word in both
-                 sentences and add a cta button to the end where 'let's go'
-                 appears ... consistent with the other your next step
-                 cards"). The whole row stays the link; the CTA is a styled
-                 span inside it, since a button can't nest in an anchor. */}
-              <span className="min-w-0 text-[14px] leading-[19px] font-semibold sm:text-[15px]" style={{ color: "var(--foreground)" }}>
-                {line.verb} {line.rest}
-              </span>
-              <span className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-                <line.Icon className="h-4 w-4" aria-hidden /> Let&rsquo;s go <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
-              </span>
-            </Link>
-          </Fragment>
-        ))}
+        <Link
+          href={step.href}
+          className="dm-quiet group flex items-center justify-between gap-[var(--space-3)] rounded-none px-[var(--space-4)] py-[var(--space-3)] pb-[var(--space-4)] sm:px-[var(--space-5)] sm:pb-[var(--space-5)]"
+        >
+          <span className="min-w-0 text-[14px] leading-[19px] font-semibold sm:text-[15px]" style={{ color: "var(--foreground)" }}>
+            {step.text}
+          </span>
+          <span className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+            <step.Icon className="h-4 w-4" aria-hidden /> Let&rsquo;s go <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          </span>
+        </Link>
       </section>
       </BorderBeam>
     </div>
   );
 }
-
-// ---- Evidence: the inputs, in the open and correctable ----
-// Everything the report is built from, in the student's terms. Nothing
-// inferred appears here, because anything a student cannot check is not
-// something we should be showing back to them as fact.
-
-function EvidenceSheet({
-  focus, confirmed, hidden, onToggleConfirmed, onHide, onClose,
-}: {
-  focus: ProfileCareer | null;
-  confirmed: Set<string>;
-  hidden: Set<string>;
-  onToggleConfirmed: (id: string) => void;
-  onHide: (id: string) => void;
-  onClose: () => void;
-}) {
-  const [scope, setScope] = useState<"all" | "career">("all");
-  const items = EVIDENCE.filter((item) => !hidden.has(item.id)).filter((item) => (scope === "all" ? true : item.careerId === focus?.id));
-  const grouped = items.reduce<Record<string, EvidenceItem[]>>((acc, item) => {
-    (acc[item.kind] ??= []).push(item);
-    return acc;
-  }, {});
-
-  return (
-    <div className="no-print fixed inset-0 z-[120] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="evidence-intro">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(8px)" }} />
-      <div className="relative flex w-full max-w-[560px] flex-col gap-[var(--space-4)] overflow-y-auto border-l p-5 pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] pt-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-      <div className="flex items-start justify-between gap-[var(--space-3)]">
-        <span className="flex flex-col gap-[3px]">
-          <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Evidence</span>
-          <h3 id="evidence-intro" className="text-[18px] leading-[22px] font-extrabold sm:text-[21px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>What your report is built from</h3>
-          <span className="max-w-[54ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
-            Only things you chose, did or wrote. If something here is wrong, fix it and the report changes with it.
-          </span>
-        </span>
-        <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close evidence">
-          <X className="h-5 w-5" aria-hidden />
-        </button>
-      </div>
-      <div role="group" aria-label="Filter evidence" className="flex w-fit gap-[3px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
-        {([["all", "Everything"], ["career", focus ? `Just ${focus.title}` : "This career"]] as const).map(([value, label]) => (
-          <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)} className="dm-quiet min-h-[38px] cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[14px] font-semibold" style={{ background: scope === value ? "var(--glass-surface-3)" : "transparent", color: scope === value ? "var(--foreground)" : "var(--muted-foreground)" }}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {Object.entries(grouped).map(([kind, list]) => (
-        <section key={kind} aria-labelledby={`ev-${kind}`} className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={GLASS}>
-          <h3 id={`ev-${kind}`} className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>
-            {EVIDENCE_KIND_LABEL[kind as EvidenceItem["kind"]]}
-          </h3>
-          <ul className="flex list-none flex-col p-0">
-            {list.map((item) => (
-              <li key={item.id} className="flex flex-wrap items-start justify-between gap-[var(--space-3)] border-t py-[11px] first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                  <span className="text-[15px] leading-[18px] font-bold">{item.label}</span>
-                  <span className="text-[14px] leading-[16px] font-bold" style={{ color: "var(--muted-foreground)" }}>{item.detail} · {item.when}</span>
-                </span>
-                <span className="flex flex-none items-center gap-[var(--space-2)]">
-                  <button type="button" role="checkbox" aria-checked={confirmed.has(item.id)} onClick={() => onToggleConfirmed(item.id)} className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[6px] text-[14px] font-bold" style={{ color: confirmed.has(item.id) ? "var(--color-feedback-success, #33c78c)" : "var(--muted-foreground)" }}>
-                    <span className="flex size-[18px] items-center justify-center rounded-[5px] border" style={{ borderColor: confirmed.has(item.id) ? "var(--color-feedback-success, #33c78c)" : "var(--glass-border)" }}>
-                      {confirmed.has(item.id) && <Check className="h-3 w-3" aria-hidden />}
-                    </span>
-                    {confirmed.has(item.id) ? "Right" : "Confirm"}
-                  </button>
-                  <button type="button" onClick={() => onHide(item.id)} className="dm-quiet min-h-[44px] cursor-pointer px-[6px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-                    Not me
-                  </button>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-
-      {items.length === 0 && (
-        <section className="rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={GLASS}>
-          <p className="text-[15px] font-bold">Nothing logged for this career yet</p>
-          <p className="mx-auto mt-[6px] max-w-[40ch] text-[15px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Play a simulation or finish a glossary level and it shows up here.</p>
-        </section>
-      )}
-
-      <section className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={GLASS}>
-        <span className="text-[16px] font-extrabold sm:text-[18px]" style={{ fontFamily: "var(--font-display)", color: "var(--accent-subtle)" }}>What does not count</span>
-        <p className="text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
-          Scrolling, tapping around and watching without finishing. Dreamari keeps some internal signals to order your feed, and none of them appear in your report or get shared with anyone.
-        </p>
-      </section>
-      </div>
-    </div>
-  );
-}
-
 // ---- Compare charts: one measure per chart, single hue, labeled bars ----
 
 function CompareChart({ title, better, unit, rows, selectedId }: { title: string; better: "lower" | "higher"; unit: (value: number) => string; rows: { id: string; name: string; value: number }[]; selectedId: string }) {
@@ -1442,7 +1513,7 @@ function RoutesTab({
 
 function MyPlanTab({
   focus, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor,
-  addCustomTask, removeCustomTask, onGoRoutes,
+  addCustomTask, removeCustomTask, onGoRoutes, step,
 }: {
   focus: ProfileCareer | null;
   horizonProgress: (career: ProfileCareer, index: number) => { complete: number; total: number; pct: number };
@@ -1453,6 +1524,7 @@ function MyPlanTab({
   addCustomTask: (careerId: string, horizonId: string, label: string) => void;
   removeCustomTask: (careerId: string, horizonId: string, taskId: string) => void;
   onGoRoutes: () => void;
+  step: { text: string; ctaLabel: string; href: string; Icon: LucideIcon };
 }) {
   if (!focus) return null;
 
@@ -1461,7 +1533,7 @@ function MyPlanTab({
       <PlanTab
         focus={focus} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
         doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
-        removeCustomTask={removeCustomTask} onGoPath={onGoRoutes}
+        removeCustomTask={removeCustomTask} onGoPath={onGoRoutes} step={step}
       />
     </div>
   );
@@ -1653,7 +1725,7 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   );
 }
 
-function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor, addCustomTask, removeCustomTask, onGoPath }: {
+function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor, addCustomTask, removeCustomTask, onGoPath, step }: {
   focus: ProfileCareer | null;
   horizonProgress: (career: ProfileCareer, index: number) => { complete: number; total: number; pct: number };
   horizonUnlocked: (career: ProfileCareer, index: number) => boolean;
@@ -1663,6 +1735,7 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
   addCustomTask: (careerId: string, horizonId: string, label: string) => void;
   removeCustomTask: (careerId: string, horizonId: string, taskId: string) => void;
   onGoPath: () => void;
+  step: { text: string; ctaLabel: string; href: string; Icon: LucideIcon };
 }) {
   const [draftTask, setDraftTask] = useState("");
   // The beam should only mean "you're using this" -- a bare hover while
@@ -1819,16 +1892,18 @@ function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask,
         );
       })}
 
-      {/* the same next step as Top Three, at the foot of the plan under the
-         last level so it does not interrupt the plan's order (Joshua Pierce,
-         Slack, 5 and 6 Sept 2026) */}
+      {/* The same resolved next step as Overview, at the foot of the plan
+         under the last level so it does not interrupt the plan's order
+         (Joshua Pierce, Slack, 5 and 6 Sept 2026) -- was hardcoded to
+         Investment Banking regardless of focus career (direct feedback, 14
+         Sept 2026), now the shared `step` resolver like everywhere else. */}
       <NextStepBanner
         emphasis="priority"
         eyebrow="Your next step"
-        text="Play the Day in the Life for the career you’re starting with."
-        ctaLabel="Play"
-        href="/play/investment-banking"
-        Icon={Gamepad2}
+        text={step.text}
+        ctaLabel={step.ctaLabel}
+        href={step.href}
+        Icon={step.Icon}
         storageKey="dreamari:top3-next-step-dismissed"
       />
     </div>
@@ -2450,147 +2525,3 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
 // tab on top of the report (see CareerReport.tsx), so the old ShareSheet
 // modal is retired rather than kept as a second, drifting copy.
 
-// ---- Export overlay ----
-
-function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { career: ProfileCareer; route: ProfileCareer["routes"][number]; progress: { complete: number; total: number; pct: number }; next: PlanTask | null; tasksFor: (career: ProfileCareer, horizonId: string) => PlanTask[]; onClose: () => void }) {
-  const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  // Customizable export: the student picks which sections go in.
-  const [sections, setSections] = useState({ receipts: true, route: true, plan: true });
-  const toggle = (key: keyof typeof sections) => setSections((current) => ({ ...current, [key]: !current[key] }));
-  return (
-    <div className="print-overlay fixed inset-0 z-[70] overflow-y-auto" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)" }}>
-      <div className="no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-[var(--space-2)] px-5 py-3 backdrop-blur-[10px]" style={{ background: "var(--glass-surface-3)" }}>
-        <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report · {career.title}</span>
-        <span className="flex flex-wrap items-center gap-[var(--space-2)]">
-          {(
-            [
-              { key: "receipts", label: "Engagement" },
-              { key: "route", label: "Pathway" },
-              { key: "plan", label: "My Plan" },
-            ] as const
-          ).map((section) => (
-            <button
-              key={section.key}
-              type="button"
-              aria-pressed={sections[section.key]}
-              onClick={() => toggle(section.key)}
-              className="cursor-pointer rounded-[var(--radius-md)] border px-[12px] py-[4px] text-[15px] font-semibold"
-              style={{
-                background: sections[section.key] ? "color-mix(in srgb, var(--primary) 24%, transparent)" : "transparent",
-                borderColor: sections[section.key] ? "var(--primary)" : "var(--glass-border)",
-                color: sections[section.key] ? "var(--foreground)" : "var(--muted-foreground)",
-              }}
-            >
-              {section.label}
-            </button>
-          ))}
-          <button type="button" onClick={() => window.print()} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-            <Printer className="h-4 w-4" /> Print / Save PDF
-          </button>
-          <button type="button" onClick={onClose} aria-label="Close report" className="flex cursor-pointer items-center justify-center rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            <X className="h-4 w-4" />
-          </button>
-        </span>
-      </div>
-
-      <div className="print-report mx-auto my-6 w-[min(720px,92vw)] rounded-[8px] bg-white p-10 text-[#111827] shadow-2xl print:my-0 print:w-full print:rounded-none print:shadow-none">
-        <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-4">
-          <div>
-            <p className="text-[15px] font-bold tracking-[0.14em] text-[#6b7280] uppercase">Dreamari · Career Interest Report</p>
-            <p className="mt-1 text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{career.title}</p>
-            <p className="text-[15px] text-[#6b7280]">{career.world}</p>
-            <p className="mt-1 text-[14px] text-[#6b7280]">Prepared for counselors, school staff, and family</p>
-          </div>
-          <div className="text-right text-[14px] text-[#6b7280]">
-            <p className="font-bold text-[#111827]">{STUDENT.name}</p>
-            <p>{STUDENT.grade} · {STUDENT.school}</p>
-            <p>{today}</p>
-          </div>
-        </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          {[
-            ["Interest", `${interestTier(career.match)}, based on ${career.receipts.length} logged signals`],
-            ["Selected pathway", `${route.type}: ${route.program}`],
-            ["Plan progress", `${progress.complete} of ${progress.total} planned actions complete (${progress.pct}%)`],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-[6px] border border-[#e5e7eb] px-3 py-2">
-              <p className="text-[12px] font-bold tracking-[0.1em] text-[#6b7280] uppercase">{label}</p>
-              <p className="text-[15px] font-bold">{value}</p>
-            </div>
-          ))}
-        </div>
-
-        {sections.receipts && (
-          <ReportSection title="Demonstrated engagement">
-            <p className="mb-2 text-[14px] leading-[18px] text-[#6b7280]">Logged automatically from {STUDENT.name.split(" ")[0]}&apos;s activity in Dreamari. Sustained, self-directed engagement is the primary signal behind the match strength above.</p>
-            <ul className="list-disc pl-5 text-[15px] leading-[20px]">
-              {career.receipts.map((receipt) => (
-                <li key={receipt.label}>{receipt.value} · {receipt.label}</li>
-              ))}
-            </ul>
-          </ReportSection>
-        )}
-
-        {sections.route && (
-        <ReportSection title="Selected pathway">
-          <div className="grid grid-cols-3 gap-x-4 gap-y-2 text-[15px]">
-            {[
-              ["Program", route.program],
-              ["Location", route.location],
-              ["Time", route.duration],
-              ["Total cost", route.cost],
-              ["Credential", route.credential],
-              ["Starting pay", route.salary],
-              ["Loan payoff", route.loanPayoff],
-              ["Next step", route.nextStep],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <p className="text-[12px] font-bold tracking-[0.1em] text-[#6b7280] uppercase">{label}</p>
-                <p className="font-bold">{value}</p>
-              </div>
-            ))}
-          </div>
-        </ReportSection>
-        )}
-
-        {sections.plan && (
-        <ReportSection title="Action plan">
-          {career.plan.map((horizon) => (
-            <div key={horizon.id} className="mb-3">
-              <p className="text-[14px] font-bold">{horizon.title}{horizon.subtitle && <span className="font-normal text-[#6b7280]"> · {horizon.subtitle}</span>}</p>
-              <ul className="mt-1 list-disc pl-5 text-[15px] leading-[19px]">
-                {tasksFor(career, horizon.id).map((task) => (
-                  <li key={task.id}>{task.action}: {task.label}{task.outOfApp ? " (out of app)" : ""}{task.custom ? " (added by student)" : ""}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-          {next && <p className="mt-2 text-[15px] font-bold">Immediate next step: {next.action}: {next.label}</p>}
-        </ReportSection>
-        )}
-
-        <ReportSection title="For the advising conversation">
-          <ul className="list-disc pl-5 text-[15px] leading-[19px]">
-            <li>Review the {route.type.toLowerCase()} pathway together, including total cost ({route.cost}), typical starting pay ({route.salary}), and the estimated loan payoff window ({route.loanPayoff}).</li>
-            <li>Ask {STUDENT.name.split(" ")[0]} which activity felt most engaging. Interest built through repeated, voluntary practice is a stronger indicator than a single assessment.</li>
-            <li>If interest holds over the next grading period, help with the concrete next step: {route.nextStep}.</li>
-          </ul>
-        </ReportSection>
-
-        <p className="mt-6 border-t border-[#e5e7eb] pt-3 text-[12px] leading-[15px] text-[#6b7280]">
-          The interest level summarizes {STUDENT.name.split(" ")[0]}&apos;s logged activity in Dreamari. It is an engagement indicator intended to support advising conversations, not a psychometric assessment or a prediction of outcomes. Cost and salary figures are estimates for planning purposes. This report is shared with the student&apos;s consent.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ReportSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="mt-5">
-      <p className="mb-2 text-[15px] font-bold tracking-[0.14em] text-[#6b7280] uppercase">{title}</p>
-      {children}
-    </div>
-  );
-}
