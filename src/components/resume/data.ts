@@ -69,7 +69,7 @@ export const EXPERIENCE_QUESTIONS = [
  *    single column below it -- the boldest, most visually distinct option.
  *  Fonts are system-safe stacks only (no new network font loads, and it
  *  keeps Print/Save PDF and any future export reliable). */
-export type ResumeLayout = "single-column" | "sidebar" | "minimal" | "banner";
+type ResumeLayout = "single-column" | "sidebar" | "minimal" | "banner";
 export type ResumeTemplateId = "classic" | "sidebar-navy" | "minimal-forest" | "banner-gold";
 export const RESUME_TEMPLATES: { id: ResumeTemplateId; label: string; description: string; layout: ResumeLayout; accent: string; nameFont: string; bodyFont?: string }[] = [
   {
@@ -145,5 +145,4 @@ export const SAMPLE_RESUME_DATA: ResumeData = {
   skills: { people: ["Customer Service", "Teamwork"], tech: ["Google Workspace"], languages: ["Spanish"] },
   certifications: [{ id: "sample-cert-1", name: "Food Handler Certification", issuer: "ServSafe", issueDate: "March 2025", expirationDate: "March 2028", credentialId: "", credentialUrl: "" }],
   versions: [],
-  tipDismissed: false,
 };

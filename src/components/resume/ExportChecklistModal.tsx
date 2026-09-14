@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download, Printer } from "lucide-react";
 import type { ResumeData } from "@/lib/resume";
+import { dateRange, resumeSkillLines } from "./ResumeDocument";
 import { CARD_CLASS, INSET, ResumeModal } from "./ui";
 
 const CONFIRMATIONS = [
@@ -37,7 +38,7 @@ async function downloadDocx(resume: ResumeData) {
     children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 200 }, children: [new TextRun({ text: "EXPERIENCE", bold: true })] }));
     for (const exp of resume.experience) {
       children.push(new Paragraph({ children: [new TextRun({ text: exp.title || "Role", bold: true }), new TextRun({ text: exp.where ? ` at ${exp.where}` : "" })] }));
-      const range = exp.startDate || exp.endDate ? `${exp.startDate}${exp.current ? " - Present" : exp.endDate ? ` - ${exp.endDate}` : ""}` : "";
+      const range = dateRange(exp.startDate, exp.endDate, exp.current);
       const meta = [exp.location, range].filter(Boolean).join("  |  ");
       if (meta) children.push(new Paragraph({ children: [new TextRun({ text: meta, italics: true, size: 20 })] }));
       for (const bullet of exp.bullets) {
@@ -47,11 +48,7 @@ async function downloadDocx(resume: ResumeData) {
     }
   }
 
-  const skillLines = [
-    resume.skills.people.length > 0 && `People Skills: ${resume.skills.people.join(", ")}`,
-    resume.skills.tech.length > 0 && `Tech Skills: ${resume.skills.tech.join(", ")}`,
-    resume.skills.languages.length > 0 && `Languages: ${resume.skills.languages.join(", ")}`,
-  ].filter(Boolean) as string[];
+  const skillLines = resumeSkillLines(resume);
   if (skillLines.length > 0) {
     children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 200 }, children: [new TextRun({ text: "SKILLS", bold: true })] }));
     for (const line of skillLines) children.push(new Paragraph({ children: [new TextRun({ text: line, size: 21 })] }));
@@ -76,7 +73,7 @@ async function downloadDocx(resume: ResumeData) {
   URL.revokeObjectURL(url);
 }
 
-export function ExportChecklistModal({ resume, onClose }: { resume: ResumeData; templateId: string; onClose: () => void }) {
+export function ExportChecklistModal({ resume, onClose }: { resume: ResumeData; onClose: () => void }) {
   const [checked, setChecked] = useState<boolean[]>(() => CONFIRMATIONS.map(() => false));
   const allChecked = checked.every(Boolean);
   const [downloading, setDownloading] = useState(false);

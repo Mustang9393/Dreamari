@@ -5,11 +5,11 @@
 // below (type -> EMPTY -> normalize -> read/snapshot/subscribe/write) is
 // copied from them on purpose, not reinvented.
 
-export const RESUME_KEY = "dreamari-resume";
+const RESUME_KEY = "dreamari-resume";
 
 export type ExperienceType = "job" | "internship" | "research" | "volunteer" | "club" | "other";
 
-export type ResumeProfile = {
+type ResumeProfile = {
   firstName: string;
   lastName: string;
   email: string;
@@ -65,11 +65,11 @@ export type ResumeCertification = {
   credentialUrl: string;
 };
 
-export type ATSKeywordStatus = "verified" | "possible" | "missing";
-export type ATSKeywordMatch = { keyword: string; status: ATSKeywordStatus; context: string };
-export type ATSReadabilityStatus = "pass" | "warn";
-export type ATSReadabilityItem = { id: string; label: string; status: ATSReadabilityStatus; note: string };
-export type ATSQualityBreakdown = {
+type ATSKeywordStatus = "verified" | "possible" | "missing";
+type ATSKeywordMatch = { keyword: string; status: ATSKeywordStatus; context: string };
+type ATSReadabilityStatus = "pass" | "warn";
+type ATSReadabilityItem = { id: string; label: string; status: ATSReadabilityStatus; note: string };
+type ATSQualityBreakdown = {
   experienceQuality: number;
   bulletQuality: number;
   atsFormatting: number;
@@ -135,12 +135,10 @@ export type ResumeData = {
   skills: ResumeSkills;
   certifications: ResumeCertification[];
   versions: ResumeVersion[];
-  /** the "you've got a good start" coaching tip, shown once ever, not once per click */
-  tipDismissed: boolean;
 };
 
 export const EMPTY_PROFILE: ResumeProfile = { firstName: "", lastName: "", email: "", phone: "", country: "", state: "", city: "", bio: "" };
-export const EMPTY_SKILLS: ResumeSkills = { people: [], tech: [], languages: [] };
+const EMPTY_SKILLS: ResumeSkills = { people: [], tech: [], languages: [] };
 export const EMPTY_RESUME: ResumeData = {
   profile: EMPTY_PROFILE,
   education: [],
@@ -148,7 +146,6 @@ export const EMPTY_RESUME: ResumeData = {
   skills: EMPTY_SKILLS,
   certifications: [],
   versions: [],
-  tipDismissed: false,
 };
 
 export const MAX_SKILLS_PER_CATEGORY = 3;
@@ -285,7 +282,6 @@ function normalize(value: unknown): ResumeData {
     skills: normalizeSkills(v.skills),
     certifications: normalizeCertifications(v.certifications),
     versions: normalizeVersions(v.versions),
-    tipDismissed: bool(v.tipDismissed),
   };
 }
 
@@ -343,10 +339,6 @@ export function writeResume(patch: Partial<ResumeData>): void {
     // no storage: the session still works, it just won't be remembered
   }
   for (const listener of listeners) listener();
-}
-
-export function isResumeEmpty(r: ResumeData): boolean {
-  return r.education.length === 0 && r.experience.length === 0 && r.certifications.length === 0 && r.skills.people.length === 0 && r.skills.tech.length === 0 && r.skills.languages.length === 0 && !r.profile.firstName && !r.profile.lastName;
 }
 
 // ---- List helpers -----------------------------------------------------

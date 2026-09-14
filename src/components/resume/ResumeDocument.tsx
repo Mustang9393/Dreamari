@@ -81,13 +81,25 @@ function SectionLabel({ children, variant = "rule" }: { children: ReactNode; var
   );
 }
 
-function dateRange(start: string, end: string, current: boolean) {
+export function dateRange(start: string, end: string, current: boolean) {
   const from = start.trim();
   const to = current ? "Present" : end.trim();
   if (!from && !to) return "";
   if (!from) return to;
   if (!to) return from;
   return `${from} – ${to}`;
+}
+
+/** "People Skills: ...", "Tech Skills: ...", "Languages: ..." -- one line
+ *  per non-empty category, shared by every place that flattens the resume
+ *  to text (Text Preview, .docx export) so they never drift from each
+ *  other. */
+export function resumeSkillLines(resume: ResumeData): string[] {
+  return [
+    resume.skills.people.length > 0 && `People Skills: ${resume.skills.people.join(", ")}`,
+    resume.skills.tech.length > 0 && `Tech Skills: ${resume.skills.tech.join(", ")}`,
+    resume.skills.languages.length > 0 && `Languages: ${resume.skills.languages.join(", ")}`,
+  ].filter((line): line is string => !!line);
 }
 
 // ---- Shared entry content -- identical across layouts, just arranged

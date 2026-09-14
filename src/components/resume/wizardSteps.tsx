@@ -8,6 +8,7 @@ import {
   type ResumeEducation,
   type ResumeExperience,
   makeId,
+  MAX_SKILLS_PER_CATEGORY,
   readResume,
   removeCertification,
   removeEducation,
@@ -315,7 +316,7 @@ export function ExperienceStep({ resume, onNext, onBack, onAdd, onEdit }: { resu
 function SkillsPicker({ categoryKey, label, hint, suggestions, selected, onClose, onSave }: { categoryKey: "people" | "tech" | "languages"; label: string; hint: string; suggestions: string[]; selected: string[]; onClose: () => void; onSave: (values: string[]) => void }) {
   const [picked, setPicked] = useState<string[]>(selected);
   const [custom, setCustom] = useState("");
-  const toggle = (s: string) => setPicked((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : cur.length >= 3 ? cur : [...cur, s]));
+  const toggle = (s: string) => setPicked((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : cur.length >= MAX_SKILLS_PER_CATEGORY ? cur : [...cur, s]));
   return (
     <ResumeModal title={label} onClose={onClose}>
       <p className="mb-[var(--space-4)] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{hint} Pick up to 3.</p>
@@ -324,7 +325,7 @@ function SkillsPicker({ categoryKey, label, hint, suggestions, selected, onClose
         <button
           type="button"
           onClick={() => {
-            if (!custom.trim() || picked.length >= 3) return;
+            if (!custom.trim() || picked.length >= MAX_SKILLS_PER_CATEGORY) return;
             setPicked([...picked, custom.trim()]);
             setCustom("");
           }}
@@ -405,23 +406,6 @@ export function SkillsStep({ resume, onNext, onBack }: { resume: ResumeData; onN
           </div>
         );
       })}
-      {open && (() => {
-        const cat = SKILL_CATEGORIES.find((c) => c.key === open)!;
-        return (
-          <SkillsPicker
-            categoryKey={cat.key}
-            label={cat.label}
-            hint={cat.hint}
-            suggestions={cat.suggestions}
-            selected={resume.skills[cat.key]}
-            onClose={() => setOpen(null)}
-            onSave={(values) => {
-              writeResume({ skills: { ...readResume().skills, [cat.key]: values } });
-              setOpen(null);
-            }}
-          />
-        );
-      })()}
       <WizardFooter onBack={onBack} onNext={onNext} />
     </div>
   );

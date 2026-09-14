@@ -1,7 +1,8 @@
 "use client";
 
 import type { ResumeData } from "@/lib/resume";
-import { CARD_CLASS, INSET, ResumeModal } from "./ui";
+import { dateRange, resumeSkillLines } from "./ResumeDocument";
+import { CARD_CLASS, INSET, NOT_A_GUARANTEE_NOTE, ResumeModal } from "./ui";
 
 // What an ATS parser typically sees: flattened plain text, no layout, no
 // styling. Built straight from the data model (not scraped off the visual
@@ -26,17 +27,13 @@ function resumeToPlainText(resume: ResumeData): string {
     lines.push("", "EXPERIENCE");
     for (const exp of resume.experience) {
       lines.push([exp.title, exp.where].filter(Boolean).join(" | "));
-      const range = exp.startDate || exp.endDate ? `${exp.startDate}${exp.current ? " - Present" : exp.endDate ? ` - ${exp.endDate}` : ""}` : "";
+      const range = dateRange(exp.startDate, exp.endDate, exp.current);
       if (exp.location || range) lines.push([exp.location, range].filter(Boolean).join(" | "));
       for (const bullet of exp.bullets) if (bullet.trim()) lines.push(`* ${bullet}`);
     }
   }
 
-  const skillLines = [
-    resume.skills.people.length > 0 && `People Skills: ${resume.skills.people.join(", ")}`,
-    resume.skills.tech.length > 0 && `Tech Skills: ${resume.skills.tech.join(", ")}`,
-    resume.skills.languages.length > 0 && `Languages: ${resume.skills.languages.join(", ")}`,
-  ].filter(Boolean) as string[];
+  const skillLines = resumeSkillLines(resume);
   if (skillLines.length > 0) lines.push("", "SKILLS", ...skillLines);
 
   if (resume.certifications.length > 0) {
@@ -50,7 +47,7 @@ function resumeToPlainText(resume: ResumeData): string {
 export function TextPreviewModal({ resume, onClose }: { resume: ResumeData; onClose: () => void }) {
   return (
     <ResumeModal title="ATS Text Preview" onClose={onClose}>
-      <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>How your resume looks as plain text. Not a guarantee every system reads it the same way.</p>
+      <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>How your resume looks as plain text. {NOT_A_GUARANTEE_NOTE}</p>
       <pre className={`${CARD_CLASS} overflow-x-auto text-[12.5px] leading-[1.6] whitespace-pre-wrap`} style={{ ...INSET, fontFamily: "var(--font-mono, monospace)", color: "var(--foreground)" }}>
         {resumeToPlainText(resume)}
       </pre>

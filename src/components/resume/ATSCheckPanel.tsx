@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AlertTriangle, Check, CheckCircle2, Sparkles } from "lucide-react";
 import { saveATSCheck, type ATSCheckResult, type ResumeData, type ResumeVersion } from "@/lib/resume";
-import { CARD_CLASS, INSET, ResumeModal } from "./ui";
+import { CARD_CLASS, INSET, NOT_A_GUARANTEE_NOTE, ResumeModal } from "./ui";
 
 // The full "ATS Check" audit -- resume-quality rating (score + grade + a
 // 7-category breakdown + strengths/improvements), a job-match breakdown,
@@ -208,7 +208,7 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
                 </li>
               ))}
             </ul>
-            <p className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>Not a guarantee every system will read it the same way.</p>
+            <p className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>{NOT_A_GUARANTEE_NOTE}</p>
           </div>
 
           {result.missingQualifications.length > 0 && (

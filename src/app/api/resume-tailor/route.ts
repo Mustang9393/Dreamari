@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { matchLabelFor, mentionedSkills, type ExperienceInput, type SkillCategory, type SkillsInput } from "@/lib/resumeSkillMatch";
 
 // Resume Builder's "Match to a Job" step (14-15 Sept 2026, direct feedback:
 // "where do we introduce tailoring... make that work, and make that part
@@ -14,10 +15,6 @@ import { NextResponse } from "next/server";
 // mentioned it. Matches the same "absence is real, never fabricated" rule
 // this whole app already holds data to.
 
-type ExperienceInput = { id: string; title: string; where: string; bullets: string[] };
-type SkillsInput = { people: string[]; tech: string[]; languages: string[] };
-type SkillCategory = "people" | "tech" | "languages";
-
 type Payload = {
   jobDescription?: string;
   targetPosition?: string;
@@ -31,37 +28,19 @@ export type TailorAnalysis = { matchScore: number; matchLabel: string; qualitySc
 
 const text = (v: unknown, max = 6000) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
-const SKILL_POOL: { category: SkillCategory; skills: string[] }[] = [
-  { category: "people", skills: ["Communication", "Teamwork", "Leadership", "Customer Service", "Adaptability", "Professionalism", "Problem Solving", "Time Management"] },
-  { category: "tech", skills: ["Microsoft Excel", "Google Workspace", "Canva", "Photoshop", "Python", "Cash Register", "Social Media"] },
-  { category: "languages", skills: ["English", "Spanish", "Mandarin", "French", "Hindi", "Arabic"] },
-];
-
-function matchLabelFor(score: number): string {
-  if (score >= 75) return "Strong Match";
-  if (score >= 45) return "Possible Match";
-  return "Early Fit";
-}
-
 function templateAnalysis(jobDescription: string, experience: ExperienceInput[], skills: SkillsInput): TailorAnalysis {
-  const jdLower = jobDescription.toLowerCase();
   const have = new Set([...skills.people, ...skills.tech, ...skills.languages].map((s) => s.toLowerCase()));
-
-  const mentioned = SKILL_POOL.flatMap((c) => c.skills.map((skill) => ({ category: c.category, skill }))).filter(({ skill }) => jdLower.includes(skill.toLowerCase()));
+  const mentioned = mentionedSkills(jobDescription, skills, experience);
 
   const suggestions: SkillSuggestion[] = [];
   const gaps: string[] = [];
   let verified = 0;
-  for (const { category, skill } of mentioned) {
-    const skillLower = skill.toLowerCase();
-    if (have.has(skillLower)) {
+  for (const { category, skill, status, supportingLabel } of mentioned) {
+    if (status === "verified") {
       verified++;
-      continue;
-    }
-    const supportingEntry = experience.find((e) => [e.title, e.where, ...e.bullets].join(" ").toLowerCase().includes(skillLower));
-    if (supportingEntry) {
+    } else if (status === "possible" && supportingLabel) {
       verified++;
-      suggestions.push({ category, skill, reason: `Shows up in your ${supportingEntry.title || supportingEntry.where} experience -- worth listing as a named skill.` });
+      suggestions.push({ category, skill, reason: `Shows up in your ${supportingLabel} experience -- worth listing as a named skill.` });
     } else {
       gaps.push(skill);
     }

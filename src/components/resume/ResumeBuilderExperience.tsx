@@ -138,7 +138,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
       ) : panel === "text" ? (
         <TextPreviewModal resume={resume} onClose={() => setPanel("none")} />
       ) : panel === "export" ? (
-        <ExportChecklistModal resume={resume} templateId={templateId} onClose={() => setPanel("none")} />
+        <ExportChecklistModal resume={resume} onClose={() => setPanel("none")} />
       ) : (
         <ResumeDocument resume={resume} templateId={templateId} />
       )}

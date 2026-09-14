@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { matchLabelFor, mentionedSkills } from "@/lib/resumeSkillMatch";
 
 // The full "ATS Check" audit (15 Sept 2026, direct feedback: "make sure all
 // of the functionality from the replit is there" -- the reference's ATS
@@ -19,7 +20,6 @@ import { NextResponse } from "next/server";
 type ExperienceInput = { id: string; title: string; where: string; startDate: string; current: boolean; bullets: string[] };
 type SkillsInput = { people: string[]; tech: string[]; languages: string[] };
 type EducationInput = { schoolName: string; gradYear: string };
-type SkillCategory = "people" | "tech" | "languages";
 
 type Payload = {
   jobDescription?: string;
@@ -111,29 +111,19 @@ function fallbackExperienceScores(experience: ExperienceInput[]): { experienceQu
   return { experienceQuality, bulletQuality, focusConciseness };
 }
 
-const SKILL_POOL: { category: SkillCategory; skills: string[] }[] = [
-  { category: "people", skills: ["Communication", "Teamwork", "Leadership", "Customer Service", "Adaptability", "Professionalism", "Problem Solving", "Time Management"] },
-  { category: "tech", skills: ["Microsoft Excel", "Google Workspace", "Canva", "Photoshop", "Python", "Cash Register", "Social Media"] },
-  { category: "languages", skills: ["English", "Spanish", "Mandarin", "French", "Hindi", "Arabic"] },
-];
-
 function fallbackJobMatch(jobDescription: string, experience: ExperienceInput[], skills: SkillsInput) {
   if (!jobDescription) return { jobMatchScore: null, jobMatchLabel: "", verifiedMatches: [] as string[], possibleMatches: [] as string[], jobGaps: [] as string[], keywordMatches: [] as KeywordMatch[], missingQualifications: [] as string[] };
-  const jdLower = jobDescription.toLowerCase();
-  const have = new Set([...skills.people, ...skills.tech, ...skills.languages].map((s) => s.toLowerCase()));
-  const mentioned = SKILL_POOL.flatMap((c) => c.skills).filter((s) => jdLower.includes(s.toLowerCase()));
-  const keywordMatches: KeywordMatch[] = mentioned.map((skill) => {
-    const skillLower = skill.toLowerCase();
-    if (have.has(skillLower)) return { keyword: skill, status: "verified", context: "Listed in your confirmed skills." };
-    const supporting = experience.find((e) => [e.title, e.where, ...e.bullets].join(" ").toLowerCase().includes(skillLower));
-    if (supporting) return { keyword: skill, status: "possible", context: `Reflected in your ${supporting.title || supporting.where} experience, not listed as a named skill.` };
-    return { keyword: skill, status: "missing", context: "No verified experience or skill." };
-  });
+  const mentioned = mentionedSkills(jobDescription, skills, experience);
+  const keywordMatches: KeywordMatch[] = mentioned.map(({ skill, status, supportingLabel }) => ({
+    keyword: skill,
+    status,
+    context: status === "verified" ? "Listed in your confirmed skills." : status === "possible" ? `Reflected in your ${supportingLabel} experience, not listed as a named skill.` : "No verified experience or skill.",
+  }));
   const verifiedMatches = keywordMatches.filter((k) => k.status === "verified").map((k) => k.keyword);
   const possibleMatches = keywordMatches.filter((k) => k.status === "possible").map((k) => k.keyword);
   const jobGaps = keywordMatches.filter((k) => k.status === "missing").map((k) => k.keyword);
   const jobMatchScore = mentioned.length > 0 ? Math.round(((verifiedMatches.length + possibleMatches.length * 0.5) / mentioned.length) * 100) : 50;
-  const jobMatchLabel = jobMatchScore >= 75 ? "Strong Match" : jobMatchScore >= 45 ? "Possible Match" : "Early Fit";
+  const jobMatchLabel = matchLabelFor(jobMatchScore);
   const missingQualifications = jobGaps.map((g) => `${g} — no verified experience`);
   return { jobMatchScore, jobMatchLabel, verifiedMatches, possibleMatches, jobGaps, keywordMatches, missingQualifications };
 }
