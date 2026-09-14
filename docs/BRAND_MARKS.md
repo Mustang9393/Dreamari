@@ -33,5 +33,14 @@ Files live in `public/images/logos/companies/`; registration is `COMPANY_MARKS` 
 | Mayo Clinic | Not found | White | To confirm |
 | Johnson & Johnson | Not found | White | To confirm |
 | Blackstone | Not checked | White | To confirm |
+| IBM | Not checked | White wordmark, `ibm.svg` (Wikimedia Commons "IBM logo.svg") | To confirm |
+| Genentech | Not checked | White wordmark, `genentech.svg` (Wikimedia Commons "Genentech.svg") | To confirm |
+| CDC Foundation | Not checked | White mark + wordmark, `cdc-foundation.svg` (the foundation's own site, cdcfoundation.org -- its own mark, not the government CDC's; the source file's "Together our impact is greater" tagline is stripped, dot mark and wordmark kept) | To confirm |
+| UnitedHealth Group | Not checked | White wordmark, `unitedhealth-group.svg` (Wikimedia Commons "UnitedHealth Group logo.svg") | To confirm |
+| Kaiser Permanente | Not checked | White mark + wordmark, `kaiser-permanente.svg` (Wikimedia Commons "KP logo.svg", the brand's full lockup despite the filename, not just "KP") | To confirm |
+| Moderna | Not checked | White wordmark + dash mark, `moderna.svg` (Wikimedia Commons "Moderna logo.svg") | To confirm |
+| Warner Music Group | Not checked | White symbol + wordmark, `warner-music-group.svg` (Wikimedia Commons "Warner Music Group horizontal logo.svg") | To confirm |
+| Paramount | Not checked | White wordmark, `paramount.svg` (Wikimedia Commons "Paramount-logotype.svg", the current post-Skydance-merger "Paramount, A Skydance Corporation" lockup) | To confirm |
+| Condé Nast | Not checked | White wordmark, `conde-nast.svg` (Wikimedia Commons "Condé Nast logo.svg") | To confirm |
 
 Beyond colour: most of these brands require permission for a third party to show their logo at all. Decision of 4 Sept 2026: every mark in this table is cleared for demo use. Before public launch each needs a written OK or a text name instead. The Kellogg's office tour is a Kellogg's office and carries the Kellogg's mark; only the Kellanova talent director clip carries Mars.

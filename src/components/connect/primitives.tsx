@@ -533,6 +533,28 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // red-on-white use is cleared with brand@netflix.com.
   Netflix: { file: "netflix", aspect: 3.7 },
   Adobe: { file: "adobe", aspect: 3.8 },
+  // Nine more added when professionalsFrom was expanded across all five
+  // communities (14 Sept 2026); same trimmed-to-ink-bounds treatment as the
+  // 2026-09-03 batch above, marks pulled from each brand's own current
+  // wordmark (Wikimedia Commons except CDC Foundation, see below).
+  IBM: { file: "ibm", aspect: 2.6775 },
+  Genentech: { file: "genentech", aspect: 7.0366 },
+  // CDC Foundation is the independent nonprofit, not the government CDC
+  // agency -- its mark comes from its own site (cdcfoundation.org), not
+  // Wikimedia's CDC seal. Source file carries a "Together our impact is
+  // greater" tagline under the mark; those glyphs (fill #85888b in the
+  // source) are stripped so the chip shows just the dot mark + wordmark.
+  "CDC Foundation": { file: "cdc-foundation", aspect: 4.4261 },
+  "UnitedHealth Group": { file: "unitedhealth-group", aspect: 13.788 },
+  // KP logo.svg is Kaiser Permanente's own full lockup (sunburst mark +
+  // wordmark), not just the "KP" initials.
+  "Kaiser Permanente": { file: "kaiser-permanente", aspect: 8.9746 },
+  Moderna: { file: "moderna", aspect: 4.3539 },
+  "Warner Music Group": { file: "warner-music-group", aspect: 4.0608 },
+  // The current wordmark (post-Skydance-merger "Paramount, A Skydance
+  // Corporation" lockup), not the earlier arched Paramount Global mark.
+  Paramount: { file: "paramount", aspect: 3.2583 },
+  "Condé Nast": { file: "conde-nast", aspect: 6.8193 },
 };
 
 // Equal visual weight (direct feedback: letters the same height, chips the
