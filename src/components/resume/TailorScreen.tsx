@@ -8,6 +8,10 @@ import { CARD_CLASS, Field, INSET, TextInput, WizardFooter } from "./ui";
 
 const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "", template: DEFAULT_RESUME_TEMPLATE };
 
+// A quick way to change an already-picked template -- the real, informed
+// choice happens in the full gallery (with a genuine example preview per
+// layout), so this stays a simple swatch + name rather than trying to
+// re-mimic four different real layouts in a 52px box.
 function TemplatePicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   return (
     <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-4">
@@ -18,15 +22,10 @@ function TemplatePicker({ value, onChange }: { value: string; onChange: (id: str
             key={t.id}
             type="button"
             onClick={() => onChange(t.id)}
-            className="dm-tap flex cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left"
+            className="dm-tap flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left"
             style={selected ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 10%, transparent)" } : { borderColor: "var(--glass-border)" }}
           >
-            <div className="flex h-[52px] w-full flex-col gap-[4px] rounded-[6px] bg-white p-[8px]">
-              <div className="h-[6px] w-[60%] rounded-[2px]" style={{ background: t.accent, fontFamily: t.nameFont === "serif" ? "Georgia, serif" : undefined }} />
-              <div className="h-[3px] w-[85%] rounded-[2px]" style={{ background: t.accent, opacity: 0.35 }} />
-              <div className="h-[3px] w-[70%] rounded-[2px]" style={{ background: "#d0d0d0" }} />
-              <div className="h-[3px] w-[75%] rounded-[2px]" style={{ background: "#d0d0d0" }} />
-            </div>
+            <span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />
             <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
               {selected && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
               {t.label}
@@ -65,8 +64,10 @@ function PickRow({ label, meta, checked, onToggle }: { label: string; meta?: str
 // description. Skills and certifications always carry through (plan's
 // original scope) -- only these two lists are picked per version, which is
 // the actual point of having more than one saved resume.
-export function TailorScreen({ resume, initial, onCancel, onSaved }: { resume: ResumeData; initial: ResumeVersion | null; onCancel: () => void; onSaved: (version: ResumeVersion) => void }) {
-  const [draft, setDraft] = useState<ResumeVersion>(initial ?? { ...EMPTY_VERSION, id: makeId(), educationIds: resume.education.map((e) => e.id), experienceIds: resume.experience.map((e) => e.id) });
+export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onSaved }: { resume: ResumeData; initial: ResumeVersion | null; initialTemplateId?: string; onCancel: () => void; onSaved: (version: ResumeVersion) => void }) {
+  const [draft, setDraft] = useState<ResumeVersion>(
+    initial ?? { ...EMPTY_VERSION, id: makeId(), educationIds: resume.education.map((e) => e.id), experienceIds: resume.experience.map((e) => e.id), template: initialTemplateId ?? DEFAULT_RESUME_TEMPLATE },
+  );
   const canSave = draft.name.trim().length > 0;
 
   const toggleEducation = (id: string) => setDraft((d) => ({ ...d, educationIds: d.educationIds.includes(id) ? d.educationIds.filter((x) => x !== id) : [...d.educationIds, id] }));

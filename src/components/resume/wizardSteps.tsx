@@ -93,6 +93,18 @@ export function PersonalInfoStep({ resume, onNext, showToast }: { resume: Resume
       <Field label="City" htmlFor="rb-city">
         <TextInput id="rb-city" value={p.city} onChange={(v) => set({ city: v })} placeholder="San Jose" />
       </Field>
+      <Field label="Short Bio (optional)" htmlFor="rb-bio">
+        <textarea
+          id="rb-bio"
+          value={p.bio}
+          onChange={(e) => set({ bio: e.target.value })}
+          placeholder="A sentence or two about what you're looking for and what makes you a strong candidate."
+          rows={3}
+          maxLength={400}
+          className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]"
+          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        />
+      </Field>
       <WizardFooter
         nextDisabled={!canContinue}
         onNext={() => {
@@ -373,22 +385,38 @@ export function SkillsStep({ resume, onNext, onBack }: { resume: ResumeData; onN
 // ---------------------------------------------------------------------------
 // 5. Certifications
 // ---------------------------------------------------------------------------
-const EMPTY_CERT: ResumeCertification = { id: "", name: "", issuer: "", date: "" };
+const EMPTY_CERT: ResumeCertification = { id: "", name: "", issuer: "", issueDate: "", expirationDate: "", credentialId: "", credentialUrl: "" };
 
+// Matches the reference's actual fields exactly (checked live, 15 Sept
+// 2026): Name and Issuing Organization both required, separate issue/
+// expiration dates rather than one combined date, plus optional credential
+// ID/URL for verification -- the shape any real certification (AWS, food
+// handler, CPR) actually needs.
 function CertificationModal({ initial, onClose, onSaved }: { initial: ResumeCertification | null; onClose: () => void; onSaved: (name: string) => void }) {
   const [draft, setDraft] = useState<ResumeCertification>(initial ?? { ...EMPTY_CERT, id: makeId() });
-  const canSave = draft.name.trim().length > 0;
+  const canSave = draft.name.trim().length > 0 && draft.issuer.trim().length > 0;
   return (
-    <ResumeModal title="Add a Certification" onClose={onClose}>
+    <ResumeModal title="Add Certification" onClose={onClose}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="Certification Name" htmlFor="cert-name" required>
-          <TextInput id="cert-name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} placeholder="e.g. CPR Certified" />
+          <TextInput id="cert-name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} placeholder="e.g. AWS Certified Cloud Practitioner" />
         </Field>
-        <Field label="Issuing Organization (optional)" htmlFor="cert-issuer">
-          <TextInput id="cert-issuer" value={draft.issuer} onChange={(v) => setDraft({ ...draft, issuer: v })} placeholder="e.g. American Red Cross" />
+        <Field label="Issuing Organization" htmlFor="cert-issuer" required>
+          <TextInput id="cert-issuer" value={draft.issuer} onChange={(v) => setDraft({ ...draft, issuer: v })} placeholder="e.g. Amazon Web Services" />
         </Field>
-        <Field label="Date (optional)" htmlFor="cert-date">
-          <TextInput id="cert-date" value={draft.date} onChange={(v) => setDraft({ ...draft, date: v })} placeholder="e.g. March 2026" />
+        <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
+          <Field label="Issue Date" htmlFor="cert-issue-date">
+            <TextInput id="cert-issue-date" value={draft.issueDate} onChange={(v) => setDraft({ ...draft, issueDate: v })} placeholder="e.g. Jan 2024" />
+          </Field>
+          <Field label="Expiration Date" htmlFor="cert-exp-date">
+            <TextInput id="cert-exp-date" value={draft.expirationDate} onChange={(v) => setDraft({ ...draft, expirationDate: v })} placeholder="e.g. Jan 2027 or No Expiry" />
+          </Field>
+        </div>
+        <Field label="Credential ID (optional)" htmlFor="cert-credential-id">
+          <TextInput id="cert-credential-id" value={draft.credentialId} onChange={(v) => setDraft({ ...draft, credentialId: v })} placeholder="e.g. ABC123XYZ" />
+        </Field>
+        <Field label="Credential URL (optional)" htmlFor="cert-credential-url">
+          <TextInput id="cert-credential-url" value={draft.credentialUrl} onChange={(v) => setDraft({ ...draft, credentialUrl: v })} placeholder="e.g. https://www.credly.com/badges/…" />
         </Field>
         <div className="flex items-center justify-end gap-[var(--space-3)] pt-[var(--space-2)]">
           <button type="button" onClick={onClose} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
@@ -422,7 +450,7 @@ export function CertificationsStep({ resume, onNext, onBack, showToast }: { resu
       ) : (
         <div className="flex flex-col gap-[var(--space-3)]">
           {resume.certifications.map((c) => (
-            <EntryRow key={c.id} title={c.name} subtitle={c.issuer || undefined} meta={c.date || undefined} onEdit={() => setEditing(c)} onRemove={() => removeCertification(c.id)} />
+            <EntryRow key={c.id} title={c.name} subtitle={c.issuer || undefined} meta={c.issueDate || undefined} onEdit={() => setEditing(c)} onRemove={() => removeCertification(c.id)} />
           ))}
         </div>
       )}

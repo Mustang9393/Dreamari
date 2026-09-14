@@ -18,7 +18,7 @@ function prefillFromStudentProfileIfEmpty() {
   if (!isResumeEmpty(readResume())) return;
   const sp = readStudentProfile();
   const [firstName, ...rest] = STUDENT.name.split(" ");
-  writeResume({ profile: { firstName, lastName: rest.join(" "), email: sp.email, phone: "", country: "", state: sp.states[0] ?? "", city: "" } });
+  writeResume({ profile: { firstName, lastName: rest.join(" "), email: sp.email, phone: "", country: "", state: sp.states[0] ?? "", city: "", bio: "" } });
 }
 
 function formatDate(ts: number) {
@@ -63,7 +63,9 @@ export function ResumeExperience() {
 
   const startBuilding = () => {
     prefillFromStudentProfileIfEmpty();
-    router.push("/resume-builder");
+    // Template first, with a real example in every option (direct feedback,
+    // 14 Sept 2026), then straight into filling it out.
+    router.push("/resume-builder?view=templates");
   };
 
   const versions = [...resume.versions].sort((a, b) => b.updatedAt - a.updatedAt);
@@ -140,7 +142,7 @@ export function ResumeExperience() {
           <span className="text-[13px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your Resumes</span>
           <button
             type="button"
-            onClick={() => router.push("/resume-builder?view=tailor")}
+            onClick={() => router.push("/resume-builder?view=templates")}
             className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white"
             style={{ background: "var(--primary)" }}
           >

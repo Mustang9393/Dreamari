@@ -17,6 +17,10 @@ export type ResumeProfile = {
   country: string;
   state: string;
   city: string;
+  /** Optional 1-2 sentence intro/objective. Not in the original reference,
+   *  added on request -- standard advice for a student resume with a short
+   *  work history, and it's opt-in so nobody is forced to write one. */
+  bio: string;
 };
 
 export type ResumeEducation = {
@@ -55,7 +59,10 @@ export type ResumeCertification = {
   id: string;
   name: string;
   issuer: string;
-  date: string;
+  issueDate: string;
+  expirationDate: string;
+  credentialId: string;
+  credentialUrl: string;
 };
 
 export type ResumeVersion = {
@@ -82,7 +89,7 @@ export type ResumeData = {
   tipDismissed: boolean;
 };
 
-export const EMPTY_PROFILE: ResumeProfile = { firstName: "", lastName: "", email: "", phone: "", country: "", state: "", city: "" };
+export const EMPTY_PROFILE: ResumeProfile = { firstName: "", lastName: "", email: "", phone: "", country: "", state: "", city: "", bio: "" };
 export const EMPTY_SKILLS: ResumeSkills = { people: [], tech: [], languages: [] };
 export const EMPTY_RESUME: ResumeData = {
   profile: EMPTY_PROFILE,
@@ -114,7 +121,7 @@ function strings(value: unknown, max = Infinity): string[] {
 function normalizeProfile(value: unknown): ResumeProfile {
   if (!value || typeof value !== "object") return EMPTY_PROFILE;
   const v = value as Record<string, unknown>;
-  return { firstName: str(v.firstName), lastName: str(v.lastName), email: str(v.email), phone: str(v.phone), country: str(v.country), state: str(v.state), city: str(v.city) };
+  return { firstName: str(v.firstName), lastName: str(v.lastName), email: str(v.email), phone: str(v.phone), country: str(v.country), state: str(v.state), city: str(v.city), bio: str(v.bio).slice(0, 400) };
 }
 function normalizeEducation(value: unknown): ResumeEducation[] {
   if (!Array.isArray(value)) return [];
@@ -149,7 +156,7 @@ function normalizeCertifications(value: unknown): ResumeCertification[] {
   if (!Array.isArray(value)) return [];
   return value
     .filter((v): v is Record<string, unknown> => !!v && typeof v === "object" && typeof (v as Record<string, unknown>).id === "string")
-    .map((v) => ({ id: str(v.id), name: str(v.name), issuer: str(v.issuer), date: str(v.date) }));
+    .map((v) => ({ id: str(v.id), name: str(v.name), issuer: str(v.issuer), issueDate: str(v.issueDate), expirationDate: str(v.expirationDate), credentialId: str(v.credentialId), credentialUrl: str(v.credentialUrl) }));
 }
 function normalizeVersions(value: unknown): ResumeVersion[] {
   if (!Array.isArray(value)) return [];

@@ -8615,7 +8615,108 @@ select different color/style/layout or preset templates." Two real gaps:
    the Tailor screen, saved per resume version, so different tailored
    resumes can carry different templates independently.
 
+**Same-day follow-up 6:** several rounds of direct feedback once templates
+and the live preview were live:
+
+1. "there are more features like choosing and tailoring and customising
+   after the first generic creation flow, also the field for
+   certifications are wrong... incorporate Dreamy but not as small as its
+   used in the replit and not like an afterthought." Re-checked the
+   reference live (`seed` tab) rather than relying on memory:
+   - Confirmed the reference's own "generate/customize further" flow is
+     actually broken end to end -- repeated attempts through its "You've
+     got a good start" nudge modal (`Got it!` and `Generate Anyway` both
+     just close it and drop back to the same form) left "Saved Resumes"
+     permanently empty. There is no further screen to replicate; Choose &
+     Tailor (name, education picker, experience picker, job description,
+     "skills automatically included") already matches what's built here,
+     and unlike the reference it actually completes.
+   - Certifications WAS wrong: the reference's real fields are Certification
+     Name*, Issuing Organization* (required, not optional), separate Issue
+     Date / Expiration Date (not one combined date), plus optional
+     Credential ID and Credential URL. `ResumeCertification` in `resume.ts`,
+     the wizard's `CertificationModal`, and `ResumeDocument`'s rendering
+     were all rewritten to match exactly.
+   - Templates got real structural variety, not just color, researched
+     against common US resume archetypes: Classic (single column, the
+     reference's own shape, kept as default), Modern Sidebar (a tinted
+     aside for contact/skills/certifications next to a main story column),
+     Minimalist (left-aligned, thin accent labels, no full rules), Banner
+     (a bold color band across the top). Backgrounds stay light tints, never
+     solid-color-behind-white-text, since most browsers suppress background
+     graphics on print by default -- a solid fill would print invisible.
+   - Dreamy: reused Build's own `DreamyGuide` component directly (not
+     reinvented) with a new `RESUME_WIZARD_DREAMY`/`RESUME_TEMPLATE_GALLERY_
+     DREAMY` line+sprite map in `data.ts`, matching `STAGE_DREAMY`'s exact
+     pattern. Now present at full Build-scale on every wizard step and the
+     template gallery, with the same reaction-burst-on-advance wiring
+     (`reactionNonce`/`react()`) Build itself uses.
+2. "selecting a template should come before building it out... show me a
+   fully populated example." Added `TemplateGallery.tsx` + `SAMPLE_RESUME_
+   DATA` (one consistent example person/content across every card, so only
+   the template differs) as a new `?view=templates` step ahead of the
+   wizard/tailor, wired from both "Create My Resume" (zero state) and
+   "Create New Resume" (Your Resumes list).
+3. "use more of the width of the screen... match the margins to home and
+   explore." `Shell`'s outer container now uses the exact classes Home/
+   Explore/Profile all share (`max-w-[1440px] px-5 sm:px-[var(--space-14)]`)
+   instead of ad hoc per-view values; individual views center their own
+   narrower content within that same consistent gutter.
+4. "give the preview more prominence... more width... always zoomable and
+   can be opened in a new window." Widened the wizard's grid so the preview
+   column gets the larger share (`520px` fixed form / `1fr` preview, was
+   `680px`/`1fr`). Added `OpenInNewWindowButton` (`window.open` on the
+   view's own URL) next to the existing zoom modal in both the document
+   view and the wizard's live preview -- confirmed `window.open` is blocked
+   by this sandboxed Browser pane specifically (returns `null`), not a code
+   issue; works from a real user click in a real browser tab.
+5. "the preview can zoom in on the section that I am filling in... crop and
+   scrollable too... but always fit the width." Added `data-section`
+   markers to every section across all four layouts, and `cropped`/
+   `focusSection` props on `ResumeDocument`/`ScaledSheet`: the wizard's live
+   preview now renders in a shorter (520px) scrollable window instead of
+   the whole page, auto-scrolling to the section matching the active step
+   (`WIZARD_STEP_SECTIONS`) via `scrollIntoView`. The horizontal fit-to-
+   width scale is untouched -- only the vertical framing crops/scrolls.
+6. "dont go full width on dreamy's speech bubbles." `DreamyGuide`'s own
+   bubble is `flex-1` by design (matches Build, not touched); capped the
+   wrapper around both new usages at `max-w-[440px]` so it hugs the line
+   instead of stretching the full form-column width.
+
+**Same-day follow-up 7:** "I cant see them properly when they are in those
+small cards" -- the template gallery's mini-previews were too small to
+actually judge a layout by. Redesigned `TemplateGallery.tsx`: desktop shows
+a list of options beside one large live preview (click an option, the panel
+updates instantly); tablet/mobile keeps the card grid but each card gets an
+explicit "Preview" button opening the same large view in a modal, plus "Use
+This" to confirm directly from the card.
+
+**Same-day follow-up 8:** on the wizard's cropped/section-following live
+preview (follow-up 6, point 5): "the first zoom is just a scroll down and i
+dont think its needed for the first part... keep it so the preview shows
+the full header including the margin on top, then scroll to each section...
+zoom in a bit more... I want the zoom to follow the updates." Personal
+Information (step 0) and Review (step 5) no longer have a target section
+(`WIZARD_STEP_SECTIONS` uses `null` for both), so the preview just rests at
+its natural top position instead of auto-scrolling into the header for no
+reason. Sections 1-4 now also scale up an extra 12% (`SECTION_ZOOM_BOOST`)
+on top of the fit-to-width scale when focused, centered via a translateX
+computed in real container pixels (not a naive `transform-origin: 50%`,
+which doesn't centre correctly once the base fit-to-width scale is folded
+in) -- kept inside the page's own 56px side padding, so the zoom never
+crops into actual text. The scroll/zoom effect now also depends on `resume`
+itself, so it re-centers as the focused section's content grows (a new
+bullet, another entry), not only when the step changes.
+
 **Not yet built** (next stages per the original plan): real `.docx` export
 (Print/Save PDF works today via `window.print()`, no doc-generation library
-added yet). Templates/scaling not yet pushed -- staged locally, everything
-else on this list already is.
+added yet).
+
+**Cross-checked Codex's parallel work before pushing:** "Enhance shared
+progress lightning with organic strikes and idle nudges" (`31aaa6d`,
+`ProgressSpark.tsx`/`SparkBar.tsx`/new `/progress-lab` review page) is
+already finished and live on `origin/main` -- its own handoff entry records
+browser verification, ESLint, `tokens:check`, and a full production build
+all passing, plus explicit user authorization to push. Nothing further
+needed there; merged it into this branch below before pushing to keep both
+sets of work on `main` together.
