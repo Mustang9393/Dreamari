@@ -331,12 +331,14 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                       {sticker !== null && <Stat label="Full Price" value={money(sticker)} note="Before financial aid" />}
                       {c.netPrice !== null && <Stat label="Average Cost After Aid" value={`${money(c.netPrice)} / year`} />}
                     </div>
-                    <div>
-                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Cost by Family Income</h3>
-                      <div className="mt-[var(--space-2)]">
-                        {d.bands.map((b, i, arr) => <Row key={b.label} label={bandLabel(b.label)} value={money(b.pay)} last={i === arr.length - 1} />)}
+                    {d.bands.length > 0 && (
+                      <div>
+                        <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Cost by Family Income</h3>
+                        <div className="mt-[var(--space-2)]">
+                          {d.bands.map((b, i, arr) => <Row key={b.label} label={bandLabel(b.label)} value={money(b.pay)} last={i === arr.length - 1} />)}
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                       {breakdown.length > 0 && (
                         <div>

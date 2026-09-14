@@ -147,3 +147,83 @@ Same direction, two more tabs:
   visualization or a whole section for.
 
 Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.
+
+## 9. Update, 14 Sept 2026 -- 25 real colleges added alongside the fabricated set
+
+The prototype's ~30 colleges (figures transcribed 3 Sept 2026 from the live
+Dreamari build, per `data.ts`'s own header comment) were always placeholder
+data. The user supplied a 200-college sample of the *real* production API
+response shape (`GET /colleges` card + `GET /colleges/:slug` profile,
+IPEDS/College Scorecard-derived) plus its README, with explicit instruction
+to fill the demo with real values -- "only use what is required after all
+our design notes... removing sections and updating this have been updated,"
+i.e. scoped strictly to whatever survives §§1-8's simplification above, not
+the source README's fuller shape.
+
+Decisions, each pinned down directly rather than assumed:
+
+- **Keep our shape, refresh the numbers.** Real values are transformed into
+  the *existing* `College`/`CollegeExtra` field names, not a restructure to
+  match the real API's own nesting (`admission`/`campus`/`enrollment`
+  objects, etc.) -- "keep our shape."
+- **Princeton stays fabricated for now.** It isn't in the 200-college
+  sample anyway (confirmed by lookup); the user is sending Princeton's real
+  data separately, to go through this same pipeline once it arrives.
+  Everything else in the demo is real.
+- **25 colleges, matching the existing demo's rough size** -- not all 200.
+  Reasoning given: populating all 200 (plus fetching each one's image/logo)
+  would cost meaningful time and usage credits for a demo that only needs
+  to *feel* real, not be exhaustive; the list/search/filter UI needed zero
+  code changes to handle either count, confirmed live before this was
+  decided, so nothing about the smaller number is a functional compromise.
+- **No images or logos fetched for any of the 25.** Every new entry uses
+  `photo: false, mark: false` -- the placeholder-card state the source
+  README itself calls out as a common, deliberately-oversampled real-world
+  state (22 of 1,116 no-photo colleges included in the 200-sample), not an
+  edge case being papered over.
+
+The 25 were chosen to span the same range of real-world data completeness
+the source sample itself highlights: large well-resourced publics (Illinois
+State, Texas A&M, Arizona State) down to tiny/sparse institutions with
+mostly-null financial and outcome data (Caan Academy of Nursing, 96
+undergrads; Christine Valmy; avalon-institute-las-vegas). Three
+originally-chosen slugs (`palmer-college-of-chiropractic`,
+`claremont-graduate-university`, `university-of-oklahoma-health-sciences-
+center`) were dropped and replaced after transform crashes revealed they're
+graduate/professional-only institutions with `profile.admission === null`
+in the real API -- no undergraduate admissions process exists to show. A
+fourth replacement (`urban-academy-of-beauty`) was dropped separately after
+its real `totalUndergrad` came back `0`, which would have violated the
+absence-is-never-zero rule; `caan-academy-of-nursing` (real enrollment: 96)
+replaced it.
+
+Transform: `scripts/colleges/transform-real-data.py` (new -- see its own
+header for usage; takes the sample JSON + a slug list, prints TS object-
+literal source for both files, same convention as `build-extra.mjs`
+documenting itself as `extra.ts`'s own generator). Inserted at the exact
+verified end of `COLLEGES` in `data.ts` and `EXTRA` in `extra.ts` -- not via
+a generic `];`/`};` string search, which the first attempt used and which
+silently landed the block inside `data.ts`'s unrelated `synthDetail()`
+function (that function contains its own, later `];`). Re-run from a clean
+`git checkout` with line-index-anchored insertion instead.
+
+One real product bug surfaced by this real (rather than fabricated) data:
+Cost's "Cost by Family Income" heading rendered unconditionally even when a
+college has zero published income bands (`caan-academy-of-nursing`'s
+`d.bands` is empty) -- fixed with the same `{d.bands.length > 0 && (...)}`
+guard already used for the adjacent Full Price Breakdown/Grants &
+Scholarships sections. Every fabricated college always had all 5 bands
+populated, so the gap was invisible until genuinely sparse real data
+existed to expose it.
+
+Browser-verified live: Illinois State University (rich data, every tab),
+Caan Academy of Nursing (sparse-data edge case, "Not published" states,
+the bands-heading bug then its fix), the `/colleges` "For You" list and
+Browse All search (new real colleges appear alongside fabricated Princeton
+with no code changes, correct "--" em-dash for unavailable figures).
+ESLint + `tsc --noEmit -p .` clean project-wide.
+
+Implementation: `src/components/colleges/data.ts`,
+`src/components/colleges/extra.ts`,
+`src/components/colleges/CollegeDetailExperience.tsx` (Cost tab bands
+guard), `scripts/colleges/transform-real-data.py` (new).

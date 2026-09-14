@@ -9148,3 +9148,56 @@ Division I-FCS + 10 sport chips, no bars; Opportunities: Study abroad +
 Career services), Academic Facts gained "Undergraduate Research: Offered"
 as its fifth row, checked at mobile width too. ESLint + `tsc --noEmit`
 clean. Not yet pushed, same hold as the rest of this round.
+
+### 14 Sept 2026 — Colleges: 25 real colleges added alongside the fabricated demo set
+
+Design notes: `docs/COLLEGE_LOOKUP_AUDIT.md` §9. User supplied a 200-college
+sample of the real production API response (card + profile shape) plus its
+README and asked us to fill the demo with real values, scoped to whatever
+the §§1-8 simplification rounds above still actually read.
+
+- **25 real colleges added to `data.ts`/`extra.ts`**, kept in our existing
+  field-name shape (not the real API's nesting) per direct instruction --
+  "keep our shape, refresh the numbers." Princeton is untouched/still
+  fabricated; it isn't in the 200-sample, and the user is sending its real
+  data separately for the same treatment. 25 was a direct call to match the
+  existing demo's rough size rather than use all 200, to avoid the
+  time/usage-credit cost of an exhaustive population + per-college image
+  fetching that a demo doesn't need. None of the 25 have real images/logos
+  fetched -- all use `photo: false, mark: false`, the same placeholder state
+  ~1/5 of real colleges are in per the source README, not a shortcut being
+  hidden.
+- New `scripts/colleges/transform-real-data.py` does the JSON-to-TS
+  transform (see its header for usage) -- written to avoid hand-transcribing
+  dozens of fields per college across 25 entries. Three originally-chosen
+  colleges turned out to be graduate/professional-only institutions with a
+  null `admission` block in the real API (no undergrad admissions to show)
+  and were swapped for others from the same "no published price" pool; one
+  more swap after a replacement's real undergrad enrollment came back `0`,
+  which would have violated the "never render absence as zero" rule.
+- Inserted at an exact, verified line index in both files -- an initial
+  attempt used a generic `];`/`};` string search and silently corrupted
+  `data.ts` by landing the block inside its unrelated `synthDetail()`
+  function (which has its own later `];`); reverted via `git checkout` and
+  redone correctly. Worth remembering for the Princeton pass or any future
+  additions: never `rfind` a bare closing-bracket string in a file with
+  more than one array/object.
+- Fixed one real UI bug this exposed: `CollegeDetailExperience.tsx`'s Cost
+  tab rendered the "Cost by Family Income" heading unconditionally even
+  with zero published bands (a real state for `caan-academy-of-nursing`,
+  96 undergrads) -- now guarded with `{d.bands.length > 0 && (...)}`,
+  matching the pattern already used for Full Price Breakdown/Grants &
+  Scholarships. Every fabricated college always had all 5 bands, so this
+  was invisible until real sparse data existed.
+
+Browser-verified live: Illinois State University (rich-data path, every
+tab), Caan Academy of Nursing (sparse-data edge case -- Overview "Not
+published" states, the bands bug, Student Body at tiny scale, Academics
+degree-level selector), `/colleges` "For You" list and Browse All search
+(new real colleges surface correctly alongside fabricated Princeton, no
+code changes needed for list/search/filter). ESLint + `tsc --noEmit -p .`
+clean project-wide. Not yet pushed -- same "ask before push" hold as the
+rest of this session; will batch with earlier unpushed local commits
+(Resume Builder prefill fix, the four College Details simplification
+rounds) once the user says go. Princeton's real data is expected next, to
+go through this same transform script.
