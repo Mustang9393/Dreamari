@@ -9317,3 +9317,33 @@ Athletics/Opportunities) with no vague copy or progress bars. All confirmed
 matching the notes exactly.
 
 ESLint + `tsc --noEmit -p .` clean.
+
+### 14 Sept 2026 — Resume Builder: template picker composition fix
+
+Direct feedback on the New Resume template picker screen: "I can hardly
+see the preview," too much copy, wasted space, preview sitting too low.
+
+- Desktop layout changed from a fixed `320px` list column beside a
+  `max-w-[440px]` centered preview (leaving most of the wide `1fr` column
+  empty) to an explicit `grid-cols-[30%_70%]` split with the preview
+  filling its full column -- `ResumeDocument` already auto-scales to its
+  container width, so no size cap was needed once the column itself is
+  correctly proportioned.
+- Per-template descriptions removed everywhere (desktop rows and mobile/
+  tablet cards) -- name + color swatch only. "The preview should do the
+  talking" now that it's actually large enough to judge a layout by.
+- Dreamy's speech bubble and the "Choose a template" heading moved from a
+  full-width block above the two-column grid into the narrow left column
+  itself (`TemplateGallery.tsx`, was split across that file and
+  `ResumeBuilderExperience.tsx`) -- this is what was pushing the preview
+  down ("why is it sitting so low") and what made the bubble read as one
+  long bar across the screen; it now wraps naturally at the column's width.
+  Also dropped the "Each one shows a filled-in example..." subtitle
+  paragraph as more copy the bigger preview now makes redundant.
+- Column gap tightened (`space-8` to `space-6`) per "there doesn't need to
+  be a huge gap."
+
+Outer page margins were untouched -- already matching Home/Explore/Profile
+via the shared `Shell` component from an earlier pass today (see its own
+header comment). ESLint + `tsc --noEmit -p .` clean, verified live at both
+the `lg` desktop split and the mobile/tablet card grid.

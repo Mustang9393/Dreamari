@@ -6,7 +6,7 @@ import { Pencil, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
-import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATE_GALLERY_DREAMY, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
+import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
 import { ExperienceModal } from "./ExperienceModal";
 import { PrintResumeButton, ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
 import { TailorScreen } from "./TailorScreen";
@@ -147,9 +147,6 @@ function ResumeBuilderInner() {
     return (
       <Shell contentMaxWidth={1200}>
         <TopBar label="New Resume" onClose={backToProfile} />
-        <div className="mb-[var(--space-6)] max-w-[440px]">
-          <DreamyGuide sprite={RESUME_TEMPLATE_GALLERY_DREAMY.sprite} line={RESUME_TEMPLATE_GALLERY_DREAMY.line} />
-        </div>
         <TemplateGallery
           onSelect={(templateId) => {
             const isFirstResume = readResume().versions.length === 0;

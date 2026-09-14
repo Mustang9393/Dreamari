@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Check, Eye, X } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
-import { RESUME_TEMPLATES, SAMPLE_RESUME_DATA, type ResumeTemplateId } from "./data";
+import { DreamyGuide } from "@/components/build/DreamyGuide";
+import { RESUME_TEMPLATES, RESUME_TEMPLATE_GALLERY_DREAMY, SAMPLE_RESUME_DATA, type ResumeTemplateId } from "./data";
 import { ResumeDocument } from "./ResumeDocument";
 
 function UseTemplateButton({ onClick }: { onClick: () => void }) {
@@ -19,21 +20,22 @@ function UseTemplateButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+// Name + swatch only -- the description used to sit here too, but with the
+// live preview now large enough to actually judge (direct feedback, 14
+// Sept 2026: "the preview should do the talking"), a text description of
+// what a template looks like is redundant with a picture of it.
 function TemplateRow({ template, active, onFocus }: { template: (typeof RESUME_TEMPLATES)[number]; active: boolean; onFocus: () => void }) {
   return (
     <button
       type="button"
       onClick={onFocus}
-      className="dm-tap flex cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left"
+      className="dm-tap flex cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[10px] text-left"
       style={active ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 10%, transparent)" } : { borderColor: "var(--glass-border)" }}
     >
-      <span className="size-8 flex-none rounded-full border" style={{ background: template.accent, borderColor: "var(--glass-border)" }} aria-hidden />
-      <span className="flex min-w-0 flex-col gap-[1px]">
-        <span className="flex items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
-          {active && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
-          {template.label}
-        </span>
-        <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>{template.description}</span>
+      <span className="size-7 flex-none rounded-full border" style={{ background: template.accent, borderColor: "var(--glass-border)" }} aria-hidden />
+      <span className="flex items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
+        {active && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+        {template.label}
       </span>
     </button>
   );
@@ -50,36 +52,43 @@ export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId)
   const previewTemplate = RESUME_TEMPLATES.find((t) => t.id === previewing);
 
   return (
-    <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="flex flex-col gap-[4px]">
-        <h2 className="text-[19px] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>Choose a template</h2>
-        <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Each one shows a filled-in example so you can see exactly how yours will look. You can change this anytime.</p>
-      </div>
-
-      {/* Desktop: list + large live preview side by side. */}
-      <div className="hidden gap-[var(--space-8)] lg:grid lg:grid-cols-[320px_1fr] lg:items-start">
-        <div className="flex flex-col gap-[var(--space-3)]">
-          {RESUME_TEMPLATES.map((t) => (
-            <TemplateRow key={t.id} template={t} active={focused === t.id} onFocus={() => setFocused(t.id)} />
-          ))}
+    <div className="flex flex-col gap-[var(--space-5)]">
+      {/* Desktop: a narrow 30% picker beside a large, top-aligned live
+         preview at 70% (direct feedback, 14 Sept 2026: "the preview should
+         do the talking... keep the column on the left 30% and the preview
+         70%... make the preview legible... why is it sitting so low" --
+         Dreamy + heading used to sit full-width above this grid, pushing
+         the preview down; both now live in the narrow column instead, so
+         the preview starts at the very top of the section). */}
+      <div className="hidden gap-[var(--space-6)] lg:grid lg:grid-cols-[30%_70%] lg:items-start">
+        <div className="flex flex-col gap-[var(--space-4)]">
+          <DreamyGuide sprite={RESUME_TEMPLATE_GALLERY_DREAMY.sprite} line={RESUME_TEMPLATE_GALLERY_DREAMY.line} />
+          <h2 className="text-[19px] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>Choose a template</h2>
+          <div className="flex flex-col gap-[var(--space-2)]">
+            {RESUME_TEMPLATES.map((t) => (
+              <TemplateRow key={t.id} template={t} active={focused === t.id} onFocus={() => setFocused(t.id)} />
+            ))}
+          </div>
           <UseTemplateButton onClick={() => onSelect(focused)} />
         </div>
-        <div className="mx-auto w-full max-w-[440px]">
+        <div className="w-full">
           <ResumeDocument resume={SAMPLE_RESUME_DATA} templateId={focused} />
         </div>
       </div>
 
-      {/* Tablet/mobile: cards with an explicit Preview button -- no room
-         for a permanent side panel, so the big view opens as a modal. */}
+      {/* Tablet/mobile: heading up top, then cards with an explicit Preview
+         button -- no room for a permanent side panel, so the big view opens
+         as a modal. */}
+      <div className="flex flex-col gap-[var(--space-4)] lg:hidden">
+        <DreamyGuide sprite={RESUME_TEMPLATE_GALLERY_DREAMY.sprite} line={RESUME_TEMPLATE_GALLERY_DREAMY.line} />
+        <h2 className="text-[19px] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>Choose a template</h2>
+      </div>
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:hidden">
         {RESUME_TEMPLATES.map((t) => (
           <div key={t.id} className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
             <div className="flex items-center gap-[var(--space-3)]">
               <span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />
-              <span className="flex flex-col gap-[1px]">
-                <span className="text-[14.5px] font-extrabold" style={{ color: "var(--foreground)" }}>{t.label}</span>
-                <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>{t.description}</span>
-              </span>
+              <span className="text-[14.5px] font-extrabold" style={{ color: "var(--foreground)" }}>{t.label}</span>
             </div>
             <div className="flex items-center gap-[var(--space-3)]">
               <button
