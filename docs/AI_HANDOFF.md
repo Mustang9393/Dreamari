@@ -9242,3 +9242,48 @@ Also this session, two small unrelated fixes:
 ESLint + `tsc --noEmit -p .` clean across all touched files. Not yet
 pushed -- held per explicit instruction until the college data/image work
 was confirmed correct.
+
+### 14 Sept 2026 — Match Learn More modal, Build copy, student avatar picker
+
+Three more direct-feedback rounds, same session:
+
+- **Match's "Learn More" modal** (`src/components/match-lab/MatchGrid.tsx`,
+  `DetailModal`): dropped the "At a Glance" eyebrow line entirely (the three
+  sections below it were always the real content). The three section
+  headings (What You'd Do / Good Fit If You Like / School & Path) are now
+  the largest text in the card (`15px` extrabold, was a `10.5px` uppercase
+  eyebrow -- smaller than its own bullets), bullets stepped down to `13px`
+  and muted so the eye lands on headings first, per "clear hierarchy, fast
+  scanning, minimal distraction." Icons were tried removed, then explicitly
+  asked back in white, inline with the (now larger) heading text -- kept
+  BookOpen/Sparkles/GraduationCap, recolored to `#fff` from the career's
+  own accent color.
+- **Build copy**: "What sounds interesting?" -> "Which career fields
+  interest you?" ("the current wording feels a little vague... immediately
+  clear that students are choosing career areas"), "Choose up to 2" kept
+  as-is. Updated in both the real step (`src/components/build/steps.tsx`)
+  and the matching static mockup on the Schools landing page
+  (`src/components/marketing/SchoolsIllustrations.tsx`) so the two don't
+  drift.
+- **Student avatar picker** ("Instagram-style edit button... have that
+  work"): a small edit-icon badge now overlaps the corner of Jordan's
+  avatar on their own Profile header, opening a grid of all 80 illustrated
+  portraits (`AVATAR_POOL` in `src/lib/avatar.ts`) to pick from. New
+  reactive override layer in `avatar.ts` (`AVATAR_OVERRIDE_KEY`,
+  `writeAvatarOverride`, `useStudentAvatarSrc`) -- same localStorage +
+  listeners idiom as `studentProfile.ts`/`resume.ts` -- checked only for
+  Jordan's own seed, so the fixed pin/hash system for every other name is
+  untouched. `studentAvatarSrc()` (the plain, non-reactive function) stays
+  as the SSR-safe default; the three render sites that show a student's
+  own face (`chrome.tsx`'s nav, `ProfileExperience.tsx`'s header,
+  `connect/primitives.tsx`'s shared `Avatar`) now call the new
+  `useStudentAvatarSrc()` hook instead, so a pick propagates live to all
+  three without a reload -- verified in the browser (profile header + nav
+  update instantly on pick, survives a hard reload, still the same
+  component `Avatar` Connect uses everywhere). Deliberately still no real
+  photo upload -- picks are limited to the same fixed illustrated set,
+  consistent with the "no student photo is ever stored" policy already in
+  place.
+
+ESLint + `tsc --noEmit -p .` clean across all seven touched files. Not yet
+pushed.

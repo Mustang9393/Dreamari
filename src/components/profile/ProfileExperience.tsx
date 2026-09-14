@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
-import { studentAvatarSrc } from "@/lib/avatar";
+import { AVATAR_POOL, useStudentAvatarSrc, writeAvatarOverride } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { UndoToast } from "@/components/app/UndoToast";
 import Link from "next/link";
@@ -14,7 +14,7 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
@@ -254,6 +254,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // the A/B switch is a crossfade, never a half-decoded swap
   const [bgUrl, setBgUrl] = useState<string>(COVERS[0]);
   const [coverOpen, setCoverOpen] = useState(false);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const avatarSeed = STUDENT.name.split(" ")[0] || STUDENT.name;
+  const avatarSrc = useStudentAvatarSrc(avatarSeed);
+  const pickAvatar = (src: string) => {
+    writeAvatarOverride(src);
+    setAvatarPickerOpen(false);
+  };
   useEffect(() => {
     // the browser is the store for the prototype; read after mount so the
     // server render and the first paint match
@@ -505,16 +512,53 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                  no student photo is ever stored, and the avatar system
                  should reach every place a student's own picture shows up,
                  not just Connect) -- same seed, same face as everywhere
-                 else the student appears; no upload control, since there is
-                 no photo to upload anymore. */}
-              <Image
-                src={studentAvatarSrc(STUDENT.name.split(" ")[0] || STUDENT.name)}
-                alt=""
-                width={144}
-                height={144}
-                className="size-[72px] flex-none rounded-full border-2 object-cover"
-                style={{ borderColor: "rgba(255,255,255,0.9)" }}
-              />
+                 else the student appears. An Instagram-style edit button
+                 (direct feedback, 14 Sept 2026) lets the student swap it for
+                 any of the illustrated portraits -- still no real photo,
+                 still the same fixed set, just a student-chosen face
+                 instead of the seeded default. */}
+              <span className="relative flex-none">
+                <Image
+                  src={avatarSrc}
+                  alt=""
+                  width={144}
+                  height={144}
+                  className="size-[72px] flex-none rounded-full border-2 object-cover"
+                  style={{ borderColor: "rgba(255,255,255,0.9)" }}
+                />
+                <button
+                  type="button"
+                  aria-label="Change your picture"
+                  aria-expanded={avatarPickerOpen}
+                  onClick={() => setAvatarPickerOpen(true)}
+                  className="dm-tap absolute right-[-2px] bottom-[-2px] flex size-[26px] cursor-pointer items-center justify-center rounded-full border-2"
+                  style={{ background: "var(--primary)", borderColor: "rgba(255,255,255,0.9)", color: "#fff" }}
+                >
+                  <Pencil className="h-3 w-3" strokeWidth={2.75} aria-hidden />
+                </button>
+                {avatarPickerOpen && (
+                  <Portal>
+                    <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose your picture" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
+                      <button type="button" aria-label="Close" onClick={() => setAvatarPickerOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+                      <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+                        <div className="flex items-center justify-between gap-[var(--space-3)]">
+                          <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Choose your picture</h3>
+                          <button type="button" onClick={() => setAvatarPickerOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                            <X className="h-4 w-4" aria-hidden />
+                          </button>
+                        </div>
+                        <div className="grid max-h-[60vh] grid-cols-5 gap-[10px] overflow-y-auto pr-[2px] sm:grid-cols-6">
+                          {AVATAR_POOL.map((src) => (
+                            <button key={src} type="button" aria-label="Use this picture" aria-pressed={avatarSrc === src} onClick={() => pickAvatar(src)} className="dm-tap relative aspect-square cursor-pointer overflow-hidden rounded-full" style={{ boxShadow: avatarSrc === src ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
+                              <Image src={src} alt="" fill sizes="64px" className="object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </Portal>
+                )}
+              </span>
               <span className="flex min-w-0 flex-1 flex-col gap-[2px] pb-[4px]">
                 <h2 className="text-[28px] leading-[32px] font-extrabold tracking-[-0.02em] text-balance sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)" }}>{STUDENT.name}</h2>
                 <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "rgba(255,255,255,0.82)" }}>{STUDENT.school}</span>

@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from "react";
+
 // Every student's avatar, app-wide (direct feedback, 8 Sept 2026: "the
 // avatar stuff should trickle down into everything... wherever a student's
 // avatar is used"). Replaces the earlier DiceBear-generated set (direct
@@ -132,4 +134,75 @@ export function studentAvatarSrc(seed: string): string {
   let index = hash(seed) % ILLUSTRATED_COUNT;
   while (EXCLUDED_INDICES.has(index)) index = (index + 1) % ILLUSTRATED_COUNT;
   return `/images/avatars/students/student-${String(index + 1).padStart(2, "0")}.png`;
+}
+
+// ---- The student's own picked avatar (14 Sept 2026, direct feedback: "an
+// Instagram-style edit button next to Jordan's picture so we can switch to
+// whichever we want") -- the ONE avatar in the app a student can change.
+// Everyone else still resolves through the fixed pin/hash above; this is a
+// separate override layered on top, checked only for Jordan's own seed, so
+// nothing about the collision-free pinned cast or the diversity balance
+// above has to change. Same localStorage-plus-listeners idiom as
+// studentProfile.ts/resume.ts: read after mount so SSR and first paint
+// match, same-tab listeners notified directly, other tabs via `storage`.
+export const AVATAR_OVERRIDE_KEY = "dreamari-jordan-avatar";
+
+/** Every illustrated portrait on disk, in order -- the full pool the picker
+ *  offers, deliberately NOT filtered by EXCLUDED_INDICES above (that
+ *  exclusion is about the anonymous hash fallback avoiding a duplicate
+ *  cluster; a student choosing their own face on purpose should still be
+ *  able to pick any of the 80). */
+export const AVATAR_POOL: string[] = Array.from({ length: ILLUSTRATED_COUNT }, (_, i) => `/images/avatars/students/student-${String(i + 1).padStart(2, "0")}.png`);
+
+let cachedOverrideRaw: string | null = null;
+const overrideListeners = new Set<() => void>();
+
+export function readAvatarOverride(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(AVATAR_OVERRIDE_KEY);
+  } catch {
+    return null;
+  }
+}
+export function avatarOverrideSnapshot(): string | null {
+  if (typeof window === "undefined") return null;
+  cachedOverrideRaw = readAvatarOverride();
+  return cachedOverrideRaw;
+}
+export function serverAvatarOverrideSnapshot(): string | null {
+  return null;
+}
+export function subscribeAvatarOverride(listener: () => void): () => void {
+  overrideListeners.add(listener);
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === null || event.key === AVATAR_OVERRIDE_KEY) listener();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    overrideListeners.delete(listener);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+/** Pass `null` to revert Jordan to the default (avatar-jordan.webp). */
+export function writeAvatarOverride(src: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (src) window.localStorage.setItem(AVATAR_OVERRIDE_KEY, src);
+    else window.localStorage.removeItem(AVATAR_OVERRIDE_KEY);
+  } catch {
+    // no storage: the pick still applies for this render, just not remembered
+  }
+  for (const listener of overrideListeners) listener();
+}
+
+/** The reactive version of studentAvatarSrc -- use this wherever a picked
+ *  avatar needs to show up live (nav, Profile's own header, Connect's
+ *  Avatar). Every seed but Jordan's behaves identically to the plain
+ *  function; Jordan's checks the override first. */
+export function useStudentAvatarSrc(seed: string): string {
+  const override = useSyncExternalStore(subscribeAvatarOverride, avatarOverrideSnapshot, serverAvatarOverrideSnapshot);
+  const normalized = seed === "Jordan Rivera" ? "Jordan" : seed;
+  if (normalized === "Jordan" && override) return override;
+  return studentAvatarSrc(seed);
 }

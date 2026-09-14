@@ -10,7 +10,7 @@ import { createContext, useContext, useState } from "react";
 import { ChevronRight, CheckCircle2, Clock } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { studentAvatarSrc } from "@/lib/avatar";
+import { useStudentAvatarSrc } from "@/lib/avatar";
 import { PROS, type Thread } from "./data";
 
 /** In-page navigation for anything rendered inside Connect: lets a pro's
@@ -163,12 +163,13 @@ export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
   // the app's first-name-only identity rule) generate the identical
   // avatar -- one consistent face per person, not one per string variant.
   const seed = name.split(" ")[0] || name;
+  const avatarSrc = useStudentAvatarSrc(seed);
   return (
     <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
       {photo ? (
         <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
       ) : (
-        <Image src={studentAvatarSrc(seed)} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
+        <Image src={avatarSrc} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
       )}
     </span>
   );

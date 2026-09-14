@@ -69,7 +69,7 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
       <CardHud percent={percent} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="What sounds interesting?" subtitle="Choose up to 2" />
+        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which career fields interest you?" subtitle="Choose up to 2" />
         {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
            caption row (label + counter), then the picks side by side as
            Bricolage statements in their world colors, separated by a dot.
