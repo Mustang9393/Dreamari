@@ -8390,3 +8390,14 @@ to this area are expected.
 
 Lint/tsc clean on all three. Not committed, not pushed -- same WIP area,
 checking in first.
+
+**Same-day follow-up:** the 4/3 -> 3/2 hero crop above cropped a couple of
+heads (Private Equity Analyst, Software Engineer) -- `object-cover` on
+`next/image` crops evenly from both edges by default, so shortening the box
+ate into the top of a portrait as much as the bottom. Added `object-top` next
+to the existing `object-cover` on `DetailModal`'s hero `<Image>`: any crop
+this ratio needs now comes only from the bottom, below the subject. Verified
+live across all six cards -- Private Equity and Software Engineer's heads are
+back in frame, and spot-checked the other four (Investment Banker, Data
+Scientist, Fashion Buyer, Game Designer) to confirm top-anchoring didn't cut
+anything important off the bottom of those instead. Lint/tsc clean.

@@ -407,9 +407,14 @@ function DetailModal({
              16/9, since these are waist-up portraits and a much shorter
              crop starts losing heads. The rest of the height this modal
              needed to lose without scrolling comes from tightening spacing
-             below, not from cropping further. */}
+             below, not from cropping further. object-top (direct feedback,
+             14 Sept 2026: Private Equity/Software Engineer's heads were
+             getting cropped): default object-cover crops evenly from both
+             edges, so shortening the box also ate into the top of a
+             portrait. Anchoring to the top means any crop this ratio still
+             needs comes only from the bottom, below the subject. */}
           <div className="relative w-full" style={{ aspectRatio: "3 / 2" }}>
-            <Image src={career.photo} alt="" fill sizes="440px" className="object-cover" draggable={false} priority />
+            <Image src={career.photo} alt="" fill sizes="440px" className="object-cover object-top" draggable={false} priority />
             {/* prev/next through the deck without closing -- scoped to the
                hero image so top-1/2 centers on the photo, not the whole
                scrollable card (it used to drift onto "Career Breakdown"
