@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Portal } from "@/components/profile/CareerReport";
 
@@ -133,24 +133,29 @@ export function useResumeToast() {
 
 // ---------------------------------------------------------------------------
 // Modal -- the shared "Add Education" / "Add Certification" / Experience
-// wrapper. Centered card over a scrim, same corner-radius/border language as
-// everything else here.
+// wrapper. IN-PLACE, not a floating overlay (direct feedback, 15 Sept
+// 2026, after a first attempt as a fixed left-anchored drawer: "the side
+// bar doesn't cover the modal underneath, so it looks cluttered sitting
+// above each other" -- a fixed-position drawer can't line up with a
+// responsive grid column without measuring it, and even then it's a
+// second layer floating over the first). This version isn't positioned at
+// all: each step (EducationStep, CertificationsStep, the wizard's own
+// Experience branch) swaps its OWN body for this form and swaps back on
+// close, so there is only ever one thing in that card at a time -- no
+// overlap is possible by construction. The live preview lives in the
+// grid's other column entirely, so it was never at risk either way.
 // ---------------------------------------------------------------------------
 
-export function ResumeModal({ title, onClose, children, width = 480 }: { title: string; onClose: () => void; children: ReactNode; width?: number }) {
+export function ResumeModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <Portal>
-      <div className="fixed inset-0 z-[120] flex items-center justify-center p-4" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-        <div className="flex max-h-[88dvh] w-full flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ maxWidth: width, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.6)" }}>
-          <div className="flex flex-none items-center justify-between border-b px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-            <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
-            <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-              <X className="h-4 w-4" aria-hidden />
-            </button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-[var(--space-5)] py-[var(--space-4)]">{children}</div>
-        </div>
+    <div className="flex min-h-0 flex-1 flex-col gap-[var(--space-4)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both]">
+      <div className="flex flex-none items-center gap-[var(--space-2)] border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+        <button type="button" aria-label="Back" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+          <ChevronLeft className="h-4 w-4" aria-hidden />
+        </button>
+        <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
       </div>
-    </Portal>
+      <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
+    </div>
   );
 }

@@ -494,6 +494,13 @@ body {
   0% { opacity: 0; transform: translateY(6px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+/* Resume builder's left-anchored form drawer (ResumeModal, resume/ui.tsx):
+   slides in from its own edge rather than fading in place, so it reads as
+   a panel opening beside the live preview, not a dialog popping up. */
+@keyframes resume-drawer-in {
+  0% { opacity: 0; transform: translateX(-16px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
 /* Dreamy-local confetti: each particle flies out along its own --bx/--by vector
    and fades — celebration stays anchored to the character (Duolingo-style),
    never a screen-wide wash. */

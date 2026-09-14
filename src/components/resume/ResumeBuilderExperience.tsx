@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore, type ReactNode } from "react";
-import { ExternalLink, Pencil, X } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
@@ -77,24 +77,7 @@ function TopBar({ label, onClose, extra }: { label: string; onClose: () => void;
   );
 }
 
-// Own-tab, no app chrome -- what "Open in New Window" opens (direct
-// feedback, 14 Sept 2026: the preview should always be zoomable AND
-// poppable into its own window, not just the in-page zoom modal).
-function OpenInNewWindowButton({ href }: { href: string }) {
-  return (
-    <button
-      type="button"
-      data-print-hide
-      onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
-      className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-      style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-    >
-      <ExternalLink className="h-4 w-4" aria-hidden /> New Window
-    </button>
-  );
-}
-
-function DocumentScreen({ resume, title, onBack, backLabel, editHref, selfHref, router, templateId }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; selfHref: string; router: ReturnType<typeof useRouter>; templateId: string }) {
+function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, templateId }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter>; templateId: string }) {
   return (
     <Shell contentMaxWidth={900}>
       <TopBar
@@ -103,7 +86,6 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, selfHref, 
         extra={
           <>
             <ZoomResumeButton resume={resume} templateId={templateId} title={title} />
-            <OpenInNewWindowButton href={selfHref} />
             <PrintResumeButton />
             {editHref && (
               <button
@@ -141,6 +123,16 @@ function ResumeBuilderInner() {
   const [reactionNonce, setReactionNonce] = useState(0);
   const react = () => setReactionNonce((n) => n + 1);
   const [experienceModal, setExperienceModal] = useState<ResumeExperienceEntry | null | "new">(null);
+  // Which `data-field` the live preview's camera should pan to right now --
+  // set by whichever drawer field is focused (`${entryId}:${fieldKind}`),
+  // cleared back to section-level framing when the drawer closes or the
+  // step changes (direct feedback, 15 Sept 2026: "the camera tracking all
+  // updates one by one, per field... after one section is done it can fit
+  // the whole section... before we move on" -- that whole-section fit is
+  // just what ResumeDocument already does once activeField goes back to
+  // null, no separate state needed for it).
+  const [activeField, setActiveField] = useState<string | null>(null);
+  const goToStep = (i: number) => { setActiveField(null); setStepIndex(i); };
   const { toast, showToast } = useResumeToast();
 
   const backToProfile = () => router.push("/profile?tab=resume");
@@ -193,7 +185,6 @@ function ResumeBuilderInner() {
         onBack={backToProfile}
         backLabel="Back to Resumes"
         editHref={`/resume-builder?view=tailor&version=${activeVersion.id}`}
-        selfHref={`/resume-builder?view=version&version=${activeVersion.id}`}
         router={router}
         templateId={activeVersion.template}
       />
@@ -201,7 +192,7 @@ function ResumeBuilderInner() {
   }
 
   if (view === "document") {
-    return <DocumentScreen resume={resume} title="Your Resume" onBack={backToProfile} backLabel="Back to Resumes" selfHref="/resume-builder?view=document" router={router} templateId={DEFAULT_RESUME_TEMPLATE} />;
+    return <DocumentScreen resume={resume} title="Your Resume" onBack={backToProfile} backLabel="Back to Resumes" router={router} templateId={DEFAULT_RESUME_TEMPLATE} />;
   }
 
   const dreamy = RESUME_WIZARD_DREAMY[stepIndex];
@@ -211,9 +202,10 @@ function ResumeBuilderInner() {
       <TopBar label="Resume Builder" onClose={backToProfile} />
       {/* The preview gets the larger share of the row now (direct feedback,
          14 Sept 2026: "give the preview more prominence... more width so we
-         can see it better") -- the form column holds at a comfortable
-         reading width, every extra pixel goes to the resume itself. */}
-      <div className="grid grid-cols-1 items-start gap-[var(--space-6)] lg:grid-cols-[520px_1fr]">
+         can see it better") -- the preview column runs 20% wider than the
+         form column (direct feedback, 15 Sept 2026), both flexible so the
+         ratio holds as the viewport grows. */}
+      <div className="grid grid-cols-1 items-start gap-[var(--space-6)] lg:grid-cols-[minmax(420px,1fr)_minmax(0,1.2fr)]">
         <div className="flex flex-col gap-[var(--space-5)]">
           {/* Dreamy front and center for every step, the same treatment
              Build gives him -- not the reference's small inline coaching
@@ -224,24 +216,40 @@ function ResumeBuilderInner() {
           </div>
           <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <WizardProgress stepIndex={stepIndex} />
-            {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); setStepIndex(1); }} showToast={showToast} />}
-            {stepIndex === 1 && <EducationStep resume={resume} onNext={() => { react(); setStepIndex(2); }} onBack={() => setStepIndex(0)} showToast={showToast} />}
+            {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); goToStep(1); }} showToast={showToast} onFieldFocus={setActiveField} />}
+            {stepIndex === 1 && <EducationStep resume={resume} onNext={() => { react(); goToStep(2); }} onBack={() => goToStep(0)} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 2 && (
-              <ExperienceStep
-                resume={resume}
-                onNext={() => { react(); setStepIndex(3); }}
-                onBack={() => setStepIndex(1)}
-                onAdd={() => setExperienceModal("new")}
-                onEdit={(entry) => setExperienceModal(entry)}
-              />
+              // In-place, like Education/Certifications: the drawer swaps
+              // this same card's body rather than floating over it, so
+              // there's never a second layer sitting on top of the list.
+              experienceModal !== null ? (
+                <ExperienceModal
+                  initial={experienceModal === "new" ? null : experienceModal}
+                  onClose={() => { setActiveField(null); setExperienceModal(null); }}
+                  onSaved={(title) => {
+                    setActiveField(null);
+                    setExperienceModal(null);
+                    showToast(`${title} added`);
+                  }}
+                  onFieldFocus={setActiveField}
+                />
+              ) : (
+                <ExperienceStep
+                  resume={resume}
+                  onNext={() => { react(); goToStep(3); }}
+                  onBack={() => goToStep(1)}
+                  onAdd={() => setExperienceModal("new")}
+                  onEdit={(entry) => setExperienceModal(entry)}
+                />
+              )
             )}
-            {stepIndex === 3 && <SkillsStep resume={resume} onNext={() => { react(); setStepIndex(4); }} onBack={() => setStepIndex(2)} />}
-            {stepIndex === 4 && <CertificationsStep resume={resume} onNext={() => { react(); setStepIndex(5); }} onBack={() => setStepIndex(3)} showToast={showToast} />}
+            {stepIndex === 3 && <SkillsStep resume={resume} onNext={() => { react(); goToStep(4); }} onBack={() => goToStep(2)} />}
+            {stepIndex === 4 && <CertificationsStep resume={resume} onNext={() => { react(); goToStep(5); }} onBack={() => goToStep(3)} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 5 && (
               <ReviewStep
                 resume={resume}
-                onBack={() => setStepIndex(4)}
-                onEditStep={(step) => setStepIndex(step)}
+                onBack={() => goToStep(4)}
+                onEditStep={(step) => goToStep(step)}
                 onFinish={() => {
                   react();
                   // First finish with nothing saved yet: create a real,
@@ -282,28 +290,22 @@ function ResumeBuilderInner() {
         {/* Live preview, desktop only (direct feedback, 14 Sept 2026): the
            same ResumeDocument the finished document view uses, fed by the
            same reactive resume state, so it updates as the student types. */}
-        <div className="hidden lg:sticky lg:top-8 lg:flex lg:max-h-[calc(100dvh-64px)] lg:flex-col lg:gap-[var(--space-3)] lg:overflow-y-auto">
+        {/* A firm height (not max-height + its own scroll) so the preview
+           below can actually fill it via height:100% instead of hugging
+           its content vertically (direct feedback, 14 Sept 2026). The
+           camera/crop inside ResumeDocument handles framing now, so this
+           column itself never needs to scroll. */}
+        <div className="hidden lg:sticky lg:top-8 lg:flex lg:h-[calc(100dvh-64px)] lg:min-w-0 lg:flex-col lg:gap-[var(--space-3)]">
           <div className="flex flex-none flex-wrap items-center justify-between gap-[var(--space-2)]">
             <span className="text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Live Preview</span>
-            <div className="flex items-center gap-[var(--space-2)]">
-              <ZoomResumeButton resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} title="Live Preview" />
-              <OpenInNewWindowButton href="/resume-builder?view=document" />
-            </div>
+            <ZoomResumeButton resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} title="Live Preview" />
           </div>
-          <ResumeDocument resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} cropped focusSection={WIZARD_STEP_SECTIONS[stepIndex]} />
+          <div className="min-h-0 min-w-0 flex-1">
+            <ResumeDocument resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} cropped focusSection={WIZARD_STEP_SECTIONS[stepIndex]} activeField={activeField} />
+          </div>
         </div>
       </div>
 
-      {experienceModal !== null && (
-        <ExperienceModal
-          initial={experienceModal === "new" ? null : experienceModal}
-          onClose={() => setExperienceModal(null)}
-          onSaved={(title) => {
-            setExperienceModal(null);
-            showToast(`${title} added`);
-          }}
-        />
-      )}
       {toast}
     </Shell>
   );

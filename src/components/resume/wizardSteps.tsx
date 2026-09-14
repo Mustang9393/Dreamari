@@ -55,7 +55,7 @@ function EntryRow({ title, subtitle, meta, onEdit, onRemove }: { title: string; 
 // ---------------------------------------------------------------------------
 // 1. Personal Information
 // ---------------------------------------------------------------------------
-export function PersonalInfoStep({ resume, onNext, showToast }: { resume: ResumeData; onNext: () => void; showToast: (m: string) => void }) {
+export function PersonalInfoStep({ resume, onNext, showToast, onFieldFocus }: { resume: ResumeData; onNext: () => void; showToast: (m: string) => void; onFieldFocus?: (field: string | null) => void }) {
   const p = resume.profile;
   // Reads the freshest stored profile at write time, not the render-time `p`
   // closure -- successive keystrokes across fields can otherwise fire before
@@ -63,21 +63,25 @@ export function PersonalInfoStep({ resume, onNext, showToast }: { resume: Resume
   // field's write when it rebuilds the full profile object.
   const set = (patch: Partial<ResumeData["profile"]>) => writeResume({ profile: { ...readResume().profile, ...patch } });
   const canContinue = p.firstName.trim().length > 0 && p.lastName.trim().length > 0;
+  // Matches the `data-field="profile:*"` markers the header carries
+  // (ResumeDocument.tsx) -- field tracking works on the first page too
+  // (direct feedback, 15 Sept 2026), not just inside a drawer.
+  const track = (field: string) => () => onFieldFocus?.(field);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
         <Field label="First Name" htmlFor="rb-first" required>
-          <TextInput id="rb-first" value={p.firstName} onChange={(v) => set({ firstName: v })} placeholder="Jordan" />
+          <TextInput id="rb-first" value={p.firstName} onChange={(v) => set({ firstName: v })} onFocus={track("profile:name")} placeholder="Jordan" />
         </Field>
         <Field label="Last Name" htmlFor="rb-last" required>
-          <TextInput id="rb-last" value={p.lastName} onChange={(v) => set({ lastName: v })} placeholder="Rivers" />
+          <TextInput id="rb-last" value={p.lastName} onChange={(v) => set({ lastName: v })} onFocus={track("profile:name")} placeholder="Rivers" />
         </Field>
       </div>
       <Field label="Email" htmlFor="rb-email">
-        <TextInput id="rb-email" type="email" value={p.email} onChange={(v) => set({ email: v })} placeholder="you@school.org" />
+        <TextInput id="rb-email" type="email" value={p.email} onChange={(v) => set({ email: v })} onFocus={track("profile:contact")} placeholder="you@school.org" />
       </Field>
       <Field label="Phone (optional)" htmlFor="rb-phone">
-        <TextInput id="rb-phone" type="tel" value={p.phone} onChange={(v) => set({ phone: v })} placeholder="(555) 123-4567" />
+        <TextInput id="rb-phone" type="tel" value={p.phone} onChange={(v) => set({ phone: v })} onFocus={track("profile:contact")} placeholder="(555) 123-4567" />
       </Field>
       <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
         <Field label="Country" htmlFor="rb-country">
@@ -87,17 +91,18 @@ export function PersonalInfoStep({ resume, onNext, showToast }: { resume: Resume
           </SelectInput>
         </Field>
         <Field label="State / Province / Region" htmlFor="rb-state">
-          <TextInput id="rb-state" value={p.state} onChange={(v) => set({ state: v })} placeholder="California" />
+          <TextInput id="rb-state" value={p.state} onChange={(v) => set({ state: v })} onFocus={track("profile:contact")} placeholder="California" />
         </Field>
       </div>
       <Field label="City" htmlFor="rb-city">
-        <TextInput id="rb-city" value={p.city} onChange={(v) => set({ city: v })} placeholder="San Jose" />
+        <TextInput id="rb-city" value={p.city} onChange={(v) => set({ city: v })} onFocus={track("profile:contact")} placeholder="San Jose" />
       </Field>
       <Field label="Short Bio (optional)" htmlFor="rb-bio">
         <textarea
           id="rb-bio"
           value={p.bio}
           onChange={(e) => set({ bio: e.target.value })}
+          onFocus={track("profile:bio")}
           placeholder="A sentence or two about what you're looking for and what makes you a strong candidate."
           rows={3}
           maxLength={400}
@@ -108,6 +113,7 @@ export function PersonalInfoStep({ resume, onNext, showToast }: { resume: Resume
       <WizardFooter
         nextDisabled={!canContinue}
         onNext={() => {
+          onFieldFocus?.(null);
           showToast("Personal information saved");
           onNext();
         }}
@@ -121,21 +127,26 @@ export function PersonalInfoStep({ resume, onNext, showToast }: { resume: Resume
 // ---------------------------------------------------------------------------
 const EMPTY_EDU: ResumeEducation = { id: "", schoolName: "", cityState: "", gradYear: "", program: "", gpa: "", honors: [] };
 
-function EducationModal({ initial, onClose, onSaved }: { initial: ResumeEducation | null; onClose: () => void; onSaved: (name: string) => void }) {
+function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: ResumeEducation | null; onClose: () => void; onSaved: (name: string) => void; onFieldFocus?: (field: string | null) => void }) {
   const [draft, setDraft] = useState<ResumeEducation>(initial ?? { ...EMPTY_EDU, id: makeId() });
   const [honorDraft, setHonorDraft] = useState("");
   const canSave = draft.schoolName.trim().length > 0 && draft.gradYear.trim().length > 0;
+  // Matches the `data-field` markers EducationEntries puts on the live
+  // preview (ResumeDocument.tsx) -- lets the wizard's camera pan to
+  // whichever field is actually focused, e.g. the graduation year that
+  // sits at the far right edge of its row (direct feedback, 15 Sept 2026).
+  const track = (kind: string) => () => onFieldFocus?.(`${draft.id}:${kind}`);
   return (
-    <ResumeModal title="Add Your High School" onClose={onClose}>
+    <ResumeModal title="Add Your High School" onClose={() => { onFieldFocus?.(null); onClose(); }}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="High School Name" htmlFor="edu-name" required>
-          <TextInput id="edu-name" value={draft.schoolName} onChange={(v) => setDraft({ ...draft, schoolName: v })} placeholder="Lincoln High School" />
+          <TextInput id="edu-name" value={draft.schoolName} onChange={(v) => setDraft({ ...draft, schoolName: v })} onFocus={track("schoolName")} placeholder="Lincoln High School" />
         </Field>
         <Field label="City and State (optional)" htmlFor="edu-city">
-          <TextInput id="edu-city" value={draft.cityState} onChange={(v) => setDraft({ ...draft, cityState: v })} placeholder="City, State" />
+          <TextInput id="edu-city" value={draft.cityState} onChange={(v) => setDraft({ ...draft, cityState: v })} onFocus={track("cityState")} placeholder="City, State" />
         </Field>
         <Field label="Expected Graduation Year" htmlFor="edu-grad" required>
-          <TextInput id="edu-grad" value={draft.gradYear} onChange={(v) => setDraft({ ...draft, gradYear: v })} placeholder="e.g. June 2027" />
+          <TextInput id="edu-grad" value={draft.gradYear} onChange={(v) => setDraft({ ...draft, gradYear: v })} onFocus={track("gradYear")} placeholder="e.g. June 2027" />
         </Field>
         <Field label="High School Program (optional)" htmlFor="edu-program">
           <SelectInput id="edu-program" value={draft.program} onChange={(v) => setDraft({ ...draft, program: v })}>
@@ -144,11 +155,11 @@ function EducationModal({ initial, onClose, onSaved }: { initial: ResumeEducatio
           </SelectInput>
         </Field>
         <Field label="GPA (optional)" htmlFor="edu-gpa">
-          <TextInput id="edu-gpa" value={draft.gpa} onChange={(v) => setDraft({ ...draft, gpa: v })} placeholder="e.g. 3.8" />
+          <TextInput id="edu-gpa" value={draft.gpa} onChange={(v) => setDraft({ ...draft, gpa: v })} onFocus={track("cityState")} placeholder="e.g. 3.8" />
         </Field>
         <Field label="Awards or Honors (optional)" htmlFor="edu-honors">
           <div className="flex gap-[var(--space-2)]">
-            <TextInput id="edu-honors" value={honorDraft} onChange={setHonorDraft} placeholder="e.g. Honor Roll, AP Scholar" />
+            <TextInput id="edu-honors" value={honorDraft} onChange={setHonorDraft} onFocus={track("honors")} placeholder="e.g. Honor Roll, AP Scholar" />
             <button
               type="button"
               onClick={() => {
@@ -193,8 +204,24 @@ function EducationModal({ initial, onClose, onSaved }: { initial: ResumeEducatio
   );
 }
 
-export function EducationStep({ resume, onNext, onBack, showToast }: { resume: ResumeData; onNext: () => void; onBack: () => void; showToast: (m: string) => void }) {
+export function EducationStep({ resume, onNext, onBack, showToast, onFieldFocus }: { resume: ResumeData; onNext: () => void; onBack: () => void; showToast: (m: string) => void; onFieldFocus?: (field: string | null) => void }) {
   const [editing, setEditing] = useState<ResumeEducation | null | "new">(null);
+  // Swaps this whole card's body for the form rather than layering a modal
+  // over the list (see ResumeModal, ui.tsx) -- only one is ever mounted.
+  if (editing) {
+    return (
+      <EducationModal
+        initial={editing === "new" ? null : editing}
+        onClose={() => { onFieldFocus?.(null); setEditing(null); }}
+        onSaved={(name) => {
+          onFieldFocus?.(null);
+          setEditing(null);
+          showToast(`${name} added`);
+        }}
+        onFieldFocus={onFieldFocus}
+      />
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -211,16 +238,6 @@ export function EducationStep({ resume, onNext, onBack, showToast }: { resume: R
             <EntryRow key={e.id} title={e.schoolName} subtitle={e.program ? `${e.program} Program` : "High School"} meta={`Expected Graduation: ${e.gradYear}`} onEdit={() => setEditing(e)} onRemove={() => removeEducation(e.id)} />
           ))}
         </div>
-      )}
-      {editing && (
-        <EducationModal
-          initial={editing === "new" ? null : editing}
-          onClose={() => setEditing(null)}
-          onSaved={(name) => {
-            setEditing(null);
-            showToast(`${name} added`);
-          }}
-        />
       )}
       <WizardFooter onBack={onBack} onNext={onNext} />
     </div>
@@ -335,6 +352,23 @@ function SkillsPicker({ categoryKey, label, hint, suggestions, selected, onClose
 
 export function SkillsStep({ resume, onNext, onBack }: { resume: ResumeData; onNext: () => void; onBack: () => void }) {
   const [open, setOpen] = useState<"people" | "tech" | "languages" | null>(null);
+  if (open) {
+    const cat = SKILL_CATEGORIES.find((c) => c.key === open)!;
+    return (
+      <SkillsPicker
+        categoryKey={cat.key}
+        label={cat.label}
+        hint={cat.hint}
+        suggestions={cat.suggestions}
+        selected={resume.skills[cat.key]}
+        onClose={() => setOpen(null)}
+        onSave={(values) => {
+          writeResume({ skills: { ...readResume().skills, [cat.key]: values } });
+          setOpen(null);
+        }}
+      />
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       {SKILL_CATEGORIES.map((cat) => {
@@ -392,34 +426,37 @@ const EMPTY_CERT: ResumeCertification = { id: "", name: "", issuer: "", issueDat
 // expiration dates rather than one combined date, plus optional credential
 // ID/URL for verification -- the shape any real certification (AWS, food
 // handler, CPR) actually needs.
-function CertificationModal({ initial, onClose, onSaved }: { initial: ResumeCertification | null; onClose: () => void; onSaved: (name: string) => void }) {
+function CertificationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: ResumeCertification | null; onClose: () => void; onSaved: (name: string) => void; onFieldFocus?: (field: string | null) => void }) {
   const [draft, setDraft] = useState<ResumeCertification>(initial ?? { ...EMPTY_CERT, id: makeId() });
   const canSave = draft.name.trim().length > 0 && draft.issuer.trim().length > 0;
+  // Matches the `data-field` markers CertificationEntries puts on the live
+  // preview (ResumeDocument.tsx).
+  const track = (kind: string) => () => onFieldFocus?.(`${draft.id}:${kind}`);
   return (
-    <ResumeModal title="Add Certification" onClose={onClose}>
+    <ResumeModal title="Add Certification" onClose={() => { onFieldFocus?.(null); onClose(); }}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="Certification Name" htmlFor="cert-name" required>
-          <TextInput id="cert-name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} placeholder="e.g. AWS Certified Cloud Practitioner" />
+          <TextInput id="cert-name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} onFocus={track("name")} placeholder="e.g. AWS Certified Cloud Practitioner" />
         </Field>
         <Field label="Issuing Organization" htmlFor="cert-issuer" required>
-          <TextInput id="cert-issuer" value={draft.issuer} onChange={(v) => setDraft({ ...draft, issuer: v })} placeholder="e.g. Amazon Web Services" />
+          <TextInput id="cert-issuer" value={draft.issuer} onChange={(v) => setDraft({ ...draft, issuer: v })} onFocus={track("name")} placeholder="e.g. Amazon Web Services" />
         </Field>
         <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
           <Field label="Issue Date" htmlFor="cert-issue-date">
-            <TextInput id="cert-issue-date" value={draft.issueDate} onChange={(v) => setDraft({ ...draft, issueDate: v })} placeholder="e.g. Jan 2024" />
+            <TextInput id="cert-issue-date" value={draft.issueDate} onChange={(v) => setDraft({ ...draft, issueDate: v })} onFocus={track("dates")} placeholder="e.g. Jan 2024" />
           </Field>
           <Field label="Expiration Date" htmlFor="cert-exp-date">
-            <TextInput id="cert-exp-date" value={draft.expirationDate} onChange={(v) => setDraft({ ...draft, expirationDate: v })} placeholder="e.g. Jan 2027 or No Expiry" />
+            <TextInput id="cert-exp-date" value={draft.expirationDate} onChange={(v) => setDraft({ ...draft, expirationDate: v })} onFocus={track("dates")} placeholder="e.g. Jan 2027 or No Expiry" />
           </Field>
         </div>
         <Field label="Credential ID (optional)" htmlFor="cert-credential-id">
-          <TextInput id="cert-credential-id" value={draft.credentialId} onChange={(v) => setDraft({ ...draft, credentialId: v })} placeholder="e.g. ABC123XYZ" />
+          <TextInput id="cert-credential-id" value={draft.credentialId} onChange={(v) => setDraft({ ...draft, credentialId: v })} onFocus={track("name")} placeholder="e.g. ABC123XYZ" />
         </Field>
         <Field label="Credential URL (optional)" htmlFor="cert-credential-url">
           <TextInput id="cert-credential-url" value={draft.credentialUrl} onChange={(v) => setDraft({ ...draft, credentialUrl: v })} placeholder="e.g. https://www.credly.com/badges/…" />
         </Field>
         <div className="flex items-center justify-end gap-[var(--space-3)] pt-[var(--space-2)]">
-          <button type="button" onClick={onClose} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
+          <button type="button" onClick={() => { onFieldFocus?.(null); onClose(); }} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
           <button
             type="button"
             disabled={!canSave}
@@ -435,8 +472,18 @@ function CertificationModal({ initial, onClose, onSaved }: { initial: ResumeCert
   );
 }
 
-export function CertificationsStep({ resume, onNext, onBack, showToast }: { resume: ResumeData; onNext: () => void; onBack: () => void; showToast: (m: string) => void }) {
+export function CertificationsStep({ resume, onNext, onBack, showToast, onFieldFocus }: { resume: ResumeData; onNext: () => void; onBack: () => void; showToast: (m: string) => void; onFieldFocus?: (field: string | null) => void }) {
   const [editing, setEditing] = useState<ResumeCertification | null | "new">(null);
+  if (editing) {
+    return (
+      <CertificationModal
+        initial={editing === "new" ? null : editing}
+        onClose={() => { onFieldFocus?.(null); setEditing(null); }}
+        onSaved={(name) => { onFieldFocus?.(null); setEditing(null); showToast(`${name} added`); }}
+        onFieldFocus={onFieldFocus}
+      />
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -453,13 +500,6 @@ export function CertificationsStep({ resume, onNext, onBack, showToast }: { resu
             <EntryRow key={c.id} title={c.name} subtitle={c.issuer || undefined} meta={c.issueDate || undefined} onEdit={() => setEditing(c)} onRemove={() => removeCertification(c.id)} />
           ))}
         </div>
-      )}
-      {editing && (
-        <CertificationModal
-          initial={editing === "new" ? null : editing}
-          onClose={() => setEditing(null)}
-          onSaved={(name) => { setEditing(null); showToast(`${name} added`); }}
-        />
       )}
       <WizardFooter onBack={onBack} onNext={onNext} nextLabel="Review" />
     </div>
