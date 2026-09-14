@@ -8796,3 +8796,10 @@ style. ESLint + `tsc --noEmit` clean on both touched files.
 **Not touched:** `CARD` (Ask Me composer / Posts entries) still uses
 `--glass-surface-2` on purpose -- that one wasn't part of the complaint, and
 it already carries a primary tint tuned for a smaller element.
+
+**Follow-up:** checked the reference article the user linked
+(greatplacetowork.com/resources/blog/what-are-employee-resource-groups-ergs)
+-- "Employee Resource Groups" is the standard industry term (used the same
+way at EY, KPMG, Zillow, AT&T), so the section label changed from the
+shorter "Employee Groups" to that. Pushed to main (`6c61296` then this
+label fix) with explicit authorization.

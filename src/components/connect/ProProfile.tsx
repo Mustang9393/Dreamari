@@ -333,11 +333,15 @@ export function OverviewSection({ pro, communities, onOpenCommunity }: { pro: Pr
         )}
         {pro.employeeGroups && pro.employeeGroups.length > 0 && (
           // Another way to find a professional a student relates to, beyond
-          // topics/world (direct request, 15 Sept 2026): opt-in company ERGs,
-          // kept as compact badges rather than another icon-row list since
-          // there's often several of them and they're scanned, not read.
+          // topics/world (direct request, 15 Sept 2026): opt-in company
+          // ERGs, kept as compact badges rather than another icon-row list
+          // since there's often several of them and they're scanned, not
+          // read. "Employee Resource Groups" (not the shorter "Employee
+          // Groups") per greatplacetowork.com/resources/blog/what-are-
+          // employee-resource-groups-ergs -- the standard industry term,
+          // used the same way at EY, KPMG, Zillow, AT&T.
           <div className="flex flex-col items-start gap-[var(--space-2)]">
-            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Employee Groups</span>
+            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Employee Resource Groups</span>
             <div className="flex flex-wrap gap-[6px]">
               {pro.employeeGroups.map((g) => (
                 <span key={g} className="rounded-[var(--radius-sm)] border px-[10px] py-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{g}</span>
