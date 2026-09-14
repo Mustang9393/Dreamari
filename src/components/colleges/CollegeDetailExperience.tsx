@@ -10,7 +10,7 @@ import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
-import { Donut, SplitBar } from "./viz";
+import { Donut } from "./viz";
 import { EXTRA } from "./extra";
 import { Segmented } from "@/components/connect/viz";
 
@@ -135,6 +135,12 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   // instance) -- still genuinely aid-relevant, not a mislabeled dead end.
   const applyHref = x?.links.apply ?? null;
   const aidHref = x?.links.aid ?? x?.links.calc ?? null;
+  // Shared between Academics (Undergraduate Research moved there, direct
+  // feedback 15 Sept 2026 -- "that is an academic opportunity") and Campus
+  // Life (Study abroad, ROTC) so the same underlying `ways` data isn't
+  // parsed twice with two chances to disagree.
+  const wayNames = d ? (x && x.ways.length > 0 ? x.ways.map((w) => w.name) : d.ways) : [];
+  const hasWay = (needle: string) => wayNames.some((w) => w.toLowerCase().includes(needle));
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -370,7 +376,8 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 <Row label="Graduation Rate" value={pct(c.finish)} />
                 {typeof d.finish4 === "number" && <Row label="4-Year Graduation Rate" value={`${d.finish4}%`} />}
                 <Row label="First-Year Retention" value={pct(c.retention)} />
-                <Row label="Student-Faculty Ratio" value={d.ratio} last />
+                <Row label="Student-Faculty Ratio" value={d.ratio} last={!hasWay("undergraduate research")} />
+                {hasWay("undergraduate research") && <Row label="Undergraduate Research" value="Offered" last />}
               </div>
             </TabPanel>
 
@@ -458,52 +465,60 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             )}
 
             {tab === "life" && (
-            <div className="flex flex-col gap-[var(--space-5)]">
-            <TabPanel id="life-title" title="Life there">
-              <div className="flex flex-col gap-[var(--space-6)]">
-                <div className="grid gap-[var(--space-6)] md:grid-cols-2">
-                  <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Ways to study here</h3>
-                    <div className="mt-[var(--space-2)]">
-                      {x && x.ways.length ? x.ways.map((w, i, arr) => <Row key={w.name} label={w.name} note={w.note} value="" last={i === arr.length - 1} />) : d.ways.length ? d.ways.map((w, i, arr) => <Row key={w} label={w} value="" last={i === arr.length - 1} />) : <Row label="No extras" note="no study abroad, no ROTC, no evening classes" value="" last />}
+            <TabPanel id="life-title" title="Campus Life">
+              {/* Four sections, exactly the parts of campus life students
+                 actually weigh (direct feedback, 15 Sept 2026) -- not an
+                 institutional directory. "After college / Pay and debt" is
+                 gone entirely (belongs elsewhere, not this tab), and
+                 Undergraduate Research moved to Academics -- it's an
+                 academic opportunity, not a campus-life one. Teacher
+                 training, evening/weekend classes, and childcare-on-campus
+                 (all real data, none named in the new structure) simply
+                 don't have a section here anymore either. */}
+              {(() => {
+                const studyAbroad = hasWay("study abroad");
+                const rotc = hasWay("rotc");
+                // The only `helps` entry specific enough to keep -- "Careers
+                // advice" and "Help finding a job when you finish" are
+                // exactly the vague copy called out to remove.
+                const careerServices = d.helps.includes("Help finding work while you study");
+                return (
+                  <div className="flex flex-col gap-[var(--space-6)]">
+                    <div>
+                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Housing</h3>
+                      <div className="mt-[var(--space-2)]">
+                        <Row label="Housing available" value={d.housing ? "Yes" : "No"} last />
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What the college helps with</h3>
-                    <div className="mt-[var(--space-2)]">
-                      {d.helps.map((h, i, arr) => <Row key={h} label={h} value="" last={i === arr.length - 1 && !d.notOffered?.length} />)}
-                      {d.notOffered?.map((n, i, arr) => <Row key={n} label={n} value="Not offered" tone="muted" last={i === arr.length - 1} />)}
+                    <div>
+                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Activities &amp; Organizations</h3>
+                      <div className="mt-[var(--space-2)]">
+                        <Row label="Student clubs &amp; organizations" value="" last={!rotc} />
+                        {rotc && <Row label="ROTC" value="Offered" last />}
+                      </div>
                     </div>
+                    {d.sport && (
+                      <div>
+                        <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Athletics</h3>
+                        <div className="mt-[var(--space-2)]">
+                          <Row label="League" value={d.sport.league} last />
+                        </div>
+                        <ul className="mt-[var(--space-3)] flex flex-wrap gap-[8px]" aria-label="Sports offered">{d.sport.teams.map((t) => <li key={t} className="rounded-full px-[11px] py-[4px] text-[13px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.08)" }}>{t}</li>)}</ul>
+                      </div>
+                    )}
+                    {(studyAbroad || careerServices) && (
+                      <div>
+                        <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Opportunities</h3>
+                        <div className="mt-[var(--space-2)]">
+                          {studyAbroad && <Row label="Study abroad" value="" last={!careerServices} />}
+                          {careerServices && <Row label="Career services" value="" last />}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-                {d.sport && (
-                  <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Sport</h3>
-                    <div className="mt-[var(--space-2)]">
-                      <Row label="League" value={d.sport.league} last={!(x?.teamMen && x?.teamWomen)} />
-                      {x?.teamMen && x?.teamWomen ? (
-                        <SplitBar title={`${d.sport.students.toLocaleString("en-US")} students on a team`} a={{ label: "men", value: x.teamMen }} b={{ label: "women", value: x.teamWomen }} />
-                      ) : (
-                        <Row label="Students on a team" value={d.sport.students.toLocaleString("en-US")} last />
-                      )}
-                    </div>
-                    <ul className="mt-[var(--space-3)] flex flex-wrap gap-[8px]" aria-label="Teams">{d.sport.teams.map((t) => <li key={t} className="rounded-full px-[11px] py-[4px] text-[13px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.08)" }}>{t}</li>)}</ul>
-                  </div>
-                )}
-              </div>
+                );
+              })()}
             </TabPanel>
-
-            <TabPanel id="after-title" title="After college">
-              <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Pay and debt</h3>
-              <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, in every subject.</p>
-              <div className="mt-[var(--space-2)]">
-                <Row label="Typical pay six years after starting" note="finished or not" value={d.pay6 ? `${money(d.pay6)} a year` : "Not published"} />
-                <Row label="Owed when they finish" note={d.monthly ? `federal loans, about ${money(d.monthly)} a month` : "federal loans"} value={d.debt ? money(d.debt) : "Not published"} />
-                <Row label="Borrowers paying their loans back" value={c.repay !== null ? `${c.repay}%` : "Not published"} last={x?.fallBehind === null || x?.fallBehind === undefined} />
-                {x?.fallBehind !== null && x?.fallBehind !== undefined && <Row label="Borrowers who fall behind" value={`${x.fallBehind}%`} last />}
-              </div>
-            </TabPanel>
-            </div>
             )}
           </>
         )}

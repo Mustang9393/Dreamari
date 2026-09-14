@@ -112,7 +112,7 @@ of Dreamari:
 
 Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.
 
-## 8. Update, 15 Sept 2026 -- Academics/Cost/Student Body simplification, "fits you" retired
+## 8. Update, 15 Sept 2026 -- Academics/Cost/Student Body/Campus Life simplification, "fits you" retired
 
 Same direction, two more tabs:
 
@@ -136,5 +136,14 @@ Same direction, two more tabs:
   is a plain list now, not bars. The one visualization kept from the
   original design is the demographics donut -- explicitly reconfirmed as
   worth keeping, not retired like the others this round.
+- **§4's "Life there"/"After college" collapse into one "Campus Life" tab,
+  four sections** (Housing, Activities & Organizations, Athletics,
+  Opportunities). After-college outcomes data (pay, debt, repayment) is
+  dropped from this page entirely -- belongs with academics/careers
+  elsewhere in Dreamari, not campus life. Undergraduate Research relocates
+  to Academics. §4's own "See it, then ask" companion idea (already
+  retired above) and this tab's old sport `SplitBar` are both gone the
+  same way: real data, but not decision-useful enough to keep a
+  visualization or a whole section for.
 
 Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.

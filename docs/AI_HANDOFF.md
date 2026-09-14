@@ -9100,3 +9100,51 @@ matches (9,137 / 5,813 / 3,324 / 99% / 1% / 50% / 50%, demographics
 33/23/13/10/9/7 with trimmed labels), checked at mobile width. ESLint +
 `tsc --noEmit` clean. Not yet pushed -- batched with the Academics/Cost
 round above, same "not yet" hold.
+
+### 15 Sept 2026 — College Details: Campus Life simplification, drops "fits you" again
+
+Same request, made about Campus Life specifically after seeing it still
+had the "fits you" block too (it's shared across every tab via the header
+area, so this confirms it's gone everywhere, not just Overview -- no
+additional code change needed there, already removed in the Academics/
+Cost round above).
+
+- **"Life there" -> "Campus Life"**, four sections instead of "Ways to
+  study here" / "What the college helps with" / "Sport", plus the
+  separate "After college" panel dropped entirely ("belongs elsewhere,"
+  matches the Academics round's own reasoning for keeping outcomes data
+  off this page): **Housing** (`d.housing` Yes/No -- no live-on-campus %
+  or housing-type breakdown exists in the data, so neither is fabricated,
+  same "hide what's unavailable" rule as every other tab this round).
+  **Activities & Organizations** (a baseline "Student clubs &
+  organizations" row plus ROTC when the school's `ways` data mentions it
+  -- no fraternity/sorority or club-count field exists anywhere in
+  data.ts/extra.ts, confirmed by grep, so neither renders; ready for real
+  numbers later per the request's own "if we eventually have a reliable
+  number of clubs" note). **Athletics** (league + `d.sport.teams` as
+  compact chips, reusing the exact chip markup that already existed for
+  this -- the men/women `SplitBar` is gone, "no progress bars needed").
+  **Opportunities** (Study abroad from `ways`, "Career services" from the
+  one `d.helps` entry specific enough to keep -- "Help finding work while
+  you study" -- the two vague ones named directly, "Careers advice" and
+  "Help finding a job when you finish", are gone, and so is the fourth
+  `helps` value across the whole dataset, "Childcare on campus", which
+  doesn't fit any of the four named sections).
+- **Undergraduate Research moved to Academics** ("that is an academic
+  opportunity and fits better under Academics") -- a new `wayNames`/
+  `hasWay()` pair lives once near the top of the component (previously
+  computed inline inside the Life tab only) so Academic Facts and Campus
+  Life both read the same underlying `ways` data without parsing it
+  twice. Teacher training, evening/weekend classes, and the intellectual-
+  disability program note (all real `ways`/`helps` values, none named in
+  the new structure) no longer have a section anywhere on the page --
+  deliberate, not an oversight, per "gives students the parts of campus
+  life they are actually likely to care about."
+
+Browser-verified live at `/colleges/princeton-university`: Campus Life
+shows exactly the four sections with Princeton's real data (Housing: Yes;
+Activities & Organizations: clubs row + ROTC Offered; Athletics: NCAA
+Division I-FCS + 10 sport chips, no bars; Opportunities: Study abroad +
+Career services), Academic Facts gained "Undergraduate Research: Offered"
+as its fifth row, checked at mobile width too. ESLint + `tsc --noEmit`
+clean. Not yet pushed, same hold as the rest of this round.
