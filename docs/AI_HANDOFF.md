@@ -8981,3 +8981,92 @@ Factors Considered, and Typical Scores all match) and
 three header actions render together, checked at desktop and mobile
 widths). ESLint + `tsc --noEmit` clean. Pushed to main with explicit
 authorization.
+
+### 15 Sept 2026 — College Details: Academics + Cost simplification, drop "fits you"
+
+Same Slack thread, same direction, two more tabs plus one whole feature
+removed:
+
+1. **"Why [college] fits you" (`YourPath`) removed entirely**, not
+   conditionally hidden -- was reached via `?route=<career>` from Explore
+   Schools "For you". Direct feedback: "adds complexity and may be
+   difficult to support consistently with the data." Deleted the function,
+   its render site, and every now-unused import that only it needed
+   (`Suspense`, `useSearchParams`, `useSyncExternalStore`, `FIT_WORDS`/
+   `fitFor`/`parseGpa`/`pathwayFor` from `./pathway`, the three
+   `studentProfile` imports, `SMALL`). `pathway.ts`/`studentProfile.ts`
+   themselves are untouched -- nothing else in the codebase depended on
+   this file's use of them.
+2. **Academics -> "Academic Facts"**: the old two-column "Finishing"/
+   "Staying, and class size" split, each with per-row notes plus a "More
+   finish rates" reveal (5/6/8-year breakdowns) and a part-time-retention
+   row, all collapsed into ONE flat 4-row list -- Graduation Rate, 4-Year
+   Graduation Rate, First-Year Retention, Student-Faculty Ratio, no notes.
+   Direct feedback: "no paragraphs underneath each metric... that's
+   enough."
+3. **"What you can study" -> "Popular Majors"**: dropped grads/year, pay,
+   the "Biggest first. Pay is one year after graduating." subtitle, and
+   the "Too few to publish pay" rows entirely -- "career salary and
+   outcomes belong elsewhere in Dreamari." Rows are now just name + share
+   of graduates. The degree-level `Segmented` selector only renders when a
+   school actually has more than one level (`levels.length > 1`) --
+   already only ever populated with levels the data has, so "only show
+   what the institution offers" was already true by construction, just
+   needed the single-level case to skip an unnecessary selector. "X
+   biggest" button relabeled "View All Majors".
+4. **Cost -> "What It Costs"**: replaced the `Ladder` bar-chart
+   visualization with two headline `Stat` tiles (new local component) --
+   Full Price and Average Cost After Aid -- then a plain "Cost by Family
+   Income" list using a new `bandLabel()` formatter ("Under $30,000" ->
+   "Under $30K", "$30,000 to $48,000" -> "$30K–$48K", "Over $110,000" ->
+   "$110K+") so the table doesn't repeat "Family earns" five times.
+   Renamed "The full price, broken down" -> "Full Price Breakdown"
+   (Tuition/Fees/Housing/Food, hides any unavailable one instead of a
+   "None, commute only"-style fallback message) and "Money you do not pay
+   back" -> "Grants & Scholarships" (College/Pell grant recipients, notes
+   dropped). Removed the inline "Your family's price"/"Financial aid"
+   links -- redundant with the header's own Financial Aid action from the
+   previous round.
+
+Browser-verified live at `/colleges/princeton-university?route=investment-
+banking` (confirms "fits you" is gone even in the one scenario that used
+to trigger it) -- every single number in the request matched exactly:
+Academic Facts (98%/75%/98%/5 to 1), Popular Majors top 5 + View All,
+Full Price $82,938, Average Cost After Aid $6,128 / year, all five income
+bands, Full Price Breakdown, Grants & Scholarships. Checked at mobile
+width too. ESLint + `tsc --noEmit` clean.
+
+### 15 Sept 2026 — Resume Builder: fix stale data on "Create My Resume"
+
+Bug report: delete your only saved resume, click "Create My Resume" again,
+and every field still shows the old answers. Root cause:
+`removeVersion()` (`src/lib/resume.ts:288-290`) only removes the entry
+from `versions` by design -- the delete-confirmation dialog in
+`ResumeExperience.tsx` says so explicitly ("This only removes this saved
+resume. Your education, experience, and skills stay in your profile"),
+since a `ResumeVersion` is just a tailored subset of one shared
+profile/education/experience/skills/certifications pool
+(`resumeForVersion`). That's genuinely the wanted behavior for "Create New
+Resume" when you already have one saved (direct feedback confirmed this:
+"useful when I hit create new resume when I already have one built"). The
+bug was specifically the OTHER entry point: the zero-resumes empty
+state's "Create My Resume" button called `prefillFromStudentProfileIfEmpty`,
+which only prefilled identity when the store was *fully* empty (checked
+via `isResumeEmpty`) -- after a delete, education/experience/etc were
+still populated, so that check short-circuited and nothing was reset.
+
+Fix: that function only every runs from the zero-versions button (it's
+not rendered otherwise), so "starting fresh" is exactly what it always
+means there now -- renamed to `startFreshFromStudentProfile` and it
+unconditionally resets the whole draft (`writeResume({ ...EMPTY_RESUME,
+profile: {...} })`) before prefilling name/email/state from the account.
+"Create New Resume" (the `versions.length > 0` add-another button) was
+never wired to this function and still isn't touched -- it keeps carrying
+the shared answers forward, unchanged.
+
+Browser-verified: seeded stale education/profile data with 0 saved
+versions (the exact repro), clicked "Create My Resume", confirmed via
+both the localStorage snapshot and the live wizard screen that Education/
+Experience reset to empty while First/Last Name still prefill from the
+account identity (Jordan Rivera, the demo student's own name -- not
+leftover resume data). ESLint + `tsc --noEmit` clean.

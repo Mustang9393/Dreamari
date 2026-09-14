@@ -111,3 +111,25 @@ of Dreamari:
   making the section smaller.
 
 Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.
+
+## 8. Update, 15 Sept 2026 -- Academics/Cost simplification, "fits you" retired
+
+Same direction, two more tabs:
+
+- **§4's "See it, then ask" companion, "Why this college fits you"
+  (`YourPath`, added after this doc was written) is retired entirely.**
+  Direct feedback: too hard to keep consistent with the data across every
+  college. The `?route=<career>` entry point from Explore Schools "For
+  you" no longer does anything special on a college's own page.
+- **Academics collapses to one "Academic Facts" list** (Graduation Rate,
+  4-Year Graduation Rate, First-Year Retention, Student-Faculty Ratio) and
+  a **"Popular Majors" list** (name + share of graduates only -- no pay,
+  no grads/year). §4's own "Career fit"/outcomes framing for this page is
+  superseded: earnings data belongs elsewhere in Dreamari, not on the
+  academics tab.
+- **Cost's "Ladder" bar-chart visualization is retired** for two headline
+  numbers (Full Price, Average Cost After Aid) plus plain tables -- "make
+  ours even more concise" than even the U.S. News reference screenshot
+  used as inspiration.
+
+Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.
