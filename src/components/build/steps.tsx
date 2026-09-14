@@ -69,7 +69,7 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
       <CardHud percent={percent} />
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
-        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="What sounds interesting?" subtitle="Choose up to 2" />
+        <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which career fields interest you?" subtitle="Choose up to 2" />
         {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
            caption row (label + counter), then the picks side by side as
            Bricolage statements in their world colors, separated by a dot.
@@ -439,8 +439,8 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
           <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />
         </div>
-        <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="You’re moving fast. 🚀" /></h1>
-        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">The good part is coming.</p>
+        <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="You’re halfway there. ✨" /></h1>
+        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">Keep going. Your matches are getting closer.</p>
       </GlassCard>
       </div>
       </div>

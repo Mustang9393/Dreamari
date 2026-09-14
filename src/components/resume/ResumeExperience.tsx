@@ -4,21 +4,24 @@ import { useRouter } from "next/navigation";
 import { useSyncExternalStore, useState } from "react";
 import { Eye, FileText, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
-import { isResumeEmpty, readResume, removeVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, writeResume, type ResumeVersion } from "@/lib/resume";
+import { EMPTY_RESUME, removeVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, writeResume, type ResumeVersion } from "@/lib/resume";
 import { readStudentProfile } from "@/lib/studentProfile";
 import { STUDENT } from "@/components/profile/data";
 import { CARD_CLASS, INSET, useResumeToast } from "./ui";
 
-/** Prefill from the student's own identity and existing Build/Settings
- *  answers, the same name/school shown everywhere else in Profile -- a
- *  resume that opens on someone else's name is confusing, not a blank
- *  slate (direct feedback, 14 Sept 2026). Only touches the store if it's
- *  genuinely still empty, so it never clobbers real answers. */
-function prefillFromStudentProfileIfEmpty() {
-  if (!isResumeEmpty(readResume())) return;
+/** Only ever called from the zero-resumes empty state below, so this IS
+ *  "starting fresh" by definition -- resets the whole draft (education,
+ *  experience, skills, certifications) before prefilling identity, rather
+ *  than the old empty-check that silently left a deleted resume's answers
+ *  in place (direct feedback, 15 Sept 2026: delete your only resume, hit
+ *  Create again, and the old fields were all still there). "Create New
+ *  Resume" below, the ADD-ANOTHER path when you already have one saved,
+ *  never calls this -- that one is supposed to keep the shared answers,
+ *  same identity/school prefill everywhere else in Profile. */
+function startFreshFromStudentProfile() {
   const sp = readStudentProfile();
   const [firstName, ...rest] = STUDENT.name.split(" ");
-  writeResume({ profile: { firstName, lastName: rest.join(" "), email: sp.email, phone: "", country: "", state: sp.states[0] ?? "", city: "", bio: "" } });
+  writeResume({ ...EMPTY_RESUME, profile: { firstName, lastName: rest.join(" "), email: sp.email, phone: "", country: "", state: sp.states[0] ?? "", city: "", bio: "" } });
 }
 
 function formatDate(ts: number) {
@@ -62,7 +65,7 @@ export function ResumeExperience() {
   const [confirmDelete, setConfirmDelete] = useState<ResumeVersion | null>(null);
 
   const startBuilding = () => {
-    prefillFromStudentProfileIfEmpty();
+    startFreshFromStudentProfile();
     // Template first, with a real example in every option (direct feedback,
     // 14 Sept 2026), then straight into filling it out.
     router.push("/resume-builder?view=templates");

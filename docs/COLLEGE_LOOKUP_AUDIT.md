@@ -111,3 +111,189 @@ of Dreamari:
   making the section smaller.
 
 Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.
+
+## 8. Update, 15 Sept 2026 -- Academics/Cost/Student Body/Campus Life simplification, "fits you" retired
+
+Same direction, two more tabs:
+
+- **§4's "See it, then ask" companion, "Why this college fits you"
+  (`YourPath`, added after this doc was written) is retired entirely.**
+  Direct feedback: too hard to keep consistent with the data across every
+  college. The `?route=<career>` entry point from Explore Schools "For
+  you" no longer does anything special on a college's own page.
+- **Academics collapses to one "Academic Facts" list** (Graduation Rate,
+  4-Year Graduation Rate, First-Year Retention, Student-Faculty Ratio) and
+  a **"Popular Majors" list** (name + share of graduates only -- no pay,
+  no grads/year). §4's own "Career fit"/outcomes framing for this page is
+  superseded: earnings data belongs elsewhere in Dreamari, not on the
+  academics tab.
+- **Cost's "Ladder" bar-chart visualization is retired** for two headline
+  numbers (Full Price, Average Cost After Aid) plus plain tables -- "make
+  ours even more concise" than even the U.S. News reference screenshot
+  used as inspiration.
+- **§4's "Quick facts strip" (Really pay / Get in / Finish / Students) and
+  Who is There's `SplitBar`s are superseded on Student Body.** Enrollment
+  is a plain list now, not bars. The one visualization kept from the
+  original design is the demographics donut -- explicitly reconfirmed as
+  worth keeping, not retired like the others this round.
+- **§4's "Life there"/"After college" collapse into one "Campus Life" tab,
+  four sections** (Housing, Activities & Organizations, Athletics,
+  Opportunities). After-college outcomes data (pay, debt, repayment) is
+  dropped from this page entirely -- belongs with academics/careers
+  elsewhere in Dreamari, not campus life. Undergraduate Research relocates
+  to Academics. §4's own "See it, then ask" companion idea (already
+  retired above) and this tab's old sport `SplitBar` are both gone the
+  same way: real data, but not decision-useful enough to keep a
+  visualization or a whole section for.
+
+Implementation: `src/components/colleges/CollegeDetailExperience.tsx`.
+
+## 9. Update, 14 Sept 2026 -- 25 real colleges added alongside the fabricated set
+
+The prototype's ~30 colleges (figures transcribed 3 Sept 2026 from the live
+Dreamari build, per `data.ts`'s own header comment) were always placeholder
+data. The user supplied a 200-college sample of the *real* production API
+response shape (`GET /colleges` card + `GET /colleges/:slug` profile,
+IPEDS/College Scorecard-derived) plus its README, with explicit instruction
+to fill the demo with real values -- "only use what is required after all
+our design notes... removing sections and updating this have been updated,"
+i.e. scoped strictly to whatever survives §§1-8's simplification above, not
+the source README's fuller shape.
+
+Decisions, each pinned down directly rather than assumed:
+
+- **Keep our shape, refresh the numbers.** Real values are transformed into
+  the *existing* `College`/`CollegeExtra` field names, not a restructure to
+  match the real API's own nesting (`admission`/`campus`/`enrollment`
+  objects, etc.) -- "keep our shape."
+- **Princeton stays fabricated for now.** It isn't in the 200-college
+  sample anyway (confirmed by lookup); the user is sending Princeton's real
+  data separately, to go through this same pipeline once it arrives.
+  Everything else in the demo is real.
+- **25 colleges, matching the existing demo's rough size** -- not all 200.
+  Reasoning given: populating all 200 (plus fetching each one's image/logo)
+  would cost meaningful time and usage credits for a demo that only needs
+  to *feel* real, not be exhaustive; the list/search/filter UI needed zero
+  code changes to handle either count, confirmed live before this was
+  decided, so nothing about the smaller number is a functional compromise.
+- **No images or logos fetched for any of the 25.** Every new entry uses
+  `photo: false, mark: false` -- the placeholder-card state the source
+  README itself calls out as a common, deliberately-oversampled real-world
+  state (22 of 1,116 no-photo colleges included in the 200-sample), not an
+  edge case being papered over.
+
+The 25 were chosen to span the same range of real-world data completeness
+the source sample itself highlights: large well-resourced publics (Illinois
+State, Texas A&M, Arizona State) down to tiny/sparse institutions with
+mostly-null financial and outcome data (Caan Academy of Nursing, 96
+undergrads; Christine Valmy; avalon-institute-las-vegas). Three
+originally-chosen slugs (`palmer-college-of-chiropractic`,
+`claremont-graduate-university`, `university-of-oklahoma-health-sciences-
+center`) were dropped and replaced after transform crashes revealed they're
+graduate/professional-only institutions with `profile.admission === null`
+in the real API -- no undergraduate admissions process exists to show. A
+fourth replacement (`urban-academy-of-beauty`) was dropped separately after
+its real `totalUndergrad` came back `0`, which would have violated the
+absence-is-never-zero rule; `caan-academy-of-nursing` (real enrollment: 96)
+replaced it.
+
+Transform: `scripts/colleges/transform-real-data.py` (new -- see its own
+header for usage; takes the sample JSON + a slug list, prints TS object-
+literal source for both files, same convention as `build-extra.mjs`
+documenting itself as `extra.ts`'s own generator). Inserted at the exact
+verified end of `COLLEGES` in `data.ts` and `EXTRA` in `extra.ts` -- not via
+a generic `];`/`};` string search, which the first attempt used and which
+silently landed the block inside `data.ts`'s unrelated `synthDetail()`
+function (that function contains its own, later `];`). Re-run from a clean
+`git checkout` with line-index-anchored insertion instead.
+
+One real product bug surfaced by this real (rather than fabricated) data:
+Cost's "Cost by Family Income" heading rendered unconditionally even when a
+college has zero published income bands (`caan-academy-of-nursing`'s
+`d.bands` is empty) -- fixed with the same `{d.bands.length > 0 && (...)}`
+guard already used for the adjacent Full Price Breakdown/Grants &
+Scholarships sections. Every fabricated college always had all 5 bands
+populated, so the gap was invisible until genuinely sparse real data
+existed to expose it.
+
+Browser-verified live: Illinois State University (rich data, every tab),
+Caan Academy of Nursing (sparse-data edge case, "Not published" states,
+the bands-heading bug then its fix), the `/colleges` "For You" list and
+Browse All search (new real colleges appear alongside fabricated Princeton
+with no code changes, correct "--" em-dash for unavailable figures).
+ESLint + `tsc --noEmit -p .` clean project-wide.
+
+Implementation: `src/components/colleges/data.ts`,
+`src/components/colleges/extra.ts`,
+`src/components/colleges/CollegeDetailExperience.tsx` (Cost tab bands
+guard), `scripts/colleges/transform-real-data.py` (new).
+
+**Correction, same day:** a follow-up data-accuracy pass ("some colleges are
+showing 0% acceptance? check all data") caught one bad value in the §9 set:
+Alliant International University-San Diego's real `admitRate` was a
+statistically-meaningless 0% (0 of just 6 reported applicants), not a
+genuine near-zero acceptance rate. Swapped for School of Visual Arts (New
+York) -- real, clean data throughout (93% acceptance, 3,255 undergrads).
+Every other card-visible figure across all 25 colleges was spot-checked
+against the source JSON at the same time; nothing else was wrong.
+
+## 10. Update, 14 Sept 2026 -- real photos and marks fetched for all 25 real colleges
+
+Direct follow-up instruction after §9: fetch real campus photos and school
+marks/logos for the 25 real colleges (all shipped with `photo: false, mark:
+false` placeholders in §9), plus close a gap found in the same audit: 8 of
+the original ~30 fabricated-data colleges had real image files on disk all
+along but stale `photo:false`/`mark:false` flags in `data.ts` (the flags
+turned out to be **dead code** -- `collegeImage()`/`collegeMark()` in
+`data.ts` gate purely on `PHOTOS`/`MARKS` Sets generated from what's
+actually in `public/images/colleges/`, never on the literal's own
+`photo`/`mark` fields). Corrected all 33 stale entries to `true` for
+honesty, even though nothing renders differently.
+
+Explicit instruction: don't limit sourcing to Wikimedia Commons -- "search
+everywhere, far and wide." `scripts/colleges/fetch-images.mjs` (Wikimedia
+Commons + Wikipedia lead-image, the existing pipeline) was extended via new
+`seed-names.json` entries and got about 60% of the 50 needed assets (25
+photos + 25 marks). The remainder came from each institution's own official
+site (logo in the site header, or a real campus/location photo from an
+About/Locations page) -- the same nominative-use rationale this file's own
+generator already documents for Wikipedia-sourced seals ("licences vary...
+en.wikipedia seals are often fair use").
+
+**Two bad automatic matches caught and fixed by visual spot-check**, not by
+the fetch script itself (its Commons search is keyword-driven and can match
+on a substring with no institutional connection):
+- Texas A&M University's auto-matched "campus" photo was a building at the
+  University of Barishal, Bangladesh (matched on generic "academic
+  building" search terms). Replaced with the real Academic Building, Texas
+  A&M (Commons).
+- Strayer University-Tennessee's auto-matched photo was **a stray dog in
+  Pristina** (matched purely on "Stray" in "Strayer"). Replaced with a real
+  Strayer University branch-campus photo (Commons); Strayer's own site
+  yielded no usable campus photography (it's a primarily-online chain of
+  leased office-park locations, so this may be the actual limit of what's
+  publicly photographed for this institution).
+- Two more replaced on inspection for being topically wrong rather than
+  outright unrelated: Illinois State University's auto-match was a 1930s
+  post-office mural (replaced with a real Watterson Towers dorm photo), and
+  Chief Dull Knife College's was an unrelated USDA meeting-room photo
+  (replaced with the college's own official campus photo).
+
+This is the direct lesson to carry forward: **a keyword-matched Commons
+search result must be visually spot-checked, not trusted on file-size/
+license filtering alone** -- both bad matches passed every automated filter
+(real width, real CC/PD license, real institution-adjacent search term) and
+were still completely wrong.
+
+`public/images/colleges/credits.json` updated with attribution for every
+manually-sourced asset (official-site logos/photos cite the source page;
+Commons/Wikipedia assets cite the file and license, matching the existing
+convention). `images.ts` regenerated via `write-manifest.mjs` --
+now 55 photos, 55 marks (30 original + 25 real). `seed-names.json` (the
+`fetch-images.mjs` input list) permanently extended with the 25 new
+colleges for future reruns. ESLint + `tsc --noEmit -p .` clean.
+
+Implementation: `public/images/colleges/*.webp` (50 new files),
+`public/images/colleges/credits.json`, `src/components/colleges/images.ts`
+(regenerated), `src/components/colleges/data.ts` (33 stale photo/mark
+flags corrected), `scripts/colleges/seed-names.json` (extended).

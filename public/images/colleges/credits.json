@@ -273,5 +273,200 @@
     "mark": "https://upload.wikimedia.org/wikipedia/en/5/5a/Kean_univ_nj_seal.png",
     "wikipedia": "https://en.wikipedia.org/wiki/Kean_University",
     "summary": "Kean University is a public university in Union, Elizabeth, Hillside, Jefferson, and Jersey City, New Jersey. It is part of New Jersey's public system of higher education and is a state-designated research university."
+  },
+  "illinois-state-university": {
+    "photo": "Watterson Towers, Normal, IL.jpg (real replacement -- original auto-match was a post-office mural)",
+    "photoLicense": "Public domain",
+    "photoAuthor": "Buster7",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Watterson_Towers,_Normal,_IL.jpg",
+    "mark": "https://thumb.wikimedia.org/wikipedia/en/thumb/3/3e/Illinois_State_University_seal.svg/250px-Illinois_State_University_seal.svg.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Illinois_State_University",
+    "summary": "Illinois State University is a public research university in Normal, Illinois, United States. It was founded in 1857 as Illinois State Normal University and is the oldest public university in Illinois. In fall 2026, the university enrolled 21,577 students."
+  },
+  "clarkson-university": {
+    "photo": "Clarkson Capital Region Campus Building.jpg",
+    "photoLicense": "CC BY-SA 4.0",
+    "photoAuthor": "JakeNewmanCU",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Clarkson_Capital_Region_Campus_Building.jpg",
+    "mark": "https://upload.wikimedia.org/wikipedia/en/f/f1/Clarkson-seal.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Clarkson_University",
+    "summary": "Clarkson University is a private research university with its main campus in Potsdam, New York. Clarkson has additional graduate programs and research facilities in the New York Capital District. It was established in 1896 and enrolled over 4,000 students in 2024. Students pursue bachelor's, master's, and doctoral degrees in each of its schools and institutes: the David D. Reh School of Business, Wallace H. Coulter School of Engineering and Applied Sciences, Earl R. and Barbara D. Lewis School of Health and Life Sciences, Institute for a Sustainable Environment, and Institute for STEM Education. The university is classified among \"R2: Doctoral Universities \u2013 High research activity\"."
+  },
+  "texas-a-m-university-college-station": {
+    "photo": "Academic Building, Texas A&M University (2007).jpg",
+    "photoLicense": "Public domain / PD-self",
+    "photoAuthor": "Balaram Mahalder",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Academic_Building,_Texas_A%26M_University_(2007).jpg",
+    "mark": "official Wikipedia seal",
+    "wikipedia": "https://en.wikipedia.org/wiki/Texas_A%26M_University",
+    "summary": "Texas A&M University is a public land-grant research university in College Station, Texas, United States. It was founded in 1876 and became the flagship institution of the Texas A&M University System in 1948. Since 2021, Texas A&M has enrolled the largest student body in the United States. It is classified among \"R1: Doctoral Universities \u2013 Very high research activity\" and since 2001 has been a member of the Association of American Universities."
+  },
+  "arizona-state-university-campus-immersion": {
+    "photo": "Campus view - Arizona State University - Tempe, AZ - DSC05930.JPG",
+    "photoLicense": "CC0",
+    "photoAuthor": "Daderot",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Campus_view_-_Arizona_State_University_-_Tempe,_AZ_-_DSC05930.JPG",
+    "mark": "https://thumb.wikimedia.org/wikipedia/en/thumb/a/a1/Arizona_State_University_seal.svg/250px-Arizona_State_University_seal.svg.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Arizona_State_University",
+    "summary": "Arizona State University is a public research university in Tempe, Arizona, United States. Founded in 1885 as Territorial Normal School by the 13th Arizona Territorial Legislature, the university is one of the largest public universities by enrollment in the United States. It was one of about 180 \"normal schools\" founded in the late 19th century to train teachers for the rapidly growing public common schools. Some closed, but most steadily expanded their role and became state colleges in the early 20th century, then state universities in the late 20th century."
+  },
+  "grand-canyon-university": {
+    "photo": "Grand Canyon University Phoenix Campus - panoramio (4).jpg",
+    "photoLicense": "CC BY 3.0",
+    "photoAuthor": "davidpinter",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Grand_Canyon_University_Phoenix_Campus_-_panoramio_(4).jpg",
+    "mark": "https://thumb.wikimedia.org/wikipedia/en/thumb/3/37/Grand_Canyon_University_seal.svg/250px-Grand_Canyon_University_seal.svg.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Grand_Canyon_University",
+    "summary": "Grand Canyon University (GCU) is a private Christian university in Phoenix, Arizona, United States. The university offers degrees in over 200 areas of study and is administratively divided into nine colleges. As of September 2023, more than 100,000 students were enrolled online and in person, making it one of the largest Christian universities by enrollment."
+  },
+  "miami-dade-college": {
+    "photo": "Miami Dade College Campus entrance .jpg",
+    "photoLicense": "CC BY-SA 4.0",
+    "photoAuthor": "Karlaramos14",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Miami_Dade_College_Campus_entrance_.jpg",
+    "mark": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Miami_Dade_College_Downtown_Campus.jpg",
+    "wikipedia": "https://en.wikipedia.org/wiki/Miami_Dade_College",
+    "summary": "Miami Dade College (MDC) is a public college located in Miami, Florida, United States. Established in 1960, MDC operates eight campuses and numerous outreach centers throughout Miami-Dade County. It is the largest institution in the Florida College System."
+  },
+  "southern-new-hampshire-university": {
+    "mark": "https://thumb.wikimedia.org/wikipedia/en/thumb/a/ac/Southern_New_Hampshire_University_seal.svg/250px-Southern_New_Hampshire_University_seal.svg.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Southern_New_Hampshire_University",
+    "summary": "Southern New Hampshire University (SNHU) is a private university in Manchester and Hooksett, New Hampshire, United States. The university is accredited by the New England Commission of Higher Education, along with national accreditation for some hospitality, health, education and business degrees. It is one of the fastest-growing universities nationwide with 170,000 online students and 3,000 on campus.",
+    "photo": "Official About Us banner (snhu.edu) -- SETA building on SNHU campus",
+    "photoUrl": "https://www.snhu.edu/about-us"
+  },
+  "norfolk-state-university": {
+    "photo": "Dick Price Stadium 2018.jpg",
+    "photoLicense": "CC BY-SA 4.0",
+    "photoAuthor": "B",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Dick_Price_Stadium_2018.jpg",
+    "mark": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Norfolk_State_University_Seal.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Norfolk_State_University",
+    "summary": "Norfolk State University (NSU) is a public historically black university in Norfolk, Virginia. It is a member of the Thurgood Marshall College Fund and Virginia High-Tech Partnership."
+  },
+  "bluefield-state-university": {
+    "mark": "https://upload.wikimedia.org/wikipedia/en/b/bb/Bluefield_state_college_seal.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Bluefield_State_University",
+    "summary": "Bluefield State University is a public historically black university (HBCU) in Bluefield, West Virginia, United States. The university is a member-school of the Thurgood Marshall College Fund but is now a predominantly white institution (PWI).",
+    "photo": "Mahood Hall (bluefieldstate.edu homepage)",
+    "photoUrl": "https://bluefieldstate.edu/"
+  },
+  "lincoln-university": {
+    "mark": "https://thumb.wikimedia.org/wikipedia/en/thumb/0/0a/Lincoln_University_of_Missouri_seal.svg/250px-Lincoln_University_of_Missouri_seal.svg.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Lincoln_University_(Missouri)",
+    "summary": "Lincoln University is a public, historically black, land-grant university in Jefferson City, Missouri. Founded in 1866 by African-American veterans of the American Civil War, it is a member-school of the Thurgood Marshall College Fund. This was the first black university in the state. In the fall 2023, the university enrolled 1,799 students.",
+    "photo": "Young Hall, Lincoln University of Missouri.jpg",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Young_Hall,_Lincoln_University_of_Missouri.jpg"
+  },
+  "fond-du-lac-tribal-and-community-college": {
+    "photo": "Official site photo (fdltcc.edu)",
+    "photoUrl": "https://fdltcc.edu/",
+    "mark": "Official FDLTCC logo (fdltcc.edu)",
+    "markUrl": "https://fdltcc.edu/"
+  },
+  "chief-dull-knife-college": {
+    "photo": "Official campus photo (cdkc.edu) -- original auto-match was an unrelated USDA meeting photo",
+    "photoLicense": "Public domain",
+    "photoAuthor": "USDAgov",
+    "photoUrl": "https://www.cdkc.edu/about/",
+    "mark": "https://upload.wikimedia.org/wikipedia/en/1/14/Chief_Dull_Knife_College_logo.jpg",
+    "wikipedia": "https://en.wikipedia.org/wiki/Chief_Dull_Knife_College",
+    "summary": "Chief Dull Knife College is a public tribal land-grant community college on the Northern Cheyenne Indian Reservation in Lame Deer, Montana. It is an open-admission college with about 141 students. On average, more than half of its graduates move on to four-year colleges."
+  },
+  "maine-college-of-art-design": {
+    "photo": "Salt Institute for Documentary Studies, Portland ME.jpg",
+    "photoLicense": "CC BY-SA 4.0",
+    "photoAuthor": "John Phelan",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Salt_Institute_for_Documentary_Studies,_Portland_ME.jpg",
+    "mark": "https://upload.wikimedia.org/wikipedia/commons/5/5d/MECA_25_FirstFriday-13.jpg",
+    "wikipedia": "https://en.wikipedia.org/wiki/Maine_College_of_Art_%26_Design",
+    "summary": "Maine College of Art & Design (MECA&D) is a private art school in Portland, Maine. Founded in 1882, Maine College of Art & Design is the oldest arts educational institution in Maine. Roughly 32% of MECA&D students are from Maine. The College is accredited by the New England Commission of Higher Education. In August 2021, the institution formerly named Maine College of Art changed its name to Maine College of Art & Design to reflect the school's emphasis on design."
+  },
+  "virginia-wesleyan-university": {
+    "mark": "https://upload.wikimedia.org/wikipedia/en/a/a6/Virginia_wesleyan_univ_seal.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Batten_University",
+    "summary": "Batten University is a private university in Virginia Beach, Virginia, United States. The university is nonsectarian but historically affiliated with The United Methodist Church. It enrolls 4,632 learners in all locations: 1,676 students annually in undergraduate and graduate programs, 2,601 in VWU Global Campus, and 355 students at LUJ/VWU Global (Japan). Virginia Wesleyan transitioned from a college to a university in 2017.",
+    "photo": "Greer Environmental Sciences Center.jpg",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Greer_Environmental_Sciences_Center.jpg"
+  },
+  "goldey-beacom-college": {
+    "mark": "Goldey-Beacom_College_seal.jpg",
+    "wikipedia": "https://en.wikipedia.org/wiki/Goldey%E2%80%93Beacom_College",
+    "summary": "Goldey\u2013Beacom College is a private university in Pike Creek Valley, Delaware, United States. Its setting is suburban with a campus of 24 acres (9.7\u00a0ha). It uses a semester-based academic calendar and is accredited to award certificates, associate, baccalaureate, master's, and doctoral degrees. The institution traces its origins to 1886 when H. S. Goldey opened the Wilmington Commercial College. The current name results from a 1951 merger with Beacom College, founded by and named for W. H. Beacom, a former instructor at Goldey's school.",
+    "photo": "Official campus photo (gbc.edu)",
+    "photoUrl": "https://www.gbc.edu/about/",
+    "markUrl": "https://en.wikipedia.org/wiki/Goldey%E2%80%93Beacom_College"
+  },
+  "wiregrass-georgia-technical-college": {
+    "photo": "Fountain plaque, Wiregrass Tech, Valdosta.JPG",
+    "photoLicense": "CC BY-SA 3.0",
+    "photoAuthor": "Michael Rivera",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Fountain_plaque,_Wiregrass_Tech,_Valdosta.JPG",
+    "mark": "Wiregrass logo GRNBLK (H) PNG.png",
+    "markUrl": "https://commons.wikimedia.org/wiki/File:Wiregrass_logo_GRNBLK_(H)_PNG.png"
+  },
+  "lakeshore-technical-college": {
+    "photo": "TC-LTC.jpg",
+    "photoLicense": "CC BY-SA 2.0",
+    "photoAuthor": "Alec Wilson",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:TC-LTC.jpg",
+    "mark": "https://upload.wikimedia.org/wikipedia/en/0/0b/Lakeshore_Technical_College_%28logo%29.png",
+    "wikipedia": "https://en.wikipedia.org/wiki/Lakeshore_College",
+    "summary": "Lakeshore College is a public community college in Cleveland, Wisconsin. It is part of the Wisconsin Technical College System. The college offers associate degree and technical diploma programs as well as certifications and adult continuing education programs."
+  },
+  "strayer-university-tennessee": {
+    "photo": "2009-03-06 Strayer University in Morrisville.jpg (representative Strayer campus, chain-standard building)",
+    "photoLicense": "CC BY 4.0",
+    "photoAuthor": "Jeffrey Beall",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:2009-03-06_Strayer_University_in_Morrisville.jpg",
+    "mark": "Strayer University logo.svg",
+    "markUrl": "https://commons.wikimedia.org/wiki/File:Strayer_University_logo.svg"
+  },
+  "school-of-visual-arts": {
+    "photo": "SVA-23rdStreet.jpg",
+    "photoLicense": "CC BY-SA 4.0",
+    "photoAuthor": "Veeayepeeessveeaye",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:SVA-23rdStreet.jpg",
+    "mark": "Official SVA logo (sva.edu)",
+    "markUrl": "https://sva.edu/"
+  },
+  "jefferson-community-and-technical-college": {
+    "photo": "Old Louisville Theological Seminary.jpg",
+    "photoLicense": "Public domain",
+    "photoAuthor": "Jack Boucher",
+    "photoUrl": "https://commons.wikimedia.org/wiki/File:Old_Louisville_Theological_Seminary.jpg",
+    "mark": "https://upload.wikimedia.org/wikipedia/commons/4/4f/JCTC_4.jpg",
+    "wikipedia": "https://en.wikipedia.org/wiki/Jefferson_Community_and_Technical_College",
+    "summary": "Jefferson Community and Technical College (JCTC) is a public community college in Louisville, Kentucky. It is part of the Kentucky Community and Technical College System and the largest college in that system. JCTC was formed on July 1, 2005, by the consolidation of Jefferson Community College and Jefferson Technical College. Jefferson Community College was originally chartered in 1968 and Jefferson Technical College was chartered in 1953. JCTC is accredited by the Southern Association of Colleges and Schools (SACS)."
+  },
+  "avalon-institute-las-vegas": {
+    "photo": "Official storefront photo (avalon.edu, Las Vegas location page)",
+    "photoUrl": "https://avalon.edu/locations/las-vegas-nv/",
+    "mark": "Official Avalon Institute logo (avalon.edu)",
+    "markUrl": "https://avalon.edu/"
+  },
+  "pima-medical-institute-tucson": {
+    "photo": "Official Tucson campus photo (pmi.edu)",
+    "photoUrl": "https://pmi.edu/locations/",
+    "mark": "Official Pima Medical Institute logo (pmi.edu)",
+    "markUrl": "https://pmi.edu/"
+  },
+  "caan-academy-of-nursing": {
+    "photo": "Official site photo (caanacademy.org)",
+    "photoUrl": "https://www.caanacademy.org/",
+    "mark": "Official CAAN Academy of Nursing logo (caanacademy.org)",
+    "markUrl": "https://www.caanacademy.org/"
+  },
+  "christine-valmy-international-school-for-esthetics-skin-care-makeup": {
+    "photo": "Official site photo (christinevalmy.com)",
+    "photoUrl": "https://www.christinevalmy.com/ny-beauty-school-esthetics-makeup/",
+    "mark": "Official Christine Valmy logo (christinevalmy.com)",
+    "markUrl": "https://www.christinevalmy.com/"
+  },
+  "san-joaquin-valley-college-modesto": {
+    "photo": "Official site program photo (sjvc.edu)",
+    "photoUrl": "https://www.sjvc.edu/campus/modesto/",
+    "mark": "Official San Joaquin Valley College logo (sjvc.edu)",
+    "markUrl": "https://www.sjvc.edu/"
   }
 }

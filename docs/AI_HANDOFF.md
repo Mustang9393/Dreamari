@@ -9019,3 +9019,369 @@ Factors Considered, and Typical Scores all match) and
 three header actions render together, checked at desktop and mobile
 widths). ESLint + `tsc --noEmit` clean. Pushed to main with explicit
 authorization.
+
+### 15 Sept 2026 — College Details: Academics + Cost simplification, drop "fits you"
+
+Same Slack thread, same direction, two more tabs plus one whole feature
+removed:
+
+1. **"Why [college] fits you" (`YourPath`) removed entirely**, not
+   conditionally hidden -- was reached via `?route=<career>` from Explore
+   Schools "For you". Direct feedback: "adds complexity and may be
+   difficult to support consistently with the data." Deleted the function,
+   its render site, and every now-unused import that only it needed
+   (`Suspense`, `useSearchParams`, `useSyncExternalStore`, `FIT_WORDS`/
+   `fitFor`/`parseGpa`/`pathwayFor` from `./pathway`, the three
+   `studentProfile` imports, `SMALL`). `pathway.ts`/`studentProfile.ts`
+   themselves are untouched -- nothing else in the codebase depended on
+   this file's use of them.
+2. **Academics -> "Academic Facts"**: the old two-column "Finishing"/
+   "Staying, and class size" split, each with per-row notes plus a "More
+   finish rates" reveal (5/6/8-year breakdowns) and a part-time-retention
+   row, all collapsed into ONE flat 4-row list -- Graduation Rate, 4-Year
+   Graduation Rate, First-Year Retention, Student-Faculty Ratio, no notes.
+   Direct feedback: "no paragraphs underneath each metric... that's
+   enough."
+3. **"What you can study" -> "Popular Majors"**: dropped grads/year, pay,
+   the "Biggest first. Pay is one year after graduating." subtitle, and
+   the "Too few to publish pay" rows entirely -- "career salary and
+   outcomes belong elsewhere in Dreamari." Rows are now just name + share
+   of graduates. The degree-level `Segmented` selector only renders when a
+   school actually has more than one level (`levels.length > 1`) --
+   already only ever populated with levels the data has, so "only show
+   what the institution offers" was already true by construction, just
+   needed the single-level case to skip an unnecessary selector. "X
+   biggest" button relabeled "View All Majors".
+4. **Cost -> "What It Costs"**: replaced the `Ladder` bar-chart
+   visualization with two headline `Stat` tiles (new local component) --
+   Full Price and Average Cost After Aid -- then a plain "Cost by Family
+   Income" list using a new `bandLabel()` formatter ("Under $30,000" ->
+   "Under $30K", "$30,000 to $48,000" -> "$30K–$48K", "Over $110,000" ->
+   "$110K+") so the table doesn't repeat "Family earns" five times.
+   Renamed "The full price, broken down" -> "Full Price Breakdown"
+   (Tuition/Fees/Housing/Food, hides any unavailable one instead of a
+   "None, commute only"-style fallback message) and "Money you do not pay
+   back" -> "Grants & Scholarships" (College/Pell grant recipients, notes
+   dropped). Removed the inline "Your family's price"/"Financial aid"
+   links -- redundant with the header's own Financial Aid action from the
+   previous round.
+
+Browser-verified live at `/colleges/princeton-university?route=investment-
+banking` (confirms "fits you" is gone even in the one scenario that used
+to trigger it) -- every single number in the request matched exactly:
+Academic Facts (98%/75%/98%/5 to 1), Popular Majors top 5 + View All,
+Full Price $82,938, Average Cost After Aid $6,128 / year, all five income
+bands, Full Price Breakdown, Grants & Scholarships. Checked at mobile
+width too. ESLint + `tsc --noEmit` clean.
+
+### 15 Sept 2026 — Resume Builder: fix stale data on "Create My Resume"
+
+Bug report: delete your only saved resume, click "Create My Resume" again,
+and every field still shows the old answers. Root cause:
+`removeVersion()` (`src/lib/resume.ts:288-290`) only removes the entry
+from `versions` by design -- the delete-confirmation dialog in
+`ResumeExperience.tsx` says so explicitly ("This only removes this saved
+resume. Your education, experience, and skills stay in your profile"),
+since a `ResumeVersion` is just a tailored subset of one shared
+profile/education/experience/skills/certifications pool
+(`resumeForVersion`). That's genuinely the wanted behavior for "Create New
+Resume" when you already have one saved (direct feedback confirmed this:
+"useful when I hit create new resume when I already have one built"). The
+bug was specifically the OTHER entry point: the zero-resumes empty
+state's "Create My Resume" button called `prefillFromStudentProfileIfEmpty`,
+which only prefilled identity when the store was *fully* empty (checked
+via `isResumeEmpty`) -- after a delete, education/experience/etc were
+still populated, so that check short-circuited and nothing was reset.
+
+Fix: that function only every runs from the zero-versions button (it's
+not rendered otherwise), so "starting fresh" is exactly what it always
+means there now -- renamed to `startFreshFromStudentProfile` and it
+unconditionally resets the whole draft (`writeResume({ ...EMPTY_RESUME,
+profile: {...} })`) before prefilling name/email/state from the account.
+"Create New Resume" (the `versions.length > 0` add-another button) was
+never wired to this function and still isn't touched -- it keeps carrying
+the shared answers forward, unchanged.
+
+Browser-verified: seeded stale education/profile data with 0 saved
+versions (the exact repro), clicked "Create My Resume", confirmed via
+both the localStorage snapshot and the live wizard screen that Education/
+Experience reset to empty while First/Last Name still prefill from the
+account identity (Jordan Rivera, the demo student's own name -- not
+leftover resume data). ESLint + `tsc --noEmit` clean.
+
+### 15 Sept 2026 — College Details: Student Body simplification
+
+Third tab in this same simplification pass (design notes:
+`docs/COLLEGE_LOOKUP_AUDIT.md` §8):
+
+- **"Who is there" -> "Who Goes Here?"**, two plain sections instead of
+  bar-chart `SplitBar`s. **Enrollment**: Total/Undergraduate/Graduate
+  students as counts, Full-time/Part-time as percentages (converted from
+  the stored headcounts, `d.fullTime`/`d.partTime`, not stored as a
+  percent), Women/Men as the stored percentages. **Student Demographics**
+  keeps the `Donut` -- explicitly called out as worth keeping ("one of the
+  few visualizations here that genuinely makes the information easier to
+  understand") -- but drops the explanatory paragraph ("The government's
+  categories. International means students on visas.") and the raw
+  headcount next to each percent (`Donut`'s own `n` prop just isn't passed
+  at this call site; the shared component itself is untouched, still used
+  elsewhere). New `DEMO_LABEL` map trims "Hispanic or Latino" ->
+  "Hispanic / Latino", "Black or African American" -> "Black", same
+  pattern as `FACTOR_LABEL` from the Admissions round.
+- Confirmed nothing from the U.S. News reference (veteran %, demographics
+  "availability" indicators, clubs, housing, athletics, Greek life, ROTC)
+  was ever in this tab to begin with -- explicitly called out as things to
+  leave out, already true, no action needed.
+
+Browser-verified live at `/colleges/princeton-university`: every number
+matches (9,137 / 5,813 / 3,324 / 99% / 1% / 50% / 50%, demographics
+33/23/13/10/9/7 with trimmed labels), checked at mobile width. ESLint +
+`tsc --noEmit` clean. Not yet pushed -- batched with the Academics/Cost
+round above, same "not yet" hold.
+
+### 15 Sept 2026 — College Details: Campus Life simplification, drops "fits you" again
+
+Same request, made about Campus Life specifically after seeing it still
+had the "fits you" block too (it's shared across every tab via the header
+area, so this confirms it's gone everywhere, not just Overview -- no
+additional code change needed there, already removed in the Academics/
+Cost round above).
+
+- **"Life there" -> "Campus Life"**, four sections instead of "Ways to
+  study here" / "What the college helps with" / "Sport", plus the
+  separate "After college" panel dropped entirely ("belongs elsewhere,"
+  matches the Academics round's own reasoning for keeping outcomes data
+  off this page): **Housing** (`d.housing` Yes/No -- no live-on-campus %
+  or housing-type breakdown exists in the data, so neither is fabricated,
+  same "hide what's unavailable" rule as every other tab this round).
+  **Activities & Organizations** (a baseline "Student clubs &
+  organizations" row plus ROTC when the school's `ways` data mentions it
+  -- no fraternity/sorority or club-count field exists anywhere in
+  data.ts/extra.ts, confirmed by grep, so neither renders; ready for real
+  numbers later per the request's own "if we eventually have a reliable
+  number of clubs" note). **Athletics** (league + `d.sport.teams` as
+  compact chips, reusing the exact chip markup that already existed for
+  this -- the men/women `SplitBar` is gone, "no progress bars needed").
+  **Opportunities** (Study abroad from `ways`, "Career services" from the
+  one `d.helps` entry specific enough to keep -- "Help finding work while
+  you study" -- the two vague ones named directly, "Careers advice" and
+  "Help finding a job when you finish", are gone, and so is the fourth
+  `helps` value across the whole dataset, "Childcare on campus", which
+  doesn't fit any of the four named sections).
+- **Undergraduate Research moved to Academics** ("that is an academic
+  opportunity and fits better under Academics") -- a new `wayNames`/
+  `hasWay()` pair lives once near the top of the component (previously
+  computed inline inside the Life tab only) so Academic Facts and Campus
+  Life both read the same underlying `ways` data without parsing it
+  twice. Teacher training, evening/weekend classes, and the intellectual-
+  disability program note (all real `ways`/`helps` values, none named in
+  the new structure) no longer have a section anywhere on the page --
+  deliberate, not an oversight, per "gives students the parts of campus
+  life they are actually likely to care about."
+
+Browser-verified live at `/colleges/princeton-university`: Campus Life
+shows exactly the four sections with Princeton's real data (Housing: Yes;
+Activities & Organizations: clubs row + ROTC Offered; Athletics: NCAA
+Division I-FCS + 10 sport chips, no bars; Opportunities: Study abroad +
+Career services), Academic Facts gained "Undergraduate Research: Offered"
+as its fifth row, checked at mobile width too. ESLint + `tsc --noEmit`
+clean. Not yet pushed, same hold as the rest of this round.
+
+### 14 Sept 2026 — Colleges: 25 real colleges added alongside the fabricated demo set
+
+Design notes: `docs/COLLEGE_LOOKUP_AUDIT.md` §9. User supplied a 200-college
+sample of the real production API response (card + profile shape) plus its
+README and asked us to fill the demo with real values, scoped to whatever
+the §§1-8 simplification rounds above still actually read.
+
+- **25 real colleges added to `data.ts`/`extra.ts`**, kept in our existing
+  field-name shape (not the real API's nesting) per direct instruction --
+  "keep our shape, refresh the numbers." Princeton is untouched/still
+  fabricated; it isn't in the 200-sample, and the user is sending its real
+  data separately for the same treatment. 25 was a direct call to match the
+  existing demo's rough size rather than use all 200, to avoid the
+  time/usage-credit cost of an exhaustive population + per-college image
+  fetching that a demo doesn't need. None of the 25 have real images/logos
+  fetched -- all use `photo: false, mark: false`, the same placeholder state
+  ~1/5 of real colleges are in per the source README, not a shortcut being
+  hidden.
+- New `scripts/colleges/transform-real-data.py` does the JSON-to-TS
+  transform (see its header for usage) -- written to avoid hand-transcribing
+  dozens of fields per college across 25 entries. Three originally-chosen
+  colleges turned out to be graduate/professional-only institutions with a
+  null `admission` block in the real API (no undergrad admissions to show)
+  and were swapped for others from the same "no published price" pool; one
+  more swap after a replacement's real undergrad enrollment came back `0`,
+  which would have violated the "never render absence as zero" rule.
+- Inserted at an exact, verified line index in both files -- an initial
+  attempt used a generic `];`/`};` string search and silently corrupted
+  `data.ts` by landing the block inside its unrelated `synthDetail()`
+  function (which has its own later `];`); reverted via `git checkout` and
+  redone correctly. Worth remembering for the Princeton pass or any future
+  additions: never `rfind` a bare closing-bracket string in a file with
+  more than one array/object.
+- Fixed one real UI bug this exposed: `CollegeDetailExperience.tsx`'s Cost
+  tab rendered the "Cost by Family Income" heading unconditionally even
+  with zero published bands (a real state for `caan-academy-of-nursing`,
+  96 undergrads) -- now guarded with `{d.bands.length > 0 && (...)}`,
+  matching the pattern already used for Full Price Breakdown/Grants &
+  Scholarships. Every fabricated college always had all 5 bands, so this
+  was invisible until real sparse data existed.
+
+Browser-verified live: Illinois State University (rich-data path, every
+tab), Caan Academy of Nursing (sparse-data edge case -- Overview "Not
+published" states, the bands bug, Student Body at tiny scale, Academics
+degree-level selector), `/colleges` "For You" list and Browse All search
+(new real colleges surface correctly alongside fabricated Princeton, no
+code changes needed for list/search/filter). ESLint + `tsc --noEmit -p .`
+clean project-wide. Not yet pushed -- same "ask before push" hold as the
+rest of this session; will batch with earlier unpushed local commits
+(Resume Builder prefill fix, the four College Details simplification
+rounds) once the user says go. Princeton's real data is expected next, to
+go through this same transform script.
+
+### 14 Sept 2026 — Colleges: real photos and marks fetched for the 25 real colleges
+
+Design notes: `docs/COLLEGE_LOOKUP_AUDIT.md` §10. Direct follow-up to the
+same day's §9 real-data round -- user asked to fetch real campus photos and
+school logos for every college still on the placeholder state, sourcing
+"far and wide," not just Wikimedia Commons.
+
+- All 25 real colleges (plus a stale-flag fix for 8 of the original
+  fabricated-data colleges that had real image files on disk the whole
+  time but incorrect `photo:false`/`mark:false` in `data.ts` -- discovered
+  these flags are dead code, unused by the actual rendering path) now have
+  real photo + mark assets. 55 photos / 55 marks total.
+- Caught and fixed two badly-wrong automatic Commons matches by visual
+  spot-check: Texas A&M's photo was a Bangladesh university building;
+  Strayer University-Tennessee's photo was a random stray dog in Pristina
+  (matched on the substring "Stray"). Also swapped two topically-weak
+  matches (Illinois State's 1930s post-office mural, Chief Dull Knife
+  College's unrelated USDA meeting photo) for real campus photos. Lesson
+  for any future fetch round: spot-check Commons keyword matches visually,
+  license/size filters alone aren't enough.
+- `scripts/colleges/seed-names.json` permanently extended with the 25 new
+  colleges so `fetch-images.mjs` covers them on any future rerun.
+  `credits.json` has attribution for every asset, official-site sourced or
+  Commons/Wikipedia.
+
+Also this session, two small unrelated fixes:
+- **College cards**: the program-match checkmark (e.g. next to "Business
+  Administration") was low-contrast accent-blue on the card surface --
+  direct feedback. Now a solid `--primary` circular badge with a white
+  check icon, matching the existing "Comparing" button's solid-accent
+  treatment. `src/components/colleges/shared.tsx`.
+- **Build flow halfway screen**: "You're moving fast. 🚀 / The good part is
+  coming." replaced with "You're halfway there. ✨ / Keep going. Your
+  matches are getting closer." -- direct feedback that "moving fast" could
+  read as a nudge to slow down/second-guess answers, when the message
+  should be purely encouraging. `src/components/build/steps.tsx`.
+
+ESLint + `tsc --noEmit -p .` clean across all touched files. Not yet
+pushed -- held per explicit instruction until the college data/image work
+was confirmed correct.
+
+### 14 Sept 2026 — Match Learn More modal, Build copy, student avatar picker
+
+Three more direct-feedback rounds, same session:
+
+- **Match's "Learn More" modal** (`src/components/match-lab/MatchGrid.tsx`,
+  `DetailModal`): dropped the "At a Glance" eyebrow line entirely (the three
+  sections below it were always the real content). The three section
+  headings (What You'd Do / Good Fit If You Like / School & Path) are now
+  the largest text in the card (`15px` extrabold, was a `10.5px` uppercase
+  eyebrow -- smaller than its own bullets), bullets stepped down to `13px`
+  and muted so the eye lands on headings first, per "clear hierarchy, fast
+  scanning, minimal distraction." Icons were tried removed, then explicitly
+  asked back in white, inline with the (now larger) heading text -- kept
+  BookOpen/Sparkles/GraduationCap, recolored to `#fff` from the career's
+  own accent color.
+- **Build copy**: "What sounds interesting?" -> "Which career fields
+  interest you?" ("the current wording feels a little vague... immediately
+  clear that students are choosing career areas"), "Choose up to 2" kept
+  as-is. Updated in both the real step (`src/components/build/steps.tsx`)
+  and the matching static mockup on the Schools landing page
+  (`src/components/marketing/SchoolsIllustrations.tsx`) so the two don't
+  drift.
+- **Student avatar picker** ("Instagram-style edit button... have that
+  work"): a small edit-icon badge now overlaps the corner of Jordan's
+  avatar on their own Profile header, opening a grid of all 80 illustrated
+  portraits (`AVATAR_POOL` in `src/lib/avatar.ts`) to pick from. New
+  reactive override layer in `avatar.ts` (`AVATAR_OVERRIDE_KEY`,
+  `writeAvatarOverride`, `useStudentAvatarSrc`) -- same localStorage +
+  listeners idiom as `studentProfile.ts`/`resume.ts` -- checked only for
+  Jordan's own seed, so the fixed pin/hash system for every other name is
+  untouched. `studentAvatarSrc()` (the plain, non-reactive function) stays
+  as the SSR-safe default; the three render sites that show a student's
+  own face (`chrome.tsx`'s nav, `ProfileExperience.tsx`'s header,
+  `connect/primitives.tsx`'s shared `Avatar`) now call the new
+  `useStudentAvatarSrc()` hook instead, so a pick propagates live to all
+  three without a reload -- verified in the browser (profile header + nav
+  update instantly on pick, survives a hard reload, still the same
+  component `Avatar` Connect uses everywhere). Deliberately still no real
+  photo upload -- picks are limited to the same fixed illustrated set,
+  consistent with the "no student photo is ever stored" policy already in
+  place.
+
+ESLint + `tsc --noEmit -p .` clean across all seven touched files. Not yet
+pushed.
+
+### 14 Sept 2026 — Princeton: real-data cross-check against a fresh Usman export
+
+User sent a second dataset (`colleges-sample.json`, 243 colleges — the
+original 200 plus 43 recognizable names including Princeton, added
+specifically so the team can check a layout against a college it can
+picture) and asked to update Princeton's data and flag anything else
+needing a fix.
+
+Cross-checked every field in Princeton's `data.ts`/`extra.ts` entry against
+this real export. Result: all of it was already accurate -- the original
+"fabricated" data was transcribed from the real live site back on 3 Sept
+and has held up. The one real discrepancy found: `gradsPerYear` was `2400`,
+real value is `2382` (source: `card.graduates`). Fixed. Photo (Nassau Hall,
+CC0, Wikimedia) and mark (real Princeton seal) were also already real and
+matched the new export's own Google-sourced campus photo choice closely
+enough not to need replacing.
+
+Also used this pass to re-verify, live in the browser, that the College
+Details notes from earlier today (`@Chandu M P` Slack messages on Header/
+Admissions/Cost, Academics, and Campus Life) are correctly implemented on
+Princeton's actual page: Website/Financial Aid header actions (no Apply --
+correctly hidden, Princeton's `applicationUrl` is null), Requirements/Other
+Factors Considered split, plain Typical Scores ranges, Academic Facts list
+with Undergraduate Research moved in, Popular Majors with degree-level
+tabs, and Campus Life's four sections (Housing/Activities & Organizations/
+Athletics/Opportunities) with no vague copy or progress bars. All confirmed
+matching the notes exactly.
+
+ESLint + `tsc --noEmit -p .` clean.
+
+### 14 Sept 2026 — Resume Builder: template picker composition fix
+
+Direct feedback on the New Resume template picker screen: "I can hardly
+see the preview," too much copy, wasted space, preview sitting too low.
+
+- Desktop layout changed from a fixed `320px` list column beside a
+  `max-w-[440px]` centered preview (leaving most of the wide `1fr` column
+  empty) to an explicit `grid-cols-[30%_70%]` split with the preview
+  filling its full column -- `ResumeDocument` already auto-scales to its
+  container width, so no size cap was needed once the column itself is
+  correctly proportioned.
+- Per-template descriptions removed everywhere (desktop rows and mobile/
+  tablet cards) -- name + color swatch only. "The preview should do the
+  talking" now that it's actually large enough to judge a layout by.
+- Dreamy's speech bubble and the "Choose a template" heading moved from a
+  full-width block above the two-column grid into the narrow left column
+  itself (`TemplateGallery.tsx`, was split across that file and
+  `ResumeBuilderExperience.tsx`) -- this is what was pushing the preview
+  down ("why is it sitting so low") and what made the bubble read as one
+  long bar across the screen; it now wraps naturally at the column's width.
+  Also dropped the "Each one shows a filled-in example..." subtitle
+  paragraph as more copy the bigger preview now makes redundant.
+- Column gap tightened (`space-8` to `space-6`) per "there doesn't need to
+  be a huge gap."
+
+Outer page margins were untouched -- already matching Home/Explore/Profile
+via the shared `Shell` component from an earlier pass today (see its own
+header comment). ESLint + `tsc --noEmit -p .` clean, verified live at both
+the `lg` desktop split and the mobile/tablet card grid.

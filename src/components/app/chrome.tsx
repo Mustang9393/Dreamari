@@ -8,7 +8,7 @@ import { ChevronLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Su
 import { useGlobalTheme } from "./theme";
 import { useDreamScore } from "@/lib/dreamScore";
 import { DreamScoreTip } from "@/components/app/DreamScoreTip";
-import { studentAvatarSrc } from "@/lib/avatar";
+import { useStudentAvatarSrc } from "@/lib/avatar";
 import { STUDENT } from "@/components/profile/data";
 
 // The student's generated avatar doubles as the Profile entry point in both
@@ -279,6 +279,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
   const score = useDreamScore();
   // one number everywhere: the live Dream Score (100 after Build), never a placeholder
   const xp = score;
+  const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
   return (
     <header
       // glass-surface-1 (3% alpha) read as barely-there once real content
@@ -346,7 +347,7 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
           </>
         )}
         <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
-          <Image src={studentAvatarSrc(AVATAR_SEED)} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
+          <Image src={avatarSrc} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
         </Link>
         <QuickLinksMenu />
       </div>
@@ -362,6 +363,7 @@ const MOBILE_ITEMS = [
 ] as const;
 
 export function MobileNav({ active }: { active: string }) {
+  const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t backdrop-blur-[10px] md:hidden"
@@ -389,7 +391,7 @@ export function MobileNav({ active }: { active: string }) {
         className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
       >
         <Image
-          src={studentAvatarSrc(AVATAR_SEED)}
+          src={avatarSrc}
           alt=""
           width={56}
           height={56}

@@ -1,21 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
-import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
+import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
-import { Donut, Ladder, SplitBar } from "./viz";
+import { Donut } from "./viz";
 import { EXTRA } from "./extra";
-import { FIT_WORDS, fitFor, parseGpa, pathwayFor } from "./pathway";
-import { studentProfileSnapshot, serverStudentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
-import { useSyncExternalStore } from "react";
 import { Segmented } from "@/components/connect/viz";
 
 // One college. The career page's anatomy: a header that dissolves into the
@@ -61,6 +57,15 @@ const FACTOR_LABEL: Record<string, string> = {
 };
 const factorLabel = (s: string) => FACTOR_LABEL[s] ?? s;
 
+// Same trim, applied to the government's own demographic category names
+// (direct feedback, 15 Sept 2026: shorter labels on the Student Body donut).
+const DEMO_LABEL: Record<string, string> = {
+  "Hispanic or Latino": "Hispanic / Latino",
+  "Black or African American": "Black",
+  "American Indian or Alaska Native": "American Indian / Alaska Native",
+};
+const demoLabel = (s: string) => DEMO_LABEL[s] ?? s;
+
 /** One tab's content: the same grounded panel "Key Facts" already uses,
  *  so a tab never reads as a lesser version of the page's own header
  *  section. */
@@ -73,16 +78,28 @@ function TabPanel({ id, title, children }: { id: string; title: string; children
   );
 }
 
-/** A quiet in-section disclosure: the headline rows stay, the rest wait
- *  behind one link so a section never opens as a wall of numbers. */
-function Reveal({ label, children }: { label: string; children: React.ReactNode }) {
-  const [on, setOn] = useState(false);
-  if (on) return <>{children}</>;
+/** A headline number, not a row -- Cost's "Full Price"/"Average Cost After
+ *  Aid" (direct feedback, 15 Sept 2026: two figures a student should read
+ *  in seconds, not find inside a bar chart). */
+function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <button type="button" onClick={() => setOn(true)} className="dm-link mt-[var(--space-2)] flex min-h-[36px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>
-      {label} <ChevronDown className="h-4 w-4" aria-hidden />
-    </button>
+    <div className="flex flex-col gap-[2px]">
+      <span className={LABEL} style={{ color: SOFT }}>{label}</span>
+      <span className="text-[26px] leading-[30px] font-extrabold" style={DISPLAY}>{value}</span>
+      {note && <span className="text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
+    </div>
   );
+}
+
+/** "Under $30,000" -> "Under $30K", "$30,000 to $48,000" -> "$30K–$48K",
+ *  "Over $110,000" -> "$110K+" -- the same five fixed bands every college
+ *  uses (data.ts), trimmed so a family-income table doesn't repeat "Family
+ *  earns" on every row (direct feedback, 15 Sept 2026). */
+function bandLabel(label: string): string {
+  const short = (s: string) => s.replace(/,000/g, "K");
+  if (label.startsWith("Under ")) return `Under ${short(label.slice(6))}`;
+  if (label.startsWith("Over ")) return `${short(label.slice(5))}+`;
+  return short(label).replace(" to ", "–");
 }
 
 /** Per-school focal point for the wide desktop header crop, where the
@@ -118,6 +135,12 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   // instance) -- still genuinely aid-relevant, not a mislabeled dead end.
   const applyHref = x?.links.apply ?? null;
   const aidHref = x?.links.aid ?? x?.links.calc ?? null;
+  // Shared between Academics (Undergraduate Research moved there, direct
+  // feedback 15 Sept 2026 -- "that is an academic opportunity") and Campus
+  // Life (Study abroad, ROTC) so the same underlying `ways` data isn't
+  // parsed twice with two chances to disagree.
+  const wayNames = d ? (x && x.ways.length > 0 ? x.ways.map((w) => w.name) : d.ways) : [];
+  const hasWay = (needle: string) => wayNames.some((w) => w.toLowerCase().includes(needle));
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -216,10 +239,6 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           </div>
         </section>
 
-        {/* Reached from Explore Schools "For you" (?route=<career>): why this
-           school is on the student's path, before the general sections. */}
-        <Suspense fallback={null}><YourPath c={c} /></Suspense>
-
         <Segmented ariaLabel="College section" value={tab} onChange={(k) => setTab(k)} options={TABS} grow />
 
         {/* Key Facts (was "At a glance", direct feedback, 15 Sept 2026: less
@@ -292,65 +311,49 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             )}
 
             {tab === "cost" && (
-            <TabPanel id="cost-title" title="What it costs">
+            <TabPanel id="cost-title" title="What It Costs">
               {(() => {
                 const sticker = d.tuitionInState !== null && d.fees !== null ? d.tuitionInState + d.fees + (d.housingCost ?? 0) + (d.foodCost ?? 0) : null;
-                const lowerPaysMore = d.bands.some((b, i) => i > 0 && b.pay < d.bands[i - 1].pay);
+                const breakdown: { label: string; value: string }[] = [];
+                if (d.tuitionInState !== null) breakdown.push({ label: d.tuitionInState === d.tuitionOutState ? "Tuition" : "Tuition, in state", value: money(d.tuitionInState) });
+                if (d.tuitionOutState !== null && d.tuitionOutState !== d.tuitionInState) breakdown.push({ label: "Tuition, out of state", value: money(d.tuitionOutState) });
+                if (d.fees !== null && d.fees > 0) breakdown.push({ label: "Fees", value: money(d.fees) });
+                if (d.housingCost !== undefined) breakdown.push({ label: "Housing", value: money(d.housingCost) });
+                if (d.foodCost !== undefined) breakdown.push({ label: "Food", value: money(d.foodCost) });
                 return (
                   <div className="flex flex-col gap-[var(--space-6)]">
-                    <div>
-                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What families actually pay</h3>
-                      <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>For a year, after grants. Lower income, bigger grant.{lowerPaysMore ? " Savings and living at home change it too." : ""}</p>
-                      <div className="mt-[var(--space-2)]">
-                        {sticker ? (
-                          <Ladder
-                            ceiling={sticker}
-                            format={(n) => money(n)}
-                            rows={[
-                              { label: "Full price", note: d.housingCost ? "tuition, fees, housing and food, before any aid" : "tuition and fees, before any aid", value: sticker, top: true },
-                              ...d.bands.map((b) => ({ label: `Family earns ${b.label.toLowerCase()}`, value: b.pay })),
-                              { label: "Average", note: "across all families who got aid", value: c.netPrice ?? 0 },
-                            ]}
-                          />
-                        ) : (
-                          <>
-                            {d.bands.map((b) => <Row key={b.label} label={`Family earns ${b.label.toLowerCase()}`} value={money(b.pay)} />)}
-                            <Row label="Average" note="across all families who got aid" value={c.netPrice === null ? "Not published" : money(c.netPrice)} last />
-                          </>
-                        )}
-                      </div>
-                      <div className="mt-[var(--space-3)] flex flex-wrap gap-x-[var(--space-5)] gap-y-[var(--space-2)]">
-                        {(x?.links.calc || c.website) && (
-                          <a href={x?.links.calc ?? c.website} target="_blank" rel="noreferrer" className="dm-link flex w-fit items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>
-                            Your family&apos;s price <ArrowUpRight className="h-4 w-4" aria-hidden />
-                          </a>
-                        )}
-                        {x?.links.aid && (
-                          <a href={x.links.aid} target="_blank" rel="noreferrer" className="dm-link flex w-fit items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>
-                            Financial aid <ArrowUpRight className="h-4 w-4" aria-hidden />
-                          </a>
-                        )}
-                      </div>
+                    {/* Two headline numbers, not a bar chart (direct feedback,
+                       15 Sept 2026: "a clean two-column table... make the
+                       information feel much easier to absorb") -- full
+                       price and what it actually becomes after aid are the
+                       two numbers a student reads first. */}
+                    <div className="grid gap-[var(--space-5)] sm:grid-cols-2">
+                      {sticker !== null && <Stat label="Full Price" value={money(sticker)} note="Before financial aid" />}
+                      {c.netPrice !== null && <Stat label="Average Cost After Aid" value={`${money(c.netPrice)} / year`} />}
                     </div>
+                    {d.bands.length > 0 && (
+                      <div>
+                        <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Cost by Family Income</h3>
+                        <div className="mt-[var(--space-2)]">
+                          {d.bands.map((b, i, arr) => <Row key={b.label} label={bandLabel(b.label)} value={money(b.pay)} last={i === arr.length - 1} />)}
+                        </div>
+                      </div>
+                    )}
                     <div className="grid gap-[var(--space-6)] md:grid-cols-2">
-                      {d.tuitionInState !== null && (
+                      {breakdown.length > 0 && (
                         <div>
-                          <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>The full price, broken down</h3>
+                          <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Full Price Breakdown</h3>
                           <div className="mt-[var(--space-2)]">
-                            <Row label={d.tuitionInState === d.tuitionOutState ? "Tuition" : "Tuition, in state"} value={money(d.tuitionInState)} />
-                            {d.tuitionOutState !== null && d.tuitionOutState !== d.tuitionInState && <Row label="Tuition, out of state" value={money(d.tuitionOutState)} />}
-                            {d.fees !== null && <Row label="Required fees" value={d.fees === 0 ? "None" : money(d.fees)} last={!d.housing && d.housingCost === undefined} />}
-                            {d.housingCost !== undefined ? <Row label={d.foodCost ? "Housing on campus" : "Housing and food on campus"} value={money(d.housingCost)} last={d.foodCost === undefined} /> : <Row label="Housing on campus" value={d.housing ? "Yes" : "None, commute only"} tone="muted" last />}
-                            {d.foodCost !== undefined && <Row label="Food" note={x?.meal === "Yes" ? "meal plans offered" : x?.meal === "No" ? "no meal plans" : undefined} value={money(d.foodCost)} last />}
+                            {breakdown.map((r, i, arr) => <Row key={r.label} label={r.label} value={r.value} last={i === arr.length - 1} />)}
                           </div>
                         </div>
                       )}
                       {(d.scholarshipShare !== undefined || d.pell !== undefined) && (
                         <div>
-                          <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Money you do not pay back</h3>
+                          <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Grants &amp; Scholarships</h3>
                           <div className="mt-[var(--space-2)]">
-                            {d.scholarshipShare !== undefined && <Row label="New students with a scholarship from the college" note={d.scholarshipAvg && d.scholarshipShare ? `about ${money(d.scholarshipAvg)} each` : undefined} value={d.scholarshipShare ? `${d.scholarshipShare}%` : "None"} last={d.pell === undefined} />}
-                            {d.pell !== undefined && <Row label="Students with a federal Pell grant" note="for lower-income families" value={`${d.pell}%`} last />}
+                            {d.scholarshipShare !== undefined && <Row label="College grant recipients" value={`${d.scholarshipShare}%`} last={d.pell === undefined} />}
+                            {d.pell !== undefined && <Row label="Pell Grant recipients" value={`${d.pell}%`} last />}
                           </div>
                         </div>
                       )}
@@ -363,35 +366,30 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
             {tab === "academics" && (
             <div className="flex flex-col gap-[var(--space-5)]">
-            <TabPanel id="academics-title" title="Academics">
-              <div className="grid gap-[var(--space-6)] md:grid-cols-2">
-                <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Finishing</h3>
-                  <div className="mt-[var(--space-2)]">
-                    <Row label="Finish within six years" note="everyone who started, part time and transfers included" value={pct(c.finish)} />
-                    {typeof d.finish4 === "number" && <Row label="Finish in four years" note="bachelor's students who started here" value={`${d.finish4}%`} last={!x} />}
-                    {x && (
-                      <Reveal label="More finish rates">
-                        {x.finish5 !== null && <Row label="Finish in five years" note="bachelor's students who started here" value={`${x.finish5}%`} />}
-                        {x.finish6b !== null && <Row label="Finish in six years" note="bachelor's students who started here" value={`${x.finish6b}%`} />}
-                        {x.finish6ft !== null && <Row label="Finish in six years" note="full-time students only" value={`${x.finish6ft}%`} />}
-                        <Row label="Finish within eight years" note="everyone who started" value={x.finish8 !== null ? `${x.finish8}%` : "Not published"} last />
-                      </Reveal>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Staying, and class size</h3>
-                  <div className="mt-[var(--space-2)]">
-                    <Row label="First-years who come back" value={pct(c.retention)} />
-                    {x?.retPart !== null && x?.retPart !== undefined && <Row label="Part-time students who come back" value={`${x.retPart}%`} />}
-                    <Row label="Students per teacher" value={d.ratio} last />
-                  </div>
-                </div>
+            <TabPanel id="academics-title" title="Academic Facts">
+              {/* One flat list, no sub-headers, no notes (direct feedback,
+                 15 Sept 2026: "no paragraphs underneath each metric unless
+                 something genuinely needs clarification") -- exactly the
+                 four numbers a student needs to judge academic success,
+                 same shape as Overview's own Key Facts. The five/six/eight-
+                 year finish-rate breakdown and the part-time retention
+                 split are gone too, not just hidden -- "that's enough". */}
+              <div>
+                <Row label="Graduation Rate" value={pct(c.finish)} />
+                {typeof d.finish4 === "number" && <Row label="4-Year Graduation Rate" value={`${d.finish4}%`} />}
+                <Row label="First-Year Retention" value={pct(c.retention)} />
+                <Row label="Student-Faculty Ratio" value={d.ratio} last={!hasWay("undergraduate research")} />
+                {hasWay("undergraduate research") && <Row label="Undergraduate Research" value="Offered" last />}
               </div>
             </TabPanel>
 
-            <TabPanel id="study-title" title="What you can study">
+            <TabPanel id="study-title" title="Popular Majors">
+              {/* Name and share of graduates only -- no grads/year, no pay
+                 (direct feedback, 15 Sept 2026: "idk why that is here in
+                 the academics section... career salary and outcomes belong
+                 elsewhere"), no "biggest first" subtitle. A value that
+                 isn't available is just omitted, never a "not published"
+                 row. */}
               {x && Object.keys(x.programmes).length > 0 ? (() => {
                 const levels = Object.keys(x.programmes);
                 const active = level && levels.includes(level) ? level : levels.includes("Bachelor's degrees") ? "Bachelor's degrees" : levels[0];
@@ -400,18 +398,16 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                 const shown = allRows ? rows : rows.slice(0, 5);
                 return (
                   <div className="flex flex-col gap-[var(--space-4)]">
-                    <Segmented ariaLabel="Programme level" value={active} onChange={(k) => { setLevel(k); setAllRows(false); }} options={levels.map((l) => ({ key: l, label: l.replace(/ degrees$/, "").replace("Graduate certificates", "Grad certificates") }))} />
+                    {levels.length > 1 && (
+                      <Segmented ariaLabel="Programme level" value={active} onChange={(k) => { setLevel(k); setAllRows(false); }} options={levels.map((l) => ({ key: l, label: l.replace(/ degrees$/, "").replace("Graduate certificates", "Grad certificates") }))} />
+                    )}
                     <div>
                       <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{total} {active.toLowerCase()}</h3>
-                      <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Biggest first. Pay is one year after graduating.</p>
                       <div className="mt-[var(--space-2)]">
-                        {shown.map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads.toLocaleString("en-US")} graduates a year, ${p.share} of all graduates`} value={p.pay.startsWith("$") ? `${p.pay} a year` : p.pay === "not reported" ? "Pay not reported" : "Too few to publish pay"} tone={p.pay.startsWith("$") ? "ink" : "muted"} last={i === arr.length - 1} />)}
+                        {shown.map((p, i, arr) => <Row key={p.name} label={p.name} value={p.share} last={i === arr.length - 1} />)}
                       </div>
                       {rows.length > 5 && !allRows && (
-                        <button type="button" onClick={() => setAllRows(true)} className="dm-link mt-[var(--space-2)] flex min-h-[36px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>{rows.length} biggest <ChevronDown className="h-4 w-4" aria-hidden /></button>
-                      )}
-                      {allRows && total > rows.length && c.website && (
-                        <a href={c.website} target="_blank" rel="noreferrer" className="dm-link mt-[var(--space-2)] flex w-fit items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>All {total} on the college&apos;s site <ArrowUpRight className="h-4 w-4" aria-hidden /></a>
+                        <button type="button" onClick={() => setAllRows(true)} className="dm-link mt-[var(--space-2)] flex min-h-[36px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: SOFT }}>View All Majors <ChevronDown className="h-4 w-4" aria-hidden /></button>
                       )}
                     </div>
                   </div>
@@ -425,10 +421,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                     </div>
                   </div>
                   <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Biggest programmes</h3>
-                    <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Pay is one year after graduating.</p>
+                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Popular Majors</h3>
                     <div className="mt-[var(--space-2)]">
-                      {d.programmes.map((p, i, arr) => <Row key={p.name} label={p.name} note={`${p.grads} graduates a year, ${p.share}% of all graduates`} value={p.pay === "not published" ? "Pay not published" : `${p.pay} a year`} tone={p.pay === "not published" ? "muted" : "ink"} last={i === arr.length - 1} />)}
+                      {d.programmes.map((p, i, arr) => <Row key={p.name} label={p.name} value={`${p.share}%`} last={i === arr.length - 1} />)}
                     </div>
                   </div>
                 </div>
@@ -438,21 +433,33 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             )}
 
             {tab === "student" && (
-            <TabPanel id="who-title" title="Who is there">
+            <TabPanel id="who-title" title="Who Goes Here?">
               <div className="grid gap-[var(--space-6)] md:grid-cols-2">
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>{(c.undergrads + (d.gradStudents ?? 0)).toLocaleString("en-US")} students</h3>
-                  <div className="mt-[var(--space-1)]">
-                    {d.gradStudents ? <SplitBar title="Undergraduates and graduate students" a={{ label: "undergraduates", value: c.undergrads }} b={{ label: "graduate students", value: d.gradStudents }} /> : null}
-                    <SplitBar title="Full time and part time" a={{ label: "full time", value: d.fullTime }} b={{ label: "part time", value: d.partTime }} />
-                    <SplitBar title="Women and men, undergraduates" a={{ label: "women", value: Math.round((c.undergrads * d.women) / 100) }} b={{ label: "men", value: Math.round((c.undergrads * d.men) / 100) }} />
+                  {/* Plain rows, no bars (direct feedback, 15 Sept 2026) --
+                     full/part time are stored as headcounts, not a percent,
+                     so they're converted here rather than in the data. */}
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Enrollment</h3>
+                  <div className="mt-[var(--space-2)]">
+                    <Row label="Total students" value={(c.undergrads + (d.gradStudents ?? 0)).toLocaleString("en-US")} />
+                    <Row label="Undergraduate students" value={c.undergrads.toLocaleString("en-US")} />
+                    {d.gradStudents !== undefined && <Row label="Graduate students" value={d.gradStudents.toLocaleString("en-US")} />}
+                    <Row label="Full-time students" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}%`} />
+                    <Row label="Part-time students" value={`${Math.round((d.partTime / (d.fullTime + d.partTime)) * 100)}%`} />
+                    <Row label="Women" value={`${d.women}%`} />
+                    <Row label="Men" value={`${d.men}%`} last />
                   </div>
                 </div>
                 <div>
-                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Where undergraduates come from</h3>
-                  <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>The government&apos;s categories. International means students on visas.</p>
+                  {/* The one visualization on this tab worth keeping (direct
+                     feedback, 15 Sept 2026) -- no explanatory paragraph, no
+                     raw headcount next to the percent, trimmed labels
+                     ("Hispanic / Latino", not "...or Latino"). Any real
+                     methodology note belongs under Where these numbers come
+                     from, not here. */}
+                  <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Student Demographics</h3>
                   <div className="mt-[var(--space-4)]">
-                    <Donut parts={d.makeup.map((m) => ({ label: m.label, pct: m.pct, n: m.n }))} />
+                    <Donut parts={d.makeup.map((m) => ({ label: demoLabel(m.label), pct: m.pct }))} />
                   </div>
                 </div>
               </div>
@@ -460,52 +467,60 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             )}
 
             {tab === "life" && (
-            <div className="flex flex-col gap-[var(--space-5)]">
-            <TabPanel id="life-title" title="Life there">
-              <div className="flex flex-col gap-[var(--space-6)]">
-                <div className="grid gap-[var(--space-6)] md:grid-cols-2">
-                  <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Ways to study here</h3>
-                    <div className="mt-[var(--space-2)]">
-                      {x && x.ways.length ? x.ways.map((w, i, arr) => <Row key={w.name} label={w.name} note={w.note} value="" last={i === arr.length - 1} />) : d.ways.length ? d.ways.map((w, i, arr) => <Row key={w} label={w} value="" last={i === arr.length - 1} />) : <Row label="No extras" note="no study abroad, no ROTC, no evening classes" value="" last />}
+            <TabPanel id="life-title" title="Campus Life">
+              {/* Four sections, exactly the parts of campus life students
+                 actually weigh (direct feedback, 15 Sept 2026) -- not an
+                 institutional directory. "After college / Pay and debt" is
+                 gone entirely (belongs elsewhere, not this tab), and
+                 Undergraduate Research moved to Academics -- it's an
+                 academic opportunity, not a campus-life one. Teacher
+                 training, evening/weekend classes, and childcare-on-campus
+                 (all real data, none named in the new structure) simply
+                 don't have a section here anymore either. */}
+              {(() => {
+                const studyAbroad = hasWay("study abroad");
+                const rotc = hasWay("rotc");
+                // The only `helps` entry specific enough to keep -- "Careers
+                // advice" and "Help finding a job when you finish" are
+                // exactly the vague copy called out to remove.
+                const careerServices = d.helps.includes("Help finding work while you study");
+                return (
+                  <div className="flex flex-col gap-[var(--space-6)]">
+                    <div>
+                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Housing</h3>
+                      <div className="mt-[var(--space-2)]">
+                        <Row label="Housing available" value={d.housing ? "Yes" : "No"} last />
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>What the college helps with</h3>
-                    <div className="mt-[var(--space-2)]">
-                      {d.helps.map((h, i, arr) => <Row key={h} label={h} value="" last={i === arr.length - 1 && !d.notOffered?.length} />)}
-                      {d.notOffered?.map((n, i, arr) => <Row key={n} label={n} value="Not offered" tone="muted" last={i === arr.length - 1} />)}
+                    <div>
+                      <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Activities &amp; Organizations</h3>
+                      <div className="mt-[var(--space-2)]">
+                        <Row label="Student clubs &amp; organizations" value="" last={!rotc} />
+                        {rotc && <Row label="ROTC" value="Offered" last />}
+                      </div>
                     </div>
+                    {d.sport && (
+                      <div>
+                        <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Athletics</h3>
+                        <div className="mt-[var(--space-2)]">
+                          <Row label="League" value={d.sport.league} last />
+                        </div>
+                        <ul className="mt-[var(--space-3)] flex flex-wrap gap-[8px]" aria-label="Sports offered">{d.sport.teams.map((t) => <li key={t} className="rounded-full px-[11px] py-[4px] text-[13px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.08)" }}>{t}</li>)}</ul>
+                      </div>
+                    )}
+                    {(studyAbroad || careerServices) && (
+                      <div>
+                        <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Opportunities</h3>
+                        <div className="mt-[var(--space-2)]">
+                          {studyAbroad && <Row label="Study abroad" value="" last={!careerServices} />}
+                          {careerServices && <Row label="Career services" value="" last />}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-                {d.sport && (
-                  <div>
-                    <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Sport</h3>
-                    <div className="mt-[var(--space-2)]">
-                      <Row label="League" value={d.sport.league} last={!(x?.teamMen && x?.teamWomen)} />
-                      {x?.teamMen && x?.teamWomen ? (
-                        <SplitBar title={`${d.sport.students.toLocaleString("en-US")} students on a team`} a={{ label: "men", value: x.teamMen }} b={{ label: "women", value: x.teamWomen }} />
-                      ) : (
-                        <Row label="Students on a team" value={d.sport.students.toLocaleString("en-US")} last />
-                      )}
-                    </div>
-                    <ul className="mt-[var(--space-3)] flex flex-wrap gap-[8px]" aria-label="Teams">{d.sport.teams.map((t) => <li key={t} className="rounded-full px-[11px] py-[4px] text-[13px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.08)" }}>{t}</li>)}</ul>
-                  </div>
-                )}
-              </div>
+                );
+              })()}
             </TabPanel>
-
-            <TabPanel id="after-title" title="After college">
-              <h3 className={MEDIUM} style={{ ...DISPLAY, color: SOFT }}>Pay and debt</h3>
-              <p className="mt-[2px] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Everyone who went here, in every subject.</p>
-              <div className="mt-[var(--space-2)]">
-                <Row label="Typical pay six years after starting" note="finished or not" value={d.pay6 ? `${money(d.pay6)} a year` : "Not published"} />
-                <Row label="Owed when they finish" note={d.monthly ? `federal loans, about ${money(d.monthly)} a month` : "federal loans"} value={d.debt ? money(d.debt) : "Not published"} />
-                <Row label="Borrowers paying their loans back" value={c.repay !== null ? `${c.repay}%` : "Not published"} last={x?.fallBehind === null || x?.fallBehind === undefined} />
-                {x?.fallBehind !== null && x?.fallBehind !== undefined && <Row label="Borrowers who fall behind" value={`${x.fallBehind}%`} last />}
-              </div>
-            </TabPanel>
-            </div>
             )}
           </>
         )}
@@ -525,39 +540,5 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
       <MobileNav active="Explore" />
     </div>
-  );
-}
-
-
-function YourPath({ c }: { c: NonNullable<ReturnType<typeof collegeBySlug>> }) {
-  const route = useSearchParams().get("route");
-  const profile = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
-  const pathway = pathwayFor(route);
-  if (!pathway) return null;
-  const fit = fitFor(c, parseGpa(profile.gpa));
-  const programmes = c.detail?.programmes.map((p) => p.name) ?? [];
-  const direct = programmes.some((n) => new RegExp(pathway.program.split(/[\s,/]+/)[0], "i").test(n)) || c.level === "Bachelor's degrees";
-  const rows: { label: string; value: string }[] = [
-    { label: "Career", value: pathway.careerTitle },
-    { label: "Education route", value: pathway.route },
-    { label: "Recommended program", value: pathway.program },
-    { label: "Career fit", value: direct ? "Strong" : c.level === "Associate degrees" ? "2-year start" : "Related" },
-    { label: "Admissions", value: FIT_WORDS[fit] },
-  ];
-  return (
-    <section aria-labelledby="your-path" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ ...PANEL, borderColor: `color-mix(in srgb, ${ACCENT} 45%, var(--glass-border))` }}>
-      {/* no eyebrow: "Your path" was our label, not from the brief (direct
-         feedback, 11 Sept 2026) */}
-      <h2 id="your-path" className={BIG}>Why {c.name} fits you</h2>
-      <dl className="grid gap-x-[var(--space-5)] gap-y-[8px] sm:grid-cols-2">
-        {rows.map((r) => (
-          <div key={r.label} className="flex items-baseline justify-between gap-[var(--space-3)] border-b pb-[6px]" style={{ borderColor: RULE }}>
-            <dt className={SMALL} style={{ color: "var(--muted-foreground)" }}>{r.label}</dt>
-            <dd className={`${SMALL} m-0 text-right font-bold`}>{r.value}</dd>
-          </div>
-        ))}
-      </dl>
-      {pathway.alsoRelevant.length > 0 && <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Also relevant: {pathway.alsoRelevant.join(" · ")}</p>}
-    </section>
   );
 }

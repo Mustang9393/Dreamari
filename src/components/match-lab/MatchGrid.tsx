@@ -461,21 +461,19 @@ function DetailModal({
              elsewhere for later. 8th-grade reading level, short bullets,
              nothing here that needs a second read. */}
           <div className="flex flex-col px-5 pt-4 pb-4" style={{ background: "var(--color-night-card)" }}>
-            <p className={`${bricolage.className} mb-3 text-[11px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase`}>At a Glance</p>
-
-            <BreakdownSection icon={<BookOpen className="h-4 w-4" />} color={career.color} label="What You'd Do">
+            <BreakdownSection icon={<BookOpen className="h-4 w-4" />} label="What You'd Do">
               <BulletList items={career.whatYouDo} />
             </BreakdownSection>
 
             <BreakdownDivider />
 
-            <BreakdownSection icon={<Sparkles className="h-4 w-4" />} color={career.color} label="Good Fit If You Like">
+            <BreakdownSection icon={<Sparkles className="h-4 w-4" />} label="Good Fit If You Like">
               <BulletList items={career.goodFitIf} />
             </BreakdownSection>
 
             <BreakdownDivider />
 
-            <BreakdownSection icon={<GraduationCap className="h-4 w-4" />} color={career.color} label="School & Path">
+            <BreakdownSection icon={<GraduationCap className="h-4 w-4" />} label="School & Path">
               <BulletList items={career.schoolPath} />
             </BreakdownSection>
           </div>
@@ -506,14 +504,12 @@ function DetailModal({
   );
 }
 
-function BreakdownSection({ icon, color, label, children }: { icon: React.ReactNode; color: string; label: string; children: React.ReactNode }) {
+function BreakdownSection({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
   return (
     <section>
       <div className="flex items-center gap-2">
-        <span aria-hidden className="flex-none" style={{ color }}>
-          {icon}
-        </span>
-        <h3 className="text-[10.5px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase">{label}</h3>
+        <span aria-hidden className="flex-none text-white">{icon}</span>
+        <h3 className="text-[15px] font-extrabold tracking-[-0.01em] text-[var(--color-night-foreground)]">{label}</h3>
       </div>
       <div className="mt-1.5 text-left">{children}</div>
     </section>
@@ -524,17 +520,18 @@ function BreakdownDivider() {
   return <hr aria-hidden className="my-3 border-0" style={{ height: 1, background: "var(--color-glass-border)" }} />;
 }
 
-/** Every "At a Glance" section is 2-3 short bullets, never a paragraph --
- * that's the whole point of the simplified detail (direct instruction, 13
- * Sept 2026: "very short bullet points that scan well on vertical
- * screens"). One shared list style so all three sections read as one
- * system rather than three differently-formatted blocks. */
+/** Every section is 2-3 short bullets, never a paragraph -- that's the whole
+ * point of the simplified detail (direct instruction, 13 Sept 2026: "very
+ * short bullet points that scan well on vertical screens"). One shared list
+ * style so all three sections read as one system rather than three
+ * differently-formatted blocks. Sized below the section heading (direct
+ * feedback, 14 Sept 2026: headings should read first, bullets second). */
 function BulletList({ items }: { items: string[] }) {
   return (
     <ul className="flex flex-col gap-1.5">
       {items.map((item) => (
-        <li key={item} className="flex items-start gap-2 text-[14.5px] leading-[1.5] font-medium text-[var(--color-night-foreground)]">
-          <span aria-hidden className="mt-[9px] size-1 flex-none rounded-full" style={{ background: "var(--color-night-muted-foreground)" }} />
+        <li key={item} className="flex items-start gap-2 text-[13px] leading-[1.5] font-medium text-[var(--color-night-muted-foreground)]">
+          <span aria-hidden className="mt-[8px] size-1 flex-none rounded-full" style={{ background: "var(--color-night-muted-foreground)" }} />
           {item}
         </li>
       ))}

@@ -490,14 +490,14 @@ export function BuildIllustration() {
   return (
     <Panel label={false}>
       <Fit base={520}>
-        <div role="img" aria-label="Build: What sounds interesting? Choose up to 2. Business & Money and Tech & Engineering are chosen from six career worlds shown. 13% complete." className="flex flex-col gap-5 p-7">
+        <div role="img" aria-label="Build: Which career fields interest you? Choose up to 2. Business & Money and Tech & Engineering are chosen from six career worlds shown. 13% complete." className="flex flex-col gap-5 p-7">
           <div className="flex items-center justify-between gap-4">
             <Caps color={BLUE}>Build</Caps>
             <span className="flex items-center gap-2 text-[12px] font-bold tabular-nums" style={{ color: INK2 }}><span className="h-[6px] w-[120px] overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}><span className="block h-full w-[13%] rounded-full" style={{ background: BLUE }} /></span>13% complete</span>
           </div>
           <div className="flex items-center gap-4">
             <Image src="/images/dreamy/v2/dreamy-curious.png" alt="" width={144} height={144} className="size-[72px] flex-none object-contain" />
-            <div><p className="text-[24px] leading-[28px] font-extrabold tracking-[-0.015em]" style={{ color: INK }}>What sounds interesting?</p><p className="mt-1 text-[13.5px] font-semibold" style={{ color: INK2 }}>Choose up to 2</p></div>
+            <div><p className="text-[24px] leading-[28px] font-extrabold tracking-[-0.015em]" style={{ color: INK }}>Which career fields interest you?</p><p className="mt-1 text-[13.5px] font-semibold" style={{ color: INK2 }}>Choose up to 2</p></div>
           </div>
           <ul className="grid grid-cols-2 gap-2.5">
             {BUILD_WORLDS.map((w) => (
