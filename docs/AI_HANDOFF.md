@@ -9380,3 +9380,54 @@ regression). This doesn't touch the total image weight in `public/images/`
 (341MB across the repo) -- Next's own image pipeline is already serving
 correctly-sized/optimized versions per request, confirmed in the network
 log, so that's a repo-size concern rather than a runtime one.
+
+### 14 Sept 2026 — Resume Builder: live-tracking + placeholder text for every nested modal
+
+Direct feedback: "the builder zoom is amazing... but the same zoom + pan +
+realtime tracking + updating in the preview isn't working for these inner
+menus like education and experience... everything I type on any input
+field should be zoomed+tracked+shown live updating" -- then clarified to
+cover every nested modal, not just Experience.
+
+Root cause (confirmed by investigation, not guessed): the wiring
+(`onFieldFocus`/`activeField`, `data-field` markers) was already correct
+and identical across `ExperienceModal.tsx`, and `EducationModal`/
+`CertificationModal` in `wizardSteps.tsx` -- the actual gap was that all
+three stage a local `draft` and only call `upsertX(draft)` on Save, so a
+**brand-new** entry has no corresponding `data-field` node in the DOM
+until saved; the camera falls back to the generic section-level empty
+state. Editing an *existing* entry (where the id already exists in
+`resume.experience`/etc.) always worked, which is why "Education works"
+looked inconsistent with "Experience doesn't" -- it was new-vs-existing,
+not a per-modal wiring bug.
+
+Fix, applied identically to all three modals:
+- A `useEffect(() => { upsertX(draft); }, [draft])` live-writes every
+  change straight into the actual resume store, not just on Save -- so the
+  live preview shows the in-progress entry (and has a real `data-field` to
+  track) from the moment the modal opens, before a single character is
+  typed.
+- Closing without saving now rolls this back: a brand-new entry is removed
+  (`removeX(draft.id)`), an existing entry being edited is restored to its
+  pre-modal snapshot (`upsertX(initial)`) -- so an abandoned edit never
+  leaves a half-changed entry in the actual resume.
+- `ResumeDocument.tsx`'s `EducationEntries`/`ExperienceEntries`/
+  `CertificationEntries` now always render every field's `data-field` span
+  (previously conditional on having a value), with a muted-italic
+  placeholder ("Job Title", "Company / Organization", "City, State",
+  "Start – End", etc.) standing in for anything still empty -- this is
+  also the fix for the separate note ("when we zoom in and it's blank
+  before we type it's a little off-putting... muted helper text?"): the
+  camera now always has something legible to land on.
+
+Skills intentionally NOT touched -- it's chip-toggle based (not a
+progressively-typed field with a natural preview position), and was
+already excluded from tracking by a prior, deliberate design decision
+(`SkillsStep` never receives `onFieldFocus`).
+
+`src/components/resume/ExperienceModal.tsx`,
+`src/components/resume/wizardSteps.tsx`,
+`src/components/resume/ResumeDocument.tsx`. Verified live: opening a new
+Experience entry shows the placeholder-filled preview immediately, focusing
+"Where" pans the camera to it, typing updates the preview character-by-
+character. ESLint + `tsc --noEmit -p .` clean.

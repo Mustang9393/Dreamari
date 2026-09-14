@@ -93,6 +93,22 @@ function dateRange(start: string, end: string, current: boolean) {
 // ---- Shared entry content -- identical across layouts, just arranged
 // differently by each one below. ----
 
+// A field with nothing typed yet still renders -- muted, italic, the same
+// placeholder copy its input shows -- rather than an empty span. Two
+// reasons at once (direct feedback, 15 Sept 2026): the live-tracking
+// camera needs a real `data-field` node to pan to from the moment a new
+// entry's modal opens, not just once there's a value to show; and a
+// student zooming into a genuinely blank patch of white page reads as
+// broken, where a soft placeholder reads as "type here."
+function FieldText({ value, placeholder, dataField, className, style }: { value: string; placeholder: string; dataField: string; className: string; style: React.CSSProperties }) {
+  const empty = !value.trim();
+  return (
+    <span data-field={dataField} className={className} style={empty ? { ...style, color: "var(--ink-faint)", fontStyle: "italic" } : style}>
+      {empty ? placeholder : value}
+    </span>
+  );
+}
+
 function EducationEntries({ resume, tight }: { resume: ResumeData; tight?: boolean }) {
   if (resume.education.length === 0) return null;
   return (
@@ -100,14 +116,16 @@ function EducationEntries({ resume, tight }: { resume: ResumeData; tight?: boole
       {resume.education.map((edu) => (
         <div key={edu.id} className="flex flex-col gap-[2px]">
           <div className={tight ? "flex flex-col gap-[1px]" : "flex items-baseline justify-between gap-[12px]"}>
-            <span data-field={`${edu.id}:schoolName`} className="text-[14px] font-bold" style={{ color: "var(--ink)" }}>{edu.schoolName}</span>
-            {edu.gradYear && <span data-field={`${edu.id}:gradYear`} className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }}>{edu.gradYear}</span>}
+            <FieldText value={edu.schoolName} placeholder="High School Name" dataField={`${edu.id}:schoolName`} className="text-[14px] font-bold" style={{ color: "var(--ink)" }} />
+            <FieldText value={edu.gradYear} placeholder="Graduation Year" dataField={`${edu.id}:gradYear`} className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }} />
           </div>
-          {(edu.cityState || edu.program || edu.gpa) && (
-            <span data-field={`${edu.id}:cityState`} className="text-[12.5px]" style={{ color: "var(--ink-soft)" }}>
-              {[edu.cityState, edu.program && `${edu.program} Program`, edu.gpa && `GPA: ${edu.gpa}`].filter(Boolean).join(" · ")}
-            </span>
-          )}
+          <FieldText
+            value={[edu.cityState, edu.program && `${edu.program} Program`, edu.gpa && `GPA: ${edu.gpa}`].filter(Boolean).join(" · ")}
+            placeholder="City, State"
+            dataField={`${edu.id}:cityState`}
+            className="text-[12.5px]"
+            style={{ color: "var(--ink-soft)" }}
+          />
           {edu.honors.length > 0 && <span data-field={`${edu.id}:honors`} className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>{edu.honors.join(", ")}</span>}
         </div>
       ))}
@@ -125,14 +143,19 @@ function ExperienceEntries({ resume }: { resume: ResumeData }) {
         return (
           <div key={exp.id} className="flex flex-col gap-[4px]">
             <div className="flex items-baseline justify-between gap-[12px]">
-              <span data-field={`${exp.id}:title`} className="text-[14.5px] font-bold" style={{ color: "var(--ink)" }}>
-                {exp.title}{exp.where && <span className="font-semibold" style={{ color: "var(--ink-soft)" }}> at {exp.where}</span>}
+              <span data-field={`${exp.id}:title`} className="text-[14.5px] font-bold" style={exp.title.trim() ? { color: "var(--ink)" } : { color: "var(--ink-faint)", fontStyle: "italic" }}>
+                {exp.title.trim() || "Job Title"}
+                <span className="font-semibold" style={exp.where.trim() ? { color: "var(--ink-soft)" } : { color: "var(--ink-faint)", fontStyle: "italic" }}> at {exp.where.trim() || "Company / Organization"}</span>
               </span>
-              {range && <span data-field={`${exp.id}:dates`} className="flex-none text-[13px] font-semibold" style={{ color: "var(--ink-soft)" }}>{range}</span>}
+              <FieldText value={range} placeholder="Start – End" dataField={`${exp.id}:dates`} className="flex-none text-[13px] font-semibold" style={{ color: "var(--ink-soft)" }} />
             </div>
-            {(exp.location || kind) && (
-              <span data-field={`${exp.id}:location`} className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>{[kind?.label, exp.location].filter(Boolean).join(" · ")}</span>
-            )}
+            <FieldText
+              value={[kind?.label, exp.location].filter(Boolean).join(" · ")}
+              placeholder="City, State"
+              dataField={`${exp.id}:location`}
+              className="text-[12.5px]"
+              style={{ color: "var(--ink-faint)" }}
+            />
             {exp.bullets.filter((b) => b.trim()).length > 0 && (
               <ul className="mt-[2px] flex flex-col gap-[3px] pl-[18px]" style={{ listStyleType: "disc", color: "var(--ink-soft)" }}>
                 {exp.bullets.filter((b) => b.trim()).map((b, i) => (
@@ -180,11 +203,11 @@ function CertificationEntries({ resume, tight }: { resume: ResumeData; tight?: b
         return (
           <div key={cert.id} className={tight ? "flex flex-col gap-[1px]" : "flex items-baseline justify-between gap-[12px]"}>
             <span data-field={`${cert.id}:name`} className="text-[13px]" style={{ color: "var(--ink-soft)" }}>
-              <span className="font-bold" style={{ color: "var(--ink)" }}>{cert.name}</span>
-              {cert.issuer && `, ${cert.issuer}`}
+              <span className="font-bold" style={cert.name.trim() ? { color: "var(--ink)" } : { color: "var(--ink-faint)", fontStyle: "italic" }}>{cert.name.trim() || "Certification Name"}</span>
+              {cert.issuer.trim() ? `, ${cert.issuer}` : <span style={{ color: "var(--ink-faint)", fontStyle: "italic" }}>, Issuing Organization</span>}
               {cert.credentialId && <span className="text-[12px]" style={{ color: "var(--ink-faint)" }}> · ID: {cert.credentialId}</span>}
             </span>
-            {range && <span data-field={`${cert.id}:dates`} className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }}>{range}</span>}
+            <FieldText value={range} placeholder="Issue – Expiration" dataField={`${cert.id}:dates`} className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }} />
           </div>
         );
       })}
