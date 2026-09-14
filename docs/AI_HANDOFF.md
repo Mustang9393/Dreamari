@@ -38,6 +38,44 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-14 Connect: real logo marks for the 9 companies added to professionalsFrom (PUSHED TO MAIN, user-authorized, 482eb25)
+
+`professionalsFrom` in `src/components/connect/data.ts` was expanded across all
+five communities (General 13, Finance 8, Technology 7, Healthcare 9, Creative
+8) with real companies, and nine of them had no entry in `COMPANY_MARKS`
+(`src/components/connect/primitives.tsx`): IBM, Genentech, CDC Foundation,
+UnitedHealth Group, Kaiser Permanente, Moderna, Warner Music Group,
+Paramount, Condé Nast. Their "+N more" chip in `CommunityCard.tsx`'s
+`MoreMarks` popover was falling back to plain text for all nine.
+
+Sourced a real SVG mark for each (mostly Wikimedia Commons, trimmed to ink
+bounds the same way the 2026-09-03 batch was), added to `COMPANY_MARKS`, and
+logged each in `docs/BRAND_MARKS.md`. Two things worth knowing if you touch
+these again:
+
+1. **CDC Foundation** is the independent nonprofit, not the government CDC
+   agency -- deliberately sourced from cdcfoundation.org's own site, not
+   Wikimedia's CDC seal. The source file's "Together our impact is greater"
+   tagline (fill `#85888b` in the original) was stripped out of the SVG,
+   keeping just the dot mark + wordmark.
+2. **Warner Music Group's source had a real bug for our system**: the "W"
+   ribbon shape is a cutout achieved by painting an opaque white rect BEHIND
+   an opaque blue path with the ribbon as a hole -- fine for normal
+   rendering, but our `CompanyChip`/`CompanyMark` mask to a single ink color
+   off the alpha channel, and alpha doesn't care about z-order/color, so the
+   whole square came out as a solid blob. Fixed by deleting that backing
+   rect so the ribbon is real transparency. **If a future mark looks like a
+   blob instead of its icon, check for this same pattern** (an opaque
+   "background" shape sitting behind a shape that's supposed to read as a
+   hole).
+
+Validated: `npx tsc --noEmit` clean; confirmed live via `document.querySelector('[title="..."]')`
+mask-image inspection (not just a screenshot) for all nine, plus a visual
+pass across the Technology/Healthcare/Creative popovers at both mobile and
+desktop widths. No open issues. If chips elsewhere still show as plain text,
+it's a company not yet in `COMPANY_MARKS` at all (not one of these nine) --
+check which board/company and add it the same way.
+
 ### 2026-09-07 (later still) Schools view: replaced the sticky stage story with plain rows, rebuilt Connect, dropped pill CTAs
 
 Several rounds of direct feedback in quick succession:
