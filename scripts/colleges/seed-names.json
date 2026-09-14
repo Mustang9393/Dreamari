@@ -105,7 +105,7 @@
  {
   "slug": "rutgers-university-new-brunswick",
   "name": "Rutgers University-New Brunswick",
-  "wiki": "Rutgers University–New Brunswick",
+  "wiki": "Rutgers University\u2013New Brunswick",
   "query": "Old Queens Rutgers"
  },
  {
@@ -161,5 +161,155 @@
   "name": "Kean University",
   "wiki": "Kean_University",
   "query": "Kean University Union"
+ },
+ {
+  "slug": "illinois-state-university",
+  "name": "Illinois State University",
+  "wiki": "Illinois_State_University",
+  "query": "Illinois State University Normal campus"
+ },
+ {
+  "slug": "clarkson-university",
+  "name": "Clarkson University",
+  "wiki": "Clarkson_University",
+  "query": "Clarkson University Potsdam campus"
+ },
+ {
+  "slug": "texas-a-m-university-college-station",
+  "name": "Texas A&M University",
+  "wiki": "Texas A&M University",
+  "query": "Texas A&M University Academic Building"
+ },
+ {
+  "slug": "arizona-state-university-campus-immersion",
+  "name": "Arizona State University",
+  "wiki": "Arizona_State_University",
+  "query": "Arizona State University Tempe campus"
+ },
+ {
+  "slug": "grand-canyon-university",
+  "name": "Grand Canyon University",
+  "wiki": "Grand_Canyon_University",
+  "query": "Grand Canyon University Phoenix campus"
+ },
+ {
+  "slug": "miami-dade-college",
+  "name": "Miami Dade College",
+  "wiki": "Miami_Dade_College",
+  "query": "Miami Dade College campus"
+ },
+ {
+  "slug": "southern-new-hampshire-university",
+  "name": "Southern New Hampshire University",
+  "wiki": "Southern_New_Hampshire_University",
+  "query": "Southern New Hampshire University Manchester campus"
+ },
+ {
+  "slug": "norfolk-state-university",
+  "name": "Norfolk State University",
+  "wiki": "Norfolk_State_University",
+  "query": "Norfolk State University campus"
+ },
+ {
+  "slug": "bluefield-state-university",
+  "name": "Bluefield State University",
+  "wiki": "Bluefield_State_University",
+  "query": "Bluefield State University campus"
+ },
+ {
+  "slug": "lincoln-university",
+  "name": "Lincoln University (Missouri)",
+  "wiki": "Lincoln_University_(Missouri)",
+  "query": "Lincoln University Jefferson City Missouri campus"
+ },
+ {
+  "slug": "fond-du-lac-tribal-and-community-college",
+  "name": "Fond du Lac Tribal and Community College",
+  "wiki": "Fond_du_Lac_Tribal_and_Community_College",
+  "query": "Fond du Lac Tribal and Community College Cloquet"
+ },
+ {
+  "slug": "chief-dull-knife-college",
+  "name": "Chief Dull Knife College",
+  "wiki": "Chief_Dull_Knife_College",
+  "query": "Chief Dull Knife College Lame Deer Montana"
+ },
+ {
+  "slug": "maine-college-of-art-design",
+  "name": "Maine College of Art & Design",
+  "wiki": "Maine_College_of_Art",
+  "query": "Maine College of Art Portland building"
+ },
+ {
+  "slug": "virginia-wesleyan-university",
+  "name": "Virginia Wesleyan University",
+  "wiki": "Virginia_Wesleyan_University",
+  "query": "Virginia Wesleyan University campus"
+ },
+ {
+  "slug": "goldey-beacom-college",
+  "name": "Goldey-Beacom College",
+  "wiki": "Goldey\u2013Beacom College",
+  "query": "Goldey-Beacom College Wilmington campus"
+ },
+ {
+  "slug": "wiregrass-georgia-technical-college",
+  "name": "Wiregrass Georgia Technical College",
+  "wiki": null,
+  "query": "Wiregrass Georgia Technical College Valdosta"
+ },
+ {
+  "slug": "lakeshore-technical-college",
+  "name": "Lakeshore Technical College",
+  "wiki": "Lakeshore_Technical_College",
+  "query": "Lakeshore Technical College Cleveland Wisconsin"
+ },
+ {
+  "slug": "avalon-institute-las-vegas",
+  "name": "Avalon Institute",
+  "wiki": null,
+  "query": "Avalon Institute Las Vegas campus"
+ },
+ {
+  "slug": "strayer-university-tennessee",
+  "name": "Strayer University",
+  "wiki": "Strayer_University",
+  "query": "Strayer University campus"
+ },
+ {
+  "slug": "school-of-visual-arts",
+  "name": "School of Visual Arts",
+  "wiki": "School_of_Visual_Arts",
+  "query": "School of Visual Arts New York building"
+ },
+ {
+  "slug": "pima-medical-institute-tucson",
+  "name": "Pima Medical Institute",
+  "wiki": null,
+  "query": "Pima Medical Institute Tucson campus"
+ },
+ {
+  "slug": "caan-academy-of-nursing",
+  "name": "CAAN Academy of Nursing",
+  "wiki": null,
+  "query": "nursing school Matteson Illinois"
+ },
+ {
+  "slug": "christine-valmy-international-school-for-esthetics-skin-care-makeup",
+  "name": "Christine Valmy International School for Esthetics, Skin Care & Makeup",
+  "wiki": null,
+  "query": "Christine Valmy school New York"
+ },
+ {
+  "slug": "jefferson-community-and-technical-college",
+  "name": "Jefferson Community and Technical College",
+  "wiki": "Jefferson_Community_and_Technical_College",
+  "query": "Jefferson Community and Technical College Louisville"
+ },
+ {
+  "slug": "san-joaquin-valley-college-modesto",
+  "name": "San Joaquin Valley College",
+  "wiki": null,
+  "query": "San Joaquin Valley College campus"
  }
 ]

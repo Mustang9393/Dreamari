@@ -9201,3 +9201,44 @@ rest of this session; will batch with earlier unpushed local commits
 (Resume Builder prefill fix, the four College Details simplification
 rounds) once the user says go. Princeton's real data is expected next, to
 go through this same transform script.
+
+### 14 Sept 2026 — Colleges: real photos and marks fetched for the 25 real colleges
+
+Design notes: `docs/COLLEGE_LOOKUP_AUDIT.md` §10. Direct follow-up to the
+same day's §9 real-data round -- user asked to fetch real campus photos and
+school logos for every college still on the placeholder state, sourcing
+"far and wide," not just Wikimedia Commons.
+
+- All 25 real colleges (plus a stale-flag fix for 8 of the original
+  fabricated-data colleges that had real image files on disk the whole
+  time but incorrect `photo:false`/`mark:false` in `data.ts` -- discovered
+  these flags are dead code, unused by the actual rendering path) now have
+  real photo + mark assets. 55 photos / 55 marks total.
+- Caught and fixed two badly-wrong automatic Commons matches by visual
+  spot-check: Texas A&M's photo was a Bangladesh university building;
+  Strayer University-Tennessee's photo was a random stray dog in Pristina
+  (matched on the substring "Stray"). Also swapped two topically-weak
+  matches (Illinois State's 1930s post-office mural, Chief Dull Knife
+  College's unrelated USDA meeting photo) for real campus photos. Lesson
+  for any future fetch round: spot-check Commons keyword matches visually,
+  license/size filters alone aren't enough.
+- `scripts/colleges/seed-names.json` permanently extended with the 25 new
+  colleges so `fetch-images.mjs` covers them on any future rerun.
+  `credits.json` has attribution for every asset, official-site sourced or
+  Commons/Wikipedia.
+
+Also this session, two small unrelated fixes:
+- **College cards**: the program-match checkmark (e.g. next to "Business
+  Administration") was low-contrast accent-blue on the card surface --
+  direct feedback. Now a solid `--primary` circular badge with a white
+  check icon, matching the existing "Comparing" button's solid-accent
+  treatment. `src/components/colleges/shared.tsx`.
+- **Build flow halfway screen**: "You're moving fast. 🚀 / The good part is
+  coming." replaced with "You're halfway there. ✨ / Keep going. Your
+  matches are getting closer." -- direct feedback that "moving fast" could
+  read as a nudge to slow down/second-guess answers, when the message
+  should be purely encouraging. `src/components/build/steps.tsx`.
+
+ESLint + `tsc --noEmit -p .` clean across all touched files. Not yet
+pushed -- held per explicit instruction until the college data/image work
+was confirmed correct.

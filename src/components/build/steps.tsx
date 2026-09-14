@@ -439,8 +439,8 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
           <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />
         </div>
-        <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="You’re moving fast. 🚀" /></h1>
-        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">The good part is coming.</p>
+        <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="You’re halfway there. ✨" /></h1>
+        <p className="mt-2 text-[15px] font-medium text-[var(--color-night-muted-foreground)] sm:text-[16px]">Keep going. Your matches are getting closer.</p>
       </GlassCard>
       </div>
       </div>

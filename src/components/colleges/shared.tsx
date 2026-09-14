@@ -385,8 +385,11 @@ export function SchoolCard({
         {(program || fit || extraChip) && (
           <div className="flex min-h-[24px] flex-wrap items-center gap-x-[8px] gap-y-[6px]">
             {program && (
-              <span className="flex min-w-0 items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
-                <span className="truncate">{program}</span> <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden style={{ color: SOFT }} />
+              <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                <span className="truncate">{program}</span>
+                <span className="flex h-[16px] w-[16px] flex-none items-center justify-center rounded-full" style={{ background: ACCENT }} aria-hidden>
+                  <Check className="h-[10px] w-[10px]" strokeWidth={3.5} style={{ color: "#fff" }} />
+                </span>
               </span>
             )}
             {program && <Chip label={PATH_WORD[c.level]} tone="path" />}
