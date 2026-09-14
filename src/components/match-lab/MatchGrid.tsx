@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Plus, Sparkles, X } from "lucide-react";
+import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Info, Plus, Sparkles, X } from "lucide-react";
+import { BorderBeam } from "border-beam";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
@@ -110,11 +111,15 @@ export function MatchGrid() {
                 <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
               </span>
               <span className="flex flex-none items-center gap-2">
+                {/* A little more prominent than a muted status chip (direct
+                   feedback, 14 Sept 2026): bigger dot, bolder/brighter
+                   text, a stronger border -- this is the one number a
+                   student should always be able to find at a glance. */}
                 <span
-                  className="flex flex-none items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-1 text-[11px] font-semibold whitespace-nowrap text-[var(--color-night-muted-foreground)] backdrop-blur"
-                  style={{ background: "var(--color-glass-surface-raised)", borderColor: "var(--color-glass-border-raised)" }}
+                  className="flex flex-none items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold whitespace-nowrap text-[var(--color-night-foreground)] backdrop-blur"
+                  style={{ background: "var(--color-glass-surface-raised)", borderColor: "color-mix(in srgb, var(--color-feedback-success) 40%, var(--color-glass-border-raised))" }}
                 >
-                  <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 8px ${SUCCESS}` }} />
+                  <span aria-hidden className="h-2 w-2 flex-none rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 10px ${SUCCESS}` }} />
                   {selected.length} of {MAX_SLOTS}
                 </span>
               </span>
@@ -267,22 +272,37 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
         className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100"
         style={{ background: "rgba(5,8,20,0.32)" }}
       />
-      {/* Scrim + title: a normal flex child sized by its own content (not
-         a fixed reserve), so it's exactly as tall as the actual title
-         needs -- it grows upward from the bottom when the title wraps to
-         two lines, and sits flush above the world label otherwise, with
-         no leftover gap on a one-line title (direct feedback, 12 Sept
-         2026). This column holds ONLY the scrim now; "Learn more" below
-         is deliberately a separate, independently-centered layer -- see
-         its own comment for why. */}
+      {/* Scrim + Learn more + title: one bottom-anchored flow now, not a
+         separate fixed-offset floating badge (direct feedback, 14 Sept
+         2026: hug the title, not the upper half of the card). The old
+         version needed a different top offset per breakpoint to dodge a
+         two-line title growing the scrim upward from underneath it; putting
+         "Learn more" INSIDE this same flex column, right above the title,
+         means it just moves with the title automatically, on whatever line
+         count, with no per-breakpoint math and no collision risk -- and it
+         always sits on the guaranteed-dark scrim rather than an
+         unpredictable patch of photo. Also lighter on real vertical space
+         (a phone's actual viewport is shorter than this preview once
+         Safari/Chrome's own chrome is accounted for): nothing here needs
+         its own reserved clearance anymore, it just adds one row to a
+         block that was already there. */}
       <div className="pointer-events-none absolute inset-0 z-[1] flex flex-col justify-end">
         <div
-          className="flex flex-none flex-col items-center gap-1 px-2 pt-14 pb-3 text-center uppercase"
+          className="flex flex-none flex-col items-center gap-1.5 px-2 pt-14 pb-3 text-center uppercase"
           style={{
             background:
               "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-night-background) 55%, transparent) 34%, color-mix(in srgb, var(--color-night-background) 82%, transparent) 60%, var(--color-night-background) 100%)",
           }}
         >
+          <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4} strength={0.7} active>
+            <span
+              className="flex items-center gap-1 rounded-full px-2.5 py-[5px] text-[10.5px] font-semibold whitespace-nowrap backdrop-blur-md sm:gap-1.5 sm:px-3 sm:py-[6px] sm:text-[12px]"
+              style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", color: "rgba(255,255,255,0.95)" }}
+            >
+              <Info className="h-3 w-3 flex-none sm:h-3.5 sm:w-3.5" strokeWidth={2.5} aria-hidden />
+              Learn more
+            </span>
+          </BorderBeam>
           <p style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 17, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.02em", color: "var(--color-night-foreground)" }}>
             {career.title}
           </p>
@@ -291,30 +311,6 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
           </p>
         </div>
       </div>
-      {/* "Learn more" needs a DIFFERENT anchor per breakpoint -- the grid
-         itself changes shape (2 cols x 3 rows on mobile, 3 cols x 2 rows
-         from sm up), so a mobile card is much shorter, relative to its
-         width, than a desktop one. One fixed value can't read right on
-         both: a top offset small enough to clear a two-line title on a
-         short real-phone card (screenshotted, direct feedback, 12 Sept
-         2026) sits awkwardly close to the top row on a desktop card
-         that's twice as tall. Below sm: a fixed distance from the top
-         edge, decoupled entirely from the scrim (which is bottom-anchored
-         and grows upward when a title wraps), so it can't collide with a
-         two-line title regardless of how tall that makes the scrim. At sm
-         and up, where the card has real height to spare, dead center
-         reads fine (confirmed on desktop before this mobile-specific
-         issue came up) and stays a single fixed point either way -- unlike
-         centering in the gap between the top chips and the scrim, tried
-         first, which shifted per-card since that gap shrinks on a
-         two-line title. z-[2] keeps it above the scrim regardless. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute top-11 left-1/2 z-[2] -translate-x-1/2 rounded-[var(--radius-sm)] px-1.5 py-[2px] text-[8px] font-semibold whitespace-nowrap backdrop-blur-md sm:top-1/2 sm:-translate-y-1/2 sm:px-2 sm:py-[3px] sm:text-[9px]"
-        style={{ background: "color-mix(in srgb, var(--color-night-background) 45%, transparent)", color: "rgba(255,255,255,0.92)" }}
-      >
-        Learn more
-      </span>
       {/* salary chip */}
       <span
         className="absolute top-2 left-2 z-[1] rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md"
@@ -406,8 +402,13 @@ function DetailModal({
         </button>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none]">
-          {/* hero */}
-          <div className="relative w-full" style={{ aspectRatio: "4 / 3" }}>
+          {/* hero: 4/3 -> 3/2 (direct feedback, 14 Sept 2026: shorten this
+             without cropping the photo too much) -- a modest step, not
+             16/9, since these are waist-up portraits and a much shorter
+             crop starts losing heads. The rest of the height this modal
+             needed to lose without scrolling comes from tightening spacing
+             below, not from cropping further. */}
+          <div className="relative w-full" style={{ aspectRatio: "3 / 2" }}>
             <Image src={career.photo} alt="" fill sizes="440px" className="object-cover" draggable={false} priority />
             {/* prev/next through the deck without closing -- scoped to the
                hero image so top-1/2 centers on the photo, not the whole
@@ -434,7 +435,7 @@ function DetailModal({
               </span>
             </div>
             <div
-              className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center gap-1.5 px-2 pt-16 pb-4 text-center uppercase"
+              className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center gap-1.5 px-2 pt-12 pb-3 text-center uppercase"
               style={{
                 background:
                   "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-night-background) 50%, transparent) 30%, color-mix(in srgb, var(--color-night-background) 75%, transparent) 51%, var(--color-night-background) 100%)",
@@ -454,8 +455,8 @@ function DetailModal({
              3 slot?" read, not the full Career Report -- that lives
              elsewhere for later. 8th-grade reading level, short bullets,
              nothing here that needs a second read. */}
-          <div className="flex flex-col px-5 pt-5 pb-6" style={{ background: "var(--color-night-card)" }}>
-            <p className={`${bricolage.className} mb-4 text-[11px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase`}>At a Glance</p>
+          <div className="flex flex-col px-5 pt-4 pb-4" style={{ background: "var(--color-night-card)" }}>
+            <p className={`${bricolage.className} mb-3 text-[11px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase`}>At a Glance</p>
 
             <BreakdownSection icon={<BookOpen className="h-4 w-4" />} color={career.color} label="What You'd Do">
               <BulletList items={career.whatYouDo} />
@@ -476,7 +477,7 @@ function DetailModal({
         </div>
 
         {/* footer CTA */}
-        <div className="flex-none border-t p-4" style={{ borderColor: "var(--color-glass-border)", background: "var(--color-night-card)" }}>
+        <div className="flex-none border-t px-4 py-3" style={{ borderColor: "var(--color-glass-border)", background: "var(--color-night-card)" }}>
           <button
             type="button"
             onClick={onToggle}
@@ -509,13 +510,13 @@ function BreakdownSection({ icon, color, label, children }: { icon: React.ReactN
         </span>
         <h3 className="text-[10.5px] font-bold tracking-[0.12em] text-[var(--color-night-muted-foreground)] uppercase">{label}</h3>
       </div>
-      <div className="mt-2 text-left">{children}</div>
+      <div className="mt-1.5 text-left">{children}</div>
     </section>
   );
 }
 
 function BreakdownDivider() {
-  return <hr aria-hidden className="my-4 border-0" style={{ height: 1, background: "var(--color-glass-border)" }} />;
+  return <hr aria-hidden className="my-3 border-0" style={{ height: 1, background: "var(--color-glass-border)" }} />;
 }
 
 /** Every "At a Glance" section is 2-3 short bullets, never a paragraph --

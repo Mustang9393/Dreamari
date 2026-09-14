@@ -8326,3 +8326,67 @@ need it -- centered multi-line text next to a fixed icon drifts out from
 under it) while Explore/match-grid's plain-text rows are centered (matches
 the centered sprite/title/CTA composition). Not an inconsistency to fix --
 direct feedback: leave both as they are.
+
+## 2026-09-14 · /match-grid: "Learn more" pill redesigned (WIP area, more to come)
+
+Direct instruction: the live "Learn more" label on each `GridCard`
+(`MatchGrid.tsx`) was purely decorative (`aria-hidden`, an 8-9px `<span>`, no
+icon) -- "too small," needed an info icon leading it and "a slight shiny
+border." Rebuilt it as a real pill: `Info` icon (lucide-react) + "Learn more"
+text at 10.5px/12px (mobile/desktop, up from 8px/9px), more padding, wrapped
+in `BorderBeam` (`size="sm"`, `strength={0.7}`, always `active`) for the
+shiny-border effect -- same package/pattern used for nudges elsewhere this
+session (Match.tsx's "+" badge, Next button), just persistently on rather
+than conditional, since this isn't a one-time nudge. Kept the existing
+per-breakpoint anchor position (`top-11` fixed on mobile, dead-center from
+`sm`) and its `aria-hidden`/non-interactive status unchanged -- the whole
+card still opens the detail modal on click; this redesign was scoped to the
+label's own size/legibility/border, not its placement or interactivity.
+
+Lint/tsc clean. Verified live at both a 375px mobile viewport (all 6 cards'
+pills legible, beam visible, no overlap) and desktop; confirmed tapping a
+card still opens `DetailModal` correctly (interaction unaffected). Per the
+user, this whole screen (/match-grid) is still WIP -- mobile layout is being
+refined separately, and this pill fix is one piece of that, not the last.
+Not committed, not pushed -- checking in before pushing since more changes
+to this area are expected.
+
+**Same-day follow-up, three more changes to `MatchGrid.tsx`:**
+
+1. **"Learn more" repositioned.** Direct feedback: it should hug the title,
+   not float in the upper/center of the card, and real Safari/Chrome UI
+   chrome eats more vertical space than this preview shows. Moved it OUT of
+   its own fixed-offset absolutely-positioned layer (which needed different
+   top values per breakpoint to dodge a 2-line title, per the old comment)
+   and INTO the same bottom-anchored flex column as the title, as the first
+   child. It now moves with the title automatically on any line count, with
+   no per-breakpoint math, always sits on the guaranteed-dark scrim instead
+   of an unpredictable patch of photo, and needs no independently-reserved
+   headroom -- all upside for a real device with less vertical room than a
+   devtools preview implies. (Recommended this over keeping it centered:
+   grouping it with the title/world label reads as one coherent info
+   cluster, and removes the fragile fixed-offset hack entirely.)
+2. **"0 of 3" counter made more prominent**: bigger dot, bolder/brighter
+   text (`--color-night-foreground` instead of muted), a stronger
+   green-tinted border, `rounded-full` instead of a small rect.
+3. **`DetailModal`'s hero shortened to fit all 3 sections without
+   scrolling** (direct feedback: shorten it "without cropping the image too
+   much"). Measured the actual overflow live via `scrollHeight -
+   clientHeight` before touching anything (81px at a standard desktop
+   modal), rather than guessing. Used a modest hero crop (4/3 -> 3/2, not
+   16/9 -- these are waist-up portraits and a much shorter ratio starts
+   losing heads) for about half the savings, and tightened spacing that
+   doesn't touch the photo at all for the rest: the scrim's top padding
+   (pt-16->pt-12, more room before text, not less photo), the content
+   section's padding, the "At a Glance" label's margin, both dividers'
+   margins, each section's icon-to-list gap, and the footer's padding.
+   Verified live (not assumed): 0px overflow now at a standard 375x812 or
+   larger viewport. At the extreme low end (iPhone SE-class, ~580px of
+   *available* height once Safari's chrome is subtracted, tested directly)
+   it still scrolls by design -- closing that gap too would mean either
+   illegibly small text or cropping the photo well past "not too much," so
+   this was left as an accepted tradeoff rather than chased further, and
+   flagged rather than silently claimed as fully fixed.
+
+Lint/tsc clean on all three. Not committed, not pushed -- same WIP area,
+checking in first.
