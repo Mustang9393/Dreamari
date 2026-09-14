@@ -218,7 +218,19 @@ function fullNameOf(resume: ResumeData) {
 
 // ---- Layouts -- same underlying content, four different arrangements. ----
 
-function SingleColumnLayout({ resume }: { resume: ResumeData }) {
+/** Nothing typed yet, but this is the empty resume's own "you are here"
+ *  hint -- shown only in the wizard's live preview (`placeholders`), never
+ *  on the real document/print output, which just omits an empty section
+ *  entirely as before. Direct feedback, 14 Sept 2026: "the skills title
+ *  should already be there on the preview so i know where its going to be
+ *  populating" -- as soon as the Skills step (or its modal) is open, not
+ *  only after the first skill is actually saved. */
+function EmptyHint() {
+  return <p className="text-[12.5px] italic" style={{ color: "var(--ink-faint)" }}>Nothing added yet</p>;
+}
+
+function SingleColumnLayout({ resume, placeholders }: { resume: ResumeData; placeholders?: boolean }) {
+  const hasSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0;
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col items-center text-center">
@@ -229,16 +241,16 @@ function SingleColumnLayout({ resume }: { resume: ResumeData }) {
         )}
       </header>
       <div className="mt-[28px] flex flex-col gap-[24px]">
-        {resume.education.length > 0 && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel>Education</SectionLabel><EducationEntries resume={resume} /></section>}
-        {resume.experience.length > 0 && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel>Experience &amp; Activities</SectionLabel><ExperienceEntries resume={resume} /></section>}
-        {(resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length) > 0 && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel>Skills</SectionLabel><SkillsBlock resume={resume} /></section>}
-        {resume.certifications.length > 0 && <section data-section="certifications" className="flex flex-col gap-[14px]"><SectionLabel>Certifications</SectionLabel><CertificationEntries resume={resume} /></section>}
+        {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel>Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel>Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel>Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[14px]"><SectionLabel>Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
     </>
   );
 }
 
-function SidebarLayout({ resume }: { resume: ResumeData }) {
+function SidebarLayout({ resume, placeholders }: { resume: ResumeData; placeholders?: boolean }) {
   const hasSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0;
   return (
     <div className="flex gap-[28px]">
@@ -252,19 +264,20 @@ function SidebarLayout({ resume }: { resume: ResumeData }) {
           {(resume.profile.city || resume.profile.state) && <span>{[resume.profile.city, resume.profile.state].filter(Boolean).join(", ")}</span>}
           {resume.profile.country && <span>{resume.profile.country}</span>}
         </div>
-        {hasSkills && <div data-section="skills" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Skills</SectionLabel><SkillsBlock resume={resume} stacked /></div>}
-        {resume.certifications.length > 0 && <div data-section="certifications" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Certifications</SectionLabel><CertificationEntries resume={resume} tight /></div>}
+        {(hasSkills || placeholders) && <div data-section="skills" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} stacked /> : <EmptyHint />}</div>}
+        {(resume.certifications.length > 0 || placeholders) && <div data-section="certifications" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} tight /> : <EmptyHint />}</div>}
       </aside>
       <div className="flex min-w-0 flex-1 flex-col gap-[22px]">
         {resume.profile.bio.trim() && <p className="text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }}>{resume.profile.bio.trim()}</p>}
-        {resume.education.length > 0 && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel>Education</SectionLabel><EducationEntries resume={resume} /></section>}
-        {resume.experience.length > 0 && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel>Experience &amp; Activities</SectionLabel><ExperienceEntries resume={resume} /></section>}
+        {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel>Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel>Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
     </div>
   );
 }
 
-function MinimalLayout({ resume }: { resume: ResumeData }) {
+function MinimalLayout({ resume, placeholders }: { resume: ResumeData; placeholders?: boolean }) {
+  const hasSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0;
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col items-start text-left">
@@ -275,16 +288,17 @@ function MinimalLayout({ resume }: { resume: ResumeData }) {
         )}
       </header>
       <div className="mt-[32px] flex flex-col gap-[28px]">
-        {resume.education.length > 0 && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Education</SectionLabel><EducationEntries resume={resume} /></section>}
-        {resume.experience.length > 0 && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Experience &amp; Activities</SectionLabel><ExperienceEntries resume={resume} /></section>}
-        {(resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length) > 0 && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Skills</SectionLabel><SkillsBlock resume={resume} /></section>}
-        {resume.certifications.length > 0 && <section data-section="certifications" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Certifications</SectionLabel><CertificationEntries resume={resume} /></section>}
+        {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
     </>
   );
 }
 
-function BannerLayout({ resume }: { resume: ResumeData }) {
+function BannerLayout({ resume, placeholders }: { resume: ResumeData; placeholders?: boolean }) {
+  const hasSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0;
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col gap-[4px]">
@@ -296,21 +310,21 @@ function BannerLayout({ resume }: { resume: ResumeData }) {
         )}
       </header>
       <div className="mt-[24px] flex flex-col gap-[24px]">
-        {resume.education.length > 0 && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Education</SectionLabel><EducationEntries resume={resume} /></section>}
-        {resume.experience.length > 0 && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Experience &amp; Activities</SectionLabel><ExperienceEntries resume={resume} /></section>}
-        {(resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length) > 0 && <section data-section="skills" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Skills</SectionLabel><SkillsBlock resume={resume} /></section>}
-        {resume.certifications.length > 0 && <section data-section="certifications" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Certifications</SectionLabel><CertificationEntries resume={resume} /></section>}
+        {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
     </>
   );
 }
 
-function ResumeSheetContent({ resume, templateId }: { resume: ResumeData; templateId: string }) {
+function ResumeSheetContent({ resume, templateId, placeholders }: { resume: ResumeData; templateId: string; placeholders?: boolean }) {
   const layout = templateFor(templateId).layout;
-  if (layout === "sidebar") return <SidebarLayout resume={resume} />;
-  if (layout === "minimal") return <MinimalLayout resume={resume} />;
-  if (layout === "banner") return <BannerLayout resume={resume} />;
-  return <SingleColumnLayout resume={resume} />;
+  if (layout === "sidebar") return <SidebarLayout resume={resume} placeholders={placeholders} />;
+  if (layout === "minimal") return <MinimalLayout resume={resume} placeholders={placeholders} />;
+  if (layout === "banner") return <BannerLayout resume={resume} placeholders={placeholders} />;
+  return <SingleColumnLayout resume={resume} placeholders={placeholders} />;
 }
 
 const CROPPED_WINDOW_HEIGHT = 520;
@@ -369,17 +383,30 @@ function ScaledSheet({ resume, templateId, cropped, focusSection }: { resume: Re
 
   return (
     <div
-      ref={containerRef}
-      className="print:hidden"
-      style={{ width: "100%", height: containerHeight, overflowY: cropped ? "auto" : "hidden", overflowX: "hidden" }}
+      className="relative overflow-hidden print:hidden"
+      style={{
+        width: "100%",
+        height: containerHeight,
+        borderRadius: "var(--radius-lg)",
+        transition: "box-shadow 0.2s ease",
+        // The real iOS text-cursor loupe (confirmed against a live
+        // screenshot, 14 Sept 2026): no border stroke, no blur -- content
+        // inside stays sharp. What reads as "lens" is the elevation: a
+        // solid shape that visibly lifts off the page behind it via
+        // shadow alone. Shadow-only, no backdrop-filter, so it's free on
+        // a phone.
+        boxShadow: zoomed ? "0 26px 52px -14px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.4)" : undefined,
+      }}
     >
-      <div
-        ref={sheetRef}
-        data-doc="resume"
-        className="dm-report overflow-hidden rounded-[var(--radius-lg)] p-[56px] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)]"
-        style={{ ...paperStyle(templateId), width: PAGE_WIDTH, height: PAGE_HEIGHT, transform, transformOrigin: "top left", visibility: scale ? "visible" : "hidden" }}
-      >
-        <ResumeSheetContent resume={resume} templateId={templateId} />
+      <div ref={containerRef} className="h-full w-full" style={{ overflowY: cropped ? "auto" : "hidden", overflowX: "hidden" }}>
+        <div
+          ref={sheetRef}
+          data-doc="resume"
+          className="dm-report overflow-hidden rounded-[var(--radius-lg)] p-[56px] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)]"
+          style={{ ...paperStyle(templateId), width: PAGE_WIDTH, height: PAGE_HEIGHT, transform, transformOrigin: "top left", visibility: scale ? "visible" : "hidden" }}
+        >
+          <ResumeSheetContent resume={resume} templateId={templateId} placeholders={cropped} />
+        </div>
       </div>
     </div>
   );

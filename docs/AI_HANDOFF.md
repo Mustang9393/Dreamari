@@ -8721,6 +8721,26 @@ all passing, plus explicit user authorization to push. Nothing further
 needed there; merged it into this branch below before pushing to keep both
 sets of work on `main` together.
 
+**Same-day follow-up 9 (not yet pushed):** two more rounds on the wizard's
+cropped/zoomed live preview:
+1. "the skills title should already be there on the preview so i know
+   where its going to be populating" -- section headers in the cropped
+   wizard preview (`placeholders` prop, threaded through `ResumeDocument`
+   -> `ResumeSheetContent` -> each layout) now render even before any
+   entry exists, with a small "Nothing added yet" hint in place of the
+   list. Screen-only: `placeholders` is only ever passed from the wizard's
+   cropped preview, never from the print copy or the real document/version
+   view, so an empty section still just doesn't appear on an actual sent
+   resume.
+2. "magnifying glass border thing... apple already sort of does this" --
+   first pass used a blurred vignette, which wasn't it; the user then sent
+   an actual screenshot of iOS's text-cursor loupe mid-drag. Confirmed
+   against that: no border stroke, no blur -- the loupe is a solid,
+   perfectly sharp bubble that reads as "lifted" purely through elevation
+   (shadow). Replaced the vignette with a shadow-only treatment on the
+   crop window when a section is focused, no `backdrop-filter` at all, so
+   there's no phone performance cost either version would have risked.
+
 ### 14 Sept 2026 — Shared progress lightning and idle nudges
 
 User requested richer effects, then directed us back to the older organic bolt
