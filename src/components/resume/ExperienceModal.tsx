@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, Loader2, Sparkles, Trash2 } from "lucide-react";
-import { makeId, upsertExperience, type ExperienceType, type ResumeExperience } from "@/lib/resume";
+import { makeId, removeExperience, upsertExperience, type ExperienceType, type ResumeExperience } from "@/lib/resume";
 import { EXPERIENCE_QUESTIONS, EXPERIENCE_TYPES } from "./data";
 import { Field, ResumeModal, TextInput } from "./ui";
 
@@ -24,7 +24,25 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus }: { i
   // there's nothing to track there -- the camera just keeps the section-
   // level framing from the Info step until Lines has real bullets to pan to.
   const track = (kind: string) => () => onFieldFocus?.(`${draft.id}:${kind}`);
-  const closeAndClear = () => { onFieldFocus?.(null); onClose(); };
+
+  // Live-write the draft into the actual resume on every change (direct
+  // feedback, 14-15 Sept 2026: "everything I type on any input field
+  // should be zoomed+tracked+shown live updating in the preview") -- not
+  // just on Save. This is also what gives the camera a real `data-field`
+  // node to pan to from the moment the modal opens, even before the
+  // entry has ever been saved (ResumeDocument.tsx's FieldText renders the
+  // muted placeholder for whatever's still empty). Closing without saving
+  // rolls this back below rather than leaving a half-filled entry behind.
+  useEffect(() => {
+    upsertExperience(draft);
+  }, [draft]);
+
+  const closeAndClear = () => {
+    onFieldFocus?.(null);
+    if (initial) upsertExperience(initial); // revert live edits made this session
+    else removeExperience(draft.id); // discard a new entry that was never saved
+    onClose();
+  };
 
   const infoValid = draft.where.trim().length > 0 && draft.title.trim().length > 0;
 
@@ -52,7 +70,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus }: { i
   }
 
   function save() {
-    upsertExperience(draft);
+    // already live-written by the effect above; just stop tracking and hand back
     onFieldFocus?.(null);
     onSaved(draft.title);
   }

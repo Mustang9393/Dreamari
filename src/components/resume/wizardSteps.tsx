@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Award, Briefcase, Check, CircleDashed, GraduationCap, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import {
   type ResumeData,
@@ -136,8 +136,22 @@ function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: 
   // whichever field is actually focused, e.g. the graduation year that
   // sits at the far right edge of its row (direct feedback, 15 Sept 2026).
   const track = (kind: string) => () => onFieldFocus?.(`${draft.id}:${kind}`);
+
+  // Live-write on every change, same as ExperienceModal (direct feedback,
+  // 14-15 Sept 2026: every nested modal should track+update live, not
+  // just Experience) -- gives the camera a real field to pan to and the
+  // preview real (or placeholder) text from the moment this opens.
+  useEffect(() => {
+    upsertEducation(draft);
+  }, [draft]);
+  const closeAndClear = () => {
+    onFieldFocus?.(null);
+    if (initial) upsertEducation(initial);
+    else removeEducation(draft.id);
+    onClose();
+  };
   return (
-    <ResumeModal title="Add Your High School" onClose={() => { onFieldFocus?.(null); onClose(); }}>
+    <ResumeModal title="Add Your High School" onClose={closeAndClear}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="High School Name" htmlFor="edu-name" required>
           <TextInput id="edu-name" value={draft.schoolName} onChange={(v) => setDraft({ ...draft, schoolName: v })} onFocus={track("schoolName")} placeholder="Lincoln High School" />
@@ -185,14 +199,11 @@ function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: 
           )}
         </Field>
         <div className="flex items-center justify-end gap-[var(--space-3)] pt-[var(--space-2)]">
-          <button type="button" onClick={onClose} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
+          <button type="button" onClick={closeAndClear} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
           <button
             type="button"
             disabled={!canSave}
-            onClick={() => {
-              upsertEducation(draft);
-              onSaved(draft.schoolName);
-            }}
+            onClick={() => { onFieldFocus?.(null); onSaved(draft.schoolName); }}
             className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
             style={{ background: "var(--primary)" }}
           >
@@ -432,8 +443,19 @@ function CertificationModal({ initial, onClose, onSaved, onFieldFocus }: { initi
   // Matches the `data-field` markers CertificationEntries puts on the live
   // preview (ResumeDocument.tsx).
   const track = (kind: string) => () => onFieldFocus?.(`${draft.id}:${kind}`);
+
+  // Live-write on every change, same as ExperienceModal/EducationModal.
+  useEffect(() => {
+    upsertCertification(draft);
+  }, [draft]);
+  const closeAndClear = () => {
+    onFieldFocus?.(null);
+    if (initial) upsertCertification(initial);
+    else removeCertification(draft.id);
+    onClose();
+  };
   return (
-    <ResumeModal title="Add Certification" onClose={() => { onFieldFocus?.(null); onClose(); }}>
+    <ResumeModal title="Add Certification" onClose={closeAndClear}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="Certification Name" htmlFor="cert-name" required>
           <TextInput id="cert-name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} onFocus={track("name")} placeholder="e.g. AWS Certified Cloud Practitioner" />
@@ -456,11 +478,11 @@ function CertificationModal({ initial, onClose, onSaved, onFieldFocus }: { initi
           <TextInput id="cert-credential-url" value={draft.credentialUrl} onChange={(v) => setDraft({ ...draft, credentialUrl: v })} placeholder="e.g. https://www.credly.com/badges/…" />
         </Field>
         <div className="flex items-center justify-end gap-[var(--space-3)] pt-[var(--space-2)]">
-          <button type="button" onClick={() => { onFieldFocus?.(null); onClose(); }} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
+          <button type="button" onClick={closeAndClear} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
           <button
             type="button"
             disabled={!canSave}
-            onClick={() => { upsertCertification(draft); onSaved(draft.name); }}
+            onClick={() => { onFieldFocus?.(null); onSaved(draft.name); }}
             className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
             style={{ background: "var(--primary)" }}
           >

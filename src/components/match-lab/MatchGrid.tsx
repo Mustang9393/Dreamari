@@ -147,9 +147,13 @@ export function MatchGrid() {
         </section>
 
         {/* ---- sticky continue bar ---- */}
+        {/* No blur (direct feedback, 14 Sept 2026: "stuttering... Match
+           grid etc" -- fixed + full-width + backdrop-blur-xl recomposites
+           every scroll frame, permanently on screen, for a bar that was
+           already 88% opaque and barely needed the blur to read solid). */}
         <div
-          className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t px-4 py-3 backdrop-blur-xl"
-          style={{ background: "color-mix(in srgb, var(--color-night-background) 88%, transparent)", borderColor: "var(--color-glass-border)" }}
+          className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t px-4 py-3"
+          style={{ background: "color-mix(in srgb, var(--color-night-background) 94%, transparent)", borderColor: "var(--color-glass-border)" }}
         >
           <div className="flex w-full max-w-[880px] items-center justify-between gap-3">
             <p className="text-[13px] leading-[17px] font-semibold text-[var(--color-night-muted-foreground)]">

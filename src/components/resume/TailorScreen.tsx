@@ -1,12 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
-import { makeId, upsertVersion, type ResumeData, type ResumeVersion } from "@/lib/resume";
+import { Check, Plus, Sparkles } from "lucide-react";
+import { DreamyGuide } from "@/components/build/DreamyGuide";
+import { addSkill, makeId, upsertVersion, type ResumeData, type ResumeSkills, type ResumeVersion } from "@/lib/resume";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
-import { CARD_CLASS, Field, INSET, TextInput, WizardFooter } from "./ui";
+import { CARD_CLASS, Field, INSET, ResumeModal, TextInput, WizardFooter } from "./ui";
 
-const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "", template: DEFAULT_RESUME_TEMPLATE };
+const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "", targetPosition: "", targetCompany: "", template: DEFAULT_RESUME_TEMPLATE, atsCheck: null };
+
+type SkillCategory = keyof ResumeSkills;
+type SkillSuggestion = { category: SkillCategory; skill: string; reason: string };
+type TailorAnalysis = { matchScore: number; matchLabel: string; qualityScore: number; suggestions: SkillSuggestion[]; gaps: string[]; improvements: string[] };
+
+const CATEGORY_LABEL: Record<SkillCategory, string> = { people: "People", tech: "Tech", languages: "Languages" };
 
 // A quick way to change an already-picked template -- the real, informed
 // choice happens in the full gallery (with a genuine example preview per
@@ -59,16 +66,67 @@ function PickRow({ label, meta, checked, onToggle }: { label: string; meta?: str
   );
 }
 
+/** One number, one label, one quiet color cue by tier -- the same "small
+ *  stat, not a gauge" restraint the rest of this app uses for scores
+ *  (direct feedback, 15 Sept 2026: reference's version of this was a big
+ *  purple modal; ours should look like it belongs on this screen, not
+ *  interrupt it). */
+function ScoreChip({ label, value, sublabel }: { label: string; value: number; sublabel?: string }) {
+  const tone = value >= 75 ? "var(--world-food-farming-nature, #3aa66b)" : value >= 45 ? "var(--accent-subtle)" : "var(--muted-foreground)";
+  return (
+    <div className="flex flex-1 flex-col gap-[2px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+      <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+      <span className="flex items-baseline gap-[6px]">
+        <span className="text-[22px] leading-none font-extrabold tabular-nums" style={{ color: tone, fontFamily: "var(--font-display)" }}>{value}</span>
+        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>/100{sublabel ? ` · ${sublabel}` : ""}</span>
+      </span>
+    </div>
+  );
+}
+
+function SuggestionRow({ suggestion, added, onAdd }: { suggestion: SkillSuggestion; added: boolean; onAdd: () => void }) {
+  return (
+    <div className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+      <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+        <span className="flex items-center gap-[6px] text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>
+          {suggestion.skill}
+          <span className="rounded-full border px-[6px] py-[1px] text-[10px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{CATEGORY_LABEL[suggestion.category]}</span>
+        </span>
+        <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>{suggestion.reason}</span>
+      </span>
+      <button
+        type="button"
+        onClick={onAdd}
+        disabled={added}
+        className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-full border px-[12px] py-[6px] text-[12.5px] font-bold disabled:cursor-default"
+        style={added ? { borderColor: "var(--world-food-farming-nature, #3aa66b)", color: "var(--world-food-farming-nature, #3aa66b)", background: "color-mix(in srgb, var(--world-food-farming-nature, #3aa66b) 12%, transparent)" } : { borderColor: "var(--primary)", color: "var(--primary)" }}
+      >
+        {added ? <><Check className="h-3.5 w-3.5" aria-hidden /> Added</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Add</>}
+      </button>
+    </div>
+  );
+}
+
 // Choose & Tailor: name a resume, pick which education/experience entries
 // from the master profile go into THIS version, optionally paste a job
-// description. Skills and certifications always carry through (plan's
-// original scope) -- only these two lists are picked per version, which is
-// the actual point of having more than one saved resume.
+// description to match against. Skills and certifications always carry
+// through (plan's original scope) -- only these two lists are picked per
+// version, which is the actual point of having more than one saved resume.
 export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onSaved }: { resume: ResumeData; initial: ResumeVersion | null; initialTemplateId?: string; onCancel: () => void; onSaved: (version: ResumeVersion) => void }) {
   const [draft, setDraft] = useState<ResumeVersion>(
     initial ?? { ...EMPTY_VERSION, id: makeId(), educationIds: resume.education.map((e) => e.id), experienceIds: resume.experience.map((e) => e.id), template: initialTemplateId ?? DEFAULT_RESUME_TEMPLATE },
   );
   const canSave = draft.name.trim().length > 0;
+
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<TailorAnalysis | null>(null);
+  const [analyzedFor, setAnalyzedFor] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState(false);
+  const [added, setAdded] = useState<Set<string>>(new Set());
+
+  const matchKey = `${draft.jobDescription}|${draft.targetPosition}|${draft.targetCompany}`;
+  const isStale = analysis !== null && analyzedFor !== matchKey;
 
   const toggleEducation = (id: string) => setDraft((d) => ({ ...d, educationIds: d.educationIds.includes(id) ? d.educationIds.filter((x) => x !== id) : [...d.educationIds, id] }));
   const toggleExperience = (id: string) => setDraft((d) => ({ ...d, experienceIds: d.experienceIds.includes(id) ? d.experienceIds.filter((x) => x !== id) : [...d.experienceIds, id] }));
@@ -79,6 +137,84 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
     upsertVersion(entry);
     onSaved(entry);
   };
+
+  async function findMatchingSkills() {
+    setAnalyzing(true);
+    setAnalyzeError(false);
+    try {
+      const res = await fetch("/api/resume-tailor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobDescription: draft.jobDescription,
+          targetPosition: draft.targetPosition,
+          targetCompany: draft.targetCompany,
+          experience: resume.experience.map((e) => ({ id: e.id, title: e.title, where: e.where, bullets: e.bullets })),
+          skills: resume.skills,
+        }),
+      });
+      const data = (await res.json()) as { ok: boolean } & Partial<TailorAnalysis>;
+      if (data.ok && typeof data.matchScore === "number") {
+        setAnalysis({ matchScore: data.matchScore, matchLabel: data.matchLabel ?? "", qualityScore: data.qualityScore ?? 0, suggestions: data.suggestions ?? [], gaps: data.gaps ?? [], improvements: data.improvements ?? [] });
+        setAnalyzedFor(matchKey);
+        setShowResults(true);
+      } else {
+        setAnalyzeError(true);
+      }
+    } catch {
+      setAnalyzeError(true);
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
+  const dreamyLine = !analysis
+    ? ""
+    : analysis.matchScore >= 75
+      ? "You're a strong fit for this one! ✨"
+      : analysis.matchScore >= 45
+        ? "You've got some good matches. ✨"
+        : "A few more skills would help this land. ✨";
+
+  if (showResults && analysis) {
+    return (
+      <ResumeModal title="Job Match Results" onClose={() => setShowResults(false)}>
+        <DreamyGuide sprite="/images/dreamy/v2/dreamy-puzzle.png" line={dreamyLine} />
+
+        <div className="flex gap-[var(--space-3)]">
+          <ScoreChip label="Resume Quality" value={analysis.qualityScore} />
+          <ScoreChip label="Job Match" value={analysis.matchScore} sublabel={analysis.matchLabel} />
+        </div>
+
+        {analysis.suggestions.length > 0 && (
+          <div className="flex flex-col gap-[8px]">
+            <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Skills worth adding</span>
+            {analysis.suggestions.map((s) => (
+              <SuggestionRow
+                key={s.skill}
+                suggestion={s}
+                added={added.has(s.skill) || resume.skills[s.category].some((have) => have.toLowerCase() === s.skill.toLowerCase())}
+                onAdd={() => { addSkill(s.category, s.skill); setAdded((cur) => new Set(cur).add(s.skill)); }}
+              />
+            ))}
+          </div>
+        )}
+
+        {analysis.improvements.length > 0 && (
+          <div className="flex flex-col gap-[4px]">
+            <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Worth strengthening</span>
+            <ul className="flex flex-col gap-[3px] pl-[16px]" style={{ listStyleType: "disc", color: "var(--muted-foreground)" }}>
+              {analysis.improvements.map((tip) => <li key={tip} className="text-[12.5px]">{tip}</li>)}
+            </ul>
+          </div>
+        )}
+
+        {analysis.gaps.length > 0 && (
+          <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Not yet covered: {analysis.gaps.join(", ")}.</p>
+        )}
+      </ResumeModal>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
@@ -118,17 +254,43 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
         </div>
       </Field>
 
-      <Field label="Job Description (optional)" htmlFor="tailor-jd">
-        <textarea
-          id="tailor-jd"
-          value={draft.jobDescription}
-          onChange={(e) => setDraft({ ...draft, jobDescription: e.target.value })}
-          placeholder="Paste a job description here to line your resume up with it."
-          rows={4}
-          className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[14px] font-semibold outline-none focus:border-[var(--primary)]"
-          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-        />
-      </Field>
+      <div className={CARD_CLASS} style={INSET}>
+        <span className="flex items-center gap-[6px] text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>
+          <Sparkles className="h-4 w-4 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden /> Match to a Job
+        </span>
+        <Field label="Job Description" htmlFor="tailor-jd">
+          <textarea
+            id="tailor-jd"
+            value={draft.jobDescription}
+            onChange={(e) => setDraft({ ...draft, jobDescription: e.target.value })}
+            placeholder="Paste a job description to tailor this resume to it."
+            rows={4}
+            className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[14px] font-semibold outline-none focus:border-[var(--primary)]"
+            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          />
+        </Field>
+        <div className="grid gap-[var(--space-3)] sm:grid-cols-2">
+          <Field label="Target Position (optional)" htmlFor="tailor-position">
+            <TextInput id="tailor-position" value={draft.targetPosition} onChange={(v) => setDraft({ ...draft, targetPosition: v })} placeholder="e.g. Marketing Intern" />
+          </Field>
+          <Field label="Target Company (optional)" htmlFor="tailor-company">
+            <TextInput id="tailor-company" value={draft.targetCompany} onChange={(v) => setDraft({ ...draft, targetCompany: v })} placeholder="e.g. Acme Corp" />
+          </Field>
+        </div>
+
+        {draft.jobDescription.trim().length > 0 && (
+          <button
+            type="button"
+            onClick={analysis && !isStale ? () => setShowResults(true) : findMatchingSkills}
+            disabled={analyzing}
+            className="dm-tap flex min-h-[44px] cursor-pointer items-center justify-center gap-[8px] self-start rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-70"
+            style={{ background: "var(--primary)" }}
+          >
+            <Sparkles className="h-4 w-4" aria-hidden /> {analyzing ? "Finding matches…" : analysis && !isStale ? "View Results" : "Find Matching Skills"}
+          </button>
+        )}
+        {analyzeError && <p className="text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t match this job. You can still save without it.</p>}
+      </div>
 
       <WizardFooter onBack={onCancel} backLabel="Cancel" onNext={save} nextDisabled={!canSave} nextLabel="Save Resume" />
     </div>

@@ -2,15 +2,18 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Pencil, X } from "lucide-react";
+import { Download, FileText, Pencil, Sparkles, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
+import { ATSCheckPanel } from "./ATSCheckPanel";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
 import { ExperienceModal } from "./ExperienceModal";
-import { PrintResumeButton, ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
+import { ExportChecklistModal } from "./ExportChecklistModal";
+import { ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
 import { TailorScreen } from "./TailorScreen";
 import { TemplateGallery } from "./TemplateGallery";
+import { TextPreviewModal } from "./TextPreviewModal";
 import { useResumeToast, WizardProgress } from "./ui";
 import { CertificationsStep, EducationStep, ExperienceStep, PersonalInfoStep, ReviewStep, SkillsStep } from "./wizardSteps";
 
@@ -77,7 +80,8 @@ function TopBar({ label, onClose, extra }: { label: string; onClose: () => void;
   );
 }
 
-function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, templateId }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter>; templateId: string }) {
+function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, templateId, version }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter>; templateId: string; version?: ResumeVersion }) {
+  const [panel, setPanel] = useState<"none" | "ats" | "text" | "export">("none");
   return (
     <Shell contentMaxWidth={900}>
       <TopBar
@@ -85,8 +89,36 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         onClose={() => router.push("/profile?tab=resume")}
         extra={
           <>
+            {version && (
+              <button
+                type="button"
+                data-print-hide
+                onClick={() => setPanel("ats")}
+                className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
+                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+              >
+                <Sparkles className="h-4 w-4" aria-hidden /> ATS Check
+              </button>
+            )}
+            <button
+              type="button"
+              data-print-hide
+              onClick={() => setPanel("text")}
+              className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
+              style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+            >
+              <FileText className="h-4 w-4" aria-hidden /> Text Preview
+            </button>
             <ZoomResumeButton resume={resume} templateId={templateId} title={title} />
-            <PrintResumeButton />
+            <button
+              type="button"
+              data-print-hide
+              onClick={() => setPanel("export")}
+              className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
+              style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+            >
+              <Download className="h-4 w-4" aria-hidden /> Export
+            </button>
             {editHref && (
               <button
                 type="button"
@@ -101,7 +133,15 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
           </>
         }
       />
-      <ResumeDocument resume={resume} templateId={templateId} />
+      {panel === "ats" && version ? (
+        <ATSCheckPanel resume={resume} version={version} onClose={() => setPanel("none")} />
+      ) : panel === "text" ? (
+        <TextPreviewModal resume={resume} onClose={() => setPanel("none")} />
+      ) : panel === "export" ? (
+        <ExportChecklistModal resume={resume} templateId={templateId} onClose={() => setPanel("none")} />
+      ) : (
+        <ResumeDocument resume={resume} templateId={templateId} />
+      )}
       <button
         type="button"
         data-print-hide
@@ -184,6 +224,7 @@ function ResumeBuilderInner() {
         editHref={`/resume-builder?view=tailor&version=${activeVersion.id}`}
         router={router}
         templateId={activeVersion.template}
+        version={activeVersion}
       />
     );
   }
@@ -271,7 +312,10 @@ function ResumeBuilderInner() {
                       educationIds: current.education.map((e) => e.id),
                       experienceIds: current.experience.map((e) => e.id),
                       jobDescription: "",
+                      targetPosition: "",
+                      targetCompany: "",
                       template: pickedTemplate ?? DEFAULT_RESUME_TEMPLATE,
+                      atsCheck: null,
                     };
                     upsertVersion(version);
                     router.push(`/resume-builder?view=version&version=${version.id}`);

@@ -282,12 +282,16 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
   const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
   return (
     <header
-      // glass-surface-1 (3% alpha) read as barely-there once real content
-      // scrolled underneath it -- glass-surface-3 is the same near-solid
-      // token MobileNav already uses for this exact job (a persistent bar
-      // over arbitrary scrolling content), plus the same 10px blur.
-      className="sticky top-0 z-40 hidden h-[62px] w-full items-center justify-between border-b px-[var(--space-8)] backdrop-blur-[10px] md:flex"
-      style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)" }}
+      // Near-solid, no blur (direct feedback, 14 Sept 2026: "stuttering...
+      // everywhere... animations, transitions" -- a sticky, full-width
+      // backdrop-blur recomposites on every scroll frame, on every page,
+      // the exact "large-area filter: blur()" cost this codebase's own
+      // platform notes warn against). Same fix already used for the
+      // hamburger menus (22 Aug 2026: glass let content bleed through and
+      // made rows illegible) -- a 96% solid mix reads the same as the old
+      // glass-surface-3 without paying for backdrop-filter every frame.
+      className="sticky top-0 z-40 hidden h-[62px] w-full items-center justify-between border-b px-[var(--space-8)] md:flex"
+      style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)" }}
     >
       <Wordmark />
 
@@ -298,12 +302,19 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
         className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px]"
         style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
       >
+        {/* prefetch={false}: these 5 links render on every page, so Next's
+           default eager prefetch was fetching all 5 routes' RSC payloads
+           on every single page load whether or not the student ever
+           clicked them -- part of the "stuttering everywhere" report, 14
+           Sept 2026. A click still fetches instantly; it just isn't
+           speculative anymore. */}
         {NAV_ITEMS.map((item) => {
           const isActive = item.label === active;
           return (
             <Link
               key={item.label}
               href={item.href}
+              prefetch={false}
               aria-current={isActive ? "page" : undefined}
               className="dm-quiet rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase"
               style={{
@@ -366,8 +377,12 @@ export function MobileNav({ active }: { active: string }) {
   const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t backdrop-blur-[10px] md:hidden"
-      style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom)" }}
+      // Near-solid, no blur -- same reasoning as DesktopNavigation above:
+      // a fixed, full-width backdrop-blur bar costs a recomposite on every
+      // scroll frame, on every page, which is a lot to pay for a bar that's
+      // always on screen.
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t md:hidden"
+      style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {MOBILE_ITEMS.map(({ label, href, Icon }) => {
         const isActive = label === active;
@@ -375,6 +390,7 @@ export function MobileNav({ active }: { active: string }) {
           <Link
             key={label}
             href={href}
+            prefetch={false}
             aria-label={label}
             aria-current={isActive ? "page" : undefined}
             className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
@@ -386,6 +402,7 @@ export function MobileNav({ active }: { active: string }) {
       })}
       <Link
         href="/profile"
+        prefetch={false}
         aria-label="My Profile"
         aria-current={active === "Profile" ? "page" : undefined}
         className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"

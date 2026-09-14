@@ -65,6 +65,49 @@ export type ResumeCertification = {
   credentialUrl: string;
 };
 
+export type ATSKeywordStatus = "verified" | "possible" | "missing";
+export type ATSKeywordMatch = { keyword: string; status: ATSKeywordStatus; context: string };
+export type ATSReadabilityStatus = "pass" | "warn";
+export type ATSReadabilityItem = { id: string; label: string; status: ATSReadabilityStatus; note: string };
+export type ATSQualityBreakdown = {
+  experienceQuality: number;
+  bulletQuality: number;
+  atsFormatting: number;
+  completeness: number;
+  skills: number;
+  education: number;
+  focusConciseness: number;
+};
+
+/** The full "ATS Check" audit for one saved resume version -- a resume-
+ *  quality rating (score + letter grade + category breakdown + strengths/
+ *  improvements), a job-match breakdown (only meaningful once a job
+ *  description is set), a deterministic ATS readability checklist, and the
+ *  job's requirements the student's real profile doesn't support. Persisted
+ *  on the version it was run against (direct feedback, 15 Sept 2026: "make
+ *  sure all of the functionality from the replit is there") rather than
+ *  recomputed on every view -- `analyzedFor` is a fingerprint of the inputs
+ *  that produced it, so the UI can tell when it's gone stale and needs a
+ *  re-run rather than silently showing an old result. */
+export type ATSCheckResult = {
+  qualityScore: number;
+  qualityGrade: string;
+  qualityBreakdown: ATSQualityBreakdown;
+  qualityStrengths: string[];
+  qualityImprovements: string[];
+  jobMatchScore: number | null;
+  jobMatchLabel: string;
+  verifiedMatches: string[];
+  possibleMatches: string[];
+  jobGaps: string[];
+  keywordMatches: ATSKeywordMatch[];
+  readability: ATSReadabilityItem[];
+  missingQualifications: string[];
+  aiAssisted: boolean;
+  generatedAt: number;
+  analyzedFor: string;
+};
+
 export type ResumeVersion = {
   id: string;
   name: string;
@@ -73,9 +116,16 @@ export type ResumeVersion = {
   educationIds: string[];
   experienceIds: string[];
   jobDescription: string;
+  /** Optional context alongside the job description -- matches the
+   *  reference's own "Match to a Job" fields (direct feedback, 15 Sept
+   *  2026: "it asks for position, JD and company too"). Neither is
+   *  required; they sharpen the match analysis when filled in. */
+  targetPosition: string;
+  targetCompany: string;
   /** A ResumeTemplateId (src/components/resume/data.ts) -- kept as a plain
    *  string here so this data-layer file doesn't import from components/. */
   template: string;
+  atsCheck: ATSCheckResult | null;
 };
 
 export type ResumeData = {
@@ -158,6 +208,54 @@ function normalizeCertifications(value: unknown): ResumeCertification[] {
     .filter((v): v is Record<string, unknown> => !!v && typeof v === "object" && typeof (v as Record<string, unknown>).id === "string")
     .map((v) => ({ id: str(v.id), name: str(v.name), issuer: str(v.issuer), issueDate: str(v.issueDate), expirationDate: str(v.expirationDate), credentialId: str(v.credentialId), credentialUrl: str(v.credentialUrl) }));
 }
+function num(value: unknown, fallback = 0): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+function keywordStatus(value: unknown): ATSKeywordStatus {
+  return value === "verified" || value === "possible" || value === "missing" ? value : "missing";
+}
+function readabilityStatus(value: unknown): ATSReadabilityStatus {
+  return value === "pass" || value === "warn" ? value : "warn";
+}
+function normalizeATSCheck(value: unknown): ATSCheckResult | null {
+  if (!value || typeof value !== "object") return null;
+  const v = value as Record<string, unknown>;
+  const b = (v.qualityBreakdown && typeof v.qualityBreakdown === "object" ? v.qualityBreakdown : {}) as Record<string, unknown>;
+  return {
+    qualityScore: num(v.qualityScore),
+    qualityGrade: str(v.qualityGrade),
+    qualityBreakdown: {
+      experienceQuality: num(b.experienceQuality),
+      bulletQuality: num(b.bulletQuality),
+      atsFormatting: num(b.atsFormatting),
+      completeness: num(b.completeness),
+      skills: num(b.skills),
+      education: num(b.education),
+      focusConciseness: num(b.focusConciseness),
+    },
+    qualityStrengths: strings(v.qualityStrengths),
+    qualityImprovements: strings(v.qualityImprovements),
+    jobMatchScore: typeof v.jobMatchScore === "number" ? v.jobMatchScore : null,
+    jobMatchLabel: str(v.jobMatchLabel),
+    verifiedMatches: strings(v.verifiedMatches),
+    possibleMatches: strings(v.possibleMatches),
+    jobGaps: strings(v.jobGaps),
+    keywordMatches: Array.isArray(v.keywordMatches)
+      ? v.keywordMatches
+          .filter((k): k is Record<string, unknown> => !!k && typeof k === "object")
+          .map((k) => ({ keyword: str(k.keyword), status: keywordStatus(k.status), context: str(k.context) }))
+      : [],
+    readability: Array.isArray(v.readability)
+      ? v.readability
+          .filter((r): r is Record<string, unknown> => !!r && typeof r === "object")
+          .map((r) => ({ id: str(r.id), label: str(r.label), status: readabilityStatus(r.status), note: str(r.note) }))
+      : [],
+    missingQualifications: strings(v.missingQualifications),
+    aiAssisted: bool(v.aiAssisted),
+    generatedAt: num(v.generatedAt, Date.now()),
+    analyzedFor: str(v.analyzedFor),
+  };
+}
 function normalizeVersions(value: unknown): ResumeVersion[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -170,7 +268,10 @@ function normalizeVersions(value: unknown): ResumeVersion[] {
       educationIds: strings(v.educationIds),
       experienceIds: strings(v.experienceIds),
       jobDescription: str(v.jobDescription),
+      targetPosition: str(v.targetPosition),
+      targetCompany: str(v.targetCompany),
       template: str(v.template) || "classic",
+      atsCheck: normalizeATSCheck(v.atsCheck),
     }));
 }
 
@@ -253,6 +354,17 @@ export function isResumeEmpty(r: ResumeData): boolean {
 // splice logic here keeps that identical everywhere instead of re-derived
 // per screen.
 
+/** Adds one skill to a category, case-insensitively deduped -- the "Match
+ *  to a Job" suggestions add here, one click, no confirmation step (direct
+ *  feedback, 15 Sept 2026, mirroring the reference's own one-tap add). */
+export function addSkill(category: keyof ResumeSkills, skill: string): void {
+  const value = skill.trim();
+  if (!value) return;
+  const current = readResume();
+  if (current.skills[category].some((s) => s.toLowerCase() === value.toLowerCase())) return;
+  writeResume({ skills: { ...current.skills, [category]: [...current.skills[category], value] } });
+}
+
 export function upsertEducation(entry: ResumeEducation): void {
   const current = readResume();
   const exists = current.education.some((e) => e.id === entry.id);
@@ -284,6 +396,15 @@ export function upsertVersion(entry: ResumeVersion): void {
   const current = readResume();
   const exists = current.versions.some((v) => v.id === entry.id);
   writeResume({ versions: exists ? current.versions.map((v) => (v.id === entry.id ? entry : v)) : [...current.versions, entry] });
+}
+/** Patches just the ATS Check result onto an already-saved version --
+ *  called after a check run completes, without disturbing anything else a
+ *  student may have changed on the version in the meantime. */
+export function saveATSCheck(versionId: string, result: ATSCheckResult): void {
+  const current = readResume();
+  const version = current.versions.find((v) => v.id === versionId);
+  if (!version) return;
+  upsertVersion({ ...version, atsCheck: result });
 }
 export function removeVersion(id: string): void {
   writeResume({ versions: readResume().versions.filter((v) => v.id !== id) });

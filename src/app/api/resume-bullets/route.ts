@@ -28,12 +28,30 @@ const FALLBACK_VERB: Record<ExperienceType, string> = {
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// The plain-English questions this feeds from ("What did you do day-to-day?")
+// invite a conversational answer, not a resume-ready phrase -- and without
+// an API key, this fallback IS the bullet, verbatim capitalization aside
+// (the "AI-drafted, edit this" banner only shows when `aiAssisted` is true,
+// so a student sees this as finished, not a draft). Stripping the most
+// common conversational tells -- a first-person opener, filler words, "like"
+// used as a casual quantifier -- turns "I basically just stood at the
+// register all day" into "stood at the register all day": still not a
+// polished AI rewrite (no real NLP here), but no longer something that
+// reads as obviously unedited.
+function cleanAnswer(raw: string): string {
+  let s = raw.trim();
+  s = s.replace(/^i\s+(?:'m\s+|was\s+|'d\s+|would\s+)?(?:basically\s+|literally\s+|just\s+|kind of\s+|sort of\s+|really\s+)*/i, "");
+  s = s.replace(/\b(?:basically|literally|kind of|sort of)\b\s*/gi, "");
+  s = s.replace(/\blike\s+(?=\d)/gi, "");
+  return s.replace(/\s{2,}/g, " ").trim();
+}
+
 function templateBullets(type: ExperienceType, where: string, answers: Record<string, string>): string[] {
   const lines: string[] = [];
-  const dayToDay = answers.dayToDay?.trim();
-  const tools = answers.tools?.trim();
-  const team = answers.team?.trim();
-  const proud = answers.proud?.trim();
+  const dayToDay = answers.dayToDay?.trim() && cleanAnswer(answers.dayToDay);
+  const tools = answers.tools?.trim() && cleanAnswer(answers.tools);
+  const team = answers.team?.trim() && cleanAnswer(answers.team);
+  const proud = answers.proud?.trim() && cleanAnswer(answers.proud);
   // The day-to-day answer is already phrased as a verb phrase (its own
   // placeholder models that), so it becomes the bullet directly rather than
   // getting a second verb stacked in front of it.

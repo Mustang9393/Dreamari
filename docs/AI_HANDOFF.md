@@ -9385,3 +9385,311 @@ Outer page margins were untouched -- already matching Home/Explore/Profile
 via the shared `Shell` component from an earlier pass today (see its own
 header comment). ESLint + `tsc --noEmit -p .` clean, verified live at both
 the `lg` desktop split and the mobile/tablet card grid.
+
+### 14 Sept 2026 — Perf: nav backdrop-blur and eager Link prefetch removed
+
+Direct feedback: "stuttering and slow loading... everywhere - animations,
+transitions, match grid etc." Investigated live on the production deploy
+(not localhost) via the browser's network log rather than guessing:
+
+- **DesktopNavigation's sticky top bar and MobileNav's fixed bottom bar**
+  both ran a 10px `backdrop-filter` across the full viewport width, on
+  every single page, permanently mounted (sticky/fixed) -- the exact
+  "large-area filter: blur()... exhausts GPU memory" anti-pattern this
+  codebase's own platform notes already warn against (see
+  `docs/handoff/README-FOR-USMAN.md`). A sticky/fixed blurred bar forces a
+  recomposite on every scroll frame, on every page, for the life of the
+  session. Replaced with the same near-solid fix already used for the
+  hamburger menus (22 Aug 2026, `8350ff8`: "glass surface let page content
+  bleed through and made rows illegible") -- `color-mix(in srgb,
+  var(--background) 96%, var(--foreground))`, no filter.
+- **The 5 nav Links (Home/Explore/Play/Connect/Profile) render on every
+  page** and had no explicit `prefetch` prop, so Next's default eager
+  prefetch was fetching all 5 routes' RSC payloads on every page load --
+  confirmed via the browser's network log on the live deploy, which showed
+  hundreds of repeated `?_rsc=...` requests to the same routes accumulating
+  over a normal browsing session. Set `prefetch={false}` on all of them; a
+  click still fetches instantly, it's just no longer speculative on every
+  page mount.
+
+`src/components/app/chrome.tsx`. ESLint + `tsc --noEmit -p .` clean,
+verified live (near-solid nav bar renders correctly, no visual
+regression). This doesn't touch the total image weight in `public/images/`
+(341MB across the repo) -- Next's own image pipeline is already serving
+correctly-sized/optimized versions per request, confirmed in the network
+log, so that's a repo-size concern rather than a runtime one.
+
+### 14 Sept 2026 — Resume Builder: live-tracking + placeholder text for every nested modal
+
+Direct feedback: "the builder zoom is amazing... but the same zoom + pan +
+realtime tracking + updating in the preview isn't working for these inner
+menus like education and experience... everything I type on any input
+field should be zoomed+tracked+shown live updating" -- then clarified to
+cover every nested modal, not just Experience.
+
+Root cause (confirmed by investigation, not guessed): the wiring
+(`onFieldFocus`/`activeField`, `data-field` markers) was already correct
+and identical across `ExperienceModal.tsx`, and `EducationModal`/
+`CertificationModal` in `wizardSteps.tsx` -- the actual gap was that all
+three stage a local `draft` and only call `upsertX(draft)` on Save, so a
+**brand-new** entry has no corresponding `data-field` node in the DOM
+until saved; the camera falls back to the generic section-level empty
+state. Editing an *existing* entry (where the id already exists in
+`resume.experience`/etc.) always worked, which is why "Education works"
+looked inconsistent with "Experience doesn't" -- it was new-vs-existing,
+not a per-modal wiring bug.
+
+Fix, applied identically to all three modals:
+- A `useEffect(() => { upsertX(draft); }, [draft])` live-writes every
+  change straight into the actual resume store, not just on Save -- so the
+  live preview shows the in-progress entry (and has a real `data-field` to
+  track) from the moment the modal opens, before a single character is
+  typed.
+- Closing without saving now rolls this back: a brand-new entry is removed
+  (`removeX(draft.id)`), an existing entry being edited is restored to its
+  pre-modal snapshot (`upsertX(initial)`) -- so an abandoned edit never
+  leaves a half-changed entry in the actual resume.
+- `ResumeDocument.tsx`'s `EducationEntries`/`ExperienceEntries`/
+  `CertificationEntries` now always render every field's `data-field` span
+  (previously conditional on having a value), with a muted-italic
+  placeholder ("Job Title", "Company / Organization", "City, State",
+  "Start – End", etc.) standing in for anything still empty -- this is
+  also the fix for the separate note ("when we zoom in and it's blank
+  before we type it's a little off-putting... muted helper text?"): the
+  camera now always has something legible to land on.
+
+Skills intentionally NOT touched -- it's chip-toggle based (not a
+progressively-typed field with a natural preview position), and was
+already excluded from tracking by a prior, deliberate design decision
+(`SkillsStep` never receives `onFieldFocus`).
+
+`src/components/resume/ExperienceModal.tsx`,
+`src/components/resume/wizardSteps.tsx`,
+`src/components/resume/ResumeDocument.tsx`. Verified live: opening a new
+Experience entry shows the placeholder-filled preview immediately, focusing
+"Where" pans the camera to it, typing updates the preview character-by-
+character. ESLint + `tsc --noEmit -p .` clean.
+
+### 14 Sept 2026 — Perf: Match grid's sticky continue bar, same blur fix
+
+Follow-up to the nav backdrop-blur fix, same session: "see if you can find
+what's causing the stutter and slow animations... see if we can fix them."
+Audited every `backdrop-filter`/`backdrop-blur` usage in the app for the
+same large-area + persistent-mount pattern that made the nav bars
+expensive. Found one more clear match: Match grid's sticky "continue" bar
+(`fixed inset-x-0 bottom-0`, full width, always mounted while browsing
+matches) ran `backdrop-blur-xl` (a heavy 24px blur) over a background that
+was already 88% opaque -- the blur was doing almost no visible work while
+still paying the full per-frame compositing cost. Dropped the blur, bumped
+opacity to 94% to keep it reading solid.
+
+Also audited and deliberately left alone: every other `backdrop-filter` in
+the app is on a small, card-level surface (badges, circular icon buttons,
+toasts, popovers) -- exactly what this codebase's own platform notes call
+the acceptable case ("reserve backdrop-blur for a few card-level
+surfaces"), not the large-area anti-pattern. `MatchLab.tsx` (the old swipe
+deck) has a few heavier ones too, but it's dormant -- no live entry point
+routes to it anymore (`MatchGrid.tsx`'s own header comment confirms this)
+-- so not worth the risk of touching unused code.
+
+Also checked `AuroraBackground.tsx` (the animated canvas background used
+across Build): canvas-based, not CSS blur, respects `prefers-reduced-
+motion`, and correctly cancels its `requestAnimationFrame` loop on
+unmount -- already built the right way, not a contributor here.
+
+`src/components/match-lab/MatchGrid.tsx`. ESLint + `tsc --noEmit -p .`
+clean, verified live (bar still reads solid, no blur).
+
+### 15 Sept 2026 — Resume Builder: "Match to a Job" actually works now
+
+Direct feedback: "where do we introduce tailoring the resume to a job
+description other than the edit selection thing at the end? We need to
+make that work, and make that part of the flow... refer the replit again
+to see how that actually works and what the output is/should be."
+
+The `jobDescription` field already existed on `ResumeVersion` and in
+`TailorScreen.tsx` -- it was purely decorative, stored but never read
+anywhere. Re-checked the Replit reference (signed in this time, since the
+first pass 401'd on every submit) and captured its real, authenticated
+`/api/resumes/generate` response: it runs two scores (a general resume
+"quality" score and a job-specific "match" score with a label), a
+skill-suggestion list grounded in the student's own experience bullets
+(never invented -- "Not in profile" / opt-in "+Add"), and a short honest
+gaps list for what the posting wants that the profile doesn't support yet.
+Also confirmed two things worth NOT copying: the reference asks for
+Job Description + Target Position + Target Company (all three, so we
+added the latter two), and its "good start" coaching modal is a genuine,
+reproducible bug -- it re-fires on every single submit instead of once.
+
+Built new:
+- `src/app/api/resume-tailor/route.ts` -- same AI-with-graceful-fallback
+  shape as `resume-bullets/route.ts`: calls Claude for real analysis when
+  `ANTHROPIC_API_KEY` is set (returns matchScore, qualityScore, skill
+  suggestions with a reason grounded in the student's own experience,
+  gaps, improvement tips), otherwise a keyword-overlap fallback against
+  our own `SKILL_CATEGORIES` list so the feature works with zero setup.
+  Verified both paths directly (curl) -- a bullet literally containing
+  "leadership" correctly surfaces a grounded suggestion; "teamwork"
+  (JD-relevant but not literally present) correctly lands as a gap instead
+  of a fabricated suggestion.
+- `ResumeVersion` gained `targetPosition`/`targetCompany` (string, both
+  optional) alongside the existing `jobDescription`.
+- `addSkill()` in `resume.ts` -- one-tap, case-insensitive-deduped add
+  straight to the student's actual skills list, no confirmation step.
+- `TailorScreen.tsx`: the job-description field now sits under a clear
+  "Match to a Job" heading explaining what it does (direct feedback,
+  15 Sept 2026: "optional by itself doesn't communicate that it's for
+  tailoring the resume") -- not just a bare "optional" field label. An
+  explicit "Find Matching Skills" button (not auto-fire-on-keystroke, to
+  keep API calls deliberate) shows results inline on the same screen, no
+  modal: a small `DreamyGuide` line (reusing the exact prominent-not-
+  afterthought treatment the wizard steps already use, per direct
+  feedback "like we did for build match play profile etc, but subtler"),
+  two compact score chips, suggestion rows with working Add buttons, a
+  short improvement-tips list, and a quiet gaps line. Never shows twice
+  uninvited and never blocks Save -- fixes the reference's own nag-modal
+  bug by construction rather than patching around it.
+
+Verified live: seeded a resume matching the reference's own test data,
+ran the same job description through both, got sensible/consistent
+scores and a correctly-grounded suggestion. ESLint + `tsc --noEmit -p .`
+clean on every touched file (the two other errors reported project-wide,
+`src/app/gate/page.tsx` and a warning cluster in `ConnectExperience.tsx`,
+are pre-existing and untouched by this change).
+
+`src/app/api/resume-tailor/route.ts` (new), `src/lib/resume.ts`,
+`src/components/resume/TailorScreen.tsx`,
+`src/components/resume/ResumeBuilderExperience.tsx`.
+
+## 15 Sep 2026 -- Match to a Job results moved into a modal, copy trimmed
+
+Direct feedback: "the dreamy stuff can be a modal, otherwise theres a lot
+of clutter... so many new things are being added to that last section."
+The analysis results (Dreamy line, score chips, suggestions,
+improvements, gaps) now open in a `ResumeModal` (the same in-place
+panel-swap pattern `ExperienceModal`/`EducationModal` already use, not a
+floating overlay) instead of stacking inline under the job description
+fields. Opens once per "Find Matching Skills" run; a "View Results"
+button reopens the same result without re-fetching. Still never fires on
+Save, so it doesn't reproduce the reference's nag-modal bug.
+
+Also trimmed copy per direct feedback: dropped the "Match to a Job"
+description line (redundant with the textarea's own placeholder),
+shortened the placeholder and error text.
+
+Verified live: seeded a resume, ran a job description through, modal
+opened with correct scores/suggestions, Back returned to the form with
+the draft intact, "View Results" reopened without a second API call.
+ESLint + `tsc --noEmit -p .` clean on `TailorScreen.tsx`.
+
+`src/components/resume/TailorScreen.tsx`.
+
+## 15 Sep 2026 -- Bullet-generation fallback no longer echoes raw filler
+
+Direct feedback: make sure AI-generated bullets sound relevant/logical.
+No `ANTHROPIC_API_KEY` is set in this dev environment, so every bullet a
+student sees here goes through `templateBullets()`'s deterministic
+fallback -- and it was echoing the student's raw plain-English answer
+almost verbatim (only capitalized), with no "AI-drafted, edit this"
+banner shown (that only appears when `aiAssisted` is true), so a student
+would see a first-person, filler-laden sentence as a finished bullet.
+Verified live via direct `/api/resume-bullets` calls: "I basically just
+stood at the register all day..." produced exactly that as the bullet.
+Added `cleanAnswer()`: strips a leading first-person opener ("I was...",
+"I'd basically..."), scattered filler words (basically/literally/kind
+of/sort of), and "like" used as a casual quantifier ("like 5" -> "5").
+Re-verified same input now returns "Stood at the register all day...".
+A second call with already-clean input confirmed no regression (passed
+through unchanged). This is regex cleanup, not real rewriting -- it
+removes the most obviously unedited tells, nothing more.
+
+`src/app/api/resume-bullets/route.ts`.
+
+## 15 Sep 2026 -- ATS Check, Text Preview, real .docx export
+
+Direct feedback: "Full functionality like the replit has" -- a full audit
+of the reference's Resume Builder against ours (screen by screen, every
+button) found the whole "ATS Check" system missing (only two "ATS-
+friendly" copy strings existed, no actual feature), plus Text Preview and
+real .docx export were also gaps (the latter already flagged, never
+built, in the original project plan).
+
+**ATS Check** (`src/app/api/resume-ats-check/route.ts`, new): a resume-
+quality rating (0-100, letter grade, 7-category breakdown), a job-match
+breakdown (verified/possible/gaps + keyword-by-keyword), an ATS
+readability checklist, and missing qualifications -- matching the
+reference's own four-part panel. Split by what needs judgment vs what's
+just checkable: the readability checklist and 4 of 7 quality categories
+(completeness, skills, education, ATS formatting) are computed directly
+from the resume data, no AI, no fabrication risk. Only the genuinely
+subjective pieces (experience/bullet quality, job-match reasoning,
+keyword verification) go through Claude when a key is present, with a
+heuristic fallback otherwise -- same shape as the other two AI routes.
+Persisted on the `ResumeVersion` (`atsCheck` field, `src/lib/resume.ts`)
+so reopening it is instant; a fingerprint of the resume's actual content
+(`ATSCheckPanel.tsx`'s `fingerprintFor`) detects staleness and shows a
+"resume changed, re-run" banner over the last real result rather than
+either a fake-fresh stale result or a blank slate.
+
+**Text Preview** (`TextPreviewModal.tsx`, new): resume flattened to plain
+text straight from the data model, not scraped off the visual document.
+
+**Real .docx export** (`ExportChecklistModal.tsx`, new): added the `docx`
+npm package. A 6-item honesty-confirmation checklist (matching the
+reference) gates both "Export PDF" (still `window.print()`) and
+"Download .docx" (`Packer.toBlob()`, US Letter page size, real headings/
+bullets, no template layout -- the doc-generation library has no notion
+of the 4 visual templates, so this is one consistent single-column
+export regardless of which template the version uses).
+
+All three wired into `DocumentScreen`'s toolbar in
+`ResumeBuilderExperience.tsx` (ATS Check only shown when a saved
+`ResumeVersion` exists, matching the reference: it's a finished-resume
+feature, not available mid-wizard). `PrintResumeButton` deleted from
+`ResumeDocument.tsx` -- fully superseded by the new Export flow, no
+remaining callers.
+
+Direct feedback mid-build: keep the actual resume content's own writing
+level as-is (still professional, not simplified) -- "8th grader reading
+level" was specifically for the ATS Check explanatory copy, so students
+understand what the scores/checklist mean, not for resume bullets
+themselves. Trimmed every ATS Check/Text Preview/Export string to that
+bar; the AI prompt for the subjective fields now explicitly asks for it
+too.
+
+Two real bugs caught and fixed during live verification (not just
+written and assumed correct):
+1. The stale-check banner's very first version replaced the whole
+   screen with the "Run ATS Check" empty state instead of showing the
+   last real result -- `result` state was seeded from `cached` (null
+   when stale) instead of `version.atsCheck` (the actual last result,
+   stale or not).
+2. The stale banner didn't clear after a successful re-run -- `stale`
+   was a `useState` computed once at mount and never updated; added
+   `setStale(false)` on a successful run.
+
+Verified live end-to-end: ran ATS Check (real scores, breakdown sums to
+total, strengths/improvements/job-match/readability/missing-quals all
+populated correctly) on both a resume with a job description and one
+without; confirmed persistence across reload; confirmed staleness
+detection and the two bugs above by deliberately editing skills between
+runs; Text Preview matches the data exactly; Export checklist gates both
+buttons until all 6 boxes are checked; the .docx download was captured
+and confirmed to produce a real blob (`Packer.toBlob` succeeded, correct
+filename) rather than just checking the button didn't throw. ESLint +
+`tsc --noEmit -p .` clean project-wide (the two pre-existing errors in
+`src/app/gate/page.tsx` and `ConnectExperience.tsx` are untouched by
+this work).
+
+**Not built** (scoped out for time, not forgotten): the reference's
+per-section inline "AI regenerate" / "Hide" toggles on the finished
+document, and the "Approve" status flag. Neither was named directly by
+the ATS Check ask; flag if still wanted.
+
+`src/lib/resume.ts`, `src/app/api/resume-ats-check/route.ts` (new),
+`src/components/resume/ATSCheckPanel.tsx` (new),
+`src/components/resume/TextPreviewModal.tsx` (new),
+`src/components/resume/ExportChecklistModal.tsx` (new),
+`src/components/resume/ResumeBuilderExperience.tsx`,
+`src/components/resume/ResumeDocument.tsx`,
+`src/components/resume/TailorScreen.tsx`, `package.json` (added `docx`).
