@@ -120,9 +120,13 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
 
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<TailorAnalysis | null>(null);
+  const [analyzedFor, setAnalyzedFor] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [analyzeError, setAnalyzeError] = useState(false);
   const [added, setAdded] = useState<Set<string>>(new Set());
+
+  const matchKey = `${draft.jobDescription}|${draft.targetPosition}|${draft.targetCompany}`;
+  const isStale = analysis !== null && analyzedFor !== matchKey;
 
   const toggleEducation = (id: string) => setDraft((d) => ({ ...d, educationIds: d.educationIds.includes(id) ? d.educationIds.filter((x) => x !== id) : [...d.educationIds, id] }));
   const toggleExperience = (id: string) => setDraft((d) => ({ ...d, experienceIds: d.experienceIds.includes(id) ? d.experienceIds.filter((x) => x !== id) : [...d.experienceIds, id] }));
@@ -152,6 +156,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
       const data = (await res.json()) as { ok: boolean } & Partial<TailorAnalysis>;
       if (data.ok && typeof data.matchScore === "number") {
         setAnalysis({ matchScore: data.matchScore, matchLabel: data.matchLabel ?? "", qualityScore: data.qualityScore ?? 0, suggestions: data.suggestions ?? [], gaps: data.gaps ?? [], improvements: data.improvements ?? [] });
+        setAnalyzedFor(matchKey);
         setShowResults(true);
       } else {
         setAnalyzeError(true);
@@ -276,12 +281,12 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
         {draft.jobDescription.trim().length > 0 && (
           <button
             type="button"
-            onClick={analysis ? () => setShowResults(true) : findMatchingSkills}
+            onClick={analysis && !isStale ? () => setShowResults(true) : findMatchingSkills}
             disabled={analyzing}
             className="dm-tap flex min-h-[44px] cursor-pointer items-center justify-center gap-[8px] self-start rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-70"
             style={{ background: "var(--primary)" }}
           >
-            <Sparkles className="h-4 w-4" aria-hidden /> {analyzing ? "Finding matches…" : analysis ? "View Results" : "Find Matching Skills"}
+            <Sparkles className="h-4 w-4" aria-hidden /> {analyzing ? "Finding matches…" : analysis && !isStale ? "View Results" : "Find Matching Skills"}
           </button>
         )}
         {analyzeError && <p className="text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t match this job. You can still save without it.</p>}
