@@ -9545,3 +9545,24 @@ the draft intact, "View Results" reopened without a second API call.
 ESLint + `tsc --noEmit -p .` clean on `TailorScreen.tsx`.
 
 `src/components/resume/TailorScreen.tsx`.
+
+## 15 Sep 2026 -- Bullet-generation fallback no longer echoes raw filler
+
+Direct feedback: make sure AI-generated bullets sound relevant/logical.
+No `ANTHROPIC_API_KEY` is set in this dev environment, so every bullet a
+student sees here goes through `templateBullets()`'s deterministic
+fallback -- and it was echoing the student's raw plain-English answer
+almost verbatim (only capitalized), with no "AI-drafted, edit this"
+banner shown (that only appears when `aiAssisted` is true), so a student
+would see a first-person, filler-laden sentence as a finished bullet.
+Verified live via direct `/api/resume-bullets` calls: "I basically just
+stood at the register all day..." produced exactly that as the bullet.
+Added `cleanAnswer()`: strips a leading first-person opener ("I was...",
+"I'd basically..."), scattered filler words (basically/literally/kind
+of/sort of), and "like" used as a casual quantifier ("like 5" -> "5").
+Re-verified same input now returns "Stood at the register all day...".
+A second call with already-clean input confirmed no regression (passed
+through unchanged). This is regex cleanup, not real rewriting -- it
+removes the most obviously unedited tells, nothing more.
+
+`src/app/api/resume-bullets/route.ts`.
