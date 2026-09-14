@@ -8816,3 +8816,29 @@ race/gender presumption either way: "First Generation Professionals" (kept
 INTEREST", not only protected-class identity). Added a note directly on the
 `employeeGroups` field in data.ts so a future seed doesn't repeat this.
 Pushed to main once verified live.
+
+**Follow-up 3:** "make sure all professional profiles have realistic
+relevant employee resource groups" -- populated `employeeGroups` for the
+remaining 38 pros (data.ts), not just `pro-johnson`. Same non-demographic
+policy as the correction above, applied consistently rather than as a
+one-off: every group is professional/interest-based (First Generation
+Professionals, Career Changers Network, New Professionals Network,
+Sustainability Network, Volunteers Network, Toastmasters Club), picked per
+pro from something already stated in their own `story`/`journey`/
+`education` text (self-taught, community college, career switch, first in
+family, etc.), never from a guess at race/gender/orientation. No pro got a
+demographic-identity ERG in this pass.
+
+**Follow-up 4:** "add more companies per community so it looks like a
+healthy batch" (General 13, Finance 8, Technology 7, Healthcare 9, Creative
+8, counts given directly). Expanded each community's `professionalsFrom`
+in data.ts to those exact counts -- kept each array's original first 3-5
+companies in place (those are the ones with real logo marks, shown on the
+card; `CompanyMark`/`CompanyChip` in primitives.tsx already fall back to
+plain text for a name with no logo asset, confirmed in the code, so the
+new additions render safely either way) and appended real, field-
+appropriate companies, several already pros' own employers elsewhere in
+data.ts for consistency (Genentech, CDC Foundation, HSBC, Spotify, etc.).
+Browser-verified live at `/connect`: all five cards show the exact
+requested counts. Pushed to main with explicit authorization ("push this
+first").
