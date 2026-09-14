@@ -5,7 +5,7 @@ import { Check, Plus, Sparkles } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { addSkill, makeId, upsertVersion, type ResumeData, type ResumeSkills, type ResumeVersion } from "@/lib/resume";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
-import { CARD_CLASS, Field, INSET, ResumeModal, TextInput, WizardFooter } from "./ui";
+import { CARD_CLASS, Field, INSET, ResumeModal, selectedRowStyle, TextInput, WizardFooter } from "./ui";
 
 const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "", targetPosition: "", targetCompany: "", template: DEFAULT_RESUME_TEMPLATE, atsCheck: null };
 
@@ -30,7 +30,7 @@ function TemplatePicker({ value, onChange }: { value: string; onChange: (id: str
             type="button"
             onClick={() => onChange(t.id)}
             className="dm-tap flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left"
-            style={selected ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 10%, transparent)" } : { borderColor: "var(--glass-border)" }}
+            style={selectedRowStyle(selected)}
           >
             <span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />
             <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
@@ -50,7 +50,7 @@ function PickRow({ label, meta, checked, onToggle }: { label: string; meta?: str
       type="button"
       onClick={onToggle}
       className="dm-tap flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-left"
-      style={checked ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 10%, transparent)" } : { borderColor: "var(--glass-border)" }}
+      style={selectedRowStyle(checked)}
     >
       <span
         className="flex size-5 flex-none items-center justify-center rounded-[6px] border"

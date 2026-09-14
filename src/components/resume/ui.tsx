@@ -10,12 +10,23 @@ import { Portal } from "@/components/profile/CareerReport";
 // _LABEL/_CARD, ProfileExperience.tsx:2221-2225) rather than imported, since
 // those are file-local consts in a 2500+ line file. Same look, independent
 // module.
-export const FIELD_CLASS = "min-h-[44px] w-full rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]";
+const FIELD_CLASS = "min-h-[44px] w-full rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]";
 export const FIELD_STYLE: CSSProperties = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" };
-export const LABEL_CLASS = "text-[12px] font-bold tracking-[0.06em] uppercase";
+const LABEL_CLASS = "text-[12px] font-bold tracking-[0.06em] uppercase";
 export const CARD_CLASS = "flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]";
 export const INSET = { background: "var(--inset-surface)", borderColor: "var(--inset-border)" } as const;
 export const DANGER = "var(--color-feedback-error, #ff6b6b)";
+/** Shared disclaimer wherever a check/preview could otherwise read as a
+ *  promise (ATS Check, Text Preview). One sentence, one source, so it
+ *  can't drift into two different claims. */
+export const NOT_A_GUARANTEE_NOTE = "Not a guarantee every system reads it the same way.";
+/** The selected/checked border + tint every pick-row and template swatch
+ *  in this feature uses -- same object literal was hand-copied three
+ *  times (TemplateGallery, TailorScreen x2), which risked one drifting
+ *  from the others. */
+export function selectedRowStyle(active: boolean): CSSProperties {
+  return active ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 10%, transparent)" } : { borderColor: "var(--glass-border)" };
+}
 
 export function Field({ label, htmlFor, children, required }: { label: string; htmlFor: string; children: ReactNode; required?: boolean }) {
   return (
@@ -58,7 +69,7 @@ export function SelectInput({ id, value, onChange, children }: { id: string; val
 // reused here labeled "RESUME" instead of "BUILD" rather than re-derived.
 // ---------------------------------------------------------------------------
 
-export const WIZARD_STEPS = ["Personal Information", "Education", "Experience & Activities", "Skills", "Certifications", "Review"] as const;
+const WIZARD_STEPS = ["Personal Information", "Education", "Experience & Activities", "Skills", "Certifications", "Review"] as const;
 
 export function WizardProgress({ stepIndex }: { stepIndex: number }) {
   const percent = Math.round(((stepIndex + 1) / WIZARD_STEPS.length) * 100);
@@ -106,7 +117,7 @@ export function WizardFooter({ onBack, onNext, nextLabel = "Save & Next", nextDi
 // manually closed) and is positioned above the sticky footer, never over it.
 // ---------------------------------------------------------------------------
 
-export function ResumeToast({ message, onClose }: { message: string; onClose: () => void }) {
+function ResumeToast({ message, onClose }: { message: string; onClose: () => void }) {
   useEffect(() => {
     const t = window.setTimeout(onClose, 2500);
     return () => window.clearTimeout(t);

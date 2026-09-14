@@ -6,6 +6,7 @@ import { Portal } from "@/components/profile/CareerReport";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { RESUME_TEMPLATES, RESUME_TEMPLATE_GALLERY_DREAMY, SAMPLE_RESUME_DATA, type ResumeTemplateId } from "./data";
 import { ResumeDocument } from "./ResumeDocument";
+import { selectedRowStyle } from "./ui";
 
 function UseTemplateButton({ onClick }: { onClick: () => void }) {
   return (
@@ -30,7 +31,7 @@ function TemplateRow({ template, active, onFocus }: { template: (typeof RESUME_T
       type="button"
       onClick={onFocus}
       className="dm-tap flex cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[10px] text-left"
-      style={active ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 10%, transparent)" } : { borderColor: "var(--glass-border)" }}
+      style={selectedRowStyle(active)}
     >
       <span className="size-7 flex-none rounded-full border" style={{ background: template.accent, borderColor: "var(--glass-border)" }} aria-hidden />
       <span className="flex items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
