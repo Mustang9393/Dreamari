@@ -4,15 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { ProgressSpark } from "@/components/build/ProgressSpark";
 
 // The Build flow's progress bar, extracted so every bar in the app can have the
-// same life: a fill that actually transitions, a hand-drawn spark that sweeps the
+// same life: a fill that actually transitions, a particle discharge that sweeps the
 // newly-filled span when the value grows, and the fill itself flickering/glowing
 // in the SAME color as that spark while it fires. Plain `width: X%` bars had
 // none of this (and several had no transition at all) -- see the Sep 2 audit.
 //
-// Deliberately quiet by default outside Build: `idle` (the occasional unprompted
-// flicker) is opt-in, so a screen with several bars (Home's activity cards) never
-// has sparks going off at random. Growth still sparks everywhere.
-//
+// Idle nudges share a cooldown so a screen full of bars stays quiet.
+// User activity postpones them; only visible, incomplete bars participate.
 // Render output must be deterministic between server and client: `glow` is a
 // plain CSS color string used as-is for the resting shadow. Anything that reads
 // computed styles (`glowAt`) only runs inside effects, for the spark and the
@@ -24,6 +22,7 @@ import { ProgressSpark } from "@/components/build/ProgressSpark";
 // re-celebrate on Previous. `memoryKey` keeps the last shown percent across
 // remounts (module-level, so it survives), only mutated inside the timer that
 // actually lands, which keeps it idempotent under StrictMode's double-invoke.
+let lastIdleSpark = 0;
 const lastShown = new Map<string, number>();
 
 export function SparkBar({
@@ -34,7 +33,7 @@ export function SparkBar({
   height = 4,
   track = "var(--color-glass-surface-2)",
   min = 0,
-  idle = false,
+  idle = true,
   memoryKey,
   className = "",
 }: {
@@ -54,15 +53,15 @@ export function SparkBar({
   /** Visual floor so the bar never opens on a literally empty track. */
   min?: number;
   /** Occasional unprompted flicker in place, so the bar doesn't read as dead
-      between advances. Build only, by default. */
+      between advances. Enabled by default; pass false to opt out. */
   idle?: boolean;
   memoryKey?: string;
   className?: string;
 }) {
-  const shown = Math.max(min, Math.min(100, percent));
+  const shown = Math.max(0, Math.min(100, Math.max(min, Number.isFinite(percent) ? percent : 0)));
   const remembered = memoryKey ? lastShown.get(memoryKey) : undefined;
   const [displayPercent, setDisplayPercent] = useState(remembered ?? shown);
-  const [comet, setComet] = useState<{ from: number; to: number; nonce: number } | null>(null);
+  const [comet, setComet] = useState<{ from: number; to: number; nonce: number; color: string } | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const fillRef = useRef<HTMLDivElement | null>(null);
 
@@ -72,9 +71,12 @@ export function SparkBar({
     const from = memoryKey ? (lastShown.get(memoryKey) ?? shown) : displayPercent;
     const growing = shown > from;
     const timer = setTimeout(() => {
+      const trackWidth = trackRef.current?.getBoundingClientRect().width ?? 0;
+      const visibleFrom = trackWidth && fillRef.current
+        ? fillRef.current.getBoundingClientRect().width / trackWidth * 100 : from;
       if (memoryKey) lastShown.set(memoryKey, shown);
       setDisplayPercent(shown);
-      if (growing) setComet((c) => ({ from, to: shown, nonce: (c?.nonce ?? 0) + 1 }));
+      if (growing) setComet((c) => ({ from: visibleFrom, to: shown, nonce: (c?.nonce ?? 0) + 1, color: glowAt ? glowAt(shown / 100) : glow }));
     }, 0);
     return () => clearTimeout(timer);
     // displayPercent is intentionally not a dep: it's the "from" snapshot for THIS
@@ -83,23 +85,39 @@ export function SparkBar({
   }, [shown, memoryKey]);
 
   useEffect(() => {
-    if (!idle) return;
+    if (!idle || shown <= 0 || shown >= 100) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let lastActivity = Date.now();
     let timer: ReturnType<typeof setTimeout>;
+    const activity = () => { lastActivity = Date.now(); };
+    const events = ["pointerdown", "pointermove", "keydown", "scroll"] as const;
+    events.forEach(event => window.addEventListener(event, activity, { passive: true }));
+    document.addEventListener("visibilitychange", activity);
     function scheduleIdle() {
-      // 7-15s: spaced out enough not to read as a loop, per direct feedback.
       timer = setTimeout(() => {
-        setComet((c) => ({ from: shown, to: shown, nonce: (c?.nonce ?? 0) + 1 }));
+        const now = Date.now();
+        const bounds = trackRef.current?.getBoundingClientRect();
+        const visible = bounds && bounds.width > 0 && bounds.height > 0
+          && bounds.bottom > 0 && bounds.top < window.innerHeight
+          && bounds.right > 0 && bounds.left < window.innerWidth;
+        if (!document.hidden && !motion.matches && visible
+          && now - lastActivity >= 10000 && now - lastIdleSpark >= 10000) {
+          lastIdleSpark = now;
+          setComet((c) => ({ from: shown, to: shown, nonce: (c?.nonce ?? 0) + 1,
+            color: glowAt ? glowAt(shown / 100) : glow }));
+        }
         scheduleIdle();
-      }, 7000 + Math.random() * 8000);
+      }, 10000 + Math.random() * 8000);
     }
     scheduleIdle();
-    return () => clearTimeout(timer);
-  }, [idle, shown]);
+    return () => {
+      clearTimeout(timer);
+      events.forEach(event => window.removeEventListener(event, activity));
+      document.removeEventListener("visibilitychange", activity);
+    };
+  }, [idle, shown, glow, glowAt]);
 
   const restingShadow = `0 0 10px 0 color-mix(in srgb, ${glow} 55%, transparent)`;
-
-  // Client-only (effects/spark): the celebrated point's color.
-  const [sparkColor, setSparkColor] = useState<string | null>(null);
 
   useEffect(() => {
     // The fill flickers in step with the spark (same nonce, same color): an irregular
@@ -107,24 +125,22 @@ export function SparkBar({
     // the same electricity rather than a calmer animation sitting next to it. Web
     // Animations API so it restarts cleanly per nonce and reverts to the inline
     // styles when done without any manual reset.
-    if (!comet || !fillRef.current) return;
-    const glowColor = glowAt ? glowAt(comet.to / 100) : glow;
-    const timer = setTimeout(() => setSparkColor(glowColor), 0);
+    if (!comet || comet.from === comet.to || !fillRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const glowColor = comet.color;
     const glowShadow = (spread: number, blur: number) => `0 0 ${blur}px ${spread}px ${glowColor}`;
     const anim = fillRef.current.animate(
       [
         { filter: "brightness(1) saturate(1)", boxShadow: restingShadow, offset: 0 },
-        { filter: "brightness(1.65) saturate(1.4)", boxShadow: glowShadow(4, 24), offset: 0.12 },
+        { filter: "brightness(1.25) saturate(1.4)", boxShadow: glowShadow(4, 24), offset: 0.12 },
         { filter: "brightness(1.1) saturate(1.1)", boxShadow: glowShadow(1, 12), offset: 0.24 },
-        { filter: "brightness(1.55) saturate(1.35)", boxShadow: glowShadow(3, 20), offset: 0.4 },
+        { filter: "brightness(1.18) saturate(1.35)", boxShadow: glowShadow(3, 20), offset: 0.4 },
         { filter: "brightness(1.05) saturate(1.05)", boxShadow: glowShadow(1, 10), offset: 0.55 },
-        { filter: "brightness(1.4) saturate(1.25)", boxShadow: glowShadow(2, 16), offset: 0.7 },
+        { filter: "brightness(1.12) saturate(1.25)", boxShadow: glowShadow(2, 16), offset: 0.7 },
         { filter: "brightness(1) saturate(1)", boxShadow: restingShadow, offset: 1 },
       ],
       { duration: 700, easing: "ease-out" },
     );
     return () => {
-      clearTimeout(timer);
       anim.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,11 +151,11 @@ export function SparkBar({
       <div className="w-full overflow-hidden rounded-full" style={{ height, background: track }}>
         <div
           ref={fillRef}
-          className="h-full rounded-full transition-[width] duration-700 ease-out"
+          className="h-full rounded-full transition-[width] duration-700 ease-[cubic-bezier(0.33,1,0.68,1)] motion-reduce:transition-none"
           style={{ width: `${displayPercent}%`, background: fill, boxShadow: restingShadow }}
         />
       </div>
-      {comet && <ProgressSpark key={comet.nonce} trackRef={trackRef} fromPercent={comet.from} toPercent={comet.to} color={sparkColor ?? glow} />}
+      {comet && <ProgressSpark key={comet.nonce} trackRef={trackRef} fromPercent={comet.from} toPercent={comet.to} color={comet.color} />}
     </div>
   );
 }
