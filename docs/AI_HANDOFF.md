@@ -8938,3 +8938,46 @@ with the identical `track()`/`data-field` pattern (where/title ->
 `:bullet:N`) but not separately re-verified live this pass -- same code
 path as Education, already proven correct, but worth a spot check next
 session.
+
+### 15 Sept 2026 — College Details page: simplification pass
+
+Relayed from Slack, a straightforward copy/hierarchy trim of
+`CollegeDetailExperience.tsx` (design notes: `docs/COLLEGE_LOOKUP_AUDIT.md`
+§7, added this same round):
+
+1. Header: removed "Worth knowing" entirely; added Apply/Financial Aid as
+   two more header actions alongside Website (`EXTRA[slug].links.apply`/
+   `.aid`, already-real data that used to live only inside the Admissions/
+   Cost tabs) -- Financial Aid falls back to the net price calculator link
+   when a school has no dedicated aid page (Princeton, the exact example
+   in the request, is one of these). Apply/Financial Aid render only when
+   that college actually has the link -- no dead buttons. Save unchanged.
+2. Overview -> "Key Facts": renamed from "At a glance", 4 rows (Yearly
+   Cost, Acceptance Rate, Graduation Rate, Undergraduate Population), every
+   explanatory `note` dropped.
+3. Admissions: `d.require`/`d.consider` (already real per-college data, not
+   new) now render as two headed `DotList` groups, "Requirements" and
+   "Other Factors Considered", instead of a "Required"/"Looked at" value on
+   every row. Added a `FACTOR_LABEL` map trimming the copy uniformly across
+   every college's require/consider strings ("Your school record" ->
+   "School record", "Recommendations" -> "Recommendation letter", etc.)
+   rather than hand-editing 30 rows of data.ts. The inline "How to apply"
+   link was removed too -- redundant with the new header Apply button.
+   "Scores of students who got in" -> "Typical Scores", `RangeBar`
+   (progress-bar visualization) swapped for plain `Row`s ("SAT Reading:
+   740–780").
+4. Removed the "See it, then ask someone" folded section entirely (YouTube
+   campus tours + Ask a pro on Connect) -- sent students outside the app,
+   and implied Connect always has a pro from that exact school. `HoverBeam`/
+   `PlayCircle`/`MessagesSquare` imports and the `tourUrl`/`worth` locals
+   removed as unused. `SectionKey` narrowed from `"see" | "sources"` to
+   just `"sources"`.
+
+Browser-verified live at `/colleges/princeton-university` (the exact
+example in the request -- Website + Financial Aid render, Apply correctly
+absent since Princeton has no apply link; Key Facts, Requirements/Other
+Factors Considered, and Typical Scores all match) and
+`/colleges/augustana-university` (has a real apply link, confirms all
+three header actions render together, checked at desktop and mobile
+widths). ESLint + `tsc --noEmit` clean. Pushed to main with explicit
+authorization.
