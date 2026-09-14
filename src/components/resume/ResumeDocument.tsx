@@ -57,7 +57,18 @@ export function ResumeDocument({ resume }: { resume: ResumeData }) {
   const totalSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length;
 
   return (
-    <article data-doc="resume" className="dm-report overflow-hidden rounded-[var(--radius-lg)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-8)]" style={PAPER_STYLE}>
+    <article
+      data-doc="resume"
+      // Fixed US Letter aspect ratio on screen (direct feedback, 14 Sept
+      // 2026: the preview should already be sheet-sized, not grow with
+      // content) -- overflow scrolls inside that fixed box rather than
+      // stretching it. Printing must NOT inherit this: a resume longer than
+      // one page needs to paginate normally, so print: cancels both the
+      // ratio and the scroll clipping and lets the browser's own @page
+      // rule (app.css) do the pagination.
+      className="dm-report aspect-[8.5/11] w-full overflow-y-auto rounded-[var(--radius-lg)] p-[var(--space-5)] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)] sm:p-[var(--space-8)] print:aspect-auto print:h-auto print:overflow-visible"
+      style={PAPER_STYLE}
+    >
       <header data-print-keep className="flex flex-col items-center text-center">
         <h1 className="text-[24px] leading-[28px] font-extrabold tracking-[-0.01em] sm:text-[30px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)", color: "var(--ink)" }}>{fullName}</h1>
         {contactLine.length > 0 && (

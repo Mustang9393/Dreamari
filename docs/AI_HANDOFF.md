@@ -8574,6 +8574,19 @@ title" (direct feedback) was already correct as built: `TailorScreen`'s
 document view's top bar) and `ResumeDocument.tsx` never reads it -- the
 document's own heading always comes from the real Personal Info name.
 
+**Same-day follow-up 4:** "have a full letter size or a4 size document,
+dont make it get bigger with content... The sheet size should already be
+there." `ResumeDocument.tsx`'s `<article>` was sizing itself to content
+(padding only, no fixed dimensions). Added a fixed US Letter aspect ratio
+(`aspect-[8.5/11]`, this being a US high-school context throughout --
+grades, GPA scale, states) with internal scroll for overflow, screen-only:
+`print:aspect-auto print:h-auto print:overflow-visible` cancels it during
+`window.print()`, so a resume that runs past one page still paginates
+through the browser's normal print flow (the existing `@page` rule in
+app.css) instead of getting clipped to a single fixed box. Verified both
+the full document view and the wizard's desktop sidebar preview render as
+a real sheet now regardless of how little or much content is in them.
+
 **Not yet built** (next stages per the original plan): real `.docx` export
 (Print/Save PDF works today via `window.print()`, no doc-generation library
 added yet).
