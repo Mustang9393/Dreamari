@@ -8401,3 +8401,179 @@ live across all six cards -- Private Equity and Software Engineer's heads are
 back in frame, and spot-checked the other four (Investment Banker, Data
 Scientist, Fashion Buyer, Game Designer) to confirm top-anchoring didn't cut
 anything important off the bottom of those instead. Lint/tsc clean.
+
+### 2026-09-14 Resume Builder: wizard, AI bullet generation, full-screen route
+
+Built the real Resume Builder (`docs/handoff/specs/profile-overview.md` had
+only a "Coming soon" placeholder -- confirmed no locked spec, genuinely
+greenfield). Ported from a reference implementation
+(`resume-builder-maishak.replit.app`, reviewed live end-to-end at desktop/
+tablet/mobile): same content, copy, and flow, rebuilt for this design system
+with several reference bugs fixed rather than repeated.
+
+**New files:** `src/lib/resume.ts` (data store, same
+typed-shape/normalize/`useSyncExternalStore` convention as `studentProfile.ts`
+and `picks.ts`); `src/components/resume/{ui,data,wizardSteps,
+ExperienceModal,ResumeExperience,ResumeBuilderExperience}.tsx`;
+`src/app/api/resume-bullets/route.ts` (first AI-backed feature in this repo --
+calls Claude if `ANTHROPIC_API_KEY` is set, else a client-agnostic template
+fallback, same graceful-degradation shape as `demo-request/route.ts`); new
+route `src/app/resume-builder/page.tsx`.
+
+**Structural change from the reference:** the reference spreads Resume
+Builder / Saved Resumes / Choose & Tailor across 3 top-level app tabs, which
+is what left Choose & Tailor unreachable from its own mobile nav. Collapsed
+into states of one Resume tab instead of separate nav tabs.
+
+**Then, direct feedback once it was live:** "the builder should open into its
+own window or screen rather than sitting under the my profile tabs for the
+whole flow" -- the 6-step wizard was originally an internal view inside
+`ResumeExperience.tsx`, squeezed under Profile's header + tab row (worst on
+mobile). Split it out: `ResumeExperience.tsx` is now just the Profile tab's
+compact summary card ("Edit My Info" + a first-visit auto-redirect when the
+store is empty), and the actual wizard moved to `ResumeBuilderExperience.tsx`
+at its own route, `/resume-builder` -- same pattern as Build's own full-screen
+`/flow` route (bare `<main>`, `marketing-v2 themeable` wrapper for design
+tokens, no chrome from the host page). A close (X) button and "Finish" both
+return to `/profile?tab=resume`; nothing is lost by leaving mid-wizard since
+every field already writes straight to the shared store as you type.
+
+**Two real bugs caught live, not assumed fixed:**
+1. `PersonalInfoStep`'s field setter rebuilt the whole profile object from
+   the render-time `p` closure (`writeResume({ profile: { ...p, ...patch }
+   })`). Firing multiple field writes in quick succession (confirmed via
+   direct localStorage inspection) let a later write's stale closure clobber
+   an earlier field's value. Fixed by reading `readResume().profile` fresh
+   inside the setter instead of the closure -- same fix applied to the
+   Skills category writer, the other spot with the same pattern.
+2. `ResumeModal`/`ResumeToast` originally used raw `createPortal(...,
+   document.body)`. Every `--space-*`, `--radius-*`, `--card`, `--primary`,
+   etc. token is scoped to the `.marketing-v2.themeable` wrapper class, not
+   `:root` -- confirmed by walking the DOM chain live (`--space-3` resolves
+   inside the wrapper, empty string on `document.body` itself). Portaling
+   straight to `document.body` escapes that wrapper entirely, so every
+   spacing/color token in the portaled modal was undefined: gaps collapsed
+   (buttons ran together, "CancelSave"), and colors fell back to raw
+   unstyled browser defaults. This exact class of bug already has a fix
+   living in the codebase -- `Portal` in `CareerReport.tsx`, whose own
+   comment explains precisely this (host div carries `marketing-v2
+   themeable` for exactly this reason). Reused that `Portal` instead of
+   rolling a second one; verified live before and after.
+
+AI bullet generation: no `ANTHROPIC_API_KEY` configured anywhere in this env,
+so every live test exercised the template fallback -- first pass produced
+grammatically doubled bullets ("Assisted sorted donated supplies...", a verb
+stacked in front of an answer that was already phrased as a verb phrase).
+Rewrote the template to use the day-to-day answer directly as the lead bullet
+rather than prefixing a second verb, and reworded the tools/team/proud lines
+to read as complete sentences. Not proofread against the real Claude path
+(no key here to test it), but the request/response shape matches
+`demo-request/route.ts`'s existing external-call pattern.
+
+Verified live via the dev server at desktop, tablet (768px -- confirmed a
+real `sm:grid-cols-2` reflow, not a shrunk desktop clone), and mobile
+(375px -- single column, sticky footer clear of the bottom nav now that the
+wizard isn't nested under it). Full wizard run through Personal Info ->
+Education -> Experience (both the AI-generate path and the "write my own
+lines" escape hatch) -> Skills -> Certifications -> Review (checklist
+confirmed live-computed off real data, not a tracked flag) -> Finish, with
+the resume-home summary card updating correctly after. Lint/tsc clean on
+every touched file.
+
+**Same-day follow-up:** "I meant the live preview of the resume like in the
+replit" -- the wizard collected data but never rendered it as an actual
+resume document (that was still-unbuilt Stage 5 of the plan). Added
+`ResumeDocument.tsx`: a real formatted resume (centered name/contact header,
+underlined section labels, right-aligned dates, bullet lists), reusing the
+app's existing printable-document system wholesale (`.dm-report` -- the same
+class Career Report's export already uses, dark-on-screen/forced
+black-on-white when printed) rather than inventing new colors. Wired into
+`ResumeBuilderExperience.tsx` as a `showDocument` view: Review's "Finish" now
+lands there instead of returning straight to Profile, and a new "Preview
+Resume" button on the Resume tab's summary card (`ResumeExperience.tsx`)
+jumps to it directly via `/resume-builder?view=document`. Added a working
+"Print / Save PDF" button (`window.print()`, same call Career Report's own
+export button makes) -- real `.docx` generation is still the separate later
+stage, but this gives a genuine, working way to get the resume out today.
+Verified live at both the default dark theme and forced-light (what print
+uses).
+
+**Same-day follow-up 2:** three more rounds of direct feedback once Choose &
+Tailor and multiple saved resumes came up:
+
+1. "the builder should open into its own window or screen" (already covered
+   above) then "I dont see any create resume flow happening. Lets please
+   follow the replits functionality" and "I should be able to create and
+   re-create resumes as much as I want and then tailor them as well... do we
+   see a live real time updated preview of the resume on the side like in
+   replit? We should have it ideally at least for desktop." Built the actual
+   missing pieces: `TailorScreen.tsx` (name a resume, pick which education/
+   experience entries to include, optional job description) wired into
+   `ResumeBuilderExperience.tsx` as `?view=tailor`; a per-version filtered
+   document view (`?view=version&version=<id>`, via new `resumeForVersion()`
+   helper in `resume.ts`); `ResumeExperience.tsx`'s Resume tab now lists
+   every saved version ("Your Resumes") with Create/Open/Edit/Delete, not
+   just a single static summary card. Added a live split-preview to the
+   wizard itself at `lg:` breakpoint -- the same `ResumeDocument` the
+   finished view uses, fed by the same reactive store, so it updates as the
+   student types, exactly matching the reference's own live-preview pattern.
+2. "Its says no resumes yet but there is an alex chen resume right there?"
+   -- real gap, not a misunderstanding: finishing the wizard only opened a
+   preview, it never actually saved anything into the versions list, so
+   "Your Resumes" stayed empty even right after finishing. Fixed: the
+   wizard's Review "Finish" now creates a real named version on the first
+   finish (named from the student's own name, all current education/
+   experience included) and lands on ITS document view, so it shows up in
+   "Your Resumes" immediately. Later finishes just open the full preview,
+   since by then there's already at least one saved resume to open or edit.
+3. "why alex chen, match it to the users name please" -- "Alex Chen" was my
+   own test input while verifying the above, not anything the app
+   generates; flagged because `prefillFromStudentProfile()` was blanking
+   firstName/lastName on every fresh entry rather than using the app's own
+   demo identity. Now prefills from `STUDENT.name` (`profile/data.ts`,
+   "Jordan Rivera" -- the same name shown in the Profile header everywhere
+   else), split into first/last, so a fresh resume opens already matching
+   who the app says is logged in instead of a blank or mismatched name.
+
+**Real bug caught mid-testing, not a tool artifact:** the Resume tab's
+one-time "is this empty, should I redirect to the wizard" check
+(`ResumeExperience.tsx`) read `resume` from the `useSyncExternalStore` hook's
+closure inside a `useEffect`. On a fresh client-side hydration, that closure
+can still hold the server snapshot (always empty) at the moment the effect
+first fires, even though the real localStorage data is already correct --
+so the check saw "empty," ran `prefillFromStudentProfile()`, and silently
+wiped a student's real first/last name on every single visit to the Resume
+tab, even ones long after the wizard had been completed. Confirmed by
+watching real saved data (name + education + experience) disappear on
+nothing but a plain navigation back to `/profile?tab=resume`. Fixed by
+reading `readResume()` fresh inside the effect instead of the closure
+variable -- verified with several navigate-away-and-back round trips
+afterward, data holds.
+
+Also removed every em dash from Resume Builder's own copy and generated
+resume text (direct feedback, 14 Sept 2026, third time this rule's been
+corrected across sessions -- see the standing "no em dashes" instruction):
+`ResumeDocument.tsx`'s "Title — Company" became "Title at Company",
+certification "Name — Issuer" became "Name, Issuer", and a few wizard/step
+copy lines were rephrased into two sentences.
+
+**Same-day follow-up 3:** "do we also have a zero resume state where it
+empty? That should ideally be the default view unless i create a resume."
+Replaced the auto-redirect-into-the-wizard-on-first-visit behavior (the
+exact effect that carried the earlier name-wiping hydration bug) with an
+explicit zero state: `ResumeExperience.tsx` now renders a plain "You haven't
+created a resume yet" card with a single "Create My Resume" CTA whenever
+`resume.versions.length === 0`, and only that click (not a silent effect)
+prefills the student's name and pushes to `/resume-builder`. The summary
+card + "Your Resumes" list only take over once a resume actually exists.
+This also fully removes the class of bug the hydration-race fix above was
+patching, since there's no more auto-triggered effect to race in the first
+place. Confirmed separately that "name your resumes, not the actual resume
+title" (direct feedback) was already correct as built: `TailorScreen`'s
+"Resume Name" field is purely organizational (the "Your Resumes" list, the
+document view's top bar) and `ResumeDocument.tsx` never reads it -- the
+document's own heading always comes from the real Personal Info name.
+
+**Not yet built** (next stages per the original plan): real `.docx` export
+(Print/Save PDF works today via `window.print()`, no doc-generation library
+added yet).

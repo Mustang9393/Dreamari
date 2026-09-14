@@ -27,6 +27,7 @@ import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, 
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import { EventStubs } from "./EventStubs";
+import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
 import {
   ACADEMIC_RECORD,
@@ -685,7 +686,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         )}
         {tab === "resume" && (
           <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume" className="flex flex-col gap-[var(--space-4)]">
-            <ResumeView />
+            <ResumeExperience />
             {/* Same bridge-between-features banner as Top Three -> Play
                (direct feedback, 8 Sept 2026): a resume is a dead end on its
                own, so the obvious next step points at Connect. */}
@@ -2444,18 +2445,6 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
   );
 }
 
-function ResumeView() {
-  // Just the name and the state until the feature is real (direct feedback,
-  // 5 Sept 2026): no explanation, no steps, no disabled button.
-  return (
-    <section id="resume" className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={INSET}>
-      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
-        <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Resume Builder</h2>
-        <span className="rounded-[var(--radius-sm)] px-[10px] py-[3px] text-[12px] leading-[16px] font-bold tracking-[0.06em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--accent-subtle)" }}>Coming soon</span>
-      </div>
-    </section>
-  );
-}
 
 // Sharing moved into the Career Report itself: the Aug 29 doc makes Share a
 // tab on top of the report (see CareerReport.tsx), so the old ShareSheet
