@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Expand, Maximize2, Minimize2, Minus, Plus, X } from "lucide-react";
+import { Expand, Maximize2, Minimize2, Minus, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { ResumeData } from "@/lib/resume";
 import { Portal } from "@/components/profile/CareerReport";
@@ -662,20 +662,6 @@ export function ResumeDocument({ resume, templateId = "classic", cropped, focusS
         <ResumeSheetContent resume={resume} templateId={templateId} />
       </article>
     </>
-  );
-}
-
-export function PrintResumeButton() {
-  return (
-    <button
-      type="button"
-      onClick={() => window.print()}
-      data-print-hide
-      className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[13.5px] font-bold text-white"
-      style={{ background: "var(--primary)" }}
-    >
-      <Download className="h-4 w-4" aria-hidden /> Print / Save PDF
-    </button>
   );
 }
 

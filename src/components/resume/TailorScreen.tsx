@@ -7,7 +7,7 @@ import { addSkill, makeId, upsertVersion, type ResumeData, type ResumeSkills, ty
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
 import { CARD_CLASS, Field, INSET, ResumeModal, TextInput, WizardFooter } from "./ui";
 
-const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "", targetPosition: "", targetCompany: "", template: DEFAULT_RESUME_TEMPLATE };
+const EMPTY_VERSION: ResumeVersion = { id: "", name: "", createdAt: 0, updatedAt: 0, educationIds: [], experienceIds: [], jobDescription: "", targetPosition: "", targetCompany: "", template: DEFAULT_RESUME_TEMPLATE, atsCheck: null };
 
 type SkillCategory = keyof ResumeSkills;
 type SkillSuggestion = { category: SkillCategory; skill: string; reason: string };

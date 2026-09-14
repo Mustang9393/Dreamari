@@ -9566,3 +9566,92 @@ through unchanged). This is regex cleanup, not real rewriting -- it
 removes the most obviously unedited tells, nothing more.
 
 `src/app/api/resume-bullets/route.ts`.
+
+## 15 Sep 2026 -- ATS Check, Text Preview, real .docx export
+
+Direct feedback: "Full functionality like the replit has" -- a full audit
+of the reference's Resume Builder against ours (screen by screen, every
+button) found the whole "ATS Check" system missing (only two "ATS-
+friendly" copy strings existed, no actual feature), plus Text Preview and
+real .docx export were also gaps (the latter already flagged, never
+built, in the original project plan).
+
+**ATS Check** (`src/app/api/resume-ats-check/route.ts`, new): a resume-
+quality rating (0-100, letter grade, 7-category breakdown), a job-match
+breakdown (verified/possible/gaps + keyword-by-keyword), an ATS
+readability checklist, and missing qualifications -- matching the
+reference's own four-part panel. Split by what needs judgment vs what's
+just checkable: the readability checklist and 4 of 7 quality categories
+(completeness, skills, education, ATS formatting) are computed directly
+from the resume data, no AI, no fabrication risk. Only the genuinely
+subjective pieces (experience/bullet quality, job-match reasoning,
+keyword verification) go through Claude when a key is present, with a
+heuristic fallback otherwise -- same shape as the other two AI routes.
+Persisted on the `ResumeVersion` (`atsCheck` field, `src/lib/resume.ts`)
+so reopening it is instant; a fingerprint of the resume's actual content
+(`ATSCheckPanel.tsx`'s `fingerprintFor`) detects staleness and shows a
+"resume changed, re-run" banner over the last real result rather than
+either a fake-fresh stale result or a blank slate.
+
+**Text Preview** (`TextPreviewModal.tsx`, new): resume flattened to plain
+text straight from the data model, not scraped off the visual document.
+
+**Real .docx export** (`ExportChecklistModal.tsx`, new): added the `docx`
+npm package. A 6-item honesty-confirmation checklist (matching the
+reference) gates both "Export PDF" (still `window.print()`) and
+"Download .docx" (`Packer.toBlob()`, US Letter page size, real headings/
+bullets, no template layout -- the doc-generation library has no notion
+of the 4 visual templates, so this is one consistent single-column
+export regardless of which template the version uses).
+
+All three wired into `DocumentScreen`'s toolbar in
+`ResumeBuilderExperience.tsx` (ATS Check only shown when a saved
+`ResumeVersion` exists, matching the reference: it's a finished-resume
+feature, not available mid-wizard). `PrintResumeButton` deleted from
+`ResumeDocument.tsx` -- fully superseded by the new Export flow, no
+remaining callers.
+
+Direct feedback mid-build: keep the actual resume content's own writing
+level as-is (still professional, not simplified) -- "8th grader reading
+level" was specifically for the ATS Check explanatory copy, so students
+understand what the scores/checklist mean, not for resume bullets
+themselves. Trimmed every ATS Check/Text Preview/Export string to that
+bar; the AI prompt for the subjective fields now explicitly asks for it
+too.
+
+Two real bugs caught and fixed during live verification (not just
+written and assumed correct):
+1. The stale-check banner's very first version replaced the whole
+   screen with the "Run ATS Check" empty state instead of showing the
+   last real result -- `result` state was seeded from `cached` (null
+   when stale) instead of `version.atsCheck` (the actual last result,
+   stale or not).
+2. The stale banner didn't clear after a successful re-run -- `stale`
+   was a `useState` computed once at mount and never updated; added
+   `setStale(false)` on a successful run.
+
+Verified live end-to-end: ran ATS Check (real scores, breakdown sums to
+total, strengths/improvements/job-match/readability/missing-quals all
+populated correctly) on both a resume with a job description and one
+without; confirmed persistence across reload; confirmed staleness
+detection and the two bugs above by deliberately editing skills between
+runs; Text Preview matches the data exactly; Export checklist gates both
+buttons until all 6 boxes are checked; the .docx download was captured
+and confirmed to produce a real blob (`Packer.toBlob` succeeded, correct
+filename) rather than just checking the button didn't throw. ESLint +
+`tsc --noEmit -p .` clean project-wide (the two pre-existing errors in
+`src/app/gate/page.tsx` and `ConnectExperience.tsx` are untouched by
+this work).
+
+**Not built** (scoped out for time, not forgotten): the reference's
+per-section inline "AI regenerate" / "Hide" toggles on the finished
+document, and the "Approve" status flag. Neither was named directly by
+the ATS Check ask; flag if still wanted.
+
+`src/lib/resume.ts`, `src/app/api/resume-ats-check/route.ts` (new),
+`src/components/resume/ATSCheckPanel.tsx` (new),
+`src/components/resume/TextPreviewModal.tsx` (new),
+`src/components/resume/ExportChecklistModal.tsx` (new),
+`src/components/resume/ResumeBuilderExperience.tsx`,
+`src/components/resume/ResumeDocument.tsx`,
+`src/components/resume/TailorScreen.tsx`, `package.json` (added `docx`).
