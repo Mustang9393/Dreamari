@@ -7,7 +7,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
-import { BIG, DISPLAY, DotList, Folded, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
+import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
 import { Donut } from "./viz";
@@ -525,8 +525,30 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           </>
         )}
 
-        <Folded id="sources" title="Where these numbers come from" open={open.has("sources")} onToggle={() => toggle("sources")}>
-          <div>
+        {/* A footnote, not a section -- direct feedback: the shared `Folded`
+           card (same treatment as real content sections like "What they
+           actually do") read as large and clickable as everything above
+           it, when this is just a data-sourcing disclosure nobody needs
+           to be pulled toward. Deliberately not reusing `Folded` here (it
+           still renders full-size for its other 5 uses on Career Detail,
+           which are real sections and should stay prominent) -- this is
+           its own small, centered, muted trigger instead. */}
+        <button
+          type="button"
+          aria-expanded={open.has("sources")}
+          aria-controls="sources-panel"
+          onClick={() => toggle("sources")}
+          className="dm-quiet mx-auto mt-[var(--space-6)] flex cursor-pointer items-center gap-[4px] py-[6px]"
+        >
+          <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Where these numbers come from</span>
+          <ChevronDown
+            className="h-3 w-3 flex-none transition-transform duration-200"
+            style={{ transform: open.has("sources") ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }}
+            aria-hidden
+          />
+        </button>
+        {open.has("sources") && (
+          <div id="sources-panel" className="mx-auto w-full max-w-[520px] pb-[var(--space-6)]">
             <Row label="Cost" note="what families paid after grants" value="IPEDS" />
             <Row label="Finish" note="everyone who started, part-time and transfers included" value="IPEDS" />
             <Row label="Pay and debt" note="everyone who went here, not one programme" value="College Scorecard" />
@@ -535,7 +557,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             {d?.partOf && <Row label="Part of" value={d.partOf} tone="muted" last={!d.sample} />}
             {d?.sample && <Row label="Prototype note" note="headline figures are real; detail is sample data until the live feed is wired in" value="Sample" last />}
           </div>
-        </Folded>
+        )}
       </main>
 
       <MobileNav active="Explore" />
