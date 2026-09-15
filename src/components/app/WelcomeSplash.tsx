@@ -58,7 +58,7 @@ const SCENES: Record<SplashSurface, Scene> = {
     cta: "Start Exploring",
   },
   explore: {
-    sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
+    sprite: "/images/dreamy/v2/splash/dreamy-explore.webp",
     tint: ["40, 140, 255", "30, 185, 170"],
     title: "EXPLORE",
     // Two labelled rows, one per half of Explore (direct feedback, 13 Sept
