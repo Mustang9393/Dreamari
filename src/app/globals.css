@@ -543,6 +543,21 @@ body {
   }
 }
 
+/* Dreamy's own idle motion (DreamyGuide.tsx) -- a small breathing bob, not
+   the big signup-page cloud-float above (direct feedback, 16 Sept 2026:
+   "it doesnt have to float so high and low, just a little bit... like
+   breathing"). Kept separate from cloud-float so this doesn't also shrink
+   the signup page's own cloud. */
+@keyframes dreamy-breathe {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 /* ── Landing page: animated background blobs ── */
 @keyframes blob1 {
   0%,

@@ -97,7 +97,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
           className={`absolute rounded-full ${compact ? "inset-[-35%]" : "inset-[-90%]"}`}
           style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 30%, transparent) 0%, color-mix(in srgb, var(--color-accent-purple) 9%, transparent) 42%, transparent 64%)" }}
         />
-        <div className={`absolute inset-0 ${wiggling ? "motion-safe:[animation:dreamy-wiggle_0.6s_ease-in-out]" : "motion-safe:animate-[cloud-float_5.5s_ease-in-out_infinite]"}`}>
+        <div className={`absolute inset-0 ${wiggling ? "motion-safe:[animation:dreamy-wiggle_0.6s_ease-in-out]" : "motion-safe:animate-[dreamy-breathe_5.5s_ease-in-out_infinite]"}`}>
           <div ref={tiltRef} className="relative h-full w-full [transition:transform_.06s_linear] [will-change:transform]">
             <Image
               key={reacting ? reactionSprite : sprite}
