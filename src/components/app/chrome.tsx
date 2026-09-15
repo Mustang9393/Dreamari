@@ -193,17 +193,20 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
  *  roles, and the theme choice. The landing pages' hamburger renders this
  *  same panel (direct instruction, 11 Sept 2026: identical menus everywhere,
  *  theme toggle inside the menu). `extra` lets a page add its own rows on
- *  top. `hideDemoLinks` (marketing nav only, 15 Sept 2026: "a lot of the
- *  hamburger is for demo only, drop this set") skips the whole-app sitemap
- *  and the Connect role switcher -- both are internal QA/demo conveniences,
- *  not navigation a real visitor should see -- while the in-app hamburger
- *  (QuickLinksMenu below) keeps them, unchanged. */
+ *  top. `hideDemoLinks` (marketing nav only) skips only the Connect role
+ *  switcher -- that one is internal QA/demo scaffolding (the "Demo-only
+ *  scaffolding" section of docs/handoff/specs/connect.md), not navigation a
+ *  real visitor should see. `QUICK_LINKS` is the real site map (a link to
+ *  every tab/flow, not sunsetted) and stays in both menus -- it was wrongly
+ *  swept into the same `hideDemoLinks` guard on 15 Sept 2026 and got cut
+ *  from the marketing hamburger along with the role switcher; corrected the
+ *  same day. */
 export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLinks = false }: { onNavigate?: () => void; extra?: React.ReactNode; className?: string; hideDemoLinks?: boolean }) {
   const { theme, toggle } = useGlobalTheme();
   return (
     <div className={`flex flex-col gap-[2px] ${className}`}>
       {extra}
-      {!hideDemoLinks && QUICK_LINKS.map((link) => (
+      {QUICK_LINKS.map((link) => (
         <Link
           key={link.label}
           href={link.href}
