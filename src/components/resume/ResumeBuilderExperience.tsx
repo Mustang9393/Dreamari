@@ -268,7 +268,19 @@ function ResumeBuilderInner() {
   // just what ResumeDocument already does once activeField goes back to
   // null, no separate state needed for it).
   const [activeField, setActiveField] = useState<string | null>(null);
-  const goToStep = (i: number) => { setActiveField(null); setSubDreamy(null); setStepIndex(i); };
+  // Scrolls back to the top on every step change so Dreamy's new line
+  // (he sits right at the top of the page) is actually visible without
+  // the student having to scroll back up themselves -- otherwise the
+  // change happens off-screen if they'd scrolled down to reach a field
+  // (direct feedback, 16 Sept 2026: "i should see the dreamy speech
+  // change at every screen... right now it changes but i need to scroll
+  // up and i dont notice it").
+  const goToStep = (i: number) => {
+    setActiveField(null);
+    setSubDreamy(null);
+    setStepIndex(i);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const { toast, showToast } = useResumeToast();
 
   const backToProfile = () => router.push("/profile?tab=resume");
@@ -366,7 +378,7 @@ function ResumeBuilderInner() {
          form column (direct feedback, 15 Sept 2026), both flexible so the
          ratio holds as the viewport grows. */}
       <div className="grid grid-cols-1 items-start gap-[var(--space-6)] lg:grid-cols-[minmax(420px,1fr)_minmax(0,1.2fr)]">
-        <div className="flex flex-col gap-[var(--space-5)]">
+        <div className="flex flex-col gap-[var(--space-3)]">
           <div className="max-w-[440px]">
             <DreamyGuide sprite={activeDreamy.sprite} line={activeDreamy.line} reactionNonce={reactionNonce} />
           </div>
