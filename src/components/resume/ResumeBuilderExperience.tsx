@@ -337,16 +337,16 @@ function ResumeBuilderInner() {
          ratio holds as the viewport grows. */}
       <div className="grid grid-cols-1 items-start gap-[var(--space-6)] lg:grid-cols-[minmax(420px,1fr)_minmax(0,1.2fr)]">
         <div className="flex flex-col gap-[var(--space-5)]">
-          {/* Dreamy front and center for every step, the same treatment
-             Build gives him -- not the reference's small inline coaching
-             tip (direct feedback, 14 Sept 2026). Capped width so his
-             bubble hugs the line instead of stretching full column width. */}
-          {!(stepIndex === 2 && experienceModal !== null) && !subDreamy && (
-            <div className="max-w-[440px]">
-              <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
-            </div>
-          )}
           <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            {/* Dreamy lives inside the same card as the fields he's
+               introducing, same as every sub-flow's own DreamyGuide inside
+               its ResumeModal -- floating him above the card read as a
+               separate, disconnected element (direct feedback, 16 Sept
+               2026: "keep dreamy consistently inside the boxes with the
+               content"). */}
+            {!(stepIndex === 2 && experienceModal !== null) && !subDreamy && (
+              <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
+            )}
             <WizardProgress stepIndex={stepIndex} />
             {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); goToStep(1); }} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 1 && <EducationStep resume={resume} onNext={() => { react(); goToStep(2); }} onBack={() => goToStep(0)} showToast={showToast} onFieldFocus={setActiveField} />}

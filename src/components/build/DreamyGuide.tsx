@@ -108,7 +108,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
       {/* Cinematic bubble: a frosted whisper-caption — near-black glass, a
          faint gradient hairline, and the line materializing ink-style. Keyed
          by line so each stage's coaching re-performs its entrance. */}
-      <div key={line} className="relative flex-1">
+      <div key={line} className="relative w-fit max-w-full">
         <div
           aria-hidden
           className="absolute top-1/2 -left-[6px] h-3 w-3 -translate-y-1/2 rotate-45 rounded-[2px] backdrop-blur-md"
