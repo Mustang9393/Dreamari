@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { bricolage } from "./fonts";
-import { InkText, LocalBurst } from "./ui";
+import { LocalBurst } from "./ui";
 
 // Re-exported for existing external consumers (MatchLab, the Glossary game)
 // that import LocalBurst from this module -- it now lives in ui.tsx
@@ -113,9 +113,13 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
         <LocalBurst nonce={reactionNonce} />
       </div>
       {/* Cinematic bubble: a frosted whisper-caption — near-black glass, a
-         faint gradient hairline, and the line materializing ink-style. Keyed
-         by line so each stage's coaching re-performs its entrance. */}
-      <div key={line} className="relative w-fit max-w-full">
+         faint gradient hairline. Keyed by line so each stage's coaching
+         re-performs its entrance. A plain fade + rise, not InkText's
+         per-word blur-in -- that animation staggers and re-blurs every
+         word, which in a bubble this size read as the text doubling up on
+         itself mid-transition (direct feedback, 16 Sept 2026: "the text in
+         the speech bubble is being repeated inside"). */}
+      <div key={line} className="relative w-fit max-w-full motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]">
         <div
           aria-hidden
           className="absolute top-1/2 -left-[6px] h-3 w-3 -translate-y-1/2 rotate-45 rounded-[2px] backdrop-blur-md"
@@ -129,7 +133,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
             boxShadow: "0 12px 40px -18px color-mix(in srgb, var(--color-accent-purple) 45%, transparent), inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent)",
           }}
         >
-          <InkText text={line} delay={0.15} />
+          {line}
         </p>
       </div>
     </div>

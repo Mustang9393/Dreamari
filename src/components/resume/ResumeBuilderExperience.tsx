@@ -51,10 +51,17 @@ export function ResumeBuilderExperience() {
 // the exact classes those pages use. A view that wants a narrower reading
 // column (a form, a document) centers one inside that same outer gutter
 // via contentMaxWidth rather than shrinking the gutter itself.
-function Shell({ children, contentMaxWidth }: { children: ReactNode; contentMaxWidth?: number }) {
+function Shell({ children, contentMaxWidth, tabs }: { children: ReactNode; contentMaxWidth?: number; tabs?: ReactNode }) {
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
       <AppBackdrop />
+      {/* Rendered full-bleed, BEFORE the padded content column below, so a
+         sticky tabs bar docks flush at the true top of the page -- inside
+         the padded column it sat under the column's own top padding,
+         reading as a floating panel with a gap above it (direct feedback,
+         16 Sept 2026: "why are they in a floating black box with gaps on
+         top and below"). */}
+      {tabs}
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-[1440px] flex-col px-5 pt-5 pb-[max(24px,env(safe-area-inset-bottom))] sm:px-[var(--space-14)] sm:pt-8">
         {contentMaxWidth ? <div className="mx-auto flex w-full flex-1 flex-col" style={{ maxWidth: contentMaxWidth }}>{children}</div> : children}
       </div>
@@ -69,7 +76,7 @@ function Shell({ children, contentMaxWidth }: { children: ReactNode; contentMaxW
 // (template pick + wizard, the saved list, and name/education/template
 // selection); the finished document keeps its own header, which already
 // covers the reference's equivalent actions (ATS Check, Export, etc.).
-function ResumeBuilderTabs({ active, router }: { active: "builder" | "saved" | "tailor"; router: ReturnType<typeof useRouter> }) {
+function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "saved" | "tailor"; router: ReturnType<typeof useRouter>; onClose: () => void }) {
   const items: { key: typeof active; label: string; href: string }[] = [
     { key: "builder", label: "Resume Builder", href: "/resume-builder" },
     { key: "saved", label: "Saved Resumes", href: "/resume-builder?view=list" },
@@ -77,52 +84,73 @@ function ResumeBuilderTabs({ active, router }: { active: "builder" | "saved" | "
   ];
   return (
     <div
-      role="tablist"
-      aria-label="Resume Builder sections"
       data-print-hide
       // Sticky, not just top-of-page -- it was scrolling out of view on
       // any tall step (direct feedback, 16 Sept 2026: "make sure they are
       // more prominent and always visible/sticky"), same pattern
-      // WizardFooter already uses for staying put at the bottom.
-      className="sticky top-0 z-30 -mx-5 mb-[var(--space-5)] flex flex-none gap-[var(--space-5)] border-b px-5 pt-[max(12px,env(safe-area-inset-top))] pb-0 backdrop-blur-md sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]"
-      style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}
+      // WizardFooter already uses for staying put at the bottom. Full-bleed
+      // (Shell renders this outside its own padded column) so it docks
+      // flush at the page's true top edge instead of floating under the
+      // column's own top padding.
+      className="sticky top-0 z-30 w-full backdrop-blur-md"
+      style={{ borderBottom: "1px solid var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}
     >
-      {items.map((item) => {
-        const isActive = item.key === active;
-        return (
-          <button
-            key={item.key}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => router.push(item.href)}
-            className="relative cursor-pointer pb-[10px] text-[13.5px] font-bold whitespace-nowrap"
-            style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)" }}
-          >
-            {item.label}
-            {isActive && <span aria-hidden className="absolute inset-x-0 -bottom-px h-[2px] rounded-full" style={{ background: "var(--primary)" }} />}
-          </button>
-        );
-      })}
+      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-[var(--space-4)] px-5 pt-[max(14px,env(safe-area-inset-top))] sm:px-[var(--space-14)]">
+        {/* Active tab already says what this page is -- a separate
+           "Resume Builder" title repeated the same word right below it
+           (direct feedback, 16 Sept 2026: "it already says what it is in
+           the tabs label, make those bigger"), so the tabs carry both the
+           page identity and the navigation now. */}
+        <div role="tablist" aria-label="Resume Builder sections" className="flex flex-none gap-[var(--space-6)]">
+          {items.map((item) => {
+            const isActive = item.key === active;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => router.push(item.href)}
+                className="relative cursor-pointer pb-[14px] text-[16px] font-extrabold whitespace-nowrap sm:text-[17px]"
+                style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-display)" }}
+              >
+                {item.label}
+                {isActive && <span aria-hidden className="absolute inset-x-0 -bottom-px h-[2px] rounded-full" style={{ background: "var(--primary)" }} />}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          aria-label="Close and return to Profile"
+          onClick={onClose}
+          className="dm-quiet mb-[10px] flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+          style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+        >
+          <X className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
     </div>
   );
 }
 
-function TopBar({ label, onClose, extra }: { label: string; onClose: () => void; extra?: ReactNode }) {
+function TopBar({ label, onClose, extra }: { label: string; onClose?: () => void; extra?: ReactNode }) {
   return (
     <div data-print-hide className="mb-[var(--space-5)] flex flex-none flex-wrap items-center justify-between gap-[var(--space-3)]">
       <span className="text-[13px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
       <div className="flex items-center gap-[var(--space-3)]">
         {extra}
-        <button
-          type="button"
-          aria-label="Close and return to Profile"
-          onClick={onClose}
-          className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-          style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-        >
-          <X className="h-4 w-4" aria-hidden />
-        </button>
+        {onClose && (
+          <button
+            type="button"
+            aria-label="Close and return to Profile"
+            onClick={onClose}
+            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+            style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -253,9 +281,7 @@ function ResumeBuilderInner() {
 
   if (view === "list") {
     return (
-      <Shell contentMaxWidth={900}>
-        <ResumeBuilderTabs active="saved" router={router} />
-        <TopBar label="Saved Resumes" onClose={backToProfile} />
+      <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active="saved" router={router} onClose={backToProfile} />}>
         <ResumeExperience />
       </Shell>
     );
@@ -263,9 +289,8 @@ function ResumeBuilderInner() {
 
   if (view === "templates") {
     return (
-      <Shell contentMaxWidth={1200}>
-        <ResumeBuilderTabs active="builder" router={router} />
-        <TopBar label="New Resume" onClose={backToProfile} />
+      <Shell contentMaxWidth={1200} tabs={<ResumeBuilderTabs active="builder" router={router} onClose={backToProfile} />}>
+        <TopBar label="New Resume" />
         <TemplateGallery
           onSelect={(templateId) => {
             const isFirstResume = readResume().versions.length === 0;
@@ -288,9 +313,8 @@ function ResumeBuilderInner() {
     // from picking a template for another one.
     const isEditingExisting = searchParams.get("edit") === "1";
     return (
-      <Shell contentMaxWidth={760}>
-        <ResumeBuilderTabs active="tailor" router={router} />
-        <TopBar label={activeVersion ? "Edit Selection" : "New Resume"} onClose={backToProfile} />
+      <Shell contentMaxWidth={760} tabs={<ResumeBuilderTabs active="tailor" router={router} onClose={backToProfile} />}>
+        <TopBar label={activeVersion ? "Edit Selection" : "New Resume"} />
         <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
           <TailorScreen
             resume={resume}
@@ -328,9 +352,7 @@ function ResumeBuilderInner() {
   const showWizardDreamy = !(stepIndex === 2 && experienceModal !== null) && !subDreamy;
 
   return (
-    <Shell>
-      <ResumeBuilderTabs active="builder" router={router} />
-      <TopBar label="Resume Builder" onClose={backToProfile} />
+    <Shell tabs={<ResumeBuilderTabs active="builder" router={router} onClose={backToProfile} />}>
       {/* The preview gets the larger share of the row now (direct feedback,
          14 Sept 2026: "give the preview more prominence... more width so we
          can see it better") -- the preview column runs 20% wider than the
@@ -338,15 +360,21 @@ function ResumeBuilderInner() {
          ratio holds as the viewport grows. */}
       <div className="grid grid-cols-1 items-start gap-[var(--space-6)] lg:grid-cols-[minmax(420px,1fr)_minmax(0,1.2fr)]">
         <div className="flex flex-col gap-[var(--space-5)]">
+          {/* Empty, matching-height spacer -- the live preview column's own
+             "Live Preview / Full Screen" row (below) is the same height, so
+             the card and the document start at the same Y instead of the
+             two frames drifting apart (direct feedback, 16 Sept 2026: "I
+             need these two frames to be aligned"). Dreamy himself lives
+             inside the card's own surface, not out here (direct feedback,
+             16 Sept 2026: "Dreamy should sit inside the left panel
+             surface") -- perched on the card's top edge below, his head
+             pokes up into the top of this reserved band rather than the
+             band holding him directly. */}
+          <div aria-hidden className="hidden flex-none lg:block lg:min-h-[56px]" />
           <div
             className={`relative flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border px-[var(--space-6)] pb-[var(--space-6)] ${showWizardDreamy ? "pt-[34px]" : "pt-[var(--space-6)]"}`}
             style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}
           >
-            {/* Dreamy perches on the card's own top edge -- overlapping
-               border, no dedicated row -- instead of claiming full-width
-               space above the progress bar (direct feedback, 16 Sept 2026:
-               "place him in other already vacant spaces instead of
-               increasing vertical space by giving him an entire row"). */}
             {showWizardDreamy && (
               <div className="absolute -top-[24px] right-[var(--space-6)] left-[var(--space-6)]">
                 <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} size="sm" />
@@ -444,8 +472,8 @@ function ResumeBuilderInner() {
            its content vertically (direct feedback, 14 Sept 2026). The
            camera/crop inside ResumeDocument handles framing now, so this
            column itself never needs to scroll. */}
-        <div className="hidden lg:sticky lg:top-8 lg:flex lg:h-[calc(100dvh-64px)] lg:min-w-0 lg:flex-col lg:gap-[var(--space-3)]">
-          <div className="flex flex-none flex-wrap items-center justify-between gap-[var(--space-2)]">
+        <div className="hidden lg:sticky lg:top-8 lg:flex lg:h-[calc(100dvh-64px)] lg:min-w-0 lg:flex-col lg:gap-[var(--space-5)]">
+          <div className="flex flex-none flex-wrap items-center justify-between gap-[var(--space-2)] lg:min-h-[56px]">
             <span className="text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Live Preview</span>
             <ZoomResumeButton resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} title="Live Preview" />
           </div>
