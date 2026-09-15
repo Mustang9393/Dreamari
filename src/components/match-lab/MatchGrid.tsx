@@ -110,7 +110,7 @@ export function MatchGrid() {
                 <BackButton fallback="/flow" />
                 <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
               </span>
-              <span className="flex flex-none flex-col items-end gap-[3px]">
+              <span className="flex flex-none items-center gap-2">
                 {/* A little more prominent than a muted status chip (direct
                    feedback, 14 Sept 2026): bigger dot, bolder/brighter
                    text, a stronger border -- this is the one number a
@@ -121,15 +121,6 @@ export function MatchGrid() {
                 >
                   <span aria-hidden className="h-2 w-2 flex-none rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 10px ${SUCCESS}` }} />
                   {selected.length} of {MAX_SLOTS}
-                </span>
-                {/* Reassurance that picking isn't a commitment (direct
-                   feedback, 16 Sept 2026, Slack: students shouldn't feel
-                   they have to commit to a career just by saving it here).
-                   Its own small line under the counter, not folded into the
-                   "Tap a card..." instruction above (direct feedback:
-                   "dont mount that onto the other text"). */}
-                <span className="px-1 text-[10.5px] leading-[12px] font-medium whitespace-nowrap text-[var(--color-night-muted-foreground)]">
-                  Change anytime
                 </span>
               </span>
             </div>
