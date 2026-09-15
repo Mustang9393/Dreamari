@@ -207,7 +207,7 @@ function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: 
   );
 }
 
-export function EducationStep({ resume, onNext, onBack, showToast, onFieldFocus }: { resume: ResumeData; onNext: () => void; onBack: () => void; showToast: (m: string) => void; onFieldFocus?: (field: string | null) => void }) {
+export function EducationStep({ resume, onNext, showToast, onFieldFocus }: { resume: ResumeData; onNext: () => void; showToast: (m: string) => void; onFieldFocus?: (field: string | null) => void }) {
   const [editing, setEditing] = useState<ResumeEducation | null | "new">(null);
   // Swaps this whole card's body for the form rather than layering a modal
   // over the list (see ResumeModal, ui.tsx) -- only one is ever mounted.
@@ -241,7 +241,7 @@ export function EducationStep({ resume, onNext, onBack, showToast, onFieldFocus 
           ))}
         </div>
       )}
-      <WizardFooter onBack={onBack} onNext={onNext} />
+      <WizardFooter onNext={onNext} />
     </div>
   );
 }
@@ -251,7 +251,7 @@ export function EducationStep({ resume, onNext, onBack, showToast, onFieldFocus 
 //    lives in ExperienceModal.tsx (kept in its own file, it's the biggest
 //    piece of this feature).
 // ---------------------------------------------------------------------------
-export function ExperienceStep({ resume, onNext, onBack, onAdd, onEdit }: { resume: ResumeData; onNext: () => void; onBack: () => void; onAdd: () => void; onEdit: (entry: ResumeExperience) => void }) {
+export function ExperienceStep({ resume, onNext, onAdd, onEdit }: { resume: ResumeData; onNext: () => void; onAdd: () => void; onEdit: (entry: ResumeExperience) => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-end gap-[var(--space-3)]">
@@ -294,7 +294,7 @@ export function ExperienceStep({ resume, onNext, onBack, onAdd, onEdit }: { resu
           })}
         </div>
       )}
-      <WizardFooter onBack={onBack} onNext={onNext} />
+      <WizardFooter onNext={onNext} />
     </div>
   );
 }
@@ -362,7 +362,7 @@ function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSa
   );
 }
 
-export function SkillsStep({ resume, onNext, onBack, onSubDreamy }: { resume: ResumeData; onNext: () => void; onBack: () => void; onSubDreamy?: (dreamy: { sprite: string; line: string } | null) => void }) {
+export function SkillsStep({ resume, onNext, onSubDreamy }: { resume: ResumeData; onNext: () => void; onSubDreamy?: (dreamy: { sprite: string; line: string } | null) => void }) {
   const [open, setOpen] = useState<"people" | "tech" | "languages" | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   // The picker below has its own DreamyGuide (asking that category's
@@ -436,7 +436,7 @@ export function SkillsStep({ resume, onNext, onBack, onSubDreamy }: { resume: Re
           </div>
         );
       })}
-      <WizardFooter onBack={onBack} onNext={onNext} />
+      <WizardFooter onNext={onNext} />
     </div>
   );
 }
@@ -508,7 +508,7 @@ function CertificationModal({ initial, onClose, onSaved, onFieldFocus }: { initi
   );
 }
 
-export function CertificationsStep({ resume, onNext, onBack, showToast, onFieldFocus }: { resume: ResumeData; onNext: () => void; onBack: () => void; showToast: (m: string) => void; onFieldFocus?: (field: string | null) => void }) {
+export function CertificationsStep({ resume, onNext, showToast, onFieldFocus }: { resume: ResumeData; onNext: () => void; showToast: (m: string) => void; onFieldFocus?: (field: string | null) => void }) {
   const [editing, setEditing] = useState<ResumeCertification | null | "new">(null);
   if (editing) {
     return (
@@ -536,7 +536,7 @@ export function CertificationsStep({ resume, onNext, onBack, showToast, onFieldF
           ))}
         </div>
       )}
-      <WizardFooter onBack={onBack} onNext={onNext} nextLabel="Review" />
+      <WizardFooter onNext={onNext} nextLabel="Review" />
     </div>
   );
 }
@@ -590,7 +590,7 @@ function ChecklistRow({
   );
 }
 
-export function ReviewStep({ resume, onBack, onEditStep, onFinish }: { resume: ResumeData; onBack: () => void; onEditStep: (step: number) => void; onFinish: () => void }) {
+export function ReviewStep({ resume, onEditStep, onFinish }: { resume: ResumeData; onEditStep: (step: number) => void; onFinish: () => void }) {
   // The "good start" tip: real in the reference, a real centered popup
   // shown at export time, not the inline checklist-summary card this step
   // used to show instead (direct instruction, 16 Sept 2026: "take no
@@ -616,7 +616,7 @@ export function ReviewStep({ resume, onBack, onEditStep, onFinish }: { resume: R
           <ChecklistRow key={i.label} Icon={i.Icon} label={i.label} optional={i.optional} subtitle={i.subtitle} done={i.done} onEdit={() => onEditStep(i.step)} last={idx === items.length - 1} />
         ))}
       </div>
-      <WizardFooter onBack={onBack} onNext={() => setShowTip(true)} nextLabel="Save & Export" nextDisabled={!complete} />
+      <WizardFooter onNext={() => setShowTip(true)} nextLabel="Save & Export" nextDisabled={!complete} />
       {showTip && (
         <div
           className="fixed inset-0 z-[130] flex items-end justify-center p-4 sm:items-center"

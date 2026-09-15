@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Download, FileText, Pencil, Sparkles, Wand2, X } from "lucide-react";
+import { ChevronLeft, Download, FileText, Pencil, Sparkles, Wand2, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
@@ -364,33 +364,35 @@ function ResumeBuilderInner() {
              "Live Preview / Full Screen" row (below) is the same height, so
              the card and the document start at the same Y instead of the
              two frames drifting apart (direct feedback, 16 Sept 2026: "I
-             need these two frames to be aligned"). Dreamy himself lives
-             inside the card's own surface, not out here (direct feedback,
-             16 Sept 2026: "Dreamy should sit inside the left panel
-             surface") -- perched on the card's top edge below, his head
-             pokes up into the top of this reserved band rather than the
-             band holding him directly. */}
+             need these two frames to be aligned"). */}
           <div aria-hidden className="hidden flex-none lg:block lg:min-h-[56px]" />
-          <div className="relative flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            {/* Overlaps the card's own top-left corner at desktop width
-               (a negative offset into the spacer above, no padding
-               reserved for him inside the card) rather than pushing the
-               whole card down to make room (direct feedback, 16 Sept
-               2026: "keep the floating to a minimum... the cloud itself
-               can overlap onto rows without needing padding"). Below the
-               spacer's own `lg` breakpoint there's no reserved room above
-               the card to overlap into -- the sticky tabs bar sits right
-               there instead, and the same negative offset clipped him
-               under it -- so he renders in normal flow there, a plain
-               first row, no overlap. */}
-            {showWizardDreamy && (
-              <div className="relative mb-[2px] lg:absolute lg:top-[-30px] lg:-left-[8px] lg:z-10 lg:mb-0">
-                <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} size="sm" />
+          <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            {/* Back sits beside the step label + progress bar as one
+               column, not down in the footer -- Dreamy moved below this
+               row instead of overlapping it (direct feedback, 16 Sept
+               2026: "the back button [and] the resume label + progress
+               bar can be aligned so its one column... the Dreamy and
+               speech bubble will sit below it"). Each step's own
+               WizardFooter keeps only Next/Save; Back lives here once. */}
+            <div className="flex items-start gap-[var(--space-3)]">
+              {showWizardDreamy && stepIndex > 0 && (
+                <button
+                  type="button"
+                  aria-label="Back"
+                  onClick={() => goToStep(stepIndex - 1)}
+                  className="dm-quiet mt-[1px] flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
+                  style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+                >
+                  <ChevronLeft className="h-4 w-4" aria-hidden />
+                </button>
+              )}
+              <div className="min-w-0 flex-1">
+                <WizardProgress stepIndex={stepIndex} />
               </div>
-            )}
-            <WizardProgress stepIndex={stepIndex} />
+            </div>
+            {showWizardDreamy && <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} size="sm" />}
             {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); goToStep(1); }} showToast={showToast} onFieldFocus={setActiveField} />}
-            {stepIndex === 1 && <EducationStep resume={resume} onNext={() => { react(); goToStep(2); }} onBack={() => goToStep(0)} showToast={showToast} onFieldFocus={setActiveField} />}
+            {stepIndex === 1 && <EducationStep resume={resume} onNext={() => { react(); goToStep(2); }} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 2 && (
               // In-place, like Education/Certifications: the drawer swaps
               // this same card's body rather than floating over it, so
@@ -410,18 +412,16 @@ function ResumeBuilderInner() {
                 <ExperienceStep
                   resume={resume}
                   onNext={() => { react(); goToStep(3); }}
-                  onBack={() => goToStep(1)}
                   onAdd={() => setExperienceModal("new")}
                   onEdit={(entry) => setExperienceModal(entry)}
                 />
               )
             )}
-            {stepIndex === 3 && <SkillsStep resume={resume} onNext={() => { react(); goToStep(4); }} onBack={() => goToStep(2)} onSubDreamy={setSubDreamy} />}
-            {stepIndex === 4 && <CertificationsStep resume={resume} onNext={() => { react(); goToStep(5); }} onBack={() => goToStep(3)} showToast={showToast} onFieldFocus={setActiveField} />}
+            {stepIndex === 3 && <SkillsStep resume={resume} onNext={() => { react(); goToStep(4); }} onSubDreamy={setSubDreamy} />}
+            {stepIndex === 4 && <CertificationsStep resume={resume} onNext={() => { react(); goToStep(5); }} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 5 && (
               <ReviewStep
                 resume={resume}
-                onBack={() => goToStep(4)}
                 onEditStep={(step) => goToStep(step)}
                 onFinish={() => {
                   react();
