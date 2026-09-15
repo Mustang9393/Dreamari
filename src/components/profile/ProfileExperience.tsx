@@ -29,6 +29,10 @@ import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./Ca
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
+import { collegeBySlug, collegeImage } from "@/components/colleges/data";
+import { tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
+import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
+import { useSavedVideos } from "@/lib/savedVideos";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -2187,31 +2191,97 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
 
 // ---- Locker tab: rich poster grid ----
 
+function SchoolsShelf() {
+  const [saved] = useSavedColleges();
+  const colleges = [...saved].map((slug) => collegeBySlug(slug)).filter((c): c is NonNullable<typeof c> => !!c);
+  if (colleges.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
+        <p className="text-[15px] font-bold">No schools saved yet</p>
+        <Link href="/colleges" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Browse schools</Link>
+      </div>
+    );
+  }
+  return (
+    <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
+      {colleges.map((c) => (
+        <Link key={c.slug} href={`/colleges/${c.slug}`} className="dm-tap flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="relative block aspect-[4/3] w-full" style={{ background: "var(--glass-surface-1)" }}>
+            {collegeImage(c) && <Image src={collegeImage(c)!} alt="" fill sizes="220px" className="object-cover" />}
+          </span>
+          <span className="flex flex-col gap-[2px] p-[10px]" style={{ background: "var(--glass-surface-1)" }}>
+            <span className="truncate text-[14px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
+            <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{collegeTags(c).join(" · ")}</span>
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function VideosShelf() {
+  const [saved] = useSavedVideos();
+  const videos = COMPANY_VIDEOS.filter((v) => saved.has(v.video));
+  if (videos.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
+        <p className="text-[15px] font-bold">No videos saved yet</p>
+        <Link href="/explore" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Browse videos</Link>
+      </div>
+    );
+  }
+  return (
+    <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
+      {videos.map((v) => (
+        <div key={v.video} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="relative block aspect-[3/4] w-full">
+            <Image src={v.poster} alt="" fill sizes="220px" className="object-cover" />
+          </span>
+          <span className="flex flex-col gap-[2px] p-[10px]" style={{ background: "var(--glass-surface-1)" }}>
+            <span className="truncate text-[14px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{v.title}</span>
+            <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{v.company}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void }) {
-  // The locker holds two collections: careers the student saved, and the
-  // ticket stubs of events they attended (direct feedback, 4 Sept 2026).
-  const [shelf, setShelf] = useState<"careers" | "events">("careers");
+  // The locker holds everything a student saves across Dreamari, grouped
+  // into the four categories students actually save (direct feedback, 16
+  // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside
+  // Leading Companies," not tied to one specific career), and event stubs.
+  const [shelf, setShelf] = useState<"careers" | "schools" | "videos" | "events">("careers");
+  const [savedSchools] = useSavedColleges();
+  const [savedVideos] = useSavedVideos();
   const stubCount = EVENTS.filter((e) => e.lifecycle === "Active follow-up").length;
+  const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", videos: "Videos", events: "Event Stubs" };
+  const SHELF_COUNT: Record<typeof shelf, number> = { careers: locker.length, schools: savedSchools.size, videos: savedVideos.size, events: stubCount };
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>{shelf === "careers" ? "Saved" : "Event Stubs"}</h2>
+        <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Saved</h2>
         <span className="flex items-center gap-[var(--space-3)]">
-          <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{shelf === "careers" ? `${locker.length} saved` : `${stubCount} kept`}</span>
+          <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{SHELF_COUNT[shelf]} {shelf === "events" ? "kept" : "saved"}</span>
           <button type="button" aria-label="Close Saved" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
         </span>
       </div>
       <div role="tablist" aria-label="Locker shelves" className="flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-        {([["careers", "Saved"], ["events", "Event Stubs"]] as const).map(([id, label]) => (
-          <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => setShelf(id)} className="dm-quiet min-h-[32px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[14px] text-[13px] leading-[16px] font-semibold" style={{ background: shelf === id ? "var(--foreground)" : "transparent", color: shelf === id ? "var(--background)" : "var(--foreground)" }}>
-            {label}
+        {(["careers", "schools", "videos", "events"] as const).map((id) => (
+          <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => setShelf(id)} className="dm-quiet min-h-[32px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[14px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: shelf === id ? "var(--foreground)" : "transparent", color: shelf === id ? "var(--background)" : "var(--foreground)" }}>
+            {SHELF_LABEL[id]}
           </button>
         ))}
       </div>
       {shelf === "events" ? (
         <EventStubs />
+      ) : shelf === "schools" ? (
+        <SchoolsShelf />
+      ) : shelf === "videos" ? (
+        <VideosShelf />
       ) : locker.length === 0 ? (
         <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
           <p className="text-[15px] font-bold">Everything saved is in your Top 3</p>

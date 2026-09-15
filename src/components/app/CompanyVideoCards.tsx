@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Play, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, Play, Volume2, VolumeX, X } from "lucide-react";
 import { LetterMark } from "@/components/connect/primitives";
+import { useSavedVideos } from "@/lib/savedVideos";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 import { setVideoSoundMuted, useVideoSoundMuted } from "./videoSound";
 
@@ -42,6 +43,8 @@ export function CompanyVideoCards() {
 function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolean; onOpen: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [savedVideos, toggleSaved] = useSavedVideos();
+  const saved = savedVideos.has(item.video);
   // Whether THIS card's own <video> is actually muted right now -- distinct
   // from the shared preference below, because a hover can fall back to
   // muted for one attempt when the browser blocks unmuted autoplay. The
@@ -150,6 +153,18 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
         style={{ objectPosition: "50% 30%" }}
       />
+      {/* Top-left: save for later (Profile > Saved > Videos), same corner
+         convention as the college/career bookmark toggles elsewhere. */}
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); toggleSaved(item.video); }}
+        aria-label={saved ? `Remove ${item.title} from Saved` : `Save ${item.title}`}
+        aria-pressed={saved}
+        className="dm-tap absolute top-[10px] left-[10px] z-[1] flex size-[34px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 hover:scale-110"
+        style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+      >
+        <Bookmark className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} fill={saved ? "#FFFFFF" : "none"} />
+      </button>
       {/* Top-right badge: a play glyph before anything has played, then a
          real mute/unmute toggle once the clip is playing. */}
       {playing ? (
