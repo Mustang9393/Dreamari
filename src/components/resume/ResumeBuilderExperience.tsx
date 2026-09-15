@@ -11,6 +11,7 @@ import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } 
 import { ExperienceModal } from "./ExperienceModal";
 import { ExportChecklistModal } from "./ExportChecklistModal";
 import { JobMatchPanel } from "./JobMatchPanel";
+import { ResumeExperience } from "./ResumeExperience";
 import { ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
 import { TailorScreen } from "./TailorScreen";
 import { TemplateGallery } from "./TemplateGallery";
@@ -57,6 +58,42 @@ function Shell({ children, contentMaxWidth }: { children: ReactNode; contentMaxW
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-[1440px] flex-col px-5 pt-5 pb-[max(24px,env(safe-area-inset-bottom))] sm:px-[var(--space-14)] sm:pt-8">
         {contentMaxWidth ? <div className="mx-auto flex w-full flex-1 flex-col" style={{ maxWidth: contentMaxWidth }}>{children}</div> : children}
       </div>
+    </div>
+  );
+}
+
+// The replit reference keeps three peer sections always reachable in one
+// persistent nav (Resume Builder / Saved Resumes / Choose & Tailor), not
+// a directed one-way flow -- direct instruction, 16 Sept 2026: "match it
+// exactly". Scoped to the screens that actually correspond to those three
+// (template pick + wizard, the saved list, and name/education/template
+// selection); the finished document keeps its own header, which already
+// covers the reference's equivalent actions (ATS Check, Export, etc.).
+function ResumeBuilderTabs({ active, router }: { active: "builder" | "saved" | "tailor"; router: ReturnType<typeof useRouter> }) {
+  const items: { key: typeof active; label: string; href: string }[] = [
+    { key: "builder", label: "Resume Builder", href: "/resume-builder" },
+    { key: "saved", label: "Saved Resumes", href: "/resume-builder?view=list" },
+    { key: "tailor", label: "Choose & Tailor", href: "/resume-builder?view=tailor" },
+  ];
+  return (
+    <div role="tablist" aria-label="Resume Builder sections" data-print-hide className="mb-[var(--space-5)] flex flex-none gap-[var(--space-5)] border-b" style={{ borderColor: "var(--glass-border)" }}>
+      {items.map((item) => {
+        const isActive = item.key === active;
+        return (
+          <button
+            key={item.key}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => router.push(item.href)}
+            className="relative cursor-pointer pb-[10px] text-[13.5px] font-bold whitespace-nowrap"
+            style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)" }}
+          >
+            {item.label}
+            {isActive && <span aria-hidden className="absolute inset-x-0 -bottom-px h-[2px] rounded-full" style={{ background: "var(--primary)" }} />}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -197,9 +234,20 @@ function ResumeBuilderInner() {
   // uses what was actually picked, not always the default.
   const pickedTemplate = (searchParams.get("template") as ResumeTemplateId | null) ?? undefined;
 
+  if (view === "list") {
+    return (
+      <Shell contentMaxWidth={900}>
+        <ResumeBuilderTabs active="saved" router={router} />
+        <TopBar label="Saved Resumes" onClose={backToProfile} />
+        <ResumeExperience />
+      </Shell>
+    );
+  }
+
   if (view === "templates") {
     return (
       <Shell contentMaxWidth={1200}>
+        <ResumeBuilderTabs active="builder" router={router} />
         <TopBar label="New Resume" onClose={backToProfile} />
         <TemplateGallery
           onSelect={(templateId) => {
@@ -224,6 +272,7 @@ function ResumeBuilderInner() {
     const isEditingExisting = searchParams.get("edit") === "1";
     return (
       <Shell contentMaxWidth={760}>
+        <ResumeBuilderTabs active="tailor" router={router} />
         <TopBar label={activeVersion ? "Edit Selection" : "New Resume"} onClose={backToProfile} />
         <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
           <TailorScreen
@@ -262,6 +311,7 @@ function ResumeBuilderInner() {
 
   return (
     <Shell>
+      <ResumeBuilderTabs active="builder" router={router} />
       <TopBar label="Resume Builder" onClose={backToProfile} />
       {/* The preview gets the larger share of the row now (direct feedback,
          14 Sept 2026: "give the preview more prominence... more width so we
