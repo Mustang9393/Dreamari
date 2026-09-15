@@ -198,6 +198,11 @@ function ResumeBuilderInner() {
   }
 
   if (view === "tailor") {
+    // Present (not the resume-home "Tailor" button, not "Edit Selection" on
+    // a finished document -- both append &edit=1) whenever this is still
+    // part of creating the resume: straight from finishing the wizard, or
+    // from picking a template for another one.
+    const isEditingExisting = searchParams.get("edit") === "1";
     return (
       <Shell contentMaxWidth={760}>
         <TopBar label={activeVersion ? "Tailor Resume" : "Tailor New Resume"} onClose={backToProfile} />
@@ -206,6 +211,7 @@ function ResumeBuilderInner() {
             resume={resume}
             initial={activeVersion}
             initialTemplateId={pickedTemplate}
+            skippable={!isEditingExisting}
             onCancel={backToProfile}
             onSaved={(saved) => router.push(`/resume-builder?view=version&version=${saved.id}`)}
           />
@@ -221,7 +227,7 @@ function ResumeBuilderInner() {
         title={activeVersion.name}
         onBack={backToProfile}
         backLabel="Back to Resumes"
-        editHref={`/resume-builder?view=tailor&version=${activeVersion.id}`}
+        editHref={`/resume-builder?view=tailor&version=${activeVersion.id}&edit=1`}
         router={router}
         templateId={activeVersion.template}
         version={activeVersion}
@@ -298,9 +304,18 @@ function ResumeBuilderInner() {
                   // gap). Uses whatever template was picked on the way in
                   // (the gallery, if this came from there); falls back to
                   // the default when the wizard was entered directly (e.g.
-                  // "Edit My Info" on an existing resume). Later finishes
-                  // just go to the full preview -- by then there's already
-                  // at least one saved resume to open or edit from the list.
+                  // "Edit My Info" on an existing resume). Routes into
+                  // Tailor next, not straight to the finished document --
+                  // Choose & Tailor (which education/experience to include,
+                  // and matching to a job description) is a real step in
+                  // the reference flow, not a thing you stumble into later
+                  // via "Edit Selection" on the finished resume (direct
+                  // feedback, 15 Sept 2026: "matching the job is hidden in
+                  // the last screen inside edit selection... tailor resume
+                  // is a big part of the flow in the replit"). Later
+                  // finishes (editing shared info via "Edit My Info") just
+                  // go to the full preview -- there's no new version being
+                  // created there to tailor.
                   const current = readResume();
                   if (current.versions.length === 0) {
                     const name = `${current.profile.firstName} ${current.profile.lastName}`.trim() || "My Resume";
@@ -318,7 +333,7 @@ function ResumeBuilderInner() {
                       atsCheck: null,
                     };
                     upsertVersion(version);
-                    router.push(`/resume-builder?view=version&version=${version.id}`);
+                    router.push(`/resume-builder?view=tailor&version=${version.id}`);
                   } else {
                     router.push("/resume-builder?view=document");
                   }

@@ -112,7 +112,7 @@ function SuggestionRow({ suggestion, added, onAdd }: { suggestion: SkillSuggesti
 // description to match against. Skills and certifications always carry
 // through (plan's original scope) -- only these two lists are picked per
 // version, which is the actual point of having more than one saved resume.
-export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onSaved }: { resume: ResumeData; initial: ResumeVersion | null; initialTemplateId?: string; onCancel: () => void; onSaved: (version: ResumeVersion) => void }) {
+export function TailorScreen({ resume, initial, initialTemplateId, skippable = false, onCancel, onSaved }: { resume: ResumeData; initial: ResumeVersion | null; initialTemplateId?: string; skippable?: boolean; onCancel: () => void; onSaved: (version: ResumeVersion) => void }) {
   const [draft, setDraft] = useState<ResumeVersion>(
     initial ?? { ...EMPTY_VERSION, id: makeId(), educationIds: resume.education.map((e) => e.id), experienceIds: resume.experience.map((e) => e.id), template: initialTemplateId ?? DEFAULT_RESUME_TEMPLATE },
   );
@@ -292,7 +292,16 @@ export function TailorScreen({ resume, initial, initialTemplateId, onCancel, onS
         {analyzeError && <p className="text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t match this job. You can still save without it.</p>}
       </div>
 
-      <WizardFooter onBack={onCancel} backLabel="Cancel" onNext={save} nextDisabled={!canSave} nextLabel="Save Resume" />
+      {/* Reached right after finishing the wizard (or picking a template for
+         another resume), this step is optional, not a gate -- nothing here
+         is required beyond the name, which is already prefilled, so
+         "skip" and "save" both just move on (direct feedback, 15 Sept
+         2026: "we also need to make tailoring an optional step in the
+         actual flow not a hidden step"). Reopened later to edit an
+         already-finished resume (the "Tailor" button, or "Edit Selection"
+         on the finished document), there's nothing to skip past -- that's
+         Cancel, back to Profile, discarding whatever was changed here. */}
+      <WizardFooter onBack={skippable ? save : onCancel} backLabel={skippable ? "Skip for now" : "Cancel"} onNext={save} nextDisabled={!canSave} nextLabel="Save Resume" />
     </div>
   );
 }

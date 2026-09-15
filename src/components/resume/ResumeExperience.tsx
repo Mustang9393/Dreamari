@@ -171,7 +171,7 @@ export function ResumeExperience() {
               key={v.id}
               version={v}
               onOpen={() => router.push(`/resume-builder?view=version&version=${v.id}`)}
-              onEdit={() => router.push(`/resume-builder?view=tailor&version=${v.id}`)}
+              onEdit={() => router.push(`/resume-builder?view=tailor&version=${v.id}&edit=1`)}
               onDelete={() => setConfirmDelete(v)}
             />
           ))}
