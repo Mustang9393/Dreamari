@@ -21,13 +21,30 @@ import { COUNTRIES, EDUCATION_PROGRAMS, EXPERIENCE_TYPES, SKILL_CATEGORIES } fro
 import { CARD_CLASS, Field, INSET, ResumeModal, SelectInput, TextInput, WizardFooter } from "./ui";
 
 // ---------------------------------------------------------------------------
-// Empty-state tile -- one shared shape for every step's "nothing yet" state.
+// Empty-state CTA -- the "Add X" action itself fills the empty-state slot
+// (a plain icon in a dashed box, with a separate small "Add" button up top,
+// was two things doing one job -- direct feedback, 16 Sept 2026: "i dont
+// like the big frame with the education icon in the middle... put the cta
+// where that is"). Once the first entry exists, this collapses away and
+// the small top-right "Add" button (already in every one of these steps)
+// takes over for adding more -- same shared shape wherever a step lists
+// entries with an "Add" action (Education, Experience, Certifications).
+// A real filled surface + a leading "+", not a dashed outline -- the
+// dashed-box version read as an inert placeholder graphic rather than
+// something tappable (direct feedback, 16 Sept 2026: "needs to read more
+// like a button... some sort of surface and a + leading").
 // ---------------------------------------------------------------------------
-function EmptyTile({ Icon }: { Icon: typeof GraduationCap }) {
+function EmptyStateAdd({ label, onAdd }: { label: string; onAdd: () => void }) {
   return (
-    <div className="flex items-center justify-center rounded-[var(--radius-lg)] border border-dashed py-[var(--space-8)]" style={{ borderColor: "var(--glass-border)" }}>
-      <Icon className="h-6 w-6" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-    </div>
+    <button
+      type="button"
+      onClick={onAdd}
+      className="dm-tap flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-lg)] border py-[var(--space-5)] text-[14.5px] font-bold"
+      style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}
+    >
+      <Plus className="h-4 w-4" aria-hidden />
+      {label}
+    </button>
   );
 }
 
@@ -226,19 +243,21 @@ export function EducationStep({ resume, onNext, showToast, onFieldFocus }: { res
   }
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-center justify-end gap-[var(--space-3)]">
-        <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
-          <Plus className="h-4 w-4" aria-hidden /> Add Education
-        </button>
-      </div>
       {resume.education.length === 0 ? (
-        <EmptyTile Icon={GraduationCap} />
+        <EmptyStateAdd label="Add Education" onAdd={() => setEditing("new")} />
       ) : (
-        <div className="flex flex-col gap-[var(--space-3)]">
-          {resume.education.map((e) => (
-            <EntryRow key={e.id} title={e.schoolName} subtitle={e.program ? `${e.program} Program` : "High School"} meta={`Expected Graduation: ${e.gradYear}`} onEdit={() => setEditing(e)} onRemove={() => removeEducation(e.id)} />
-          ))}
-        </div>
+        <>
+          <div className="flex items-center justify-end gap-[var(--space-3)]">
+            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+              <Plus className="h-4 w-4" aria-hidden /> Add Education
+            </button>
+          </div>
+          <div className="flex flex-col gap-[var(--space-3)]">
+            {resume.education.map((e) => (
+              <EntryRow key={e.id} title={e.schoolName} subtitle={e.program ? `${e.program} Program` : "High School"} meta={`Expected Graduation: ${e.gradYear}`} onEdit={() => setEditing(e)} onRemove={() => removeEducation(e.id)} />
+            ))}
+          </div>
+        </>
       )}
       <WizardFooter onNext={onNext} />
     </div>
@@ -253,15 +272,16 @@ export function EducationStep({ resume, onNext, showToast, onFieldFocus }: { res
 export function ExperienceStep({ resume, onNext, onAdd, onEdit }: { resume: ResumeData; onNext: () => void; onAdd: () => void; onEdit: (entry: ResumeExperience) => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-center justify-end gap-[var(--space-3)]">
-        <button type="button" onClick={onAdd} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
-          <Plus className="h-4 w-4" aria-hidden /> Add Experience
-        </button>
-      </div>
       {resume.experience.length === 0 ? (
-        <EmptyTile Icon={Briefcase} />
+        <EmptyStateAdd label="Add Experience" onAdd={onAdd} />
       ) : (
-        <div className="flex flex-col gap-[var(--space-3)]">
+        <>
+          <div className="flex items-center justify-end gap-[var(--space-3)]">
+            <button type="button" onClick={onAdd} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+              <Plus className="h-4 w-4" aria-hidden /> Add Experience
+            </button>
+          </div>
+          <div className="flex flex-col gap-[var(--space-3)]">
           {resume.experience.map((exp) => {
             const kind = EXPERIENCE_TYPES.find((t) => t.type === exp.type);
             return (
@@ -291,7 +311,8 @@ export function ExperienceStep({ resume, onNext, onAdd, onEdit }: { resume: Resu
               </div>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
       <WizardFooter onNext={onNext} />
     </div>
@@ -519,19 +540,21 @@ export function CertificationsStep({ resume, onNext, showToast, onFieldFocus }: 
   }
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-center justify-end gap-[var(--space-3)]">
-        <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
-          <Plus className="h-4 w-4" aria-hidden /> Add Certification
-        </button>
-      </div>
       {resume.certifications.length === 0 ? (
-        <EmptyTile Icon={Award} />
+        <EmptyStateAdd label="Add Certification" onAdd={() => setEditing("new")} />
       ) : (
-        <div className="flex flex-col gap-[var(--space-3)]">
-          {resume.certifications.map((c) => (
-            <EntryRow key={c.id} title={c.name} subtitle={c.issuer || undefined} meta={c.issueDate || undefined} onEdit={() => setEditing(c)} onRemove={() => removeCertification(c.id)} />
-          ))}
-        </div>
+        <>
+          <div className="flex items-center justify-end gap-[var(--space-3)]">
+            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+              <Plus className="h-4 w-4" aria-hidden /> Add Certification
+            </button>
+          </div>
+          <div className="flex flex-col gap-[var(--space-3)]">
+            {resume.certifications.map((c) => (
+              <EntryRow key={c.id} title={c.name} subtitle={c.issuer || undefined} meta={c.issueDate || undefined} onEdit={() => setEditing(c)} onRemove={() => removeCertification(c.id)} />
+            ))}
+          </div>
+        </>
       )}
       <WizardFooter onNext={onNext} nextLabel="Review" />
     </div>
