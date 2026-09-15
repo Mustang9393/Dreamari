@@ -8,8 +8,8 @@ import { BorderBeam } from "border-beam";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
-import { collegeBySlug, money } from "./data";
-import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, pct, tags, useSaved } from "./shared";
+import { collegeBySlug, money, similarSchools } from "./data";
+import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, SchoolCard, pct, tags, useSaved } from "./shared";
 import { Donut } from "./viz";
 import { EXTRA } from "./extra";
 import { Segmented } from "@/components/connect/viz";
@@ -524,6 +524,26 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             )}
           </>
         )}
+
+        {/* Similar Schools: matched on the school being viewed, not the
+           student's own profile -- a 1.8-GPA visitor to Princeton should
+           still see Princeton's peers, not community colleges. Same rail
+           and SchoolCard as For You / Explore. */}
+        {(() => {
+          const matches = similarSchools(c);
+          if (matches.length === 0) return null;
+          return (
+            <TabPanel id="similar-schools-title" title="Similar Schools">
+              <ul className="dreamari-card-rail -mx-5 -my-[10px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[10px] sm:-mx-6 sm:px-6" aria-label="Schools similar to this one">
+                {matches.map(({ college: m, reason }) => (
+                  <li key={m.slug} className="w-[min(84vw,320px)] flex-none">
+                    <SchoolCard c={m} saved={saved.has(m.slug)} onSave={() => toggleSaved(m.slug)} compared={false} why={reason} />
+                  </li>
+                ))}
+              </ul>
+            </TabPanel>
+          );
+        })()}
 
         {/* A footnote, not a section -- direct feedback: the shared `Folded`
            card (same treatment as real content sections like "What they

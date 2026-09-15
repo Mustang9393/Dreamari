@@ -8,7 +8,7 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/component
 import { OpenCue } from "@/components/app/PosterCard";
 import { announce } from "@/components/app/LiveRegion";
 import { SMALL } from "@/components/career/CareerDetailExperience";
-import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, milesFromHome, milesLabel, type College } from "./data";
+import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, type College } from "./data";
 
 // One accent for the whole feature: colleges have no world, so they borrow
 // the app's primary blue. Cards for tribal colleges, trade schools etc. do
@@ -309,12 +309,17 @@ export function SchoolCard({
   const [showWhy, setShowWhy] = useState(false);
   const img = collegeImage(c);
   const mark = collegeMark(c);
-  // The Replit's three figures: acceptance, price after aid, miles from home.
-  const miles = milesFromHome(c);
+  // The Replit's three figures: acceptance, price after aid, finish rate.
+  // "Miles from home" used to stand in for the third figure on a hardcoded
+  // list of ~20 campus towns and silently fell back to finish rate for
+  // every other school (flagged by Joshua Pierce, 15 Sept 2026: "sometimes
+  // it shows finish rate and other times miles from home... we should keep
+  // this consistent") -- there's no real per-student location to compute
+  // distance from, so every card now shows the same real figure instead.
   const stats = [
     { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
     { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "avg. after aid" },
-    miles !== null ? { v: milesLabel(miles), k: "from home" } : { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
+    { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
   ];
   const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.85)" };
   return (

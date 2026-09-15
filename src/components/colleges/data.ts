@@ -520,21 +520,99 @@ export const STATES = [...new Set(COLLEGES.map((c) => c.state))].map((s) => ({ c
 export const money = (n: number) => `$${n.toLocaleString("en-US")}`;
 export const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "")}K` : String(n));
 
-// ---- Miles from home (demo) -----------------------------------------------
-// The demo student is Jordan Rivera at Westfield High School, so "home" is
-// Westfield, NJ. Road distances, rounded, by campus town; a mock that reads
-// right on the cards (the Replit's "from home" figure) until real geocoding
-// exists. Unknown towns return null and the card shows finish rate instead.
-const HOME_MILES: Record<string, number> = {
-  "New Brunswick, NJ": 18, "Ewing, NJ": 40, "Mahwah, NJ": 38, "Paramus, NJ": 25, "Edison, NJ": 10,
-  "Montclair, NJ": 20, "Newark, NJ": 14, "Princeton, NJ": 32, "Glassboro, NJ": 85, "Union, NJ": 5,
-  "Brookings, SD": 1360, "Vermillion, SD": 1320, "Sioux Falls, SD": 1300, "Kyle, SD": 1650, "Watertown, SD": 1370,
-  "Madison, SD": 1340, "Mitchell, SD": 1370, "Rapid City, SD": 1700, "Spearfish, SD": 1740, "Aberdeen, SD": 1420,
-  "Yankton, SD": 1340, "Mission, SD": 1540, "Sisseton, SD": 1400,
-};
-export function milesFromHome(c: College): number | null {
-  return HOME_MILES[`${c.city}, ${c.state}`] ?? null;
+// ---- Similar Schools --------------------------------------------------
+// Matches on the school being viewed, not the student's own profile (a
+// personalized "fit" block was removed from College Detail on 15 Sept 2026
+// for being hard to support consistently with the data -- this keeps that
+// same discipline: every factor below reads a real field, nothing invented,
+// and there is no distance factor because there is no reliable per-student
+// location signal, the same reason the "miles from home" stat was retired).
+//
+// Community colleges only match other community colleges, and trade/
+// technical schools only match within the same program family (a
+// cosmetology school recommends cosmetology schools, not aviation ones).
+// Family is read from the school's own NAME, not `detail.programmes` --
+// `synthDetail` below hands every school without real reference data the
+// same generic per-level programme list (all "Certificates" schools get
+// "Cosmetology, Esthetician, Nail Technician..." whether or not that's
+// what they actually teach), so programme names are only trustworthy when
+// `detail.sample` is not true. Everything else (Bachelor's/Associate,
+// outside the community-college case) matches within its own level, then
+// ranks by control, selectivity, size, cost and state.
+function isCommunityCollege(c: College): boolean {
+  return c.level === "Associate degrees" && /community college/i.test(c.name);
 }
-export function milesLabel(miles: number): string {
-  return `${miles.toLocaleString("en-US")} mi`;
+const TRADE_FAMILIES: { label: string; test: RegExp }[] = [
+  { label: "cosmetology", test: /cosmet|esthet|nail tech|barber|beauty|skin care|makeup|massage therapy/i },
+  { label: "aviation", test: /aviation|pilot|aircraft|flight/i },
+  { label: "culinary", test: /culinary|baking|pastry|chef/i },
+  { label: "automotive", test: /automotive|diesel|motorcycle/i },
+  { label: "healthcare", test: /nursing|dental|medical assist|pharmacy tech|surgical tech|veterinary/i },
+  { label: "information technology", test: /information technology|computer|network|cybersecurity|it\b/i },
+  { label: "construction and trades", test: /welding|electrical|plumbing|hvac|carpentry|construction/i },
+];
+function tradeFamily(c: College): string | null {
+  const fromName = TRADE_FAMILIES.find((f) => f.test.test(c.name));
+  if (fromName) return fromName.label;
+  if (c.detail && !c.detail.sample) {
+    const fromProgrammes = TRADE_FAMILIES.find((f) => c.detail!.programmes.some((p) => f.test.test(p.name)));
+    if (fromProgrammes) return fromProgrammes.label;
+  }
+  return null;
+}
+// A real, non-synthesized programme both schools actually offer -- same
+// `detail.sample` guard as tradeFamily, for the same reason.
+function sharedRealProgramme(a: College, b: College): string | null {
+  if (!a.detail || a.detail.sample || !b.detail || b.detail.sample) return null;
+  const bNames = b.detail.programmes.map((p) => p.name.toLowerCase());
+  const match = a.detail.programmes.find((p) => bNames.some((n) => n === p.name.toLowerCase() || n.includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(n)));
+  return match?.name ?? null;
+}
+
+type Factor = "control" | "selectivity" | "openAdmission" | "size" | "cost" | "nearby";
+const FACTOR_WORD: Record<Factor, string> = { control: "type", selectivity: "selectivity", openAdmission: "open admission", size: "size", cost: "cost", nearby: "location" };
+
+function scoreAndReason(base: College, c: College): { score: number; reason: string } {
+  const factors: Factor[] = [];
+  let score = 0;
+  if (c.control === base.control) { factors.push("control"); score += 2; }
+  if (base.admitRate === null && c.admitRate === null) { factors.push("openAdmission"); score += 2; }
+  else if (base.admitRate !== null && c.admitRate !== null && Math.abs(base.admitRate - c.admitRate) <= 15) { factors.push("selectivity"); score += 2; }
+  if (c.size === base.size) { factors.push("size"); score += 1; }
+  if (base.netPrice !== null && c.netPrice !== null && Math.abs(base.netPrice - c.netPrice) <= 8000) { factors.push("cost"); score += 1; }
+  if (c.state === base.state) { factors.push("nearby"); score += 1; }
+  const programme = sharedRealProgramme(base, c);
+  if (programme) score += 3;
+
+  let reason: string;
+  if (programme) reason = `Also offers ${programme}`;
+  else if (factors.includes("openAdmission") && factors.includes("nearby")) reason = "Also open admission and nearby";
+  else if (factors.length >= 2) reason = `Similar ${FACTOR_WORD[factors[0]]} and ${FACTOR_WORD[factors[1]]}`;
+  else if (factors.length === 1) reason = `Similar ${FACTOR_WORD[factors[0]]}`;
+  else reason = "A comparable option";
+  return { score, reason };
+}
+
+export type SimilarMatch = { college: College; reason: string };
+
+export function similarSchools(current: College, max = 4): SimilarMatch[] {
+  const rest = COLLEGES.filter((c) => c.slug !== current.slug);
+  let pool: College[];
+  let familyReason: string | null = null;
+
+  if (isCommunityCollege(current)) {
+    pool = rest.filter(isCommunityCollege);
+  } else if (current.level === "Certificates") {
+    const family = tradeFamily(current);
+    pool = rest.filter((c) => c.level === "Certificates" && (family === null || tradeFamily(c) === family));
+    if (family) familyReason = `Similar ${family} training`;
+  } else {
+    pool = rest.filter((c) => c.level === current.level);
+  }
+
+  return pool
+    .map((college) => ({ college, ...scoreAndReason(current, college) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, max)
+    .map(({ college, reason }) => ({ college, reason: familyReason ?? reason }));
 }
