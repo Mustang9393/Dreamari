@@ -1,7 +1,8 @@
 "use client";
 
-import { Expand, Maximize2, Minimize2, Minus, Plus, X } from "lucide-react";
+import { Expand, Maximize2, Minus, Plus, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { BorderBeam } from "border-beam";
 import type { ResumeData } from "@/lib/resume";
 import { Portal } from "@/components/profile/CareerReport";
 import { EXPERIENCE_TYPES, RESUME_TEMPLATES, type ResumeTemplateId } from "./data";
@@ -442,22 +443,24 @@ function measureTextExtent(root: HTMLElement): { left: number; right: number } |
  *  for their page preview, so what's on screen is proportionally identical
  *  to a full-size page rather than an arbitrary content-sized box.
  *
- *  `cropped` + `focusSection` is a "camera" over that sheet: it fits the
- *  focused section's own bounding box into the frame (centered both ways)
- *  and re-fits continuously as that section's content grows (typing a
- *  bullet, adding an entry). Moving to a different section pans/zooms the
- *  camera straight there -- no reset-to-full-page interlude (direct
- *  feedback, 15 Sept 2026: the reset read as a jarring extra cut; one
- *  continuous camera move reads as a single motion instead). A manual
- *  "fit to screen" toggle lets the student see the whole page any time
- *  without losing the camera's place on the next step. No `focusSection`
- *  (the first/last step) just shows the full page. */
+ *  Fit-to-screen -- the whole page always visible -- is the baseline now,
+ *  not a manual opt-out from an automatic zoom (direct feedback, 16 Sept
+ *  2026, after review with a second designer: automatic zoom-to-field lost
+ *  the "where on the page am I" context a live preview exists to answer --
+ *  "I put a date, it zoomed in... without me knowing where it is in the
+ *  whole resume"). The camera-tracking behaviour still exists in full --
+ *  `cropped` + `focusSection` fits the focused section/field into the frame
+ *  and re-fits as it grows, panning smoothly between targets -- but only
+ *  once the student explicitly turns on "Follow Me". That choice sticks
+ *  across steps in either direction (no more resetting on every section
+ *  change, which is what made the old manual toggle feel like it didn't
+ *  actually work as a preference). */
 function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }: { resume: ResumeData; templateId: string; cropped?: boolean; focusSection?: string | null; activeField?: string | null }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
   const [contentZoom, setContentZoom] = useState<ContentZoom | null>(null);
-  const [manualFit, setManualFit] = useState(false);
+  const [followMe, setFollowMe] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -468,13 +471,6 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-
-  // A step change gets a fresh camera on the new section rather than
-  // staying parked on a manual "fit to screen" left over from a prior step.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setManualFit(false);
-  }, [focusSection]);
 
   // Fits either the focused FIELD (while a drawer input for it is
   // focused) or, failing that, the focused SECTION's real text into the
@@ -579,8 +575,9 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
   // `contentZoom` being non-null already means a real target was found
   // (field or section) -- not gated on `focusSection` itself, since step
   // 0 (Personal Info) has none by default but still zooms once a field on
-  // it is actually focused.
-  const zoomed = cropped && !!contentZoom && !manualFit;
+  // it is actually focused. Zooming itself now only happens with Follow
+  // Me explicitly on.
+  const zoomed = cropped && !!contentZoom && followMe;
   // translate3d/scale3d, not the 2D form -- promotes this to its own GPU
   // layer up front instead of only while the transition is actually
   // running, which is what was reading as a soft/blurry moment on the
@@ -597,7 +594,7 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
       : undefined;
   const containerHeight = cropped ? "100%" : scale ? PAGE_HEIGHT * scale : undefined;
   const accent = templateFor(templateId).accent;
-  const canToggleFit = cropped && !!contentZoom;
+  const canFollow = cropped && !!contentZoom;
 
   return (
     <div
@@ -665,18 +662,42 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
           />
         )}
       </div>
-      {canToggleFit && (
-        <button
-          type="button"
-          data-print-hide
-          aria-label={manualFit ? "Zoom back to this section" : "Fit to screen"}
-          title={manualFit ? "Zoom back to this section" : "Fit to screen"}
-          onClick={() => setManualFit((v) => !v)}
-          className="dm-quiet absolute top-3 right-3 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border"
-          style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)", color: "var(--foreground)" }}
-        >
-          {manualFit ? <Expand className="h-3.5 w-3.5" aria-hidden /> : <Minimize2 className="h-3.5 w-3.5" aria-hidden />}
-        </button>
+      {canFollow && (
+        <div className="absolute top-3 right-3 z-10">
+          {followMe ? (
+            <button
+              type="button"
+              data-print-hide
+              aria-label="Stop following -- show the whole page"
+              title="Stop following -- show the whole page"
+              onClick={() => setFollowMe(false)}
+              className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[7px] text-[12px] font-bold"
+              style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)", color: "var(--foreground)" }}
+            >
+              <Expand className="h-3.5 w-3.5" aria-hidden /> Fit to Screen
+            </button>
+          ) : (
+            // The invitation itself gets the flashy treatment -- once it's
+            // on, the camera motion is already the interesting part, so the
+            // button settles into a plain state rather than competing with
+            // the page it's supposed to help read (direct feedback, 16
+            // Sept 2026: "a toggle like follow me with the beam border...
+            // for a cooler effect").
+            <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4} strength={0.7} active>
+              <button
+                type="button"
+                data-print-hide
+                aria-label="Follow Me -- zoom in on whatever you're editing"
+                title="Follow Me -- zoom in on whatever you're editing"
+                onClick={() => setFollowMe(true)}
+                className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[7px] text-[12px] font-bold"
+                style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)", color: "var(--foreground)" }}
+              >
+                <Sparkles className="h-3.5 w-3.5" aria-hidden /> Follow Me
+              </button>
+            </BorderBeam>
+          )}
+        </div>
       )}
     </div>
   );
