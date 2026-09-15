@@ -169,7 +169,7 @@ export function MatchGrid() {
                  disclaimer -- smaller and more muted than the status
                  line above it, not competing with it. */}
               <p className="text-[11px] leading-[13px] font-medium text-[var(--color-night-muted-foreground)] opacity-60">
-                Not final. Change anytime.
+                You can change them anytime.
               </p>
             </div>
             <button
