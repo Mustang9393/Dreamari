@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, GripVertical, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
-import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, removeExperience, upsertExperience, type ExperienceType, type ResumeExperience } from "@/lib/resume";
 import { EXPERIENCE_QUESTIONS, EXPERIENCE_TYPES } from "./data";
 import { Field, ResumeModal, TextInput } from "./ui";
@@ -19,7 +18,7 @@ const BULLET_MAX = 200;
 
 const EMPTY: ResumeExperience = { id: "", type: "job", where: "", title: "", location: "", startDate: "", endDate: "", current: false, bullets: [], aiAssisted: false };
 
-export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus }: { initial: ResumeExperience | null; onClose: () => void; onSaved: (title: string) => void; onFieldFocus?: (field: string | null) => void }) {
+export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSubDreamy }: { initial: ResumeExperience | null; onClose: () => void; onSaved: (title: string) => void; onFieldFocus?: (field: string | null) => void; onSubDreamy?: (dreamy: { sprite: string; line: string } | null) => void }) {
   const [sub, setSub] = useState<SubStep>(initial ? "info" : "type");
   const [draft, setDraft] = useState<ResumeExperience>(initial ?? { ...EMPTY, id: makeId() });
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -124,9 +123,19 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus }: { i
 
   const [q1, q2, q3, q4] = EXPERIENCE_QUESTIONS;
 
+  // Reports this sub-step's own line up to the single Dreamy that lives
+  // outside the card, instead of rendering a second one in here (direct
+  // feedback, 16 Sept 2026: "revert the dreamy position to before when it
+  // was outside, and just have it update to say what each modal was
+  // saying").
+  useEffect(() => {
+    onSubDreamy?.({ sprite: spriteByStep[sub], line: titleByStep[sub] });
+    return () => onSubDreamy?.(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sub]);
+
   return (
     <ResumeModal title={modalHeaderByStep[sub]} onClose={closeAndClear}>
-      <DreamyGuide sprite={spriteByStep[sub]} line={titleByStep[sub]} />
       {sub === "type" && (
         <div className="flex flex-col gap-[var(--space-3)]">
           {EXPERIENCE_TYPES.map(({ type, label, hint, Icon }) => (

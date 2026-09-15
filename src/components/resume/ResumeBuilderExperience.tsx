@@ -348,8 +348,15 @@ function ResumeBuilderInner() {
     return <DocumentScreen resume={resume} title="Your Resume" onBack={backToProfile} backLabel="Back to Resumes" router={router} templateId={DEFAULT_RESUME_TEMPLATE} />;
   }
 
-  const dreamy = RESUME_WIZARD_DREAMY[stepIndex];
-  const showWizardDreamy = !(stepIndex === 2 && experienceModal !== null) && !subDreamy;
+  // One Dreamy, always visible, outside the card -- his line/sprite just
+  // updates to whatever's actually active: the wizard step by default, or
+  // whichever nested sub-flow (Experience's screens, a Skills category)
+  // reports its own line up via onSubDreamy while it's open (direct
+  // feedback, 16 Sept 2026: "revert the dreamy position to before when it
+  // was outside, and just have it update to say what each modal was
+  // saying" -- one Dreamy that follows you, not one per modal).
+  const activeDreamy = subDreamy ?? RESUME_WIZARD_DREAMY[stepIndex];
+  const showBackButton = stepIndex > 0 && !subDreamy;
 
   return (
     <Shell tabs={<ResumeBuilderTabs active="builder" router={router} onClose={backToProfile} />}>
@@ -360,37 +367,31 @@ function ResumeBuilderInner() {
          ratio holds as the viewport grows. */}
       <div className="grid grid-cols-1 items-start gap-[var(--space-6)] lg:grid-cols-[minmax(420px,1fr)_minmax(0,1.2fr)]">
         <div className="flex flex-col gap-[var(--space-5)]">
-          {/* Empty, matching-height spacer -- the live preview column's own
-             "Live Preview / Full Screen" row (below) is the same height, so
-             the card and the document start at the same Y instead of the
-             two frames drifting apart (direct feedback, 16 Sept 2026: "I
-             need these two frames to be aligned"). */}
-          <div aria-hidden className="hidden flex-none lg:block lg:min-h-[56px]" />
+          <div className="max-w-[440px]">
+            <DreamyGuide sprite={activeDreamy.sprite} line={activeDreamy.line} reactionNonce={reactionNonce} />
+          </div>
           <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             {/* Back sits beside the step label + progress bar as one
-               column, not down in the footer -- Dreamy moved below this
-               row instead of overlapping it (direct feedback, 16 Sept
+               column, not down in the footer (direct feedback, 16 Sept
                2026: "the back button [and] the resume label + progress
-               bar can be aligned so its one column... the Dreamy and
-               speech bubble will sit below it"). Each step's own
+               bar can be aligned so its one column"). Each step's own
                WizardFooter keeps only Next/Save; Back lives here once. */}
-            <div className="flex items-start gap-[var(--space-3)]">
-              {showWizardDreamy && stepIndex > 0 && (
-                <button
-                  type="button"
-                  aria-label="Back"
-                  onClick={() => goToStep(stepIndex - 1)}
-                  className="dm-quiet mt-[1px] flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
-                  style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                >
-                  <ChevronLeft className="h-4 w-4" aria-hidden />
-                </button>
-              )}
-              <div className="min-w-0 flex-1">
-                <WizardProgress stepIndex={stepIndex} />
-              </div>
-            </div>
-            {showWizardDreamy && <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} size="sm" />}
+            <WizardProgress
+              stepIndex={stepIndex}
+              leading={
+                showBackButton ? (
+                  <button
+                    type="button"
+                    aria-label="Back"
+                    onClick={() => goToStep(stepIndex - 1)}
+                    className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full border"
+                    style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                ) : undefined
+              }
+            />
             {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); goToStep(1); }} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 1 && <EducationStep resume={resume} onNext={() => { react(); goToStep(2); }} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 2 && (
@@ -407,6 +408,7 @@ function ResumeBuilderInner() {
                     showToast(`${title} added`);
                   }}
                   onFieldFocus={setActiveField}
+                  onSubDreamy={setSubDreamy}
                 />
               ) : (
                 <ExperienceStep

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Award, Briefcase, Check, CircleDashed, GraduationCap, HelpCircle, Pencil, Plus, Sparkles, Trash2, User } from "lucide-react";
-import { DreamyGuide } from "@/components/build/DreamyGuide";
 import {
   type ResumeData,
   type ResumeCertification,
@@ -318,8 +317,7 @@ function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSa
   const toggle = (s: string) => setPicked((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : cur.length >= MAX_SKILLS_PER_CATEGORY ? cur : [...cur, s]));
   return (
     <ResumeModal title={label} onClose={onClose}>
-      <DreamyGuide sprite={SKILL_DREAMY[categoryKey].sprite} line={SKILL_DREAMY[categoryKey].line} />
-      <p className="mt-[var(--space-3)] mb-[var(--space-4)] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select up to 3.</p>
+      <p className="mb-[var(--space-4)] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select up to 3.</p>
       <div className="mb-[var(--space-4)] flex gap-[var(--space-2)]">
         <TextInput id={`skill-${categoryKey}-custom`} value={custom} onChange={setCustom} placeholder="Type your own…" />
         <button
@@ -365,10 +363,9 @@ function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSa
 export function SkillsStep({ resume, onNext, onSubDreamy }: { resume: ResumeData; onNext: () => void; onSubDreamy?: (dreamy: { sprite: string; line: string } | null) => void }) {
   const [open, setOpen] = useState<"people" | "tech" | "languages" | null>(null);
   const [showHelp, setShowHelp] = useState(false);
-  // The picker below has its own DreamyGuide (asking that category's
-  // question) -- tell the wizard shell to hide its own top-level Dreamy
-  // while it's open, so only one ever shows (direct feedback, 16 Sept
-  // 2026: "two dreamys on screen").
+  // Reports this category's own line up to the single Dreamy that lives
+  // outside the card (direct feedback, 16 Sept 2026: "just have it update
+  // to say what each modal was saying" -- one Dreamy, not one per modal).
   useEffect(() => {
     onSubDreamy?.(open ? SKILL_DREAMY[open] : null);
     return () => onSubDreamy?.(null);
