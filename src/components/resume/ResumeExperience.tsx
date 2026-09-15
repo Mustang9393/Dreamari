@@ -37,14 +37,22 @@ function StatusPill({ tone, children }: { tone: "neutral" | "primary" | "success
   return <span className="rounded-full border px-[9px] py-[3px] text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={style}>{children}</span>;
 }
 
-function ScoreBadge({ code, label, value }: { code: string; label: string; value: number }) {
+// A cryptic 2-letter code (NW, JM) next to its own spelled-out label
+// ("Needs Work") was decoding nothing -- direct feedback, 16 Sept 2026:
+// "what is JM? ... what is NW?". This is the same shape as JobMatchPanel's
+// own ScoreChip (uppercase category label, then the number itself as the
+// colored anchor with its plain-English verdict after it) -- an older,
+// clearer pattern already established elsewhere that this card's own
+// badge had drifted from (direct feedback: "there was a better way these
+// badges were shown before").
+function ScoreBadge({ category, label, value }: { category: string; label: string; value: number }) {
   const tone = scoreTone(value);
   return (
-    <span className="flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[8px] py-[4px]" style={{ borderColor: "color-mix(in srgb, " + tone + " 35%, transparent)", background: "color-mix(in srgb, " + tone + " 12%, transparent)" }}>
-      <span className="flex size-[20px] flex-none items-center justify-center rounded-[5px] text-[9.5px] font-extrabold" style={{ background: tone, color: "#05070f" }}>{code}</span>
-      <span className="flex items-baseline gap-[3px]">
-        <span className="text-[12.5px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{value}/100</span>
-        <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+    <span className="flex flex-col gap-[1px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[6px]" style={{ borderColor: "var(--glass-border)" }}>
+      <span className="text-[10px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{category}</span>
+      <span className="flex items-baseline gap-[5px]">
+        <span className="text-[17px] leading-none font-extrabold tabular-nums" style={{ color: tone, fontFamily: "var(--font-display)" }}>{value}</span>
+        <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>/100 · {label}</span>
       </span>
     </span>
   );
@@ -72,9 +80,8 @@ function formatDate(ts: number) {
 function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void }) {
   const [downloading, setDownloading] = useState(false);
   const ats = version.atsCheck;
-  // "NW — Needs Work" -> "NW" / "Needs Work", the same short-code-plus-
-  // label shape the replit reference's own card badge uses.
-  const [gradeCode, gradeLabel] = ats ? ats.qualityGrade.split(" — ") : ["", ""];
+  // Stored as "NW — Needs Work"; only the plain-English half is ever shown.
+  const gradeLabel = ats ? (ats.qualityGrade.split(" — ")[1] ?? ats.qualityGrade) : "";
   const template = RESUME_TEMPLATES.find((t) => t.id === version.template) ?? RESUME_TEMPLATES[0];
   return (
     // A left accent stripe in the version's own template color, and a
@@ -127,8 +134,8 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
       </div>
       {(ats || version.targetPosition) && (
         <div className="flex flex-wrap items-center gap-[8px] pr-[var(--space-5)]">
-          {ats && <ScoreBadge code={gradeCode} label={gradeLabel} value={ats.qualityScore} />}
-          {ats && ats.jobMatchScore !== null && <ScoreBadge code="JM" label={ats.jobMatchLabel || "Job Match"} value={ats.jobMatchScore} />}
+          {ats && <ScoreBadge category="Resume Rating" label={gradeLabel} value={ats.qualityScore} />}
+          {ats && ats.jobMatchScore !== null && <ScoreBadge category="Job Match" label={ats.jobMatchLabel || "Possible Match"} value={ats.jobMatchScore} />}
           {version.targetPosition && (
             <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               Target: <span style={{ color: "var(--foreground)" }}>{version.targetPosition}</span>
