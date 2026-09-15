@@ -8,7 +8,8 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/component
 import { OpenCue } from "@/components/app/PosterCard";
 import { announce } from "@/components/app/LiveRegion";
 import { SMALL } from "@/components/career/CareerDetailExperience";
-import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, type College } from "./data";
+import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeCoords, collegeImage, collegeMark, compact, type College } from "./data";
+import { haversineMiles, milesLabel, seededMiles, useHomeCoords } from "./distance";
 
 // One accent for the whole feature: colleges have no world, so they borrow
 // the app's primary blue. Cards for tribal colleges, trade schools etc. do
@@ -309,17 +310,24 @@ export function SchoolCard({
   const [showWhy, setShowWhy] = useState(false);
   const img = collegeImage(c);
   const mark = collegeMark(c);
-  // The Replit's three figures: acceptance, price after aid, finish rate.
-  // "Miles from home" used to stand in for the third figure on a hardcoded
-  // list of ~20 campus towns and silently fell back to finish rate for
-  // every other school (flagged by Joshua Pierce, 15 Sept 2026: "sometimes
-  // it shows finish rate and other times miles from home... we should keep
-  // this consistent") -- there's no real per-student location to compute
-  // distance from, so every card now shows the same real figure instead.
+  // The Replit's three figures: acceptance, price after aid, miles from
+  // home -- now real on both ends: the student's own zip code (geocoded
+  // live via Zippopotam) and the college's real campus coordinates
+  // (geocoded once via Nominatim, COLLEGE_COORDS in data.ts). The old
+  // version stood in "miles from home" for ~20 hand-typed towns and
+  // silently fell back to finish rate for every other school (flagged by
+  // Joshua Pierce, 15 Sept 2026: "sometimes it shows finish rate and other
+  // times miles from home... we should keep this consistent"). Direct
+  // instruction the same day: never fall back to a different stat -- when
+  // there's no real zip on file yet, show a seeded (fixed, not
+  // random-per-render) placeholder distance instead.
+  const home = useHomeCoords();
+  const dest = collegeCoords(c);
+  const miles = home && dest ? Math.round(haversineMiles(home, dest)) : seededMiles(c.slug);
   const stats = [
     { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
     { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "avg. after aid" },
-    { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
+    { v: milesLabel(miles), k: "from home" },
   ];
   const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.85)" };
   return (

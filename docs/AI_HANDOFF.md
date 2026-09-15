@@ -9757,3 +9757,24 @@ ESLint + `tsc --noEmit -p .` clean across all seven touched files.
 `src/components/marketing/Nav.tsx`, `src/components/app/chrome.tsx`,
 `src/components/colleges/data.ts`, `src/components/colleges/shared.tsx`,
 `src/components/colleges/CollegeDetailExperience.tsx`.
+
+## 2026-09-15 · Real miles-from-home on school cards
+
+Replaced the seeded/finish-rate third stat chip with a real distance,
+per direct instruction ("never fallback to finish rate... if you have to
+fake a distance that's okay for the demo"). Two free, no-key APIs:
+Nominatim (OpenStreetMap) geocoded all 55 colleges' real campus towns once
+(`COLLEGE_COORDS` in `colleges/data.ts`, static from here on); Zippopotam.us
+geocodes the student's real `StudentProfile.zipCode` live, the first time
+it's needed, cached in localStorage so it's one lookup per zip ever, not
+per card (`colleges/distance.ts`, new file). Real haversine distance when
+both ends are known; a seeded (deterministic, not random-per-render)
+placeholder when there's no zip on file yet -- the card never omits the
+stat and never falls back to a different figure. Verified live: no zip on
+file -> a fixed seeded number; zip set to San Francisco (94102) -> 2,475 mi
+to Clarkson University (Potsdam, NY), a correct real distance.
+
+ESLint + `tsc --noEmit -p .` clean.
+
+`src/components/colleges/data.ts`, `src/components/colleges/shared.tsx`,
+`src/components/colleges/distance.ts` (new).
