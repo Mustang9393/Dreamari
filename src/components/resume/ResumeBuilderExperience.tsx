@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Download, FileText, Pencil, Sparkles, X } from "lucide-react";
+import { Download, FileText, Pencil, Sparkles, Wand2, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
@@ -10,6 +10,7 @@ import { ATSCheckPanel } from "./ATSCheckPanel";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
 import { ExperienceModal } from "./ExperienceModal";
 import { ExportChecklistModal } from "./ExportChecklistModal";
+import { JobMatchPanel } from "./JobMatchPanel";
 import { ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
 import { TailorScreen } from "./TailorScreen";
 import { TemplateGallery } from "./TemplateGallery";
@@ -81,7 +82,7 @@ function TopBar({ label, onClose, extra }: { label: string; onClose: () => void;
 }
 
 function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, templateId, version }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter>; templateId: string; version?: ResumeVersion }) {
-  const [panel, setPanel] = useState<"none" | "ats" | "text" | "export">("none");
+  const [panel, setPanel] = useState<"none" | "tailor" | "ats" | "text" | "export">("none");
   return (
     <Shell contentMaxWidth={900}>
       <TopBar
@@ -89,6 +90,17 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         onClose={() => router.push("/profile?tab=resume")}
         extra={
           <>
+            {version && (
+              <button
+                type="button"
+                data-print-hide
+                onClick={() => setPanel("tailor")}
+                className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
+                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+              >
+                <Wand2 className="h-4 w-4" aria-hidden /> Tailor Resume
+              </button>
+            )}
             {version && (
               <button
                 type="button"
@@ -133,7 +145,9 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
           </>
         }
       />
-      {panel === "ats" && version ? (
+      {panel === "tailor" && version ? (
+        <JobMatchPanel resume={resume} version={version} onClose={() => setPanel("none")} />
+      ) : panel === "ats" && version ? (
         <ATSCheckPanel resume={resume} version={version} onClose={() => setPanel("none")} />
       ) : panel === "text" ? (
         <TextPreviewModal resume={resume} onClose={() => setPanel("none")} />
@@ -198,14 +212,19 @@ function ResumeBuilderInner() {
   }
 
   if (view === "tailor") {
-    // Present (not the resume-home "Tailor" button, not "Edit Selection" on
-    // a finished document -- both append &edit=1) whenever this is still
+    // Name it, pick what's in it, pick a template -- matching to a job is
+    // its own separate thing now (JobMatchPanel, opened from the finished
+    // document), so this screen isn't called "Tailor" anymore either
+    // (direct feedback, 15 Sept 2026: "the tailoring happens as a
+    // seperate thing from the last naming/template changer"). Present
+    // (not resume-home's "Edit" button, not "Edit Selection" on a
+    // finished document -- both append &edit=1) whenever this is still
     // part of creating the resume: straight from finishing the wizard, or
     // from picking a template for another one.
     const isEditingExisting = searchParams.get("edit") === "1";
     return (
       <Shell contentMaxWidth={760}>
-        <TopBar label={activeVersion ? "Tailor Resume" : "Tailor New Resume"} onClose={backToProfile} />
+        <TopBar label={activeVersion ? "Edit Selection" : "New Resume"} onClose={backToProfile} />
         <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
           <TailorScreen
             resume={resume}

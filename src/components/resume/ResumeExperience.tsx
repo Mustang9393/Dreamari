@@ -39,20 +39,24 @@ function VersionRow({ version, onOpen, onEdit, onDelete }: { version: ResumeVers
           </span>
         </button>
         <div className="flex flex-none items-center gap-[6px]">
-          {/* "Edit" alone doesn't say what's actually here -- which
-             education/experience to include, the template, and matching to
-             a job description (direct feedback, 15 Sept 2026: "I dont see
-             the tailor resume feature anymore" -- nothing on screen ever
-             said the word "Tailor", just an unlabeled pencil icon, so the
-             feature read as missing even though it was one click away). */}
+          {/* Which education/experience to include and the template --
+             matching to a job lives on the finished resume itself now (the
+             "Tailor Resume" button, right beside ATS Check) since it's
+             something you'd want to redo against a different job any
+             number of times, not a one-time step bundled in here (direct
+             feedback, 15 Sept 2026: "the tailoring happens as a seperate
+             thing from the last naming/template changer"). Still a
+             labeled button, not just an icon (direct feedback: "I dont
+             see the tailor resume feature anymore" -- a bare pencil icon
+             read as nothing at all). */}
           <button
             type="button"
-            aria-label={`Tailor ${version.name}`}
+            aria-label={`Edit ${version.name}`}
             onClick={onEdit}
             className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
             style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
           >
-            <Pencil className="h-3.5 w-3.5" aria-hidden /> Tailor
+            <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit
           </button>
           <button type="button" aria-label={`Delete ${version.name}`} onClick={onDelete} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
             <Trash2 className="h-4 w-4" aria-hidden />
