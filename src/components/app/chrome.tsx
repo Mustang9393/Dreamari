@@ -192,13 +192,18 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
 /** The one menu every screen shares: the app's pages, the Connect demo
  *  roles, and the theme choice. The landing pages' hamburger renders this
  *  same panel (direct instruction, 11 Sept 2026: identical menus everywhere,
- *  theme toggle inside the menu). `extra` lets a page add its own rows on top. */
-export function QuickLinksPanel({ onNavigate, extra, className = "" }: { onNavigate?: () => void; extra?: React.ReactNode; className?: string }) {
+ *  theme toggle inside the menu). `extra` lets a page add its own rows on
+ *  top. `hideDemoLinks` (marketing nav only, 15 Sept 2026: "a lot of the
+ *  hamburger is for demo only, drop this set") skips the whole-app sitemap
+ *  and the Connect role switcher -- both are internal QA/demo conveniences,
+ *  not navigation a real visitor should see -- while the in-app hamburger
+ *  (QuickLinksMenu below) keeps them, unchanged. */
+export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLinks = false }: { onNavigate?: () => void; extra?: React.ReactNode; className?: string; hideDemoLinks?: boolean }) {
   const { theme, toggle } = useGlobalTheme();
   return (
     <div className={`flex flex-col gap-[2px] ${className}`}>
       {extra}
-      {QUICK_LINKS.map((link) => (
+      {!hideDemoLinks && QUICK_LINKS.map((link) => (
         <Link
           key={link.label}
           href={link.href}
@@ -209,18 +214,22 @@ export function QuickLinksPanel({ onNavigate, extra, className = "" }: { onNavig
           {link.label}
         </Link>
       ))}
-      <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Connect demo · view as</span>
-      {DEMO_LINKS.map((link) => (
-        <Link
-          key={link.label}
-          href={link.href}
-          onClick={onNavigate}
-          className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
-          style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
-        >
-          {link.label}
-        </Link>
-      ))}
+      {!hideDemoLinks && (
+        <>
+          <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Connect demo · view as</span>
+          {DEMO_LINKS.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              onClick={onNavigate}
+              className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+              style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </>
+      )}
       {/* Theme choice rides in the same menu on every screen */}
       <button
         type="button"

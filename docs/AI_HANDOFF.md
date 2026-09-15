@@ -9655,3 +9655,67 @@ the ATS Check ask; flag if still wanted.
 `src/components/resume/ResumeBuilderExperience.tsx`,
 `src/components/resume/ResumeDocument.tsx`,
 `src/components/resume/TailorScreen.tsx`, `package.json` (added `docx`).
+
+## 2026-09-15 · Enterprise page structure, College Detail: Similar Schools, marketing nav simplified
+
+Three pieces of work this session, all verified live.
+
+**Enterprise/Schools page (`SchoolsView.tsx`, `SchoolsIllustrations.tsx`):**
+Went through several structural directions (a sticky-scroll story, a full
+"route" reimagining) before landing back on the page's own established
+structure -- full H2s, pill tabs (`Chips`), the chip-driven five-stage
+gallery -- since that's what both this page and Codex's independent
+`enterprise-landing-concepts` sketch converged on from the same reference.
+Two real fixes kept from the detours: the Match illustration was a stale
+swipe-deck mechanic (the real `/match-grid` page grids instead, verified
+live 15 Sept) -- redrawn to match, salary chip + save button + real copy.
+And the stage gallery's art column is now a fixed height (measured live:
+natural heights ranged 423-741px across the five illustrations, visibly
+jumping the row) -- Codex's own version used the same fixed-height guard
+for the same reason. The Audiences section's illustration column is 520px,
+not the previous 600px (right-sized to the tallest real composition,
+487px -- 600px left ~170px of dead space under it).
+
+**College Detail: Similar Schools (`colleges/data.ts`, `shared.tsx`,
+`CollegeDetailExperience.tsx`):** New section at the bottom of every school
+profile, matched on the school being viewed, not the student's profile (the
+same discipline behind removing `YourPath`/"Why X fits you" from this page
+on 15 Sept for being hard to support consistently with the data). Community
+colleges only match other community colleges; trade/technical schools only
+match within the same program family (cosmetology, aviation, culinary,
+automotive, healthcare, IT, construction), read from the school's own name
+-- `synthDetail()` hands every school without real reference data the same
+generic per-level programme list, so programme names are only trusted for
+matching when `detail.sample` is not true. Everything else ranks within its
+own degree level by control, selectivity, size, cost and state. Verified
+live: Princeton -> South Dakota State ("Also offers Economics", a real
+shared programme) and Kean University ("Similar size and cost"); Christine
+Valmy (cosmetology) -> 3 genuine cosmetology/esthetics matches ("Similar
+cosmetology training"); Bergen Community College correctly shows zero
+matches (it's the only true community college in the current 55-school
+dataset) rather than a bad one.
+
+Same change fixed a flagged inconsistency (Joshua Pierce): `SchoolCard`'s
+third stat used to be "miles from home" from a hardcoded ~20-town lookup
+table (added 11 Sept for a 33-college dataset) that silently fell back to
+finish rate for any of the 25 colleges added 14 Sept whose town wasn't in
+the table. Removed the table; every card now shows finish rate, always.
+
+**Marketing nav (`marketing/Nav.tsx`, `app/chrome.tsx`):** Dropped the
+inline link rows (student "How it works/Simulations/Career worlds", schools
+"Why Dreamari/Student Experience/For Your Organization") from both the
+desktop bar and the hamburger -- direct feedback, minimize the landing
+page. Also dropped the whole-app sitemap and the Connect demo role switcher
+from the marketing hamburger specifically (`QuickLinksPanel` gained a
+`hideDemoLinks` prop) -- both are internal QA/demo conveniences, not real
+visitor navigation; the in-app hamburger (`QuickLinksMenu`) is unchanged.
+The bar is now just the logo, the CTA, and a hamburger holding the audience
+switch and theme toggle.
+
+ESLint + `tsc --noEmit -p .` clean across all seven touched files.
+
+`src/components/marketing/SchoolsView.tsx`,
+`src/components/marketing/SchoolsIllustrations.tsx`,
+`src/components/marketing/Nav.tsx`, `src/components/app/chrome.tsx`,
+`src/components/colleges/data.ts`, `src/components/colleges/shared.tsx`,
+`src/components/colleges/CollegeDetailExperience.tsx`.

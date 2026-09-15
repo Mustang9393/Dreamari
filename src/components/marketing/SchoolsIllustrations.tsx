@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowRight, Briefcase, Check, ChevronLeft, ChevronRight, GraduationCap, MessageSquare, Plus, Sparkles, Target, ThumbsUp, Users, Waypoints } from "lucide-react";
+import { ArrowRight, Briefcase, Check, GraduationCap, MessageSquare, Plus, Sparkles, Target, ThumbsUp, Users, Waypoints } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useRef, type CSSProperties, type ReactNode } from "react";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { CompanyChip } from "@/components/connect/primitives";
 import { PROS, THREADS } from "@/components/connect/data";
@@ -516,14 +516,18 @@ export function BuildIllustration() {
 }
 
 // The illustration's own cards -- NOT imported from the live match-grid
-// deck (this is the Enterprise/Schools page: a stylized, info-dense
+// component (this is the Enterprise/Schools page: a stylized, info-dense
 // mockup like its Build/Explore/Immerse/Connect siblings on the same
 // page, not a literal recreation of the Student page's Match.tsx cards
 // -- direct instruction, 13 Sept 2026: "should feel more like the others
-// on there"). Investment Banker's figures match what this illustration
-// already had pre-redesign ($361K median); Private Equity and Software
-// Engineer extend it with the same photo assets this page's other
-// illustrations already use.
+// on there"). The mechanic below WAS a fanned swipe deck; verified live
+// against /match-grid on 15 Sept 2026 and the real page grids instead (tap
+// a card, tap + to save), so this was redrawn to match -- salary chip,
+// save button and the page's own "Tap a card to see details. Tap + to
+// save it." caption. Investment Banker's figures match what this
+// illustration already had pre-redesign ($361K median); Private Equity and
+// Software Engineer extend it with the same photo assets this page's
+// other illustrations already use.
 const MATCH_CARDS = [
   {
     id: "investment-banking",
@@ -551,181 +555,38 @@ const MATCH_CARDS = [
   },
 ] as const;
 const MATCH_SLOTS = 3;
-
-// The exact fanned-deck mechanic as the Play tab's Career Simulations
-// carousel (MobileDeck in PlayHub.tsx): an `order` array of ids rotates
-// front-to-back; advance() sends the front card flying off-screen (the
-// same motion a left-swipe produces) before rotating it to the back;
-// back() pulls the last card to the front and slides it in from
-// off-screen the same way a right-swipe would. Only differences from
-// PlayHub's version, per direct instruction: buttons trigger the same
-// advance()/back() a swipe would (not just gesture + one idle hint), the
-// front card is still draggable on touch, and the buttons sit either
-// side of the stack instead of being absent.
-const MATCH_DECK_VISIBLE = 3;
-const MATCH_CARD_W = 220;
-const MATCH_CARD_H = 300;
-// Bigger than PlayHub's own 16px/0.06 (direct feedback: the peeking cards
-// need to actually read as peeking, not just a sliver) -- the deck's own
-// box is widened by MATCH_STEP_X * (MATCH_DECK_VISIBLE - 1) below so the
-// peek has somewhere to go without the side arrows masking it.
-const MATCH_STEP_X = 34;
-const MATCH_STEP_SCALE = 0.09;
-const MATCH_SPRING = { type: "spring", stiffness: 300, damping: 32, mass: 0.9 } as const;
-const MATCH_OFFSCREEN = 260;
-const MATCH_SWIPE_DISTANCE = 50;
-const MATCH_SWIPE_VELOCITY = 450;
-
-function MatchDetailSection({ label, items }: { label: string; items: readonly string[] }) {
-  return (
-    <div>
-      <p className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: INK2 }}>{label}</p>
-      <ul className="mt-1.5 flex flex-col gap-1">
-        {items.map((item) => (
-          <li key={item} className="flex items-start gap-1.5 text-[12.5px] leading-[17px] font-medium" style={{ color: INK }}>
-            <span aria-hidden className="mt-[7px] size-1 flex-none rounded-full" style={{ background: INK2 }} />
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+// The real page's own state on first load: two of three already saved
+// (Investment Banking, Private Equity), so the grid shows what "saved"
+// and "not yet saved" both look like without any interaction.
+const MATCH_SAVED = ["investment-banking", "private-equity"];
 
 export function MatchIllustration() {
-  const [order, setOrder] = useState(MATCH_CARDS.map((c) => c.id));
-  const [leaving, setLeaving] = useState<{ id: string; dir: 1 | -1 } | null>(null);
-  const [entering, setEntering] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string[]>(["investment-banking", "private-equity"]);
-  const [openId, setOpenId] = useState<string | null>(null);
-
-  function advance(dir: 1 | -1) {
-    if (leaving) return;
-    setEntering(null);
-    setLeaving({ id: order[0], dir });
-    setOpenId(null);
-  }
-  function back() {
-    if (leaving || order.length < 2) return;
-    const last = order[order.length - 1];
-    setEntering(last);
-    setOrder([last, ...order.slice(0, -1)]);
-    setOpenId(null);
-  }
-  function settle() {
-    setOrder((o) => [...o.slice(1), o[0]]);
-    setLeaving(null);
-  }
-  function toggleSelect(id: string) {
-    setSelected((sel) => (sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]));
-  }
-
-  const open = openId ? MATCH_CARDS.find((c) => c.id === openId) : null;
-
   return (
-    <Fit base={520}>
-        <div role="img" aria-label="Match: Find your Top 3, a fanned card stack. Investment Banker and Private Equity Analyst are saved; Software Engineer is not yet saved. Prev and Next arrows page through the three careers with the same motion as a swipe, a plus button saves each one, and Learn more reveals what the job involves." className="flex flex-col items-center gap-4 p-2">
-          <div className="flex w-full items-center justify-between">
-            <span className="text-[15px] font-extrabold" style={{ color: INK }}>Find your Top 3</span>
-            <span className="flex gap-1.5">
-              {Array.from({ length: MATCH_SLOTS }).map((_, i) => (
-                <span key={i} className="size-3.5 rounded-full" style={{ background: i < selected.length ? AMBER : "transparent", boxShadow: `inset 0 0 0 2px ${i < selected.length ? AMBER : "var(--ill-line)"}` }} />
-              ))}
-            </span>
-          </div>
-
-          <div className="flex w-full items-center justify-center gap-2">
-            <button type="button" onClick={back} aria-label="Previous career" className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--surface)", borderColor: LINE, color: INK, boxShadow: TILE_SHADOW }}>
-              <ChevronLeft className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
-            </button>
-
-            <div className="relative flex-none" style={{ height: MATCH_CARD_H, width: MATCH_CARD_W + MATCH_STEP_X * (MATCH_DECK_VISIBLE - 1) }}>
-              {order.map((id, index) => {
-                const c = MATCH_CARDS.find((card) => card.id === id)!;
-                const isLeaving = leaving?.id === id;
-                const slot = leaving && !isLeaving ? index - 1 : index;
-                const shown = isLeaving || slot < MATCH_DECK_VISIBLE;
-                const depth = Math.min(slot, MATCH_DECK_VISIBLE - 1);
-                const isFront = slot === 0 && !leaving;
-                const target = isLeaving
-                  ? { x: leaving.dir * MATCH_OFFSCREEN, scale: 1, opacity: 1 }
-                  : { x: depth * MATCH_STEP_X, scale: 1 - depth * MATCH_STEP_SCALE, opacity: shown ? 1 : 0 };
-                const animate = entering === id && slot === 0 ? { ...target, x: [-MATCH_OFFSCREEN, 0] } : target;
-                const rank = selected.indexOf(id) + 1;
-                return (
-                  <motion.div
-                    key={id}
-                    className="absolute top-0 left-0"
-                    style={{ height: MATCH_CARD_H, width: MATCH_CARD_W, zIndex: isLeaving ? MATCH_DECK_VISIBLE + 2 : MATCH_DECK_VISIBLE + 1 - slot, pointerEvents: isFront ? "auto" : "none", touchAction: "pan-y" }}
-                    initial={false}
-                    animate={animate}
-                    transition={MATCH_SPRING}
-                    onAnimationComplete={() => {
-                      if (isLeaving) settle();
-                      if (entering === id) setEntering(null);
-                    }}
-                    drag={isFront ? "x" : false}
-                    dragDirectionLock
-                    dragSnapToOrigin
-                    dragMomentum={false}
-                    dragElastic={1}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.x < -MATCH_SWIPE_DISTANCE || info.velocity.x < -MATCH_SWIPE_VELOCITY) advance(-1);
-                      else if (info.offset.x > MATCH_SWIPE_DISTANCE || info.velocity.x > MATCH_SWIPE_VELOCITY) back();
-                    }}
-                  >
-                    <Poster src={c.photo} title={c.title} world={c.world} className="h-full w-full" style={{ pointerEvents: isFront ? "auto" : "none" }} />
-                    <span className="absolute top-2 left-2 rounded-full px-2 py-[3px] text-[10px] font-bold" style={{ background: "#dcfce7", color: "#166534" }}>{c.salary}</span>
-                    {isFront && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => toggleSelect(id)}
-                          aria-pressed={rank > 0}
-                          aria-label={rank > 0 ? `Remove ${c.title} from your Top 3` : `Add ${c.title} to your Top 3`}
-                          className="absolute top-2 right-2 flex size-7 cursor-pointer items-center justify-center rounded-full border-2 transition-transform active:scale-90"
-                          style={rank > 0 ? { background: BLUE, borderColor: BLUE } : { background: "rgba(5,7,15,0.35)", borderColor: "rgba(255,255,255,0.65)" }}
-                        >
-                          {rank > 0 ? <span className="text-[12px] font-extrabold text-white">{rank}</span> : <Plus className="h-3.5 w-3.5 text-white" strokeWidth={3} aria-hidden />}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setOpenId(openId === id ? null : id)}
-                          aria-expanded={openId === id}
-                          className="absolute top-[34%] left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full px-2 py-[3px] text-[9.5px] font-semibold whitespace-nowrap text-white"
-                          style={{ background: "rgba(5,7,15,0.4)" }}
-                        >
-                          Learn more
-                        </button>
-                      </>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            <button type="button" onClick={() => advance(-1)} aria-label="Next career" className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ background: "var(--surface)", borderColor: LINE, color: INK, boxShadow: TILE_SHADOW }}>
-              <ChevronRight className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
-            </button>
-          </div>
-
-          <AnimatePresence>
-            {open && (
-              <motion.div
-                initial={{ opacity: 0, y: -6, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                exit={{ opacity: 0, y: -6, height: 0 }}
-                transition={{ duration: 0.22, ease: EASE }}
-                className="w-full max-w-[220px] overflow-hidden rounded-[14px] border px-4 py-3"
-                style={{ borderColor: LINE, background: "var(--ill-soft)" }}
-              >
-                {/* No modal -- the same inline reveal below the card
-                   stack this illustration has had all session. */}
-                <MatchDetailSection label="What You'd Do" items={open.whatYouDo} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+    <Fit base={560}>
+      <div role="img" aria-label="Find your Top 3: a grid of career cards, each with a salary chip and a save button. Investment Banker and Private Equity Analyst are saved, 2 of 3. Software Engineer is not yet saved. Tap a card to see details, tap plus to save it." className="flex flex-col gap-4 p-2">
+        <div className="flex w-full items-center justify-between">
+          <span className="text-[15px] font-extrabold" style={{ color: INK }}>Find your Top 3</span>
+          <span className="text-[12px] font-bold tabular-nums" style={{ color: BLUE }}>{MATCH_SAVED.length} <span style={{ color: INK2 }}>of {MATCH_SLOTS}</span></span>
         </div>
+        <p className="text-[11.5px] font-semibold" style={{ color: INK2 }}>Tap a card to see details. Tap + to save it.</p>
+        {/* Same 3-across, same aspect ratio as ExploreIllustration below --
+           one shared card proportion across the stage gallery so no stage's
+           row is taller than its neighbours. */}
+        <div className="grid grid-cols-3 gap-3">
+          {MATCH_CARDS.map((c) => {
+            const rank = MATCH_SAVED.indexOf(c.id) + 1;
+            return (
+              <div key={c.id} className="relative">
+                <Poster src={c.photo} title={c.title} world={c.world} className="aspect-[3/4]" />
+                <span className="absolute top-2 left-2 rounded-full px-2 py-[3px] text-[10px] font-bold" style={{ background: "#dcfce7", color: "#166534" }}>{c.salary}</span>
+                <span className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold text-white" style={rank > 0 ? { background: BLUE } : { background: "rgba(5,7,15,0.4)" }}>
+                  {rank > 0 ? rank : <Plus className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </Fit>
   );
 }
@@ -755,7 +616,7 @@ export function ImmerseIllustration() {
   const beat = level.beats.find((b) => b.id === "L1-08");
   const choice = beat?.kind === "choice" ? beat : null;
   return (
-    <Panel label={false} className="aspect-[5/4]" style={{ background: INK }}>
+    <Panel label={false} className="aspect-[4/3]" style={{ background: INK }}>
       <Image src="/images/play/ib/locations/reception.webp" alt="" fill sizes="700px" className="object-cover" style={{ objectPosition: "50% 30%" }} />
       <CardProgressiveBlur size="70%" />
       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(5,7,15,0.82) 0%, rgba(5,7,15,0.4) 45%, rgba(5,7,15,0.08) 75%)" }} />

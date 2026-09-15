@@ -10,23 +10,12 @@ type NavProps = {
   onStudentClick?: () => void;
 };
 
-const LINKS = [
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Simulations", href: "#play" },
-  { label: "Career worlds", href: "#explore" },
-];
-
-// The buying audience gets three links and one CTA, nothing else: no demo
-// quick-links, no "Get started" into the student flow. Anchors match the
-// section ids in SchoolsView.
-const SCHOOLS_LINKS = [
-  { label: "Why Dreamari", href: "#why-dreamari" },
-  { label: "Student Experience", href: "#student-experience" },
-  { label: "For Your Organization", href: "#organization" },
-];
-
-// Demo quick-links (v3): jump straight into the interactive prototypes without
-// scrolling for a CTA — Build = the profile flow, Match = the match-flow lab.
+// Inline link rows (student "How it works/Simulations/Career worlds" and
+// schools "Why Dreamari/Student Experience/For Your Organization") were
+// dropped from both the desktop bar and the hamburger 15 Sept 2026 (direct
+// feedback: minimize what's on the landing page) -- this is a single
+// long-scroll page, so the links only ever saved a scroll, and the
+// audience toggle plus CTA already say everything the bar needs to.
 
 // Re-imagined per direct feedback ("it doesn't need to be this complicated...
 // something modern and out of the box"): a floating frosted-glass island instead of
@@ -46,7 +35,6 @@ const SCHOOLS_LINKS = [
 // padding clears it.
 export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
   const schools = view === "schools";
-  const links = schools ? SCHOOLS_LINKS : LINKS;
   const cta = schools ? { label: "Request a demo", href: "#demo" } : { label: "Get started", href: "/flow" };
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -135,26 +123,6 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
           DREAMARI
         </Link>
 
-        {/* Links stay desktop-only (same 900px tier as before — below that there's no
-           room without wrapping, and the page is a single scroll anyway). */}
-        <nav className="hidden items-center gap-[28px] text-[14px] font-semibold min-[900px]:flex" style={{ color: "var(--muted-foreground)" }}>
-          {schools && (
-            <span className="rounded-[6px] px-2 py-1 text-[11px] font-bold tracking-[0.12em] whitespace-nowrap uppercase" style={{ background: "color-mix(in srgb, var(--foreground) 6%, transparent)", color: "var(--muted-foreground)" }}>
-              For educators
-            </span>
-          )}
-          {links.map((link) => (
-            <Link key={link.label} href={link.href} className="transition-colors hover:[color:var(--foreground)]">
-              {link.label}
-            </Link>
-          ))}
-          {!schools && (
-            <button type="button" onClick={onSchoolsClick} className="transition-colors hover:[color:var(--foreground)]">
-              For schools
-            </button>
-          )}
-        </nav>
-
         <div className="flex items-center gap-2">
           <Link
             href={cta.href}
@@ -167,8 +135,8 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
           >
             {cta.label}
           </Link>
-          {/* Hamburger: phones/tablets only — quick route into the demos
-             without hunting for CTAs mid-pitch. */}
+          {/* Hamburger: now the only way to switch audience or theme at any
+             width, since the inline link rows are gone. */}
           <button
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -208,13 +176,9 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
           >
             <QuickLinksPanel
               onNavigate={() => setMenuOpen(false)}
+              hideDemoLinks
               extra={
                 <>
-                  {links.map((link) => (
-                    <Link key={link.label} href={link.href} onClick={() => setMenuOpen(false)} className="rounded-xl px-4 py-2 text-[14px] font-semibold min-[900px]:hidden" style={{ color: "var(--foreground)" }}>
-                      {link.label}
-                    </Link>
-                  ))}
                   {schools ? (
                     onStudentClick && (
                       <button type="button" onClick={() => { setMenuOpen(false); onStudentClick(); }} className="rounded-xl px-4 py-2 text-left text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
