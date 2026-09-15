@@ -124,12 +124,8 @@ export function MatchGrid() {
                 </span>
               </span>
             </div>
-            {/* Reassurance that picking isn't a commitment, tagged onto
-               the existing instruction rather than its own line (direct
-               feedback, 16 Sept 2026, Slack) -- kept short so it reads as
-               one more short beat, not a second sentence's worth. */}
             <p className="mb-2.5 flex-none px-1 text-[12.5px] leading-[16px] font-medium text-[var(--color-night-muted-foreground)]">
-              Tap a card to see details. Tap + to save it. Change anytime.
+              Tap a card to see details. Tap + to save it.
             </p>
 
             {/* ---- the grid: all 6, always visible, no scroll -- rows
@@ -160,13 +156,22 @@ export function MatchGrid() {
           style={{ background: "color-mix(in srgb, var(--color-night-background) 94%, transparent)", borderColor: "var(--color-glass-border)" }}
         >
           <div className="flex w-full max-w-[880px] items-center justify-between gap-3">
-            <p className="text-[13px] leading-[17px] font-semibold text-[var(--color-night-muted-foreground)]">
-              {selected.length === 0
-                ? "Save up to 3 careers to build your profile around."
-                : selected.length < MAX_SLOTS
-                  ? `${selected.length} saved — add up to ${MAX_SLOTS - selected.length} more, or continue now.`
-                  : "Your Top 3 is set."}
-            </p>
+            <div className="flex flex-col gap-[2px]">
+              <p className="text-[13px] leading-[17px] font-semibold text-[var(--color-night-muted-foreground)]">
+                {selected.length === 0
+                  ? "Save up to 3 careers to build your profile around."
+                  : selected.length < MAX_SLOTS
+                    ? `${selected.length} saved, add up to ${MAX_SLOTS - selected.length} more, or continue now.`
+                    : "Your Top 3 is set."}
+              </p>
+              {/* Reassurance that picking isn't a commitment (direct
+                 feedback, 16 Sept 2026, Slack), styled visibly as a
+                 disclaimer -- smaller and more muted than the status
+                 line above it, not competing with it. */}
+              <p className="text-[11px] leading-[13px] font-medium text-[var(--color-night-muted-foreground)] opacity-60">
+                Not final. Change anytime.
+              </p>
+            </div>
             <button
               type="button"
               onClick={finish}
