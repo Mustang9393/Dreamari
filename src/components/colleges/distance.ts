@@ -73,8 +73,19 @@ export function useHomeCoords(): Coords | null {
   const profile = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
   const zip = /^\d{5}$/.test(profile.zipCode) ? profile.zipCode : "";
   // Tagged with the zip it was resolved for, so a still-in-flight lookup
-  // from a previous zip never gets attributed to the current one.
-  const [resolved, setResolved] = useState<{ zip: string; coords: Coords | null } | null>(() => (zip && memCache && zip in memCache ? { zip, coords: memCache[zip] } : null));
+  // from a previous zip never gets attributed to the current one. The
+  // initializer reads localStorage directly (not the `memCache` module
+  // variable, which is only ever populated inside `geocodeZip` -- itself
+  // only called from the effect below) -- without this, every card on
+  // every page load showed the seeded placeholder first and then jumped to
+  // the real distance a moment later, even for a zip resolved many times
+  // before, which is what read as a stray line/glitch through the stat
+  // (two different numbers briefly overlapping mid-repaint).
+  const [resolved, setResolved] = useState<{ zip: string; coords: Coords | null } | null>(() => {
+    if (!zip) return null;
+    if (memCache === null) memCache = readZipCache();
+    return zip in memCache ? { zip, coords: memCache[zip] } : null;
+  });
   useEffect(() => {
     if (!zip) return;
     let cancelled = false;
