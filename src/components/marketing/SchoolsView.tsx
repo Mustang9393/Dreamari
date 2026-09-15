@@ -269,10 +269,15 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
     <div>
       {/* ---- 1. Hero -- the route's origin ---------------------------------- */}
       <section className="relative overflow-hidden px-6 pt-[clamp(104px,13vh,150px)]">
-        {/* aurora: two slow blobs behind the glass; the same blue and violet
-           the headline gradient uses, so the page has one light source */}
-        <div aria-hidden className="mkt-drift-a pointer-events-none absolute -top-40 right-[-10%] h-[680px] w-[680px] rounded-full blur-[90px]" style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%)" }} />
-        <div aria-hidden className="mkt-drift-b pointer-events-none absolute top-[38%] left-[-12%] h-[620px] w-[620px] rounded-full blur-[90px]" style={{ background: "radial-gradient(circle, rgba(125,92,255,0.22), transparent 70%)" }} />
+        {/* aurora: two slow blobs behind the glass, the same blue and violet
+           the headline gradient uses. Tuned for a near-black ground, where a
+           soft colour glow reads as depth -- on the light theme's near-white
+           ground the same opacity reads as a dirty wash across the whole
+           page instead (direct feedback, 15 Sept 2026: "I dont really like
+           how our surface colors play wiht each other"), so it's much
+           quieter here, not the same strength turned down slightly. */}
+        <div aria-hidden className="mkt-drift-a pointer-events-none absolute -top-40 right-[-10%] h-[680px] w-[680px] rounded-full blur-[90px]" style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%)", opacity: theme === "light" ? 0.35 : 1 }} />
+        <div aria-hidden className="mkt-drift-b pointer-events-none absolute top-[38%] left-[-12%] h-[620px] w-[620px] rounded-full blur-[90px]" style={{ background: "radial-gradient(circle, rgba(125,92,255,0.22), transparent 70%)", opacity: theme === "light" ? 0.35 : 1 }} />
         <div className="relative mx-auto max-w-[1100px]">
           <motion.div className="mb-10 flex justify-center sm:mb-12" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
             <AudienceToggle view={view} onChange={onChangeView} />
@@ -310,7 +315,13 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
       </section>
 
       {/* ---- 2. Audiences -- first stop on the route ------------------------ */}
-      <Stop id="organization" first className="border-b" style={{ borderColor: "var(--border)", background: "var(--hero-mid)" }}>
+      {/* --hero-mid bands meaningfully darker than --background in dark
+         theme (a real navy step, #0c0d26 vs #05070f) but sits only 2-3%
+         off it in light theme (#dfe4f4 vs #f4f7ff) -- not enough contrast
+         to read as a deliberate section, just a faint, purposeless seam
+         next to the page's other near-white tones. One consistent ground
+         in light theme; the real dark-theme band is untouched. */}
+      <Stop id="organization" first className="border-b" style={{ borderColor: "var(--border)", background: theme === "light" ? "var(--background)" : "var(--hero-mid)" }}>
         <Reveal>
           <Waypoint n="01 / 04" />
           <div className="mt-4"><SectionHead title="Built for the students you serve." wide /></div>
