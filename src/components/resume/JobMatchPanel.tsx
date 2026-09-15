@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { Check, Plus, Sparkles } from "lucide-react";
 import { addSkill, upsertVersion, type ResumeData, type ResumeSkills, type ResumeVersion } from "@/lib/resume";
-import { CARD_CLASS, Field, INSET, ResumeModal, TextInput } from "./ui";
+import { CARD_CLASS, Field, INSET, ResumeModal } from "./ui";
 
 type SkillCategory = keyof ResumeSkills;
 type SkillSuggestion = { category: SkillCategory; skill: string; reason: string };
-type TailorAnalysis = { matchScore: number; matchLabel: string; qualityScore: number; suggestions: SkillSuggestion[]; gaps: string[]; improvements: string[] };
+type TailorAnalysis = { matchScore: number; matchLabel: string; qualityScore: number; suggestions: SkillSuggestion[]; gaps: string[]; improvements: string[]; targetPosition: string; targetCompany: string };
 
 const CATEGORY_LABEL: Record<SkillCategory, string> = { people: "People", tech: "Tech", languages: "Languages" };
 
@@ -59,8 +59,6 @@ function SuggestionRow({ suggestion, added, onAdd }: { suggestion: SkillSuggesti
 // ive saved, i could want to tailor it to many jobs").
 export function JobMatchPanel({ resume, version, onClose }: { resume: ResumeData; version: ResumeVersion; onClose: () => void }) {
   const [jobDescription, setJobDescription] = useState(version.jobDescription);
-  const [targetPosition, setTargetPosition] = useState(version.targetPosition);
-  const [targetCompany, setTargetCompany] = useState(version.targetCompany);
 
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<TailorAnalysis | null>(null);
@@ -68,8 +66,7 @@ export function JobMatchPanel({ resume, version, onClose }: { resume: ResumeData
   const [analyzeError, setAnalyzeError] = useState(false);
   const [added, setAdded] = useState<Set<string>>(new Set());
 
-  const matchKey = `${jobDescription}|${targetPosition}|${targetCompany}`;
-  const isStale = analysis !== null && analyzedFor !== matchKey;
+  const isStale = analysis !== null && analyzedFor !== jobDescription;
 
   async function findMatchingSkills() {
     setAnalyzing(true);
@@ -80,16 +77,16 @@ export function JobMatchPanel({ resume, version, onClose }: { resume: ResumeData
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           jobDescription,
-          targetPosition,
-          targetCompany,
           experience: resume.experience.map((e) => ({ id: e.id, title: e.title, where: e.where, bullets: e.bullets })),
           skills: resume.skills,
         }),
       });
       const data = (await res.json()) as { ok: boolean } & Partial<TailorAnalysis>;
       if (data.ok && typeof data.matchScore === "number") {
-        setAnalysis({ matchScore: data.matchScore, matchLabel: data.matchLabel ?? "", qualityScore: data.qualityScore ?? 0, suggestions: data.suggestions ?? [], gaps: data.gaps ?? [], improvements: data.improvements ?? [] });
-        setAnalyzedFor(matchKey);
+        const targetPosition = data.targetPosition ?? "";
+        const targetCompany = data.targetCompany ?? "";
+        setAnalysis({ matchScore: data.matchScore, matchLabel: data.matchLabel ?? "", qualityScore: data.qualityScore ?? 0, suggestions: data.suggestions ?? [], gaps: data.gaps ?? [], improvements: data.improvements ?? [], targetPosition, targetCompany });
+        setAnalyzedFor(jobDescription);
         upsertVersion({ ...version, jobDescription, targetPosition, targetCompany, updatedAt: Date.now() });
       } else {
         setAnalyzeError(true);
@@ -107,25 +104,21 @@ export function JobMatchPanel({ resume, version, onClose }: { resume: ResumeData
         Paste a job description to see how this resume fits, and which skills are worth adding. Come back and tailor it to a different job anytime.
       </p>
 
+      {/* Just the job description, no separate Target Position/Company
+         fields -- the replit reference only ever asks for this, and reads
+         the title/company straight out of the pasted text itself (direct
+         instruction, 16 Sept 2026: "match it exactly"). */}
       <Field label="Job Description" htmlFor="jm-jd">
         <textarea
           id="jm-jd"
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          placeholder="Paste a job description to tailor this resume to it."
-          rows={5}
+          placeholder="Paste the full job description here…"
+          rows={6}
           className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[14px] font-semibold outline-none focus:border-[var(--primary)]"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
         />
       </Field>
-      <div className="grid gap-[var(--space-3)] sm:grid-cols-2">
-        <Field label="Target Position (optional)" htmlFor="jm-position">
-          <TextInput id="jm-position" value={targetPosition} onChange={setTargetPosition} placeholder="e.g. Marketing Intern" />
-        </Field>
-        <Field label="Target Company (optional)" htmlFor="jm-company">
-          <TextInput id="jm-company" value={targetCompany} onChange={setTargetCompany} placeholder="e.g. Acme Corp" />
-        </Field>
-      </div>
 
       <button
         type="button"
@@ -147,6 +140,11 @@ export function JobMatchPanel({ resume, version, onClose }: { resume: ResumeData
           )}
 
           <div className={CARD_CLASS} style={INSET}>
+            {(analysis.targetPosition || analysis.targetCompany) && (
+              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                Target: <span style={{ color: "var(--foreground)" }}>{[analysis.targetPosition, analysis.targetCompany].filter(Boolean).join(" at ")}</span>
+              </span>
+            )}
             <div className="flex gap-[var(--space-3)]">
               <ScoreChip label="Resume Quality" value={analysis.qualityScore} />
               <ScoreChip label="Job Match" value={analysis.matchScore} sublabel={analysis.matchLabel} />
