@@ -91,8 +91,16 @@ export function WizardProgress({ stepIndex }: { stepIndex: number }) {
 // ---------------------------------------------------------------------------
 
 export function WizardFooter({ onBack, onNext, nextLabel = "Save & Next", nextDisabled, backLabel = "Back" }: { onBack?: () => void; onNext: () => void; nextLabel?: ReactNode; nextDisabled?: boolean; backLabel?: string }) {
+  // var(--surface) here, not var(--card) -- this footer sits sticky INSIDE
+  // a rounded var(--card) panel (every wizard step, Edit Selection), and
+  // --surface renders visibly darker than --card with square corners
+  // where the card is rounded. The mismatch read as a separate floating
+  // dark rectangle rather than part of the card underneath it (direct
+  // feedback, 16 Sept 2026: "a weird dark shape with a dark border and
+  // floating inside the surfaces... clipped by padding"). Matching the
+  // card's own background makes it read as one continuous panel again.
   return (
-    <div className="sticky bottom-0 z-10 flex items-center justify-between gap-[var(--space-3)] border-t px-[var(--space-1)] pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--surface)" }}>
+    <div className="sticky bottom-0 z-10 flex items-center justify-between gap-[var(--space-3)] border-t px-[var(--space-1)] pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
       {onBack ? (
         <button type="button" onClick={onBack} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
