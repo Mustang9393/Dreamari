@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore, type ReactNode } from "react";
+import { motion } from "framer-motion";
 import { ChevronLeft, Download, FileText, Pencil, Sparkles, Wand2, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
@@ -115,7 +116,23 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
                 style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-display)" }}
               >
                 {item.label}
-                {isActive && <span aria-hidden className="absolute inset-x-0 -bottom-px h-[2px] rounded-full" style={{ background: "var(--primary)" }} />}
+                {/* A muted underline, not the brand color -- it was
+                   clashing with the page's own blue CTAs right below it
+                   (direct feedback, 16 Sept 2026: "the higlhight color
+                   on the resume tab clashes with the cta"). Slides
+                   between tabs via a shared layoutId instead of just
+                   appearing under whichever one is active (direct
+                   feedback: "have whatever highlight we end up keeping
+                   for tabs... animate and slide over when we switch"). */}
+                {isActive && (
+                  <motion.span
+                    layoutId="resume-builder-tab-underline"
+                    aria-hidden
+                    className="absolute inset-x-0 -bottom-px h-[2px]"
+                    style={{ background: "var(--foreground)" }}
+                    transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                  />
+                )}
               </button>
             );
           })}
@@ -461,7 +478,13 @@ function ResumeBuilderInner() {
                   // created there to tailor.
                   const current = readResume();
                   if (current.versions.length === 0) {
-                    const name = `${current.profile.firstName} ${current.profile.lastName}`.trim() || "My Resume";
+                    // A resume title, not the student's own name -- every
+                    // saved resume belongs to this one student already, so
+                    // their name on the card said nothing about which
+                    // resume it was (direct feedback, 16 Sept 2026: "show
+                    // the name it was saved in rather than the users name
+                    // on the resume").
+                    const name = "My Resume";
                     const version: ResumeVersion = {
                       id: makeId(),
                       name,

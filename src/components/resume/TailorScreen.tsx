@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, upsertVersion, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
@@ -71,6 +71,41 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
     initial ?? { ...EMPTY_VERSION, id: makeId(), educationIds: resume.education.map((e) => e.id), experienceIds: resume.experience.map((e) => e.id), template: initialTemplateId ?? DEFAULT_RESUME_TEMPLATE },
   );
   const canSave = draft.name.trim().length > 0;
+  const [matching, setMatching] = useState(false);
+  const [matchError, setMatchError] = useState(false);
+
+  // Paste a job description right here, matching the reference exactly
+  // (direct instruction, 16 Sept 2026: "please match the replit for
+  // everything" -- this section had been left out entirely). Same
+  // extraction endpoint JobMatchPanel uses later on the finished resume;
+  // this pass only needs the target position/company out of it, not a
+  // full skills analysis.
+  async function matchToJob() {
+    if (draft.jobDescription.trim().length === 0) return;
+    setMatching(true);
+    setMatchError(false);
+    try {
+      const res = await fetch("/api/resume-tailor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobDescription: draft.jobDescription,
+          experience: resume.experience.map((e) => ({ id: e.id, title: e.title, where: e.where, bullets: e.bullets })),
+          skills: resume.skills,
+        }),
+      });
+      const data = (await res.json()) as { ok: boolean; targetPosition?: string; targetCompany?: string };
+      if (data.ok) {
+        setDraft((d) => ({ ...d, targetPosition: data.targetPosition ?? d.targetPosition, targetCompany: data.targetCompany ?? d.targetCompany }));
+      } else {
+        setMatchError(true);
+      }
+    } catch {
+      setMatchError(true);
+    } finally {
+      setMatching(false);
+    }
+  }
 
   const toggleEducation = (id: string) => setDraft((d) => ({ ...d, educationIds: d.educationIds.includes(id) ? d.educationIds.filter((x) => x !== id) : [...d.educationIds, id] }));
   const toggleExperience = (id: string) => setDraft((d) => ({ ...d, experienceIds: d.experienceIds.includes(id) ? d.experienceIds.filter((x) => x !== id) : [...d.experienceIds, id] }));
@@ -139,13 +174,55 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
         )}
       </div>
 
-      <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Skills from your profile will be automatically included.</p>
+      {/* Was missing entirely -- the reference has this right on this
+         screen, not only as a later, separate action (direct feedback,
+         16 Sept 2026: "the choose and tailor tab doesnt not have the ai
+         match to job description thingy... please match the replit for
+         everything"). */}
+      <div className="flex flex-col gap-[var(--space-3)]">
+        <div className="flex items-center gap-[8px]">
+          <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Match to a Job</span>
+          <span className="rounded-[var(--radius-sm)] border px-[7px] py-[1px] text-[10px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Optional</span>
+        </div>
+        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Paste the job description and I&apos;ll help you choose what fits best.</p>
+        <textarea
+          value={draft.jobDescription}
+          onChange={(e) => setDraft({ ...draft, jobDescription: e.target.value })}
+          placeholder="Paste the full job description here…"
+          rows={5}
+          className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[14px] font-semibold outline-none focus:border-[var(--primary)]"
+          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        />
+        <button
+          type="button"
+          onClick={matchToJob}
+          disabled={matching || draft.jobDescription.trim().length === 0}
+          className="dm-tap flex min-h-[40px] w-fit cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          style={{ background: "var(--primary)" }}
+        >
+          <Sparkles className="h-4 w-4" aria-hidden /> {matching ? "Matching…" : "Match to This Job"}
+        </button>
+        {matchError && <p className="text-[12px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t read that job description. Try again in a moment.</p>}
+        {(draft.targetPosition || draft.targetCompany) && (
+          <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            Target: <span style={{ color: "var(--foreground)" }}>{[draft.targetPosition, draft.targetCompany].filter(Boolean).join(" at ")}</span>
+          </p>
+        )}
+      </div>
 
       <Field label="Template" htmlFor="tailor-template">
         <div id="tailor-template">
           <TemplatePicker value={draft.template} onChange={(template) => setDraft({ ...draft, template })} />
         </div>
       </Field>
+
+      {/* A disclaimer, not a regular paragraph -- it read as one more line
+         of body content sitting in the middle of the form (direct
+         feedback, 16 Sept 2026: "'Skills from your profile will be
+         automatically included.' this is supposed to be a disclaimer.
+         please see placement in the replit"). Small print right above
+         the submit action, the way a disclaimer actually reads. */}
+      <p className="text-[11px] italic" style={{ color: "var(--muted-foreground)" }}>Skills from your profile will be automatically included.</p>
 
       {/* Reached right after finishing the wizard (or picking a template for
          another resume), this step is optional, not a gate -- nothing here

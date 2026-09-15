@@ -248,7 +248,7 @@ export function EducationStep({ resume, onNext, showToast, onFieldFocus }: { res
       ) : (
         <>
           <div className="flex items-center justify-end gap-[var(--space-3)]">
-            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
               <Plus className="h-4 w-4" aria-hidden /> Add Education
             </button>
           </div>
@@ -277,7 +277,7 @@ export function ExperienceStep({ resume, onNext, onAdd, onEdit }: { resume: Resu
       ) : (
         <>
           <div className="flex items-center justify-end gap-[var(--space-3)]">
-            <button type="button" onClick={onAdd} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={onAdd} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
               <Plus className="h-4 w-4" aria-hidden /> Add Experience
             </button>
           </div>
@@ -545,7 +545,7 @@ export function CertificationsStep({ resume, onNext, showToast, onFieldFocus }: 
       ) : (
         <>
           <div className="flex items-center justify-end gap-[var(--space-3)]">
-            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+            <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
               <Plus className="h-4 w-4" aria-hidden /> Add Certification
             </button>
           </div>

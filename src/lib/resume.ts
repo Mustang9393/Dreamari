@@ -126,6 +126,14 @@ export type ResumeVersion = {
    *  string here so this data-layer file doesn't import from components/. */
   template: string;
   atsCheck: ATSCheckResult | null;
+  /** A student-chosen tag color (a CSS color value), independent of the
+   *  template's own accent -- lets versions be told apart at a glance the
+   *  way Finder tags work (direct feedback, 16 Sept 2026: "let the user
+   *  choose a color, like apple adds tags so it can be found easier").
+   *  Undefined on anything saved before this existed; the card falls back
+   *  to the brand color, never the template's own accent (which can be
+   *  black and read as no color at all). */
+  color?: string;
 };
 
 export type ResumeData = {
@@ -269,6 +277,7 @@ function normalizeVersions(value: unknown): ResumeVersion[] {
       targetCompany: str(v.targetCompany),
       template: str(v.template) || "classic",
       atsCheck: normalizeATSCheck(v.atsCheck),
+      color: typeof v.color === "string" && v.color ? v.color : undefined,
     }));
 }
 

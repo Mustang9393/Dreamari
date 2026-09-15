@@ -734,7 +734,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         )}
         {tab === "resume" && (
           <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume" className="flex flex-col gap-[var(--space-4)]">
-            <ResumeExperience />
+            <ResumeExperience hideTitle />
             {/* Same bridge-between-features banner as Top Three -> Play
                (direct feedback, 8 Sept 2026): a resume is a dead end on its
                own, so the obvious next step points at Connect. */}

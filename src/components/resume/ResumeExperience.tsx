@@ -1,13 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSyncExternalStore, useState, type ReactNode } from "react";
+import { useSyncExternalStore, useState } from "react";
 import { ArrowRight, Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { readStudentProfile } from "@/lib/studentProfile";
 import { STUDENT } from "@/components/profile/data";
-import { RESUME_TEMPLATES } from "./data";
 import { downloadDocx } from "./ExportChecklistModal";
 import { CARD_CLASS, INSET, useResumeToast } from "./ui";
 
@@ -19,24 +18,6 @@ import { CARD_CLASS, INSET, useResumeToast } from "./ui";
 function scoreTone(value: number) {
   return value >= 75 ? "var(--world-food-farming-nature, #3aa66b)" : value >= 45 ? "var(--accent-subtle)" : "var(--muted-foreground)";
 }
-// "STANDARD" vs "TAILORED", and "APPROVED" -- status pills the reference
-// shows on every Saved Resumes card (confirmed live, 16 Sept 2026: a
-// resume with no job description reads "STANDARD", one that's been
-// through Choose & Tailor reads "TAILORED" + "APPROVED"). Its own API
-// stores these as real `type`/`approved` columns rather than deriving
-// them, but nothing in our data model exposes an explicit "approved"
-// action anywhere in its flow -- the closest real signal we have is
-// whether an ATS Check has actually been run on this version, so that's
-// what "APPROVED" is derived from here.
-function StatusPill({ tone, children }: { tone: "neutral" | "primary" | "success"; children: ReactNode }) {
-  const style = tone === "success"
-    ? { borderColor: "color-mix(in srgb, var(--color-feedback-success, #3aa66b) 40%, transparent)", background: "color-mix(in srgb, var(--color-feedback-success, #3aa66b) 14%, transparent)", color: "var(--color-feedback-success, #3aa66b)" }
-    : tone === "primary"
-      ? { borderColor: "color-mix(in srgb, var(--primary) 40%, transparent)", background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--primary)" }
-      : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" };
-  return <span className="rounded-full border px-[9px] py-[3px] text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={style}>{children}</span>;
-}
-
 // A cryptic 2-letter code (NW, JM) next to its own spelled-out label
 // ("Needs Work") was decoding nothing -- direct feedback, 16 Sept 2026:
 // "what is JM? ... what is NW?". This is the same shape as JobMatchPanel's
@@ -48,13 +29,18 @@ function StatusPill({ tone, children }: { tone: "neutral" | "primary" | "success
 function ScoreBadge({ category, label, value }: { category: string; label: string; value: number }) {
   const tone = scoreTone(value);
   return (
-    <span className="flex flex-col gap-[1px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[6px]" style={{ borderColor: "var(--glass-border)" }}>
-      <span className="text-[10px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{category}</span>
-      <span className="flex items-baseline gap-[5px]">
-        <span className="text-[17px] leading-none font-extrabold tabular-nums" style={{ color: tone, fontFamily: "var(--font-display)" }}>{value}</span>
-        <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>/100 · {label}</span>
+    <div className="flex items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      {/* A ring, not just a number, gives the score somewhere to visually
+         "fill up to" instead of sitting as flat text (direct feedback,
+         16 Sept 2026: "make the stat/score badges more aesthetic"). */}
+      <div className="relative flex size-[32px] flex-none items-center justify-center rounded-full" style={{ background: `conic-gradient(${tone} ${value * 3.6}deg, color-mix(in srgb, ${tone} 16%, transparent) 0deg)` }}>
+        <div className="flex size-[25px] items-center justify-center rounded-full text-[10px] font-extrabold tabular-nums" style={{ background: "var(--card)", color: tone }}>{value}</div>
+      </div>
+      <span className="flex flex-col gap-[1px]">
+        <span className="text-[10px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{category}</span>
+        <span className="text-[11.5px] font-bold" style={{ color: tone }}>{label}</span>
       </span>
-    </span>
+    </div>
   );
 }
 
@@ -77,18 +63,78 @@ function formatDate(ts: number) {
   return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
+// A small preset palette for tagging saved resumes -- like Finder tags,
+// so a student with several versions can tell them apart at a glance
+// without reading the name (direct feedback, 16 Sept 2026: "let the user
+// choose a color, like apple adds tags so it can be found easier").
+// Independent of the template's own accent, which can be black (the
+// Classic template's) and read as no color chosen at all.
+const TAG_COLORS = ["var(--primary)", "#a855f7", "#ec4899", "#f97316", "#eab308", "#22c55e", "#14b8a6", "#ef4444"];
+
+function TagDot({ color, onPick }: { color: string; onPick: (color: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative">
+      <button
+        type="button"
+        aria-label="Choose a tag color"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className="dm-tap flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full"
+      >
+        <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />
+      </button>
+      {open && (
+        <>
+          <span aria-hidden className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setOpen(false); }} />
+          <div
+            className="absolute top-[18px] left-0 z-20 flex flex-wrap gap-[6px] rounded-[var(--radius-md)] border p-[8px]"
+            style={{ width: "112px", background: "var(--card)", borderColor: "var(--glass-border)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {TAG_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                aria-label={`Tag color ${c}`}
+                onClick={() => {
+                  onPick(c);
+                  setOpen(false);
+                }}
+                className="dm-tap flex size-[18px] cursor-pointer items-center justify-center rounded-full border"
+                style={{ background: c, borderColor: c === color ? "var(--foreground)" : "transparent" }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </span>
+  );
+}
+
 function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void }) {
   const [downloading, setDownloading] = useState(false);
   const ats = version.atsCheck;
   // Stored as "NW — Needs Work"; only the plain-English half is ever shown.
   const gradeLabel = ats ? (ats.qualityGrade.split(" — ")[1] ?? ats.qualityGrade) : "";
-  const template = RESUME_TEMPLATES.find((t) => t.id === version.template) ?? RESUME_TEMPLATES[0];
+  // The card's own accent follows the student's chosen tag color, not
+  // the template's -- a template's own accent can be black (Classic's
+  // is) and read as no color at all on both the card tint and the Open
+  // button (direct feedback, 16 Sept 2026: "why is the dot on the card
+  // black?... lose the black open button"). Falls back to a neutral
+  // gray rather than the brand blue -- "Create New" is already blue on
+  // this same screen (direct feedback: "do not tint it blue, too many
+  // blue ctas on the page right now"); blue is reserved for a tag the
+  // student actually picked.
+  const accent = version.color ?? "var(--muted-foreground)";
   return (
     // Darker glass surface than a flat tint, backdrop-blur keeps it
     // reading as glass rather than a solid tinted panel (direct feedback,
-    // 16 Sept 2026: "a better surface color, maybe darker without losing
-    // that glass effect"). Kept to two rows plus an optional scores row
-    // -- a separate footer band for Edit/Open made the card taller, not
+    // "a better surface color, maybe darker without losing that glass
+    // effect"). Kept to two rows plus an optional scores row -- a
+    // separate footer band for Edit/Open made the card taller, not
     // sleeker (direct feedback: "much sleeker, much shorter"). A left
     // accent stripe in the template color was here too, dropped on
     // sight (direct feedback: "i dont like the dark colored line on the
@@ -96,20 +142,37 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
     // quieter nod to the same thing instead.
     <div
       className="relative flex flex-col gap-[8px] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-3)] backdrop-blur-md"
-      style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, var(--inset-surface) 85%, ${template.accent} 15%)` }}
+      style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, var(--inset-surface) 85%, ${accent} 15%)` }}
     >
       <div className="flex items-start justify-between gap-[var(--space-3)]">
-        <button type="button" onClick={onOpen} className="dm-link flex min-w-0 cursor-pointer flex-col gap-[3px] text-left">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={onOpen}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
+          className="dm-link flex min-w-0 cursor-pointer flex-col gap-[3px] text-left"
+        >
           <div className="flex flex-wrap items-center gap-[6px]">
-            <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: template.accent }} />
-            {version.targetPosition ? <StatusPill tone="primary">Tailored</StatusPill> : <StatusPill tone="neutral">Standard</StatusPill>}
-            {ats && <StatusPill tone="success">Approved</StatusPill>}
+            <TagDot color={accent} onPick={(color) => upsertVersion({ ...version, color, updatedAt: Date.now() })} />
+            <span className="truncate text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
           </div>
-          <span className="truncate text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
+          {/* Says what it's actually for when there's something to say,
+             folded into the same meta line rather than its own row
+             (direct feedback, 16 Sept 2026: "put the tailored to
+             marketing intern thing somewhere else, dont increase height
+             with more rows") -- "Standard" and "Approved" didn't hold up
+             under a straight question ("what is approved saying? who
+             approved it?... remove the standard one unless it makes
+             sense"): nothing here backs an actual approval action, and
+             "Standard" just meant "nothing to say yet." */}
           <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>
-            {version.educationIds.length} education · {version.experienceIds.length} experience · updated {formatDate(version.updatedAt)}
+            {version.educationIds.length} education · {version.experienceIds.length} experience
+            {version.targetPosition && (
+              <> · <span style={{ color: accent }}>Tailored for {version.targetPosition}</span></>
+            )}
+            {" "}· updated {formatDate(version.updatedAt)}
           </span>
-        </button>
+        </div>
         <div className="flex flex-none items-center gap-[4px]">
           <button type="button" aria-label={`Edit ${version.name}`} onClick={onEdit} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
             <Pencil className="h-4 w-4" aria-hidden />
@@ -140,22 +203,17 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
           <button
             type="button"
             onClick={onOpen}
-            className="dm-tap ml-[4px] flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[7px] text-[12.5px] font-bold text-white"
-            style={{ background: template.accent }}
+            className="dm-tap ml-[4px] flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
+            style={{ borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, background: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent }}
           >
             Open <ArrowRight className="h-3.5 w-3.5" aria-hidden />
           </button>
         </div>
       </div>
-      {(ats || version.targetPosition) && (
+      {ats && (
         <div className="flex flex-wrap items-center gap-[8px]">
-          {ats && <ScoreBadge category="Resume Rating" label={gradeLabel} value={ats.qualityScore} />}
-          {ats && ats.jobMatchScore !== null && <ScoreBadge category="Job Match" label={ats.jobMatchLabel || "Possible Match"} value={ats.jobMatchScore} />}
-          {version.targetPosition && (
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              Target: <span style={{ color: "var(--foreground)" }}>{version.targetPosition}</span>
-            </span>
-          )}
+          <ScoreBadge category="Resume Rating" label={gradeLabel} value={ats.qualityScore} />
+          {ats.jobMatchScore !== null && <ScoreBadge category="Job Match" label={ats.jobMatchLabel || "Possible Match"} value={ats.jobMatchScore} />}
         </div>
       )}
     </div>
@@ -169,7 +227,7 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
 // first visit, which was also where the earlier name-wiping bug lived. The
 // summary card + "Your Resumes" list only take over once resume.versions
 // has at least one entry.
-export function ResumeExperience() {
+export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } = {}) {
   const router = useRouter();
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const { toast } = useResumeToast();
@@ -215,20 +273,29 @@ export function ResumeExperience() {
     <div className="flex flex-col gap-[var(--space-4)]">
       {/* The reference's own page title + subtitle -- missing here
          entirely before (direct feedback, 16 Sept 2026: "the saved
-         resumes tab has copy we have ommitted"). */}
+         resumes tab has copy we have ommitted"). Suppressed when this
+         same component is embedded in Profile's own Resume tab, though --
+         the tab itself already says "Resume" right above it there, so
+         "Saved Resumes" repeated it a third time (direct feedback: "dont
+         have 'saved resumes' and its caption in the my profile view"). */}
       <div className="flex items-start justify-between gap-[var(--space-3)]">
         {/* "Your Resumes" as a section label right below this same title
            just repeated it -- nothing else shares the page for it to
            distinguish from (direct feedback, 16 Sept 2026: "it says your
            resumes again"). */}
-        <div className="flex flex-col gap-[2px]">
-          <h2 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Saved Resumes</h2>
-          <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Manage, edit, and download your resumes.</p>
-        </div>
+        {!hideTitle && (
+          <div className="flex flex-col gap-[2px]">
+            <h2 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Saved Resumes</h2>
+            <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Manage, edit, and download your resumes.</p>
+          </div>
+        )}
+        {/* rounded-md, not a full pill (direct feedback, 16 Sept 2026:
+           "do not have any pill shaped ctas please") -- same soft-shadow
+           lift as a modern solid CTA, not a flat fill. */}
         <button
           type="button"
           onClick={() => router.push("/resume-builder?view=templates")}
-          className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white"
+          className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[9px] text-[13.5px] font-bold text-white shadow-[0_4px_14px_-4px_var(--primary)]"
           style={{ background: "var(--primary)" }}
         >
           <Plus className="h-4 w-4" aria-hidden /> Create New
