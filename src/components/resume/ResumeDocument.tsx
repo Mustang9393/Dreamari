@@ -581,10 +581,19 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
   // 0 (Personal Info) has none by default but still zooms once a field on
   // it is actually focused.
   const zoomed = cropped && !!contentZoom && !manualFit;
+  // translate3d/scale3d, not the 2D form -- promotes this to its own GPU
+  // layer up front instead of only while the transition is actually
+  // running, which is what was reading as a soft/blurry moment on the
+  // text every time the camera panned to a new field or section (direct
+  // feedback, 16 Sept 2026: "theres some unintentional distortion
+  // happening when it updates"). No blur/glass filter was ever applied
+  // here (removed for good in an earlier pass, see the comment below) --
+  // this was a rasterization artifact of animating `scale()` on a
+  // text-heavy layer, not a leftover effect.
   const transform = zoomed && contentZoom
-    ? `translate(${contentZoom.tx}px, ${contentZoom.ty}px) scale(${contentZoom.scale})`
+    ? `translate3d(${contentZoom.tx}px, ${contentZoom.ty}px, 0) scale3d(${contentZoom.scale}, ${contentZoom.scale}, 1)`
     : scale
-      ? `scale(${scale})`
+      ? `scale3d(${scale}, ${scale}, 1)`
       : undefined;
   const containerHeight = cropped ? "100%" : scale ? PAGE_HEIGHT * scale : undefined;
   const accent = templateFor(templateId).accent;
@@ -613,7 +622,18 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
           ref={sheetRef}
           data-doc="resume"
           className="dm-report overflow-hidden rounded-[var(--radius-lg)] p-[56px] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.75)]"
-          style={{ ...paperStyle(templateId), width: PAGE_WIDTH, height: PAGE_HEIGHT, transform, transformOrigin: "top left", transition: "transform 0.38s cubic-bezier(0.3,0.1,0.2,1)", visibility: scale ? "visible" : "hidden" }}
+          style={{
+            ...paperStyle(templateId),
+            width: PAGE_WIDTH,
+            height: PAGE_HEIGHT,
+            transform,
+            transformOrigin: "top left",
+            transition: "transform 0.38s cubic-bezier(0.3,0.1,0.2,1)",
+            visibility: scale ? "visible" : "hidden",
+            willChange: "transform",
+            backfaceVisibility: "hidden",
+            WebkitFontSmoothing: "antialiased",
+          }}
         >
           <ResumeSheetContent resume={resume} templateId={templateId} placeholders={cropped} />
         </div>
