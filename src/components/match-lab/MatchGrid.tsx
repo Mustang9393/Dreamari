@@ -124,8 +124,12 @@ export function MatchGrid() {
                 </span>
               </span>
             </div>
+            {/* Reassurance that picking isn't a commitment, tagged onto
+               the existing instruction rather than its own line (direct
+               feedback, 16 Sept 2026, Slack) -- kept short so it reads as
+               one more short beat, not a second sentence's worth. */}
             <p className="mb-2.5 flex-none px-1 text-[12.5px] leading-[16px] font-medium text-[var(--color-night-muted-foreground)]">
-              Tap a card to see details. Tap + to save it.
+              Tap a card to see details. Tap + to save it. Change anytime.
             </p>
 
             {/* ---- the grid: all 6, always visible, no scroll -- rows
