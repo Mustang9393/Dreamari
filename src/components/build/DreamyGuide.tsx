@@ -23,11 +23,18 @@ type DreamyGuideProps = {
   line: string;
   reactionNonce?: number;
   reactionSprite?: string;
+  /** "sm" is the compact perch variant -- smaller avatar, tighter halo, for
+   *  overlapping a card's own top edge instead of claiming a full row
+   *  (direct feedback, 16 Sept 2026: "place him in other already vacant
+   *  spaces instead of increasing vertical space by giving him an entire
+   *  row"). Every existing call site keeps the original "md" size. */
+  size?: "md" | "sm";
 };
 
 const REACTION_MS = 950;
 
-export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = "/images/dreamy/v2/dreamy-heart.png" }: DreamyGuideProps) {
+export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = "/images/dreamy/v2/dreamy-heart.png", size = "md" }: DreamyGuideProps) {
+  const compact = size === "sm";
   const tiltRef = useRef<HTMLDivElement | null>(null);
   const [reacting, setReacting] = useState(false);
   const [wiggling, setWiggling] = useState(false);
@@ -77,9 +84,9 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
   }, []);
 
   return (
-    <div className="relative z-20 flex w-full items-center gap-3">
+    <div className={`relative z-20 flex w-full items-center ${compact ? "gap-2" : "gap-3"}`}>
       <div
-        className="relative h-[72px] w-[72px] flex-none [perspective:600px] sm:h-[88px] sm:w-[88px]"
+        className={compact ? "relative h-[44px] w-[44px] flex-none [perspective:600px] sm:h-[52px] sm:w-[52px]" : "relative h-[72px] w-[72px] flex-none [perspective:600px] sm:h-[88px] sm:w-[88px]"}
         onMouseEnter={() => {
           setWiggling(true);
           setTimeout(() => setWiggling(false), 650);
@@ -87,7 +94,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
       >
         <div
           aria-hidden
-          className="absolute inset-[-90%] rounded-full"
+          className={`absolute rounded-full ${compact ? "inset-[-35%]" : "inset-[-90%]"}`}
           style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--color-brand-500) 30%, transparent) 0%, color-mix(in srgb, var(--color-accent-purple) 9%, transparent) 42%, transparent 64%)" }}
         />
         <div className={`absolute inset-0 ${wiggling ? "motion-safe:[animation:dreamy-wiggle_0.6s_ease-in-out]" : "motion-safe:animate-[cloud-float_5.5s_ease-in-out_infinite]"}`}>
@@ -115,7 +122,7 @@ export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = 
           style={{ background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)", borderLeft: "1px solid var(--color-glass-border)", borderBottom: "1px solid var(--color-glass-border)" }}
         />
         <p
-          className={`${bricolage.className} relative rounded-[var(--radius-lg)] px-4 py-2.5 text-[13px] leading-snug font-semibold text-[var(--color-night-foreground)] italic backdrop-blur-md sm:text-[15px]`}
+          className={`${bricolage.className} relative rounded-[var(--radius-lg)] ${compact ? "px-3 py-2 text-[12px] sm:text-[13.5px]" : "px-4 py-2.5 text-[13px] sm:text-[15px]"} leading-snug font-semibold text-[var(--color-night-foreground)] italic backdrop-blur-md`}
           style={{
             background: "color-mix(in srgb, var(--color-night-card) 72%, transparent)",
             border: "1px solid var(--color-glass-border)",

@@ -325,6 +325,7 @@ function ResumeBuilderInner() {
   }
 
   const dreamy = RESUME_WIZARD_DREAMY[stepIndex];
+  const showWizardDreamy = !(stepIndex === 2 && experienceModal !== null) && !subDreamy;
 
   return (
     <Shell>
@@ -337,15 +338,19 @@ function ResumeBuilderInner() {
          ratio holds as the viewport grows. */}
       <div className="grid grid-cols-1 items-start gap-[var(--space-6)] lg:grid-cols-[minmax(420px,1fr)_minmax(0,1.2fr)]">
         <div className="flex flex-col gap-[var(--space-5)]">
-          <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            {/* Dreamy lives inside the same card as the fields he's
-               introducing, same as every sub-flow's own DreamyGuide inside
-               its ResumeModal -- floating him above the card read as a
-               separate, disconnected element (direct feedback, 16 Sept
-               2026: "keep dreamy consistently inside the boxes with the
-               content"). */}
-            {!(stepIndex === 2 && experienceModal !== null) && !subDreamy && (
-              <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
+          <div
+            className={`relative flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border px-[var(--space-6)] pb-[var(--space-6)] ${showWizardDreamy ? "pt-[34px]" : "pt-[var(--space-6)]"}`}
+            style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}
+          >
+            {/* Dreamy perches on the card's own top edge -- overlapping
+               border, no dedicated row -- instead of claiming full-width
+               space above the progress bar (direct feedback, 16 Sept 2026:
+               "place him in other already vacant spaces instead of
+               increasing vertical space by giving him an entire row"). */}
+            {showWizardDreamy && (
+              <div className="absolute -top-[24px] right-[var(--space-6)] left-[var(--space-6)]">
+                <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} size="sm" />
+              </div>
             )}
             <WizardProgress stepIndex={stepIndex} />
             {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); goToStep(1); }} showToast={showToast} onFieldFocus={setActiveField} />}
