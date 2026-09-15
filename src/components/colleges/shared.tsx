@@ -401,9 +401,20 @@ export function SchoolCard({
           </div>
         )}
 
-        <dl className="grid grid-cols-2 gap-[8px] border-t pt-[10px]" style={{ borderColor: RULE }}>
-          {stats.map((x) => (
-            <div key={x.k} className="flex min-w-0 flex-col">
+        {/* A 50/50 grid (built for 3 stats, then one removed) left each
+           figure stranded in its own half-width column with dead space
+           trailing it -- a plain flex row with a divider between the pair
+           reads as one connected stat instead (direct feedback, 16 Sept
+           2026: "is there a way to arrange the remaining stats better...
+           they look a little awkward now"). No border-t either -- the
+           card's other sections (name, chips, "Why this school?") are all
+           just separated by gap already; this was the only one drawing an
+           actual rule, which read as a stray line rather than a deliberate
+           one once nothing else on the card had one (direct feedback: "so
+           many random lines on a card"). */}
+        <dl className="flex items-start gap-[20px]">
+          {stats.map((x, i) => (
+            <div key={x.k} className="flex min-w-0 flex-col" style={i > 0 ? { borderLeft: `1px solid ${RULE}`, paddingLeft: 20 } : undefined}>
               <dd className="m-0 text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.v}</dd>
               <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.k}</dt>
             </div>
