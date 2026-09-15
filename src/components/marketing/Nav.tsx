@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { QuickLinksPanel } from "@/components/app/chrome";
+import { ENTERPRISE_ENABLED } from "./AudienceToggle";
 
 type NavProps = {
   view: "student" | "schools";
@@ -186,7 +187,19 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
                       </button>
                     )
                   ) : (
-                    <button type="button" onClick={() => { setMenuOpen(false); onSchoolsClick(); }} className="rounded-xl px-4 py-2 text-left text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    // Disabled alongside the Hero pill (15 Sept 2026: the
+                    // schools/enterprise page is mid-redesign, not ready for
+                    // the live site) -- same ENTERPRISE_ENABLED flag, so
+                    // flipping it back on re-enables both entry points at once.
+                    <button
+                      type="button"
+                      disabled={!ENTERPRISE_ENABLED}
+                      aria-disabled={!ENTERPRISE_ENABLED}
+                      title={!ENTERPRISE_ENABLED ? "Coming soon" : undefined}
+                      onClick={ENTERPRISE_ENABLED ? () => { setMenuOpen(false); onSchoolsClick(); } : undefined}
+                      className="rounded-xl px-4 py-2 text-left text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+                      style={{ color: "var(--foreground)" }}
+                    >
                       For schools
                     </button>
                   )}

@@ -11,6 +11,7 @@ import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, H
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
+import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "./PayMap";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
@@ -120,29 +121,6 @@ export function Section({ id, title, action, children }: { id?: string; title: s
         {action}
       </div>
       {children}
-    </section>
-  );
-}
-
-// Folded section: the heading is the control. Collapsed, it is the heading
-// alone (direct feedback: no caption under it); open, the content.
-export function Folded({ id, title, open, onToggle, children }: { id: string; title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
-  return (
-    <section id={id} className="flex w-full scroll-mt-[124px] flex-col rounded-[var(--radius-lg)] border" style={PANEL}>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={`${id}-panel`}
-        onClick={onToggle}
-        className={`dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] p-[var(--space-5)] text-left sm:px-[var(--space-6)] ${open ? "rounded-t-[inherit] border-b" : "rounded-[inherit]"}`}
-        style={{ borderColor: "var(--glass-border)" }}
-      >
-        <h2 className={`${BIG} min-w-0`} style={DISPLAY}>{title}</h2>
-        <ChevronDown className="mt-[4px] h-5 w-5 flex-none transition-transform duration-200" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
-      </button>
-      <div id={`${id}-panel`} hidden={!open} className="px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-6)] sm:px-[var(--space-6)]">
-        {children}
-      </div>
     </section>
   );
 }
@@ -364,6 +342,21 @@ function viewModel(career: ResolvedCareer) {
   };
 }
 
+// Horizontal tabs (15 Sept 2026 direct feedback: match the Explore School
+// detail page's own tab structure -- "once a student understands how to
+// navigate one detail page, they should immediately understand the other").
+// The header's summary/scenario line and the Typical Degree/Typical Pay
+// facts stay outside the tab system, always visible above it, the same way
+// College Detail keeps its photo header and action row above its own tabs.
+type CareerTab = "overview" | "education" | "ladder" | "pay" | "software";
+const CAREER_TABS: { key: CareerTab; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "education", label: "Education" },
+  { key: "ladder", label: "Career Ladder" },
+  { key: "pay", label: "Pay" },
+  { key: "software", label: "Software" },
+];
+
 export function CareerDetailExperience({ slug }: { slug: string }) {
   const router = useRouter();
   const career = resolveCareer(slug);
@@ -381,18 +374,10 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [payView, setPayView] = useState<"states" | "country">("states");
   // the (i) that opened the popover, kept in state (not a ref) so render can read it
   const [factAnchor, setFactAnchor] = useState<HTMLElement | null>(null);
-  const [openSections, setOpenSections] = useState<Set<string>>(() => new Set());
+  const [tab, setTab] = useState<CareerTab>("overview");
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
-
-  const toggleSection = (id: string) =>
-    setOpenSections((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   if (!career) {
     return (
@@ -531,21 +516,9 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            feedback): one plain paragraph before the facts. */}
         {vm.scenario && <p className={`${SMALL} -mt-[var(--space-2)] max-w-[62ch]`} style={{ color: "var(--muted-foreground)" }}>{vm.scenario}</p>}
 
-        {/* Section chips (UX audit, 11 Sept 2026): the page is ten sections
-           long; these stick under the header and jump to each one. Additive,
-           no content moves. */}
-        {/* Compact (direct feedback, 11 Sept 2026: "much taller than it
-           needs to be"): no full-width bar. One small segmented strip that
-           hugs its four links, with its own blur so it stays legible while
-           it sticks; the nav row itself is transparent. */}
-        <nav aria-label="Sections" className="sticky top-[56px] z-20 flex md:top-[64px]">
-          <div className="flex max-w-full gap-[2px] overflow-x-auto rounded-full border p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--background) 70%, var(--glass-surface-2))", borderColor: "var(--glass-border)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-            {[["#facts", "Facts"], ["#pay", "Pay"], ["#ladder", "Ladder"], ["#education", "Education"]].map(([href, label]) => (
-              <a key={href} href={href} className="dm-quiet flex-none rounded-full px-[11px] py-[4px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{label}</a>
-            ))}
-          </div>
-        </nav>
-        {/* Quick facts: one strip, internal dividers, label over figure. */}
+        {/* Quick facts: one strip, internal dividers, label over figure.
+           Stays above the tabs (direct feedback, 15 Sept 2026: "keep Typical
+           Degree and Typical Pay visible near the top before the tabs"). */}
         {vm.facts.length > 0 && (
           <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] grid-cols-2 rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : vm.facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
             {vm.facts.map((fact, i) => (
@@ -600,7 +573,9 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           </section>
         )}
 
-        {vm.payByState && (
+        <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={CAREER_TABS} grow />
+
+        {tab === "pay" && vm.payByState && (
           <Section
             id="pay"
             title={vm.payByState.title ?? "Pay by state"}
@@ -647,7 +622,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           </Section>
         )}
 
-        {vm.ladder.length > 0 && (
+        {tab === "ladder" && vm.ladder.length > 0 && (
           <Section id="ladder" title="Career ladder">
             <ol className="flex flex-col">
               {vm.ladder.map((rung) => (
@@ -657,38 +632,39 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           </Section>
         )}
 
-        {/* Folded from here down. */}
-        {vm.whatTheyDo && (
-          <Folded id="what-they-do" title="What they actually do" open={openSections.has("what-they-do")} onToggle={() => toggleSection("what-they-do")}>
-            <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>
-          </Folded>
+        {/* Overview: the general explanation of the career, then what it
+           takes and what it asks for -- the same three ideas College
+           Detail's own Overview tab groups (Key Facts, one panel per idea),
+           just carried over as this page's existing three sections rather
+           than reinvented. */}
+        {tab === "overview" && (
+          <div className="flex flex-col gap-[var(--space-6)]">
+            {vm.whatTheyDo && (
+              <Section id="what-they-do" title="What they actually do">
+                <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>
+              </Section>
+            )}
+            {vm.knowAbout.length > 0 && (
+              <Section id="know-about" title="What you need to know about">
+                <DotList items={vm.knowAbout} accent={accent} />
+              </Section>
+            )}
+            {vm.goodAt.length > 0 && (
+              <Section id="good-at" title="What you would need to be good at">
+                <DotList items={vm.goodAt} accent={accent} />
+              </Section>
+            )}
+          </div>
         )}
 
-        {vm.knowAbout.length > 0 && (
-          <Folded id="know-about" title="What you need to know about" open={openSections.has("know-about")} onToggle={() => toggleSection("know-about")}>
-            <DotList items={vm.knowAbout} accent={accent} />
-          </Folded>
-        )}
-
-        {vm.goodAt.length > 0 && (
-          <Folded id="good-at" title="What you would need to be good at" open={openSections.has("good-at")} onToggle={() => toggleSection("good-at")}>
-            <DotList items={vm.goodAt} accent={accent} />
-          </Folded>
-        )}
-
-        {vm.software.length > 0 && (
-          <Folded id="software" title="Software you would use" open={openSections.has("software")} onToggle={() => toggleSection("software")}>
+        {tab === "software" && vm.software.length > 0 && (
+          <Section id="software" title="Software you would use">
             <DotList items={vm.software} accent={accent} />
-          </Folded>
+          </Section>
         )}
 
-        {vm.education && (
-          <Folded
-            id="education"
-            title="Education"
-            open={openSections.has("education")}
-            onToggle={() => toggleSection("education")}
-          >
+        {tab === "education" && vm.education && (
+          <Section id="education" title="Education">
             <div className="grid gap-[var(--space-6)] sm:grid-cols-2">
               <div className="flex flex-col gap-[var(--space-3)]">
                 <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>What people study for it</h3>
@@ -720,9 +696,13 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </ul>
               </div>
             </div>
-          </Folded>
+          </Section>
         )}
 
+        {/* Careers like this one stays outside the tab system, at the
+           bottom of the page regardless of which tab is open -- same
+           placement College Detail gives Similar Schools (15 Sept 2026
+           direct feedback: "Keep careers like this one on the bottom"). */}
         {similar.length > 0 && (
           <Section title="Careers like this one">
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y" }}>
