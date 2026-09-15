@@ -78,17 +78,14 @@ export function SelectInput({ id, value, onChange, children }: { id: string; val
 // pixel"). ReviewStep's own item label is set independently to match.
 const WIZARD_STEPS = ["Personal Information", "Education", "Experience & Activities", "Skills", "Certifications", "Review"] as const;
 
-export function WizardProgress({ stepIndex, leading, center }: { stepIndex: number; leading?: ReactNode; center?: ReactNode }) {
+export function WizardProgress({ stepIndex, leading }: { stepIndex: number; leading?: ReactNode }) {
   const percent = Math.round(((stepIndex + 1) / WIZARD_STEPS.length) * 100);
   return (
     <div className="flex flex-col gap-[6px]">
-      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+      <div className="flex items-center gap-[var(--space-3)]">
         {leading}
-        {center && <div className="min-w-0 flex-1">{center}</div>}
-        <div className="ml-auto flex flex-none items-center gap-[var(--space-3)]">
-          <span className="text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Resume · {WIZARD_STEPS[stepIndex]}</span>
-          <span className="text-[11px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{percent}%</span>
-        </div>
+        <span className="text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Resume · {WIZARD_STEPS[stepIndex]}</span>
+        <span className="ml-auto flex-none text-[11px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{percent}%</span>
       </div>
       <SparkBar percent={percent} fill="var(--primary)" glow="var(--primary)" memoryKey="resume-wizard" />
     </div>

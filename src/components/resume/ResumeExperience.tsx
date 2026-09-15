@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore, useState, type ReactNode } from "react";
-import { Copy, Download, Eye, FileText, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { readStudentProfile } from "@/lib/studentProfile";
@@ -196,46 +196,15 @@ export function ResumeExperience() {
     );
   }
 
-  const totalSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length;
-
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className={CARD_CLASS} style={INSET}>
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-          <div className="flex items-center gap-[var(--space-3)]">
-            <span className="flex size-11 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--accent-subtle)" }}>
-              <FileText className="h-5 w-5" aria-hidden />
-            </span>
-            <div className="flex flex-col gap-[2px]">
-              <span className="text-[16px] font-extrabold" style={{ color: "var(--foreground)" }}>{resume.profile.firstName ? `${resume.profile.firstName} ${resume.profile.lastName}`.trim() : "Your Resume Profile"}</span>
-              <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
-                {resume.education.length} education · {resume.experience.length} experience · {totalSkills} skills
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-[var(--space-3)]">
-            <button
-              type="button"
-              onClick={() => router.push("/resume-builder?view=document")}
-              className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-              style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-            >
-              <Eye className="h-4 w-4" aria-hidden /> Preview Full Resume
-            </button>
-            <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4} strength={0.7} active>
-              <button
-                type="button"
-                onClick={() => router.push("/resume-builder")}
-                className="dm-tap relative flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                <Pencil className="h-4 w-4" aria-hidden /> Edit My Info
-              </button>
-            </BorderBeam>
-          </div>
-        </div>
+      {/* The reference's own page title + subtitle -- missing here
+         entirely before (direct feedback, 16 Sept 2026: "the saved
+         resumes tab has copy we have ommitted"). */}
+      <div className="flex flex-col gap-[2px]">
+        <h2 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Saved Resumes</h2>
+        <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Manage, edit, and download your resumes.</p>
       </div>
-
       <div className="flex flex-col gap-[var(--space-3)]">
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <span className="text-[13px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your Resumes</span>
@@ -245,7 +214,7 @@ export function ResumeExperience() {
             className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white"
             style={{ background: "var(--primary)" }}
           >
-            <Plus className="h-4 w-4" aria-hidden /> Create New Resume
+            <Plus className="h-4 w-4" aria-hidden /> Create New
           </button>
         </div>
 
