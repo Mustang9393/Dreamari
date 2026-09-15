@@ -69,7 +69,14 @@ export function SelectInput({ id, value, onChange, children }: { id: string; val
 // reused here labeled "RESUME" instead of "BUILD" rather than re-derived.
 // ---------------------------------------------------------------------------
 
-const WIZARD_STEPS = ["Personal Information", "Education", "Experience & Activity", "Skills", "Certifications", "Review"] as const;
+// "Experience & Activities" here (plural, matching the reference's own big
+// on-page header for this step), but the Review checklist's own item for
+// the same step reads "Experience & Activity" (singular) in the reference
+// -- a genuine inconsistency in the source between two different UI
+// elements, re-checked live rather than assumed to be a typo on either
+// side (direct feedback, 16 Sept 2026: "dont be lazy... match every
+// pixel"). ReviewStep's own item label is set independently to match.
+const WIZARD_STEPS = ["Personal Information", "Education", "Experience & Activities", "Skills", "Certifications", "Review"] as const;
 
 export function WizardProgress({ stepIndex }: { stepIndex: number }) {
   const percent = Math.round(((stepIndex + 1) / WIZARD_STEPS.length) * 100);

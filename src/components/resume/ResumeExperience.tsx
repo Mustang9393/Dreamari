@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSyncExternalStore, useState } from "react";
+import { useSyncExternalStore, useState, type ReactNode } from "react";
 import { Copy, Download, Eye, FileText, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
@@ -18,6 +18,24 @@ import { CARD_CLASS, INSET, useResumeToast } from "./ui";
 function scoreTone(value: number) {
   return value >= 75 ? "var(--world-food-farming-nature, #3aa66b)" : value >= 45 ? "var(--accent-subtle)" : "var(--muted-foreground)";
 }
+// "STANDARD" vs "TAILORED", and "APPROVED" -- status pills the reference
+// shows on every Saved Resumes card (confirmed live, 16 Sept 2026: a
+// resume with no job description reads "STANDARD", one that's been
+// through Choose & Tailor reads "TAILORED" + "APPROVED"). Its own API
+// stores these as real `type`/`approved` columns rather than deriving
+// them, but nothing in our data model exposes an explicit "approved"
+// action anywhere in its flow -- the closest real signal we have is
+// whether an ATS Check has actually been run on this version, so that's
+// what "APPROVED" is derived from here.
+function StatusPill({ tone, children }: { tone: "neutral" | "primary" | "success"; children: ReactNode }) {
+  const style = tone === "success"
+    ? { borderColor: "color-mix(in srgb, var(--color-feedback-success, #3aa66b) 40%, transparent)", background: "color-mix(in srgb, var(--color-feedback-success, #3aa66b) 14%, transparent)", color: "var(--color-feedback-success, #3aa66b)" }
+    : tone === "primary"
+      ? { borderColor: "color-mix(in srgb, var(--primary) 40%, transparent)", background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--primary)" }
+      : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" };
+  return <span className="rounded-full border px-[9px] py-[3px] text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={style}>{children}</span>;
+}
+
 function ScoreBadge({ code, label, value }: { code: string; label: string; value: number }) {
   const tone = scoreTone(value);
   return (
@@ -60,6 +78,10 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
     <div className={CARD_CLASS} style={INSET}>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onOpen} className="dm-link flex min-w-0 cursor-pointer flex-col gap-[2px] text-left">
+          <div className="flex flex-wrap items-center gap-[6px]">
+            {version.targetPosition ? <StatusPill tone="primary">Tailored</StatusPill> : <StatusPill tone="neutral">Standard</StatusPill>}
+            {ats && <StatusPill tone="success">Approved</StatusPill>}
+          </div>
           <span className="truncate text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{version.name}</span>
           <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
             {version.educationIds.length} education · {version.experienceIds.length} experience · updated {formatDate(version.updatedAt)}

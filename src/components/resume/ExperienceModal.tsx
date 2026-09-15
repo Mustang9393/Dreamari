@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, GripVertical, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, removeExperience, upsertExperience, type ExperienceType, type ResumeExperience } from "@/lib/resume";
 import { EXPERIENCE_QUESTIONS, EXPERIENCE_TYPES } from "./data";
 import { Field, ResumeModal, TextInput } from "./ui";
@@ -98,11 +99,34 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus }: { i
     questions2: "Almost done – two more!",
     lines: "Here are your resume lines!",
   };
+  const modalHeaderByStep: Record<SubStep, string> = {
+    type: "New Experience",
+    info: "New Experience",
+    dates: "New Experience",
+    questions1: "New Experience",
+    questions2: "New Experience",
+    lines: "New Experience",
+  };
+  // Dreamy follows the student through every one of these screens in the
+  // reference, not just the outer wizard step -- direct feedback, 16 Sept
+  // 2026: "bring dreamy into the places wherever it was in the replit...
+  // you havent made dreamy follow the users screens more and be more
+  // involved." The modal's own title bar shrinks to a plain label since
+  // Dreamy now carries the actual line.
+  const spriteByStep: Record<SubStep, string> = {
+    type: "/images/dreamy/v2/dreamy-curious.png",
+    info: "/images/dreamy/v2/dreamy-happy.png",
+    dates: "/images/dreamy/v2/dreamy-glasses.png",
+    questions1: "/images/dreamy/v2/dreamy-idea.png",
+    questions2: "/images/dreamy/v2/dreamy-party.png",
+    lines: "/images/dreamy/v2/dreamy-heart.png",
+  };
 
   const [q1, q2, q3, q4] = EXPERIENCE_QUESTIONS;
 
   return (
-    <ResumeModal title={titleByStep[sub]} onClose={closeAndClear}>
+    <ResumeModal title={modalHeaderByStep[sub]} onClose={closeAndClear}>
+      <DreamyGuide sprite={spriteByStep[sub]} line={titleByStep[sub]} />
       {sub === "type" && (
         <div className="flex flex-col gap-[var(--space-3)]">
           {EXPERIENCE_TYPES.map(({ type, label, hint, Icon }) => (
@@ -131,7 +155,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus }: { i
       {sub === "info" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           <Field label="Where?" htmlFor="exp-where" required>
-            <TextInput id="exp-where" value={draft.where} onChange={(v) => setDraft({ ...draft, where: v })} onFocus={track("title")} placeholder="e.g. Target, Library" />
+            <TextInput id="exp-where" value={draft.where} onChange={(v) => setDraft({ ...draft, where: v })} onFocus={track("where")} placeholder="e.g. Target, Library" />
           </Field>
           <Field label="Your title or role?" htmlFor="exp-title" required>
             <TextInput id="exp-title" value={draft.title} onChange={(v) => setDraft({ ...draft, title: v })} onFocus={track("title")} />

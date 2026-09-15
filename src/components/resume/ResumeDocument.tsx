@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { BorderBeam } from "border-beam";
 import type { ResumeData } from "@/lib/resume";
 import { Portal } from "@/components/profile/CareerReport";
-import { EXPERIENCE_TYPES, RESUME_TEMPLATES, type ResumeTemplateId } from "./data";
+import { RESUME_TEMPLATES, type ResumeTemplateId } from "./data";
 
 // The actual resume, rendered as a real document -- not a form summary.
 // Reuses the app's existing printable-document system (`.dm-report`, the
@@ -91,16 +91,13 @@ export function dateRange(start: string, end: string, current: boolean) {
   return `${from} – ${to}`;
 }
 
-/** "People Skills: ...", "Tech Skills: ...", "Languages: ..." -- one line
- *  per non-empty category, shared by every place that flattens the resume
- *  to text (Text Preview, .docx export) so they never drift from each
- *  other. */
+/** One combined "Core Skills: ..." line (all three pickers flattened
+ *  together, not split by category), shared by every place that flattens
+ *  the resume to text (Text Preview, .docx export) so they never drift
+ *  from each other or from SkillsBlock's own on-screen render. */
 export function resumeSkillLines(resume: ResumeData): string[] {
-  return [
-    resume.skills.people.length > 0 && `People Skills: ${resume.skills.people.join(", ")}`,
-    resume.skills.tech.length > 0 && `Tech Skills: ${resume.skills.tech.join(", ")}`,
-    resume.skills.languages.length > 0 && `Languages: ${resume.skills.languages.join(", ")}`,
-  ].filter((line): line is string => !!line);
+  const values = [...resume.skills.people, ...resume.skills.tech, ...resume.skills.languages];
+  return values.length > 0 ? [`Core Skills: ${values.join(", ")}`] : [];
 }
 
 // ---- Shared entry content -- identical across layouts, just arranged
@@ -122,6 +119,10 @@ function FieldText({ value, placeholder, dataField, className, style }: { value:
   );
 }
 
+// Row order matches the reference, checked live (16 Sept 2026): school +
+// city/state first, program (or "High School" when none is set -- the
+// same fallback EducationStep's own list row already uses) + graduation
+// year second, in italics.
 function EducationEntries({ resume, tight }: { resume: ResumeData; tight?: boolean }) {
   if (resume.education.length === 0) return null;
   return (
@@ -130,45 +131,48 @@ function EducationEntries({ resume, tight }: { resume: ResumeData; tight?: boole
         <div key={edu.id} className="flex flex-col gap-[2px]">
           <div className={tight ? "flex flex-col gap-[1px]" : "flex items-baseline justify-between gap-[12px]"}>
             <FieldText value={edu.schoolName} placeholder="High School Name" dataField={`${edu.id}:schoolName`} className="text-[14px] font-bold" style={{ color: "var(--ink)" }} />
-            <FieldText value={edu.gradYear} placeholder="Graduation Year" dataField={`${edu.id}:gradYear`} className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }} />
+            <FieldText value={edu.cityState} placeholder="City, State" dataField={`${edu.id}:cityState`} className="flex-none text-[12.5px] font-semibold" style={{ color: "var(--ink-soft)" }} />
           </div>
-          <FieldText
-            value={[edu.cityState, edu.program && `${edu.program} Program`, edu.gpa && `GPA: ${edu.gpa}`].filter(Boolean).join(" · ")}
-            placeholder="City, State"
-            dataField={`${edu.id}:cityState`}
-            className="text-[12.5px]"
-            style={{ color: "var(--ink-soft)" }}
-          />
-          {edu.honors.length > 0 && <span data-field={`${edu.id}:honors`} className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>{edu.honors.join(", ")}</span>}
+          <div className={tight ? "flex flex-col gap-[1px]" : "flex items-baseline justify-between gap-[12px]"}>
+            <span className="text-[12.5px] italic" style={{ color: "var(--ink-soft)" }}>{edu.program ? `${edu.program} Program` : "High School"}</span>
+            <FieldText value={edu.gradYear} placeholder="Graduation Year" dataField={`${edu.id}:gradYear`} className="flex-none text-[12.5px]" style={{ color: "var(--ink-faint)" }} />
+          </div>
+          {(edu.gpa || edu.honors.length > 0) && (
+            <span className="text-[12.5px]" style={{ color: "var(--ink-faint)" }}>
+              {[edu.gpa && `GPA: ${edu.gpa}`, ...edu.honors].filter(Boolean).join(" · ")}
+            </span>
+          )}
         </div>
       ))}
     </div>
   );
 }
 
+// Row order matches the reference exactly, checked live (16 Sept 2026):
+// company + location first ("Target ... Kochi, Kerala"), title + dates
+// second ("Sales Associate"), then bullets -- not "Title at Company" with
+// location on its own line, which is what this used to do.
 function ExperienceEntries({ resume }: { resume: ResumeData }) {
   if (resume.experience.length === 0) return null;
   return (
     <div className="flex flex-col gap-[16px]">
       {resume.experience.map((exp) => {
-        const kind = EXPERIENCE_TYPES.find((t) => t.type === exp.type);
         const range = dateRange(exp.startDate, exp.endDate, exp.current);
         return (
-          <div key={exp.id} className="flex flex-col gap-[4px]">
+          <div key={exp.id} className="flex flex-col gap-[2px]">
             <div className="flex items-baseline justify-between gap-[12px]">
-              <span data-field={`${exp.id}:title`} className="text-[14.5px] font-bold" style={exp.title.trim() ? { color: "var(--ink)" } : { color: "var(--ink-faint)", fontStyle: "italic" }}>
-                {exp.title.trim() || "Job Title"}
-                <span className="font-semibold" style={exp.where.trim() ? { color: "var(--ink-soft)" } : { color: "var(--ink-faint)", fontStyle: "italic" }}> at {exp.where.trim() || "Company / Organization"}</span>
-              </span>
-              <FieldText value={range} placeholder="Start – End" dataField={`${exp.id}:dates`} className="flex-none text-[13px] font-semibold" style={{ color: "var(--ink-soft)" }} />
+              <FieldText value={exp.where} placeholder="Company / Organization" dataField={`${exp.id}:where`} className="text-[14.5px] font-bold" style={{ color: "var(--ink)" }} />
+              <FieldText value={exp.location} placeholder="City, State" dataField={`${exp.id}:location`} className="flex-none text-[13px] font-semibold" style={{ color: "var(--ink-soft)" }} />
             </div>
-            <FieldText
-              value={[kind?.label, exp.location].filter(Boolean).join(" · ")}
-              placeholder="City, State"
-              dataField={`${exp.id}:location`}
-              className="text-[12.5px]"
-              style={{ color: "var(--ink-faint)" }}
-            />
+            <div className="flex items-baseline justify-between gap-[12px]">
+              <FieldText value={exp.title} placeholder="Job Title" dataField={`${exp.id}:title`} className="text-[13px] italic" style={{ color: "var(--ink-soft)" }} />
+              {/* "Not Specified" rather than a blank/placeholder row once
+                 the entry has a title but no dates -- confirmed on the
+                 reference's own finished resume, 16 Sept 2026 (its wizard
+                 draft preview omits the row instead, a second, separate
+                 rendering context we don't split out here). */}
+              <FieldText value={exp.title.trim() ? range || "Not Specified" : range} placeholder="Start – End" dataField={`${exp.id}:dates`} className="flex-none text-[12.5px]" style={{ color: "var(--ink-faint)" }} />
+            </div>
             {exp.bullets.filter((b) => b.trim()).length > 0 && (
               <ul className="mt-[2px] flex flex-col gap-[3px] pl-[18px]" style={{ listStyleType: "disc", color: "var(--ink-soft)" }}>
                 {exp.bullets.filter((b) => b.trim()).map((b, i) => (
@@ -184,26 +188,21 @@ function ExperienceEntries({ resume }: { resume: ResumeData }) {
 }
 
 function SkillsBlock({ resume, stacked }: { resume: ResumeData; stacked?: boolean }) {
-  const total = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length;
-  if (total === 0) return null;
-  const groups: [string, string[]][] = [
-    ["People", resume.skills.people],
-    ["Tech", resume.skills.tech],
-    ["Languages", resume.skills.languages],
-  ].filter(([, v]) => v.length > 0) as [string, string[]][];
-  return (
-    <div className="flex flex-col gap-[6px]">
-      {groups.map(([label, values]) =>
-        stacked ? (
-          <div key={label} className="flex flex-col gap-[2px]">
-            <span className="text-[11.5px] font-bold" style={{ color: "var(--ink)" }}>{label}</span>
-            <span className="text-[12.5px]" style={{ color: "var(--ink-soft)" }}>{values.join(", ")}</span>
-          </div>
-        ) : (
-          <p key={label} className="text-[13.5px]" style={{ color: "var(--ink-soft)" }}><span className="font-bold" style={{ color: "var(--ink)" }}>{label}: </span>{values.join(", ")}</p>
-        ),
-      )}
+  const values = [...resume.skills.people, ...resume.skills.tech, ...resume.skills.languages];
+  if (values.length === 0) return null;
+  const joined = values.join(", ");
+  // One combined "Core Skills:" line, not a line per People/Tech/Languages
+  // category -- confirmed live in the reference's own document preview
+  // (all three pickers feed a single "Core Skills: X, Y" line under
+  // "Skills & Interest"), re-checked 16 Sept 2026 rather than assumed from
+  // the earlier "People Skills:"/"Tech Skills:" guess.
+  return stacked ? (
+    <div className="flex flex-col gap-[2px]">
+      <span className="text-[11.5px] font-bold" style={{ color: "var(--ink)" }}>Core Skills</span>
+      <span className="text-[12.5px]" style={{ color: "var(--ink-soft)" }}>{joined}</span>
     </div>
+  ) : (
+    <p className="text-[13.5px]" style={{ color: "var(--ink-soft)" }}><span className="font-bold" style={{ color: "var(--ink)" }}>Core Skills: </span>{joined}</p>
   );
 }
 

@@ -76,7 +76,17 @@ function ResumeBuilderTabs({ active, router }: { active: "builder" | "saved" | "
     { key: "tailor", label: "Choose & Tailor", href: "/resume-builder?view=tailor" },
   ];
   return (
-    <div role="tablist" aria-label="Resume Builder sections" data-print-hide className="mb-[var(--space-5)] flex flex-none gap-[var(--space-5)] border-b" style={{ borderColor: "var(--glass-border)" }}>
+    <div
+      role="tablist"
+      aria-label="Resume Builder sections"
+      data-print-hide
+      // Sticky, not just top-of-page -- it was scrolling out of view on
+      // any tall step (direct feedback, 16 Sept 2026: "make sure they are
+      // more prominent and always visible/sticky"), same pattern
+      // WizardFooter already uses for staying put at the bottom.
+      className="sticky top-0 z-30 -mx-5 mb-[var(--space-5)] flex flex-none gap-[var(--space-5)] border-b px-5 pt-[max(12px,env(safe-area-inset-top))] pb-0 backdrop-blur-md sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]"
+      style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}
+    >
       {items.map((item) => {
         const isActive = item.key === active;
         return (
@@ -214,6 +224,13 @@ function ResumeBuilderInner() {
   const [reactionNonce, setReactionNonce] = useState(0);
   const react = () => setReactionNonce((n) => n + 1);
   const [experienceModal, setExperienceModal] = useState<ResumeExperienceEntry | null | "new">(null);
+  // Set by a step that's swapped its own body for a sub-flow with its own
+  // DreamyGuide (SkillsStep's category picker) -- suppresses the wizard's
+  // own top-level Dreamy so only one ever shows at once, not stacked
+  // (direct feedback, 16 Sept 2026: "two dreamys on screen"). Experience's
+  // sub-flow doesn't need this passed in -- the parent already knows
+  // `experienceModal !== null` directly.
+  const [subDreamy, setSubDreamy] = useState<{ sprite: string; line: string } | null>(null);
   // Which `data-field` the live preview's camera should pan to right now --
   // set by whichever drawer field is focused (`${entryId}:${fieldKind}`),
   // cleared back to section-level framing when the drawer closes or the
@@ -223,7 +240,7 @@ function ResumeBuilderInner() {
   // just what ResumeDocument already does once activeField goes back to
   // null, no separate state needed for it).
   const [activeField, setActiveField] = useState<string | null>(null);
-  const goToStep = (i: number) => { setActiveField(null); setStepIndex(i); };
+  const goToStep = (i: number) => { setActiveField(null); setSubDreamy(null); setStepIndex(i); };
   const { toast, showToast } = useResumeToast();
 
   const backToProfile = () => router.push("/profile?tab=resume");
@@ -324,9 +341,11 @@ function ResumeBuilderInner() {
              Build gives him -- not the reference's small inline coaching
              tip (direct feedback, 14 Sept 2026). Capped width so his
              bubble hugs the line instead of stretching full column width. */}
-          <div className="max-w-[440px]">
-            <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
-          </div>
+          {!(stepIndex === 2 && experienceModal !== null) && !subDreamy && (
+            <div className="max-w-[440px]">
+              <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} />
+            </div>
+          )}
           <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <WizardProgress stepIndex={stepIndex} />
             {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); goToStep(1); }} showToast={showToast} onFieldFocus={setActiveField} />}
@@ -356,7 +375,7 @@ function ResumeBuilderInner() {
                 />
               )
             )}
-            {stepIndex === 3 && <SkillsStep resume={resume} onNext={() => { react(); goToStep(4); }} onBack={() => goToStep(2)} />}
+            {stepIndex === 3 && <SkillsStep resume={resume} onNext={() => { react(); goToStep(4); }} onBack={() => goToStep(2)} onSubDreamy={setSubDreamy} />}
             {stepIndex === 4 && <CertificationsStep resume={resume} onNext={() => { react(); goToStep(5); }} onBack={() => goToStep(3)} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 5 && (
               <ReviewStep

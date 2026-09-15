@@ -39,12 +39,14 @@ export async function downloadDocx(resume: ResumeData) {
   }
 
   if (resume.experience.length > 0) {
-    children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 200 }, children: [new TextRun({ text: "EXPERIENCE", bold: true })] }));
+    // Row order matches the reference and the on-screen preview: company +
+    // location first, title + dates second, then bullets.
+    children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 200 }, children: [new TextRun({ text: "PROFESSIONAL EXPERIENCES", bold: true })] }));
     for (const exp of resume.experience) {
-      children.push(new Paragraph({ children: [new TextRun({ text: exp.title || "Role", bold: true }), new TextRun({ text: exp.where ? ` at ${exp.where}` : "" })] }));
+      children.push(new Paragraph({ children: [new TextRun({ text: exp.where || "Company / Organization", bold: true }), new TextRun({ text: exp.location ? `  |  ${exp.location}` : "" })] }));
       const range = dateRange(exp.startDate, exp.endDate, exp.current);
-      const meta = [exp.location, range].filter(Boolean).join("  |  ");
-      if (meta) children.push(new Paragraph({ children: [new TextRun({ text: meta, italics: true, size: 20 })] }));
+      const titleLine = [exp.title || "Job Title", range || (exp.title.trim() ? "Not Specified" : "")].filter(Boolean).join("  |  ");
+      children.push(new Paragraph({ children: [new TextRun({ text: titleLine, italics: true, size: 20 })] }));
       for (const bullet of exp.bullets) {
         if (!bullet.trim()) continue;
         children.push(new Paragraph({ bullet: { level: 0 }, children: [new TextRun({ text: bullet, size: 21 })] }));
@@ -54,7 +56,7 @@ export async function downloadDocx(resume: ResumeData) {
 
   const skillLines = resumeSkillLines(resume);
   if (skillLines.length > 0) {
-    children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 200 }, children: [new TextRun({ text: "SKILLS", bold: true })] }));
+    children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 200 }, children: [new TextRun({ text: "SKILLS & INTEREST", bold: true })] }));
     for (const line of skillLines) children.push(new Paragraph({ children: [new TextRun({ text: line, size: 21 })] }));
   }
 

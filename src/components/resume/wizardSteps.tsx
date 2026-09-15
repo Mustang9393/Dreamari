@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Award, Briefcase, Check, CircleDashed, GraduationCap, HelpCircle, Pencil, Plus, Sparkles, Trash2, User } from "lucide-react";
+import { DreamyGuide } from "@/components/build/DreamyGuide";
 import {
   type ResumeData,
   type ResumeCertification,
@@ -303,13 +304,24 @@ export function ExperienceStep({ resume, onNext, onBack, onAdd, onEdit }: { resu
 // ---------------------------------------------------------------------------
 // 4. Skills
 // ---------------------------------------------------------------------------
-function SkillsPicker({ categoryKey, label, hint, suggestions, selected, onClose, onSave }: { categoryKey: "people" | "tech" | "languages"; label: string; hint: string; suggestions: string[]; selected: string[]; onClose: () => void; onSave: (values: string[]) => void }) {
+// Dreamy asks the actual question here in the reference, not just a plain
+// hint line (direct feedback, 16 Sept 2026: "bring dreamy into the places
+// wherever it was in the replit... make dreamy follow the users screens
+// more and be more involved").
+const SKILL_DREAMY: Record<"people" | "tech" | "languages", { line: string; sprite: string }> = {
+  people: { line: "What are your people skills? 🤝", sprite: "/images/dreamy/v2/dreamy-happy.png" },
+  tech: { line: "What tools or programs do you use? 💻", sprite: "/images/dreamy/v2/dreamy-idea.png" },
+  languages: { line: "What languages do you speak or write? 🌍", sprite: "/images/dreamy/v2/dreamy-glasses.png" },
+};
+
+function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSave }: { categoryKey: "people" | "tech" | "languages"; label: string; suggestions: string[]; selected: string[]; onClose: () => void; onSave: (values: string[]) => void }) {
   const [picked, setPicked] = useState<string[]>(selected);
   const [custom, setCustom] = useState("");
   const toggle = (s: string) => setPicked((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : cur.length >= MAX_SKILLS_PER_CATEGORY ? cur : [...cur, s]));
   return (
     <ResumeModal title={label} onClose={onClose}>
-      <p className="mb-[var(--space-4)] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{hint} Pick up to 3.</p>
+      <DreamyGuide sprite={SKILL_DREAMY[categoryKey].sprite} line={SKILL_DREAMY[categoryKey].line} />
+      <p className="mt-[var(--space-3)] mb-[var(--space-4)] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select up to 3.</p>
       <div className="mb-[var(--space-4)] flex gap-[var(--space-2)]">
         <TextInput id={`skill-${categoryKey}-custom`} value={custom} onChange={setCustom} placeholder="Type your own…" />
         <button
@@ -352,16 +364,24 @@ function SkillsPicker({ categoryKey, label, hint, suggestions, selected, onClose
   );
 }
 
-export function SkillsStep({ resume, onNext, onBack }: { resume: ResumeData; onNext: () => void; onBack: () => void }) {
+export function SkillsStep({ resume, onNext, onBack, onSubDreamy }: { resume: ResumeData; onNext: () => void; onBack: () => void; onSubDreamy?: (dreamy: { sprite: string; line: string } | null) => void }) {
   const [open, setOpen] = useState<"people" | "tech" | "languages" | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  // The picker below has its own DreamyGuide (asking that category's
+  // question) -- tell the wizard shell to hide its own top-level Dreamy
+  // while it's open, so only one ever shows (direct feedback, 16 Sept
+  // 2026: "two dreamys on screen").
+  useEffect(() => {
+    onSubDreamy?.(open ? SKILL_DREAMY[open] : null);
+    return () => onSubDreamy?.(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
   if (open) {
     const cat = SKILL_CATEGORIES.find((c) => c.key === open)!;
     return (
       <SkillsPicker
         categoryKey={cat.key}
         label={cat.label}
-        hint={cat.hint}
         suggestions={cat.suggestions}
         selected={resume.skills[cat.key]}
         onClose={() => setOpen(null)}
