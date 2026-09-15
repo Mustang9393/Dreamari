@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
@@ -538,8 +538,9 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           aria-expanded={open.has("sources")}
           aria-controls="sources-panel"
           onClick={() => toggle("sources")}
-          className="dm-quiet mx-auto mt-[var(--space-6)] flex cursor-pointer items-center gap-[4px] py-[6px]"
+          className="dm-quiet mx-auto mt-[var(--space-6)] flex cursor-pointer items-center gap-[4px] rounded-full px-[12px] py-[7px]"
         >
+          <Info className="h-3 w-3 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
           <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Where these numbers come from</span>
           <ChevronDown
             className="h-3 w-3 flex-none transition-transform duration-200"
