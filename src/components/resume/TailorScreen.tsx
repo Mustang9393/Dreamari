@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check } from "lucide-react";
+import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, upsertVersion, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
 import { CARD_CLASS, Field, INSET, selectedRowStyle, TextInput, WizardFooter } from "./ui";
@@ -83,12 +84,34 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
+      {/* Copy matches the reference exactly (direct instruction, 16 Sept
+         2026: "check everything... give me a report of the identified
+         gaps") -- title, Dreamy's own line for this screen, and each
+         section's heading + explainer were all missing before. "Match to
+         a Job" is deliberately NOT here -- that's its own separate action
+         on the finished resume now (JobMatchPanel), not bundled into
+         naming/picking (direct feedback, 15 Sept 2026: "the tailoring
+         happens as a seperate thing from the last naming/template
+         changer"). */}
+      <div className="flex flex-col gap-[2px]">
+        <h2 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Choose &amp; Tailor Your Resume</h2>
+        <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Pick what stands out, or match your resume to a job.</p>
+      </div>
+      <DreamyGuide sprite="/images/dreamy/v2/dreamy-idea.png" line="Choose your strongest experiences. Have a job in mind? I can help you pick what fits best." />
+
+      <div className="flex flex-col gap-[2px]">
+        <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Name This Resume</span>
+        <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Give this version a name so you can find it later.</span>
+      </div>
       <Field label="Resume Name" htmlFor="tailor-name" required>
         <TextInput id="tailor-name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} placeholder="e.g. Retail and Customer Service Resume" />
       </Field>
 
       <div className="flex flex-col gap-[var(--space-3)]">
-        <span className="text-[13px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Education to include</span>
+        <div className="flex flex-col gap-[2px]">
+          <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Your Education</span>
+          <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Choose the school information to show.</span>
+        </div>
         {resume.education.length === 0 ? (
           <p className={CARD_CLASS} style={INSET}>No education on file yet. Add some from Edit My Info first.</p>
         ) : (
@@ -101,7 +124,10 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
       </div>
 
       <div className="flex flex-col gap-[var(--space-3)]">
-        <span className="text-[13px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Experience to include</span>
+        <div className="flex flex-col gap-[2px]">
+          <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Choose Your Experiences</span>
+          <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Pick the activities and experiences that show you best.</span>
+        </div>
         {resume.experience.length === 0 ? (
           <p className={CARD_CLASS} style={INSET}>No experience on file yet. Add some from Edit My Info first.</p>
         ) : (
@@ -112,6 +138,8 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
           </div>
         )}
       </div>
+
+      <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Skills from your profile will be automatically included.</p>
 
       <Field label="Template" htmlFor="tailor-template">
         <div id="tailor-template">
@@ -129,7 +157,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
          Selection" on the finished document), there's nothing to skip
          past -- that's Cancel, back to Profile, discarding whatever was
          changed here. */}
-      <WizardFooter onBack={skippable ? save : onCancel} backLabel={skippable ? "Skip for now" : "Cancel"} onNext={save} nextDisabled={!canSave} nextLabel="Save Resume" />
+      <WizardFooter onBack={skippable ? save : onCancel} backLabel={skippable ? "Skip for now" : "Cancel"} onNext={save} nextDisabled={!canSave} nextLabel={initial ? "Save Resume" : "Create This Resume"} />
     </div>
   );
 }
