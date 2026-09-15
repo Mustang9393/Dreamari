@@ -84,29 +84,36 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
   const gradeLabel = ats ? (ats.qualityGrade.split(" — ")[1] ?? ats.qualityGrade) : "";
   const template = RESUME_TEMPLATES.find((t) => t.id === version.template) ?? RESUME_TEMPLATES[0];
   return (
-    // A left accent stripe in the version's own template color, and a
-    // faint tint of it behind the whole card -- these read identically
-    // flat and interchangeable before (direct feedback, 16 Sept 2026:
-    // "the saved resume cards need to be designed way better these are
-    // too basic and boring"). Ties each card back to the template you'll
-    // actually see when you open it.
+    // Darker glass surface than a flat tint, backdrop-blur keeps it
+    // reading as glass rather than a solid tinted panel (direct feedback,
+    // 16 Sept 2026: "a better surface color, maybe darker without losing
+    // that glass effect"). Kept to two rows plus an optional scores row
+    // -- a separate footer band for Edit/Open made the card taller, not
+    // sleeker (direct feedback: "much sleeker, much shorter"). A left
+    // accent stripe in the template color was here too, dropped on
+    // sight (direct feedback: "i dont like the dark colored line on the
+    // left of the card either") -- the small dot beside the name is a
+    // quieter nod to the same thing instead.
     <div
-      className="relative flex flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border pl-[calc(var(--space-5)+4px)]"
-      style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, ${template.accent} 5%, var(--glass-surface-1))` }}
+      className="relative flex flex-col gap-[8px] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-3)] backdrop-blur-md"
+      style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, var(--inset-surface) 85%, ${template.accent} 15%)` }}
     >
-      <span aria-hidden className="absolute top-0 left-0 h-full w-[4px]" style={{ background: template.accent }} />
-      <div className="flex items-start justify-between gap-[var(--space-3)] pt-[var(--space-4)]">
-        <button type="button" onClick={onOpen} className="dm-link flex min-w-0 cursor-pointer flex-col gap-[4px] text-left">
+      <div className="flex items-start justify-between gap-[var(--space-3)]">
+        <button type="button" onClick={onOpen} className="dm-link flex min-w-0 cursor-pointer flex-col gap-[3px] text-left">
           <div className="flex flex-wrap items-center gap-[6px]">
+            <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: template.accent }} />
             {version.targetPosition ? <StatusPill tone="primary">Tailored</StatusPill> : <StatusPill tone="neutral">Standard</StatusPill>}
             {ats && <StatusPill tone="success">Approved</StatusPill>}
           </div>
-          <span className="truncate text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
-          <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
+          <span className="truncate text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
+          <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>
             {version.educationIds.length} education · {version.experienceIds.length} experience · updated {formatDate(version.updatedAt)}
           </span>
         </button>
-        <div className="flex flex-none items-center gap-[6px] pr-[var(--space-3)]">
+        <div className="flex flex-none items-center gap-[4px]">
+          <button type="button" aria-label={`Edit ${version.name}`} onClick={onEdit} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <Pencil className="h-4 w-4" aria-hidden />
+          </button>
           <button
             type="button"
             aria-label={`Download ${version.name}`}
@@ -130,10 +137,18 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
           <button type="button" aria-label={`Delete ${version.name}`} onClick={onDelete} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
             <Trash2 className="h-4 w-4" aria-hidden />
           </button>
+          <button
+            type="button"
+            onClick={onOpen}
+            className="dm-tap ml-[4px] flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[7px] text-[12.5px] font-bold text-white"
+            style={{ background: template.accent }}
+          >
+            Open <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </button>
         </div>
       </div>
       {(ats || version.targetPosition) && (
-        <div className="flex flex-wrap items-center gap-[8px] pr-[var(--space-5)]">
+        <div className="flex flex-wrap items-center gap-[8px]">
           {ats && <ScoreBadge category="Resume Rating" label={gradeLabel} value={ats.qualityScore} />}
           {ats && ats.jobMatchScore !== null && <ScoreBadge category="Job Match" label={ats.jobMatchLabel || "Possible Match"} value={ats.jobMatchScore} />}
           {version.targetPosition && (
@@ -143,35 +158,6 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
           )}
         </div>
       )}
-      <div className="flex items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-3)] pr-[var(--space-5)] pb-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-        {/* Which education/experience to include and the template --
-           matching to a job lives on the finished resume itself now (the
-           "Tailor Resume" button, right beside ATS Check) since it's
-           something you'd want to redo against a different job any
-           number of times, not a one-time step bundled in here (direct
-           feedback, 15 Sept 2026: "the tailoring happens as a seperate
-           thing from the last naming/template changer"). Still a
-           labeled button, not just an icon (direct feedback: "I dont
-           see the tailor resume feature anymore" -- a bare pencil icon
-           read as nothing at all). */}
-        <button
-          type="button"
-          aria-label={`Edit ${version.name}`}
-          onClick={onEdit}
-          className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
-          style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-        >
-          <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit
-        </button>
-        <button
-          type="button"
-          onClick={onOpen}
-          className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] font-bold text-white"
-          style={{ background: template.accent }}
-        >
-          Open <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-        </button>
-      </div>
     </div>
   );
 }
@@ -230,22 +216,25 @@ export function ResumeExperience() {
       {/* The reference's own page title + subtitle -- missing here
          entirely before (direct feedback, 16 Sept 2026: "the saved
          resumes tab has copy we have ommitted"). */}
-      <div className="flex flex-col gap-[2px]">
-        <h2 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Saved Resumes</h2>
-        <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Manage, edit, and download your resumes.</p>
+      <div className="flex items-start justify-between gap-[var(--space-3)]">
+        {/* "Your Resumes" as a section label right below this same title
+           just repeated it -- nothing else shares the page for it to
+           distinguish from (direct feedback, 16 Sept 2026: "it says your
+           resumes again"). */}
+        <div className="flex flex-col gap-[2px]">
+          <h2 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Saved Resumes</h2>
+          <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Manage, edit, and download your resumes.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => router.push("/resume-builder?view=templates")}
+          className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white"
+          style={{ background: "var(--primary)" }}
+        >
+          <Plus className="h-4 w-4" aria-hidden /> Create New
+        </button>
       </div>
       <div className="flex flex-col gap-[var(--space-3)]">
-        <div className="flex items-center justify-between gap-[var(--space-3)]">
-          <span className="text-[13px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your Resumes</span>
-          <button
-            type="button"
-            onClick={() => router.push("/resume-builder?view=templates")}
-            className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white"
-            style={{ background: "var(--primary)" }}
-          >
-            <Plus className="h-4 w-4" aria-hidden /> Create New
-          </button>
-        </div>
 
         <div className="flex flex-col gap-[var(--space-3)]">
           {versions.map((v) => (
