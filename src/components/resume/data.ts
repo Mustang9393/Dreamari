@@ -7,13 +7,16 @@ import type { ExperienceType, ResumeData } from "@/lib/resume";
  *  (direct feedback, 14 Sept 2026: "not as small as its used in the
  *  replit... not like an afterthought... imagine it like we did for
  *  build"), not the reference's small inline coaching-tip treatment. */
+// Exact copy, checked live against the reference (16 Sept 2026, direct
+// instruction: "every text... needs to be identical to the exact flow of
+// replit. take no liberties. only design is ours").
 export const RESUME_WIZARD_DREAMY: { line: string; sprite: string }[] = [
-  { line: "Let's start with the basics about you. ✨", sprite: "/images/dreamy/v2/dreamy-happy.png" },
-  { line: "Where do you go to school? ✨", sprite: "/images/dreamy/v2/dreamy-glasses.png" },
-  { line: "Jobs, clubs, volunteering. It all counts! ✨", sprite: "/images/dreamy/v2/dreamy-controller.png" },
-  { line: "What are you good at? ✨", sprite: "/images/dreamy/v2/dreamy-idea.png" },
-  { line: "Any certifications? Skip this if not. ✨", sprite: "/images/dreamy/v2/dreamy-curious.png" },
-  { line: "Almost there. Let's look everything over. ✨", sprite: "/images/dreamy/v2/dreamy-party.png" },
+  { line: "Let's fill in your name, email and address. ✨", sprite: "/images/dreamy/v2/dreamy-happy.png" },
+  { line: "Add your school details. ✨", sprite: "/images/dreamy/v2/dreamy-glasses.png" },
+  { line: "Jobs, clubs, volunteering, and projects all count! ✨", sprite: "/images/dreamy/v2/dreamy-controller.png" },
+  { line: "Choose your top skills. ✨", sprite: "/images/dreamy/v2/dreamy-idea.png" },
+  { line: "Add any certifications you have. ✨", sprite: "/images/dreamy/v2/dreamy-curious.png" },
+  { line: "Review your resume. ✨", sprite: "/images/dreamy/v2/dreamy-party.png" },
 ];
 export const RESUME_TEMPLATE_GALLERY_DREAMY = { line: "Pick the look that feels most like you. ✨", sprite: "/images/dreamy/v2/dreamy-heart.png" };
 
@@ -48,7 +51,7 @@ export const EXPERIENCE_QUESTIONS = [
   { key: "dayToDay" as const, label: "What did you do day-to-day?", placeholder: "e.g. Helped customers" },
   { key: "tools" as const, label: "What tools or skills did you use?", placeholder: "e.g. Cash register" },
   { key: "team" as const, label: "Did you work with a team or customers?", placeholder: "e.g. Team of 5" },
-  { key: "proud" as const, label: "What are you most proud of?", placeholder: "e.g. Employee of the month" },
+  { key: "proud" as const, label: "What are you most proud of?", placeholder: "e.g. Employee of month" },
 ];
 
 /** Resume document presets -- four real, structurally distinct layouts

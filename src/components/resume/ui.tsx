@@ -69,7 +69,7 @@ export function SelectInput({ id, value, onChange, children }: { id: string; val
 // reused here labeled "RESUME" instead of "BUILD" rather than re-derived.
 // ---------------------------------------------------------------------------
 
-const WIZARD_STEPS = ["Personal Information", "Education", "Experience & Activities", "Skills", "Certifications", "Review"] as const;
+const WIZARD_STEPS = ["Personal Information", "Education", "Experience & Activity", "Skills", "Certifications", "Review"] as const;
 
 export function WizardProgress({ stepIndex }: { stepIndex: number }) {
   const percent = Math.round(((stepIndex + 1) / WIZARD_STEPS.length) * 100);

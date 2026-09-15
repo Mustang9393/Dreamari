@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Award, Briefcase, Check, CircleDashed, GraduationCap, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Award, Briefcase, Check, CircleDashed, GraduationCap, HelpCircle, Pencil, Plus, Sparkles, Trash2, User } from "lucide-react";
 import {
   type ResumeData,
   type ResumeCertification,
@@ -98,19 +98,9 @@ export function PersonalInfoStep({ resume, onNext, showToast, onFieldFocus }: { 
       <Field label="City" htmlFor="rb-city">
         <TextInput id="rb-city" value={p.city} onChange={(v) => set({ city: v })} onFocus={track("profile:contact")} placeholder="San Jose" />
       </Field>
-      <Field label="Short Bio (optional)" htmlFor="rb-bio">
-        <textarea
-          id="rb-bio"
-          value={p.bio}
-          onChange={(e) => set({ bio: e.target.value })}
-          onFocus={track("profile:bio")}
-          placeholder="A sentence or two about what you're looking for and what makes you a strong candidate."
-          rows={3}
-          maxLength={400}
-          className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]"
-          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-        />
-      </Field>
+      {/* No bio field here -- the reference's own Personal Information step
+         only ever asks for name/email/phone/address, nothing else (direct
+         instruction, 16 Sept 2026: "take no liberties"). */}
       <WizardFooter
         nextDisabled={!canContinue}
         onNext={() => {
@@ -364,6 +354,7 @@ function SkillsPicker({ categoryKey, label, hint, suggestions, selected, onClose
 
 export function SkillsStep({ resume, onNext, onBack }: { resume: ResumeData; onNext: () => void; onBack: () => void }) {
   const [open, setOpen] = useState<"people" | "tech" | "languages" | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
   if (open) {
     const cat = SKILL_CATEGORIES.find((c) => c.key === open)!;
     return (
@@ -383,13 +374,34 @@ export function SkillsStep({ resume, onNext, onBack }: { resume: ResumeData; onN
   }
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
+      <button
+        type="button"
+        onClick={() => setShowHelp((v) => !v)}
+        className="dm-link flex cursor-pointer items-center gap-[6px] self-start text-[13px] font-bold"
+        style={{ color: "var(--muted-foreground)" }}
+      >
+        <HelpCircle className="h-3.5 w-3.5" aria-hidden /> Not sure what these mean?
+      </button>
+      {showHelp && (
+        <div className={CARD_CLASS} style={INSET}>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            <strong style={{ color: "var(--foreground)" }}>People Skills</strong> — how you work and communicate with others, like teamwork or leadership.
+          </p>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            <strong style={{ color: "var(--foreground)" }}>Tech Skills</strong> — tools and technology you know how to use, like Excel or Canva.
+          </p>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+            <strong style={{ color: "var(--foreground)" }}>Languages</strong> — languages you can speak, read, or write.
+          </p>
+        </div>
+      )}
       {SKILL_CATEGORIES.map((cat) => {
         const values = resume.skills[cat.key];
         return (
           <div key={cat.key} className={CARD_CLASS} style={INSET}>
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{cat.label}</span>
+                <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{cat.label}{values.length > 0 ? ` (${values.length})` : ""}</span>
                 <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{cat.hint}</span>
               </div>
               <button type="button" onClick={() => setOpen(cat.key)} className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-full border px-[var(--space-3)] py-[6px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>
@@ -516,47 +528,103 @@ export function CertificationsStep({ resume, onNext, onBack, showToast, onFieldF
 // 6. Review -- checklist is computed live from actual data, never a
 //    separately-tracked flag that can drift from reality (plan bug-fix #3).
 // ---------------------------------------------------------------------------
-function ChecklistRow({ label, done, onEdit, last }: { label: string; done: boolean; onEdit: () => void; last?: boolean }) {
+function ChecklistRow({
+  Icon,
+  label,
+  optional,
+  subtitle,
+  done,
+  onEdit,
+  last,
+}: {
+  Icon: typeof User;
+  label: string;
+  optional?: boolean;
+  subtitle: string;
+  done: boolean;
+  onEdit: () => void;
+  last?: boolean;
+}) {
   return (
-    <div className={`flex items-center justify-between gap-[var(--space-3)] py-[10px] ${last ? "" : "border-b"}`} style={{ borderColor: "var(--glass-border)" }}>
-      <div className="flex items-center gap-[10px]">
-        {done ? <Check className="h-4 w-4 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden /> : <CircleDashed className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
-        <span className="text-[14px] font-semibold" style={{ color: done ? "var(--foreground)" : "var(--muted-foreground)" }}>{label}</span>
+    <div className={`flex items-center justify-between gap-[var(--space-3)] py-[12px] ${last ? "" : "border-b"}`} style={{ borderColor: "var(--glass-border)" }}>
+      <div className="flex min-w-0 items-center gap-[12px]">
+        <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--accent-subtle)" }}>
+          <Icon className="h-4 w-4" aria-hidden />
+        </span>
+        <div className="flex min-w-0 flex-col gap-[1px]">
+          <span className="flex items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
+            {label}
+            {optional && <span className="rounded-full border px-[6px] py-[1px] text-[10px] font-bold uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Optional</span>}
+          </span>
+          <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</span>
+        </div>
       </div>
-      <button type="button" onClick={onEdit} className="dm-link cursor-pointer text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>{done ? "Edit" : "Add"}</button>
+      <div className="flex flex-none items-center gap-[10px]">
+        <span
+          className="flex items-center gap-[4px] rounded-full px-[10px] py-[4px] text-[11px] font-bold whitespace-nowrap"
+          style={done ? { background: "color-mix(in srgb, var(--world-food-farming-nature, #3aa66b) 16%, transparent)", color: "var(--world-food-farming-nature, #3aa66b)" } : { background: "color-mix(in srgb, var(--color-amber-500, #f59e0b) 16%, transparent)", color: "var(--color-amber-500, #f59e0b)" }}
+        >
+          {done ? <Check className="h-3 w-3" aria-hidden /> : <CircleDashed className="h-3 w-3" aria-hidden />}
+          {done ? "Done" : "Not started"}
+        </span>
+        <button type="button" onClick={onEdit} className="dm-link cursor-pointer text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>Edit</button>
+      </div>
     </div>
   );
 }
 
 export function ReviewStep({ resume, onBack, onEditStep, onFinish }: { resume: ResumeData; onBack: () => void; onEditStep: (step: number) => void; onFinish: () => void }) {
+  // The "good start" tip: real in the reference, a real centered popup
+  // shown at export time, not the inline checklist-summary card this step
+  // used to show instead (direct instruction, 16 Sept 2026: "take no
+  // liberties... each modal... needs to be there"). Checked live: it
+  // showed on every Save & Export click in the reference, not just once,
+  // so that's what this matches too, rather than guessing at some other
+  // trigger condition never actually observed.
+  const [showTip, setShowTip] = useState(false);
+  const fullName = `${resume.profile.firstName} ${resume.profile.lastName}`.trim();
+  const totalSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length;
   const items = [
-    { label: "Personal Information", done: resume.profile.firstName.trim().length > 0 && resume.profile.lastName.trim().length > 0, step: 0 },
-    { label: "Education", done: resume.education.length > 0, step: 1 },
-    { label: "Experience & Activities", done: resume.experience.length > 0, step: 2 },
-    { label: "Skills", done: resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0, step: 3 },
-    { label: "Certifications", done: resume.certifications.length > 0, step: 4 },
+    { Icon: User, label: "Personal Information", subtitle: fullName || "Not started yet", done: fullName.length > 0, step: 0 },
+    { Icon: GraduationCap, label: "Education", subtitle: resume.education.length > 0 ? `${resume.education.length} school${resume.education.length === 1 ? "" : "s"} added` : "No schools added", done: resume.education.length > 0, step: 1 },
+    { Icon: Briefcase, label: "Experience & Activity", subtitle: resume.experience.length > 0 ? `${resume.experience.length} ${resume.experience.length === 1 ? "entry" : "entries"} added` : "No entries added", done: resume.experience.length > 0, step: 2 },
+    { Icon: Sparkles, label: "Skills", optional: true, subtitle: totalSkills > 0 ? `${totalSkills} skill${totalSkills === 1 ? "" : "s"} selected` : "Optional – none added", done: totalSkills > 0, step: 3 },
+    { Icon: Award, label: "Certifications", optional: true, subtitle: resume.certifications.length > 0 ? `${resume.certifications.length} certification${resume.certifications.length === 1 ? "" : "s"} added` : "Optional – none added", done: resume.certifications.length > 0, step: 4 },
   ];
-  const doneCount = items.filter((i) => i.done).length;
   const complete = items.filter((i) => i.step !== 4).every((i) => i.done);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className={CARD_CLASS} style={INSET}>
-        <div className="flex items-center gap-[10px]">
-          <Sparkles className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} aria-hidden />
-          <span className="text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
-            {complete ? "You've got a good start!" : `${doneCount} of ${items.length} sections done`}
-          </span>
-        </div>
-        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
-          {complete ? "Everything you need is here. You can always add more later." : "Certifications are optional. Finish the rest to build your resume."}
-        </p>
-      </div>
       <div className="flex flex-col">
         {items.map((i, idx) => (
-          <ChecklistRow key={i.label} label={i.label} done={i.done} onEdit={() => onEditStep(i.step)} last={idx === items.length - 1} />
+          <ChecklistRow key={i.label} Icon={i.Icon} label={i.label} optional={i.optional} subtitle={i.subtitle} done={i.done} onEdit={() => onEditStep(i.step)} last={idx === items.length - 1} />
         ))}
       </div>
-      <WizardFooter onBack={onBack} onNext={onFinish} nextLabel="Finish" nextDisabled={!complete} />
+      <WizardFooter onBack={onBack} onNext={() => setShowTip(true)} nextLabel="Save & Export" nextDisabled={!complete} />
+      {showTip && (
+        <div
+          className="fixed inset-0 z-[130] flex items-end justify-center p-4 sm:items-center"
+          style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }}
+          onPointerDown={(e) => { if (e.target === e.currentTarget) setShowTip(false); }}
+        >
+          <div className="flex w-full max-w-[380px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            <div className="flex items-center gap-[10px]">
+              <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--accent-subtle)" }}>
+                <Sparkles className="h-4 w-4" aria-hidden />
+              </span>
+              <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>You&apos;ve got a good start! ☁️</span>
+            </div>
+            <p className="text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>More experiences can make your resume stronger. Explore activities or ask a counselor for ideas.</p>
+            <div className="flex items-center justify-end gap-[var(--space-3)]">
+              <button type="button" onClick={() => { setShowTip(false); onEditStep(2); }} className="dm-tap cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                Add Experiences
+              </button>
+              <button type="button" onClick={() => { setShowTip(false); onFinish(); }} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
+                Got it! 👍
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

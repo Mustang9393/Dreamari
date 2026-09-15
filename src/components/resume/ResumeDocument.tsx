@@ -312,8 +312,8 @@ function SingleColumnLayout({ resume, placeholders }: { resume: ResumeData; plac
       </header>
       <div className="mt-[28px] flex flex-col gap-[24px]">
         {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel>Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel>Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel>Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel>Professional Experiences</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel>Skills & Interest</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
         {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[14px]"><SectionLabel>Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
     </>
@@ -342,13 +342,13 @@ function SidebarLayout({ resume, placeholders }: { resume: ResumeData; placehold
             <span>City, State</span>
           </div>
         ) : null}
-        {(hasSkills || placeholders) && <div data-section="skills" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} stacked /> : <EmptyHint />}</div>}
+        {(hasSkills || placeholders) && <div data-section="skills" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Skills & Interest</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} stacked /> : <EmptyHint />}</div>}
         {(resume.certifications.length > 0 || placeholders) && <div data-section="certifications" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} tight /> : <EmptyHint />}</div>}
       </aside>
       <div className="flex min-w-0 flex-1 flex-col gap-[22px]">
         <ProfileBio resume={resume} className="text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
         {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel>Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel>Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel>Professional Experiences</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
     </div>
   );
@@ -365,8 +365,8 @@ function MinimalLayout({ resume, placeholders }: { resume: ResumeData; placehold
       </header>
       <div className="mt-[32px] flex flex-col gap-[28px]">
         {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Professional Experiences</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Skills & Interest</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
         {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
     </>
@@ -385,8 +385,8 @@ function BannerLayout({ resume, placeholders }: { resume: ResumeData; placeholde
       </header>
       <div className="mt-[24px] flex flex-col gap-[24px]">
         {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Experience &amp; Activities</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Skills</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
+        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Professional Experiences</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
+        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Skills & Interest</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
         {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
       </div>
     </>
