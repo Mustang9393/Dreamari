@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore, useState, type ReactNode } from "react";
-import { Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowRight, Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { readStudentProfile } from "@/lib/studentProfile";
 import { STUDENT } from "@/components/profile/data";
+import { RESUME_TEMPLATES } from "./data";
 import { downloadDocx } from "./ExportChecklistModal";
 import { CARD_CLASS, INSET, useResumeToast } from "./ui";
 
@@ -74,39 +75,31 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
   // "NW — Needs Work" -> "NW" / "Needs Work", the same short-code-plus-
   // label shape the replit reference's own card badge uses.
   const [gradeCode, gradeLabel] = ats ? ats.qualityGrade.split(" — ") : ["", ""];
+  const template = RESUME_TEMPLATES.find((t) => t.id === version.template) ?? RESUME_TEMPLATES[0];
   return (
-    <div className={CARD_CLASS} style={INSET}>
-      <div className="flex items-start justify-between gap-[var(--space-3)]">
-        <button type="button" onClick={onOpen} className="dm-link flex min-w-0 cursor-pointer flex-col gap-[2px] text-left">
+    // A left accent stripe in the version's own template color, and a
+    // faint tint of it behind the whole card -- these read identically
+    // flat and interchangeable before (direct feedback, 16 Sept 2026:
+    // "the saved resume cards need to be designed way better these are
+    // too basic and boring"). Ties each card back to the template you'll
+    // actually see when you open it.
+    <div
+      className="relative flex flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border pl-[calc(var(--space-5)+4px)]"
+      style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, ${template.accent} 5%, var(--glass-surface-1))` }}
+    >
+      <span aria-hidden className="absolute top-0 left-0 h-full w-[4px]" style={{ background: template.accent }} />
+      <div className="flex items-start justify-between gap-[var(--space-3)] pt-[var(--space-4)]">
+        <button type="button" onClick={onOpen} className="dm-link flex min-w-0 cursor-pointer flex-col gap-[4px] text-left">
           <div className="flex flex-wrap items-center gap-[6px]">
             {version.targetPosition ? <StatusPill tone="primary">Tailored</StatusPill> : <StatusPill tone="neutral">Standard</StatusPill>}
             {ats && <StatusPill tone="success">Approved</StatusPill>}
           </div>
-          <span className="truncate text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{version.name}</span>
+          <span className="truncate text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
           <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
             {version.educationIds.length} education · {version.experienceIds.length} experience · updated {formatDate(version.updatedAt)}
           </span>
         </button>
-        <div className="flex flex-none items-center gap-[6px]">
-          {/* Which education/experience to include and the template --
-             matching to a job lives on the finished resume itself now (the
-             "Tailor Resume" button, right beside ATS Check) since it's
-             something you'd want to redo against a different job any
-             number of times, not a one-time step bundled in here (direct
-             feedback, 15 Sept 2026: "the tailoring happens as a seperate
-             thing from the last naming/template changer"). Still a
-             labeled button, not just an icon (direct feedback: "I dont
-             see the tailor resume feature anymore" -- a bare pencil icon
-             read as nothing at all). */}
-          <button
-            type="button"
-            aria-label={`Edit ${version.name}`}
-            onClick={onEdit}
-            className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
-            style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-          >
-            <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit
-          </button>
+        <div className="flex flex-none items-center gap-[6px] pr-[var(--space-3)]">
           <button
             type="button"
             aria-label={`Download ${version.name}`}
@@ -133,7 +126,7 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
         </div>
       </div>
       {(ats || version.targetPosition) && (
-        <div className="mt-[10px] flex flex-wrap items-center gap-[8px]">
+        <div className="flex flex-wrap items-center gap-[8px] pr-[var(--space-5)]">
           {ats && <ScoreBadge code={gradeCode} label={gradeLabel} value={ats.qualityScore} />}
           {ats && ats.jobMatchScore !== null && <ScoreBadge code="JM" label={ats.jobMatchLabel || "Job Match"} value={ats.jobMatchScore} />}
           {version.targetPosition && (
@@ -143,6 +136,35 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
           )}
         </div>
       )}
+      <div className="flex items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-3)] pr-[var(--space-5)] pb-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+        {/* Which education/experience to include and the template --
+           matching to a job lives on the finished resume itself now (the
+           "Tailor Resume" button, right beside ATS Check) since it's
+           something you'd want to redo against a different job any
+           number of times, not a one-time step bundled in here (direct
+           feedback, 15 Sept 2026: "the tailoring happens as a seperate
+           thing from the last naming/template changer"). Still a
+           labeled button, not just an icon (direct feedback: "I dont
+           see the tailor resume feature anymore" -- a bare pencil icon
+           read as nothing at all). */}
+        <button
+          type="button"
+          aria-label={`Edit ${version.name}`}
+          onClick={onEdit}
+          className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
+          style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        >
+          <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit
+        </button>
+        <button
+          type="button"
+          onClick={onOpen}
+          className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] font-bold text-white"
+          style={{ background: template.accent }}
+        >
+          Open <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </button>
+      </div>
     </div>
   );
 }
