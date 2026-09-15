@@ -486,32 +486,72 @@ const BUILD_WORLDS: { label: string; color: string; on?: boolean }[] = [
   { label: "Law, Safety & Justice", color: RED },
 ];
 
+// Cinematic treatment, first pass (15 Sept 2026, direction: "create really
+// nice graphics... accentuate what it's trying to convey... components can
+// float outside the screen layout, scale up... we don't need to show full
+// screens, sometimes the top left corner can be in focus... the screen can
+// go out of the page, not clipped by margins"). Real content throughout
+// (the same worlds, the same real sourcing line, now cropped out of frame
+// by design rather than removed) -- what changes is the composition: the
+// frame shows only the top of the real Build screen,
+// scaled up and cropped rather than shrunk to fit a whole card, fading out
+// rather than hard-cut so it reads as "this continues," and the progress
+// readout breaks out as its own small object overlapping the frame's edge
+// instead of packed inside the same box. `overflow: visible` up the tree
+// (this section's wrapper does not clip) is what lets it bleed.
 export function BuildIllustration() {
   return (
-    <Panel label={false}>
-      <Fit base={520}>
-        <div role="img" aria-label="Build: Which career fields interest you? Choose up to 2. Business & Money and Tech & Engineering are chosen from six career worlds shown. 13% complete." className="flex flex-col gap-5 p-7">
-          <div className="flex items-center justify-between gap-4">
-            <Caps color={BLUE}>Build</Caps>
-            <span className="flex items-center gap-2 text-[12px] font-bold tabular-nums" style={{ color: INK2 }}><span className="h-[6px] w-[120px] overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}><span className="block h-full w-[13%] rounded-full" style={{ background: BLUE }} /></span>13% complete</span>
+    <div className="relative flex items-center justify-center px-4 py-8">
+      <motion.div
+        className="relative w-full"
+        style={{ maxWidth: 480 }}
+        initial={{ opacity: 0, y: 36, scale: 0.94, rotate: -1.5 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1, rotate: -1.5 }}
+        viewport={{ once: true, amount: 0.5 }}
+        transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div role="img" aria-label="Build: Which career fields interest you? Choose up to 2. Business & Money and Tech & Engineering are chosen, from six career worlds in total." className="relative overflow-hidden rounded-[26px] border" style={{ height: 300, background: "var(--ill-panel)", borderColor: LINE, boxShadow: PANEL_SHADOW }}>
+          <div className="flex flex-col gap-6" style={{ transform: "scale(1.1)", transformOrigin: "top left", padding: "30px 30px 0" }}>
+            <div className="flex items-center gap-4">
+              <Image src="/images/dreamy/v2/dreamy-curious.png" alt="" width={180} height={180} className="size-[76px] flex-none object-contain" />
+              <div>
+                <p className="text-[25px] leading-[29px] font-extrabold tracking-[-0.015em]" style={{ color: INK }}>Which career fields interest you?</p>
+                <p className="mt-1 text-[13.5px] font-semibold" style={{ color: INK2 }}>Choose up to 2</p>
+              </div>
+            </div>
+            <ul className="grid grid-cols-2 gap-2.5">
+              {BUILD_WORLDS.map((w) => (
+                <li key={w.label} className="flex items-center gap-2.5 rounded-[14px] border px-3.5 py-3 text-[13.5px] font-bold" style={w.on ? { background: `color-mix(in srgb, ${w.color} 16%, var(--surface))`, borderColor: `color-mix(in srgb, ${w.color} 55%, var(--surface))`, color: INK } : { background: "var(--surface)", borderColor: LINE, color: INK }}>
+                  <span className="size-2.5 flex-none rounded-full" style={{ background: w.color }} />
+                  <span className="truncate">{w.label}</span>
+                  {w.on && <Check className="ml-auto h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: w.color }} />}
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11.5px] font-semibold" style={{ color: INK2 }}>Harvard FAS Mignone + O*NET Interest Profiler</p>
           </div>
-          <div className="flex items-center gap-4">
-            <Image src="/images/dreamy/v2/dreamy-curious.png" alt="" width={144} height={144} className="size-[72px] flex-none object-contain" />
-            <div><p className="text-[24px] leading-[28px] font-extrabold tracking-[-0.015em]" style={{ color: INK }}>Which career fields interest you?</p><p className="mt-1 text-[13.5px] font-semibold" style={{ color: INK2 }}>Choose up to 2</p></div>
-          </div>
-          <ul className="grid grid-cols-2 gap-2.5">
-            {BUILD_WORLDS.map((w) => (
-              <li key={w.label} className="flex items-center gap-2.5 rounded-[14px] border px-3.5 py-3 text-[13.5px] font-bold" style={w.on ? { background: `color-mix(in srgb, ${w.color} 16%, var(--surface))`, borderColor: `color-mix(in srgb, ${w.color} 55%, var(--surface))`, color: INK } : { background: "var(--surface)", borderColor: LINE, color: INK }}>
-                <span className="size-2.5 flex-none rounded-full" style={{ background: w.color }} />
-                <span className="truncate">{w.label}</span>
-                {w.on && <Check className="ml-auto h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: w.color }} />}
-              </li>
-            ))}
-          </ul>
-          <p className="text-[11.5px] font-semibold" style={{ color: INK2 }}>Harvard FAS Mignone + O*NET Interest Profiler</p>
+          {/* fades to the frame's own colour, not a hard clip -- reads as
+             "keeps going" rather than a screenshot cut off mid-content; the
+             sourcing line above sits right where this fade swallows it */}
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-20" style={{ background: "linear-gradient(to top, var(--ill-panel), transparent)" }} />
         </div>
-      </Fit>
-    </Panel>
+        {/* the progress readout, broken out as its own small object
+           overlapping the frame's bottom-right corner rather than packed
+           inside it -- the "float outside the layout" idea, at illustration
+           scale. */}
+        <motion.div
+          className="absolute flex items-center gap-2.5 rounded-[16px] border px-4 py-3"
+          style={{ right: -18, bottom: -22, background: "var(--surface)", borderColor: LINE, boxShadow: PANEL_SHADOW }}
+          initial={{ opacity: 0, y: 14, scale: 0.9 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <span className="h-[6px] w-[64px] flex-none overflow-hidden rounded-full" style={{ background: "var(--ill-line)" }}><span className="block h-full w-[13%] rounded-full" style={{ background: BLUE }} /></span>
+          <span className="text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: INK2 }}>13% complete</span>
+        </motion.div>
+      </motion.div>
+    </div>
   );
 }
 
