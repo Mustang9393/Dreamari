@@ -15,7 +15,11 @@ const CONFIRMATIONS = [
   "I understand that ATS compatibility does not guarantee an interview.",
 ] as const;
 
-async function downloadDocx(resume: ResumeData) {
+// Exported for resume-home's own one-click download action on each saved
+// card (the replit reference's download icon skips the confirmation
+// checklist entirely) -- the checklist below is still the one this modal
+// itself shows before calling it.
+export async function downloadDocx(resume: ResumeData) {
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = await import("docx");
   const name = `${resume.profile.firstName} ${resume.profile.lastName}`.trim() || "Resume";
   const contact = [resume.profile.email, resume.profile.phone, [resume.profile.city, resume.profile.state].filter(Boolean).join(", ")].filter(Boolean).join("  |  ");

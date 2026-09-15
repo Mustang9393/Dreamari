@@ -2,12 +2,34 @@
 
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore, useState } from "react";
-import { Eye, FileText, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Copy, Download, Eye, FileText, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
-import { EMPTY_RESUME, removeVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, writeResume, type ResumeVersion } from "@/lib/resume";
+import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { readStudentProfile } from "@/lib/studentProfile";
 import { STUDENT } from "@/components/profile/data";
+import { downloadDocx } from "./ExportChecklistModal";
 import { CARD_CLASS, INSET, useResumeToast } from "./ui";
+
+// Resume Quality and Job Match scores, right on the card, same tone rule
+// ScoreChip/ATSCheckPanel already use elsewhere -- the replit reference
+// shows both here too (direct instruction, 16 Sept 2026: "review the
+// Replit user flow and replicate it exactly"), instead of only being
+// visible after opening ATS Check.
+function scoreTone(value: number) {
+  return value >= 75 ? "var(--world-food-farming-nature, #3aa66b)" : value >= 45 ? "var(--accent-subtle)" : "var(--muted-foreground)";
+}
+function ScoreBadge({ code, label, value }: { code: string; label: string; value: number }) {
+  const tone = scoreTone(value);
+  return (
+    <span className="flex items-center gap-[6px] rounded-[var(--radius-sm)] border px-[8px] py-[4px]" style={{ borderColor: "color-mix(in srgb, " + tone + " 35%, transparent)", background: "color-mix(in srgb, " + tone + " 12%, transparent)" }}>
+      <span className="flex size-[20px] flex-none items-center justify-center rounded-[5px] text-[9.5px] font-extrabold" style={{ background: tone, color: "#05070f" }}>{code}</span>
+      <span className="flex items-baseline gap-[3px]">
+        <span className="text-[12.5px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{value}/100</span>
+        <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+      </span>
+    </span>
+  );
+}
 
 /** Only ever called from the zero-resumes empty state below, so this IS
  *  "starting fresh" by definition -- resets the whole draft (education,
@@ -28,7 +50,12 @@ function formatDate(ts: number) {
   return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
-function VersionRow({ version, onOpen, onEdit, onDelete }: { version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDelete: () => void }) {
+function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void }) {
+  const [downloading, setDownloading] = useState(false);
+  const ats = version.atsCheck;
+  // "NW — Needs Work" -> "NW" / "Needs Work", the same short-code-plus-
+  // label shape the replit reference's own card badge uses.
+  const [gradeCode, gradeLabel] = ats ? ats.qualityGrade.split(" — ") : ["", ""];
   return (
     <div className={CARD_CLASS} style={INSET}>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
@@ -58,11 +85,42 @@ function VersionRow({ version, onOpen, onEdit, onDelete }: { version: ResumeVers
           >
             <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit
           </button>
+          <button
+            type="button"
+            aria-label={`Download ${version.name}`}
+            disabled={downloading}
+            onClick={async () => {
+              setDownloading(true);
+              try {
+                await downloadDocx(resumeForVersion(resume, version));
+              } finally {
+                setDownloading(false);
+              }
+            }}
+            className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            <Download className="h-4 w-4" aria-hidden />
+          </button>
+          <button type="button" aria-label={`Duplicate ${version.name}`} onClick={onDuplicate} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <Copy className="h-4 w-4" aria-hidden />
+          </button>
           <button type="button" aria-label={`Delete ${version.name}`} onClick={onDelete} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
             <Trash2 className="h-4 w-4" aria-hidden />
           </button>
         </div>
       </div>
+      {(ats || version.targetPosition) && (
+        <div className="mt-[10px] flex flex-wrap items-center gap-[8px]">
+          {ats && <ScoreBadge code={gradeCode} label={gradeLabel} value={ats.qualityScore} />}
+          {ats && ats.jobMatchScore !== null && <ScoreBadge code="JM" label={ats.jobMatchLabel || "Job Match"} value={ats.jobMatchScore} />}
+          {version.targetPosition && (
+            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              Target: <span style={{ color: "var(--foreground)" }}>{version.targetPosition}</span>
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -173,9 +231,14 @@ export function ResumeExperience() {
           {versions.map((v) => (
             <VersionRow
               key={v.id}
+              resume={resume}
               version={v}
               onOpen={() => router.push(`/resume-builder?view=version&version=${v.id}`)}
               onEdit={() => router.push(`/resume-builder?view=tailor&version=${v.id}&edit=1`)}
+              onDuplicate={() => {
+                const now = Date.now();
+                upsertVersion({ ...v, id: makeId(), name: `${v.name} (Copy)`, createdAt: now, updatedAt: now, atsCheck: null });
+              }}
               onDelete={() => setConfirmDelete(v)}
             />
           ))}
