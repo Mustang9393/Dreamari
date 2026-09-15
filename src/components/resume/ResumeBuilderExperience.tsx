@@ -371,12 +371,20 @@ function ResumeBuilderInner() {
              pokes up into the top of this reserved band rather than the
              band holding him directly. */}
           <div aria-hidden className="hidden flex-none lg:block lg:min-h-[56px]" />
-          <div
-            className={`relative flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border px-[var(--space-6)] pb-[var(--space-6)] ${showWizardDreamy ? "pt-[34px]" : "pt-[var(--space-6)]"}`}
-            style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}
-          >
+          <div className="relative flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            {/* Overlaps the card's own top-left corner at desktop width
+               (a negative offset into the spacer above, no padding
+               reserved for him inside the card) rather than pushing the
+               whole card down to make room (direct feedback, 16 Sept
+               2026: "keep the floating to a minimum... the cloud itself
+               can overlap onto rows without needing padding"). Below the
+               spacer's own `lg` breakpoint there's no reserved room above
+               the card to overlap into -- the sticky tabs bar sits right
+               there instead, and the same negative offset clipped him
+               under it -- so he renders in normal flow there, a plain
+               first row, no overlap. */}
             {showWizardDreamy && (
-              <div className="absolute -top-[24px] right-[var(--space-6)] left-[var(--space-6)]">
+              <div className="relative mb-[2px] lg:absolute lg:top-[-30px] lg:-left-[8px] lg:z-10 lg:mb-0">
                 <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} reactionNonce={reactionNonce} size="sm" />
               </div>
             )}

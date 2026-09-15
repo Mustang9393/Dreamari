@@ -227,8 +227,7 @@ export function EducationStep({ resume, onNext, onBack, showToast, onFieldFocus 
   }
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-center justify-between gap-[var(--space-3)]">
-        <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Add your school details</p>
+      <div className="flex items-center justify-end gap-[var(--space-3)]">
         <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
           <Plus className="h-4 w-4" aria-hidden /> Add Education
         </button>
@@ -255,8 +254,7 @@ export function EducationStep({ resume, onNext, onBack, showToast, onFieldFocus 
 export function ExperienceStep({ resume, onNext, onBack, onAdd, onEdit }: { resume: ResumeData; onNext: () => void; onBack: () => void; onAdd: () => void; onEdit: (entry: ResumeExperience) => void }) {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-center justify-between gap-[var(--space-3)]">
-        <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Jobs, clubs, volunteering, and projects all count!</p>
+      <div className="flex items-center justify-end gap-[var(--space-3)]">
         <button type="button" onClick={onAdd} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
           <Plus className="h-4 w-4" aria-hidden /> Add Experience
         </button>
@@ -524,8 +522,7 @@ export function CertificationsStep({ resume, onNext, onBack, showToast, onFieldF
   }
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-center justify-between gap-[var(--space-3)]">
-        <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Add any certifications you have</p>
+      <div className="flex items-center justify-end gap-[var(--space-3)]">
         <button type="button" onClick={() => setEditing("new")} className="dm-tap flex flex-none cursor-pointer items-center gap-[6px] rounded-full px-[var(--space-4)] py-[8px] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
           <Plus className="h-4 w-4" aria-hidden /> Add Certification
         </button>
