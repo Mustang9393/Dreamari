@@ -200,7 +200,7 @@ function ResumeBuilderInner() {
   if (view === "tailor") {
     return (
       <Shell contentMaxWidth={760}>
-        <TopBar label={activeVersion ? "Edit Resume" : "Create Resume"} onClose={backToProfile} />
+        <TopBar label={activeVersion ? "Tailor Resume" : "Tailor New Resume"} onClose={backToProfile} />
         <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
           <TailorScreen
             resume={resume}
