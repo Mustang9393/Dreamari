@@ -1105,7 +1105,7 @@ function Top3Tab({
                 <Link
                   href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
                   aria-label={`Play ${career.title}`}
-                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-full border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
+                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
                   style={{ background: `color-mix(in srgb, ${accent} 20%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, color: "var(--foreground)" }}
                 >
                   <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: accent, borderColor: "rgba(255,255,255,0.35)" }}>
@@ -1116,7 +1116,7 @@ function Top3Tab({
                 <Link
                   href={`/career/${id}`}
                   aria-label={`Learn more about ${career.title}`}
-                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold"
+                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-[var(--radius-md)] border px-[12px] text-[14px] font-bold"
                   style={FROST}
                 >
                   <span className="min-w-0 truncate">Learn more</span> <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
@@ -1138,7 +1138,7 @@ function Top3Tab({
               {/* Get Career Report apart at the foot; no rules anywhere in
                  the card (direct feedback, 11 Sept 2026). */}
               <div className="mt-auto pt-[var(--space-1)]">
-                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-full border px-[12px] text-[14px] font-bold" style={FROST}>
+                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-[var(--radius-md)] border px-[12px] text-[14px] font-bold" style={FROST}>
                   Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
                 </button>
               </div>
@@ -2318,7 +2318,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
                   type="button"
                   onClick={() => addToTop3(career.id)}
                   aria-label={top3Count >= 3 ? `Swap ${career.title} into your Top 3` : `Add ${career.title} to your Top 3`}
-                  className="dm-quiet flex h-8 flex-none cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold whitespace-nowrap"
+                  className="dm-quiet flex h-8 flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[12px] font-bold whitespace-nowrap"
                   style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}
                 >
                   {top3Count >= 3 ? <><ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> Swap in</> : <><Plus className="h-[13px] w-[13px]" aria-hidden /> Add to Top 3</>}

@@ -798,7 +798,7 @@ function RevealPhase({ onClose }: { onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          className="mx-auto mt-1 w-fit cursor-pointer rounded-full px-4 py-2 text-[12.5px] font-semibold"
+          className="mx-auto mt-1 w-fit cursor-pointer rounded-[var(--radius-md)] px-4 py-2 text-[12.5px] font-semibold"
           style={{ color: V.muted }}
         >
           Close
