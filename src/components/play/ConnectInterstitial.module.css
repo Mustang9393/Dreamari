@@ -89,7 +89,14 @@
   box-shadow: 0 12px 28px -12px color-mix(in srgb, var(--connect-accent) 65%, transparent);
 }
 .primary:hover { filter: brightness(1.08); }
-.primary:disabled { opacity: 0.55; cursor: default; box-shadow: none; }
+/* Not-yet-available, not just a dimmed version of the bright accent
+   gradient (direct feedback, 17 Sept 2026: "the continue CTA still being
+   dim yellow gradient is clashing"). A plain quiet surface instead. */
+.primary:disabled {
+  background: color-mix(in srgb, var(--background) 85%, transparent);
+  border: 1px solid var(--glass-border); color: var(--muted-foreground);
+  box-shadow: none; opacity: 1; cursor: default;
+}
 
 /* A completed action's own button -- dark and quiet, not the same bright
    accent-yellow surface still lit up after it's done (direct feedback, 17
@@ -159,6 +166,23 @@
 .nextUp b { color: var(--connect-accent); font-weight: 800; }
 .nextUp:hover { background: color-mix(in srgb, var(--connect-accent) 14%, transparent); }
 .continueFooter { margin-top: 16px; }
+
+/* A second, quieter CTA -- never the same bright accent gradient as the
+   step's own primary action on the same screen (direct feedback, 17 Sept
+   2026: "make sure we don't have two similarly colored CTAs present at
+   once in a modal"). Clearly available, just not competing for attention. */
+.secondary {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  padding: 13px 18px; min-height: 46px; border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--connect-accent) 45%, var(--color-glass-border-raised));
+  background: color-mix(in srgb, var(--connect-accent) 10%, transparent);
+  color: var(--connect-accent); font-size: 14.5px; font-weight: 700;
+}
+.secondary:hover { background: color-mix(in srgb, var(--connect-accent) 16%, transparent); }
+.secondary:disabled {
+  background: color-mix(in srgb, var(--background) 85%, transparent);
+  border-color: var(--glass-border); color: var(--muted-foreground); cursor: default;
+}
 
 .flight { position: fixed; z-index: 6; pointer-events: none; transform: translate(-50%, -50%); white-space: nowrap; text-align: center; font: 800 24px/1.3 var(--font-display); }
 .flight .combo { display: block; padding: 0; border: none; background: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; color: inherit; }

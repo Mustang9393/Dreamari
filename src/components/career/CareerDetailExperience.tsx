@@ -8,9 +8,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
+import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, Users, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
+import { ConnectWithProfessionalsModal } from "./ConnectWithProfessionalsModal";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "./PayMap";
@@ -382,6 +383,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
+  const [connectOpen, setConnectOpen] = useState(false);
 
   if (!career) {
     return (
@@ -497,6 +499,17 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </button>
                 </BorderBeam>
               )}
+              {/* Ported from the Replit reference (dceeai.replit.app/explore-careers):
+                 view a career -> tap Connect -> "Connect with [World]
+                 Professionals" -- Ask / Answers / People. */}
+              <button
+                type="button"
+                onClick={() => setConnectOpen(true)}
+                className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
+                style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
+              >
+                <Users className="h-4 w-4" aria-hidden /> Connect
+              </button>
               <div className="flex items-center gap-[var(--space-2)]">
                 <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
                 <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
@@ -743,6 +756,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{vm.sources}</p>
         )}
       </main>
+
+      {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
 
       <MobileNav active="Explore" />
     </div>

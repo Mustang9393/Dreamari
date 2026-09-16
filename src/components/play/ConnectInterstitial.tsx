@@ -145,6 +145,9 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
   const [match, setMatch] = useState<Thread>();
   const [askPosted, setAskPosted] = useState(false);
   const [usedAnswer, setUsedAnswer] = useState(false);
+  const [matchComposing, setMatchComposing] = useState(false);
+  const [matchDraft, setMatchDraft] = useState("");
+  const [matchNote, setMatchNote] = useState<string>();
   const [totalXp, setTotalXp] = useState(0);
   const [flights, setFlights] = useState<Flight[]>([]);
   const [burstNonce, setBurstNonce] = useState(0);
@@ -246,7 +249,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
   function replay() {
     setView("intro"); setStep("like"); setDone(new Set());
     setLiked(false); setComment(undefined); setDraft(""); setQuestion(""); setMatch(undefined);
-    setAskPosted(false); setUsedAnswer(false); setTotalXp(0); setFlights([]);
+    setAskPosted(false); setUsedAnswer(false); setMatchComposing(false); setMatchDraft(""); setMatchNote(undefined); setTotalXp(0); setFlights([]);
   }
   function postQuestion(text: string) {
     setQuestion(text);
@@ -373,8 +376,10 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
                         {askPosted ? (
                           <div className={styles.posted} role="status">
                             <Check size={22} />
-                            <p>{usedAnswer ? match?.title : question}</p>
-                            <small>{usedAnswer ? "Marked as helpful." : `${community?.name ?? simulation.world} will get a notification.`}</small>
+                            <p>{matchNote ? match?.title : usedAnswer ? match?.title : question}</p>
+                            <small>
+                              {matchNote ? "Your comment was added." : usedAnswer ? "Marked as helpful." : `${community?.name ?? simulation.world} will get a notification.`}
+                            </small>
                           </div>
                         ) : match ? (
                           <div className={styles.match}>
@@ -386,10 +391,29 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
                                 <p>{matchAnswer.body}</p>
                               </>
                             )}
-                            <div className={styles.matchActions}>
-                              <button className={styles.primary} onClick={() => { setUsedAnswer(true); setAskPosted(true); reward("ask"); }}>This helps, thanks</button>
-                              <button className={styles.textButton} onClick={() => { setAskPosted(true); reward("ask"); }}>Post mine instead</button>
-                            </div>
+                            {matchComposing ? (
+                              <form
+                                className={styles.commentForm}
+                                onSubmit={(event) => {
+                                  event.preventDefault();
+                                  if (!matchDraft.trim()) return;
+                                  setMatchNote(matchDraft.trim());
+                                  setUsedAnswer(true);
+                                  setAskPosted(true);
+                                  reward("ask");
+                                }}
+                              >
+                                <label className="sr-only" htmlFor="connect-match-comment">Your comment</label>
+                                <textarea id="connect-match-comment" required maxLength={200} rows={2} placeholder="Add a comment…" value={matchDraft} onChange={(event) => setMatchDraft(event.target.value)} />
+                                <button className={styles.primary} type="submit" disabled={!matchDraft.trim()}>Post</button>
+                              </form>
+                            ) : (
+                              <div className={styles.matchActions}>
+                                <button className={styles.primary} onClick={() => { setUsedAnswer(true); setAskPosted(true); reward("ask"); }}>This helps, thanks</button>
+                                <button className={styles.textButton} onClick={() => setMatchComposing(true)}>Comment</button>
+                                <button className={styles.textButton} onClick={() => { setMatch(undefined); setQuestion(""); }}>Ask something else</button>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <div className={styles.askComposer}>
@@ -443,7 +467,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
                     </button>
                   );
                 })()}
-                <button className={`${styles.primary} ${styles.continueFooter}`} disabled={done.size === 0} onClick={() => setView("connected")}>
+                <button className={`${styles.secondary} ${styles.continueFooter}`} disabled={done.size === 0} onClick={() => setView("connected")}>
                   Continue to {nextLevelLabel.split(" · ")[0]} <ArrowRight size={16} />
                 </button>
               </motion.div>
