@@ -823,7 +823,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 <Link href="/match-grid" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-center text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Nothing saved yet · browse careers</Link>
               )}
               {locker.map((career) => (
-                <div key={career.id} className="flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-2)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                <div key={career.id} className="dm-glass flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                   <span className="relative h-[52px] w-[38px] flex-none overflow-hidden rounded-[8px]">
                     <Image src={career.photo} alt="" fill sizes="38px" className="object-cover" />
                   </span>
@@ -1127,7 +1127,7 @@ function Top3Tab({
         <button
           type="button"
           onClick={onAdd}
-          className="dm-tap flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed"
+          className="dm-tap dm-glass flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed backdrop-blur-[20px] backdrop-saturate-[1.5]"
           style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
         >
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
@@ -1406,7 +1406,7 @@ function EvidenceSheet({
 function CompareChart({ title, better, unit, rows, selectedId }: { title: string; better: "lower" | "higher"; unit: (value: number) => string; rows: { id: string; name: string; value: number }[]; selectedId: string }) {
   const max = Math.max(...rows.map((row) => row.value), 1);
   return (
-    <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+    <div className="dm-glass flex flex-col gap-[var(--space-2)] rounded-[var(--radius-lg)] p-[var(--space-4)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
       <div className="flex items-baseline justify-between">
         <span className="text-[14px] font-bold">{title}</span>
         <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{better} is better</span>
@@ -1712,7 +1712,7 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <section className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={INSET}>
+      <section className="dm-glass-2 flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] backdrop-blur-[24px] backdrop-saturate-[1.65] sm:p-[var(--space-6)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
         <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
           <div className="flex min-w-0 flex-col gap-[2px]">
             <span className="flex flex-wrap items-baseline gap-[10px]">
@@ -1763,7 +1763,7 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
         const wDone = countedSteps.filter((s) => done.has(s.id)).length;
         const isOpen = openWindow === w.id;
         return (
-          <section key={w.id} className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={INSET}>
+          <section key={w.id} className="dm-glass flex w-full flex-col rounded-[var(--radius-lg)] border backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
             <button type="button" aria-expanded={isOpen} onClick={() => setOpenWindow(isOpen ? null : w.id)} className="dm-quiet flex w-full cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:p-[var(--space-6)]">
               <span className="flex min-w-0 flex-col gap-[2px]">
                 <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--accent-subtle)" }}>{GRADE_WINDOW_MONTHS[w.id]}</span>
@@ -2180,7 +2180,7 @@ function SchoolsShelf() {
           <span className="relative block aspect-[4/3] w-full" style={{ background: "var(--glass-surface-1)" }}>
             {collegeImage(c) && <Image src={collegeImage(c)!} alt="" fill sizes="220px" className="object-cover" />}
           </span>
-          <span className="flex flex-col gap-[2px] p-[10px]" style={{ background: "var(--glass-surface-1)" }}>
+          <span className="dm-glass flex flex-col gap-[2px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="truncate text-[14px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{collegeTags(c).join(" · ")}</span>
           </span>
@@ -2208,7 +2208,7 @@ function VideosShelf() {
           <span className="relative block aspect-[3/4] w-full">
             <Image src={v.poster} alt="" fill sizes="220px" className="object-cover" />
           </span>
-          <span className="flex flex-col gap-[2px] p-[10px]" style={{ background: "var(--glass-surface-1)" }}>
+          <span className="dm-glass flex flex-col gap-[2px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="truncate text-[14px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{v.title}</span>
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{v.company}</span>
           </span>
@@ -2240,7 +2240,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
           </button>
         </span>
       </div>
-      <div role="tablist" aria-label="Locker shelves" className="flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <div role="tablist" aria-label="Locker shelves" className="dm-glass flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
         {(["careers", "schools", "videos", "events"] as const).map((id) => (
           <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => setShelf(id)} className="dm-quiet min-h-[32px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[14px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: shelf === id ? "var(--foreground)" : "transparent", color: shelf === id ? "var(--background)" : "var(--foreground)" }}>
             {SHELF_LABEL[id]}
@@ -2269,7 +2269,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
                   <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
                 </span>
               </span>
-              <span className="flex items-center justify-between gap-[var(--space-2)] p-[10px]" style={{ background: "var(--glass-surface-1)" }}>
+              <span className="dm-glass flex items-center justify-between gap-[var(--space-2)] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
                 <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
                   <span className="truncate text-[14px] leading-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
                   <span className="text-[8.5px] leading-[11px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
@@ -2391,7 +2391,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
             </button>
           )}
         </div>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-[var(--space-4)] gap-y-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-[14px]" style={{ background: "var(--glass-surface-1)" }}>
+        <dl className="dm-glass grid grid-cols-[auto_1fr] gap-x-[var(--space-4)] gap-y-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-[14px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
           {answersSummary(stored).map((row) => (
             <Fragment key={row.label}>
               <dt className="font-bold" style={{ color: "var(--muted-foreground)" }}>{row.label}</dt>
@@ -2404,7 +2404,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
             <span className={SETTINGS_LABEL} style={{ color: "var(--muted-foreground)" }}>Previous builds</span>
             <ol className="flex list-none flex-col gap-[6px] p-0">
               {archive.map((entry) => (
-                <li key={entry.id} className="flex flex-wrap items-center justify-between gap-[var(--space-2)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)" }}>
+                <li key={entry.id} className="dm-glass flex flex-wrap items-center justify-between gap-[var(--space-2)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
                   <span className="flex min-w-0 flex-col">
                     <span className="text-[14px] font-bold">{when(entry.savedAt)}</span>
                     <span className="truncate text-[13px]" style={{ color: "var(--muted-foreground)" }}>{[...entry.profile.interests, ...entry.profile.subjects, ...entry.profile.states].join(" · ") || "No answers"}</span>
@@ -2474,12 +2474,12 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
       {show === "privacy" && (
       <section id="settings-privacy" className={SETTINGS_CARD} style={INSET}>
         <div className="flex flex-col gap-[6px]">
-          <div className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)" }}>
+          <div className="dm-glass flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="text-[14px] font-bold">Profile avatar</span>
             <span className="text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>Generated, never a photo</span>
           </div>
           {["Notifications", "Who can see your profile", "Talent Pipeline opt-in", "Linked school account"].map((item) => (
-            <div key={item} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]" style={{ background: "var(--glass-surface-1)" }}>
+            <div key={item} className="dm-glass flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
               <span className="text-[14px] font-bold">{item}</span>
               <span className="rounded-[var(--radius-sm)] px-[8px] py-[2px] text-[11.5px] font-bold tracking-[0.5px] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Soon</span>
             </div>
@@ -2495,7 +2495,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           <p className="flex items-center gap-[6px] text-[13.5px] font-bold" style={{ color: DANGER }}><AlertTriangle className="h-4 w-4" aria-hidden /> These can&rsquo;t be undone from here.</p>
         </div>
         <div className="flex flex-col gap-[6px]">
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+          <div className="dm-glass flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="flex min-w-0 flex-col">
               <span className="text-[14px] font-bold">Deactivate profile</span>
               <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>{deactivated ? "Deactivated. Sign in to come back." : "Hides you from Connect. Nothing is deleted."}</span>
@@ -2509,7 +2509,7 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
               <button type="button" onClick={() => setConfirming("deactivate")} className={ghost} style={dangerGhostStyle}>Deactivate</button>
             ))}
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)]" style={{ background: "var(--glass-surface-1)" }}>
+          <div className="dm-glass flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="flex min-w-0 flex-col">
               <span className="text-[14px] font-bold">Delete profile and data</span>
               <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Removes everything for good.</span>
@@ -2544,7 +2544,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
   const toggle = (key: keyof typeof sections) => setSections((current) => ({ ...current, [key]: !current[key] }));
   return (
     <div className="print-overlay fixed inset-0 z-[70] overflow-y-auto" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)" }}>
-      <div className="no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-[var(--space-2)] px-5 py-3 backdrop-blur-[10px]" style={{ background: "var(--glass-surface-3)" }}>
+      <div className="dm-glass-3 no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-[var(--space-2)] px-5 py-3 backdrop-blur-[30px] backdrop-saturate-[1.8]" style={{ background: "var(--glass-surface-3)" }}>
         <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report · {career.title}</span>
         <span className="flex flex-wrap items-center gap-[var(--space-2)]">
           {(

@@ -56,7 +56,7 @@ const TINY = "text-[14px] leading-[20px]";
 // The frosted panel every info box on this page sits in (direct feedback:
 // more contrast, frostier): a stronger glass fill, a real backdrop blur and a
 // brighter hairline than the page's default glass-surface-1.
-export const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+export const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 100%, transparent)", backdropFilter: "blur(16px) saturate(1.65)", WebkitBackdropFilter: "blur(16px) saturate(1.65)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Per-career photo focal point for the header panel (most posters carry the
 // subject in the upper half; the exceptions are listed here).
@@ -582,7 +582,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
             id="pay"
             title={vm.payByState.title ?? "Pay by state"}
             action={
-              <div role="tablist" aria-label="Pay by state view" className="flex items-center gap-[2px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              <div role="tablist" aria-label="Pay by state view" className="dm-glass flex items-center gap-[2px] rounded-full border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                 {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
                   <button
                     key={id}
