@@ -299,7 +299,16 @@ export function StepFooter({
       <Button
         variant="primary"
         onClick={(e) => {
-          dispatchAuroraPulse("cta", e, pulseFromDreamy ? { forceDreamyOrigin: true } : undefined);
+          // `soft: true` (direct feedback, 15 Sept 2026: "extremely laggy...
+          // when it animates"): without it, this traces a wobbly ring stroke
+          // every frame (trig-heavy, ~50-70 points, two overlapping ripples,
+          // 1900ms) at the exact moment `onNext` below navigates away --
+          // worst on the Reveal My Matches step, which unmounts this whole
+          // screen's AuroraBackground and mounts Match's fresh one mid-ripple.
+          // Same soft variant the Congrats screen's own XP-landing pulse
+          // already uses (steps.tsx) for the same reason -- still glows, just
+          // skips the traced stroke.
+          dispatchAuroraPulse("cta", e, pulseFromDreamy ? { forceDreamyOrigin: true, soft: true } : undefined);
           // Give the selected answer its shimmer-and-lift moment before the step actually
           // changes, instead of the screen cutting away the instant it's chosen. holding
           // (not nextDisabled, which would visually greys the button mid-confirm) blocks a

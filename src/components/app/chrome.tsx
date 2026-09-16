@@ -297,94 +297,155 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
   );
 }
 
+// Scroll-conditional frost, exact technique as the marketing site's floating
+// nav island (`marketing/Nav.tsx`): fully transparent at rest, frosts in via
+// `color-mix` + `backdropFilter` only once the page has actually scrolled.
+// Reused here (rather than reinvented) because it's the one blur treatment
+// in this codebase already proven not to cause the "large-area filter:
+// blur() recomposites every scroll frame" stutter that got backdrop-filter
+// pulled from this exact header once already (14 Sept 2026) -- the
+// difference is scale: that bar was full-width edge-to-edge; a small,
+// inset, floating pill blurs a much smaller backing region.
+export function useScrolled(threshold = 12) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > threshold);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [threshold]);
+  return scrolled;
+}
+
 export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile" }) {
   const score = useDreamScore();
   // one number everywhere: the live Dream Score (100 after Build), never a placeholder
   const xp = score;
   const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
+  const scrolled = useScrolled();
   return (
-    <header
-      // Near-solid, no blur (direct feedback, 14 Sept 2026: "stuttering...
-      // everywhere... animations, transitions" -- a sticky, full-width
-      // backdrop-blur recomposites on every scroll frame, on every page,
-      // the exact "large-area filter: blur()" cost this codebase's own
-      // platform notes warn against). Same fix already used for the
-      // hamburger menus (22 Aug 2026: glass let content bleed through and
-      // made rows illegible) -- a 96% solid mix reads the same as the old
-      // glass-surface-3 without paying for backdrop-filter every frame.
-      className="sticky top-0 z-40 hidden h-[62px] w-full items-center justify-between border-b px-[var(--space-8)] md:flex"
-      style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)" }}
-    >
-      <Wordmark />
+    // Outer host stays `sticky` and keeps reserving its own layout height
+    // exactly as before (direct feedback, 15 Sept 2026: floating nav like
+    // the landing page, but nothing else on any page should have to change
+    // its own top padding to compensate) -- only the VISIBLE bar inside it
+    // becomes the inset, rounded, conditionally-blurred floating pill.
+    <div className="sticky top-0 z-40 hidden h-[86px] w-full md:block">
+      <div className="mx-auto flex h-[62px] max-w-[1320px] items-center justify-between px-3 pt-3">
+        <header
+          className="relative flex h-[62px] w-full items-center justify-between rounded-[28px] px-[var(--space-6)] transition-[background-color,border-color,box-shadow] duration-300"
+          style={{
+            background: scrolled ? "color-mix(in srgb, var(--background) 62%, transparent)" : "transparent",
+            backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
+            WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
+            border: `1px solid ${scrolled ? "var(--glass-border)" : "transparent"}`,
+            boxShadow: scrolled ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
+          }}
+        >
+          <Wordmark />
 
-      {/* Absolutely centered on the viewport — the wordmark and the wider
-         streak/XP cluster are unequal, so flex centering would sit left of
-         true center. */}
-      <nav
-        className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px]"
-        style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
-      >
-        {/* prefetch={false}: these 5 links render on every page, so Next's
-           default eager prefetch was fetching all 5 routes' RSC payloads
-           on every single page load whether or not the student ever
-           clicked them -- part of the "stuttering everywhere" report, 14
-           Sept 2026. A click still fetches instantly; it just isn't
-           speculative anymore. */}
-        {NAV_ITEMS.map((item) => {
-          const isActive = item.label === active;
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              prefetch={false}
-              aria-current={isActive ? "page" : undefined}
-              className="dm-quiet rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase"
-              style={{
-                background: isActive ? "var(--primary)" : "transparent",
-                color: isActive ? "var(--primary-foreground)" : "var(--foreground)",
-                fontFamily: "var(--font-body)",
-                fontWeight: isActive ? 700 : 600,
-              }}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+          {/* Absolutely centered on the viewport — the wordmark and the wider
+             streak/XP cluster are unequal, so flex centering would sit left of
+             true center. */}
+          <nav
+            className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px]"
+            style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
+          >
+            {/* prefetch={false}: these 5 links render on every page, so Next's
+               default eager prefetch was fetching all 5 routes' RSC payloads
+               on every single page load whether or not the student ever
+               clicked them -- part of the "stuttering everywhere" report, 14
+               Sept 2026. A click still fetches instantly; it just isn't
+               speculative anymore. */}
+            {NAV_ITEMS.map((item) => {
+              const isActive = item.label === active;
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  prefetch={false}
+                  aria-current={isActive ? "page" : undefined}
+                  className="dm-quiet rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase"
+                  style={{
+                    background: isActive ? "var(--primary)" : "transparent",
+                    color: isActive ? "var(--primary-foreground)" : "var(--foreground)",
+                    fontFamily: "var(--font-body)",
+                    fontWeight: isActive ? 700 : 600,
+                  }}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
 
-      <div className="flex items-center gap-[var(--space-5)]">
-        {/* Streak and Dream Score on every page, Profile included: the score
-           stays at the top of the app the way it lands there after Build
-           (Joshua Pierce, Slack, 6 Sept 2026). */}
-        {(
-          <>
-            {/* Streak/XP yield below lg so the dead-centered nav pill never
-               collides with them on narrow desktop widths. */}
-            <span className="hidden items-center gap-[6px] lg:flex">
-              <Flame aria-hidden className="h-4 w-4" style={{ color: "var(--accent)" }} />
-              <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent)", fontFamily: "var(--font-body)" }}>
-                12
-              </span>
-            </span>
-            {/* Dream Score, live: the student's own XP once they have earned any
-               the same figure Build and Match show. Shown from md so the
-               score follows them from Build and Match into the app. */}
-            <DreamScoreTip className="hidden md:flex">
-              <span key={xp} className="flex items-center gap-[6px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
-                <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
-                <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-                  {xp.toLocaleString("en-US")} XP
+          <div className="flex items-center gap-[var(--space-5)]">
+            {/* Streak and Dream Score on every page, Profile included: the score
+               stays at the top of the app the way it lands there after Build
+               (Joshua Pierce, Slack, 6 Sept 2026). */}
+            {(
+              <>
+                {/* Streak/XP yield below lg so the dead-centered nav pill never
+                   collides with them on narrow desktop widths. */}
+                <span className="hidden items-center gap-[6px] lg:flex">
+                  <Flame aria-hidden className="h-4 w-4" style={{ color: "var(--accent)" }} />
+                  <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent)", fontFamily: "var(--font-body)" }}>
+                    12
+                  </span>
                 </span>
-              </span>
-            </DreamScoreTip>
-          </>
-        )}
-        <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
-          <Image src={avatarSrc} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
-        </Link>
-        <QuickLinksMenu />
+                {/* Dream Score, live: the student's own XP once they have earned any
+                   the same figure Build and Match show. Shown from md so the
+                   score follows them from Build and Match into the app. */}
+                <DreamScoreTip className="hidden md:flex">
+                  <span key={xp} className="flex items-center gap-[6px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
+                    <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
+                    <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+                      {xp.toLocaleString("en-US")} XP
+                    </span>
+                  </span>
+                </DreamScoreTip>
+              </>
+            )}
+            <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
+              <Image src={avatarSrc} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
+            </Link>
+            <QuickLinksMenu />
+          </div>
+        </header>
       </div>
-    </header>
+    </div>
+  );
+}
+
+// Shared sticky mobile header shell (direct feedback, 15 Sept 2026: the top
+// bar should stay pinned and get the same floating-glass look as the
+// desktop nav and the landing page, instead of scrolling away). Six pages
+// used to hand-roll a byte-for-byte identical plain `<header>` here
+// (`relative z-50 flex items-center justify-between px-5 pt-5 pb-2
+// md:hidden`) that just scrolled off with the page; this is that same slot,
+// now sticky and wrapped in the same scroll-conditional pill treatment
+// `DesktopNavigation` uses, so every page's own header content (which
+// still differs -- some carry a back chevron, some don't) drops straight
+// in unchanged as `children`. `extraClassName` exists only so
+// `no-print`-carrying pages (Profile, Career Detail) can keep that.
+export function MobileHeaderShell({ children, extraClassName }: { children: React.ReactNode; extraClassName?: string }) {
+  const scrolled = useScrolled();
+  return (
+    <div className={`sticky top-0 z-50 md:hidden ${extraClassName ?? ""}`}>
+      <div className="px-3 pt-3">
+        <div
+          className="flex items-center justify-between rounded-[22px] px-[14px] py-[10px] transition-[background-color,border-color,box-shadow] duration-300"
+          style={{
+            background: scrolled ? "color-mix(in srgb, var(--background) 62%, transparent)" : "transparent",
+            backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
+            WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
+            border: `1px solid ${scrolled ? "var(--glass-border)" : "transparent"}`,
+            boxShadow: scrolled ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
   );
 }
 

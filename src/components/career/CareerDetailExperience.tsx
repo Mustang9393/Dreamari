@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
@@ -407,10 +407,10 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
       <div className="no-print">
         <DesktopNavigation active="Explore" />
       </div>
-      <header className="no-print relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
+      <MobileHeaderShell extraClassName="no-print">
         <Wordmark />
         <QuickLinksMenu />
-      </header>
+      </MobileHeaderShell>
 
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 pb-[120px] md:px-8 md:pt-[var(--space-4)]">
         <button

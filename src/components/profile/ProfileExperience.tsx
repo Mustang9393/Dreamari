@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
 import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
-import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
@@ -397,13 +397,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         <DesktopNavigation active="Profile" />
       </div>
 
-      <header className="no-print relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
+      <MobileHeaderShell extraClassName="no-print">
         <Wordmark />
         {/* no streak or XP up here: the hero card below carries both */}
         <span className="flex items-center gap-[var(--space-4)] text-[15px] font-bold">
           <QuickLinksMenu />
         </span>
-      </header>
+      </MobileHeaderShell>
 
       <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
         <div className={buildIn(0).className} style={buildIn(0).style}>

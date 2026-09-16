@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
-import { DesktopNavigation, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HoverBeam } from "./HoverBeam";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
@@ -497,7 +497,7 @@ export function HomeExperience() {
       <DesktopNavigation active="Home" />
 
       {/* Mobile header (logo + streak/XP, per the mobile frame) */}
-      <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
+      <MobileHeaderShell>
         <Wordmark />
         <span className="flex items-center gap-[var(--space-4)] text-[13px] font-bold" style={{ fontFamily: "var(--font-body)" }}>
           <span className="flex items-center gap-[6px]" style={{ color: "var(--accent-subtle)" }}>
@@ -508,7 +508,7 @@ export function HomeExperience() {
           </span>
           <QuickLinksMenu />
         </span>
-      </header>
+      </MobileHeaderShell>
 
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-10)] px-5 pt-4 pb-[120px] sm:gap-[var(--space-14)] sm:px-[var(--space-14)] sm:pt-[var(--space-10)]">
         <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Home</h1>

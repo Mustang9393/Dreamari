@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ArrowUpRight, ChevronDown, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
-import { BackButton, DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money, similarSchools } from "./data";
@@ -146,10 +146,10 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
       <AppBackdrop />
       <DesktopNavigation active="Explore" />
-      <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
+      <MobileHeaderShell>
         <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/colleges" /><Wordmark /></span>
         <QuickLinksMenu />
-      </header>
+      </MobileHeaderShell>
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]">
 

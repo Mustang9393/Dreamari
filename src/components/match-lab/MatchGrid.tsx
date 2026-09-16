@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Info, Plus, Sparkles, X } from "lucide-react";
-import { BorderBeam } from "border-beam";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
@@ -252,12 +251,12 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
         boxShadow: isSelected ? `${ringShadow}0 14px 30px -14px rgba(0,0,0,0.6)` : "0 8px 20px -14px rgba(0,0,0,0.5)",
       }}
       whileTap={{ scale: 0.97 }}
-      whileHover={{
-        y: -3,
-        scale: 1.02,
-        zIndex: 5,
-        boxShadow: `${ringShadow}0 18px 34px -14px rgba(0,0,0,0.75), 0 0 0 1px color-mix(in srgb, var(--color-accent-purple) 70%, transparent)`,
-      }}
+      // `boxShadow` dropped from here (direct feedback, 15 Sept 2026:
+      // "hover on the card animates really slow") -- box-shadow is a paint
+      // property, so Framer was repainting it every frame of every hover
+      // in/out on a card in a packed 6-card grid. `y`/`scale`/`zIndex` stay,
+      // since those are transform/compositor-only and cheap.
+      whileHover={{ y: -3, scale: 1.02, zIndex: 5 }}
       transition={{ duration: 0.26, ease: [0.2, 0.8, 0.2, 1] }}
       onClick={onOpen}
       role="button"
@@ -307,15 +306,27 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
               "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-night-background) 55%, transparent) 34%, color-mix(in srgb, var(--color-night-background) 82%, transparent) 60%, var(--color-night-background) 100%)",
           }}
         >
-          <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4} strength={0.7} active>
-            <span
-              className="flex items-center gap-1 rounded-full px-2.5 py-[5px] text-[10.5px] font-semibold whitespace-nowrap backdrop-blur-md sm:gap-1.5 sm:px-3 sm:py-[6px] sm:text-[12px]"
-              style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", color: "rgba(255,255,255,0.95)" }}
-            >
-              <Info className="h-3 w-3 flex-none sm:h-3.5 sm:w-3.5" strokeWidth={2.5} aria-hidden />
-              Learn more
-            </span>
-          </BorderBeam>
+          {/* Static border, not `BorderBeam` (direct feedback, 15 Sept 2026:
+             "loads slowly... even simple hover animates sluggishly"):
+             `BorderBeam`'s `active` prop was hardcoded true, meaning all 6
+             cards ran its continuous `filter: blur()+hue-rotate()` glow
+             loop, forever, the instant this grid mounted -- an animated
+             `filter` on 6 elements at once, all the time, not just on
+             hover. Kept the same visual weight (icon + text + backdrop-blur
+             + a bright, career-tinted ring) so "Learn more" stays just as
+             noticeable as it was made to be on 14 Sept 2026, just without
+             the per-frame cost. */}
+          <span
+            className="flex items-center gap-1 rounded-full px-2.5 py-[5px] text-[10.5px] font-semibold whitespace-nowrap backdrop-blur-md sm:gap-1.5 sm:px-3 sm:py-[6px] sm:text-[12px]"
+            style={{
+              background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)",
+              color: "rgba(255,255,255,0.95)",
+              boxShadow: `0 0 0 1.5px color-mix(in srgb, ${career.color} 70%, transparent)`,
+            }}
+          >
+            <Info className="h-3 w-3 flex-none sm:h-3.5 sm:w-3.5" strokeWidth={2.5} aria-hidden />
+            Learn more
+          </span>
           <p style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 17, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.02em", color: "var(--color-night-foreground)" }}>
             {career.title}
           </p>
