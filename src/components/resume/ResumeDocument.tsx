@@ -6,6 +6,7 @@ import { BorderBeam } from "border-beam";
 import { DEFAULT_SECTION_ORDER, type ResumeData, type ResumeSectionId } from "@/lib/resume";
 import { Portal } from "@/components/profile/CareerReport";
 import { RESUME_TEMPLATES, type ResumeTemplateId } from "./data";
+import { ToolbarButton } from "./ui";
 
 // The actual resume, rendered as a real document -- not a form summary.
 // Reuses the app's existing printable-document system (`.dm-report`, the
@@ -798,15 +799,9 @@ export function ZoomResumeButton({ resume, templateId, title, sectionOrder, hidd
 
   return (
     <>
-      <button
-        type="button"
-        data-print-hide
-        onClick={() => setOpen(true)}
-        className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-        style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-      >
-        <Maximize2 className="h-4 w-4" aria-hidden /> Full Screen
-      </button>
+      <ToolbarButton label="Full Screen" onClick={() => setOpen(true)}>
+        <Maximize2 className="h-4 w-4" aria-hidden />
+      </ToolbarButton>
       {open && (
         <Portal>
           <div className="fixed inset-0 z-[150] flex flex-col" style={{ background: "rgba(8,10,18,0.94)" }}>

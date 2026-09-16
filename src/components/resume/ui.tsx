@@ -173,6 +173,31 @@ export function useResumeToast() {
 // grid's other column entirely, so it was never at risk either way.
 // ---------------------------------------------------------------------------
 
+// The document toolbar's own button: icon-only (a plain square, no pill)
+// below `lg`, icon+label at `lg` and up. Was a row of full pill buttons at
+// every width -- 6-7 of them wrapped onto multiple lines on tablet and
+// mobile, each one ALSO wrapping its own two-word label onto two lines,
+// which both overflowed the screen and roughly tripled the toolbar's
+// height (direct feedback, 17 Sept 2026: "too many controls on top of the
+// preview on tablet mode... can we do icons only"). `title` carries the
+// label as a native tooltip once the visible text is gone.
+export function ToolbarButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      data-print-hide
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className="dm-tap flex size-9 flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold whitespace-nowrap lg:h-auto lg:w-auto lg:px-[var(--space-4)] lg:py-[10px]"
+      style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+    >
+      {children}
+      <span className="hidden lg:inline">{label}</span>
+    </button>
+  );
+}
+
 export function ResumeModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-[var(--space-4)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both]">

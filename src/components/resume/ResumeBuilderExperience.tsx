@@ -18,7 +18,7 @@ import { ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
 import { TailorScreen } from "./TailorScreen";
 import { TemplateGallery } from "./TemplateGallery";
 import { TextPreviewModal } from "./TextPreviewModal";
-import { useResumeToast, WizardProgress } from "./ui";
+import { ToolbarButton, useResumeToast, WizardProgress } from "./ui";
 import { CertificationsStep, EducationStep, ExperienceStep, PersonalInfoStep, ReviewStep, SkillsStep } from "./wizardSteps";
 
 // Which resume section the live preview auto-scrolls to as the student
@@ -156,14 +156,20 @@ function TopBar({ label, onClose, extra }: { label: string; onClose?: () => void
   return (
     <div data-print-hide className="mb-[var(--space-5)] flex flex-none flex-wrap items-center justify-between gap-[var(--space-3)]">
       <span className="text-[13px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <div className="flex items-center gap-[var(--space-3)]">
+      {/* A tighter gap while the toolbar is icon-only (below `lg`) buys back
+         just enough width that the full icon row -- Tailor/ATS/Text
+         Preview/Full Screen/Edit Sections/Export/Edit Selection/Close --
+         fits even on the narrowest phones without a horizontal scrollbar;
+         `overflow-x-auto` is still there as a hard floor if a future button
+         gets added. */}
+      <div className="flex max-w-full items-center gap-[6px] overflow-x-auto [scrollbar-width:none] lg:gap-[var(--space-3)]">
         {extra}
         {onClose && (
           <button
             type="button"
             aria-label="Close and return to Profile"
             onClick={onClose}
-            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+            className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
             style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
           >
             <X className="h-4 w-4" aria-hidden />
@@ -184,67 +190,31 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         extra={
           <>
             {version && (
-              <button
-                type="button"
-                data-print-hide
-                onClick={() => setPanel("tailor")}
-                className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                <Wand2 className="h-4 w-4" aria-hidden /> Tailor Resume
-              </button>
+              <ToolbarButton label="Tailor Resume" onClick={() => setPanel("tailor")}>
+                <Wand2 className="h-4 w-4" aria-hidden />
+              </ToolbarButton>
             )}
             {version && (
-              <button
-                type="button"
-                data-print-hide
-                onClick={() => setPanel("ats")}
-                className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                <Sparkles className="h-4 w-4" aria-hidden /> ATS Check
-              </button>
+              <ToolbarButton label="ATS Check" onClick={() => setPanel("ats")}>
+                <Sparkles className="h-4 w-4" aria-hidden />
+              </ToolbarButton>
             )}
-            <button
-              type="button"
-              data-print-hide
-              onClick={() => setPanel("text")}
-              className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-              style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-            >
-              <FileText className="h-4 w-4" aria-hidden /> Text Preview
-            </button>
+            <ToolbarButton label="Text Preview" onClick={() => setPanel("text")}>
+              <FileText className="h-4 w-4" aria-hidden />
+            </ToolbarButton>
             <ZoomResumeButton resume={resume} templateId={templateId} title={title} sectionOrder={version?.sectionOrder} hiddenSections={version?.hiddenSections} sectionOverrides={version?.sectionOverrides} />
             {version && (
-              <button
-                type="button"
-                data-print-hide
-                onClick={() => setPanel("sections")}
-                className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                <ListOrdered className="h-4 w-4" aria-hidden /> Edit Sections
-              </button>
+              <ToolbarButton label="Edit Sections" onClick={() => setPanel("sections")}>
+                <ListOrdered className="h-4 w-4" aria-hidden />
+              </ToolbarButton>
             )}
-            <button
-              type="button"
-              data-print-hide
-              onClick={() => setPanel("export")}
-              className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-              style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-            >
-              <Download className="h-4 w-4" aria-hidden /> Export
-            </button>
+            <ToolbarButton label="Export" onClick={() => setPanel("export")}>
+              <Download className="h-4 w-4" aria-hidden />
+            </ToolbarButton>
             {editHref && (
-              <button
-                type="button"
-                data-print-hide
-                onClick={() => router.push(editHref)}
-                className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold"
-                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                <Pencil className="h-4 w-4" aria-hidden /> Edit Selection
-              </button>
+              <ToolbarButton label="Edit Selection" onClick={() => router.push(editHref)}>
+                <Pencil className="h-4 w-4" aria-hidden />
+              </ToolbarButton>
             )}
           </>
         }
