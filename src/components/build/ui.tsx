@@ -65,7 +65,15 @@ export function GlassCard({ children, className = "" }: { children: React.ReactN
 // both source tokens flip per theme already, so this stays correct (and
 // WCAG AA, spot-checked) in light mode too.
 export const GLASS_PANEL_BG = "color-mix(in srgb, var(--color-night-card) 32%, var(--color-glass-surface-raised))";
-export const GLASS_PANEL_BORDER = "color-mix(in srgb, var(--color-glass-border-raised) 100%, var(--color-night-foreground) 16%)";
+// 16% (was) compounds badly in light mode specifically: --color-night-foreground
+// is near-black there, so mixing 16% of it into an already-dark 18%-black border
+// (--color-glass-border-raised) pushed the resting stroke to ~29% black -- visibly
+// heavier than the token's own documented 18%, and read as "overly dark strokes
+// around the white surfaces" (16 Sept 2026 direct feedback, worst around the
+// build flow's answer tiles). Dropped to 5%: keeps a touch of foreground cohesion
+// in dark mode without compounding light mode's border into something the base
+// token was never tuned to be.
+export const GLASS_PANEL_BORDER = "color-mix(in srgb, var(--color-glass-border-raised) 100%, var(--color-night-foreground) 5%)";
 export const GLASS_PANEL_CLASS = "backdrop-blur-md";
 
 // The in-flow progress bar. It names the CHAPTER, not the step: "BUILD" sits over
