@@ -9891,3 +9891,78 @@ change).
 `src/components/colleges/CollegeDetailExperience.tsx`,
 `src/components/career/CareerDetailExperience.tsx`,
 `src/components/build/ui.tsx`, `src/components/match-lab/MatchGrid.tsx`.
+
+## 2026-09-16 · Nav/perf follow-up bugs, margin consistency, Resume tabs, Build light-mode glow
+
+Direct feedback after the sitewide sticky-nav pass above shipped: the header
+sat centered in the middle of the screen on Build/Match, the desktop nav
+scrolled away on Profile and Career Detail, related-career cards clipped at
+the page edge, Profile felt narrower than its sibling tabs, Resume Builder's
+tabs should get the same treatment as the main nav, and Build's light-mode
+background read too flat. Five separate fixes, each its own PR:
+
+**Header centered mid-screen in light mode (PR #5).** `tokens.css`'s
+`.theme-light` rule sets `min-height: 100%`, meant for full-page themeable
+surfaces. `FlowChrome`'s fixed header and `CareerDetailExperience`'s degree
+popover also carry `marketing-v2 themeable` purely to scope CSS variables,
+not to opt into that min-height. In light mode (Build/Match's default) this
+stretched both to fill the viewport, and `items-center` centered their
+contents mid-screen. `minHeight: 0` inline on both overrides it without
+touching the shared rule.
+
+**Desktop nav scrolling away on Profile/Career Detail (same PR #5).**
+Both wrapped `<DesktopNavigation />` in an extra `<div className="no-print">`
+sized exactly to its sticky child -- `position: sticky` can never stick
+further than its own containing block, so with zero extra height in that
+wrapper, the header had nowhere to go and scrolled away the instant the
+wrapper cleared the viewport top. Home/Connect/Play never had this wrapper
+and were unaffected. Fix: `DesktopNavigation` now takes the same
+`extraClassName` prop `MobileHeaderShell` already had, applied to its own
+sticky element, no wrapper.
+
+**Related-careers rail clipping on desktop (PR #6).** The rail zeroed its
+bleed margin/padding at `md:` (`md:mx-0 md:px-0`) instead of scaling it like
+every sibling rail (Home, College Detail's Similar Schools use `sm:-mx-N
+sm:px-N`, never zero). No trailing space meant the last card hard-clipped
+at the column edge. Fixed to `md:-mx-8 md:px-8`, mirroring this page's own
+`main` padding. (Two other `md:mx-0 md:px-0` usages, in `CareerReport.tsx`
+and `ProfileExperience.tsx`, are sticky-left-column comparison tables, a
+different pattern where flush scrolling is correct -- left alone.)
+
+**Profile narrower than sibling tabs (PR #7).** Profile's `<main>` used
+`max-w-[1200px]`; Home, Play, Connect, Colleges and Explore all share
+`max-w-[1440px]` with the same `px-5 sm:px-[space-14]` baseline -- Connect's
+own header comment documents this as the app-wide convention for top-level
+tabs. Profile was the one outlier. Aligned to 1440; baseline mobile padding
+untouched.
+
+**Resume Builder tabs, same glass pill as the nav (PR #8).** Direct
+request to match the nav's scroll-conditional, transparent-at-rest pill --
+an explicit reversal of the full-bleed always-blurred bar chosen for this
+same element earlier this session. Outer inset only applies from `sm:` up
+(mobile keeps it flush edge-to-edge): unlike the nav's own pill, this row
+carries three full text labels plus a close button, and the nav's fixed
+12px inset on top of the pill's own padding pushed content off a narrow
+phone. Also fixed, found while verifying the above and confirmed
+pre-existing/unrelated: the tab row had no overflow handling at all, so a
+phone-width close button clipped off-screen with no way to reach it,
+making the wizard unclosable. The tab list now scrolls independently while
+the close button stays pinned.
+
+**Build/Match light-mode background too flat.** `BackgroundSpace.tsx`'s
+nebula glows use the same `--color-brand-500` / `--color-accent-purple` /
+`--color-decorative-pink-glow` tokens in both themes (unchanged, by
+design -- not something to fork). What actually differs is the same
+`color-mix` alpha read against a near-black fill (dark) versus a near-white
+one (light): identical percentages land far more washed out on white.
+Boosted the light-mode mix percentages only (dark's values are untouched)
+so the glow reads lighter and a touch more vivid instead of flat. No new
+tokens added, no changes to `design-tokens.generated.css` -- same named
+tokens, different blend ratio, entirely inside this one component.
+
+ESLint + `tsc --noEmit` clean on every file in every fix above.
+
+`src/components/app/FlowChrome.tsx`, `src/components/career/CareerDetailExperience.tsx`,
+`src/components/app/chrome.tsx`, `src/components/profile/ProfileExperience.tsx`,
+`src/components/resume/ResumeBuilderExperience.tsx`,
+`src/components/flow/aurora/BackgroundSpace.tsx`.
