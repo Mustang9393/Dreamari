@@ -393,9 +393,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)", overflowX: "clip" }}>
       <AppBackdrop />
 
-      <div className="no-print">
-        <DesktopNavigation active="Profile" />
-      </div>
+      <DesktopNavigation active="Profile" extraClassName="no-print" />
 
       <MobileHeaderShell extraClassName="no-print">
         <Wordmark />

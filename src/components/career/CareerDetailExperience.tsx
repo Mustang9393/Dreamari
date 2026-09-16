@@ -407,9 +407,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
          backdrops plus a third copy of the sheet, so it read lighter than
          every other screen. */}
       <AppBackdrop />
-      <div className="no-print">
-        <DesktopNavigation active="Explore" />
-      </div>
+      <DesktopNavigation active="Explore" extraClassName="no-print" />
       <MobileHeaderShell extraClassName="no-print">
         <Wordmark />
         <QuickLinksMenu />
