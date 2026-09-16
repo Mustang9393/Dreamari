@@ -41,7 +41,16 @@ export function FlowChrome() {
     return () => { clearTimeout(show); clearTimeout(leave); clearTimeout(gone); };
   }, [score]);
   return (
-    <header className="marketing-v2 themeable pointer-events-none fixed inset-x-0 top-0 z-40 flex items-center justify-between px-5 pt-5 md:px-8" style={{ background: "transparent" }}>
+    <header
+      className="marketing-v2 themeable pointer-events-none fixed inset-x-0 top-0 z-40 flex items-center justify-between px-5 pt-5 md:px-8"
+      // `minHeight: 0` fights `.theme-light`'s `min-height: 100%` (tokens.css)
+      // -- meant for full-page themeable surfaces, but this class is also
+      // carried here purely to scope the CSS variables. Without this
+      // override, light mode stretches this small fixed bar to the full
+      // viewport height, and `items-center` then centers the logo/menu in
+      // the middle of the screen instead of the top (16 Sept 2026 bug).
+      style={{ background: "transparent", minHeight: 0 }}
+    >
       <span className="pointer-events-auto flex">
         <Wordmark />
       </span>
