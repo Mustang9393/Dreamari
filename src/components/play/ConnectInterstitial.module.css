@@ -70,7 +70,12 @@
 .tabs button[aria-pressed="true"] { background: var(--connect-accent); color: #05070f; }
 .tabs svg { color: currentColor; }
 
-.author { display: flex; align-items: center; gap: 12px; }
+/* Also used as a <button> (Answers' author row opens that professional's
+   profile) -- explicit resets here so it renders identically to the plain
+   <div> version instead of picking up a button's own UA defaults (that
+   gap in the screenshot, 17 Sept 2026, was the button's default centered
+   text-align pushing the role/org line away from the name). */
+.author { display: flex; align-items: center; gap: 12px; width: 100%; padding: 0; border: none; background: none; text-align: left; font: inherit; color: inherit; }
 .author > div { min-width: 0; flex: 1; }
 .author strong { display: flex; align-items: center; gap: 6px; font-size: 15px; }
 .author svg { color: var(--connect-accent); flex: none; }
@@ -183,6 +188,130 @@
   background: color-mix(in srgb, var(--background) 85%, transparent);
   border-color: var(--glass-border); color: var(--muted-foreground); cursor: default;
 }
+
+/* Career Detail's own Connect modal reuses this module for visual parity
+   (see ConnectWithProfessionalsModal.tsx). Answers/People are both a
+   plain scrolling row of fixed-width tiles, using the full width the
+   modal has -- tried as a single-focus "depth stack" first, but reverted
+   (direct feedback, 17 Sept 2026: "everything is wrongly stretching and
+   filling... the modal is unnecessarily tall now... they should be in
+   line just like the people carousel"). Native overflow does the work:
+   as many tiles as fit show in full, and only a trailing one is ever
+   partially clipped, by the row's own edge -- never a stretched or
+   shrunk tile. */
+.row { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; padding: 2px 2px 6px; }
+.row::-webkit-scrollbar { display: none; }
+/* Direct feedback, 17 Sept 2026: "they should all be the same height."
+   .row's default flex stretch already equalizes every .rowCard's own box
+   to the tallest sibling, but a card only reads as equal-height if its
+   own border/background fills that box too -- so .rowCard is a column
+   flex container whose single child (the visible card) is told to fill
+   it, rather than sitting at its own shorter content height with blank
+   space below. */
+.rowCard { flex: 0 0 132px; scroll-snap-align: start; display: flex; flex-direction: column; }
+.rowCard > * { flex: 1 1 auto; min-height: 0; }
+/* Answers need real sentence room, not the compact People width, and no
+   wrap-and-truncate -- direct feedback, 17 Sept 2026: "the answer tiles
+   are too small... wide to fit their text" then "do not shrink the width
+   of the answers cards to make the messages wrap and truncate, use more
+   width... only one other card needs to peek through, just enough to be
+   obvious there's more." Sized as a share of the row itself (not a fixed
+   px/vw value) so it stays proportional at any dialog width while always
+   leaving that one deliberate sliver at the trailing edge. */
+.answerRowCard { flex: 0 0 88%; }
+
+.stackNav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 2px; }
+.stackNav button { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 999px; color: var(--muted-foreground); background: color-mix(in srgb, var(--background) 88%, transparent); border: 1px solid var(--glass-border); }
+.stackNav button:hover:not(:disabled) { color: var(--foreground); }
+.stackNav button:disabled { opacity: .35; cursor: default; }
+
+/* A row of same-height cards -- direct feedback, 17 Sept 2026: "all the
+   cards need to be of the same height... without looking like there's so
+   much blank space" -- default flex stretch (.row has no align-items
+   override, so it's the flex default: stretch) already equalizes every
+   card's height to the tallest one; the quote's own line-clamp below
+   keeps that "tallest" modest instead of runaway. */
+.answerCard {
+  display: flex; flex-direction: column;
+  padding: 15px; border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--background) 90%, transparent);
+}
+.answerCard .quote { font-size: 14.5px; margin: 12px 0 14px; }
+
+/* Inline like/comment, styled like the actual board's own post actions --
+   not a single flashy CTA (direct feedback, 17 Sept 2026: "the option to
+   like and comment is visible like they would be on the boards, not
+   flashy cta") but still clearly tappable and worth XP (direct feedback,
+   17 Sept 2026: "actions are not properly visible or reading as
+   clickable"), so they carry an accent tint by default rather than
+   waiting for hover/press to show any color, plus a CSS-only pulse on a
+   not-yet-touched card's own action row (direct feedback, 17 Sept 2026:
+   "maybe do a pulse nudge so the user tries to click" -- a wrapping
+   BorderBeam was tried for this and reverted: it forced its own sizing
+   onto the row, stretching the card). */
+.postActions { display: flex; gap: 8px; margin-top: auto; padding-top: 10px; border-radius: 999px; }
+.postActions button {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 650; color: var(--foreground);
+  background: color-mix(in srgb, var(--connect-accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--connect-accent) 32%, var(--glass-border));
+}
+.postActions button b { font-weight: 800; font-variant-numeric: tabular-nums; }
+.postActions button:hover { background: color-mix(in srgb, var(--connect-accent) 16%, transparent); }
+.postActions button[aria-pressed="true"] {
+  color: var(--connect-accent); border-color: color-mix(in srgb, var(--connect-accent) 55%, var(--glass-border));
+  background: color-mix(in srgb, var(--connect-accent) 16%, transparent);
+}
+.postActions[data-nudge="true"] button:first-child { animation: postActionsNudge 2.2s ease-in-out infinite; }
+@keyframes postActionsNudge {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--connect-accent) 45%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--connect-accent) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .postActions[data-nudge="true"] button:first-child { animation: none; } }
+.answerCard .savedComment, .answerCard .commentForm { margin-top: 10px; }
+
+/* People: a compact "who to follow" card, not a full post per person --
+   direct feedback, 17 Sept 2026: "people should be more like replit, a
+   list of people and their info to follow, not a whole post by them." */
+.peopleCard {
+  width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+  padding: 18px 14px; border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--background) 90%, transparent);
+}
+/* The name/avatar area opens that professional's profile -- direct
+   feedback, 17 Sept 2026: "follow should also work in modal unless i
+   click on a profile to view it." Kept as its own button, separate from
+   Follow below, so tapping Follow never also opens the profile. */
+.peopleCardMain { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
+.peopleCard strong { font-size: 12.5px; font-weight: 700; margin-top: 2px; }
+.peopleCard small { display: block; font-size: 10.5px; color: var(--muted-foreground); line-height: 1.3; }
+.followBtn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px; width: 100%; margin-top: 8px;
+  padding: 7px 8px; min-height: 32px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  background: var(--connect-accent); color: #05070f;
+}
+.followBtn:hover { filter: brightness(1.08); }
+.followBtn[data-following="true"] {
+  background: color-mix(in srgb, var(--background) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-feedback-success, #33c78c) 38%, transparent);
+  color: var(--color-feedback-success, #33c78c);
+}
+
+.seeMore { display: inline-flex; align-items: center; gap: 3px; margin-top: 14px; font-size: 12.5px; font-weight: 650; color: var(--connect-accent); }
+.seeMore:hover { text-decoration: underline; }
+
+/* A professional's own profile, opened from Answers/People -- a plain
+   in-modal view, not a real page navigation, so "back" (the header's own
+   chevron) always and only returns to this modal's own posts view --
+   direct feedback, 17 Sept 2026: "follow should also work in modal unless
+   i click on a profile to view it, and when i click back it should bring
+   me back to the modal... it should only take me back to the modal if i
+   came from the modal." */
+.profileHead { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px; margin-bottom: 16px; }
+.profileHead h2 { display: flex; align-items: center; gap: 6px; font: 700 19px/1.3 var(--font-display); margin-top: 8px; }
+.profileHead h2 svg { color: var(--connect-accent); }
+.profileHead > p { font-size: 13.5px; color: var(--muted-foreground); }
+.profileHead small { font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
 
 .flight { position: fixed; z-index: 6; pointer-events: none; transform: translate(-50%, -50%); white-space: nowrap; text-align: center; font: 800 24px/1.3 var(--font-display); }
 .flight .combo { display: block; padding: 0; border: none; background: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; color: inherit; }
