@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { CardHud, ChipGrid, Citation, ConfirmShimmer, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
+import { CardHud, ChipGrid, Citation, ConfirmShimmer, GLASS_CHIP_IDLE_BG, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
 import { ChevronRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
@@ -170,7 +170,7 @@ function VibeButtonRow({
               }}
               className={`dm-tap relative rounded-[var(--radius-md)] border px-2 py-2 text-[13px] font-semibold transition-all duration-150  ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
               style={{
-                background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-2)",
+                background: isSelected ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : GLASS_CHIP_IDLE_BG,
                 borderColor: isSelected ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
                 color: isSelected ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 80%, transparent)",
                 boxShadow: glowing ? "0 0 0 1px var(--color-brand-400), 0 4px 18px -2px color-mix(in srgb, var(--color-brand-400) 65%, transparent)" : undefined,

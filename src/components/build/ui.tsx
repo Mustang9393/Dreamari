@@ -65,7 +65,30 @@ export function GlassCard({ children, className = "" }: { children: React.ReactN
 // both source tokens flip per theme already, so this stays correct (and
 // WCAG AA, spot-checked) in light mode too.
 export const GLASS_PANEL_BG = "color-mix(in srgb, var(--color-night-card) 32%, var(--color-glass-surface-raised))";
-export const GLASS_PANEL_BORDER = "color-mix(in srgb, var(--color-glass-border-raised) 100%, var(--color-night-foreground) 16%)";
+// Idle (unselected) fill for an interactive chip that sits ON a glass panel --
+// e.g. VibeButtonRow's Fast pace/Balanced/Calm row. --color-glass-surface-2
+// is documented (design-tokens primitives) as "mid glass fill (hover/active
+// chips)", not a resting default, and it FLIPS POLARITY per theme: white-alpha
+// in dark (lightens, correctly reading as "above" the panel behind it) but
+// black-alpha in light (darkens, reading as recessed/muddy instead of raised
+// -- "I dont like the grey used for the fast paced, balanced etc chips...
+// what's most behind can be one shade and everything that sits above it gets
+// lighter and lighter", 16 Sept 2026). --color-glass-surface-raised is
+// white-alpha in BOTH themes, so scaling ITS opacity down (rather than
+// switching tokens) keeps a chip lighter than its panel in both themes
+// without a theme check.
+export const GLASS_CHIP_IDLE_BG = "color-mix(in srgb, var(--color-glass-surface-raised) 55%, transparent)";
+// This used to mix in an extra 16% of --color-night-foreground "for cohesion."
+// --color-night-foreground is near-black in light mode, so that compounded on
+// top of the already-tuned 18%-black --color-glass-border-raised token,
+// landing at ~29% black -- read as "overly dark strokes around the white
+// surfaces," still too dark even after a first pass dropped the mix-in to 5%
+// (~22%). Using the border-raised token directly, with no extra mix-in: it's
+// already a deliberate, documented value for exactly this job (design-tokens/
+// primitives.light.tokens.json: "a step past the decorative border so a
+// resting tile keeps a visible edge on the light wash") -- no reason to
+// darken it further in either theme.
+export const GLASS_PANEL_BORDER = "var(--color-glass-border-raised)";
 export const GLASS_PANEL_CLASS = "backdrop-blur-md";
 
 // The in-flow progress bar. It names the CHAPTER, not the step: "BUILD" sits over
