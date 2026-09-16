@@ -90,6 +90,18 @@
 }
 .primary:hover { filter: brightness(1.08); }
 .primary:disabled { opacity: 0.55; cursor: default; box-shadow: none; }
+
+/* A completed action's own button -- dark and quiet, not the same bright
+   accent-yellow surface still lit up after it's done (direct feedback, 17
+   Sept 2026: "too much yellow surface on the card once liked"). Still has
+   its own color (a soft success tint), not a flat gray "disabled" look. */
+.done {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  padding: 13px 18px; min-height: 46px; border-radius: var(--radius-md); cursor: default;
+  background: color-mix(in srgb, var(--background) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-feedback-success, #33c78c) 38%, transparent);
+  color: var(--color-feedback-success, #33c78c); font-size: 14.5px; font-weight: 700;
+}
 .textButton { display: inline-flex; justify-content: center; align-items: center; gap: 6px; min-height: 40px; color: var(--muted-foreground); font-size: 13.5px; font-weight: 650; }
 .textButton:hover { color: var(--connect-accent); }
 

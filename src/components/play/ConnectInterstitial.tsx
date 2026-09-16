@@ -413,7 +413,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
                           <span><MessageCircle size={13} /> {insight.replies.length + (comment ? 1 : 0)}</span>
                         </div>
                         {step === "like" ? (
-                          <button className={styles.primary} disabled={liked} onClick={() => { setLiked(true); reward("like"); }}>
+                          <button className={liked ? styles.done : styles.primary} disabled={liked} onClick={() => { setLiked(true); reward("like"); }}>
                             <ThumbsUp size={16} />{liked ? "Liked" : "Like"}
                           </button>
                         ) : comment ? (
