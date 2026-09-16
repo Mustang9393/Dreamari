@@ -15,7 +15,7 @@ import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Award, Calendar, CalendarCheck, CheckCircle2, ClipboardCheck, DollarSign, ListChecks, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Award, Calendar, CalendarCheck, CheckCircle2, ClipboardCheck, DollarSign, Info, ListChecks, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
@@ -1690,15 +1690,18 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                               </span>
                               <span className="flex flex-none items-center gap-[8px]">
                                 {s.counselorVerified && (
-                                  <span className="rounded-[4px] px-[6px] py-[1px] text-[9.5px] leading-[14px] font-bold tracking-[0.04em] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Counselor confirms</span>
+                                  <span className="flex items-center gap-[3px] rounded-[4px] px-[6px] py-[1px] text-[9.5px] leading-[14px] font-bold tracking-[0.04em] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
+                                    Counselor confirms
+                                    <Info className="h-3 w-3 flex-none" aria-hidden />
+                                  </span>
                                 )}
                                 {s.deadlineBound && (
                                   <span className="rounded-[4px] px-[6px] py-[1px] text-[9.5px] leading-[14px] font-bold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--color-feedback-error, #ff6b6b) 16%, transparent)", color: "var(--color-feedback-error, #ff6b6b)" }}>{GRADE_WINDOW_DUE[w.id]}</span>
                                 )}
                                 {s.href && (
-                                  <Link href={s.href} className="dm-quiet flex flex-none items-center gap-[3px] rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold" style={{ borderColor: "var(--inset-border)", color: "var(--foreground)" }}>
+                                  <Link href={s.href} className="dm-quiet flex flex-none items-center gap-[5px] rounded-full border px-[14px] py-[7px] text-[13.5px] font-bold" style={{ borderColor: "var(--inset-border)", color: "var(--foreground)" }}>
                                     {gradeStepCta(s.href)}
-                                    <ArrowUpRight className="h-3 w-3 flex-none" aria-hidden />
+                                    <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
                                   </Link>
                                 )}
                               </span>
