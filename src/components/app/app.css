@@ -273,14 +273,26 @@
    this look like glass to you?" -- it didn't). The fix for THAT case is a
    glass surface that reads as glass on its OWN terms: a bright top-edge
    highlight (light catching the pane's top bevel) plus a crisper full-edge
-   ring, independent of whatever happens to be behind it. */
-.dm-glass, .dm-glass-2, .dm-glass-3 {
+   ring, independent of whatever happens to be behind it.
+
+   LIGHT MODE ONLY: this whole thread of work has been a light-mode ask
+   from the very first message ("can we do the light mode stuff??") --
+   dark mode was never supposed to change, and a first pass at this
+   shadow/highlight applied unscoped, so it landed on dark surfaces too
+   and made them visibly brighter with zero justification (direct
+   feedback, 17 Sept 2026: "You've made the dark mode cards too bright.
+   WHY??? I WAS ONLY TALKING ABOUT THE LIGHT MODE"). Scoped under
+   html.light now so a dark-mode surface with this class gets no
+   box-shadow from it at all -- exactly its pre-existing look. */
+html.light .dm-glass,
+html.light .dm-glass-2,
+html.light .dm-glass-3 {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.28), 0 6px 16px -12px rgba(0, 0, 0, 0.28);
 }
-.dm-glass-2 {
+html.light .dm-glass-2 {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.34), 0 8px 20px -12px rgba(0, 0, 0, 0.3);
 }
-.dm-glass-3 {
+html.light .dm-glass-3 {
   box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 10px 24px -12px rgba(0, 0, 0, 0.32);
 }
 
