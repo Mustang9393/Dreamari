@@ -15,7 +15,7 @@ import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Award, CalendarCheck, CheckCircle2, ClipboardCheck, DollarSign, ListChecks, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Award, Calendar, CalendarCheck, CheckCircle2, ClipboardCheck, DollarSign, ListChecks, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
@@ -25,7 +25,7 @@ import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
-import { gradePlan, type GradeStepLabel } from "./gradePlanData";
+import { gradePlan, type GradeStep, type GradeStepLabel } from "./gradePlanData";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import { EventStubs } from "./EventStubs";
@@ -1492,6 +1492,27 @@ const GRADE_STEP_ICON: Record<GradeStepLabel, LucideIcon> = {
   RESULT: Award,
 };
 const GRADE_WINDOW_MONTHS: Record<string, string> = { fall: "Sept – Nov", winter: "Dec – Feb", spring: "Mar – May" };
+// A bare "Deadline" label didn't say when -- direct feedback, 16 Sept 2026:
+// "show a deadline date or something." The exact day is per-student/per-school
+// in the real spec, so this shows the term's own closing month (already on
+// screen above, not a fabricated date) rather than inventing a specific day.
+const GRADE_WINDOW_DUE: Record<string, string> = { fall: "Due by Nov", winter: "Due by Feb", spring: "Due by May" };
+
+// Names the actual destination so clicking an IN APP tile tells the student
+// what happens before they click, not just an arrow icon -- direct feedback,
+// 17 Sept 2026: "does clicking on a tile tell me what to do for that tile?"
+const GRADE_STEP_CTA: [string, string][] = [
+  ["/resume-builder", "Go to Resume Builder"],
+  ["/explore", "Go to Explore"],
+  ["/colleges", "Go to Colleges"],
+  ["/play", "Go to Play"],
+  ["/connect", "Go to Connect"],
+  ["/profile?tab=top3", "Go to Top 3"],
+  ["/flow", "Go to Profile"],
+];
+function gradeStepCta(href: string): string {
+  return GRADE_STEP_CTA.find(([prefix]) => href.startsWith(prefix))?.[1] ?? "Open";
+}
 
 // The grade-by-grade academic plan -- deliberately separate from the
 // career-route plan below it (PlanTab, Level 1/2/3 keyed to a CHOSEN
@@ -1508,11 +1529,31 @@ const GRADE_WINDOW_MONTHS: Record<string, string> = { fall: "Sept – Nov", wint
 function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onGoRoutes: () => void }) {
   const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
   const [grade, setGrade] = useState<9 | 10 | 11 | 12>(defaultGrade);
-  const [done, setDone] = useState<Set<string>>(new Set());
+  // "Build your Profile" starts checked off -- this demo student already has
+  // an avatar, school, and grade filled in, so the core step is genuinely
+  // done; the avatar/cover add-on is its own optional row instead (direct
+  // feedback, 16 Sept 2026).
+  const [done, setDone] = useState<Set<string>>(new Set(["g9-fall-build"]));
+  // Fall gets prominence and everything else starts collapsed (direct feedback,
+  // 17 Sept 2026: "only open whats relevant currently... give fall prominence
+  // over the others") -- resets on every grade switch so a student flipping
+  // grades always lands back on Fall instead of an unrelated open term.
+  const [openWindow, setOpenWindow] = useState<"fall" | "winter" | "spring">("fall");
+  const [openWindowGrade, setOpenWindowGrade] = useState(grade);
+  if (grade !== openWindowGrade) {
+    setOpenWindowGrade(grade);
+    setOpenWindow("fall");
+  }
   const plan = gradePlan(grade);
-  const allSteps = plan.windows.flatMap((w) => w.steps);
+  // Optional steps (e.g. the avatar/cover add-on) don't count toward "Steps
+  // done" -- they're still checkable, just not part of the required total.
+  const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
   const doneCount = allSteps.filter((s) => done.has(s.id)).length;
   const RULE = "var(--inset-border)";
+  // A counselor-verified step has no working checkbox, so tapping it opens
+  // this instead -- what to actually go do -- rather than leaving a locked
+  // row with no affordance at all (direct feedback, 16 Sept 2026).
+  const [noteStep, setNoteStep] = useState<GradeStep | null>(null);
 
   const toggle = (id: string) =>
     setDone((prev) => {
@@ -1569,55 +1610,151 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
       </div>
       <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allSteps.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
 
-      {/* Three terms side by side, like a school-year wall planner, instead
-         of a stacked accordion list -- direct feedback, 17 Sept 2026: "a
-         more calendar oriented design? But not so much that its too
-         complex." Each step is a dot on a vertical term-line rather than a
-         card of its own; no body copy, just the label the step already
-         carries (title + In app/Out of app + deadline flag). */}
-      <div className="mt-[var(--space-4)] grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+      {/* Full-width term rows (not side-by-side columns -- direct feedback,
+         17 Sept 2026: "dont go horizontal with the cards, the older
+         accordions stacked vertically work"), collapsed to one open term at
+         a time with Fall prominent ("only open whats relevant currently...
+         give fall prominence"). Each term header carries a small calendar
+         icon badge for "more of a calendar vibe" (a first pass stacked
+         invented month/season abbreviations on the badge -- correctly
+         called out as "is that really a thing?" -- a plain icon reads
+         honestly instead). Steps are grouped
+         In App / Out of App (brought back after a brief detour through
+         per-tile tags), and drop the one-line hint entirely -- "the ctas
+         should be enough" once every navigable step already names its
+         destination ("Go to Play", etc). */}
+      <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-3)]">
         {plan.windows.map((w) => {
-          const wDone = w.steps.filter((s) => done.has(s.id)).length;
+          const countedSteps = w.steps.filter((s) => !s.optional);
+          const wDone = countedSteps.filter((s) => done.has(s.id)).length;
+          const open = openWindow === w.id;
+          const groups = [
+            { key: "in" as const, label: "In App", items: w.steps.filter((s) => s.inApp) },
+            { key: "out" as const, label: "Out of App", items: w.steps.filter((s) => !s.inApp) },
+          ].filter((g) => g.items.length > 0);
           return (
-            <div key={w.id} className="flex flex-col rounded-[var(--radius-md)] border p-[var(--space-3)]" style={{ borderColor: RULE, background: "var(--glass-surface-1)" }}>
-              <div className="flex items-baseline justify-between gap-[8px] border-b pb-[var(--space-2)]" style={{ borderColor: RULE }}>
-                <span className="flex flex-col gap-[1px]">
-                  <span className="text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{w.title}</span>
-                  <span className="text-[10.5px] leading-[14px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{GRADE_WINDOW_MONTHS[w.id]}</span>
+            <div key={w.id} className="flex flex-col rounded-[var(--radius-md)] border" style={{ borderColor: RULE, background: "var(--glass-surface-1)" }}>
+              <button
+                type="button"
+                onClick={() => setOpenWindow(w.id)}
+                aria-expanded={open}
+                className="dm-quiet flex cursor-pointer items-center justify-between gap-[8px] px-[var(--space-4)] py-[var(--space-3)] text-left"
+                style={open ? undefined : { borderRadius: "var(--radius-md)" }}
+              >
+                <span className="flex items-center gap-[10px]">
+                  <span className="flex size-[32px] flex-none items-center justify-center rounded-[8px]" style={{ background: open ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "var(--glass-surface-2)", color: open ? "var(--primary)" : "var(--muted-foreground)" }}>
+                    <Calendar className="h-4 w-4" aria-hidden />
+                  </span>
+                  <span className="flex items-baseline gap-[8px]">
+                    <span className={open ? "text-[16px] leading-[20px] font-bold" : "text-[14px] leading-[18px] font-bold"} style={{ fontFamily: "var(--font-display)" }}>{w.title}</span>
+                    <span className="text-[11px] leading-[14px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{GRADE_WINDOW_MONTHS[w.id]}</span>
+                  </span>
                 </span>
-                <span className="text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: wDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{wDone}/{w.steps.length}</span>
-              </div>
-              <div className="mt-[2px] flex flex-col">
-                {w.steps.map((s, i) => {
-                  const complete = done.has(s.id);
-                  const StepIcon = GRADE_STEP_ICON[s.label];
-                  return (
-                    <div key={s.id} className="relative flex items-start gap-[10px] py-[9px]" style={{ opacity: complete ? 0.55 : 1 }}>
-                      {i < w.steps.length - 1 && <span aria-hidden className="absolute top-[24px] bottom-[-9px] left-[10.5px] w-px" style={{ background: RULE }} />}
-                      <button
-                        type="button"
-                        aria-label={complete ? `Mark "${s.title}" not done` : `Mark "${s.title}" done`}
-                        onClick={() => toggle(s.id)}
-                        className="dm-quiet relative z-[1] mt-[1px] flex size-[22px] flex-none cursor-pointer items-center justify-center rounded-full border"
-                        style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "var(--card)", borderColor: complete ? "transparent" : "var(--glass-border)" }}
-                      >
-                        {complete ? <Check className="h-3 w-3" style={{ color: "#05070f" }} /> : <StepIcon className="h-3 w-3" style={{ color: "var(--accent-subtle)" }} aria-hidden />}
-                      </button>
-                      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                        <span className={`text-[13.5px] leading-[18px] font-semibold ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>{s.title}</span>
-                        <span className="flex flex-wrap items-center gap-[6px]">
-                          <span className="text-[10px] leading-[13px] font-bold tracking-[0.05em] uppercase" style={{ color: s.inApp ? "var(--primary)" : "var(--muted-foreground)" }}>{s.inApp ? "In app" : "Out of app"}</span>
-                          {s.deadlineBound && <span className="text-[10px] leading-[13px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Deadline</span>}
-                        </span>
-                      </span>
+                <span className="flex items-center gap-[10px]">
+                  <span className="text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: wDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{wDone} of {countedSteps.length}</span>
+                  <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ color: "var(--muted-foreground)", transform: open ? "rotate(180deg)" : "rotate(0deg)" }} aria-hidden />
+                </span>
+              </button>
+              {open && (
+                <div className="flex flex-col border-t" style={{ borderColor: RULE }}>
+                  {groups.map((group) => (
+                    <div key={group.key} className="flex flex-col">
+                      <div className="px-[var(--space-4)] pt-[var(--space-3)] pb-[4px] text-[10.5px] leading-[13px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+                        {group.label}
+                      </div>
+                      {group.items.map((s) => {
+                        const complete = !s.counselorVerified && done.has(s.id);
+                        const StepIcon = GRADE_STEP_ICON[s.label];
+                        const rowContent = (
+                          <>
+                            {s.counselorVerified ? (
+                              <span className="flex size-[26px] flex-none items-center justify-center rounded-full border border-dashed" style={{ borderColor: "var(--inset-border)", color: "var(--muted-foreground)" }}>
+                                <Lock className="h-3 w-3" aria-hidden />
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                aria-pressed={complete}
+                                aria-label={complete ? `Mark "${s.title}" not done` : `Mark "${s.title}" done`}
+                                onClick={() => toggle(s.id)}
+                                className="dm-quiet flex-none cursor-pointer"
+                              >
+                                <span className="flex size-[26px] flex-none items-center justify-center rounded-full border" style={{ borderColor: complete ? "var(--color-feedback-success, #33c78c)" : "var(--inset-border)", background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", color: complete ? "#05070f" : "var(--muted-foreground)" }}>
+                                  {complete ? <Check className="h-3.5 w-3.5" /> : <StepIcon className="h-3.5 w-3.5" aria-hidden />}
+                                </span>
+                              </button>
+                            )}
+                            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-[8px]">
+                              <span className={`text-[14px] leading-[18px] font-semibold ${complete ? "line-through" : ""}`} style={{ color: s.optional || s.counselorVerified ? "var(--muted-foreground)" : "var(--foreground)" }}>
+                                {s.optional && "(Optional) "}{s.title}
+                              </span>
+                              <span className="flex flex-none items-center gap-[8px]">
+                                {s.counselorVerified && (
+                                  <span className="rounded-[4px] px-[6px] py-[1px] text-[9.5px] leading-[14px] font-bold tracking-[0.04em] uppercase" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>Counselor confirms</span>
+                                )}
+                                {s.deadlineBound && (
+                                  <span className="rounded-[4px] px-[6px] py-[1px] text-[9.5px] leading-[14px] font-bold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--color-feedback-error, #ff6b6b) 16%, transparent)", color: "var(--color-feedback-error, #ff6b6b)" }}>{GRADE_WINDOW_DUE[w.id]}</span>
+                                )}
+                                {s.href && (
+                                  <Link href={s.href} className="dm-quiet flex flex-none items-center gap-[3px] rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold" style={{ borderColor: "var(--inset-border)", color: "var(--foreground)" }}>
+                                    {gradeStepCta(s.href)}
+                                    <ArrowUpRight className="h-3 w-3 flex-none" aria-hidden />
+                                  </Link>
+                                )}
+                              </span>
+                            </div>
+                          </>
+                        );
+                        return s.counselorVerified ? (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => setNoteStep(s)}
+                            className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] border-b px-[var(--space-4)] py-[var(--space-3)] text-left last:border-b-0"
+                            style={{ borderColor: RULE }}
+                          >
+                            {rowContent}
+                          </button>
+                        ) : (
+                          <div
+                            key={s.id}
+                            className="flex items-center gap-[var(--space-3)] border-b px-[var(--space-4)] py-[var(--space-3)] last:border-b-0"
+                            style={{ borderColor: RULE }}
+                          >
+                            {rowContent}
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+      {noteStep && (
+        <Portal>
+          <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label={noteStep.title}>
+            <button type="button" aria-label="Close" onClick={() => setNoteStep(null)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+            <div className="relative z-[1] flex w-full max-w-[380px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+              <div className="flex items-start justify-between gap-[var(--space-3)]">
+                <div className="flex items-center gap-[10px]">
+                  <span className="flex size-[32px] flex-none items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
+                    <Lock className="h-4 w-4" aria-hidden />
+                  </span>
+                  <h3 className="text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{noteStep.title}</h3>
+                </div>
+                <button type="button" onClick={() => setNoteStep(null)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+              <p className="text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>{noteStep.counselorNote}</p>
+              <p className="text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>Your counselor confirms this one on their own dashboard, so it can&apos;t be checked off here.</p>
+            </div>
+          </div>
+        </Portal>
+      )}
     </section>
   );
 }
