@@ -35,13 +35,17 @@ export function AudienceToggle({ view, onChange }: AudienceToggleProps) {
             // main CTA (var(--primary), matching rgba(47,107,242,...) shadow),
             // which put two "look at me" blue glows on the same screen and
             // fought the CTA for attention (direct feedback, 16 Sept 2026:
-            // "so it doesnt compete with the main CTA"). Inverted-contrast
-            // segmented-control style instead (light chip on the dark track,
-            // no color, no glow) -- unmistakably "selected" without borrowing
-            // the CTA's own color identity.
+            // "so it doesnt compete with the main CTA"). A solid
+            // var(--foreground) fill fixed that but swapped one loud thing
+            // for another -- a full-white chip was its own attention-grab
+            // (direct follow-up: "more subtle and not full white"). Settled
+            // on a faint translucent wash instead of a solid color: enough
+            // lift/contrast against the transparent track to read as
+            // "selected" at a glance, without competing for the eye the way
+            // either full-color or full-white did.
             style={
               view === v
-                ? { background: "var(--foreground)", color: "var(--background)", boxShadow: "0 2px 8px -2px rgba(0,0,0,.35)" }
+                ? { background: "color-mix(in srgb, var(--foreground) 14%, transparent)", color: "var(--foreground)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--foreground) 18%, transparent)" }
                 : { background: "transparent", color: "var(--muted-foreground)" }
             }
           >
