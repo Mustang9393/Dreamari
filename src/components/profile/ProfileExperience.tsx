@@ -1820,7 +1820,7 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                               </button>
                             )}
                             {s.href && !complete ? (
-                              <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)]">
+                              <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px]">
                                 {body}
                                 <StepIcon className="h-3.5 w-3.5 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden />
                               </Link>
