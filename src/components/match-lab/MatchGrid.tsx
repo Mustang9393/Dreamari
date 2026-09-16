@@ -12,7 +12,7 @@ import { announce } from "@/components/app/LiveRegion";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { ThemeProvider, useTheme } from "@/components/flow/theme/ThemeProvider";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
 import { picksParam, writePicks } from "@/lib/picks";
@@ -222,6 +222,19 @@ export function MatchGrid() {
 
 function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: number; onOpen: () => void; onToggle: (origin?: { clientX: number; clientY: number }) => void }) {
   const isSelected = rank > 0;
+  // `career.color` (a --color-world-* token) carries two conflicting jobs in
+  // light mode: as the small "Business & Money" label text a few lines
+  // down, it MUST be the muted, contrast-safe #996900 (globals.css html.light
+  // override, 4.8:1 vs white) -- but that same muted value read as a "bad,"
+  // muddy amber for a decorative, non-text use like this ring, which only
+  // needs the 3:1 non-text contrast WCAG actually requires for a UI
+  // boundary. Brightened toward the original un-muted token specifically for
+  // this ring in light mode (direct feedback, 16 Sept 2026: "the amber is
+  // still a bad color... needs to be more bright/gold, without contrast
+  // issues" -- this ring is exactly the "without contrast issues" room that
+  // constraint gives, since it isn't carrying text). Dark mode is untouched.
+  const { theme } = useTheme();
+  const ringColor = theme === "light" ? `color-mix(in srgb, ${career.color} 100%, white 32%)` : career.color;
   // Same hover LANGUAGE as Explore's browse cards (PosterCard.tsx /
   // .poster-card in globals.css): lift, scale, the photo eases in, a dark
   // dim washes over it -- everything except OpenCue's center chevron,
@@ -320,8 +333,13 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
             className="flex items-center gap-1 rounded-full px-2.5 py-[5px] text-[10.5px] font-semibold whitespace-nowrap backdrop-blur-md sm:gap-1.5 sm:px-3 sm:py-[6px] sm:text-[12px]"
             style={{
               background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)",
-              color: "rgba(255,255,255,0.95)",
-              boxShadow: `0 0 0 1.5px color-mix(in srgb, ${career.color} 70%, transparent)`,
+              // was hardcoded white -- fine in dark mode (this scrim darkens
+              // toward --color-night-background), illegible in light mode
+              // (the same scrim LIGHTENS toward night-background there, so
+              // white text landed on a near-white chip). night-foreground
+              // flips the same direction the scrim does, in both themes.
+              color: "var(--color-night-foreground)",
+              boxShadow: `0 0 0 1.5px color-mix(in srgb, ${ringColor} 70%, transparent)`,
             }}
           >
             <Info className="h-3 w-3 flex-none sm:h-3.5 sm:w-3.5" strokeWidth={2.5} aria-hidden />
