@@ -593,8 +593,8 @@ export function HomeExperience() {
               <HoverBeam key={title} strength={0.8}>
               <Link
                 href={href}
-                className="dm-tap group relative flex h-full flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] transition-colors duration-200"
-                style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+                className="dm-tap dm-glass-2 group relative flex h-full flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] backdrop-blur-[24px] backdrop-saturate-[1.65] transition-colors duration-200"
+                style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}
               >
                 <span
                   aria-hidden

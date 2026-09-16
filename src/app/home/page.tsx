@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { HomeExperience } from "@/components/app/HomeExperience";
 import "@/components/marketing/tokens.css";
+import "@/components/app/app.css";
 
 export const metadata: Metadata = {
   title: "Home · Dreamari",
