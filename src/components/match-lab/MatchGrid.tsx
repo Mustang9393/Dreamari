@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Info, Plus, Sparkles, X } from "lucide-react";
+import { BorderBeam } from "border-beam";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
@@ -12,7 +13,7 @@ import { announce } from "@/components/app/LiveRegion";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { ThemeProvider, useTheme } from "@/components/flow/theme/ThemeProvider";
+import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
 import { picksParam, writePicks } from "@/lib/picks";
@@ -222,19 +223,6 @@ export function MatchGrid() {
 
 function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: number; onOpen: () => void; onToggle: (origin?: { clientX: number; clientY: number }) => void }) {
   const isSelected = rank > 0;
-  // `career.color` (a --color-world-* token) carries two conflicting jobs in
-  // light mode: as the small "Business & Money" label text a few lines
-  // down, it MUST be the muted, contrast-safe #996900 (globals.css html.light
-  // override, 4.8:1 vs white) -- but that same muted value read as a "bad,"
-  // muddy amber for a decorative, non-text use like this ring, which only
-  // needs the 3:1 non-text contrast WCAG actually requires for a UI
-  // boundary. Brightened toward the original un-muted token specifically for
-  // this ring in light mode (direct feedback, 16 Sept 2026: "the amber is
-  // still a bad color... needs to be more bright/gold, without contrast
-  // issues" -- this ring is exactly the "without contrast issues" room that
-  // constraint gives, since it isn't carrying text). Dark mode is untouched.
-  const { theme } = useTheme();
-  const ringColor = theme === "light" ? `color-mix(in srgb, ${career.color} 100%, white 32%)` : career.color;
   // Same hover LANGUAGE as Explore's browse cards (PosterCard.tsx /
   // .poster-card in globals.css): lift, scale, the photo eases in, a dark
   // dim washes over it -- everything except OpenCue's center chevron,
@@ -319,32 +307,37 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
               "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-night-background) 55%, transparent) 34%, color-mix(in srgb, var(--color-night-background) 82%, transparent) 60%, var(--color-night-background) 100%)",
           }}
         >
-          {/* Static border, not `BorderBeam` (direct feedback, 15 Sept 2026:
-             "loads slowly... even simple hover animates sluggishly"):
-             `BorderBeam`'s `active` prop was hardcoded true, meaning all 6
-             cards ran its continuous `filter: blur()+hue-rotate()` glow
-             loop, forever, the instant this grid mounted -- an animated
-             `filter` on 6 elements at once, all the time, not just on
-             hover. Kept the same visual weight (icon + text + backdrop-blur
-             + a bright, career-tinted ring) so "Learn more" stays just as
-             noticeable as it was made to be on 14 Sept 2026, just without
-             the per-frame cost. */}
-          <span
-            className="flex items-center gap-1 rounded-full px-2.5 py-[5px] text-[10.5px] font-semibold whitespace-nowrap backdrop-blur-md sm:gap-1.5 sm:px-3 sm:py-[6px] sm:text-[12px]"
-            style={{
-              background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)",
-              // was hardcoded white -- fine in dark mode (this scrim darkens
-              // toward --color-night-background), illegible in light mode
-              // (the same scrim LIGHTENS toward night-background there, so
-              // white text landed on a near-white chip). night-foreground
-              // flips the same direction the scrim does, in both themes.
-              color: "var(--color-night-foreground)",
-              boxShadow: `0 0 0 1.5px color-mix(in srgb, ${ringColor} 70%, transparent)`,
-            }}
-          >
-            <Info className="h-3 w-3 flex-none sm:h-3.5 sm:w-3.5" strokeWidth={2.5} aria-hidden />
-            Learn more
-          </span>
+          {/* BorderBeam restored (direct feedback, 16 Sept 2026: "I never
+             asked for [the static ring]... we had a subtle beam border
+             thing on there") after briefly removing it for a real perf
+             reason (15 Sept 2026: "loads slowly... even simple hover
+             animates sluggishly" -- `active` runs its `filter:
+             blur()+hue-rotate()` continuously on all 6 cards at once).
+             Restored at the exact size/props it had before removal
+             (`size="sm"` was already the smallest preset) -- an accepted,
+             explicit tradeoff back toward that cost. normal-case overrides
+             the parent's `uppercase` for this span only, undoing an
+             all-caps regression a later redesign introduced on top of an
+             earlier explicit "sentence case, not all-caps" decision
+             (12 Sept 2026); the title/world-label below still want their
+             own uppercase, so the parent class stays. */}
+          <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4} strength={0.7} active>
+            <span
+              className="flex items-center gap-1 rounded-full px-2.5 py-[5px] text-[10.5px] font-semibold whitespace-nowrap normal-case backdrop-blur-md sm:gap-1.5 sm:px-3 sm:py-[6px] sm:text-[12px]"
+              style={{
+                background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)",
+                // was hardcoded white -- fine in dark mode (this scrim darkens
+                // toward --color-night-background), illegible in light mode
+                // (the same scrim LIGHTENS toward night-background there, so
+                // white text landed on a near-white chip). night-foreground
+                // flips the same direction the scrim does, in both themes.
+                color: "var(--color-night-foreground)",
+              }}
+            >
+              <Info className="h-3 w-3 flex-none sm:h-3.5 sm:w-3.5" strokeWidth={2.5} aria-hidden />
+              Learn more
+            </span>
+          </BorderBeam>
           <p style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 17, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.02em", color: "var(--color-night-foreground)" }}>
             {career.title}
           </p>
