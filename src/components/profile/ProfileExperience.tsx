@@ -15,7 +15,7 @@ import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Award, CalendarCheck, CheckCircle2, ClipboardCheck, DollarSign, ListChecks, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
@@ -27,7 +27,7 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
-import { gradePlan, type GradeStep, type GradeStepLabel } from "./gradePlanData";
+import { gradePlan, type GradeStep } from "./gradePlanData";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
@@ -1667,19 +1667,6 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
   );
 }
 
-const GRADE_STEP_ICON: Record<GradeStepLabel, LucideIcon> = {
-  BUILD: BookOpen,
-  EXPLORE: Compass,
-  PLAY: Gamepad2,
-  CONNECT: Users,
-  DECIDE: CheckCircle2,
-  PLAN: CalendarCheck,
-  REVIEW: ClipboardCheck,
-  APPLY: Send,
-  FUND: DollarSign,
-  TRACK: ListChecks,
-  RESULT: Award,
-};
 const GRADE_WINDOW_MONTHS: Record<string, string> = { fall: "Sept – Nov", winter: "Dec – Feb", spring: "Mar – May" };
 const GRADE_WINDOW_DUE: Record<string, string> = { fall: "Due by Nov", winter: "Due by Feb", spring: "Due by May" };
 
@@ -1797,7 +1784,6 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                       <span className="pt-[var(--space-3)] pb-[6px] text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{group === "app" ? "In app" : "Out of app"}</span>
                       {rows.map((s) => {
                         const complete = !s.counselorVerified && done.has(s.id);
-                        const StepIcon = GRADE_STEP_ICON[s.label];
                         const body = (
                           <span className="flex min-w-0 flex-1 flex-col gap-[2px] sm:flex-row sm:items-center sm:gap-[10px]">
                             <span className="flex-none text-[11px] leading-[16px] font-bold tracking-[0.08em] uppercase sm:w-[92px] sm:leading-[22px]" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
@@ -1822,7 +1808,7 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                             {s.href && !complete ? (
                               <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px]">
                                 {body}
-                                <StepIcon className="h-3.5 w-3.5 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden />
+                                <ChevronRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
                               </Link>
                             ) : (
                               body
