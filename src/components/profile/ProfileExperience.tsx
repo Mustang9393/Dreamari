@@ -403,7 +403,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         </span>
       </MobileHeaderShell>
 
-      <main className="no-print relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
+      {/* max-w-[1440px], not [1200px]: every other top-level tab (Home, Play,
+         Connect, Colleges, Explore) shares this same max-width + px-5/
+         sm:px-[var(--space-14)] baseline -- Connect's own header comment
+         documents it as the app-wide convention. Profile was the one outlier,
+         narrower than its siblings for no stated reason (16 Sept 2026 direct
+         feedback: "margins aren't consistent... my profile especially"). */}
+      <main className="no-print relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
         <div className={buildIn(0).className} style={buildIn(0).style}>
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Profile</h1>
         </div>
