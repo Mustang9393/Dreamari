@@ -5,6 +5,7 @@ import { Suspense, useState, useSyncExternalStore, type ReactNode } from "react"
 import { motion } from "framer-motion";
 import { ChevronLeft, Download, FileText, ListOrdered, Pencil, Sparkles, Wand2, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { useScrolled } from "@/components/app/chrome";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
 import { ATSCheckPanel } from "./ATSCheckPanel";
@@ -79,31 +80,60 @@ function Shell({ children, contentMaxWidth, tabs }: { children: ReactNode; conte
 // selection); the finished document keeps its own header, which already
 // covers the reference's equivalent actions (ATS Check, Export, etc.).
 function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "saved" | "tailor"; router: ReturnType<typeof useRouter>; onClose: () => void }) {
+  const scrolled = useScrolled();
   const items: { key: typeof active; label: string; href: string }[] = [
     { key: "builder", label: "Resume Builder", href: "/resume-builder" },
     { key: "saved", label: "Saved Resumes", href: "/resume-builder?view=list" },
     { key: "tailor", label: "Choose & Tailor", href: "/resume-builder?view=tailor" },
   ];
   return (
-    <div
-      data-print-hide
-      // Sticky, not just top-of-page -- it was scrolling out of view on
-      // any tall step (direct feedback, 16 Sept 2026: "make sure they are
-      // more prominent and always visible/sticky"), same pattern
-      // WizardFooter already uses for staying put at the bottom. Full-bleed
-      // (Shell renders this outside its own padded column) so it docks
-      // flush at the page's true top edge instead of floating under the
-      // column's own top padding.
-      className="sticky top-0 z-30 w-full backdrop-blur-md"
-      style={{ borderBottom: "1px solid var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}
-    >
-      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-[var(--space-4)] px-5 pt-[max(14px,env(safe-area-inset-top))] sm:px-[var(--space-14)]">
+    // Sticky, not just top-of-page -- it was scrolling out of view on
+    // any tall step (direct feedback, 16 Sept 2026: "make sure they are
+    // more prominent and always visible/sticky"), same pattern
+    // WizardFooter already uses for staying put at the bottom. Full-bleed
+    // (Shell renders this outside its own padded column) so it docks
+    // flush at the page's true top edge instead of floating under the
+    // column's own top padding -- the outer host below stays transparent
+    // and only reserves height; the inset pill inside it carries the
+    // actual scroll-conditional glass, same treatment as the app's main
+    // nav (direct feedback, 16 Sept 2026: "same thing for the resume
+    // builders top tabs" -- an explicit reversal of the full-bleed-bar
+    // look chosen earlier this same session).
+    <div className="sticky top-0 z-30 w-full">
+      {/* Outer inset margin is sm:px-3 only, not unconditional -- unlike the
+         app nav's pill (logo + one icon, always fits), this row carries
+         three text tab labels plus a close button, and adding the same
+         12px-per-side inset on top of the pill's own px-5 pushed "Choose &
+         Tailor" and the close button off a narrow phone screen entirely
+         (16 Sept 2026). Mobile keeps the pill flush edge-to-edge instead
+         (still rounded, still scroll-conditional) so nothing overflows. */}
+      <div className="mx-auto w-full max-w-[1440px] pt-3 sm:px-3">
+        <div
+          data-print-hide
+          className="rounded-[28px] transition-[background-color,border-color,box-shadow] duration-300"
+          style={{
+            background: scrolled ? "color-mix(in srgb, var(--background) 78%, transparent)" : "transparent",
+            backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
+            WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
+            border: `1px solid ${scrolled ? "var(--glass-border)" : "transparent"}`,
+            boxShadow: scrolled ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
+          }}
+        >
+      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-[var(--space-4)] px-5 pt-[max(14px,env(safe-area-inset-top))] pb-[14px] sm:px-[var(--space-14)]">
         {/* Active tab already says what this page is -- a separate
            "Resume Builder" title repeated the same word right below it
            (direct feedback, 16 Sept 2026: "it already says what it is in
            the tabs label, make those bigger"), so the tabs carry both the
            page identity and the navigation now. */}
-        <div role="tablist" aria-label="Resume Builder sections" className="flex flex-none gap-[var(--space-6)]">
+        {/* min-w-0 + overflow-x-auto, not flex-none: three full-text labels
+           don't fit a narrow phone alongside the close button, and with no
+           way to scroll, the overflow used to clip straight through the
+           close button, making the wizard unclosable on small screens
+           (pre-existing, found 16 Sept 2026 while adding the glass pill
+           above -- unrelated to that change, confirmed by reproducing it
+           against the untouched original markup too). Scrolling the tab
+           list alone keeps the close button always reachable. */}
+        <div role="tablist" aria-label="Resume Builder sections" className="flex min-w-0 gap-[var(--space-6)] overflow-x-auto [scrollbar-width:none]">
           {items.map((item) => {
             const isActive = item.key === active;
             return (
@@ -147,6 +177,8 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
         >
           <X className="h-4 w-4" aria-hidden />
         </button>
+      </div>
+        </div>
       </div>
     </div>
   );
