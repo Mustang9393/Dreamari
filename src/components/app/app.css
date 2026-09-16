@@ -240,13 +240,16 @@
    not there"). Blur is what actually keeps text legible on a fairly
    transparent fill -- it diffuses whatever's behind into a soft wash
    instead of showing sharp, busy detail through it -- and saturate is what
-   reads as "glass" rather than "smudged." The shadow formula is the nav's
+   reads as "glass" rather than "smudged." The shadow started as the nav's
    own scroll-frosted state, verbatim (chrome.tsx: "0 12px 32px -16px
-   rgba(0,0,0,0.55)") -- direct instruction: "I want the base to be like the
-   top navbar's material" -- rather than an invented recipe, just scaled up
-   slightly per tier so a stacked surface reads as a visible step deeper,
-   which is the "elevation increases light falling on the surface" brief.
-   Blur/saturate themselves are NOT set here -- pair this class with
+   rgba(0,0,0,0.55)") -- but the nav is one bar floating over content;
+   these classes land on many stacked/nested cards at once (a term card
+   inside a plan card inside a page), where that same shadow at full
+   strength compounded into visibly "too much lift" (direct feedback, 17
+   Sept 2026). Backed off to a lighter touch -- still a real, tiered step
+   per elevation ("elevation increases light falling on the surface"), just
+   not the nav's own single-floating-bar weight. Blur/saturate themselves
+   are NOT set here -- pair this class with
    Tailwind's own backdrop-blur-[Npx]/backdrop-saturate-[N] utilities on the
    element (dm-glass -> backdrop-blur-[20px] backdrop-saturate-[1.5],
    dm-glass-2 -> [24px]/[1.65], dm-glass-3 -> [30px]/[1.8]), matching the
@@ -259,15 +262,26 @@
    this file -- `/home` and `/explore` didn't (confirmed: their compiled
    bundles ship zero `.dm-glass` rules at all), which is the other reason a
    surface can carry the class and the right Tailwind blur/saturate classes
-   and still render with no shadow and no visible frost. */
+   and still render with no shadow and no visible frost.
+
+   The nav's plain border+shadow (no highlight) reads as glass because it
+   floats over rich, varied content (career posters, photos) -- there's
+   something back there for the blur to actually refract. A card sitting
+   over a mostly-flat stretch of page has nothing behind it for blur to
+   show, so the exact same recipe just looks like a tinted rectangle no
+   matter how correct the numbers are (confirmed live, 17 Sept 2026: "does
+   this look like glass to you?" -- it didn't). The fix for THAT case is a
+   glass surface that reads as glass on its OWN terms: a bright top-edge
+   highlight (light catching the pane's top bevel) plus a crisper full-edge
+   ring, independent of whatever happens to be behind it. */
 .dm-glass, .dm-glass-2, .dm-glass-3 {
-  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.28), 0 6px 16px -12px rgba(0, 0, 0, 0.28);
 }
 .dm-glass-2 {
-  box-shadow: 0 14px 36px -16px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.34), 0 8px 20px -12px rgba(0, 0, 0, 0.3);
 }
 .dm-glass-3 {
-  box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 10px 24px -12px rgba(0, 0, 0, 0.32);
 }
 
 @media (prefers-reduced-motion: reduce) {
