@@ -720,7 +720,14 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            direct feedback: "Keep careers like this one on the bottom"). */}
         {similar.length > 0 && (
           <Section title="Careers like this one">
-            <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:mx-0 md:px-0" style={{ touchAction: "pan-x pan-y" }}>
+            {/* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own
+               md:px-8 so the rail bleeds to the true edge and re-pads back to
+               the same content line, the same convention every other card
+               rail in the app uses (Home, College Detail's Similar Schools).
+               Zeroing the margin/padding on desktop, as this rail used to,
+               left no trailing space for the last card to fade into --
+               it just hard-clipped at the container edge (16 Sept 2026). */}
+            <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
                 <PosterCard key={c.title} career={c} onClick={() => router.push(`/career/${careerSlug(c.title)}`)} />
               ))}
