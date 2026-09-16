@@ -120,7 +120,16 @@
      matching copy reserve) absorbs the dead band on the way to Build. Desktop is
      unchanged (the width term wins there); the short-viewport overrides below
      still replace this wholesale on landscape/short devices. */
-  --mascot-size: max(clamp(264px, 38vw, 460px), min(40dvh, 520px));
+  /* Trimmed 16 Sept 2026 (direct feedback, desktop screenshot): at the old
+     460px cap the mascot's peeking head reached high enough to overlap
+     "Scroll Down To Learn More" on very common laptop heights (~800-900px)
+     -- not covered by the shorter-viewport tiers below, which only kick in
+     under 700px. Cap and coefficient both trimmed a bit; VISIBLE_FRACTION
+     and the mask's fade-zone percentages in Mascot.tsx are untouched
+     (they're relative to the box, not its absolute size), so the
+     eyes/mouth crop stays exactly as tuned -- he's just a little smaller
+     and sits a little lower on typical desktop screens. */
+  --mascot-size: max(clamp(264px, 34vw, 400px), min(38dvh, 460px));
 
   /* ---- Elevation shadows (effect.styles -> Elevation), Semantic.Dark shadow-color ---- */
   --shadow-sm: 0 2px 8px 0 #00000073;

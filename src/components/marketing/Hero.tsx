@@ -75,7 +75,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
          the scroll hint and Dreamy at the bezel, which reads as his airspace —
          and he's visibly holding the bottom of it the whole time it scrolls by. */}
       <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-start">
-        <div className="mb-[26px] flex justify-center [@media(max-height:600px)]:mb-2">
+        <div className="mb-[34px] flex justify-center [@media(max-height:600px)]:mb-2">
           <AudienceToggle view={view} onChange={onChangeView} />
         </div>
         <div
@@ -89,7 +89,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
           style={{ paddingBottom: "calc(var(--mascot-size) * .72 + 8px)" }}
         >
           <h1
-            className="font-display text-[38px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(52px,4vw,64px)]"
+            className="font-display text-[42px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(58px,4.4vw,72px)]"
             style={{ lineHeight: 1.05, color: "var(--foreground)" }}
           >
             <span style={{ color: "var(--primary-tint)" }}>Dream</span>ari
@@ -98,7 +98,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
              ACTUAL rendered width, keeping every line a reasonably even
              length instead of stranding a lone short word (a widow). */}
           <p
-            className="mt-4 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
+            className="mt-5 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)", textWrap: "balance" }}
           >
             Discover careers, find your path, experience the work, and connect with professionals who do it every day.
@@ -118,7 +118,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
              (direct feedback, 9 Sept 2026: beam candidates "even on the
              landing page"). Same 3.5s family as everywhere else, full
              strength. */}
-          <div className="mt-8 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-3">
+          <div className="mt-10 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-3">
             <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={1} brightness={1.8}>
               <MarketingButton href="/flow" variant="primary" size="lg">
                 Start Journey

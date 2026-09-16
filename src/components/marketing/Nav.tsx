@@ -36,9 +36,18 @@ type NavProps = {
 // padding clears it.
 export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
   const schools = view === "schools";
-  const cta = schools ? { label: "Request a demo", href: "#demo" } : { label: "Get started", href: "/flow" };
+  const cta = schools ? { label: "Request a demo", href: "#demo" } : { label: "Start Journey", href: "/flow" };
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
+  // The nav's own CTA is a persistent "escape hatch" once you've scrolled
+  // away from the hero -- but the hero's OWN big Start Journey button is
+  // sitting right there at the top of the page too, so showing this one
+  // immediately doubled up on the exact same button, in the exact same
+  // spot on screen (direct feedback, 16 Sept 2026: "so theres no clash").
+  // Gated on the fold itself (viewport height), not the small 24px frost
+  // threshold above -- the island can frost in over the hero without its
+  // CTA appearing until the hero's own CTA has scrolled out of view.
+  const [pastFold, setPastFold] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -73,6 +82,7 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
     function onScroll() {
       const y = window.scrollY;
       setScrolled(y > 24);
+      setPastFold(y > window.innerHeight * 0.9);
       const delta = y - lastY;
       if (Math.abs(delta) > 6) {
         if (graceOver) setHidden(delta > 0 && y > 160);
@@ -125,13 +135,22 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
         </Link>
 
         <div className="flex items-center gap-2">
+          {/* Fades/scales in only past the fold, doesn't unmount -- an
+             unmount would jump the hamburger sideways the instant this
+             appears; a reserved-but-invisible slot keeps that fixed while
+             this button fades in on top of it. */}
           <Link
             href={cta.href}
-            className="rounded-xl px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
+            aria-hidden={!pastFold}
+            tabIndex={pastFold ? 0 : -1}
+            className="rounded-xl px-4 py-2 text-[13px] font-bold whitespace-nowrap transition-all duration-300 hover:-translate-y-px active:scale-[0.97] sm:px-5 sm:py-2.5 sm:text-sm"
             style={{
               background: "linear-gradient(180deg, #4a82ff, var(--primary))",
               color: "var(--primary-foreground)",
               boxShadow: "0 6px 18px -6px rgba(47,107,242,.65)",
+              opacity: pastFold ? 1 : 0,
+              transform: pastFold ? "scale(1)" : "scale(0.85)",
+              pointerEvents: pastFold ? "auto" : "none",
             }}
           >
             {cta.label}
