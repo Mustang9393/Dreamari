@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Fragment, useContext, useEffect, useMemo, useState } from "react";
+import { Fragment, useContext, useEffect, useId, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
 import { Meter, Ring, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -584,6 +585,12 @@ function eduMarkSize(ratio: number) {
  *  so the page reads as one primary choice with a small secondary switch
  *  underneath it, not two equal-weight tab bars. */
 export function SubTabs<K extends string>({ options, value, onChange, ariaLabel }: { options: { key: K; label: string }[]; value: K; onChange: (key: K) => void; ariaLabel: string }) {
+  // Same shared-layoutId slide as every other tab bar (direct feedback:
+  // "have whatever highlight we end up keeping for tabs... animate and
+  // slide over when we switch"). The underline used to be a plain
+  // border-bottom that snapped colors; now it's a motion.span that moves.
+  // `uid` scopes it to this instance since SubTabs is reused elsewhere.
+  const uid = useId();
   return (
     <div role="tablist" aria-label={ariaLabel} className="flex items-center gap-[10px] border-b" style={{ borderColor: RULE }}>
       {options.map((option, index) => {
@@ -606,10 +613,19 @@ export function SubTabs<K extends string>({ options, value, onChange, ariaLabel 
               // as a stray pill under a tab that's supposed to be a flat
               // underline (direct feedback, 13 Sept 2026: "still some sort
               // of rounded corner thing"). Just the border-bottom itself.
-              className="relative -mb-px cursor-pointer border-b-2 px-[2px] pb-[10px] text-[14px] font-bold"
-              style={{ borderColor: on ? "var(--primary)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+              className="relative -mb-px cursor-pointer px-[2px] pb-[10px] text-[14px] font-bold"
+              style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
               {option.label}
+              {on && (
+                <motion.span
+                  layoutId={`subtabs-underline-${uid}`}
+                  aria-hidden
+                  className="absolute inset-x-0 -bottom-px h-[2px]"
+                  style={{ background: "var(--primary)" }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                />
+              )}
             </button>
           </Fragment>
         );

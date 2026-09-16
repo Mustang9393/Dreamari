@@ -4,6 +4,7 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
+import { motion } from "framer-motion";
 
 import Image from "next/image";
 import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -1650,7 +1651,20 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
       {PROS.map((p) => {
         const on = p.id === selected;
         return (
-          <button key={p.id} type="button" role="tab" aria-selected={on} onClick={() => onPick(p.id)} className="dm-quiet flex w-[72px] flex-none cursor-pointer flex-col items-center gap-[6px] rounded-[var(--radius-md)] px-[4px] py-[8px]" style={on ? { background: "color-mix(in srgb, var(--primary) 18%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 60%, transparent)" } : undefined}>
+          <button key={p.id} type="button" role="tab" aria-selected={on} onClick={() => onPick(p.id)} className="dm-quiet relative flex w-[72px] flex-none cursor-pointer flex-col items-center gap-[6px] rounded-[var(--radius-md)] px-[4px] py-[8px]">
+            {/* Tint + ring slide between volunteers via a shared layoutId
+               instead of snapping (direct feedback: "have whatever
+               highlight we end up keeping for tabs... animate and slide
+               over when we switch"). */}
+            {on && (
+              <motion.span
+                layoutId="connect-volunteer-picker-highlight"
+                aria-hidden
+                className="absolute inset-0 rounded-[var(--radius-md)]"
+                style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 60%, transparent)" }}
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              />
+            )}
             <Avatar name={p.name} size={40} />
             <span className="w-full truncate text-center text-[11px] leading-[14px] font-semibold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{p.name.split(" ")[0]}</span>
           </button>
@@ -1692,10 +1706,23 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
               role="tab"
               aria-selected={on}
               onClick={() => onPick(key)}
-              className="dm-quiet flex min-h-[32px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:flex-none sm:px-[12px]"
-              style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "var(--muted-foreground)" }}
+              className="dm-quiet relative flex min-h-[32px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:flex-none sm:px-[12px]"
+              style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
             >
-              <Icon className="hidden h-[14px] w-[14px] sm:block" aria-hidden /> {title}
+              {/* Fill slides between roles via a shared layoutId instead of
+                 snapping (direct feedback: "have whatever highlight we end
+                 up keeping for tabs... animate and slide over when we
+                 switch"). */}
+              {on && (
+                <motion.span
+                  layoutId="connect-role-tabs-pill"
+                  aria-hidden
+                  className="absolute inset-0 rounded-[var(--radius-sm)]"
+                  style={{ background: "var(--primary)" }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                />
+              )}
+              <Icon className="relative hidden h-[14px] w-[14px] sm:block" aria-hidden /> <span className="relative">{title}</span>
             </button>
           );
         })}

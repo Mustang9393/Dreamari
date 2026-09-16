@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -588,10 +589,23 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                     role="tab"
                     aria-selected={payView === id}
                     onClick={() => setPayView(id)}
-                    className="dm-quiet min-h-[32px] cursor-pointer rounded-full px-[14px] text-[13px] leading-[16px] font-semibold"
-                    style={{ background: payView === id ? "var(--foreground)" : "transparent", color: payView === id ? "var(--background)" : "var(--foreground)" }}
+                    className="dm-quiet relative min-h-[32px] cursor-pointer rounded-full px-[14px] text-[13px] leading-[16px] font-semibold"
+                    style={{ color: payView === id ? "var(--background)" : "var(--foreground)" }}
                   >
-                    {label}
+                    {/* Fill slides between the two views via a shared
+                       layoutId instead of snapping (direct feedback: "have
+                       whatever highlight we end up keeping for tabs...
+                       animate and slide over when we switch"). */}
+                    {payView === id && (
+                      <motion.span
+                        layoutId="career-pay-view-pill"
+                        aria-hidden
+                        className="absolute inset-0 rounded-full"
+                        style={{ background: "var(--foreground)" }}
+                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                      />
+                    )}
+                    <span className="relative">{label}</span>
                   </button>
                 ))}
               </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { motion } from "framer-motion";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 // Small data-visual primitives for Connect's dashboards (volunteer, partner).
@@ -9,6 +10,14 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 // the caller (the person's world accent); nothing here invents a palette.
 
 export function Segmented<K extends string>({ options, value, onChange, ariaLabel, grow = false }: { options: { key: K; label: string }[]; value: K; onChange: (key: K) => void; ariaLabel: string; grow?: boolean }) {
+  // The filled pill slides between options via a shared layoutId instead of
+  // just appearing under whichever one is active (direct feedback: "have
+  // whatever highlight we end up keeping for tabs... animate and slide over
+  // when we switch"). `uid` scopes the layoutId to this one Segmented
+  // instance -- this component is reused all over the app, sometimes two at
+  // once on the same screen, and a shared string would make unrelated
+  // pills animate into each other.
+  const uid = useId();
   return (
     <div role="tablist" aria-label={ariaLabel} className={`flex max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] ${grow ? "w-full" : "w-fit"}`} style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
       {options.map((option) => {
@@ -20,10 +29,19 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
             role="tab"
             aria-selected={on}
             onClick={() => onChange(option.key)}
-            className={`dm-quiet flex min-h-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
-            style={on ? { background: "var(--primary)", color: "#FFFFFF" } : { color: "var(--muted-foreground)" }}
+            className={`dm-quiet relative flex min-h-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
+            style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
           >
-            {option.label}
+            {on && (
+              <motion.span
+                layoutId={`segmented-pill-${uid}`}
+                aria-hidden
+                className="absolute inset-0 rounded-[var(--radius-sm)]"
+                style={{ background: "var(--primary)" }}
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              />
+            )}
+            <span className="relative">{option.label}</span>
           </button>
         );
       })}

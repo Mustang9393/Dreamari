@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import { ChevronRight, Briefcase, Building2, GraduationCap, MessagesSquare, Search, Users, X } from "lucide-react";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { careerSlug } from "@/components/career/slug";
@@ -125,11 +126,27 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           </label>
 
           <div className="flex items-center gap-[8px] overflow-x-auto border-b px-[var(--space-4)] py-[10px] [scrollbar-width:none]" role="tablist" aria-label="Search in" style={{ borderColor: "var(--glass-border)" }}>
-            {SCOPES.map((s) => (
-              <button key={s.key} type="button" role="tab" aria-selected={scope === s.key} onClick={() => setScope(s.key)} className="dm-quiet flex min-h-[34px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={scope === s.key ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#fff" } : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                {s.label}
-              </button>
-            ))}
+            {SCOPES.map((s) => {
+              const on = scope === s.key;
+              return (
+                <button key={s.key} type="button" role="tab" aria-selected={on} onClick={() => setScope(s.key)} className="dm-quiet relative flex min-h-[34px] flex-none cursor-pointer items-center rounded-full border px-[13px] text-[13px] leading-[18px] font-semibold whitespace-nowrap" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? undefined : "var(--glass-surface-1)", color: on ? "#fff" : "var(--foreground)" }}>
+                  {/* Fill slides between scopes via a shared layoutId
+                     instead of snapping (direct feedback: "have whatever
+                     highlight we end up keeping for tabs... animate and
+                     slide over when we switch"). */}
+                  {on && (
+                    <motion.span
+                      layoutId="global-search-scope-pill"
+                      aria-hidden
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: "var(--primary)" }}
+                      transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                    />
+                  )}
+                  <span className="relative">{s.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-[var(--space-4)] py-[var(--space-4)]">

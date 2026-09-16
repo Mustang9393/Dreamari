@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { ChevronLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
 import { useGlobalTheme } from "./theme";
 import { useDreamScore } from "@/lib/dreamScore";
@@ -94,17 +95,26 @@ export function ExploreSectionTabs({ active }: { active: "careers" | "colleges" 
               aria-current={isActive ? "page" : undefined}
               onClick={() => { if (!isActive) router.push(section.href); }}
               onAnimationEnd={() => { if (pulsing) setNudge(false); }}
-              className={`-mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
+              className={`relative -mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
               style={{
                 fontFamily: "var(--font-body)",
                 color: isActive ? "var(--foreground)" : "var(--muted-foreground)",
-                textDecoration: isActive ? "underline" : "none",
-                textUnderlineOffset: "5px",
-                textDecorationThickness: "2px",
-                textDecorationColor: "var(--accent)",
               }}
             >
               {section.label}
+              {/* Underline slides between Careers/Colleges via a shared
+                 layoutId instead of just snapping into place (direct
+                 feedback: "have whatever highlight we end up keeping for
+                 tabs... animate and slide over when we switch"). */}
+              {isActive && (
+                <motion.span
+                  layoutId="explore-section-tab-underline"
+                  aria-hidden
+                  className="absolute inset-x-0 -bottom-[5px] h-[2px]"
+                  style={{ background: "var(--accent)" }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                />
+              )}
             </button>
           </span>
         );
