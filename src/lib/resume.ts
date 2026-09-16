@@ -108,6 +108,13 @@ export type ATSCheckResult = {
   analyzedFor: string;
 };
 
+/** A resume section a student can reorder, hide, or hand-edit from the
+ *  Edit Sections panel -- matches the `data-section` markers ResumeDocument's
+ *  layouts already carry. */
+export type ResumeSectionId = "education" | "experience" | "skills" | "certifications";
+export const DEFAULT_SECTION_ORDER: ResumeSectionId[] = ["education", "experience", "skills", "certifications"];
+const SECTION_IDS: ResumeSectionId[] = DEFAULT_SECTION_ORDER;
+
 export type ResumeVersion = {
   id: string;
   name: string;
@@ -116,6 +123,14 @@ export type ResumeVersion = {
   educationIds: string[];
   experienceIds: string[];
   jobDescription: string;
+  /** Section order/visibility/raw-text overrides for this version's document
+   *  -- the reference's "Edit Sections" panel (a saved resume's toolbar):
+   *  per-section reorder arrows, a Hide toggle, and a raw editable text box.
+   *  Undefined/empty on anything saved before this existed, which is
+   *  equivalent to the default order, nothing hidden, no overrides. */
+  sectionOrder?: ResumeSectionId[];
+  hiddenSections?: ResumeSectionId[];
+  sectionOverrides?: Partial<Record<ResumeSectionId, string>>;
   /** Optional context alongside the job description -- matches the
    *  reference's own "Match to a Job" fields (direct feedback, 15 Sept
    *  2026: "it asks for position, JD and company too"). Neither is
@@ -261,24 +276,40 @@ function normalizeATSCheck(value: unknown): ATSCheckResult | null {
     analyzedFor: str(v.analyzedFor),
   };
 }
+function sectionIds(value: unknown): ResumeSectionId[] {
+  return strings(value).filter((s): s is ResumeSectionId => (SECTION_IDS as string[]).includes(s));
+}
+function normalizeSectionOverrides(value: unknown): Partial<Record<ResumeSectionId, string>> | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const v = value as Record<string, unknown>;
+  const out: Partial<Record<ResumeSectionId, string>> = {};
+  for (const id of SECTION_IDS) if (typeof v[id] === "string" && v[id]) out[id] = str(v[id]);
+  return Object.keys(out).length > 0 ? out : undefined;
+}
 function normalizeVersions(value: unknown): ResumeVersion[] {
   if (!Array.isArray(value)) return [];
   return value
     .filter((v): v is Record<string, unknown> => !!v && typeof v === "object" && typeof (v as Record<string, unknown>).id === "string")
-    .map((v) => ({
-      id: str(v.id),
-      name: str(v.name),
-      createdAt: typeof v.createdAt === "number" ? v.createdAt : Date.now(),
-      updatedAt: typeof v.updatedAt === "number" ? v.updatedAt : Date.now(),
-      educationIds: strings(v.educationIds),
-      experienceIds: strings(v.experienceIds),
-      jobDescription: str(v.jobDescription),
-      targetPosition: str(v.targetPosition),
-      targetCompany: str(v.targetCompany),
-      template: str(v.template) || "classic",
-      atsCheck: normalizeATSCheck(v.atsCheck),
-      color: typeof v.color === "string" && v.color ? v.color : undefined,
-    }));
+    .map((v) => {
+      const order = sectionIds(v.sectionOrder);
+      return {
+        id: str(v.id),
+        name: str(v.name),
+        createdAt: typeof v.createdAt === "number" ? v.createdAt : Date.now(),
+        updatedAt: typeof v.updatedAt === "number" ? v.updatedAt : Date.now(),
+        educationIds: strings(v.educationIds),
+        experienceIds: strings(v.experienceIds),
+        jobDescription: str(v.jobDescription),
+        sectionOrder: order.length === SECTION_IDS.length ? order : undefined,
+        hiddenSections: sectionIds(v.hiddenSections),
+        sectionOverrides: normalizeSectionOverrides(v.sectionOverrides),
+        targetPosition: str(v.targetPosition),
+        targetCompany: str(v.targetCompany),
+        template: str(v.template) || "classic",
+        atsCheck: normalizeATSCheck(v.atsCheck),
+        color: typeof v.color === "string" && v.color ? v.color : undefined,
+      };
+    });
 }
 
 function normalize(value: unknown): ResumeData {

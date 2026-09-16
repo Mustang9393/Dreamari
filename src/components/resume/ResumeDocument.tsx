@@ -3,7 +3,7 @@
 import { Expand, Maximize2, Minus, Plus, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { BorderBeam } from "border-beam";
-import type { ResumeData } from "@/lib/resume";
+import { DEFAULT_SECTION_ORDER, type ResumeData, type ResumeSectionId } from "@/lib/resume";
 import { Portal } from "@/components/profile/CareerReport";
 import { RESUME_TEMPLATES, type ResumeTemplateId } from "./data";
 
@@ -287,6 +287,70 @@ function ProfileBio({ resume, className, style }: { resume: ResumeData; classNam
   return <p data-field="profile:bio" className={className} style={style}>{resume.profile.bio.trim()}</p>;
 }
 
+const SECTION_LABEL: Record<ResumeSectionId, string> = {
+  education: "Education",
+  experience: "Professional Experiences",
+  skills: "Skills & Interest",
+  certifications: "Certifications",
+};
+
+/** A section's raw-text override (Edit Sections panel), rendered plain --
+ *  no per-entry structure to lean on once a student has hand-edited it. */
+function SectionOverrideText({ text }: { text: string }) {
+  return <p className="text-[13px] leading-[19px] whitespace-pre-wrap" style={{ color: "var(--ink-soft)" }}>{text}</p>;
+}
+
+/** `group` is the fixed subset of sections a given layout slot can show
+ *  (e.g. Sidebar's aside only ever holds skills/certifications); `order`
+ *  reorders within that subset, `hidden` drops entries from it. Falls back
+ *  to the default order wherever a version predates this feature or an
+ *  override array is malformed. */
+function orderedGroup(group: ResumeSectionId[], order?: ResumeSectionId[], hidden?: ResumeSectionId[]): ResumeSectionId[] {
+  const seq = order && order.length === DEFAULT_SECTION_ORDER.length ? order : DEFAULT_SECTION_ORDER;
+  return seq.filter((id) => group.includes(id) && !(hidden ?? []).includes(id));
+}
+
+type SectionRenderOpts = {
+  resume: ResumeData;
+  placeholders?: boolean;
+  hasSkills: boolean;
+  overrides?: Partial<Record<ResumeSectionId, string>>;
+  variant?: "rule" | "bar" | "plain";
+  tight?: boolean;
+  stacked?: boolean;
+  gap?: string;
+};
+
+/** Builds one section's JSX -- shared by every layout below so the
+ *  hide/reorder/raw-override behavior from the Edit Sections panel can't
+ *  drift between them. Returns null exactly where the old hardcoded
+ *  `{condition && <section>...}` checks did. */
+function buildSectionNode(id: ResumeSectionId, opts: SectionRenderOpts): ReactNode {
+  const { resume, placeholders, hasSkills, overrides, variant = "rule", tight, stacked, gap = "14px" } = opts;
+  const override = overrides?.[id];
+  const hasContent = id === "education" ? resume.education.length > 0 : id === "experience" ? resume.experience.length > 0 : id === "skills" ? hasSkills : resume.certifications.length > 0;
+  if (!hasContent && !placeholders && !override) return null;
+  const body = override ? (
+    <SectionOverrideText text={override} />
+  ) : id === "education" ? (
+    resume.education.length > 0 ? <EducationEntries resume={resume} tight={tight} /> : <EmptyHint />
+  ) : id === "experience" ? (
+    resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />
+  ) : id === "skills" ? (
+    hasSkills ? <SkillsBlock resume={resume} stacked={stacked} /> : <EmptyHint />
+  ) : resume.certifications.length > 0 ? (
+    <CertificationEntries resume={resume} tight={tight} />
+  ) : (
+    <EmptyHint />
+  );
+  return (
+    <section key={id} data-section={id} className="flex flex-col" style={{ gap }}>
+      <SectionLabel variant={variant}>{SECTION_LABEL[id]}</SectionLabel>
+      {body}
+    </section>
+  );
+}
+
 // ---- Layouts -- same underlying content, four different arrangements. ----
 
 /** Nothing typed yet, but this is the empty resume's own "you are here"
@@ -300,8 +364,12 @@ function EmptyHint() {
   return <p className="text-[12.5px] italic" style={{ color: "var(--ink-faint)" }}>Nothing added yet</p>;
 }
 
-function SingleColumnLayout({ resume, placeholders }: { resume: ResumeData; placeholders?: boolean }) {
+type LayoutProps = { resume: ResumeData; placeholders?: boolean; sectionOrder?: ResumeSectionId[]; hiddenSections?: ResumeSectionId[]; sectionOverrides?: Partial<Record<ResumeSectionId, string>> };
+
+function SingleColumnLayout({ resume, placeholders, sectionOrder, hiddenSections, sectionOverrides }: LayoutProps) {
   const hasSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0;
+  const order = orderedGroup(["education", "experience", "skills", "certifications"], sectionOrder, hiddenSections);
+  const opts = { resume, placeholders, hasSkills, overrides: sectionOverrides, gap: "14px" };
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col items-center text-center">
@@ -310,17 +378,18 @@ function SingleColumnLayout({ resume, placeholders }: { resume: ResumeData; plac
         <ProfileBio resume={resume} className="mt-[14px] max-w-[560px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
       </header>
       <div className="mt-[28px] flex flex-col gap-[24px]">
-        {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel>Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel>Professional Experiences</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel>Skills & Interest</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[14px]"><SectionLabel>Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
+        {order.map((id) => buildSectionNode(id, opts))}
       </div>
     </>
   );
 }
 
-function SidebarLayout({ resume, placeholders }: { resume: ResumeData; placeholders?: boolean }) {
+function SidebarLayout({ resume, placeholders, sectionOrder, hiddenSections, sectionOverrides }: LayoutProps) {
   const hasSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0;
+  const asideOrder = orderedGroup(["skills", "certifications"], sectionOrder, hiddenSections);
+  const mainOrder = orderedGroup(["education", "experience"], sectionOrder, hiddenSections);
+  const asideOpts = { resume, placeholders, hasSkills, overrides: sectionOverrides, variant: "plain" as const, tight: true, stacked: true, gap: "8px" };
+  const mainOpts = { resume, placeholders, hasSkills, overrides: sectionOverrides, gap: "12px" };
   return (
     <div className="flex gap-[28px]">
       <aside data-section="profile" className="flex w-[210px] flex-none flex-col gap-[22px] rounded-[8px] p-[16px]" style={{ background: "var(--accent-tint)" }}>
@@ -341,20 +410,20 @@ function SidebarLayout({ resume, placeholders }: { resume: ResumeData; placehold
             <span>City, State</span>
           </div>
         ) : null}
-        {(hasSkills || placeholders) && <div data-section="skills" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Skills & Interest</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} stacked /> : <EmptyHint />}</div>}
-        {(resume.certifications.length > 0 || placeholders) && <div data-section="certifications" className="flex flex-col gap-[8px]"><SectionLabel variant="plain">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} tight /> : <EmptyHint />}</div>}
+        {asideOrder.map((id) => buildSectionNode(id, asideOpts))}
       </aside>
       <div className="flex min-w-0 flex-1 flex-col gap-[22px]">
         <ProfileBio resume={resume} className="text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
-        {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel>Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel>Professional Experiences</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
+        {mainOrder.map((id) => buildSectionNode(id, mainOpts))}
       </div>
     </div>
   );
 }
 
-function MinimalLayout({ resume, placeholders }: { resume: ResumeData; placeholders?: boolean }) {
+function MinimalLayout({ resume, placeholders, sectionOrder, hiddenSections, sectionOverrides }: LayoutProps) {
   const hasSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0;
+  const order = orderedGroup(["education", "experience", "skills", "certifications"], sectionOrder, hiddenSections);
+  const opts = { resume, placeholders, hasSkills, overrides: sectionOverrides, variant: "plain" as const, gap: "14px" };
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col items-start text-left">
@@ -363,17 +432,16 @@ function MinimalLayout({ resume, placeholders }: { resume: ResumeData; placehold
         <ProfileBio resume={resume} className="mt-[14px] max-w-[560px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
       </header>
       <div className="mt-[32px] flex flex-col gap-[28px]">
-        {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Professional Experiences</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Skills & Interest</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[14px]"><SectionLabel variant="plain">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
+        {order.map((id) => buildSectionNode(id, opts))}
       </div>
     </>
   );
 }
 
-function BannerLayout({ resume, placeholders }: { resume: ResumeData; placeholders?: boolean }) {
+function BannerLayout({ resume, placeholders, sectionOrder, hiddenSections, sectionOverrides }: LayoutProps) {
   const hasSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0;
+  const order = orderedGroup(["education", "experience", "skills", "certifications"], sectionOrder, hiddenSections);
+  const opts = { resume, placeholders, hasSkills, overrides: sectionOverrides, variant: "bar" as const, gap: "12px" };
   return (
     <>
       <header data-print-keep data-section="profile" className="flex flex-col gap-[4px]">
@@ -383,21 +451,19 @@ function BannerLayout({ resume, placeholders }: { resume: ResumeData; placeholde
         <ProfileBio resume={resume} className="mt-[10px] max-w-[600px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }} />
       </header>
       <div className="mt-[24px] flex flex-col gap-[24px]">
-        {(resume.education.length > 0 || placeholders) && <section data-section="education" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Education</SectionLabel>{resume.education.length > 0 ? <EducationEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.experience.length > 0 || placeholders) && <section data-section="experience" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Professional Experiences</SectionLabel>{resume.experience.length > 0 ? <ExperienceEntries resume={resume} /> : <EmptyHint />}</section>}
-        {(hasSkills || placeholders) && <section data-section="skills" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Skills & Interest</SectionLabel>{hasSkills ? <SkillsBlock resume={resume} /> : <EmptyHint />}</section>}
-        {(resume.certifications.length > 0 || placeholders) && <section data-section="certifications" className="flex flex-col gap-[12px]"><SectionLabel variant="bar">Certifications</SectionLabel>{resume.certifications.length > 0 ? <CertificationEntries resume={resume} /> : <EmptyHint />}</section>}
+        {order.map((id) => buildSectionNode(id, opts))}
       </div>
     </>
   );
 }
 
-function ResumeSheetContent({ resume, templateId, placeholders }: { resume: ResumeData; templateId: string; placeholders?: boolean }) {
+function ResumeSheetContent({ resume, templateId, placeholders, sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId: string; placeholders?: boolean } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
   const layout = templateFor(templateId).layout;
-  if (layout === "sidebar") return <SidebarLayout resume={resume} placeholders={placeholders} />;
-  if (layout === "minimal") return <MinimalLayout resume={resume} placeholders={placeholders} />;
-  if (layout === "banner") return <BannerLayout resume={resume} placeholders={placeholders} />;
-  return <SingleColumnLayout resume={resume} placeholders={placeholders} />;
+  const props = { resume, placeholders, sectionOrder, hiddenSections, sectionOverrides };
+  if (layout === "sidebar") return <SidebarLayout {...props} />;
+  if (layout === "minimal") return <MinimalLayout {...props} />;
+  if (layout === "banner") return <BannerLayout {...props} />;
+  return <SingleColumnLayout {...props} />;
 }
 
 type ContentZoom = { scale: number; tx: number; ty: number };
@@ -454,7 +520,7 @@ function measureTextExtent(root: HTMLElement): { left: number; right: number } |
  *  across steps in either direction (no more resetting on every section
  *  change, which is what made the old manual toggle feel like it didn't
  *  actually work as a preference). */
-function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }: { resume: ResumeData; templateId: string; cropped?: boolean; focusSection?: string | null; activeField?: string | null }) {
+function ScaledSheet({ resume, templateId, cropped, focusSection, activeField, sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId: string; cropped?: boolean; focusSection?: string | null; activeField?: string | null } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
@@ -631,7 +697,7 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
             WebkitFontSmoothing: "antialiased",
           }}
         >
-          <ResumeSheetContent resume={resume} templateId={templateId} placeholders={cropped} />
+          <ResumeSheetContent resume={resume} templateId={templateId} placeholders={cropped} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
         </div>
         {/* An SVG turbulence+displacement "glass" layer was tried here
            three times over (14-15 Sept 2026) -- backdrop-filter: url(...)
@@ -702,16 +768,16 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
   );
 }
 
-export function ResumeDocument({ resume, templateId = "classic", cropped, focusSection, activeField }: { resume: ResumeData; templateId?: string | ResumeTemplateId; cropped?: boolean; focusSection?: string | null; activeField?: string | null }) {
+export function ResumeDocument({ resume, templateId = "classic", cropped, focusSection, activeField, sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId?: string | ResumeTemplateId; cropped?: boolean; focusSection?: string | null; activeField?: string | null } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
   return (
     <>
-      <ScaledSheet resume={resume} templateId={templateId} cropped={cropped} focusSection={focusSection} activeField={activeField} />
+      <ScaledSheet resume={resume} templateId={templateId} cropped={cropped} focusSection={focusSection} activeField={activeField} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
       {/* Print gets its own natural-flow copy -- the scaled screen version
          is a fixed 1-page box (print:hidden above), but a resume longer
          than one page needs to paginate through the browser's own @page
          rule (app.css) instead of being clipped to that box. */}
       <article data-doc="resume-print" className="dm-report hidden rounded-[var(--radius-lg)] p-[var(--space-8)] print:block" style={paperStyle(templateId)}>
-        <ResumeSheetContent resume={resume} templateId={templateId} />
+        <ResumeSheetContent resume={resume} templateId={templateId} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
       </article>
     </>
   );
@@ -726,7 +792,7 @@ const ZOOM_MAX = 200;
  *  Reuses ScaledSheet's own container-width scaling: at 100% the container
  *  is exactly PAGE_WIDTH (true actual size on screen), so +/- just changes
  *  how much of that real size the container claims. */
-export function ZoomResumeButton({ resume, templateId, title }: { resume: ResumeData; templateId?: string | ResumeTemplateId; title: string }) {
+export function ZoomResumeButton({ resume, templateId, title, sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId?: string | ResumeTemplateId; title: string } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
   const [open, setOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
 
@@ -763,7 +829,7 @@ export function ZoomResumeButton({ resume, templateId, title }: { resume: Resume
             </div>
             <div className="flex-1 overflow-auto px-8 pb-8">
               <div className="mx-auto" style={{ width: Math.round(PAGE_WIDTH * (zoom / 100)) }}>
-                <ResumeDocument resume={resume} templateId={templateId} />
+                <ResumeDocument resume={resume} templateId={templateId} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
               </div>
             </div>
           </div>
