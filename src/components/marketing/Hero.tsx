@@ -75,7 +75,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
          the scroll hint and Dreamy at the bezel, which reads as his airspace —
          and he's visibly holding the bottom of it the whole time it scrolls by. */}
       <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-start">
-        <div className="mb-[18px] flex justify-center [@media(max-height:600px)]:mb-2">
+        <div className="mb-[26px] flex justify-center [@media(max-height:600px)]:mb-2">
           <AudienceToggle view={view} onChange={onChangeView} />
         </div>
         <div
@@ -98,20 +98,17 @@ export function Hero({ view, onChangeView }: HeroProps) {
              ACTUAL rendered width, keeping every line a reasonably even
              length instead of stranding a lone short word (a widow). */}
           <p
-            className="mt-3 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
+            className="mt-4 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)", textWrap: "balance" }}
           >
             Discover careers, find your path, experience the work, and connect with professionals who do it every day.
           </p>
-          {/* Its own SMALLER line underneath, per direct feedback -- the
-             tagline reads as a quiet signature under the pitch, not a
-             second sentence competing with it. */}
-          <p
-            className="mt-2 max-w-[580px] text-[clamp(13px,0.6vw+10px,15px)] font-bold tracking-[0.08em] uppercase [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[11px]"
-            style={{ color: "var(--foreground)" }}
-          >
-            Build. Match. Explore. Play. Connect.
-          </p>
+          {/* "Build. Match. Explore. Play. Connect." removed (16 Sept 2026,
+             direct decision): the next section already introduces these five
+             words and what each means, and the closing section brings them
+             back in the same styling -- repeating them a third time here,
+             before either has been explained, added a line without adding
+             information. */}
           {/* Single CTA per direct feedback — the ghost "See how it works" button is
              gone; the scroll hint below already covers "there's more to see." */}
           {/* The site's single most important CTA (first thing every visitor
@@ -121,7 +118,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
              (direct feedback, 9 Sept 2026: beam candidates "even on the
              landing page"). Same 3.5s family as everywhere else, full
              strength. */}
-          <div className="mt-5 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-2">
+          <div className="mt-8 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-3">
             <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={1} brightness={1.8}>
               <MarketingButton href="/flow" variant="primary" size="lg">
                 Start Journey
