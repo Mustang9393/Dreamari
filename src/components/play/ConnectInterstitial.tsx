@@ -425,7 +425,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
                           <form className={styles.commentForm} onSubmit={postComment}>
                             <label className="sr-only" htmlFor="connect-comment">Your comment</label>
                             <textarea id="connect-comment" required maxLength={200} rows={2} placeholder="Add a comment…" value={draft} onChange={(event) => setDraft(event.target.value)} />
-                            <button className={styles.primary} type="submit">Post</button>
+                            <button className={styles.primary} type="submit" disabled={!draft.trim()}>Post</button>
                           </form>
                         )}
                       </div>
