@@ -670,7 +670,7 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
               aria-label="Stop following -- show the whole page"
               title="Stop following -- show the whole page"
               onClick={() => setFollowMe(false)}
-              className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[7px] text-[12px] font-bold"
+              className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[7px] text-[12px] font-bold"
               style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)", color: "var(--foreground)" }}
             >
               <Expand className="h-3.5 w-3.5" aria-hidden /> Fit to Screen
@@ -689,7 +689,7 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField }:
                 aria-label="Follow Me -- zoom in on whatever you're editing"
                 title="Follow Me -- zoom in on whatever you're editing"
                 onClick={() => setFollowMe(true)}
-                className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[7px] text-[12px] font-bold"
+                className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[7px] text-[12px] font-bold"
                 style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)", color: "var(--foreground)" }}
               >
                 <Sparkles className="h-3.5 w-3.5" aria-hidden /> Follow Me

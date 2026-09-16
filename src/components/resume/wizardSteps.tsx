@@ -362,7 +362,7 @@ function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSa
               key={s}
               type="button"
               onClick={() => toggle(s)}
-              className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-full border px-[var(--space-4)] py-[8px] text-[13.5px] font-bold"
+              className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[8px] text-[13.5px] font-bold"
               style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "#fff" } : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}
             >
               {on && <Check className="h-3.5 w-3.5" aria-hidden />}
@@ -440,7 +440,7 @@ export function SkillsStep({ resume, onNext, onSubDreamy }: { resume: ResumeData
                 <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{cat.label}{values.length > 0 ? ` (${values.length})` : ""}</span>
                 <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{cat.hint}</span>
               </div>
-              <button type="button" onClick={() => setOpen(cat.key)} className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-full border px-[var(--space-3)] py-[6px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>
+              <button type="button" onClick={() => setOpen(cat.key)} className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[6px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--accent-subtle)" }}>
                 <Plus className="h-3.5 w-3.5" aria-hidden /> Add
               </button>
             </div>

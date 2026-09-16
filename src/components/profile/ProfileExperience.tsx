@@ -12,6 +12,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
+import { motion } from "framer-motion";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
 import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
@@ -666,11 +667,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
               className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
-              style={{ background: tab === item.id ? "var(--primary)" : "transparent", color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)", ["--ink" as string]: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
+              style={{ color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)", ["--ink" as string]: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
+              {tab === item.id && (
+                <motion.span
+                  layoutId="profile-tab-pill"
+                  className="absolute inset-0 rounded-[var(--radius-md)]"
+                  style={{ background: "var(--primary)" }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                />
+              )}
               {/* "content changed" cue: the light passes through the letters
                  only, never the pill's padding (direct feedback, 4 Sept 2026) */}
-              <span className={pings[item.id] ? "profile-tab-ping-text" : undefined}>{item.label}</span>
+              <span className={`relative ${pings[item.id] ? "profile-tab-ping-text" : ""}`}>{item.label}</span>
             </button>
           ))}
         </div>

@@ -38,7 +38,7 @@ function SuggestionRow({ suggestion, added, onAdd }: { suggestion: SkillSuggesti
         type="button"
         onClick={onAdd}
         disabled={added}
-        className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-full border px-[12px] py-[6px] text-[12.5px] font-bold disabled:cursor-default"
+        className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[12px] py-[6px] text-[12.5px] font-bold disabled:cursor-default"
         style={added ? { borderColor: "var(--world-food-farming-nature, #3aa66b)", color: "var(--world-food-farming-nature, #3aa66b)", background: "color-mix(in srgb, var(--world-food-farming-nature, #3aa66b) 12%, transparent)" } : { borderColor: "var(--primary)", color: "var(--primary)" }}
       >
         {added ? <><Check className="h-3.5 w-3.5" aria-hidden /> Added</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Add</>}
