@@ -514,7 +514,7 @@ export function QrSheet({ name, seed, accent, lead, partner, onClose }: { name: 
   }, [onClose]);
   const lit = `color-mix(in srgb, ${accent} 62%, #ffffff)`;
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label={`${name} QR code`} className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-5)]" style={{ background: "rgba(5,8,20,0.9)" }} onClick={onClose}>
+    <div role="dialog" aria-modal="true" aria-label={`${name} QR code`} className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-5)] backdrop-blur-[16px]" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }} onClick={onClose}>
       <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet absolute top-[var(--space-4)] right-[var(--space-4)] flex size-10 cursor-pointer items-center justify-center rounded-full border" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.24)", color: "#fff" }}>
         <X className="h-5 w-5" />
       </button>

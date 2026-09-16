@@ -3,9 +3,10 @@
 import Image from "next/image";
 import { SparkBar } from "@/components/flow/SparkBar";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Briefcase, ChevronLeft, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { ChevronRight, Briefcase, ChevronLeft, FastForward, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { WORLD_COLORS } from "@/components/app/worlds";
 
@@ -49,11 +50,19 @@ import {
 import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER, TIER_STRIKES, bandFor, clamp, endingFor } from "./scoring";
 import { SKILL_MEANING } from "./skills";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type Level, type Mood, type Simulation, type Tier } from "./types";
+import { ConnectInterstitial } from "./ConnectInterstitial";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
 // works: the art is the room, the box is the voice, and the choices are the
 // only thing you can do. Everything about WHAT happens lives in the level data;
 // this file only knows how a beat is staged and how reputation moves.
+
+// Demo switch: a HUD button that jumps straight to the Connect interstitial
+// without replaying a level (direct instruction, 17 Sept 2026: "add a back
+// button or replay thing so we can QA without going back so many steps to
+// launch this"). Same pattern as WelcomeSplash's DEMO_ALWAYS_SHOW_SPLASH.
+// Flip back to false before this ships to students.
+export const DEMO_CONNECT_SHORTCUT = true;
 
 type Phase = "beat" | "feedback" | "ending";
 
@@ -66,6 +75,11 @@ type Result = { tier: Tier; why: string; delta: number };
 const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket"]);
 
 export function SimulationPlayer({ simulation, level }: { simulation: Simulation; level: Level }) {
+  const router = useRouter();
+  // Opens on "Start Level N" instead of navigating straight there -- one
+  // real Connect interaction (Like/Comment/Ask a professional, always
+  // skippable) between levels, direct instruction 17 Sept 2026.
+  const [connectOpen, setConnectOpen] = useState(false);
   // Express runs save in their own slot (n + 100): the trimmed beats array
   // indexes differently, so resuming a full-mode save mid-Express (or vice
   // versa) would land on the wrong beat.
@@ -355,6 +369,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     setStrikes(0);
     setPipUsed(false);
     setReputationBaseline(START_REPUTATION);
+    setConnectOpen(false);
   };
 
   /** Replay only the beats that went wrong. */
@@ -365,12 +380,14 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     setLocked(null);
     setResult(null);
     setPhase("beat");
+    setConnectOpen(false);
     const to = level.beats.findIndex((entry) => entry.id === queue[0]);
     patchRun({ index: to });
   };
 
   const band = bandFor(reputation);
   const ending = endingFor(level.endings, reputation);
+  const nextLevel = simulation.levels.find((entry) => entry.n === level.n + 1);
 
   // Music: the Main Song runs for the whole level, switching to the
   // Promotion Song only once an ending actually advances the player --
@@ -598,6 +615,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         accent={accent}
         spotlightScore={beat.spotlight === "score"}
         onBack={index > 0 ? goBack : undefined}
+        onOpenConnect={DEMO_CONNECT_SHORTCUT && nextLevel ? () => setConnectOpen(true) : undefined}
       />
 
       {pip ? (
@@ -633,8 +651,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             reputation={reputation}
             band={band}
             simulation={simulation}
-            next={simulation.levels.find((entry) => entry.n === level.n + 1)}
+            next={nextLevel}
             misses={misses.length}
+            onAdvance={() => setConnectOpen(true)}
             onRepair={startRepair}
             onReplay={restart}
           />
@@ -665,6 +684,17 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
       {phase === "feedback" && result && (
         <FeedbackSheet beat={beat} result={result} reputation={reputation} onNext={advance} />
+      )}
+
+      {/* Rendered outside the phase branches so the demo shortcut (Hud's
+         FastForward button) can force it open from any beat, not only from
+         the ending screen it normally opens from. */}
+      {connectOpen && nextLevel && (
+        <ConnectInterstitial
+          simulation={simulation}
+          nextLevelLabel={`Level ${nextLevel.n} · ${nextLevel.role}`}
+          onContinue={() => router.push(`/play/${simulation.id}?level=${nextLevel.n}`)}
+        />
       )}
 
       {repair && repair.length > 0 && phase === "beat" && (
@@ -1930,6 +1960,7 @@ function Hud({
   accent,
   spotlightScore = false,
   onBack,
+  onOpenConnect,
 }: {
   simulation: Simulation;
   level: Level;
@@ -1944,6 +1975,9 @@ function Hud({
   /** Steps back one beat. Undefined on the level's first beat, where there is
    *  nowhere within the run to go back to. */
   onBack?: () => void;
+  /** Demo-only: jumps straight to the Connect interstitial. Undefined when
+   *  the shortcut is off or there's no next level to connect into. */
+  onOpenConnect?: () => void;
 }) {
   return (
     <header className="relative z-20 flex flex-none flex-col gap-[8px] px-3 pt-3 sm:px-5 sm:pt-4">
@@ -1982,6 +2016,18 @@ function Hud({
           </span>
         </span>
         <span className="flex flex-none items-center gap-[6px]">
+          {onOpenConnect && (
+            <button
+              type="button"
+              onClick={onOpenConnect}
+              aria-label="Demo: jump to Connect interstitial"
+              title="Demo: jump to Connect"
+              className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+              style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--accent-subtle)" }}
+            >
+              <FastForward className="h-[15px] w-[15px]" aria-hidden />
+            </button>
+          )}
           <MusicToggle />
           <MuteToggle />
         </span>
@@ -2227,6 +2273,7 @@ function EndingCard({
   simulation,
   next,
   misses,
+  onAdvance,
   onRepair,
   onReplay,
 }: {
@@ -2238,6 +2285,8 @@ function EndingCard({
   next?: Level;
   /** How many beats went wrong, so they can be offered as a repair round. */
   misses: number;
+  /** Opens the Connect interstitial instead of navigating straight there. */
+  onAdvance: () => void;
   onRepair: () => void;
   onReplay: () => void;
 }) {
@@ -2267,14 +2316,15 @@ function EndingCard({
       </p>
       <div className="mt-[var(--space-1)] flex w-full flex-col gap-[8px]">
         {ending.advances && next ? (
-          <Link
-            href={`/play/${simulation.id}?level=${next.n}`}
+          <button
+            type="button"
+            onClick={onAdvance}
             className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             Start Level {next.n} · {next.role}
             <ChevronRight className="h-[17px] w-[17px]" aria-hidden />
-          </Link>
+          </button>
         ) : ending.advances ? (
           <span
             className="flex w-full items-center justify-center gap-[8px] rounded-[var(--radius-sm)] px-[18px] py-[13px] text-[16px] font-extrabold opacity-55"

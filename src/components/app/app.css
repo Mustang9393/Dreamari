@@ -512,4 +512,20 @@ html.light .dm-report {
   45% { color: var(--muted-foreground); text-shadow: none; transform: translateY(0); }
 }
 .dm-tab-nudge { animation: dm-tab-nudge 2200ms ease-in-out both; }
+
+/* WelcomeSplash's own title-shimmer (WelcomeSplash.module.css .title),
+   generalized to any accent via --shimmer-tint so it can be reused outside
+   that component (ConnectInterstitial's intro/badge headlines) instead of
+   each cinematic screen reinventing its own sweep. */
+.dm-title-shimmer {
+  background:
+    linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, .85) 50%, transparent 58%) no-repeat -160% 0 / 60% 100%,
+    linear-gradient(165deg, var(--foreground) 25%, color-mix(in srgb, var(--shimmer-tint, var(--color-brand-500)) 34%, var(--foreground)) 90%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 6px 40px color-mix(in srgb, var(--shimmer-tint, var(--color-brand-500)) 22%, transparent);
+  animation: dm-title-sweep 2.4s ease-out 1;
+}
+@keyframes dm-title-sweep { from { background-position: -160% 0, 0 0; } to { background-position: 260% 0, 0 0; } }
+@media (prefers-reduced-motion: reduce) { .dm-title-shimmer { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .dm-tab-nudge { animation: none; } }

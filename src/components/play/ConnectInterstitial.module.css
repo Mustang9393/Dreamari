@@ -1,0 +1,158 @@
+/* Compact and single-column, matching the actual Replit reference's own
+   proportions (confirmed live, 17 Sept 2026) rather than a wide two-panel
+   layout -- this is a brief stop inside Play's own flow, not a separate
+   screen, so it stays modest and lets the scene behind it read through. */
+.overlay { position: fixed; inset: 0; z-index: 85; display: grid; place-items: center; padding: 20px; color: var(--foreground); background: transparent; }
+.backdrop {
+  position: absolute; inset: 0; border: none; cursor: default;
+  /* Dims the game scene -- never a solid/near-opaque fill (direct feedback,
+     17 Sept 2026, repeated: "the background cannot go black", "these all
+     blacked out opaque backgrounds when modals popup"). The blur itself is
+     a Tailwind utility on the element (see the component) -- Lightning CSS
+     strips a hand-authored `backdrop-filter` from a CSS-module rule. */
+  background: color-mix(in srgb, var(--background) 34%, transparent);
+}
+.dialog {
+  position: relative; width: min(640px, 100%); max-height: calc(100dvh - 40px);
+  display: flex; flex-direction: column;
+  border: 1px solid var(--color-glass-border-raised); border-radius: var(--radius-xl);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--connect-accent) 9%, transparent), transparent 55%), color-mix(in srgb, var(--background) 92%, transparent);
+  box-shadow: 0 34px 100px -26px rgba(0, 0, 0, 0.75), 0 0 70px -18px color-mix(in srgb, var(--connect-accent) 48%, transparent);
+  overflow: hidden; outline: none;
+}
+.dialog button { cursor: pointer; }
+.dialog button:focus-visible { outline: 2px solid var(--connect-accent); outline-offset: 3px; }
+/* No hard rectangle on a textarea's own focus -- direct feedback, 17 Sept
+   2026: "the rectangle yellow focus state on the ask a question text
+   input... sucks." Its containing card (InlineAsk's own bordered/beamed
+   box, or this file's .commentForm textarea border) already reads as
+   active; a second outline on top of that just doubled up. */
+.dialog textarea:focus-visible { outline: none; box-shadow: none; }
+.commentForm textarea:focus-visible { border-color: color-mix(in srgb, var(--connect-accent) 55%, var(--color-glass-border-raised)); }
+
+.toolbar { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--glass-border); flex: none; }
+.iconButton { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex: none; border-radius: var(--radius-md); color: var(--foreground); }
+.iconButton:hover { background: var(--glass-surface-1); }
+.xp { position: relative; display: flex; align-items: center; gap: 8px; color: var(--connect-accent); font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.chainMeter { width: 64px; margin-left: 4px; }
+.skip { margin-left: auto; min-height: 36px; padding: 0 10px; font-size: 13.5px; font-weight: 650; color: var(--muted-foreground); }
+.skip:hover { color: var(--foreground); }
+
+.content { flex: 1; min-height: 0; overflow-y: auto; padding: 30px 32px 32px; }
+
+/* A contained hero -- glow + Dreamy -- sized for this dialog, not a full
+   panel (see the HeroGlow component). */
+.hero { position: relative; display: flex; justify-content: center; height: 84px; margin-bottom: 6px; }
+.heroGlow { position: absolute; top: -38px; width: 260px; height: 180px; pointer-events: none; }
+.heroDreamy { position: relative; }
+.heroDreamy img { display: block; width: 136px; height: auto; filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35)); }
+
+.heading { text-align: center; }
+.heading h1 { font: 800 clamp(26px, 4.6vw, 32px)/1.12 var(--font-display); letter-spacing: -.03em; }
+.heading > p { font-size: 14.5px; line-height: 1.5; color: var(--muted-foreground); margin: 8px 0 0; }
+.requirement { margin-top: 10px; font-size: 12.5px; font-weight: 650; color: var(--connect-accent); }
+
+.menu { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+.menuRow {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  padding: 16px 18px; border: 1px solid var(--color-glass-border-raised); border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--background) 88%, transparent); transition: border-color .15s, background .15s, transform .15s;
+}
+.menuRow:hover { border-color: color-mix(in srgb, var(--connect-accent) 45%, var(--color-glass-border-raised)); background: color-mix(in srgb, var(--connect-accent) 6%, var(--background)); transform: translateY(-1px); }
+.menuRow > svg:first-child { color: var(--connect-accent); flex: none; }
+.menuRow > span { flex: 1; min-width: 0; }
+.menuRow strong { display: block; font-size: 15.5px; font-weight: 700; }
+.menuRow small { display: block; font-size: 12.5px; color: var(--muted-foreground); margin-top: 3px; }
+.menuRow > b { flex: none; color: var(--connect-accent); font-size: 12.5px; font-weight: 800; }
+
+.tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--background) 85%, transparent); border: 1px solid var(--glass-border); margin-bottom: 20px; }
+.tabs button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; border-radius: 999px; font-size: 13.5px; font-weight: 700; color: var(--muted-foreground); }
+.tabs button[aria-pressed="true"] { background: var(--connect-accent); color: #05070f; }
+.tabs svg { color: currentColor; }
+
+.author { display: flex; align-items: center; gap: 12px; }
+.author > div { min-width: 0; flex: 1; }
+.author strong { display: flex; align-items: center; gap: 6px; font-size: 15px; }
+.author svg { color: var(--connect-accent); flex: none; }
+.author small { display: block; color: var(--muted-foreground); font-size: 12px; margin-top: 2px; }
+.quote { font-size: 17px; line-height: 1.55; margin: 16px 0 12px; }
+.postMeta { display: flex; gap: 16px; margin-bottom: 18px; font-size: 12.5px; color: var(--muted-foreground); }
+.postMeta span { display: inline-flex; align-items: center; gap: 5px; }
+
+.content > div > .primary,
+.post > .primary,
+.commentForm .primary { width: 100%; }
+.primary {
+  display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 18px; min-height: 46px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--connect-accent), color-mix(in srgb, var(--connect-accent) 55%, white));
+  color: #05070f; font-size: 14.5px; font-weight: 750; flex-shrink: 0; width: 100%;
+  box-shadow: 0 12px 28px -12px color-mix(in srgb, var(--connect-accent) 65%, transparent);
+}
+.primary:hover { filter: brightness(1.08); }
+.primary:disabled { opacity: 0.55; cursor: default; box-shadow: none; }
+.textButton { display: inline-flex; justify-content: center; align-items: center; gap: 6px; min-height: 40px; color: var(--muted-foreground); font-size: 13.5px; font-weight: 650; }
+.textButton:hover { color: var(--connect-accent); }
+
+.commentForm { display: flex; flex-direction: column; gap: 10px; }
+.commentForm textarea { min-width: 0; resize: vertical; padding: 11px 13px; font-size: 14.5px; border: 1px solid var(--color-glass-border-raised); border-radius: var(--radius-md); background: var(--glass-surface-1); color: var(--foreground); }
+.commentForm textarea::placeholder { color: var(--muted-foreground); }
+.savedComment { display: flex; align-items: flex-start; gap: 10px; padding: 13px; background: var(--glass-surface-1); border-radius: var(--radius-md); font-size: 14px; }
+.savedComment strong { display: flex; align-items: baseline; gap: 6px; font-size: 13px; }
+.savedComment strong small { font-size: 11.5px; font-weight: 600; color: var(--muted-foreground); }
+.savedComment p { margin-top: 3px; overflow-wrap: anywhere; }
+
+/* A real board card (photo, name, real counts) so asking here feels like
+   landing on the actual Finance Careers board, not a text label (direct
+   feedback, 17 Sept 2026: "show something from the finance community
+   board... make it feel as if I'm typing on that actual community board"). */
+.board { position: relative; height: 128px; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 16px; flex: none; }
+.boardPhoto { object-fit: cover; }
+.boardScrim { position: absolute; inset: 0; }
+.boardInfo { position: absolute; inset-inline: 16px; bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+.boardInfo strong { font: 700 17px/1.2 var(--font-display); color: #f6f5fb; }
+.boardInfo span { font-size: 11.5px; font-weight: 600; color: rgba(246, 245, 251, 0.8); }
+.boardLogos { display: flex; flex-direction: row; gap: 6px; margin-top: 2px; }
+.askComposer { border-radius: var(--radius-lg); overflow: hidden; }
+
+.match p:first-child { font-size: 12.5px; color: var(--muted-foreground); margin-bottom: 5px; }
+.match h2 { font: 700 18.5px/1.35 var(--font-display); margin-bottom: 11px; }
+.match .author { margin: 13px 0 9px; }
+.match > p { font-size: 14.5px; line-height: 1.5; color: var(--muted-foreground); }
+.matchActions { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.posted { padding: 8px 0 4px; text-align: center; }
+.posted svg { color: var(--connect-accent); margin-bottom: 11px; }
+.posted p { font-size: 16px; font-weight: 650; overflow-wrap: anywhere; }
+.posted small { display: block; margin-top: 9px; color: var(--muted-foreground); font-size: 13px; }
+
+.connected { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 14px 0 4px; }
+.check { position: relative; display: grid; place-items: center; width: 68px; height: 68px; border-radius: 999px; background: color-mix(in srgb, var(--connect-accent) 18%, transparent); color: var(--connect-accent); margin-bottom: 8px; }
+.connected h2 { font: 750 23px/1.2 var(--font-display); }
+.connected > p { font-size: 14.5px; color: var(--muted-foreground); margin-top: 4px; }
+.combo {
+  display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .04em;
+  color: #c084fc; background: color-mix(in srgb, #c084fc 16%, transparent); border: 1px solid color-mix(in srgb, #c084fc 40%, transparent);
+}
+.gain { display: block; margin-top: 10px; font: 800 32px/1.2 var(--font-display); color: var(--connect-accent); }
+.connected small { display: block; margin-top: 6px; color: var(--muted-foreground); font-size: 12.5px; }
+.connectedActions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: 100%; margin-top: 24px; }
+.connectedActions > div { width: 100%; }
+
+.nextUp {
+  display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+  margin-top: 14px; padding: 11px 14px; border-radius: var(--radius-md);
+  border: 1px dashed color-mix(in srgb, var(--connect-accent) 45%, var(--color-glass-border-raised));
+  background: color-mix(in srgb, var(--connect-accent) 8%, transparent);
+  font-size: 13px; font-weight: 650; color: var(--foreground);
+}
+.nextUp b { color: var(--connect-accent); font-weight: 800; }
+.nextUp:hover { background: color-mix(in srgb, var(--connect-accent) 14%, transparent); }
+.continueFooter { margin-top: 16px; }
+
+.flight { position: fixed; z-index: 6; pointer-events: none; transform: translate(-50%, -50%); white-space: nowrap; text-align: center; font: 800 24px/1.3 var(--font-display); }
+.flight .combo { display: block; padding: 0; border: none; background: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; color: inherit; }
+
+@media (max-width: 480px) {
+  .overlay { padding: 10px; align-items: flex-end; }
+  .dialog { width: 100%; max-height: calc(100dvh - 20px); border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
+  .content { padding: 18px 18px 20px; }
+}

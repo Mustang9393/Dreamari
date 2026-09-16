@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, ShieldAlert, Trophy } from "lucide-react";
+import { ChevronLeft, FileText, ShieldAlert, Trophy } from "lucide-react";
 import Link from "next/link";
 
 import { Keycap } from "./interactions";
@@ -51,6 +51,33 @@ export function PerformancePlanFlow({
   // here. React's render pass has to stay pure, and Math.random is not.
   const order = pip.stepOrders[step];
 
+  // Internal back-stepper -- this sub-flow has no beat index of its own, so
+  // it can't reuse the level's goBack. Added for demos, so a step back
+  // through Performance Plan doesn't mean replaying the whole level (direct
+  // instruction, 17 Sept 2026: "a back button ... to go back one step in
+  // the game itself ... we need this for demos"). Nothing before "warning",
+  // so no back control shows there.
+  function stepBack() {
+    if (phase === "step") {
+      if (picked) {
+        setPicked(null);
+        return;
+      }
+      if (step > 0) {
+        setStep((s) => (s - 1) as 0 | 1 | 2);
+        return;
+      }
+      setPhase("warning");
+      return;
+    }
+    if (phase === "passed" || phase === "terminated") {
+      setPhase("step");
+      setStep(2);
+      setPicked(null);
+    }
+  }
+  const canStepBack = phase !== "warning";
+
   function pick(which: "correct" | "incorrect") {
     if (picked) return;
     setPicked(which);
@@ -97,6 +124,17 @@ export function PerformancePlanFlow({
                   : "radial-gradient(ellipse at 50% 30%, #3a0a10 0%, #1a0508 60%, #080304 100%)",
         }}
       />
+      {canStepBack && (
+        <button
+          type="button"
+          onClick={stepBack}
+          aria-label="Back to the previous screen"
+          className="dm-quiet fixed top-3 left-3 z-[2] flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px] sm:top-4 sm:left-5"
+          style={{ background: "rgba(10,3,6,0.55)", borderColor: "rgba(255,255,255,0.25)", color: "#F4F7FF" }}
+        >
+          <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
+        </button>
+      )}
       <div className="relative z-[1] flex w-full max-w-[480px] flex-col items-center gap-[var(--space-4)]">
         {phase === "warning" && (
           <WarningCard setup={plan.warningSetup} question={plan.warningQuestion} cta={plan.warningCta} onBegin={() => setPhase("step")} />

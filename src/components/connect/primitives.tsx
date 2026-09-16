@@ -236,14 +236,20 @@ export function InlineAsk({
   onPost,
   placeholder = "Ask this community anything…",
   accent = "var(--primary)",
+  defaultOpen = false,
 }: {
   joined: boolean;
   onRequireJoin?: () => void;
   onPost: (text: string) => void;
   placeholder?: string;
   accent?: string;
+  /** Skips the collapsed "tap to ask" pill and opens straight into the
+   *  textarea. Off by default (every existing feed call site wants the
+   *  compact collapsed row); a host that IS the ask moment, with nothing
+   *  else competing for that space, can open straight into it. */
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [text, setText] = useState("");
   const blocked = CONTACT_INFO.test(text);
   const submit = () => {

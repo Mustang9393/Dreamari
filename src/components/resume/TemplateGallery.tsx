@@ -115,7 +115,7 @@ export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId)
 
       {previewTemplate && (
         <Portal>
-          <div className="fixed inset-0 z-[150] flex flex-col" style={{ background: "rgba(8,10,18,0.94)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setPreviewing(null); }}>
+          <div className="fixed inset-0 z-[150] flex flex-col backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--color-night-background) 62%, transparent)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setPreviewing(null); }}>
             <div className="flex flex-none items-center justify-between px-5 py-4">
               <span className="text-[13px] font-bold tracking-[0.06em] text-white uppercase">{previewTemplate.label}</span>
               <button type="button" aria-label="Close" onClick={() => setPreviewing(null)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border border-white/20 text-white">

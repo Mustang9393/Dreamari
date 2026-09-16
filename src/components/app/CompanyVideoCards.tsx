@@ -218,8 +218,8 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
       role="dialog"
       aria-modal="true"
       aria-label={`${item.company}: ${item.title}`}
-      className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-4)]"
-      style={{ background: "rgba(5,8,20,0.94)" }}
+      className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-4)] backdrop-blur-[16px]"
+      style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }}
       onClick={onClose}
     >
       <div className="flex max-h-full w-full max-w-[420px] flex-col gap-[var(--space-3)]" onClick={(e) => e.stopPropagation()}>
