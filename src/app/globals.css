@@ -1080,6 +1080,15 @@ html.light .marketing-v2.themeable {
      file regardless of which page's bundle order wins that day. */
   --card: #ffffff !important;
   --border: #c9cddd !important;
+  /* AppBackdrop.tsx's own wash, boosted for light mode only -- see the
+     comment there. Dark mode never sets these, so it falls through to the
+     component's own literal defaults (50%/22%/10%/40%/12%/16%). */
+  --backdrop-wash-1: 75% !important;
+  --backdrop-wash-2: 40% !important;
+  --backdrop-wash-3: 24% !important;
+  --backdrop-wash-4: 62% !important;
+  --backdrop-wash-5: 20% !important;
+  --backdrop-wash-6: 26% !important;
   /* RAISED surfaces (tab strips, tiles, cards nested inside a card) were
      black-alpha in tokens.css -- darkening on top of an already-gray --card,
      so nesting compounded instead of elevating. Direct feedback with a
@@ -1089,13 +1098,23 @@ html.light .marketing-v2.themeable {
      headroom to climb; light mode has almost none above white --card, so
      these stay close to white and lean on --glass-border + shadow for
      definition instead of a color step. */
-  --glass-surface-1: rgba(255, 255, 255, 0.72) !important;
-  --glass-surface-2: rgba(255, 255, 255, 0.88) !important;
+  /* Raised to 0.90/0.94 (was 0.72/0.88) -- boosting the AppBackdrop wash
+     behind these (see AppBackdrop.tsx) so blur/frosting actually had
+     something to show made the surfaces THEMSELVES too see-through at the
+     old alpha: body text sitting directly on --glass-surface-1 picked up
+     enough of the vivid background behind it to lose legibility (direct
+     feedback, 17 Sept 2026: "the glass effect is so much that i cant read
+     shit... dont make it so transparent that is illegible"). The frosted
+     look now reads at the EDGES/gaps between panels, where the richer
+     backdrop actually shows through the blur -- not by letting it bleed
+     through text. */
+  --glass-surface-1: rgba(255, 255, 255, 0.9) !important;
+  --glass-surface-2: rgba(255, 255, 255, 0.94) !important;
   /* Densest tier (modal/nav chrome over busy content, strong "active" fills)
      stays the brightest and most opaque of the three -- never a return to
      black-alpha, so a 3rd-tier surface can't read as SUNKEN next to 1st/2nd
      tier ones beside it. */
-  --glass-surface-3: rgba(255, 255, 255, 0.96) !important;
+  --glass-surface-3: rgba(255, 255, 255, 0.97) !important;
   /* A border's job is to define an edge, not to climb the elevation ladder --
      stays black-alpha in both themes, it just needed real weight (was 9%,
      functionally invisible on a light page) to actually do that job here. */
