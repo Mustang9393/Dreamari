@@ -1065,9 +1065,48 @@ html.light .marketing-v2.themeable {
      Corrected to white here rather than in marketing/tokens.css, which is a
      contract file the app repo diffs against; author the real value in Figma
      Semantic.Light and this block goes away. --border firms up with it, since a
-     white card on a near-white page needs its edge to carry the separation. */
-  --card: #ffffff;
-  --border: #c9cddd;
+     white card on a near-white page needs its edge to carry the separation.
+
+     !important on every line below is load-bearing, not decoration: this
+     selector and marketing/tokens.css's own `html.light .marketing-v2.themeable`
+     block have IDENTICAL specificity, and every app route (profile,
+     resume-builder, explore, connect, ...) imports tokens.css directly, after
+     globals.css, in the bundle -- so on every one of those routes tokens.css's
+     values were silently winning the cascade and this whole block was dead
+     code. Confirmed live, 17 Sept 2026: the user sent a screenshot of Profile
+     in light mode with every surface reading as one flat gray, computed
+     --card was still #d8dbe8, not this file's #ffffff. !important is the only
+     way to make an override in a NON-contract file reliably beat the contract
+     file regardless of which page's bundle order wins that day. */
+  --card: #ffffff !important;
+  --border: #c9cddd !important;
+  /* RAISED surfaces (tab strips, tiles, cards nested inside a card) were
+     black-alpha in tokens.css -- darkening on top of an already-gray --card,
+     so nesting compounded instead of elevating. Direct feedback with a
+     screenshot: "I want the surfaces to get lighter with elevation. And
+     definitely brighter than the background." Dark mode's own glass surfaces
+     get BRIGHTER as they stack because there's a full range of black-to-white
+     headroom to climb; light mode has almost none above white --card, so
+     these stay close to white and lean on --glass-border + shadow for
+     definition instead of a color step. */
+  --glass-surface-1: rgba(255, 255, 255, 0.72) !important;
+  --glass-surface-2: rgba(255, 255, 255, 0.88) !important;
+  /* Densest tier (modal/nav chrome over busy content, strong "active" fills)
+     stays the brightest and most opaque of the three -- never a return to
+     black-alpha, so a 3rd-tier surface can't read as SUNKEN next to 1st/2nd
+     tier ones beside it. */
+  --glass-surface-3: rgba(255, 255, 255, 0.96) !important;
+  /* A border's job is to define an edge, not to climb the elevation ladder --
+     stays black-alpha in both themes, it just needed real weight (was 9%,
+     functionally invisible on a light page) to actually do that job here. */
+  --glass-border: #0000002b !important; /* ~16% black-alpha */
+  /* SUNKEN, not raised -- the one surface meant to look recessed INTO its
+     card (grouped form rows, list items), so it goes the opposite direction
+     from the raised tiers above: a light ink tint, darker than --card, where
+     tokens.css had it as white-alpha.66 (white on a now-white card = no
+     recess at all). */
+  --inset-surface: rgba(5, 7, 15, 0.045) !important;
+  --inset-border: rgba(5, 7, 15, 0.14) !important;
 }
 
 html.light {

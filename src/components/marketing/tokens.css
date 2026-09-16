@@ -281,22 +281,9 @@ html.light .marketing-v2.themeable {
   --secondary: #00000017; /* black-alpha.9 (mirror of dark white-alpha.9) */
   --secondary-foreground: #05070f; /* neutral.900 */
   --muted: #00000008; /* black-alpha.3 */
-  /* Raised 9% -> 16% black-alpha (17 Sept 2026, direct feedback: "our
-     surfaces are too dark, our background clashes with things, the text
-     clashes with surfaces"). A form input's border at 9% over a near-white
-     page is functionally invisible -- confirmed live, the Resume Builder's
-     own text fields were barely distinguishable from the card behind them.
-     Dark mode's white-alpha.9 border reads clearly because it sits on a
-     near-black page; the same alpha on light needs real weight to do the
-     same job. */
-  --glass-border: #0000002b; /* ~16% black-alpha */
-  /* Was white-alpha.66 on a now-white --card -- white on white, so every
-     "sunken" group (INSET panels: form rows, list items) read as flat as
-     the card around it instead of recessed. A light ink tint gives it a
-     real, if subtle, gray fill the way dark mode's own inset-surface reads
-     distinctly denser than its card. */
-  --inset-surface: rgba(5, 7, 15, 0.045);
-  --inset-border: rgba(5, 7, 15, 0.14);
+  --glass-border: #00000017; /* black-alpha.9 */
+  --inset-surface: rgba(255, 255, 255, 0.66);
+  --inset-border: rgba(0, 0, 0, 0.1);
   --accent: #1e4fcc; /* blue.700, follows primary */
   --accent-subtle: #1e4fcc; /* blue.700; dark's #3894ff fails contrast on neutral.50 */
   /* Wash accents: the dark values (#2e2466/#0f474d) are ink-dark and smear the
@@ -335,11 +322,8 @@ html.light .marketing-v2.themeable {
   --world-teaching-learning: #6928ff; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
   --world-personal-care-community-services: #b62060; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
   --chart-3: #9e4700; /* same hue at full saturation, darkened until it clears 4.5:1 on --card; mixing with black went muddy (4 Sept 2026) */
-  /* Raised alongside --glass-border above, same reasoning: 3%/9% black-alpha
-     panel fills were reading as barely-there on a light page, where the
-     equivalent white-alpha values read clearly against a near-black one. */
-  --glass-surface-1: #0000000f; /* ~6% black-alpha */
-  --glass-surface-2: #0000001f; /* ~12% black-alpha */
+  --glass-surface-1: #00000008; /* black-alpha.3 */
+  --glass-surface-2: #00000017; /* black-alpha.9 */
   --glass-surface-3: #05081466; /* black-alpha.40 */
   --nav-bg: rgba(244, 247, 255, 0.85);
   /* Redefining the custom properties alone doesn't repaint anything — this element's

@@ -319,7 +319,13 @@ export function SchoolCard({
     { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
     { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "avg. after aid" },
   ];
-  const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.85)" };
+  // Was a literal white-alpha "ghost" -- fine while this sat on the photo's
+  // own dark scrim, invisible once it moved onto the solid card below (a
+  // white ghost on a now-white --card is white-on-white). Theme tokens
+  // instead of a second hardcoded light-mode value, so this can't drift out
+  // of sync with the card color again (direct feedback, 17 Sept 2026, with
+  // a screenshot: "the card content is not matching light mode").
+  const ghost: React.CSSProperties = { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" };
   return (
     <article
       className="dm-tap poster-card school-card relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border"
@@ -437,10 +443,16 @@ export function SchoolCard({
         {(onCompare || onDismiss) && (
           <div className="pointer-events-auto relative z-20 mt-auto flex items-center justify-between gap-[8px] pt-[2px]">
             {onDismiss ? (
-              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.62)" }}>Not for me</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>Not for me</button>
             ) : <span />}
             {onCompare && (
-              <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); announce(compared ? `Removed ${c.name} from compare` : `Comparing ${c.name}`); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[12.5px] font-bold" style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 28%, transparent)`, color: "#fff" } : ghost}>
+              // Was a 28%-opacity tint behind white text -- against dark
+              // mode's navy --card that still read as a dark-enough chip for
+              // white text to work, but the exact same tint over a now-white
+              // --card leaves white text on pale blue (same class of bug as
+              // `ghost` above). A near-solid fill keeps white legible in
+              // either theme instead of depending on what's underneath it.
+              <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); announce(compared ? `Removed ${c.name} from compare` : `Comparing ${c.name}`); }} className="dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[12.5px] font-bold" style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 88%, transparent)`, color: "#fff" } : ghost}>
                 <ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
               </button>
             )}
