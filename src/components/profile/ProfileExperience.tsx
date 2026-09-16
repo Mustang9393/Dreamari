@@ -1789,8 +1789,6 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                             <span className="flex-none text-[11px] leading-[16px] font-bold tracking-[0.08em] uppercase sm:w-[92px] sm:leading-[22px]" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
                             <span className={`min-w-0 flex-1 text-[15px] leading-[22px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
                               {s.optional && "(Optional) "}{s.title}
-                              {s.counselorVerified && <span className="ml-[8px] text-[12px] font-semibold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Counselor confirms</span>}
-                              {s.deadlineBound && <span className="ml-[8px] text-[12px] font-semibold tracking-[0.04em] uppercase" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>{GRADE_WINDOW_DUE[w.id]}</span>}
                             </span>
                           </span>
                         );
@@ -1812,6 +1810,12 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                               </Link>
                             ) : (
                               body
+                            )}
+                            {(s.counselorVerified || s.deadlineBound) && (
+                              <span className="flex flex-none flex-col items-end gap-[2px]">
+                                {s.counselorVerified && <span className="text-[10px] leading-[13px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Counselor confirms</span>}
+                                {s.deadlineBound && <span className="text-[10px] leading-[13px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>{GRADE_WINDOW_DUE[w.id]}</span>}
+                              </span>
                             )}
                           </div>
                         );
