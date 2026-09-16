@@ -17,6 +17,7 @@ import { GestureSpotlight } from "@/components/flow/GestureSpotlight";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { LocalBurst } from "@/components/build/DreamyGuide";
+import { GLASS_CHIP_IDLE_BG } from "@/components/build/ui";
 import { picksParam, writePicks } from "@/lib/picks";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
@@ -995,7 +996,13 @@ function IconGhostButton({ label, onClick, disabled, children }: { label: string
       onClick={onClick}
       disabled={disabled}
       className="flex h-8 w-8 flex-none items-center justify-center rounded-full border transition-colors disabled:opacity-30"
-      style={{ background: "var(--color-glass-surface-2)", borderColor: "var(--color-glass-border)", color: "var(--color-night-foreground)" }}
+      // --color-glass-surface-2 flips polarity per theme (white-alpha dark,
+      // black-alpha light), and its one caller here sits inside a row
+      // already using --color-glass-surface-raised (white-alpha in both
+      // themes) -- in light mode this button read as a dark, sunken circle
+      // inside a lighter row instead of the elevated icon control it's
+      // meant to be. Same fix as VibeButtonRow's idle chips (16 Sept 2026).
+      style={{ background: GLASS_CHIP_IDLE_BG, borderColor: "var(--color-glass-border)", color: "var(--color-night-foreground)" }}
     >
       {children}
     </button>

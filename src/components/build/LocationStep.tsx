@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import usaMapModule from "@svg-maps/usa";
 import { CardHud, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, QuestionHeading, StepFooter } from "./ui";
 import type { StepProps } from "./steps";
+import { useTheme } from "@/components/flow/theme/ThemeProvider";
 
 // Location — a REAL USA map (actual state shapes via @svg-maps/usa path data, not
 // the reference's grid of abbreviation chips, per direct instruction) plus a
@@ -49,6 +50,7 @@ const STATE_CODES: Record<string, string> = {
 const GREEN = "var(--color-world-food-farming-nature)";
 
 export function LocationStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite, onSkip }: StepProps) {
+  const { theme } = useTheme();
   const [view, setView] = useState<"map" | "list">("map");
   // Short phones (Safari with its bars up) open on the list: 50 state labels
   // at 6px is the hard way in (UX audit, 11 Sept 2026). After paint, so the
@@ -125,12 +127,21 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
           // per-step trailing glow (see BuildFlowExperience.tsx), that
           // backdrop shifts hue as the student progresses. A solid map
           // surface keeps state edges reading the same regardless of what's
-          // happening behind the card. Lightened well past night-card itself
-          // (was 96% night-card, near-black) -- now that the aurora canvas is
-          // correctly layered (its own z-index fix), the page behind this
+          // happening behind the card. In dark mode, lightened well past
+          // night-card itself (was 96% night-card, near-black) -- now that
+          // the aurora canvas is correctly layered, the page behind this
           // card is visibly darker/moodier than before, and a near-black map
           // on a near-black page read as one indistinct mass with no edge.
-          style={{ background: "color-mix(in srgb, var(--color-night-card) 78%, var(--color-night-foreground) 22%)", borderColor: GLASS_PANEL_BORDER }}
+          // That fix doesn't apply in light mode: mixing in
+          // --color-night-foreground (near-black there, not near-white)
+          // DARKENS instead of lightening, and the light aurora doesn't
+          // shift moodily the way dark's does -- it rendered as a flat gray
+          // slab out of step with every other lightened light-mode surface
+          // this session (16 Sept 2026). Plain night-card in light mode is
+          // already a full step off the page background (#d8dbe8 vs
+          // #f4f7ff), enough for the state shapes (their own fills mix INTO
+          // night-card) to stay legible without the extra darkening.
+          style={{ background: theme === "light" ? "var(--color-night-card)" : "color-mix(in srgb, var(--color-night-card) 78%, var(--color-night-foreground) 22%)", borderColor: GLASS_PANEL_BORDER }}
         >
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="text-[11px] font-bold tracking-[0.18em] text-[var(--color-night-muted-foreground)] uppercase">United States</span>

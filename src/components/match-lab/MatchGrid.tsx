@@ -13,7 +13,7 @@ import { announce } from "@/components/app/LiveRegion";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { ThemeProvider, useTheme } from "@/components/flow/theme/ThemeProvider";
 import { bricolage } from "@/components/build/fonts";
 import { playMilestoneChime } from "@/components/build/sound";
 import { picksParam, writePicks } from "@/lib/picks";
@@ -223,6 +223,20 @@ export function MatchGrid() {
 
 function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: number; onOpen: () => void; onToggle: (origin?: { clientX: number; clientY: number }) => void }) {
   const isSelected = rank > 0;
+  // career.color for warm hues (amber/business-money-office, orange/
+  // building-construction) is a --color-world-* token deliberately DARKENED
+  // in light mode so it clears 4.5:1 as small TEXT elsewhere on this card
+  // (globals.css html.light: "amber-500 h41 s100 l30, 4.8:1 vs white").
+  // That same darkened value read as a dull, muddy brown/olive outline here
+  // -- no text sits directly on this border, so it only needs 3:1 non-text
+  // contrast, with plenty of room to brighten (direct feedback, 16 Sept
+  // 2026: "the amber is still a bad color... needs to be more bright/gold").
+  // Deliberately NOT applied to the "+"/rank badge or the modal's CTA
+  // button below, even though both also use career.color as a fill --
+  // both carry white text/icons directly on top, where the muted value is
+  // load-bearing for contrast, not a bug.
+  const { theme } = useTheme();
+  const cardAccent = theme === "light" ? `color-mix(in srgb, ${career.color} 100%, white 30%)` : career.color;
   // Same hover LANGUAGE as Explore's browse cards (PosterCard.tsx /
   // .poster-card in globals.css): lift, scale, the photo eases in, a dark
   // dim washes over it -- everything except OpenCue's center chevron,
@@ -242,13 +256,13 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
   // inline transform would just override. The photo zoom and dim wash
   // are plain elements framer doesn't touch, so those use ordinary
   // group-hover CSS, same mechanism as poster-card's own .poster-photo.
-  const ringShadow = isSelected ? `0 0 0 2px color-mix(in srgb, ${career.color} 55%, transparent), ` : "";
+  const ringShadow = isSelected ? `0 0 0 2px color-mix(in srgb, ${cardAccent} 55%, transparent), ` : "";
   return (
     <motion.div
       layoutId={`match-card-${career.id}`}
       className="group relative h-full w-full min-h-0 cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left"
       style={{
-        borderColor: isSelected ? career.color : "var(--color-glass-border)",
+        borderColor: isSelected ? cardAccent : "var(--color-glass-border)",
         boxShadow: isSelected ? `${ringShadow}0 14px 30px -14px rgba(0,0,0,0.6)` : "0 8px 20px -14px rgba(0,0,0,0.5)",
       }}
       whileTap={{ scale: 0.97 }}
