@@ -156,24 +156,28 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
             <TagDot color={accent} onPick={(color) => upsertVersion({ ...version, color, updatedAt: Date.now() })} />
             <span className="truncate text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
           </div>
-          {/* Says what it's actually for when there's something to say,
-             folded into the same meta line rather than its own row
-             (direct feedback, 16 Sept 2026: "put the tailored to
-             marketing intern thing somewhere else, dont increase height
-             with more rows") -- "Standard" and "Approved" didn't hold up
-             under a straight question ("what is approved saying? who
-             approved it?... remove the standard one unless it makes
-             sense"): nothing here backs an actual approval action, and
-             "Standard" just meant "nothing to say yet." */}
-          <span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>
-            {version.educationIds.length} education · {version.experienceIds.length} experience
-            {version.targetPosition && (
-              <> · <span style={{ color: accent }}>Tailored for {version.targetPosition}</span></>
-            )}
-            {" "}· updated {formatDate(version.updatedAt)}
-          </span>
+          {/* Only the one thing worth saying, and only when there IS one --
+             "2 education · 2 experience" told a student nothing they
+             didn't already know about their own resume, and "updated"
+             doesn't belong in a sentence with it either (direct feedback,
+             17 Sept 2026: "too much copy... we dont need to show the
+             count of how many stuff there are"). "Standard" and
+             "Approved" didn't hold up under a straight question either
+             ("what is approved saying? who approved it?"): nothing here
+             backs an actual approval action, and "Standard" just meant
+             "nothing to say yet." */}
+          {version.targetPosition && (
+            <span className="truncate text-[12px] font-semibold" style={{ color: accent }}>Tailored for {version.targetPosition}</span>
+          )}
         </div>
-        <div className="flex flex-none items-center gap-[4px]">
+        <div className="flex flex-none flex-col items-end gap-[6px]">
+          {/* The updated date moves to its own corner instead of stacked
+             into that meta sentence -- a timestamp reads as metadata, not
+             something to say in the same breath as what the resume is
+             for (direct feedback, 17 Sept 2026: "move the updated date to
+             a corner"). */}
+          <span className="text-[11px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{formatDate(version.updatedAt)}</span>
+          <div className="flex flex-none items-center gap-[4px]">
           <button type="button" aria-label={`Edit ${version.name}`} onClick={onEdit} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
             <Pencil className="h-4 w-4" aria-hidden />
           </button>
@@ -208,6 +212,7 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
           >
             Open <ArrowRight className="h-3.5 w-3.5" aria-hidden />
           </button>
+          </div>
         </div>
       </div>
       {ats && (
@@ -249,10 +254,10 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
           <Sparkles className="h-7 w-7" aria-hidden />
         </span>
         <div className="flex flex-col gap-[6px]">
-          <p className="text-[17px] font-extrabold" style={{ color: "var(--foreground)" }}>You haven&apos;t created a resume yet</p>
-          <p className="max-w-[46ch] text-[13px]" style={{ color: "var(--muted-foreground)" }}>
-            Build your profile step by step, then save it as your own resume. You can make more than one and pick what goes into each.
-          </p>
+          <p className="text-[17px] font-extrabold" style={{ color: "var(--foreground)" }}>No resume yet</p>
+          {/* One sentence, not a paragraph -- direct feedback, 17 Sept
+             2026: "the description is like a whole paragraph." */}
+          <p className="max-w-[38ch] text-[13px]" style={{ color: "var(--muted-foreground)" }}>Answer a few questions to build your first one.</p>
         </div>
         <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={4} strength={0.7} active>
           <button
