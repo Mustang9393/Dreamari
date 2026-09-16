@@ -38,6 +38,63 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-16 Sitewide no-pill-CTAs sweep (local only, not pushed, e628e2f)
+
+Follow-through on the Resume Builder's "no pill-shaped CTAs" pass (direct
+feedback: "throughout the app... consistent across the site"). Ran
+`grep -rln "rounded-full" src/components --include="*.tsx"` excluding
+`src/components/resume/` (already fixed) and `src/components/marketing/`
+(off-limits -- Codex was actively editing `AudienceToggle.tsx` and
+`SchoolsView.tsx` there this session; left that directory untouched, did not
+even open its files) across all ~36 remaining files.
+
+Converted only the unambiguous, text-labeled, actionable CTAs from
+`rounded-full` to `rounded-[var(--radius-md)]`:
+- `src/components/profile/ProfileExperience.tsx`: the "Play" and "Learn
+  more" links and "Get Career Report" button on a Top 3 career card (around
+  line 1105-1143), and the "Add to Top 3" / "Swap in" button in the Locker
+  tab (around line 2317).
+- `src/components/motion-lab/DailyDropDemo.tsx`: the "Close" text button in
+  `RevealPhase` (line ~798).
+
+Everything else found under `rounded-full` was left alone -- confirmed by
+reading, not guessing:
+- Icon-only circular controls (close/prev/next/edit/delete/avatar buttons),
+  dots, progress bars/tracks, decorative blurred orbs, toggle-switch tracks,
+  and badge/tag `<span>`s with no `onClick` -- exactly the excluded patterns
+  the task called out.
+- `src/components/connect/*`: the real CTAs (`FollowButton`/`PrimaryCta`/
+  `QuietCta` in `primitives.tsx`) already use `rounded-[var(--radius-md)]`/
+  `rounded-[var(--radius-sm)]`, not a pill. The remaining `rounded-full`
+  instances are `HelpfulPill`/`ActionChip` (documented in-code as "one
+  consistent chip language for every action in the row" -- an Instagram/
+  TikTok-style engagement-chip system, deliberate) plus avatars/badges.
+  Left the whole directory as-is; flagging `ActionChip`/`HelpfulPill` for a
+  human to confirm they're happy keeping that chip language pill-shaped.
+- `src/components/colleges/CollegesExperience.tsx`: quick-filter and
+  applied-filter chips (`aria-pressed`, `onClick`) read as filter/tag
+  selectors, not action CTAs -- left alone but flagging since they do have
+  `onClick` + text, in case a human disagrees.
+- `src/components/colleges/CollegeDetailExperience.tsx` line ~556-564: a
+  small muted "Where these numbers come from" disclosure trigger
+  (`aria-expanded`, no fill/border, 11px text) -- read as an accordion
+  toggle rather than a CTA, explicitly de-emphasized per its own code
+  comment ("nobody needs to be pulled toward"). Left alone, flagging for
+  review.
+- `src/components/career/CareerDetailExperience.tsx` line ~583-596 and
+  `src/components/colleges/CollegeDetailExperience.tsx` line ~583-597: `role="tab"`
+  segmented controls, not CTAs.
+
+Validated: `npx tsc --noEmit -p .` clean, `npx eslint` clean on both touched
+files. Committed locally on `main` (e628e2f) with exactly the two files
+changed -- did not stage or touch the marketing files Codex has in progress.
+**Not pushed** (push needs explicit go-ahead per standing rule).
+
+Recommended next step: a human should glance at the three flagged-but-left
+spots above (Connect's engagement chips, Colleges' filter chips, the Colleges
+disclosure trigger) and say yes/no on each; none were changed since the
+signal for "real CTA" was ambiguous.
+
 ### 2026-09-14 Connect: real logo marks for the 9 companies added to professionalsFrom (PUSHED TO MAIN, user-authorized, 482eb25)
 
 `professionalsFrom` in `src/components/connect/data.ts` was expanded across all
