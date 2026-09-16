@@ -9835,3 +9835,59 @@ ESLint + `tsc --noEmit -p .` clean.
 
 `src/components/colleges/data.ts`, `src/components/colleges/shared.tsx`,
 `src/components/colleges/distance.ts` (new).
+
+## 2026-09-16 · App-wide sticky glass nav + Build-to-Match perf fixes
+
+Direct feedback: the top nav was sticky/transparent/glass-blurred on the
+landing page only, and reverted to a plain static bar everywhere else in
+the app; separately, the Build completion screen's pulse-ring animation,
+the click-to-Match transition, and Match grid card hovers all felt
+"extremely laggy."
+
+**Nav.** Did not add `backdrop-filter` back onto the existing full-width
+`DesktopNavigation` bar as literally asked -- that shape was de-blurred on
+14 Sept specifically because a sticky, full-width backdrop-blur
+recomposites every scroll frame on every page. Instead matched
+`marketing/Nav.tsx`'s already-proven-safe pattern: a small floating pill,
+transparent at rest, frosting in (`blur(18px) saturate(1.6)`) only past a
+scroll threshold. `DesktopNavigation` (`app/chrome.tsx`) now nests an
+unchanged-layout sticky outer host around a centered, rounded floating
+header. The 6 duplicated, non-sticky mobile page headers (Home, Profile,
+Connect, Play, College Detail, Career Detail) were pulled into one new
+shared `MobileHeaderShell` (`app/chrome.tsx`) with the same scroll-frosted
+treatment, sticky this time. Bottom tab bar (`MobileNav`) untouched --
+already correct, intentionally blur-free chrome, not what "top navbar"
+referred to.
+
+**Perf.** Three concrete sources, all in the Build-completion -> Match
+path: (1) `MatchGrid.tsx`'s "Learn more" pill ran `BorderBeam` with `active`
+hardcoded true -- an animated `filter: blur()+hue-rotate()` looping forever
+on all 6 cards the instant the grid mounted, not just on hover. Removed;
+replaced with a static career-tinted pill, same visual weight, zero
+per-frame cost. (2) Card `whileHover` animated `boxShadow` (a paint
+property) on every hover in/out in a packed 6-card grid; dropped it, kept
+`y`/`scale`/`zIndex` (compositor-only). (3) `StepFooter`'s Next/"Reveal My
+Matches" click (`build/ui.tsx`) now passes `soft: true` to
+`dispatchAuroraPulse`, skipping the trig-heavy traced ring stroke
+(~50-70 points, two overlapping 1900ms ripples) that was running at the
+exact moment the screen navigates into Match's fresh `AuroraBackground` --
+the same soft variant the Congrats screen's own pulse already used for
+this reason.
+
+Not done: the grid's 18 `backdrop-blur-md` badge instances (salary chip,
+select/+ button, x6 cards) weren't re-audited at this larger combined
+scale -- flagged as optional follow-up only if still needed after this
+pass.
+
+ESLint + `tsc --noEmit` clean across all nine touched files (10 pre-existing,
+unrelated warnings only: one `<img>`-vs-`next/image` warning in `ui.tsx`,
+nine unused-variable warnings in `ConnectExperience.tsx` predating this
+change).
+
+`src/components/app/chrome.tsx`, `src/components/app/HomeExperience.tsx`,
+`src/components/profile/ProfileExperience.tsx`,
+`src/components/connect/ConnectExperience.tsx`,
+`src/components/play/PlayHub.tsx`,
+`src/components/colleges/CollegeDetailExperience.tsx`,
+`src/components/career/CareerDetailExperience.tsx`,
+`src/components/build/ui.tsx`, `src/components/match-lab/MatchGrid.tsx`.

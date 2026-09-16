@@ -11,7 +11,7 @@ import { Children, useCallback, useContext, useEffect, useMemo, useState } from 
 import { createPortal } from "react-dom";
 import { type LucideIcon as ResourceIcon, UserRound } from "lucide-react";
 import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge } from "./primitives";
 import { Segmented } from "./viz";
@@ -1371,10 +1371,10 @@ export function ConnectExperience() {
       <DesktopNavigation active="Connect" />
 
       {/* Mobile header (matches Home's pattern) */}
-      <header className="relative z-50 flex items-center justify-between px-5 pt-5 pb-2 md:hidden">
+      <MobileHeaderShell>
         <Wordmark />
         <QuickLinksMenu />
-      </header>
+      </MobileHeaderShell>
 
       {/* say()'s confirmations ("Saved insight. Find it under Saved.", "Added to
           your Plan as a next action.") used to land ONLY in an sr-only region,
