@@ -15,7 +15,7 @@ import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Briefcase, CalendarCheck, CheckCircle2, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Award, CalendarCheck, CheckCircle2, ClipboardCheck, DollarSign, ListChecks, Send, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
@@ -25,6 +25,7 @@ import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
+import { gradePlan, type GradeStepLabel } from "./gradePlanData";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import { EventStubs } from "./EventStubs";
@@ -50,7 +51,6 @@ import {
 
 type TabId = "overview" | "top3" | "routes" | "plan" | "report" | "locker" | "resume" | "settings";
 
-const ACTION_ICON = { Explore: Compass, Play: Gamepad2, Connect: Users, Decide: CheckCircle2, Build: BookOpen, Plan: CalendarCheck, Experience: Briefcase, Apply: Send } as const;
 
 function careerById(id: string | null): ProfileCareer | null {
   return ALL_PROFILE_CAREERS.find((career) => career.id === id) ?? null;
@@ -281,7 +281,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     setCoverOpen(false);
     try { window.localStorage.setItem(COVER_KEY, url); } catch {}
   };
-  const [customTasks, setCustomTasks] = useState<Record<string, PlanTask[]>>({}); // key: careerId:horizonId
+  // Was student-addable via PlanTab's own "add a step" form; that UI is
+  // gone (the career-horizon plan is no longer rendered, replaced by the
+  // grade-by-grade plan), so this never gets written to again -- kept as a
+  // plain constant, not state, since tasksFor() below still reads it.
+  const customTasks: Record<string, PlanTask[]> = {};
 
   // Swapping a career or changing the focus here is a real choice too, so it
   // persists the way the chooser's did. Only actual edits are written -- a
@@ -336,29 +340,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const toggleMajor = (name: string) => setSavedMajors((current) => { const next = new Set(current); if (next.has(name)) next.delete(name); else next.add(name); return next; });
   const toggleEvidenceConfirmed = (id: string) => setConfirmedEvidence((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   const hideEvidence = (id: string) => setHiddenEvidence((current) => new Set(current).add(id));
-
-  function addCustomTask(careerId: string, horizonId: string, label: string) {
-    const trimmed = label.trim();
-    if (!trimmed) return;
-    const task: PlanTask = { id: `custom-${Date.now()}`, label: trimmed, action: "Plan", outOfApp: true, custom: true };
-    setCustomTasks((current) => ({ ...current, [`${careerId}:${horizonId}`]: [...(current[`${careerId}:${horizonId}`] ?? []), task] }));
-  }
-
-  function removeCustomTask(careerId: string, horizonId: string, taskId: string) {
-    setCustomTasks((current) => ({ ...current, [`${careerId}:${horizonId}`]: (current[`${careerId}:${horizonId}`] ?? []).filter((task) => task.id !== taskId) }));
-    setDone((current) => ({ ...current, [careerId]: (current[careerId] ?? []).filter((id) => id !== taskId) }));
-  }
-
-  function toggleTask(careerId: string, taskId: string) {
-    // Checking a step off was a silent color change. The shared select tick (the
-    // pulse event has no aurora canvas here, so only the sound lands) plus the
-    // two progress bars above sparking as they grow (SparkBar) make it register.
-    dispatchAuroraPulse("select");
-    setDone((current) => {
-      const list = current[careerId] ?? [];
-      return { ...current, [careerId]: list.includes(taskId) ? list.filter((id) => id !== taskId) : [...list, taskId] };
-    });
-  }
 
   function addToTop3(id: string) {
     if (top3.includes(id)) return;
@@ -716,11 +697,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         )}
         {tab === "plan" && (
           <div role="tabpanel" id="profile-panel-plan" aria-labelledby="profile-tab-plan">
-            <MyPlanTab
-              focus={focus} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
-              doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
-              removeCustomTask={removeCustomTask} onGoRoutes={() => setTab("routes")}
-            />
+            <MyPlanTab focus={focus} onGoRoutes={() => setTab("routes")} />
           </div>
         )}
         {tab === "report" && focus && (
@@ -1501,29 +1478,164 @@ function RoutesTab({
 
 // ---- My Plan: what to do about it, plus what is coming up ----
 
-function MyPlanTab({
-  focus, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor,
-  addCustomTask, removeCustomTask, onGoRoutes,
-}: {
-  focus: ProfileCareer | null;
-  horizonProgress: (career: ProfileCareer, index: number) => { complete: number; total: number; pct: number };
-  horizonUnlocked: (career: ProfileCareer, index: number) => boolean;
-  doneSet: (careerId: string) => Set<string>;
-  toggleTask: (careerId: string, taskId: string) => void;
-  tasksFor: (career: ProfileCareer, horizonId: string) => PlanTask[];
-  addCustomTask: (careerId: string, horizonId: string, label: string) => void;
-  removeCustomTask: (careerId: string, horizonId: string, taskId: string) => void;
-  onGoRoutes: () => void;
-}) {
-  if (!focus) return null;
+const GRADE_STEP_ICON: Record<GradeStepLabel, LucideIcon> = {
+  BUILD: BookOpen,
+  EXPLORE: Compass,
+  PLAY: Gamepad2,
+  CONNECT: Users,
+  DECIDE: CheckCircle2,
+  PLAN: CalendarCheck,
+  REVIEW: ClipboardCheck,
+  APPLY: Send,
+  FUND: DollarSign,
+  TRACK: ListChecks,
+  RESULT: Award,
+};
+const GRADE_WINDOW_MONTHS: Record<string, string> = { fall: "Sept – Nov", winter: "Dec – Feb", spring: "Mar – May" };
+
+// The grade-by-grade academic plan -- deliberately separate from the
+// career-route plan below it (PlanTab, Level 1/2/3 keyed to a CHOSEN
+// career). This one is general: course planning, applications, financial
+// aid, the things a counselor tracks regardless of which career a student
+// is leaning toward (direct instruction, 17 Sept 2026, from a product spec
+// PDF: "a toggle for each grade 9-12... different objectives in app and
+// out of app... so when I show demos they can see that we capture the
+// essential things other edtech saas companies capture"). Defaults to the
+// student's own current grade (STUDENT.grade) rather than Grade 9, so a
+// demo opens already showing the right year. Completion state is in-memory
+// only, matching PlanTab's own `done` state just below in this file --
+// this prototype doesn't persist plan checkmarks across reloads anywhere.
+function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onGoRoutes: () => void }) {
+  const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
+  const [grade, setGrade] = useState<9 | 10 | 11 | 12>(defaultGrade);
+  const [done, setDone] = useState<Set<string>>(new Set());
+  const plan = gradePlan(grade);
+  const allSteps = plan.windows.flatMap((w) => w.steps);
+  const doneCount = allSteps.filter((s) => done.has(s.id)).length;
+  const RULE = "var(--inset-border)";
+
+  const toggle = (id: string) =>
+    setDone((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   return (
+    <section className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={INSET}>
+      <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
+        <div className="flex min-w-0 flex-col gap-[2px]">
+          <span className="flex flex-wrap items-baseline gap-[10px]">
+            <h2 className="text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}>
+              <InkText text={focus ? `Plan for ${focus.title}` : "My Plan"} />
+            </h2>
+            {focus && <button type="button" onClick={onGoRoutes} className="dm-link flex-none cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route</button>}
+          </span>
+          <span key={grade} className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Grade {grade} · {plan.title}</span>
+        </div>
+        <div role="tablist" aria-label="Choose grade" className="relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          {([9, 10, 11, 12] as const).map((g) => {
+            const active = g === grade;
+            return (
+              <button
+                key={g}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setGrade(g)}
+                className="dm-quiet relative flex size-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[14px] font-bold"
+                style={{ color: active ? "var(--primary-foreground)" : "var(--foreground)" }}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="grade-plan-pill"
+                    aria-hidden
+                    className="absolute inset-0 rounded-[var(--radius-sm)]"
+                    style={{ background: "var(--primary)" }}
+                    transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                  />
+                )}
+                <span className="relative">{g}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+        <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
+        <span className="text-[15px] leading-[22px] font-bold tabular-nums">{doneCount} of {allSteps.length}</span>
+      </div>
+      <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allSteps.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+
+      {/* Three terms side by side, like a school-year wall planner, instead
+         of a stacked accordion list -- direct feedback, 17 Sept 2026: "a
+         more calendar oriented design? But not so much that its too
+         complex." Each step is a dot on a vertical term-line rather than a
+         card of its own; no body copy, just the label the step already
+         carries (title + In app/Out of app + deadline flag). */}
+      <div className="mt-[var(--space-4)] grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+        {plan.windows.map((w) => {
+          const wDone = w.steps.filter((s) => done.has(s.id)).length;
+          return (
+            <div key={w.id} className="flex flex-col rounded-[var(--radius-md)] border p-[var(--space-3)]" style={{ borderColor: RULE, background: "var(--glass-surface-1)" }}>
+              <div className="flex items-baseline justify-between gap-[8px] border-b pb-[var(--space-2)]" style={{ borderColor: RULE }}>
+                <span className="flex flex-col gap-[1px]">
+                  <span className="text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{w.title}</span>
+                  <span className="text-[10.5px] leading-[14px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{GRADE_WINDOW_MONTHS[w.id]}</span>
+                </span>
+                <span className="text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: wDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{wDone}/{w.steps.length}</span>
+              </div>
+              <div className="mt-[2px] flex flex-col">
+                {w.steps.map((s, i) => {
+                  const complete = done.has(s.id);
+                  const StepIcon = GRADE_STEP_ICON[s.label];
+                  return (
+                    <div key={s.id} className="relative flex items-start gap-[10px] py-[9px]" style={{ opacity: complete ? 0.55 : 1 }}>
+                      {i < w.steps.length - 1 && <span aria-hidden className="absolute top-[24px] bottom-[-9px] left-[10.5px] w-px" style={{ background: RULE }} />}
+                      <button
+                        type="button"
+                        aria-label={complete ? `Mark "${s.title}" not done` : `Mark "${s.title}" done`}
+                        onClick={() => toggle(s.id)}
+                        className="dm-quiet relative z-[1] mt-[1px] flex size-[22px] flex-none cursor-pointer items-center justify-center rounded-full border"
+                        style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "var(--card)", borderColor: complete ? "transparent" : "var(--glass-border)" }}
+                      >
+                        {complete ? <Check className="h-3 w-3" style={{ color: "#05070f" }} /> : <StepIcon className="h-3 w-3" style={{ color: "var(--accent-subtle)" }} aria-hidden />}
+                      </button>
+                      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                        <span className={`text-[13.5px] leading-[18px] font-semibold ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>{s.title}</span>
+                        <span className="flex flex-wrap items-center gap-[6px]">
+                          <span className="text-[10px] leading-[13px] font-bold tracking-[0.05em] uppercase" style={{ color: s.inApp ? "var(--primary)" : "var(--muted-foreground)" }}>{s.inApp ? "In app" : "Out of app"}</span>
+                          {s.deadlineBound && <span className="text-[10px] leading-[13px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Deadline</span>}
+                        </span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// The grade plan is now the whole tab, not one card next to the old
+// career-horizon plan (PlanTab, "Next 3 Months"/"Next 6 Months"/
+// "Professional Readiness") -- direct feedback, 17 Sept 2026: "this is to
+// be the main thing... dont have redundant Next 3 months etc. Plan for
+// investment banking should be a more title like thing, not its own
+// card." PlanTab's own horizon/task machinery stays intact (still used
+// elsewhere -- OverviewTab's progress ring, ReportOverlay), just no
+// longer rendered here; GradePlanCard takes `focus`/`onGoRoutes` to show
+// "Plan for {career}" as a small kicker with a "Change route" link
+// instead of a second full plan underneath.
+function MyPlanTab({ focus, onGoRoutes }: { focus: ProfileCareer | null; onGoRoutes: () => void }) {
+  return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <PlanTab
-        focus={focus} horizonProgress={horizonProgress} horizonUnlocked={horizonUnlocked}
-        doneSet={doneSet} toggleTask={toggleTask} tasksFor={tasksFor} addCustomTask={addCustomTask}
-        removeCustomTask={removeCustomTask} onGoPath={onGoRoutes}
-      />
+      <GradePlanCard focus={focus} onGoRoutes={onGoRoutes} />
     </div>
   );
 }
@@ -1710,188 +1822,6 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
           onClose={() => setOpenRoute(null)}
         />
       )}
-    </div>
-  );
-}
-
-function PlanTab({ focus, horizonProgress, horizonUnlocked, doneSet, toggleTask, tasksFor, addCustomTask, removeCustomTask, onGoPath }: {
-  focus: ProfileCareer | null;
-  horizonProgress: (career: ProfileCareer, index: number) => { complete: number; total: number; pct: number };
-  horizonUnlocked: (career: ProfileCareer, index: number) => boolean;
-  doneSet: (careerId: string) => Set<string>;
-  toggleTask: (careerId: string, taskId: string) => void;
-  tasksFor: (career: ProfileCareer, horizonId: string) => PlanTask[];
-  addCustomTask: (careerId: string, horizonId: string, label: string) => void;
-  removeCustomTask: (careerId: string, horizonId: string, taskId: string) => void;
-  onGoPath: () => void;
-}) {
-  const [draftTask, setDraftTask] = useState("");
-  // The beam should only mean "you're using this" -- a bare hover while
-  // scrolling past isn't that (direct feedback, 9 Sept 2026: "doesnt need a
-  // beam. Only have that happen if activated"), so `active` is pinned to
-  // real focus instead of HoverBeam's own default hover-or-focus tracking.
-  const [stepFieldFocused, setStepFieldFocused] = useState(false);
-  // Every level starts closed (CEO, 4 Sept): opening into all the steps at
-  // once was overwhelming. The student taps the level they want.
-  const [openHorizon, setOpenHorizon] = useState<string | null>(null);
-
-  if (!focus) {
-    return (
-      <section className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={INSET}>
-        <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Pick a career above to see its plan</p>
-        <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Your Top 3 lives at the top of this page. Tap a card or add one.</p>
-      </section>
-    );
-  }
-
-  const allTasks = focus.plan.flatMap((horizon) => tasksFor(focus, horizon.id));
-  const doneCount = allTasks.filter((task) => doneSet(focus.id).has(task.id)).length;
-  const RULE = "var(--inset-border)";
-
-  return (
-    <div className="flex flex-col gap-[var(--space-5)]">
-      {/* One header surface: title, the change-route link, and the whole-plan
-         progress as a single line. Built like the career page's panels: one
-         layer of glass, hairlines inside, nothing stacked on top. */}
-      <section className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={INSET}>
-        <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
-          <h2 key={focus.id} className="text-[22px] leading-[26px] font-bold tracking-[-0.01em] sm:text-[26px] sm:leading-[30px]" style={{ fontFamily: "var(--font-display)" }}><InkText text={`Plan for ${focus.title}`} /></h2>
-          <button type="button" onClick={onGoPath} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[15px] leading-[22px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route <ChevronRight size={14} strokeWidth={2.75} aria-hidden /></button>
-        </div>
-        <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
-          <span className="text-[15px] leading-[22px] font-bold tabular-nums">{doneCount} of {allTasks.length}</span>
-        </div>
-        <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allTasks.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
-      </section>
-
-      {focus.plan.map((horizon, index) => {
-        const unlocked = horizonUnlocked(focus, index);
-        const stats = horizonProgress(focus, index);
-        // Visibility is never gated (report handoff 11.2): every level opens;
-        // only CHECKING OFF waits for the earlier steps.
-        const isOpen = openHorizon === horizon.id;
-        const tasks = tasksFor(focus, horizon.id);
-        return (
-          <section key={horizon.id} className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={{ ...INSET, opacity: unlocked ? 1 : 0.85 }}>
-            <button type="button" aria-expanded={isOpen} onClick={() => setOpenHorizon(isOpen ? null : horizon.id)} className="dm-quiet flex w-full cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:p-[var(--space-6)]">
-              <span className="flex min-w-0 flex-col gap-[2px]">
-                <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: unlocked ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>Level {index + 1}</span>
-                <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{horizon.title}</span>
-                {horizon.subtitle && <span className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{horizon.subtitle}</span>}
-              </span>
-              <span className="flex flex-none flex-col items-end gap-[6px] pt-[4px]">
-                <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: stats.complete > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{stats.complete} of {stats.total}</span>
-                <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} aria-hidden />
-              </span>
-            </button>
-            {isOpen && (
-              <div className="filters-reveal flex flex-col px-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
-                {!unlocked && (
-                  <p className="mb-[var(--space-2)] text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Recommended after Level {index}. You can read ahead; checking off waits.</p>
-                )}
-                {/* Rows on hairlines, grouped In app / Out of app (Joshua
-                   Pierce, Slack, 5 Sept 2026): the action label leads each
-                   task, no minutes, and an in-app row is itself the link to
-                   its feature. Out-of-app rows stay visible and only link
-                   when a supporting page exists. */}
-                {(["app", "out"] as const).map((group) => {
-                  const rows = tasks.filter((task) => (group === "out") === Boolean(task.outOfApp));
-                  if (rows.length === 0) return null;
-                  return (
-                    <Fragment key={group}>
-                      <span className="pt-[var(--space-3)] pb-[6px] text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{group === "app" ? "In app" : "Out of app"}</span>
-                      {rows.map((task) => {
-                        const complete = doneSet(focus.id).has(task.id);
-                        const TaskIcon = ACTION_ICON[task.action];
-                        /* phone: label stacked over the task so the task keeps
-                           the full width; from 640px the label is a fixed
-                           column so every task starts on the same line */
-                        const body = (
-                          <span className="flex min-w-0 flex-1 flex-col gap-[2px] sm:flex-row sm:items-center sm:gap-[10px]">
-                            <span className="flex-none text-[11px] leading-[16px] font-bold tracking-[0.08em] uppercase sm:w-[92px] sm:leading-[22px]" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{task.action}</span>
-                            <span className={`min-w-0 flex-1 text-[15px] leading-[22px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
-                              {task.label}
-                              {task.custom && <span className="ml-[8px] text-[12px] font-semibold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Yours</span>}
-                            </span>
-                          </span>
-                        );
-                        return (
-                          <div key={task.id} className="flex items-center gap-[12px] border-t py-[11px]" style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
-                            {/* 28px, not the original 22px -- the single most
-                               frequently tapped control in the whole plan
-                               (mobile audit, 9 Sept 2026). */}
-                            <button type="button" aria-label={complete ? `Mark "${task.label}" not done` : `Mark "${task.label}" done`} disabled={!unlocked} onClick={() => toggleTask(focus.id, task.id)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border disabled:cursor-default disabled:opacity-40 md:size-[22px]" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
-                              {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
-                            </button>
-                            {task.href && !complete ? (
-                              <Link href={task.href} aria-label={`${task.action}: ${task.label}`} className="dm-quiet flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)]">
-                                {body}
-                                <TaskIcon className="h-3.5 w-3.5 flex-none" style={{ color: "var(--accent-subtle)" }} aria-hidden />
-                              </Link>
-                            ) : (
-                              body
-                            )}
-                            {task.custom && (
-                              <button type="button" aria-label={`Delete "${task.label}"`} onClick={() => removeCustomTask(focus.id, horizon.id, task.id)} className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] p-[6px]" style={{ color: "var(--muted-foreground)" }}>
-                                <X className="h-3.5 w-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </Fragment>
-                  );
-                })}
-                <form
-                  className="flex items-center gap-[12px] border-t pt-[11px]"
-                  style={{ borderColor: RULE }}
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    addCustomTask(focus.id, horizon.id, draftTask);
-                    setDraftTask("");
-                  }}
-                >
-                  <Plus className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-                  {/* Gave the bare input its own small pill container -- a bare
-                     transparent input on a hairline row has no box for the ring
-                     to hug, so the beam would otherwise render as a hard, bg-less
-                     rectangle floating mid-row. */}
-                  <HoverBeam strength={0.85} active={stepFieldFocused} className="min-w-0 flex-1">
-                  <div className="flex min-w-0 flex-1 items-center rounded-[var(--radius-sm)] px-[10px] py-[6px]" style={{ background: "var(--glass-surface-1)" }}>
-                  <input
-                    value={draftTask}
-                    onChange={(event) => setDraftTask(event.target.value)}
-                    onFocus={() => setStepFieldFocused(true)}
-                    onBlur={() => setStepFieldFocused(false)}
-                    placeholder="Add your own step"
-                    className="dm-beam-input min-w-0 flex-1 bg-transparent text-[15px] leading-[22px] outline-none placeholder:text-[color:var(--muted-foreground)]"
-                    style={{ color: "var(--foreground)" }}
-                  />
-                  </div>
-                  </HoverBeam>
-                  <button type="submit" disabled={!draftTask.trim()} className="dm-quiet flex h-[32px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] px-[10px] text-[13px] font-bold disabled:opacity-35" style={{ color: "var(--accent-subtle)" }}>
-                    Add
-                  </button>
-                </form>
-              </div>
-            )}
-          </section>
-        );
-      })}
-
-      {/* the same next step as Top Three, at the foot of the plan under the
-         last level so it does not interrupt the plan's order (Joshua Pierce,
-         Slack, 5 and 6 Sept 2026) */}
-      <NextStepBanner
-        emphasis="priority"
-        eyebrow="Your next step"
-        text="Play the Day in the Life for the career you’re starting with."
-        ctaLabel="Play"
-        href="/play/investment-banking"
-        Icon={Gamepad2}
-        storageKey="dreamari:top3-next-step-dismissed"
-      />
     </div>
   );
 }
