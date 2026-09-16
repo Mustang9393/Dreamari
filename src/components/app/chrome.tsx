@@ -317,7 +317,7 @@ export function useScrolled(threshold = 12) {
   return scrolled;
 }
 
-export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile" }) {
+export function DesktopNavigation({ active, extraClassName }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile"; extraClassName?: string }) {
   const score = useDreamScore();
   // one number everywhere: the live Dream Score (100 after Build), never a placeholder
   const xp = score;
@@ -329,7 +329,14 @@ export function DesktopNavigation({ active }: { active: "Home" | "Explore" | "Pl
     // the landing page, but nothing else on any page should have to change
     // its own top padding to compensate) -- only the VISIBLE bar inside it
     // becomes the inset, rounded, conditionally-blurred floating pill.
-    <div className="sticky top-0 z-40 hidden h-[86px] w-full md:block">
+    // `extraClassName` (e.g. "no-print") goes HERE, on the sticky element
+    // itself, never on a wrapping div: a wrapper wrapping ONLY this sticky
+    // child is exactly as tall as the child, which gives position:sticky
+    // zero room to actually stick -- it scrolls away the instant the
+    // wrapper's own box (86px) clears the viewport top (16 Sept 2026 bug,
+    // found on Profile and Career Detail, both of which used to wrap this
+    // in their own `<div className="no-print">`).
+    <div className={`sticky top-0 z-40 hidden h-[86px] w-full md:block ${extraClassName ?? ""}`}>
       <div className="mx-auto flex h-[62px] max-w-[1320px] items-center justify-between px-3 pt-3">
         <header
           className="relative flex h-[62px] w-full items-center justify-between rounded-[28px] px-[var(--space-6)] transition-[background-color,border-color,box-shadow] duration-300"

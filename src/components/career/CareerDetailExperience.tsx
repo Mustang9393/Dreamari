@@ -258,7 +258,10 @@ function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null
       <div
         role="dialog"
         className="marketing-v2 themeable fixed z-[81] rounded-[var(--radius-md)] border p-[var(--space-4)]"
-        style={{ top: pos.top, left: pos.left, width: pos.width, background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+        // minHeight: 0 -- same fix as FlowChrome.tsx: `.theme-light` (tokens.css)
+        // sets `min-height: 100%` for full-page themeable surfaces, but this
+        // small floating popover only wants the class for its CSS variables.
+        style={{ top: pos.top, left: pos.left, width: pos.width, minHeight: 0, background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 24px 48px -24px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
       >
         {children}
       </div>
@@ -404,9 +407,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
          backdrops plus a third copy of the sheet, so it read lighter than
          every other screen. */}
       <AppBackdrop />
-      <div className="no-print">
-        <DesktopNavigation active="Explore" />
-      </div>
+      <DesktopNavigation active="Explore" extraClassName="no-print" />
       <MobileHeaderShell extraClassName="no-print">
         <Wordmark />
         <QuickLinksMenu />
