@@ -76,7 +76,7 @@ const INSET = { background: "var(--inset-surface)", borderColor: "var(--inset-bo
  *  underneath (a glass-surface-3 layer read as black), a lighter edge and a
  *  hairline highlight on top. */
 const FROST = { background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.22)", color: "var(--foreground)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)" } as const;
-const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
+const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(24px) saturate(1.65)", WebkitBackdropFilter: "blur(24px) saturate(1.65)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
 // Covers a student can pick for their header: six rendered materials (fluted
 // glass, molten glass, rippled glass, a grain-lit horizon) in the app's dark,
@@ -622,7 +622,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               document.getElementById(`profile-tab-${next}`)?.focus();
             }
           }}
-          className="flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] p-[var(--space-1)] [scrollbar-width:none]"
+          className="dm-glass-2 flex w-full items-center gap-[var(--space-1)] overflow-x-auto rounded-[var(--radius-lg)] p-[var(--space-1)] backdrop-blur-[24px] backdrop-saturate-[1.65] [scrollbar-width:none]"
           style={{
             background: "var(--glass-surface-2)",
             ...(tabsOverflow ? { maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)" } : {}),
@@ -1723,7 +1723,7 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
             </span>
             <span key={grade} className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Grade {grade} · {plan.title}</span>
           </div>
-          <div role="tablist" aria-label="Choose grade" className="relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <div role="tablist" aria-label="Choose grade" className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
             {([9, 10, 11, 12] as const).map((g) => {
               const active = g === grade;
               return (

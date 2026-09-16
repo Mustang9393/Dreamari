@@ -1098,23 +1098,35 @@ html.light .marketing-v2.themeable {
      headroom to climb; light mode has almost none above white --card, so
      these stay close to white and lean on --glass-border + shadow for
      definition instead of a color step. */
-  /* Raised to 0.90/0.94 (was 0.72/0.88) -- boosting the AppBackdrop wash
-     behind these (see AppBackdrop.tsx) so blur/frosting actually had
-     something to show made the surfaces THEMSELVES too see-through at the
-     old alpha: body text sitting directly on --glass-surface-1 picked up
-     enough of the vivid background behind it to lose legibility (direct
-     feedback, 17 Sept 2026: "the glass effect is so much that i cant read
-     shit... dont make it so transparent that is illegible"). The frosted
-     look now reads at the EDGES/gaps between panels, where the richer
-     backdrop actually shows through the blur -- not by letting it bleed
-     through text. */
-  --glass-surface-1: rgba(255, 255, 255, 0.9) !important;
-  --glass-surface-2: rgba(255, 255, 255, 0.94) !important;
+  /* 0.90/0.94/0.97 (raised from an original 0.72/0.88 after "the glass
+     effect is so much that i cant read shit") swung too far the other way:
+     confirmed live, 17 Sept 2026, a fresh look called these "still solid
+     white... the glass stuff is not there like dark mode has" -- at 90%+
+     opacity there's nothing left for backdrop-blur to actually show, so a
+     blurred surface and an unblurred one look identical: flat white. The
+     real cause of the original illegibility wasn't the opacity number by
+     itself, it was that plenty of components set `background:
+     var(--glass-surface-N)` with NO backdrop-filter at all (grep confirms
+     this -- e.g. Profile's own tab strip), so a low-alpha surface with no
+     blur let raw, sharp, busy backdrop detail show straight through text.
+     Blur removes exactly that sharp detail; opacity was never the actual
+     lever. So this settles lower again -- genuinely translucent, "frosted
+     glass" rather than "solid card" -- on the understanding that every
+     surface using these tokens also carries real backdrop-blur (see
+     `.dm-glass` below); a surface with blur stays legible even fairly
+     transparent, because what shows through is a soft wash, not detail.
+     Elevation logic per direct instruction, 17 Sept 2026: "elevation
+     increases light falling on the surface, so more brightness with
+     elevation" -- each tier a real, visible step up in both opacity AND
+     blur/saturation, not a few points of alpha. */
+  --glass-surface-1: rgba(255, 255, 255, 0.62) !important;
+  --glass-surface-2: rgba(255, 255, 255, 0.74) !important;
   /* Densest tier (modal/nav chrome over busy content, strong "active" fills)
      stays the brightest and most opaque of the three -- never a return to
      black-alpha, so a 3rd-tier surface can't read as SUNKEN next to 1st/2nd
-     tier ones beside it. */
-  --glass-surface-3: rgba(255, 255, 255, 0.97) !important;
+     tier ones beside it -- but still well short of solid, so it keeps
+     reading as glass instead of card. */
+  --glass-surface-3: rgba(255, 255, 255, 0.87) !important;
   /* A border's job is to define an edge, not to climb the elevation ladder --
      stays black-alpha in both themes, it just needed real weight (was 9%,
      functionally invisible on a light page) to actually do that job here. */
@@ -1140,7 +1152,13 @@ html.light {
      contrast 5.7:1 / 7.2:1 -- both already well past what's needed). Computed by
      lowering HSL lightness instead, at full saturation, which is what these
      actually needed: same hue, same saturation, just darker. */
-  --color-world-business-money-office: #996900; /* amber-500 h41 s100 l30, 4.8:1 vs white */
+  /* #996900 (l30) cleared contrast but still read as muddy mustard/brown --
+     direct feedback, 17 Sept 2026: "no muddy colors like the business and
+     money accents." A touch lighter (l34) and a few degrees warmer (h38)
+     reads as a genuine warm gold instead, and 4.19:1 still clears every
+     floor this set actually needs (3:1 non-text/large-UI; the 4.8:1 the old
+     value had was headroom, not a requirement). */
+  --color-world-business-money-office: #ad6e00; /* amber-600-ish h38 s100 l34, 4.19:1 vs white */
   --color-world-building-construction: #ad4e00; /* orange-500 h27 s100 l34, 5.4:1 vs white */
   --color-world-arts-media-sport: color-mix(in srgb, #ff4585 68%, black);
   --color-world-food-farming-nature: color-mix(in srgb, #1fc76e 55%, black);
