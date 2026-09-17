@@ -9966,3 +9966,53 @@ ESLint + `tsc --noEmit` clean on every file in every fix above.
 `src/components/app/chrome.tsx`, `src/components/profile/ProfileExperience.tsx`,
 `src/components/resume/ResumeBuilderExperience.tsx`,
 `src/components/flow/aurora/BackgroundSpace.tsx`.
+
+## 2026-09-17 · Connect-before-next-level in Play, Career Detail Connect modal, Joshua's Replit reference capture
+
+**Connect interstitial in Play (`ConnectInterstitial.tsx`).** Skippable
+modal between simulation levels, ported from Joshua's Replit
+(`dceeai.replit.app/ib-career-game`, "CONNECT BEFORE LEVEL 2"): three
+actions (Like / Comment / Ask) over real Connect content for the
+simulation's world. Deliberate departures from the reference, all direct
+requests: all three actions are required before the "Connected" screen
+(the reference stops after one), XP is weighted by effort (Like 5, Comment
+10, Ask 20, +15 for all three), a flying XP number lands on a persistent
+header counter, and the featured insight is stage-matched (Intern→Analyst
+shows the reference's own "Connect before Level 2" quote, added to
+`data.ts` as `i-first-year-analyst` at a deliberately low `helpful` so it
+stays out of the board's top results). Ask fuzzy-matches an existing thread
+by coverage of the thread title's own words (the old symmetric ratio
+failed on any realistic, longer question). Demo shortcut: `Hud`'s
+FastForward button, gated by `DEMO_CONNECT_SHORTCUT` in
+`SimulationPlayer.tsx`; flip off before a real release.
+
+**Career Detail "Connect" modal (`ConnectWithProfessionalsModal.tsx`).**
+Same chrome and XP mechanics (shares `ConnectInterstitial.module.css`),
+different actions per the second Replit reference: Ask / Answers / People.
+Answers and People are plain scrolling rows of fixed-width tiles (a
+single-focus "depth stack" was tried and reverted). Tapping a
+professional opens an in-modal profile; back returns to the same modal
+state. "Find more pros on Connect" deep-links to `/connect?board=`.
+
+**Input bugs fixed.** `DialogueBox`'s window keydown listener (Space/Enter
+advance the beat) now bails whenever `document.body.style.overflow` is
+`hidden` (every modal sets it), so keys typed into a modal no longer drive
+the game behind it. Both modals' focus-trap effect keyed on the
+`onClose`/`onContinue` callback, which Play recreates every render, so it
+re-ran and stole focus mid-typing; it now reads the callback from a ref and
+runs once.
+
+**App-wide rule:** `formatCount()` in `connect/primitives.tsx` now defaults
+to compact and abbreviates anything over 999 as K (1.5K), per direct
+instruction; all existing call sites pick this up.
+
+**`CardProgressiveBlur`** inherits its ancestor's border-radius, fixing
+square corners poking out of rounded photo headers in some browsers.
+
+**Reference capture:** `docs/reference/joshua-connect-replit-2026-09/`
+documents every view, tab and control of Joshua's Connect update on
+Replit (AT&T × Connected Learning Centers: Student / Volunteer /
+Enterprise) with a screenshot per state and the captured text, plus
+`walk.mjs` to regenerate it. Read that before re-walking the site.
+
+ESLint + `tsc --noEmit` clean on every touched file.
