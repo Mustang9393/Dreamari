@@ -64,7 +64,11 @@ const STEPS = [
 type Step = typeof STEPS[number]["id"];
 type View = "intro" | "posts" | "connected";
 type Flight = { id: number; amount: number; colorIndex: number; x: number; y: number; toX: number; toY: number };
-const CHAIN_XP = [5, 8, 12];
+// XP now reflects the effort of the action itself, not just the order it
+// was done in -- feedback from Joshua: asking a real question is more
+// effort than a like, so it should be worth more, regardless of whether
+// it's the first or third thing a student does.
+const ACTION_XP: Record<Step, number> = { like: 5, comment: 10, ask: 20 };
 const BONUS_XP = 15;
 
 /** A real rolling count-up (not just a scale-pop) -- direct feedback, 17
@@ -222,7 +226,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
   function reward(action: Step) {
     if (done.has(action)) return;
     const nextDone = new Set(done).add(action);
-    const chainAmount = CHAIN_XP[Math.min(nextDone.size - 1, CHAIN_XP.length - 1)];
+    const chainAmount = ACTION_XP[action];
     const bonus = nextDone.size === STEPS.length;
     const amount = chainAmount + (bonus ? BONUS_XP : 0);
     awardDreamScore(`${milestone}:${action}`, chainAmount);
@@ -330,7 +334,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
                       <button key={id} className={styles.menuRow} onClick={() => choose(id)}>
                         <Icon size={20} color={color} />
                         <span><strong>{title}</strong><small>{body}</small></span>
-                        <b style={{ color: done.has(id) ? color : "var(--connect-accent)" }}>{done.has(id) ? <Check size={16} /> : `+${CHAIN_XP[Math.min(done.size, CHAIN_XP.length - 1)]} XP`}</b>
+                        <b style={{ color: done.has(id) ? color : "var(--connect-accent)" }}>{done.has(id) ? <Check size={16} /> : `+${ACTION_XP[id]} XP`}</b>
                       </button>
                     );
                   })}
@@ -460,7 +464,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
                 </AnimatePresence>
                 {done.has(step) && done.size < STEPS.length && (() => {
                   const next = STEPS.find((s) => !done.has(s.id))!;
-                  const nextXp = CHAIN_XP[Math.min(done.size, CHAIN_XP.length - 1)];
+                  const nextXp = ACTION_XP[next.id];
                   return (
                     <button className={styles.nextUp} onClick={() => goToStep(next.id)}>
                       Next: {next.title} <b>+{nextXp} XP</b> <ArrowRight size={14} />
@@ -475,10 +479,11 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
 
             {view === "connected" && (() => {
               const doneTitles = STEPS.filter((s) => done.has(s.id)).map((s) => s.title);
+              const missing = STEPS.find((s) => !done.has(s.id));
               const copy = done.size === 3
                 ? { title: "All connected!", body: "Liked. Commented. Asked.", note: `+${BONUS_XP} XP bonus for all three, included above.` }
                 : done.size === 2
-                  ? { title: "Two connections made!", body: `${doneTitles.join(" and ")}, done.`, note: `One more (+${CHAIN_XP[2]} XP) for the full bonus.` }
+                  ? { title: "Two connections made!", body: `${doneTitles.join(" and ")}, done.`, note: `One more (+${missing ? ACTION_XP[missing.id] : 0} XP) for the full bonus.` }
                   : done.size === 1
                     ? { title: "Connected!", body: `${doneTitles[0]}, done.`, note: `Two more for a +${BONUS_XP} XP bonus.` }
                     : { title: "Heading out", body: "You can always connect next time.", note: "" };

@@ -49,7 +49,13 @@ const STEPS = [
 type Step = typeof STEPS[number]["id"];
 type View = "intro" | "posts" | "connected" | "profile";
 type Flight = { id: number; amount: number; colorIndex: number; x: number; y: number; toX: number; toY: number };
-const CHAIN_XP = [5, 8, 12];
+// XP reflects the effort of the action, not the order it was done in --
+// feedback from Joshua: asking a real question is more effort than a
+// like, so it should be worth more regardless of when it happens. Ask
+// matches Play's own Ask; liking/following are the lighter actions, and
+// leaving a real comment on an answer sits between the two.
+const ACTION_XP: Record<Step, number> = { ask: 20, answers: 5, people: 5 };
+const ANSWER_COMMENT_XP = 10;
 const BONUS_XP = 15;
 const CHAIN_COLOR = ["#33c78c", "#facc15", "#c084fc"];
 
@@ -213,10 +219,10 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
     }]);
   }
 
-  function reward(action: Step) {
+  function reward(action: Step, amountOverride?: number) {
     if (done.has(action)) return;
     const nextDone = new Set(done).add(action);
-    const chainAmount = CHAIN_XP[Math.min(nextDone.size - 1, CHAIN_XP.length - 1)];
+    const chainAmount = amountOverride ?? ACTION_XP[action];
     const bonus = nextDone.size === STEPS.length;
     const amount = chainAmount + (bonus ? BONUS_XP : 0);
     awardDreamScore(`${milestone}:${action}`, chainAmount);
@@ -250,7 +256,7 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
     setInsightComments((previous) => ({ ...previous, [id]: text.trim() }));
     setCommentingInsight(undefined);
     setInsightDraft("");
-    reward("answers");
+    reward("answers", ANSWER_COMMENT_XP);
   }
   function followPro(id: string) {
     if (followedPros.has(id)) return;
@@ -329,7 +335,7 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
                       <button key={id} className={styles.menuRow} onClick={() => choose(id)}>
                         <Icon size={20} color={color} />
                         <span><strong>{title}</strong><small>{body}</small></span>
-                        <b style={{ color: done.has(id) ? color : "var(--connect-accent)" }}>{done.has(id) ? <Check size={16} /> : `+${CHAIN_XP[Math.min(done.size, CHAIN_XP.length - 1)]} XP`}</b>
+                        <b style={{ color: done.has(id) ? color : "var(--connect-accent)" }}>{done.has(id) ? <Check size={16} /> : `+${ACTION_XP[id]} XP`}</b>
                       </button>
                     );
                   })}
@@ -505,7 +511,7 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
                 </AnimatePresence>
                 {done.has(step) && done.size < STEPS.length && (() => {
                   const next = STEPS.find((s) => !done.has(s.id))!;
-                  const nextXp = CHAIN_XP[Math.min(done.size, CHAIN_XP.length - 1)];
+                  const nextXp = ACTION_XP[next.id];
                   return (
                     <button className={styles.nextUp} onClick={() => goToStep(next.id)}>
                       Next: {next.title} <b>+{nextXp} XP</b> <ArrowRight size={14} />
@@ -539,10 +545,11 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
 
             {view === "connected" && (() => {
               const doneTitles = STEPS.filter((s) => done.has(s.id)).map((s) => s.title);
+              const missing = STEPS.find((s) => !done.has(s.id));
               const copy = done.size === 3
                 ? { title: "All connected!", body: "Asked. Answered. Followed.", note: `+${BONUS_XP} XP bonus for all three, included above.` }
                 : done.size === 2
-                  ? { title: "Two connections made!", body: `${doneTitles.join(" and ")}, done.`, note: `One more (+${CHAIN_XP[2]} XP) for the full bonus.` }
+                  ? { title: "Two connections made!", body: `${doneTitles.join(" and ")}, done.`, note: `One more (+${missing ? ACTION_XP[missing.id] : 0} XP) for the full bonus.` }
                   : done.size === 1
                     ? { title: "Connected!", body: `${doneTitles[0]}, done.`, note: `Two more for a +${BONUS_XP} XP bonus.` }
                     : { title: "Heading out", body: "You can always connect next time.", note: "" };
