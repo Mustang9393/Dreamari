@@ -10,15 +10,16 @@
 // by id.
 
 import Image from "next/image";
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import {
   Bookmark, BookmarkCheck, Briefcase, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, Eye, Lightbulb, Megaphone,
-  MessageCircleQuestion, MessagesSquare, ThumbsUp, UserRound, Users,
+  MessageCircleQuestion, MessagesSquare, ThumbsUp, UserRound, Users, X, FileText, ListChecks,
 } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { Avatar, CompanyChip, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { Avatar, Composer, InlineAsk, InsightMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
 import { AreaChart, MetricTile, Segmented, ruledCell } from "../viz";
-import { FollowButton, Panel, RULE } from "../ProProfile";
+import { FollowButton, Panel, ProProfileView, RULE } from "../ProProfile";
 import * as D from "./attData";
 
 const accent = D.ATT.brand.color;
@@ -50,14 +51,29 @@ function Submitted({ text = D.SUBMITTED }: { text?: string }) {
     </span>
   );
 }
+function PullQuote({ children }: { children: ReactNode }) {
+  return <blockquote className="text-[14.5px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{children}</blockquote>;
+}
+/** The other boards' engagement pill: a count that is also the toggle. */
+function CountPill({ icon: Icon, count, on, onClick, label }: { icon: typeof ThumbsUp; count: number; on: boolean; onClick: () => void; label: string }) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={on} aria-label={label} className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums" style={on ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}>
+      <Icon className="h-3.5 w-3.5" aria-hidden /> {count}
+    </button>
+  );
+}
+/** Opens a professional's profile from anywhere on the board. */
+const OpenPro = createContext<(id: string) => void>(() => {});
+
 function ProLine({ id, size = 36 }: { id: string; size?: number }) {
   const pro = D.ATT_PROS[id];
+  const openPro = useContext(OpenPro);
   return (
     <div className="flex min-w-0 flex-1 items-center gap-[10px]">
-      <Avatar name={pro.name} size={size} photo={pro.photo} />
+      <button type="button" onClick={() => openPro(id)} aria-label={pro.name} className="dm-quiet flex-none cursor-pointer rounded-full"><Avatar name={pro.name} size={size} photo={pro.photo} /></button>
       <div className="min-w-0 flex-1">
         <span className="flex items-center gap-[5px] text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>
-          <span className="truncate">{pro.name}</span> <VerifiedBadge size={14} />
+          <button type="button" onClick={() => openPro(id)} className="dm-link min-w-0 cursor-pointer truncate text-left">{pro.name}</button> <VerifiedBadge size={14} />
         </span>
         {/* one line, always: the designation truncates rather than wrapping,
            so every card's header is the same height and the question below
@@ -80,10 +96,11 @@ function InsightCard({ item, onAsk }: { item: typeof D.STUDENT_INSIGHTS[number];
   const helpful = item.helpful + (liked ? 1 : 0);
   const comments = item.comments + (comment ? 1 : 0);
   return (
-    <article className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
+    <article className="relative flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] pt-[var(--space-5)]" style={ITEM}>
+      <InsightMark color={accent} />
       <ProLine id={item.pro} />
       <h3 className="text-[16px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.question}</h3>
-      <p className="text-[14.5px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{item.quote}&rdquo;</p>
+      <PullQuote>{item.quote}</PullQuote>
       {/* Same row the other boards' insight cards carry: the helpful pill
          with its count, the comment count, then the secondary action pushed
          to the far edge. Ask is the one action that keeps its word (direct
@@ -99,7 +116,17 @@ function InsightCard({ item, onAsk }: { item: typeof D.STUDENT_INSIGHTS[number];
         >
           <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {helpful}
         </button>
-        <button type="button" onClick={() => setComposing((v) => !v)} aria-pressed={composing} aria-label={D.INSIGHT_ACTIONS.comment} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px] tabular-nums" style={{ color: composing ? "var(--accent-subtle)" : undefined }}>
+        {/* the same pill as Like: both act in place on this card (there is no
+           thread to open here), so they share one grammar; Ask, which leaves
+           for the Questions tab, is the one worded action */}
+        <button
+          type="button"
+          onClick={() => setComposing((v) => !v)}
+          aria-pressed={composing}
+          aria-label={D.INSIGHT_ACTIONS.comment}
+          className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
+          style={composing || comment ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
+        >
           <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
         </button>
         <button type="button" onClick={onAsk} className="dm-quiet ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
@@ -112,24 +139,154 @@ function InsightCard({ item, onAsk }: { item: typeof D.STUDENT_INSIGHTS[number];
           <p className="min-w-0 break-words">{comment}</p>
         </div>
       ) : composing ? (
-        <form className="flex flex-col gap-[8px]" onSubmit={(e) => { e.preventDefault(); if (!draft.trim()) return; setComment(draft.trim()); setComposing(false); setDraft(""); }}>
-          <label className="sr-only" htmlFor={`${item.id}-comment`}>{D.INSIGHT_ACTIONS.comment}</label>
-          <textarea id={`${item.id}-comment`} rows={2} maxLength={280} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={D.INSIGHT_ACTIONS.commentPlaceholder} className={`${FIELD_CLASS} resize-none`} style={FIELD_STYLE} />
-          <PrimaryCta size="sm" className={`self-end ${draft.trim() ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!draft.trim()) return; setComment(draft.trim()); setComposing(false); setDraft(""); }}>{D.INSIGHT_ACTIONS.post}</PrimaryCta>
-        </form>
+        <Composer id={`${item.id}-comment`} rows={2} autoFocus accent={accent} value={draft} onChange={setDraft} placeholder={D.INSIGHT_ACTIONS.commentPlaceholder} submitLabel={D.INSIGHT_ACTIONS.post} onSubmit={() => { setComment(draft.trim()); setComposing(false); setDraft(""); }} />
       ) : null}
     </article>
   );
 }
 
-function OpportunityCard({ item, saved, onSave }: { item: { id: string; kind: string; title: string; line: string }; saved: boolean; onSave: () => void }) {
+/** Three cards side by side from sm up, where the row is already scannable.
+ *  On phones a one-card-at-a-time rail (scroll-snap, the next card peeking)
+ *  with arrows and dots instead of three tall cards stacked, which read as
+ *  clutter (direct feedback, 17 Sept 2026: "manual buttons also so it's
+ *  obvious"). No auto-rotation. */
+function InsightRail({ onAsk }: { onAsk: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+  const count = D.STUDENT_INSIGHTS.length;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onScroll = () => {
+      const card = el.firstElementChild as HTMLElement | null;
+      if (!card) return;
+      setIndex(Math.max(0, Math.min(count - 1, Math.round(el.scrollLeft / (card.offsetWidth + 12)))));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [count]);
+  const go = (i: number) => {
+    const el = ref.current;
+    const card = el?.children[i] as HTMLElement | undefined;
+    if (el && card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: "smooth" });
+  };
   return (
-    <div className="flex h-full flex-col gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
-      <Eyebrow>{item.kind}</Eyebrow>
-      <h3 className="text-[15.5px] leading-[21px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.title}</h3>
-      <Muted>{item.line}</Muted>
-      <div className="mt-auto pt-[6px]">
-        <QuietCta size="sm" done={saved} onClick={onSave} className="w-fit">
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <div ref={ref} className="-mx-5 -mt-[24px] flex snap-x snap-mandatory gap-[16px] overflow-x-auto px-5 pt-[24px] pb-[2px] [scrollbar-width:none] sm:mx-0 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-[var(--space-4)] sm:overflow-visible sm:px-0 sm:pt-0">
+        {D.STUDENT_INSIGHTS.map((item) => (
+          <div key={item.id} className="w-[86%] flex-none snap-center sm:w-auto">
+            <InsightCard item={item} onAsk={onAsk} />
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-center gap-[var(--space-4)] sm:hidden">
+        <button type="button" aria-label="Previous insight" onClick={() => go(Math.max(0, index - 1))} disabled={index === 0} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+          <ChevronLeft className="h-4 w-4" aria-hidden />
+        </button>
+        <div className="flex items-center gap-[6px]" role="tablist" aria-label="Insights">
+          {D.STUDENT_INSIGHTS.map((item, i) => (
+            <button key={item.id} type="button" role="tab" aria-selected={i === index} aria-label={`Insight ${i + 1} of ${count}`} onClick={() => go(i)} className="dm-quiet cursor-pointer rounded-full transition-all duration-200" style={{ width: i === index ? 18 : 7, height: 7, background: i === index ? accent : "var(--glass-border)" }} />
+          ))}
+        </div>
+        <button type="button" aria-label="Next insight" onClick={() => go(Math.min(count - 1, index + 1))} disabled={index === count - 1} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+          <ChevronRight className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type Opportunity = { id: string; kind: string; title: string; line: string };
+
+/** Open / Registration open / Opening soon / Upcoming, colored by whether a
+ *  student can act now (direct feedback, 17 Sept 2026). */
+function StatusChip({ id }: { id: string }) {
+  const d = D.OPPORTUNITY_DETAILS[id];
+  if (!d) return null;
+  const U = D.OPPORTUNITY_UI;
+  const label = d.status === "open" ? U.open : d.status === "soon" ? U.soon : d.status === "registration" ? U.registration : U.upcoming;
+  const live = d.status === "open" || d.status === "registration";
+  const tone = live ? "var(--world-food-farming-nature)" : d.status === "soon" ? "var(--world-business-money-office)" : "var(--muted-foreground)";
+  return (
+    <span className="inline-flex items-center gap-[5px] rounded-full px-[8px] py-[1px] text-[11px] leading-[15px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${tone} 16%, transparent)`, color: tone }}>
+      {live && <span aria-hidden className="size-[6px] rounded-full" style={{ background: tone }} />}{label}
+    </span>
+  );
+}
+
+/** A calendar tile: month over day. */
+function DateTile({ month, day, size = "md" }: { month: string; day: number; size?: "sm" | "md" }) {
+  const sm = size === "sm";
+  return (
+    <span aria-label={`${month} ${day}`} className={`flex flex-none flex-col items-center justify-center rounded-[var(--radius-sm)] border ${sm ? "h-[40px] w-[40px]" : "h-[48px] w-[48px]"}`} style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 10%, var(--glass-surface-1))` }}>
+      <span className={`${sm ? "text-[9px]" : "text-[10px]"} leading-none font-extrabold tracking-[0.08em] uppercase`} style={{ color: accent }}>{month}</span>
+      <span className={`${sm ? "text-[15px] mt-[2px]" : "text-[18px] mt-[3px]"} leading-none font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{day}</span>
+    </span>
+  );
+}
+/** "Closes Jan 31" as a short chip. */
+function DeadlineChip({ month, day, soon = false }: { month: string; day: number; soon?: boolean }) {
+  const tone = soon ? "var(--world-business-money-office)" : "var(--foreground)";
+  return (
+    <span className="inline-flex items-center gap-[5px] rounded-full border px-[8px] py-[2px] text-[11.5px] leading-[15px] font-bold whitespace-nowrap" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: tone }}>
+      <Clock className="h-3 w-3" aria-hidden /> {soon ? D.OPPORTUNITY_UI.opens : D.OPPORTUNITY_UI.closes} {month} {day}
+    </span>
+  );
+}
+const MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December";
+/** The card's line without the date it now shows as a tile or chip, so
+ *  nothing is said twice: "Detroit, MI · November 14" -> "Detroit, MI". */
+function lineWithoutDate(line: string, d?: D.OpportunityDetail): string {
+  if (!d || (!d.date && !d.deadline)) return line;
+  return line.split(" · ").filter((part) => !new RegExp(`^(Apply by )?(${MONTHS}) \\d`).test(part)).join(" · ");
+}
+/** When, compact: the tile or the span, the time, and the deadline. */
+function WhenLine({ d }: { d: D.OpportunityDetail }) {
+  return (
+    <span className="flex flex-wrap items-center gap-[10px]">
+      {d.date && <DateTile month={d.date.month} day={d.date.day} size="sm" />}
+      {d.span && <span className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{d.span}</span>}
+      {d.date?.time && <span className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{d.date.time}</span>}
+      {d.deadline && <DeadlineChip month={d.deadline.month} day={d.deadline.day} />}
+      {!d.deadline && d.date && d.status === "soon" && <DeadlineChip month={d.date.month} day={d.date.day} soon />}
+    </span>
+  );
+}
+
+/** Interest signals as numbers, not sentences: "312 interested · 47 applied". */
+function Signals({ id, className = "" }: { id: string; className?: string }) {
+  const d = D.OPPORTUNITY_DETAILS[id];
+  if (!d) return null;
+  const U = D.OPPORTUNITY_UI;
+  const items: [typeof Users, number, string][] = [[Users, d.interested, U.interested]];
+  if (d.applied) items.push([CheckCircle2, d.applied, U.applied]);
+  if (d.registered) items.push([CheckCircle2, d.registered, U.registered]);
+  return (
+    <span className={`flex flex-wrap items-center gap-x-[12px] gap-y-[4px] text-[12px] leading-[16px] font-semibold ${className}`} style={{ color: "var(--muted-foreground)" }}>
+      {items.map(([Icon, n, label]) => <span key={label} className="flex items-center gap-[5px] tabular-nums"><Icon className="h-3.5 w-3.5" aria-hidden /> {n} {label}</span>)}
+    </span>
+  );
+}
+
+function OpportunityCard({ item, saved, onSave, onOpen, showKind = true }: { item: Opportunity; saved: boolean; onSave: () => void; onOpen: () => void; /** false inside a section whose heading already names the kind */ showKind?: boolean }) {
+  const d = D.OPPORTUNITY_DETAILS[item.id];
+  return (
+    <div className="dm-tap group relative flex h-full flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
+      {/* the whole card opens the detail sheet; Save stays its own control */}
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {item.title}</span></button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />
+      <div className={`flex flex-wrap items-center gap-[6px] ${showKind ? "justify-between" : "justify-end"}`}>{showKind && <Eyebrow>{item.kind}</Eyebrow>}<StatusChip id={item.id} /></div>
+      <div className="flex items-start gap-[12px]">
+        {d?.date && d.status !== "soon" && <DateTile month={d.date.month} day={d.date.day} />}
+        <div className="min-w-0">
+          <h3 className="text-[16px] leading-[22px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.title}</h3>
+          {/* deadlines live in the sheet, not on the card (direct feedback, 17 Sept 2026) */}
+          <Muted className="mt-[3px]">{lineWithoutDate(item.line, d)}{d?.date?.time && d.status !== "soon" ? ` · ${d.date.time}` : ""}</Muted>
+        </div>
+      </div>
+      <div className="relative z-20 mt-auto flex items-center justify-between gap-[10px] pt-[4px]">
+        <Signals id={item.id} />
+        <QuietCta size="sm" done={saved} onClick={onSave} className="flex-none">
           {saved ? <><BookmarkCheck className="h-4 w-4" aria-hidden /> {D.SAVE.saved}</> : <><Bookmark className="h-4 w-4" aria-hidden /> {D.SAVE.save}</>}
         </QuietCta>
       </div>
@@ -137,7 +294,66 @@ function OpportunityCard({ item, saved, onSave }: { item: { id: string; kind: st
   );
 }
 
-function StudentHome({ onAsk, onSeeAll, saves, toggleSave }: { onAsk: () => void; onSeeAll: () => void; saves: Record<string, boolean>; toggleSave: (id: string) => void }) {
+/** The opportunity's sheet, in the Panel language: one column, eyebrow over
+ *  title over subtitle, a ruled facts list (no boxes, no icons), the About
+ *  paragraph as the body, one accordion for the how, and a single action
+ *  row. Same chrome as Connect's Ask sheet (direct feedback, 17 Sept 2026:
+ *  title > subtitle > body, breathing room, nothing competing). */
+function OpportunitySheet({ item, saved, onSave, inPlan, onPlan, onClose }: { item: Opportunity; saved: boolean; onSave: () => void; inPlan: boolean; onPlan: () => void; onClose: () => void }) {
+  const d = D.OPPORTUNITY_DETAILS[item.id];
+  const U = D.OPPORTUNITY_UI;
+  const router = useRouter();
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [onClose]);
+  const resumeLabel = /internship|scholarship|job shadow/i.test(item.kind) ? "Tailor your résumé" : "Build your résumé";
+  return (
+    <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="att-opp-title">
+      <button type="button" aria-label={U.close} onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+        <button type="button" onClick={onClose} aria-label={U.close} className="dm-quiet absolute top-[14px] right-[14px] z-10 flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+
+        {/* header: status, title, the numbers. No eyebrow (the title names
+           the kind) and no subtitle (the facts below say who and when). */}
+        <div className="flex flex-col gap-[10px] px-[var(--space-6)] pt-[var(--space-6)] pr-[56px]">
+          <div><StatusChip id={item.id} /></div>
+          <h2 id="att-opp-title" className="text-[24px] leading-[30px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)" }}>{item.title}</h2>
+          <Signals id={item.id} />
+        </div>
+
+        {d && (
+          <>
+            {/* body */}
+            <p className="px-[var(--space-6)] pt-[var(--space-5)] text-[15px] leading-[23px]" style={{ color: "var(--foreground)" }}>{d.about}</p>
+
+            {/* facts: ruled rows, label then value */}
+            <dl className="mx-[var(--space-6)] mt-[var(--space-5)] border-t" style={{ borderColor: RULE }}>
+              {([[U.who, d.who], [U.when, <WhenLine key="when" d={d} />], [U.where, d.where], [U.how, d.how]] as [string, ReactNode][]).map(([k, v]) => (
+                <div key={k} className="grid grid-cols-[88px_1fr] gap-[var(--space-4)] border-b py-[12px]" style={{ borderColor: RULE }}>
+                  <dt className="pt-[2px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+                  <dd className="text-[14px] leading-[20px]">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        )}
+
+        {/* one action row: the primary, the résumé step, and Save as an icon */}
+        <div className="flex items-center gap-[10px] px-[var(--space-6)] pt-[var(--space-5)] pb-[var(--space-6)]">
+          {inPlan ? <QuietCta size="sm" done onClick={onPlan}><ListChecks className="h-4 w-4" aria-hidden /> {U.inPlan}</QuietCta> : <PrimaryCta size="sm" onClick={onPlan}><ListChecks className="h-4 w-4" aria-hidden /> {U.addPlan}</PrimaryCta>}
+          <QuietCta size="sm" onClick={() => router.push("/profile?tab=resume")}><FileText className="h-4 w-4" aria-hidden /> {resumeLabel}</QuietCta>
+          <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? D.SAVE.saved : D.SAVE.save} className="dm-quiet ml-auto flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+            <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity }: { onAsk: () => void; onSeeAll: () => void; saves: Record<string, boolean>; toggleSave: (id: string) => void; openOpportunity: (item: Opportunity) => void }) {
   const [pick, setPick] = useState<string>();
   return (
     <>
@@ -146,9 +362,7 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave }: { onAsk: () => void
           <SectionHead>{D.INSIGHTS_SECTION.title}</SectionHead>
           <Muted className="mt-[2px]">{D.INSIGHTS_SECTION.sub}</Muted>
         </div>
-        <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3">
-          {D.STUDENT_INSIGHTS.map((item) => <InsightCard key={item.id} item={item} onAsk={onAsk} />)}
-        </div>
+        <InsightRail onAsk={onAsk} />
       </section>
 
       <Panel id="att-poll-title" title={D.POLL.eyebrow}>
@@ -156,12 +370,35 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave }: { onAsk: () => void
            opportunity cards around it (direct feedback, 17 Sept 2026) */}
         <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={ITEM}>
           <h3 className="text-[17px] leading-[23px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.POLL.question}</h3>
-          <div className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
-            {D.POLL.options.map((option) => (
-              <QuietCta key={option} size="sm" done={pick === option} onClick={() => setPick(option)}>{option}</QuietCta>
-            ))}
+          {pick ? (
+            // the tally, the way a story poll flips once you have voted: your
+            // pick in the brand blue, everyone else's share behind it
+            <ul className="flex flex-col gap-[8px]">
+              {D.POLL.options.map((option) => {
+                const pct = D.POLL.results[option] ?? 0;
+                const mine = option === pick;
+                return (
+                  <li key={option} className="relative overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: mine ? `color-mix(in srgb, ${accent} 55%, var(--glass-border))` : "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                    <span aria-hidden className="absolute inset-y-0 left-0 transition-[width] duration-700 ease-out" style={{ width: `${pct}%`, background: mine ? `color-mix(in srgb, ${accent} 30%, transparent)` : "rgba(255,255,255,0.06)" }} />
+                    <span className="relative flex items-center justify-between gap-[10px] px-[14px] py-[9px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
+                      <span className="flex items-center gap-[6px]">{option} {mine && <CheckCircle2 className="h-4 w-4" aria-hidden style={{ color: accent }} />}</span>
+                      <span className="tabular-nums" style={{ color: mine ? accent : "var(--muted-foreground)" }}>{pct}%</span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
+              {D.POLL.options.map((option) => (
+                <QuietCta key={option} size="sm" onClick={() => setPick(option)}>{option}</QuietCta>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-wrap items-center justify-between gap-[8px]">
+            <Muted>{D.POLL.responses + (pick ? 1 : 0)} {D.POLL.answered}</Muted>
+            {pick && <Submitted text={D.POLL.saved} />}
           </div>
-          {pick && <Submitted text={D.POLL.saved} />}
         </div>
       </Panel>
 
@@ -171,7 +408,7 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave }: { onAsk: () => void
           <LinkButton onClick={onSeeAll}>{D.HOME_OPPORTUNITIES.seeAll} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-          {D.HOME_OPPORTUNITIES.items.map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} />)}
+          {D.HOME_OPPORTUNITIES.items.map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} onOpen={() => openOpportunity(item)} />)}
         </div>
       </section>
     </>
@@ -179,10 +416,10 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave }: { onAsk: () => void
 }
 
 function StudentQuestions() {
-  const [draft, setDraft] = useState("");
   const [asked, setAsked] = useState(false);
   const [open, setOpen] = useState<string>();
   const [more, setMore] = useState(false);
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
   const shown = more ? D.RECENT_ANSWERS.items : D.RECENT_ANSWERS.items.slice(0, 2);
   return (
     <>
@@ -190,29 +427,31 @@ function StudentQuestions() {
         {asked ? (
           <div className="flex flex-col gap-[8px]">
             <Submitted text={D.ASK.submitted} />
-            <LinkButton onClick={() => { setAsked(false); setDraft(""); }}>{D.ASK.again}</LinkButton>
+            <LinkButton onClick={() => setAsked(false)}>{D.ASK.again}</LinkButton>
           </div>
         ) : (
-          <form className="flex flex-col gap-[10px]" onSubmit={(e) => { e.preventDefault(); if (draft.trim()) setAsked(true); }}>
-            <label className="sr-only" htmlFor="att-ask">{D.ASK.eyebrow}</label>
-            <textarea id="att-ask" rows={3} maxLength={280} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={D.ASK.placeholder} className={`${FIELD_CLASS} resize-none`} style={FIELD_STYLE} />
-            <PrimaryCta size="sm" className={`self-end ${draft.trim() ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (draft.trim()) setAsked(true); }}>{D.ASK.cta} <ChevronRight className="h-4 w-4" aria-hidden /></PrimaryCta>
-          </form>
+          <InlineAsk joined defaultOpen accent={accent} placeholder={D.ASK.placeholder} onPost={() => setAsked(true)} />
         )}
       </Panel>
 
       <Panel id="att-answers-title" title={D.RECENT_ANSWERS.eyebrow}>
-        <ul className="-mt-[var(--space-2)] flex flex-col">
+        {/* Each answer is its own lifted card, composed like the insight
+           cards: the question as the title, who answered, the answer as a
+           pull quote once opened, then the counts (direct feedback, 17 Sept
+           2026: "more editorial, better composed... show likes and comments"). */}
+        <ul className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
           {shown.map((item) => {
             const isOpen = open === item.id;
             return (
-              <li key={item.id} className="flex flex-col gap-[10px] border-t py-[var(--space-4)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
-                <span className="text-[16px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>&ldquo;{item.question}&rdquo;</span>
-                <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-                  <ProLine id={item.pro} size={32} />
-                  <LinkButton onClick={() => setOpen(isOpen ? undefined : item.id)}>{isOpen ? D.RECENT_ANSWERS.hide : D.RECENT_ANSWERS.read} <ChevronRight className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-90" : ""}`} aria-hidden /></LinkButton>
+              <li key={item.id} className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
+                <h3 className="text-[16px] leading-[22px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.question}</h3>
+                <ProLine id={item.pro} size={32} />
+                {isOpen && <PullQuote>{item.answer}</PullQuote>}
+                <div className="mt-auto flex items-center gap-[var(--space-3)] pt-[2px]">
+                  <CountPill icon={ThumbsUp} count={item.helpful + (liked[item.id] ? 1 : 0)} on={!!liked[item.id]} onClick={() => setLiked((m) => ({ ...m, [item.id]: !m[item.id] }))} label={D.INSIGHT_ACTIONS.like} />
+                  <CountPill icon={MessagesSquare} count={item.comments} on={false} onClick={() => setOpen(item.id)} label={D.INSIGHT_ACTIONS.comment} />
+                  <span className="ml-auto"><LinkButton onClick={() => setOpen(isOpen ? undefined : item.id)}>{isOpen ? D.RECENT_ANSWERS.hide : D.RECENT_ANSWERS.read} <ChevronRight className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-90" : ""}`} aria-hidden /></LinkButton></span>
                 </div>
-                {isOpen && <p className="rounded-[var(--radius-md)] p-[12px] text-[14.5px] leading-[21px]" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{item.answer}</p>}
               </li>
             );
           })}
@@ -225,24 +464,33 @@ function StudentQuestions() {
   );
 }
 
-function StudentOpportunities({ saves, toggleSave }: { saves: Record<string, boolean>; toggleSave: (id: string) => void }) {
+function StudentOpportunities({ saves, toggleSave, openOpportunity }: { saves: Record<string, boolean>; toggleSave: (id: string) => void; openOpportunity: (item: Opportunity) => void }) {
   return (
     <>
-      {D.OPPORTUNITY_GROUPS.map((group) => (
+      {D.OPPORTUNITY_GROUPS.map((group) => {
+        // the kind eyebrow only where a section mixes kinds; "Internships"
+        // already says it (direct feedback, 17 Sept 2026)
+        const mixed = new Set(group.items.map((i) => i.kind)).size > 1;
+        return (
         <section key={group.title} className="flex flex-col gap-[var(--space-4)]">
           <SectionHead>{group.title}</SectionHead>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
-            {group.items.map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} />)}
+            {group.items.map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} onOpen={() => openOpportunity(item)} showKind={mixed} />)}
           </div>
         </section>
-      ))}
+        );
+      })}
     </>
   );
 }
 
 function StudentPeople({ follows, toggleFollow }: { follows: Record<string, boolean>; toggleFollow: (id: string) => void }) {
+  const openPro = useContext(OpenPro);
   return (
-    <>
+    // One AT&T mark for the whole section, faint in the corner, instead of a
+    // chip on every card (direct feedback, 17 Sept 2026)
+    <div className="relative flex flex-col gap-[var(--space-6)]">
+      <Image src={D.ATT.brand.markWhite} alt="" width={96} height={40} unoptimized aria-hidden className="pointer-events-none absolute top-[-6px] right-0 h-[64px] w-auto select-none" style={{ opacity: 0.07 }} />
       {D.PEOPLE_ROWS.map((row) => (
         <section key={row.title} className="flex flex-col gap-[var(--space-4)]">
           <SectionHead>{row.title}</SectionHead>
@@ -250,19 +498,20 @@ function StudentPeople({ follows, toggleFollow }: { follows: Record<string, bool
             {row.pros.map((id) => {
               const pro = D.ATT_PROS[id];
               return (
-                <div key={id} className="flex flex-col items-center gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-center" style={ITEM}>
+                <div key={id} className="dm-tap group relative flex flex-col items-center gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-center" style={ITEM}>
+                  <button type="button" onClick={() => openPro(id)} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {pro.name}</span></button>
+                  <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />
                   <Avatar name={pro.name} size={56} photo={pro.photo} />
                   <span className="mt-[4px] flex items-center gap-[5px] text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={14} /></span>
                   <span className="max-w-full truncate text-[12.5px] leading-[17px]" title={pro.role} style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
-                  <CompanyChip name={pro.org} tone="surface" size="sm" />
-                  <FollowButton compact following={!!follows[id]} onToggle={() => toggleFollow(id)} className="mt-[8px] w-full" tone={{ background: accent, color: "#FFFFFF" }} />
+                  <FollowButton compact following={!!follows[id]} onToggle={() => toggleFollow(id)} className="relative z-20 mt-[8px] w-full" tone={{ background: accent, color: "#FFFFFF" }} />
                 </div>
               );
             })}
           </div>
         </section>
       ))}
-    </>
+    </div>
   );
 }
 
@@ -270,16 +519,7 @@ function StudentPeople({ follows, toggleFollow }: { follows: Record<string, bool
 
 function AnswerForm({ id, placeholder, submit, cancel, onCancel, onDone, rows = 3 }: { id: string; placeholder: string; submit: string; cancel?: string; onCancel?: () => void; onDone: () => void; rows?: number }) {
   const [draft, setDraft] = useState("");
-  return (
-    <form className="flex flex-col gap-[10px]" onSubmit={(e) => { e.preventDefault(); if (draft.trim()) onDone(); }}>
-      <label className="sr-only" htmlFor={id}>{placeholder}</label>
-      <textarea id={id} rows={rows} maxLength={400} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={placeholder} className={`${FIELD_CLASS} resize-none`} style={FIELD_STYLE} />
-      <div className="flex flex-wrap gap-[8px]">
-        <PrimaryCta size="sm" className={draft.trim() ? "" : "pointer-events-none opacity-50"} onClick={() => { if (draft.trim()) onDone(); }}>{submit}</PrimaryCta>
-        {cancel && onCancel && <QuietCta size="sm" onClick={onCancel}>{cancel}</QuietCta>}
-      </div>
-    </form>
-  );
+  return <Composer id={id} rows={rows} maxLength={400} autoFocus accent={accent} value={draft} onChange={setDraft} placeholder={placeholder} submitLabel={submit} cancelLabel={cancel} onCancel={onCancel} onSubmit={onDone} />;
 }
 
 function VolunteerHome() {
@@ -307,9 +547,9 @@ function VolunteerQuestions() {
   const shown = more ? Q.items : Q.items.slice(0, 2);
   return (
     <Panel id="att-waiting-title" title={Q.title} aside={<Muted>{Q.sub}</Muted>}>
-      <ul className="-mt-[var(--space-2)] flex flex-col">
+      <ul className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
         {shown.map((question, i) => (
-          <li key={question} className="flex flex-col gap-[10px] border-t py-[var(--space-4)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
+          <li key={question} className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
             <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
               <span className="min-w-0 flex-1 text-[15.5px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{question}</span>
               {sent[i] ? <Submitted /> : <PrimaryCta size="sm" onClick={() => setOpenIdx(openIdx === i ? undefined : i)}>{Q.answer}</PrimaryCta>}
@@ -355,14 +595,23 @@ function VolunteerShare() {
       {done ? (
         <Submitted />
       ) : (
-        <form className="flex flex-col gap-[12px]" onSubmit={(e) => { e.preventDefault(); if (draft.trim()) setDone(true); }}>
-          {mode === "insight" ? (
-            <>
+        <Composer
+          id="att-share-body"
+          rows={4}
+          maxLength={400}
+          accent={accent}
+          value={draft}
+          onChange={setDraft}
+          placeholder={form.placeholder}
+          submitLabel={form.post}
+          onSubmit={() => setDone(true)}
+          above={mode === "insight" ? (
+            <div className="flex flex-col gap-[8px]">
               <span className="text-[14px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>{S.insight.question}</span>
               <div className="flex flex-wrap gap-[6px]">
                 {S.insight.chips.map((chip) => <QuietCta key={chip} size="xs" done={draft === chip} onClick={() => setDraft(chip)}>{chip}</QuietCta>)}
               </div>
-            </>
+            </div>
           ) : (
             <label className="flex flex-col gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               {S.opportunity.chooseType}
@@ -371,10 +620,7 @@ function VolunteerShare() {
               </select>
             </label>
           )}
-          <label className="sr-only" htmlFor="att-share-body">{form.placeholder}</label>
-          <textarea id="att-share-body" rows={4} maxLength={400} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={form.placeholder} className={`${FIELD_CLASS} resize-none`} style={FIELD_STYLE} />
-          <PrimaryCta size="sm" className={`w-fit ${draft.trim() ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (draft.trim()) setDone(true); }}>{form.post}</PrimaryCta>
-        </form>
+        />
       )}
     </Panel>
   );
@@ -625,9 +871,9 @@ function EnterpriseTeam() {
         <Muted className="mt-[2px]">{T.sub}</Muted>
       </div>
       <Panel id="att-top-title" title={T.topEyebrow}>
-        <ol className="-mt-[var(--space-2)] flex flex-col">
+        <ol className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3">
           {T.top.map((row, i) => (
-            <li key={row.pro} className="flex flex-wrap items-center gap-[var(--space-4)] border-t py-[var(--space-4)] first:border-t-0 last:pb-0" style={{ borderColor: RULE }}>
+            <li key={row.pro} className="flex flex-wrap items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
               <span className="flex size-[28px] flex-none items-center justify-center rounded-full text-[13px] font-extrabold tabular-nums" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>{i + 1}</span>
               <div className="min-w-[200px] flex-1"><ProLine id={row.pro} /></div>
               <dl className="grid flex-none grid-cols-3 gap-[var(--space-4)] text-center">
@@ -731,13 +977,27 @@ export function AttCommunityView({ onBack }: { onBack: () => void }) {
   const [volunteerTab, setVolunteerTab] = useState<typeof D.VOLUNTEER_TABS[number]["key"]>("home");
   const [enterpriseTab, setEnterpriseTab] = useState<typeof D.ENTERPRISE_TABS[number]["key"]>("program");
   const [saves, setSaves] = useState<Record<string, boolean>>({});
+  const [plan, setPlan] = useState<Record<string, boolean>>({});
   const [follows, setFollows] = useState<Record<string, boolean>>({});
+  const [profile, setProfile] = useState<string>();
+  const [opportunity, setOpportunity] = useState<Opportunity>();
   const toggleSave = (id: string) => setSaves((m) => ({ ...m, [id]: !m[id] }));
+  const togglePlan = (id: string) => setPlan((m) => ({ ...m, [id]: !m[id] }));
   const toggleFollow = (id: string) => setFollows((m) => ({ ...m, [id]: !m[id] }));
   const ink = "#f6f5fb";
 
+  // A person's profile is the same page every other professional has, with
+  // Back returning to the board exactly as it was (direct feedback, 17 Sept
+  // 2026: "make sure profiles are openable and match the other professional
+  // profiles").
+  if (profile) {
+    const pro = D.ATT_PRO_RECORDS[profile];
+    return <ProProfileView key={pro.id} pro={pro} follows={Object.fromEntries(Object.entries(follows).map(([k, v]) => [`att-${k}`, v]))} onFollow={() => toggleFollow(profile)} onBack={() => setProfile(undefined)} />;
+  }
+
   return (
-    <>
+    <OpenPro.Provider value={setProfile}>
+      {opportunity && <OpportunitySheet item={opportunity} saved={!!saves[opportunity.id]} onSave={() => toggleSave(opportunity.id)} inPlan={!!plan[opportunity.id]} onPlan={() => togglePlan(opportunity.id)} onClose={() => setOpportunity(undefined)} />}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> {D.BACK}
@@ -778,9 +1038,9 @@ export function AttCommunityView({ onBack }: { onBack: () => void }) {
         </div>
 
         <div className="flex flex-col gap-[var(--space-6)]">
-          {view === "student" && studentTab === "home" && <StudentHome onAsk={() => setStudentTab("questions")} onSeeAll={() => setStudentTab("opportunities")} saves={saves} toggleSave={toggleSave} />}
+          {view === "student" && studentTab === "home" && <StudentHome onAsk={() => setStudentTab("questions")} onSeeAll={() => setStudentTab("opportunities")} saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} />}
           {view === "student" && studentTab === "questions" && <StudentQuestions />}
-          {view === "student" && studentTab === "opportunities" && <StudentOpportunities saves={saves} toggleSave={toggleSave} />}
+          {view === "student" && studentTab === "opportunities" && <StudentOpportunities saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} />}
           {view === "student" && studentTab === "people" && <StudentPeople follows={follows} toggleFollow={toggleFollow} />}
 
           {view === "volunteer" && volunteerTab === "home" && <VolunteerHome />}
@@ -793,6 +1053,6 @@ export function AttCommunityView({ onBack }: { onBack: () => void }) {
           {view === "enterprise" && enterpriseTab === "team" && <EnterpriseTeam />}
         </div>
       </SectionSurface>
-    </>
+    </OpenPro.Provider>
   );
 }

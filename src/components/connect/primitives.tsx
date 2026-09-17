@@ -6,7 +6,7 @@
 // Nothing here is new; every component moved verbatim.
 
 import Image from "next/image";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { ChevronRight, CheckCircle2, Clock } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
@@ -90,6 +90,18 @@ const USE_PHOTO_AVATARS = false;
 // no two people who share a screen share a face. Jordan (the signed-in
 // student) wears their real profile photo.
 const AV = "/images/connect/avatars";
+/** Professionals who belong to a partner board rather than PROS (the AT&T
+ *  board's people). Keyed by name like AVATAR_PHOTO so every Avatar call
+ *  site, the profile page included, resolves their portrait the same way. */
+export const PARTNER_PORTRAITS: Record<string, string> = {
+  "Terrence Reed": "/images/connect/avatars/att-reed.jpg",
+  "Calvin Lee": "/images/connect/avatars/att-lee.jpg",
+  "Nisha Patel": "/images/connect/avatars/att-patel.jpg",
+  "Dev Johnson": "/images/connect/avatars/att-johnson.jpg",
+  "Lucia Rodriguez": "/images/connect/avatars/att-rodriguez.jpg",
+  "Amina Thompson": "/images/connect/avatars/att-thompson.jpg",
+};
+
 const AVATAR_PHOTO: Record<string, string> = {
   // Jordan is pinned in studentAvatarSrc (src/lib/avatar.ts) now, the one
   // function every avatar call site funnels through -- not here, which is
@@ -161,7 +173,7 @@ export function Avatar({ name, size = 34, photo: explicitPhoto }: { name: string
   // (Jordan included -- their pin lives in studentAvatarSrc, the fallback
   // below, not here).
   const isPro = PROS.some((p) => p.name === name);
-  const photo = explicitPhoto ?? (USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined);
+  const photo = explicitPhoto ?? (USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined) ?? PARTNER_PORTRAITS[name];
   // The seed is the FIRST word only, so "Jordan Rivera" (a full name, shown
   // on the student's own profile) and "Jordan" (the community handle, per
   // the app's first-name-only identity rule) generate the identical
@@ -816,5 +828,72 @@ export function CompanyMark({ name, ink = "currentColor", className = "", height
       </span>
       <span className="sr-only">{name}</span>
     </span>
+  );
+}
+
+
+/** The insight identity: one large serif opening mark, breaking the top-left
+ *  corner of whatever surface holds insight content. One per surface: a
+ *  single insight card wears its own, a whole insight feed wears one on its
+ *  container, never a row inside a list and never on questions, answers or
+ *  story quotes (direct feedback, 17 Sept 2026). Parent must be
+ *  `position: relative`. */
+export function InsightMark({ color = "var(--primary)", size = 56 }: { color?: string; size?: number }) {
+  return (
+    <span aria-hidden className="pointer-events-none absolute leading-none font-bold select-none" style={{ top: -Math.round(size * 0.23), left: -Math.round(size * 0.11), fontSize: size, fontFamily: 'Georgia, "Times New Roman", serif', color, textShadow: "0 2px 10px rgba(0,0,0,0.35)" }}>&ldquo;</span>
+  );
+}
+
+/** The standard text composer for comments, answers and posts: the same box
+ *  InlineAsk expands into (accent-tinted border, raised glass, the beam
+ *  running while the field has focus), with a character count and the
+ *  actions along its bottom edge. Every free-text field in Connect should be
+ *  one of these, not a bare textarea (direct feedback, 17 Sept 2026). Labels
+ *  come from the caller so the copy stays whatever the surface already says. */
+export function Composer({
+  id, value, onChange, onSubmit, submitLabel, onCancel, cancelLabel, placeholder, rows = 3, maxLength = 280, accent = "var(--primary)", autoFocus = false, above,
+}: {
+  id: string; value: string; onChange: (v: string) => void; onSubmit: () => void; submitLabel: ReactNode; onCancel?: () => void; cancelLabel?: string; placeholder: string; rows?: number; maxLength?: number; accent?: string; autoFocus?: boolean;
+  /** anything that belongs inside the box above the field (prompt chips, a type picker) */
+  above?: ReactNode;
+}) {
+  const [focused, setFocused] = useState(autoFocus);
+  const ready = value.trim().length > 0;
+  return (
+    <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={focused}>
+      <form
+        className="rounded-[var(--radius-lg)] border p-[var(--space-4)]"
+        style={{ borderColor: `color-mix(in srgb, ${accent} ${focused ? 55 : 35}%, var(--glass-border))`, background: "var(--color-glass-surface-3)" }}
+        onSubmit={(e) => { e.preventDefault(); if (ready) onSubmit(); }}
+      >
+        {above && <div className="mb-[10px]">{above}</div>}
+        <label className="sr-only" htmlFor={id}>{placeholder}</label>
+        <textarea
+          id={id}
+          autoFocus={autoFocus}
+          value={value}
+          rows={rows}
+          maxLength={maxLength}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (ready) onSubmit(); } }}
+          className="dm-beam-input w-full resize-none bg-transparent text-[14px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)]"
+          style={{ color: "var(--foreground)" }}
+        />
+        <div className="mt-[6px] flex flex-wrap items-center justify-end gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="mr-auto flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{value.length}/{maxLength}</span>
+          {onCancel && cancelLabel && (
+            <button type="button" onClick={onCancel} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+              {cancelLabel}
+            </button>
+          )}
+          <button type="submit" disabled={!ready} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[15px] text-[12px] leading-[16px] font-semibold disabled:cursor-default disabled:opacity-50" style={{ background: accent, color: "#FFFFFF" }}>
+            {submitLabel} <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
+          </button>
+        </div>
+      </form>
+    </BorderBeam>
   );
 }

@@ -40,3 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /.worktrees/
+
+# the team's generated headshot collection (source files, not served)
+Headshots/
+headshots/

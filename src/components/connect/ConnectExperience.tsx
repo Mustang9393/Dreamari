@@ -13,7 +13,7 @@ import { type LucideIcon as ResourceIcon, UserRound } from "lucide-react";
 import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge } from "./primitives";
+import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { PeopleTab, PeopleWelcome } from "./PeopleTab";
@@ -1413,29 +1413,39 @@ export function ConnectExperience() {
           view.kind === "home" || view.kind === "board" || view.kind === "partner" || view.kind === "proDashboard" || view.kind === "admin" ? "max-w-[1440px]" : "max-w-[992px]"
         }`}
       >
-        <RoleTabs
-          role={role}
-          onPick={(next) => {
-            setRole(next);
-            if (next === "student") setView({ kind: "home", tab: "communities" }, next);
-            if (next === "attendee") setView({ kind: "home", tab: "events" }, next);
-            // Volunteer opens on the profile as students see it (direct
-            // feedback, 5 Sept 2026: a company wants the result first); the
-            // private dashboard is one tap from there.
-            if (next === "pro") setView({ kind: "pro", id: volunteer }, next);
-            if (next === "partner") setView({ kind: "partner", org: PROS.find((p) => p.id === volunteer)?.org ?? "JPMorgan Chase" }, next);
-            if (next === "admin") setView({ kind: "admin" }, next);
-          }}
-        />
-        {(role === "pro" || role === "partner") && (
-          <VolunteerPicker
-            selected={volunteer}
-            onPick={(id) => {
-              const p = PROS.find((x) => x.id === id)!;
-              if (role === "partner") setView({ kind: "partner", org: p.org }, role);
-              else setView({ kind: "pro", id }, role);
-            }}
-          />
+        {/* The demo role switcher is a utility, not part of the page: it
+           shows only where it applies (the Connect landing, or while a
+           non-student role is on screen so the way back stays visible), in
+           a slim right-aligned row like the AT&T board's own switcher, so
+           boards, threads and profiles start at the same height as every
+           other main screen (direct feedback, 17 Sept 2026). */}
+        {(view.kind === "home" || role !== "student") && (
+          <div className="-mb-[var(--space-3)] flex flex-wrap items-center justify-end gap-[var(--space-3)]">
+            <RoleTabs
+              role={role}
+              onPick={(next) => {
+                setRole(next);
+                if (next === "student") setView({ kind: "home", tab: "communities" }, next);
+                if (next === "attendee") setView({ kind: "home", tab: "events" }, next);
+                // Volunteer opens on the profile as students see it (direct
+                // feedback, 5 Sept 2026: a company wants the result first); the
+                // private dashboard is one tap from there.
+                if (next === "pro") setView({ kind: "pro", id: volunteer }, next);
+                if (next === "partner") setView({ kind: "partner", org: PROS.find((p) => p.id === volunteer)?.org ?? "JPMorgan Chase" }, next);
+                if (next === "admin") setView({ kind: "admin" }, next);
+              }}
+            />
+            {(role === "pro" || role === "partner") && (
+              <VolunteerPicker
+                selected={volunteer}
+                onPick={(id) => {
+                  const p = PROS.find((x) => x.id === id)!;
+                  if (role === "partner") setView({ kind: "partner", org: p.org }, role);
+                  else setView({ kind: "pro", id }, role);
+                }}
+              />
+            )}
+          </div>
         )}
 
         {view.kind === "home" && (
@@ -1852,7 +1862,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
     // welcome popup on connect... gets cropped and i cant hit the cta" --
     // every other bottom sheet on this page had the identical bug).
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="ask-title">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="ask-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Ask a question</h2>
@@ -2029,7 +2039,7 @@ function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (re
   const [reason, setReason] = useState<string | null>(null);
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="report-title">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[440px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="report-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Report this</h2>
@@ -2618,7 +2628,12 @@ function BoardView({
         </div>
       )}
       {tab === "insights" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
+        // The feed is the insight surface here, so it wears the one insight
+        // mark on its corner; the rows inside stay plain (direct feedback,
+        // 17 Sept 2026: identify insights everywhere "without repeating it
+        // on every card").
+        <div className="relative flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <InsightMark color={communityAccent(community)} />
           {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
           {insights.map((i) => <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
           {insights.length === 0 && (
@@ -2954,7 +2969,7 @@ function EventView({
           {/* the viewer: one photo large, the count, previous and next; Escape or the X closes */}
           {photoOpen !== null && event.photos && typeof document !== "undefined" && createPortal(
             <div role="dialog" aria-modal="true" aria-label={`Photo ${photoOpen + 1} of ${event.photos.count}`} className="fixed inset-0 z-[95] flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "rgba(6,7,16,0.9)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
-              <button type="button" aria-label="Close" onClick={() => setPhotoOpen(null)} className="absolute inset-0 cursor-default" />
+              <button type="button" aria-label="Close" onClick={() => setPhotoOpen(null)} className="absolute inset-0 cursor-default backdrop-blur-[14px]" />
               <div className="relative z-[1] flex w-full max-w-[1100px] flex-col gap-[var(--space-3)]">
                 <div className="flex items-center justify-between text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
                   <span>{event.name} · Photo {photoOpen + 1} of {event.photos.count}</span>
@@ -3605,8 +3620,10 @@ function InsightThreadView({
         {/* Plain on the page's own colored backdrop, same as ThreadView's
            header -- no bordered/tinted card box (direct feedback, 9 Sept
            2026: "the professional insight opened page should also follow
-           the question page ... on top with the colored backdrop"). */}
-        <div>
+           the question page ... on top with the colored backdrop"). The one
+           insight mark sits at the header's corner: this page is one insight. */}
+        <div className="relative pl-[30px]">
+          <InsightMark color={boardCommunity ? communityAccent(boardCommunity) : "var(--primary)"} size={48} />
           <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Professional insight</span>
           <h1 className="mt-[6px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h1>
           <div className="mt-[12px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} /></div>
@@ -3702,7 +3719,7 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
   ];
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "#0e0c20", fontFamily: "var(--font-display)" }}>
           <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
@@ -3773,7 +3790,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
 
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label="Enter event code">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.55)" }} />
       <div className="relative z-[1] max-h-[calc(100dvh-96px)] w-full max-w-[480px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         {confirming ? (
           <div aria-live="polite">

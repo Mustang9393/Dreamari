@@ -348,3 +348,6 @@
   .dialog { width: 100%; max-height: calc(100dvh - 20px); border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
   .content { padding: 18px 18px 20px; }
 }
+
+/* the featured insight card carries the one insight mark on its corner (InsightMark is absolutely positioned) */
+.post { position: relative; }

@@ -45,7 +45,7 @@ import { awardDreamScore } from "@/lib/dreamScore";
 import { playMilestoneChime, playXpRise } from "@/components/build/sound";
 import { LocalBurst } from "@/components/build/ui";
 import { SparkBar } from "@/components/flow/SparkBar";
-import { Avatar, CompanyChip, formatCount, InlineAsk } from "@/components/connect/primitives";
+import { Avatar, CompanyChip, formatCount, InlineAsk, InsightMark } from "@/components/connect/primitives";
 import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Thread } from "@/components/connect/data";
 import type { Simulation } from "./types";
@@ -470,6 +470,7 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
                       </div>
                     ) : insight && pro ? (
                       <div className={styles.post}>
+                        <InsightMark color={accent} size={48} />
                         <div className={styles.author}>
                           <Avatar name={pro.name} size={38} />
                           <div>

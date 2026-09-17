@@ -9997,9 +9997,28 @@ appears in all three.
 Rule from 17 Sept: generated avatars are for students only. Insight cards
 carry the other boards' action row (helpful pill with count, comment count,
 Ask as the one worded action); the counts are ours, the Replit shows none.
-Open: five first names clash (Marcus/Andre/Elena with existing pros,
-Jordan/Maya with students) and need a decision since renaming would change
-Joshua's copy.
+Later the same day, on the same board: the five clashing first names were
+replaced (Terrence Reed, Calvin Lee, Nisha Patel, Dev Johnson, Lucia
+Rodriguez; surnames and roles kept, a code comment maps them back to the
+source). Beyond the Replit, all direct requests: opportunity cards open a
+detail sheet (about, who, when, where, how; interest and applied or
+registered counts; status chips; Add to My Plan; Tailor or Build your
+résumé; Save), dates render as calendar tiles, deadlines as "Closes Jan 31"
+chips; the This Week poll shows a response count and flips to a percentage
+tally after voting; the six professionals open the shared ProProfileView
+(`ATT_PRO_RECORDS`, demo profile copy); People tiles open profiles and the
+section carries one faint AT&T mark instead of a chip per card. Shared
+primitives added: `InsightMark` (one large serif quote on the corner of any
+surface holding insight content: the AT&T Home cards, the general boards'
+Insights tab container, the insight page header, the Play interstitial's
+featured card; never a list row), `Composer` (the standard beam-on-focus
+text field, used for every free-text field on the AT&T board), and
+`PARTNER_PORTRAITS` (name-keyed portraits for pros outside PROS). Connect's
+page-level demo role switcher now renders only on the landing or while a
+non-student role is active, in a slim right-aligned row; every Connect sheet
+backdrop blurs. Switching a board's filter tab no longer pushes onto the
+back stack. Program descriptions and profile stories are demo copy to be
+replaced by AT&T's own text.
 
 
 **Connect interstitial in Play (`ConnectInterstitial.tsx`).** Skippable
