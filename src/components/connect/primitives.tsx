@@ -42,8 +42,12 @@ export const CONTACT_WARNING = "Keep phone numbers, emails and usernames out. Pr
 
 /** "9,418" for profile totals; "8.4K" (compact) for per-post views -- the two
  *  formats the Connect 2.0 doc uses. */
-export function formatCount(n: number, mode: "grouped" | "compact" = "grouped"): string {
-  if (mode === "compact" && n >= 10000) {
+// Universal app rule, direct feedback 17 Sept 2026: any count over 999
+// abbreviates to K (1540 -> "1.5K", 38600 -> "38.6K") -- compact is the
+// default now, not an opt-in, so every existing call site picks this up
+// without having to be touched individually.
+export function formatCount(n: number, mode: "grouped" | "compact" = "compact"): string {
+  if (mode === "compact" && n >= 1000) {
     const k = n / 1000;
     return `${k >= 100 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}K`;
   }

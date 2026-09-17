@@ -33,7 +33,7 @@ import { awardDreamScore } from "@/lib/dreamScore";
 import { playMilestoneChime, playXpRise } from "@/components/build/sound";
 import { LocalBurst } from "@/components/build/ui";
 import { SparkBar } from "@/components/flow/SparkBar";
-import { Avatar, CompanyChip, InlineAsk } from "@/components/connect/primitives";
+import { Avatar, CompanyChip, formatCount, InlineAsk } from "@/components/connect/primitives";
 import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro, type Thread } from "@/components/connect/data";
 import styles from "../play/ConnectInterstitial.module.css";
@@ -377,7 +377,7 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
                             <span className={styles.boardScrim} style={{ background: cardBottomScrim("heavy") }} />
                             <div className={styles.boardInfo} style={{ textShadow: CARD_TEXT_SHADOW }}>
                               <strong>{community.name}</strong>
-                              <span>{community.students} students · {community.activePros} pros</span>
+                              <span>{formatCount(community.students)} students · {formatCount(community.activePros)} pros</span>
                               {community.professionalsFrom.length > 0 && (
                                 <span className={styles.boardLogos}>
                                   {community.professionalsFrom.slice(0, 3).map((name) => <CompanyChip key={name} name={name} tone="frost" size="sm" />)}
@@ -394,7 +394,7 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
                           </div>
                         ) : match ? (
                           <div className={styles.match}>
-                            <p>{match.followers}+ students already asked this</p>
+                            <p>{formatCount(match.followers)}+ students already asked this</p>
                             <h2>{match.title}</h2>
                             {matchAnswer?.kind === "answer" && matchAnswerPro && (
                               <>
@@ -451,7 +451,7 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
                                   <p className={styles.quote}>&ldquo;{item.body}&rdquo;</p>
                                   <div className={styles.postActions} data-nudge={untouched || undefined}>
                                     <button type="button" aria-pressed={liked} onClick={() => toggleLikeInsight(item.id)}>
-                                      <ThumbsUp size={13} /> Like <b>{item.helpful + (liked ? 1 : 0)}</b>
+                                      <ThumbsUp size={13} /> Like <b>{formatCount(item.helpful + (liked ? 1 : 0))}</b>
                                     </button>
                                     <button
                                       type="button"
@@ -499,9 +499,9 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
                                 <button type="button" className={styles.peopleCardMain} onClick={() => openProfile(p)}>
                                   <Avatar name={p.name} size={44} />
                                   <strong>{p.name}</strong>
-                                  <small>{p.role}</small>
+                                  <small className={styles.peopleRole} title={p.role}>{p.role}</small>
                                   <CompanyChip name={p.org} tone="surface" size="sm" />
-                                  <small>{p.followers} followers</small>
+                                  <small>{formatCount(p.followers)} followers</small>
                                 </button>
                                 <button type="button" className={styles.followBtn} data-following={following || undefined} onClick={() => followPro(p.id)}>
                                   {following ? <Check size={13} /> : <UserPlus size={13} />}{following ? "Following" : "Follow"}
@@ -543,7 +543,7 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
                     <h2><strong>{profilePro.name}</strong> <BadgeCheck size={16} /></h2>
                     <p>{profilePro.role} · {profilePro.org}</p>
                     <CompanyChip name={profilePro.org} tone="surface" size="sm" />
-                    <small>{profilePro.followers} followers</small>
+                    <small>{formatCount(profilePro.followers)} followers</small>
                   </div>
                   <p className={styles.quote}>&ldquo;{profilePro.story}&rdquo;</p>
                   <button className={following ? styles.done : styles.primary} disabled={following} onClick={() => followPro(profilePro.id)}>

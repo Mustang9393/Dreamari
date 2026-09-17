@@ -45,7 +45,7 @@ import { awardDreamScore } from "@/lib/dreamScore";
 import { playMilestoneChime, playXpRise } from "@/components/build/sound";
 import { LocalBurst } from "@/components/build/ui";
 import { SparkBar } from "@/components/flow/SparkBar";
-import { Avatar, CompanyChip, InlineAsk } from "@/components/connect/primitives";
+import { Avatar, CompanyChip, formatCount, InlineAsk } from "@/components/connect/primitives";
 import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Thread } from "@/components/connect/data";
 import type { Simulation } from "./types";
@@ -409,7 +409,7 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
                             <span className={styles.boardScrim} style={{ background: cardBottomScrim("heavy") }} />
                             <div className={styles.boardInfo} style={{ textShadow: CARD_TEXT_SHADOW }}>
                               <strong>{community.name}</strong>
-                              <span>{community.students} students · {community.activePros} pros</span>
+                              <span>{formatCount(community.students)} students · {formatCount(community.activePros)} pros</span>
                               {community.professionalsFrom.length > 0 && (
                                 <span className={styles.boardLogos}>
                                   {community.professionalsFrom.slice(0, 3).map((name) => (
@@ -430,7 +430,7 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
                           </div>
                         ) : match ? (
                           <div className={styles.match}>
-                            <p>{match.followers}+ students already asked this</p>
+                            <p>{formatCount(match.followers)}+ students already asked this</p>
                             <h2>{match.title}</h2>
                             {matchAnswer?.kind === "answer" && matchAnswerPro && (
                               <>
@@ -480,7 +480,7 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
                         </div>
                         <p className={styles.quote}>&ldquo;{insight.body}&rdquo;</p>
                         <div className={styles.postMeta}>
-                          <span><ThumbsUp size={13} /> {insight.helpful + (liked ? 1 : 0)}</span>
+                          <span><ThumbsUp size={13} /> {formatCount(insight.helpful + (liked ? 1 : 0))}</span>
                           <span><MessageCircle size={13} /> {insight.replies.length + (comment ? 1 : 0)}</span>
                         </div>
                         {step === "like" ? (
