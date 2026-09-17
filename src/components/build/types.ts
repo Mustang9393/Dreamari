@@ -44,7 +44,7 @@ export const STAGES: { id: StageId; percent: number; almostDone?: boolean }[] = 
 export const INTEREST_WORLDS: { label: string; slug: string }[] = [
   { label: "Arts, Media & Sport", slug: "arts-media-sport" },
   { label: "Building & Construction", slug: "building-construction" },
-  { label: "Business & Money", slug: "business-money-office" },
+  { label: "Business & Finance", slug: "business-money-office" },
   { label: "Counseling & Social Work", slug: "helping-human-services" },
   { label: "Driving, Flying & Shipping", slug: "driving-flying-shipping" },
   { label: "Factories & Making Things", slug: "factories-making-things" },

@@ -26,7 +26,7 @@ type RoutedState = "open" | "answering" | "answered" | "skipped";
  *  "Answer one?" has something behind it for every volunteer. */
 type Routed = { id: string; handle: string; grade: string; ago: string; title: string; threadId?: string };
 const ROUTED_BY_WORLD: Record<string, Routed[]> = {
-  "Business & Money": [
+  "Business & Finance": [
     { id: "r1", handle: "Diego", grade: "Sophomore", ago: "2h", title: "What do people get wrong about accounting?", threadId: "t-fin-accounting" },
     { id: "r2", handle: "Priya", grade: "Junior", ago: "1d", title: "Can I get into finance from a state school?" },
     { id: "r3", handle: "Theo", grade: "Freshman", ago: "2d", title: "What should I major in if I want to work in finance?" },

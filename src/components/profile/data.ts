@@ -81,7 +81,7 @@ const t = (id: string, label: string, action: PlanAction, href: string): PlanTas
 const o = (id: string, label: string, action: PlanAction, href?: string): PlanTask => ({ id, label, action, href, outOfApp: true });
 
 // The finance roadmap, verbatim from Joshua Pierce (Slack, 5 Sept 2026).
-// Shared by every Business & Money finance career (IB and PE); the copy
+// Shared by every Business & Finance finance career (IB and PE); the copy
 // speaks of "your #1 Career" so it reads right from either.
 const FINANCE_PLAN = (prefix: string): PlanHorizon[] => [
   h(`${prefix}-1`, "Next 3 Months", "Foundation", [
@@ -109,7 +109,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
   {
     id: "investment-banking",
     title: "Investment Banking",
-    world: "Business & Money",
+    world: "Business & Finance",
     photo: "/images/app/poster-investment-banking-v3.webp",
     photoFocus: "50% 40%",
     match: 91,
@@ -257,7 +257,7 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
   {
     id: "private-equity",
     title: "Private Equity",
-    world: "Business & Money",
+    world: "Business & Finance",
     photo: "/images/app/poster-private-equity.webp",
     match: 88,
     receipts: [
@@ -367,7 +367,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
   {
     id: "asset-management",
     title: "Asset Management",
-    world: "Business & Money",
+    world: "Business & Finance",
     photo: "/images/app/poster-asset-management.webp",
     match: 80,
     receipts: [{ kind: "saved", value: "Saved", label: "From the Browse rail" }, { kind: "sim", value: "1x", label: "Markets mini game" }],
@@ -427,7 +427,7 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
   {
     id: "fashion-buyer",
     title: "Fashion Buyer",
-    world: "Business & Money",
+    world: "Business & Finance",
     photo: "/images/app/poster-fashion-buyer.webp",
     match: 75,
     receipts: [{ kind: "watched", value: "Liked", label: "In the match deck" }, { kind: "sim", value: "1x", label: "Breakdown read" }],

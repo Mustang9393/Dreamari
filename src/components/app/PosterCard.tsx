@@ -22,7 +22,7 @@ import { posterTitleFont, WORLD_COLORS } from "./worlds";
 // the widest glyph, not the average: a title shrinks only when it truly must,
 // and never overflows because a narrow estimate said it would fit.
 const POSTER_GLYPH_EM: Record<string, number> = {
-  "Business & Money": 0.72,
+  "Business & Finance": 0.72,
   "Tech & Engineering": 0.85,
   "Health & Medicine": 0.75,
   "Law, Safety & Justice": 0.67,

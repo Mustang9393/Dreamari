@@ -8,8 +8,9 @@ import { BorderBeam } from "border-beam";
 import { preload } from "react-dom";
 import styles from "./WelcomeSplash.module.css";
 
-export type SplashSurface = "match" | "matchGrid" | "explore" | "play" | "connect" | "profile";
+export type SplashSurface = "match" | "matchGrid" | "explore" | "play" | "connect" | "profile" | "resume";
 
+export type SplashScene = Scene;
 type Scene = {
   sprite?: string;
   wide?: boolean;
@@ -22,6 +23,8 @@ type Scene = {
    *  connect one worked better with icons"); no other splash has rows. */
   rows?: { icon?: LucideIcon; text: ReactNode; /** footnote styling: divider above, muted */ note?: boolean }[];
   cta: string;
+  /** an optional quiet second action under the CTA (a score card's "See Final Tips") */
+  secondary?: string;
 };
 
 // One introduction and one action. Keep the cinematic family resemblance,
@@ -90,6 +93,15 @@ const SCENES: Record<SplashSurface, Scene> = {
     ],
     cta: "Start connecting",
   },
+  // The Resume Builder's first-run welcome (the reference's own "Hi! I'm
+  // Dreamy" moment, in the same dialog every other surface opens with).
+  resume: {
+    sprite: "/images/dreamy/v2/splash/dreamy-glasses.webp",
+    tint: ["40, 140, 255", "100, 70, 255"],
+    title: "RESUME",
+    line: "Hi! 👋 I'm Dreamy. I'll help you build your resume, one step at a time.",
+    cta: "Let's build it",
+  },
   profile: {
     sprite: "/images/dreamy/v2/splash/dreamy-party.webp",
     tint: ["255, 160, 30", "255, 50, 100"],
@@ -101,8 +113,9 @@ const SCENES: Record<SplashSurface, Scene> = {
 };
 
 
-function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () => void }) {
-  const scene = SCENES[surface];
+function SplashDialog({ surface, onDone, onSecondary, override }: { surface: SplashSurface; onDone: () => void; onSecondary?: () => void; override?: Partial<Scene> }) {
+  const scene: Scene = { ...SCENES[surface], ...override };
+  const secondaryChosen = useRef(false);
   const [departing, setDeparting] = useState(false);
   const leaving = useRef(false);
   const cta = useRef<HTMLButtonElement>(null);
@@ -139,7 +152,7 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
     setDeparting(true);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     exitTimer.current = setTimeout(() => {
-      onDone();
+      if (secondaryChosen.current) onSecondary?.(); else onDone();
       // Nudges that should wait for the welcome to clear listen for this
       // (Explore's Schools tab pulse, 11 Sept 2026). Fired here so every
       // splash, however it is mounted, announces itself.
@@ -175,18 +188,23 @@ function SplashDialog({ surface, onDone }: { surface: SplashSurface; onDone: () 
         </button>
         </BorderBeam>
         </div>
+        {scene.secondary && onSecondary && (
+          <button type="button" className={styles.secondary} onClick={() => { secondaryChosen.current = true; advance(); }} aria-disabled={departing}>
+            {scene.secondary}
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
 /** Mount a fresh introduction on every open, including controlled revisits. */
-export function WelcomeSplash({ surface, open, onDone }: { surface: SplashSurface; open: boolean; onDone: () => void }) {
+export function WelcomeSplash({ surface, open, onDone, onSecondary, scene }: { surface: SplashSurface; open: boolean; onDone: () => void; /** runs instead of onDone when the scene's secondary action is chosen */ onSecondary?: () => void; /** per-instance copy over the surface's scene (a score card's live numbers) */ scene?: Partial<SplashScene> }) {
   // Warm the sprite before the splash opens (the host renders this closed
   // first); a no-op on the server and when already requested.
-  const spriteUrl = SCENES[surface].sprite;
+  const spriteUrl = scene?.sprite ?? SCENES[surface].sprite;
   if (spriteUrl) preload(spriteUrl, { as: "image" });
-  return open ? <SplashDialog key={surface} surface={surface} onDone={onDone} /> : null;
+  return open ? <SplashDialog key={surface} surface={surface} onDone={onDone} onSecondary={onSecondary} override={scene} /> : null;
 }
 
 // Demo switch: show the splash on EVERY visit, ignoring the stored "seen"

@@ -15,10 +15,10 @@ const C = (title: string, world: string, photo: string, salary?: string): Catalo
 
 // "Careers Picked for You" (Home) — 14 posters in the design's order.
 export const HOME_PICKS: CatalogCareer[] = [
-  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.webp"),
-  C("Accountant", "Business & Money", "/images/app/poster-accountant.webp"),
-  C("Private Equity", "Business & Money", "/images/app/poster-private-equity.webp"),
-  C("Investment Banking", "Business & Money", "/images/app/poster-investment-banking-v3.webp"),
+  C("Asset Manager", "Business & Finance", "/images/app/poster-asset-manager.webp"),
+  C("Accountant", "Business & Finance", "/images/app/poster-accountant.webp"),
+  C("Private Equity", "Business & Finance", "/images/app/poster-private-equity.webp"),
+  C("Investment Banking", "Business & Finance", "/images/app/poster-investment-banking-v3.webp"),
   C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.webp"),
   C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.webp"),
   C("UI/UX Designer", "Tech & Engineering", "/images/app/poster-uiux-designer.webp"),
@@ -35,20 +35,20 @@ export const HOME_PICKS: CatalogCareer[] = [
   C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller.webp"),
   C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.webp"),
   C("Animator", "Arts, Media & Sport", "/images/app/poster-animator.webp"),
-  C("HR Manager", "Business & Money", "/images/app/poster-hr-manager.webp"),
+  C("HR Manager", "Business & Finance", "/images/app/poster-hr-manager.webp"),
   C("Game Designer", "Tech & Engineering", "/images/app/poster-game-designer.webp"),
 ];
 
 // Explore-Browse rails — content, titles, and order per Joshua (2026-08-21).
 // Rail 1 (merged Recommended + Because-You-Liked; content + order per
-// Joshua 2026-08-21): "Recommended Because You Liked Business & Money".
+// Joshua 2026-08-21): "Recommended Because You Liked Business & Finance".
 export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
-  C("Asset Manager", "Business & Money", "/images/app/poster-asset-manager.webp"),
-  C("Private Equity", "Business & Money", "/images/app/poster-private-equity-v2.webp"),
-  C("Quant", "Business & Money", "/images/app/poster-quant.webp"),
-  C("Accountant", "Business & Money", "/images/app/poster-accountant.webp"),
-  C("Management Analyst", "Business & Money", "/images/app/poster-management-analyst.webp"),
-  C("Administrative Assistant", "Business & Money", "/images/app/poster-administrative-assistant.webp"),
+  C("Asset Manager", "Business & Finance", "/images/app/poster-asset-manager.webp"),
+  C("Private Equity", "Business & Finance", "/images/app/poster-private-equity-v2.webp"),
+  C("Quant", "Business & Finance", "/images/app/poster-quant.webp"),
+  C("Accountant", "Business & Finance", "/images/app/poster-accountant.webp"),
+  C("Management Analyst", "Business & Finance", "/images/app/poster-management-analyst.webp"),
+  C("Administrative Assistant", "Business & Finance", "/images/app/poster-administrative-assistant.webp"),
 ];
 
 // "Top 5 Trending Careers Among Gen Z" (runs to 6). Congruence fix: the
@@ -111,9 +111,9 @@ export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
   C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.webp", "$137K"),
   C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.webp", "$559K"),
   C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.webp", "$227K"),
-  C("Purchasing Manager", "Business & Money", "/images/app/poster-purchasing-manager.webp", "$148K"),
+  C("Purchasing Manager", "Business & Finance", "/images/app/poster-purchasing-manager.webp", "$148K"),
   C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.webp", "$496K"),
-  C("Public Relations Manager", "Business & Money", "/images/app/poster-public-relations-manager.webp", "$146K"),
+  C("Public Relations Manager", "Business & Finance", "/images/app/poster-public-relations-manager.webp", "$146K"),
   C("Veterinarian", "Farming, Animals & Nature", "/images/app/poster-veterinarian.webp", "$130K"),
 ];
 
@@ -157,7 +157,7 @@ export type ReelCareer = {
 export const FOR_YOU_REEL: ReelCareer[] = [
   {
     title: "Investment Banking",
-    world: "Business & Money",
+    world: "Business & Finance",
     matchLabel: "STRONG MATCH",
     description: "Investment bankers help companies raise money and buy or sell businesses.",
     salary: "$361K",
@@ -200,7 +200,7 @@ export const FOR_YOU_REEL: ReelCareer[] = [
   },
   {
     title: "Private Equity",
-    world: "Business & Money",
+    world: "Business & Finance",
     matchLabel: "STRONG MATCH",
     description: "Private equity firms buy companies, try to make them better, and sell them later for more.",
     salary: "$250K",

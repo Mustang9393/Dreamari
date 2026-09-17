@@ -51,7 +51,7 @@ const POSTERS = {
  *  selector, applied to the career card). Pay and degree come from the
  *  career pages' own facts. */
 export const HERO_CAREERS = [
-  { slug: "investment-banking", title: "Investment Banker", world: "Business & Money", photo: POSTERS.ib },
+  { slug: "investment-banking", title: "Investment Banker", world: "Business & Finance", photo: POSTERS.ib },
   { slug: "nurse-anesthetist", title: "Nurse Anesthetist", world: "Health & Medicine", photo: POSTERS.nurse },
   { slug: "software-engineer", title: "Software Engineer", world: "Tech & Engineering", photo: POSTERS.swe },
 ] as const;
@@ -478,7 +478,7 @@ export function AudienceIllustration({ audience }: { audience: string }) {
 // ---------------------------------------------------------------------------
 
 const BUILD_WORLDS: { label: string; color: string; on?: boolean }[] = [
-  { label: "Business & Money", color: AMBER, on: true },
+  { label: "Business & Finance", color: AMBER, on: true },
   { label: "Tech & Engineering", color: "#6366f1", on: true },
   { label: "Health & Medicine", color: TEAL },
   { label: "Arts, Media & Sport", color: ROSE },
@@ -510,7 +510,7 @@ export function BuildIllustration() {
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div role="img" aria-label="Build: Which career fields interest you? Choose up to 2. Business & Money and Tech & Engineering are chosen, from six career worlds in total." className="relative overflow-hidden rounded-[26px] border" style={{ height: 300, background: "var(--ill-panel)", borderColor: LINE, boxShadow: PANEL_SHADOW }}>
+        <div role="img" aria-label="Build: Which career fields interest you? Choose up to 2. Business & Finance and Tech & Engineering are chosen, from six career worlds in total." className="relative overflow-hidden rounded-[26px] border" style={{ height: 300, background: "var(--ill-panel)", borderColor: LINE, boxShadow: PANEL_SHADOW }}>
           <div className="flex flex-col gap-6" style={{ transform: "scale(1.1)", transformOrigin: "top left", padding: "30px 30px 0" }}>
             <div className="flex items-center gap-4">
               <Image src="/images/dreamy/v2/dreamy-curious.png" alt="" width={180} height={180} className="size-[76px] flex-none object-contain" />
@@ -572,7 +572,7 @@ const MATCH_CARDS = [
   {
     id: "investment-banking",
     title: "Investment Banker",
-    world: "Business & Money",
+    world: "Business & Finance",
     salary: "$361K median",
     photo: POSTERS.ib,
     whatYouDo: ["Help companies raise money and make deals", "Build financial models and pitch decks"],
@@ -580,7 +580,7 @@ const MATCH_CARDS = [
   {
     id: "private-equity",
     title: "Private Equity Analyst",
-    world: "Business & Money",
+    world: "Business & Finance",
     salary: "$250K median",
     photo: POSTERS.pe,
     whatYouDo: ["Study companies a fund might buy", "Build the case for what it's worth"],
@@ -632,9 +632,9 @@ export function MatchIllustration() {
 }
 
 export function ExploreIllustration() {
-  const pills = ["All", "Business & Money", "Tech & Engineering", "Health & Medicine"];
+  const pills = ["All", "Business & Finance", "Tech & Engineering", "Health & Medicine"];
   const cards = [
-    { src: POSTERS.pe, title: "Private Equity", world: "Business & Money" },
+    { src: POSTERS.pe, title: "Private Equity", world: "Business & Finance" },
     { src: POSTERS.swe, title: "Software Engineer", world: "Tech & Engineering" },
     { src: POSTERS.nurse, title: "Nurse Anesthetist", world: "Health & Medicine" },
   ];

@@ -418,7 +418,7 @@ type Activity =
 // Kickoff" (a plot beat, not a game) is gone (CEO, 4 Sept).
 const ACTIVITIES: Activity[] = [
   { kind: "sim", sim: INVESTMENT_BANKING },
-  { kind: "glossary", title: "Finance Glossary Game", world: "Business & Money", cover: "/images/app/glossary-finance-thumb.png", href: "/play/glossary/investment-banking", pct: 60, label: "6 of 10 terms mastered" },
+  { kind: "glossary", title: "Finance Glossary Game", world: "Business & Finance", cover: "/images/app/glossary-finance-thumb.png", href: "/play/glossary/investment-banking", pct: 60, label: "6 of 10 terms mastered" },
   { kind: "sim", sim: REGISTERED_NURSE },
 ];
 

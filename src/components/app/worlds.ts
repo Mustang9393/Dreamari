@@ -11,7 +11,7 @@ export const WORLD_LABELS = [
   "All",
   "Tech & Engineering",
   "Health & Medicine",
-  "Business & Money",
+  "Business & Finance",
   "Arts, Media & Sport",
   "Science & Research",
   "Teaching & Education",
@@ -27,7 +27,7 @@ export const WORLD_LABELS = [
 ] as const;
 
 export const WORLD_COLORS: Record<string, string> = {
-  "Business & Money": "var(--world-business-money-office)",
+  "Business & Finance": "var(--world-business-money-office)",
   "Tech & Engineering": "var(--world-tech-engineering-design)",
   "Health & Medicine": "var(--world-health-medicine)",
   "Arts, Media & Sport": "var(--world-arts-media-sport)",
@@ -50,7 +50,7 @@ export const WORLD_COLORS: Record<string, string> = {
 // FONT_STYLESHEET_HREF exactly as the variants reference them.
 export function posterTitleFont(world: string): CSSProperties {
   switch (world) {
-    case "Business & Money":
+    case "Business & Finance":
       return { fontFamily: "var(--font-poster)", fontWeight: 400, letterSpacing: "0.81px" };
     case "Tech & Engineering":
       return { fontFamily: "var(--font-poster-science)", fontWeight: 700, letterSpacing: "-2px", fontVariationSettings: '"CTRS" 0, "wdth" 100' };

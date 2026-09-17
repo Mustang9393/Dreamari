@@ -6,15 +6,15 @@ import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
 
 // Real question from the assessment (question 3 of 10): "Choose Your
-// Interests." Business & Money is the demo's example path, since that's this whole
+// Interests." Business & Finance is the demo's example path, since that's this whole
 // storyboard's fixed destination (Investment Banking) — nudged to invite the tap (the
 // shared mkt-pulse ring and light sweep, 7 Sept 2026), not
 // pre-selected, so nothing reads as "already chosen" before the reader acts. Per direct
 // feedback, Tech and Health are shown but not actually pickable (hover only) — only
-// Business & Money is clickable, so the rest of the storyboard's fixed path still
+// Business & Finance is clickable, so the rest of the storyboard's fixed path still
 // makes sense regardless of what a reader tries.
-const INTERESTS = ["Tech", "Business & Money", "Health"];
-const CLICKABLE = "Business & Money";
+const INTERESTS = ["Tech", "Business & Finance", "Health"];
+const CLICKABLE = "Business & Finance";
 // The rest of the real assessment's interest categories, straight from the design
 // system's 13-world set (tokens.css) — surfaced on hover of the "+ more" chip so it
 // reads as "there's a real, specific list behind this," not just decorative copy.

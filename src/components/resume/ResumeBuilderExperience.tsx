@@ -1,13 +1,17 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, Download, FileText, ListOrdered, Pencil, Sparkles, Wand2, X } from "lucide-react";
 import { atsIsStale, runAtsCheck } from "@/lib/resumeAts";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useScrolled } from "@/components/app/chrome";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
+import { WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { flyXp } from "@/components/app/xpFlight";
+import { DreamScoreChip } from "@/components/app/DreamScoreChip";
+import { Working } from "@/components/app/Working";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
 import { ATSCheckPanel } from "./ATSCheckPanel";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
@@ -20,17 +24,19 @@ import { ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
 import { TailorScreen } from "./TailorScreen";
 import { TemplateGallery } from "./TemplateGallery";
 import { TextPreviewModal } from "./TextPreviewModal";
-import { DreamyPopup, ToolbarButton, useResumeToast, WizardProgress } from "./ui";
+import { ToolbarButton, useResumeToast, WizardProgress } from "./ui";
 import { CertificationsStep, EducationStep, ExperienceStep, PersonalInfoStep, ReviewStep, SkillsStep } from "./wizardSteps";
 
 const WELCOME_KEY = "dreamari-resume-welcome";
-/** XP per finished wizard step, matching the reference's point values. */
-const STEP_XP: Record<number, { xp: number; label: string }> = {
-  1: { xp: 10, label: "Education added!" },
-  2: { xp: 15, label: "Experience added!" },
-  3: { xp: 10, label: "Skills selected!" },
-  4: { xp: 10, label: "Certification added!" },
+/** XP per finished wizard step (the reference's point values), banked into
+ *  the Dream Score once per milestone. */
+const STEP_XP: Record<number, { xp: number; milestone: string }> = {
+  1: { xp: 10, milestone: "resume:education" },
+  2: { xp: 15, milestone: "resume:experience" },
+  3: { xp: 10, milestone: "resume:skills" },
+  4: { xp: 10, milestone: "resume:certifications" },
 };
+const CREATED_XP = 25;
 
 // Which resume section the live preview auto-scrolls to as the student
 // moves through the wizard -- matches the `data-section` markers each
@@ -178,6 +184,10 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
             );
           })}
         </div>
+        <div className="flex flex-none items-center gap-[var(--space-3)]">
+        {/* The Dream Score lives here too: this route has no main nav, and
+           the XP earned in the wizard needs the chip to fly into. */}
+        <DreamScoreChip />
         <button
           type="button"
           aria-label="Close and return to Profile"
@@ -187,6 +197,7 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
         >
           <X className="h-4 w-4" aria-hidden />
         </button>
+        </div>
       </div>
         </div>
       </div>
@@ -213,6 +224,7 @@ function TopBar({ label, badges, onClose, extra }: { label: string; /** status c
          Sept 2026). Phones keep the icon-only single row. */}
       <div className="flex max-w-full items-center gap-[6px] overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:justify-end lg:gap-[var(--space-3)] lg:overflow-visible">
         {extra}
+        <DreamScoreChip className="hidden sm:flex" />
         {onClose && (
           <button
             type="button"
@@ -241,18 +253,31 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
   const [checking, setChecking] = useState(false);
   const [failed, setFailed] = useState(false);
   const [resultSeen, setResultSeen] = useState(false);
-  useEffect(() => {
-    if (!version || !stale || checking || failed) return;
-    let cancelled = false;
-    // syncing with the network, the case the set-state-in-effect rule allows
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+  const mounted = useRef(true);
+  // Set on every mount, not just cleared on unmount: strict mode replays
+  // mount/unmount/mount in development, which left the flag false forever
+  // and the chip on "Checking" (seen live, 17 Sept 2026).
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const inFlight = useRef(false);
+  const check = () => {
+    if (!version || inFlight.current) return;
+    inFlight.current = true;
+    setFailed(false);
     setChecking(true);
     runAtsCheck(resume, version).then((next) => {
-      if (cancelled) return;
+      inFlight.current = false;
+      // Saving the result changes `stale`, which re-runs the effect below;
+      // the outcome must still land here regardless (an earlier version
+      // cancelled itself on that very change and left "Checking…" up for
+      // good, direct feedback 17 Sept 2026).
+      if (!mounted.current) return;
       setChecking(false);
       if (!next) setFailed(true);
     });
-    return () => { cancelled = true; };
+  };
+  useEffect(() => {
+    if (!version || !stale || failed) return;
+    check();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when the fingerprint changes
   }, [version?.id, stale]);
   const ats = version?.atsCheck ?? null;
@@ -269,11 +294,18 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
                 <Wand2 className="h-3 w-3" aria-hidden /> Tailored
               </span>
             )}
-            {checking && (
-              <span role="status" className="inline-flex items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-                <Sparkles className="h-3 w-3 motion-safe:animate-pulse" aria-hidden /> Checking…
-              </span>
-            )}
+            {checking ? (
+              <Working label="Checking" />
+            ) : failed ? (
+              <button type="button" onClick={check} className="dm-quiet inline-flex cursor-pointer items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+                <Sparkles className="h-3 w-3" aria-hidden /> Check didn&apos;t finish · Retry
+              </button>
+            ) : ats && !stale ? (
+              // the score, always in view once it exists; opens the full report
+              <button type="button" onClick={() => setPanel("ats")} className="dm-quiet inline-flex cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold tabular-nums" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }} aria-label="Open ATS Check">
+                <Sparkles className="h-3 w-3" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {ats.qualityScore}/100{ats.jobMatchScore !== null ? ` · Match ${ats.jobMatchScore}` : ""}
+              </button>
+            ) : null}
           </>
         }
         extra={
@@ -325,28 +357,28 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
          two numbers and the single most useful tip, with the full report
          one tap away (the reference's own moment, minus the three tips it
          listed under "one small tip"). */}
-      {showResult && ats && (
-        <DreamyPopup
-          sprite={ats.jobMatchScore !== null && ats.jobMatchScore >= 75 ? "/images/dreamy/v2/dreamy-party.png" : "/images/dreamy/v2/dreamy-idea.png"}
-          title={ats.jobMatchScore !== null ? (ats.jobMatchScore >= 75 ? "This looks like a strong match! ☁️" : "Your resume is ready. Let's make it a closer match. ☁️") : "Your resume is ready! ☁️"}
-          onClose={() => setResultSeen(true)}
-          actions={
-            <>
-              <button type="button" onClick={() => { setResultSeen(true); setPanel("ats"); }} className="dm-tap cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                See Final Tips
-              </button>
-              <button type="button" onClick={() => setResultSeen(true)} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
-                Continue
-              </button>
-            </>
-          }
-        >
-          <span className="block font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
-            Resume: {ats.qualityScore}/100{ats.jobMatchScore !== null ? ` · Job Match: ${ats.jobMatchScore}/100` : ""}
-          </span>
-          {ats.qualityImprovements[0] && <span className="mt-[6px] block">One small tip: {ats.qualityImprovements[0]}</span>}
-        </DreamyPopup>
-      )}
+      {/* The score card, once, as the same cinematic splash the rest of
+         the app opens with: the headline by match strength, the two
+         numbers, the single most useful tip; Continue banks the "first
+         resume" XP into the nav, See Final Tips opens the full panel. */}
+      <WelcomeSplash
+        surface="resume"
+        open={showResult && !!ats}
+        onDone={() => { setResultSeen(true); flyXp({ from: null, amount: CREATED_XP, milestone: `resume:created:${version?.id ?? ""}` }); }}
+        onSecondary={() => { setResultSeen(true); setPanel("ats"); }}
+        scene={ats ? {
+          sprite: ats.jobMatchScore !== null && ats.jobMatchScore >= 75 ? "/images/dreamy/v2/splash/dreamy-party.webp" : "/images/dreamy/v2/splash/dreamy-happy.webp",
+          tint: ats.jobMatchScore !== null && ats.jobMatchScore >= 75 ? ["255, 160, 30", "255, 50, 100"] : ["40, 140, 255", "100, 70, 255"],
+          title: ats.jobMatchScore !== null ? (ats.jobMatchScore >= 75 ? "STRONG MATCH" : "RESUME READY") : "RESUME READY",
+          line: ats.jobMatchScore !== null && ats.jobMatchScore < 75 ? "Let's make it a closer match." : undefined,
+          rows: [
+            { text: <><strong>Resume:</strong> {ats.qualityScore}/100{ats.jobMatchScore !== null ? <> · <strong>Job Match:</strong> {ats.jobMatchScore}/100</> : null}</> },
+            ...(ats.qualityImprovements[0] ? [{ text: <><strong>One small tip:</strong> {ats.qualityImprovements[0]}</>, note: true as const }] : []),
+          ],
+          cta: "Continue",
+          secondary: "See Final Tips",
+        } : undefined}
+      />
       <button
         type="button"
         data-print-hide
@@ -412,15 +444,15 @@ function ResumeBuilderInner() {
     setWelcome(false);
     try { window.localStorage.setItem(WELCOME_KEY, "1"); } catch { /* ignore */ }
   };
-  // XP for finishing a step with something in it, once per step per visit:
-  // the reference's "+10 pts · Education added!" toasts, in the app's own
-  // XP language (the nav already shows an XP total).
-  const [awarded, setAwarded] = useState<Set<number>>(() => new Set());
+  // XP for finishing a step with something in it: a "+N XP" lifts off the
+  // form card and slots into the nav's Dream Score (the reference's
+  // "+10 pts" toasts, as the app's own XP moment). Once per milestone,
+  // enforced by the score store itself.
+  const card = useRef<HTMLDivElement>(null);
   const award = (step: number, has: boolean) => {
     const prize = STEP_XP[step];
-    if (!prize || !has || awarded.has(step)) return;
-    setAwarded((a) => new Set(a).add(step));
-    showToast(`⭐ +${prize.xp} XP · ${prize.label}`);
+    if (!prize || !has) return;
+    flyXp({ from: card.current, amount: prize.xp, milestone: prize.milestone });
   };
 
   const backToProfile = () => router.push("/profile?tab=resume");
@@ -531,7 +563,7 @@ function ResumeBuilderInner() {
               <ZoomResumeButton resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} title="Preview" label="Preview" />
             </div>
           </div>
-          <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <div ref={card} className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             {/* Back sits beside the step label + progress bar as one
                column, not down in the footer (direct feedback, 16 Sept
                2026: "the back button [and] the resume label + progress
@@ -661,18 +693,10 @@ function ResumeBuilderInner() {
       </div>
 
       {toast}
-      {welcome && (
-        <DreamyPopup
-          sprite="/images/dreamy/v2/dreamy-happy.png"
-          title="Hi! 👋 I'm Dreamy. I'll help you build your resume, one step at a time."
-          onClose={dismissWelcome}
-          actions={
-            <button type="button" onClick={dismissWelcome} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
-              Got it! 👍
-            </button>
-          }
-        />
-      )}
+      {/* The same cinematic welcome every other surface opens with
+         (direct feedback, 17 Sept 2026: pop-ups must match Explore,
+         Connect, Match and Play). */}
+      <WelcomeSplash surface="resume" open={welcome} onDone={dismissWelcome} />
     </Shell>
   );
 }

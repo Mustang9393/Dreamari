@@ -205,7 +205,7 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
          something to stagger the rails' entrance from off of. */}
       <div className="seq-reveal contents">
         {becauseLiked.length > 0 && (
-          <Rail title="Recommended Because You Liked Business & Money">
+          <Rail title="Recommended Because You Liked Business & Finance">
             <PosterRail careers={becauseLiked} />
           </Rail>
         )}

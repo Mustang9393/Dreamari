@@ -329,7 +329,7 @@
 .profileHead small { font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
 
 /* Light mode: --connect-accent resolves to the world color's darkened light
-   rung (e.g. #825900 for Business & Money), which is calibrated for TEXT on
+   rung (e.g. #825900 for Business & Finance), which is calibrated for TEXT on
    a light page. Used as a FILL it is a dark ochre, and the ink text these
    fills carry in dark mode (#05070f) lands at ~3:1 on it and reads muddy
    (light-mode audit, 17 Sept 2026). Solid accent fill + white text here;

@@ -47,7 +47,7 @@ Marcus and Priya use Joshua's supplied headshots (`public/images/marketing/avata
 The community board card keeps its coloured glass surface (no photo, no accent line) and borrows the app's community card language: an accent-tinted border and frosted stat tiles (white at 9% with an inset hairline). Same width as every other chapter graphic (min(94cqw, 480px)).
 
 ## Demo hints, second pass (7 Sept 2026)
-The hints were too faint to notice. `mkt-pulse` now runs a brighter, wider ring (to 14px, 0.8 alpha) on a 2.4s cadence and a narrow light band (about a third of the control) that crosses the control for most of the cycle. Applied to the Build chapter's Business & Money row (its old `mkt-nudge-pulse` class had no styles behind it), Match's X then thumbs-up, Play's "Ask for your role and deadline" and Connect's Enter Community. Off under reduced motion.
+The hints were too faint to notice. `mkt-pulse` now runs a brighter, wider ring (to 14px, 0.8 alpha) on a 2.4s cadence and a narrow light band (about a third of the control) that crosses the control for most of the cycle. Applied to the Build chapter's Business & Finance row (its old `mkt-nudge-pulse` class had no styles behind it), Match's X then thumbs-up, Play's "Ask for your role and deadline" and Connect's Enter Community. Off under reduced motion.
 
 ## Poster rows (7 Sept 2026)
 Every poster row (`poster-row`) carries 44px of headroom above and 80px below, pulled back with negative margins so the layout does not move, so the grown card and its shadow (about 46px below) are never clipped by the scrolling row. Verified on Explore, Home and the career page.

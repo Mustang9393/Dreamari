@@ -909,7 +909,7 @@ const PARTNER_EVENTS = [
 export function PartnerView({ org, onBack }: { org: string; onBack: () => void }) {
   const nav = useContext(ConnectNav);
   const people = PROS.filter((p) => p.org === org);
-  const accent = WORLD_COLORS[people[0]?.world ?? "Business & Money"] ?? "var(--primary)";
+  const accent = WORLD_COLORS[people[0]?.world ?? "Business & Finance"] ?? "var(--primary)";
   const lanes = [
     { title: "In person", stats: [["8", "events"], ["1,247", "volunteers"], ["3,118", "hours"]] },
     { title: "On Dreamari", stats: [["42", "professionals"], ["2,300", "answers"], ["14,000", "students"]] },

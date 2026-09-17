@@ -403,7 +403,7 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
                    the same figure Build and Match show. Shown from md so the
                    score follows them from Build and Match into the app. */}
                 <DreamScoreTip className="hidden md:flex">
-                  <span key={xp} className="flex items-center gap-[6px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
+                  <span key={xp} data-dream-score-target className="flex items-center gap-[6px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
                     <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
                     <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
                       {xp.toLocaleString("en-US")} XP

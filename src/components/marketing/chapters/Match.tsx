@@ -357,7 +357,7 @@ function MatchDemo() {
                           {card.title}
                         </p>
                         <p className="mt-1" style={{ fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "calc(var(--mu) * 11px)", letterSpacing: "0.5px", color: WORLD_COLOR }}>
-                          Business &amp; Money
+                          Business &amp; Finance
                         </p>
                       </div>
 

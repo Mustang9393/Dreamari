@@ -513,7 +513,7 @@ export function CareerReportView(props: ReportViewProps) {
     return () => document.removeEventListener("keydown", key);
   }, [moreOpen]);
   // The report used to accent itself with the career's own world colour,
-  // which put amber/olive tones on the Business & Money reports — "just not
+  // which put amber/olive tones on the Business & Finance reports — "just not
   // easy on the eyes" (direct feedback, 5 Sept 2026). Every --primary/
   // --accent-subtle reference below now resolves to the app's own ambient
   // Dreamari blue with no local override.

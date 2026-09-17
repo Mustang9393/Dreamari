@@ -12,7 +12,7 @@ export const INVESTMENT_BANKING: Simulation = {
   id: "investment-banking",
   careerId: "investment-banking",
   title: "Investment Banker",
-  world: "Business & Money",
+  world: "Business & Finance",
   firm: "Cobalt Capital",
   cover: "/images/play/ib/l1-04.webp",
   // The trailer (Trailer tab): plays once before Level 1, skippable, ~20
@@ -76,13 +76,13 @@ export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE];
 export const SOON: { careerId: string; title: string; world: string; cover: string }[] = [
   { careerId: "airline-pilot", title: "Airline Pilot", world: "Driving, Flying & Shipping", cover: "/images/app/soon-airline-pilot.png" },
   { careerId: "software-engineer", title: "Software Engineer", world: "Tech & Engineering", cover: "/images/app/soon-software-engineer.png" },
-  { careerId: "private-equity", title: "Private Equity", world: "Business & Money", cover: "/images/app/soon-private-equity.png" },
+  { careerId: "private-equity", title: "Private Equity", world: "Business & Finance", cover: "/images/app/soon-private-equity.png" },
   { careerId: "food-scientist", title: "Food Scientist", world: "Farming, Animals & Nature", cover: "/images/app/soon-food-scientist.png" },
   // These three ride in the new Netflix-style featured row (see
   // FEATURED_ROW_SOON_IDS in PlayHub.tsx) alongside the real Investment
   // Banking simulation, rather than only appearing in the "In the works"
   // grid -- PlayHub filters them out of that grid so they don't show twice.
-  { careerId: "accountant", title: "Accountant", world: "Business & Money", cover: "/images/app/soon-accountant.png" },
+  { careerId: "accountant", title: "Accountant", world: "Business & Finance", cover: "/images/app/soon-accountant.png" },
   { careerId: "aviation-maintenance-technician", title: "Aviation Maintenance Technician", world: "Fixing Machines & Engines", cover: "/images/app/soon-aviation-maintenance-technician.png" },
   { careerId: "emergency-medicine-doctor", title: "Emergency Medicine Doctor", world: "Health & Medicine", cover: "/images/app/soon-emergency-medicine-doctor.png" },
 ];

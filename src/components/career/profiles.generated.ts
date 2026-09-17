@@ -15,7 +15,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "asset-management": {
     "slug": "asset-management",
     "title": "Asset Manager",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-asset-manager.webp",
     "summary": "Invests other people's money to grow it over time.",
     "scenario": "Imagine a retirement fund trusting you with $2 billion. Every morning the market opens and your calls are on the line.",
@@ -211,7 +211,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "accountant": {
     "slug": "accountant",
     "title": "Accountant",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-accountant.webp",
     "summary": "Keeps the money records straight and makes sure taxes and reports are right.",
     "scenario": "Imagine it is April 10th and a company's tax return is due in five days. Every number has to tie out.",
@@ -407,7 +407,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "private-equity": {
     "slug": "private-equity",
     "title": "Private Equity",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-private-equity.webp",
     "summary": "Buys companies, improves them, and sells them for a profit.",
     "scenario": "Imagine your fund buys a struggling chain of 40 stores. Three years from now it has to be worth twice as much.",
@@ -599,7 +599,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "investment-banking": {
     "slug": "investment-banking",
     "title": "Investment Banking",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-investment-banking-v3.webp",
     "summary": "Helps companies raise money and buy or sell businesses.",
     "scenario": "Imagine a hospital company wants to build 100 new hospitals but does not have the money. You find the investors and put the deal together.",
@@ -3853,7 +3853,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "hr-manager": {
     "slug": "hr-manager",
     "title": "HR Manager",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-hr-manager.webp",
     "summary": "Hires, supports and looks after the people who make a company run.",
     "scenario": "Imagine 40 open roles, a layoff rumor on Slack, and a new manager who needs coaching by Friday.",
@@ -4236,7 +4236,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "quant": {
     "slug": "quant",
     "title": "Quant",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-quant.webp",
     "summary": "Uses math and code to find patterns in markets and trade on them.",
     "scenario": "Imagine a model that is right 51 percent of the time. At a million trades a day, that 1 percent is the whole business.",
@@ -4429,7 +4429,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "management-analyst": {
     "slug": "management-analyst",
     "title": "Management Analyst",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-management-analyst.webp",
     "summary": "Studies how a company works and recommends how to do it better.",
     "scenario": "Imagine a hospital losing $4 million a year on scheduling. You have eight weeks to find out why and fix it.",
@@ -4619,7 +4619,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "administrative-assistant": {
     "slug": "administrative-assistant",
     "title": "Administrative Assistant",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-administrative-assistant.webp",
     "summary": "Keeps an office and its people organized and on time.",
     "scenario": "Imagine three executives, one shared calendar, and a board meeting that moved to tomorrow. You are the one who makes it work.",
@@ -6711,7 +6711,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "purchasing-manager": {
     "slug": "purchasing-manager",
     "title": "Purchasing Manager",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-purchasing-manager.webp",
     "summary": "Decides what a company buys, from whom, and at what price.",
     "scenario": "Imagine a supplier calling to say the parts your factory needs tomorrow are stuck at a port. You have four hours.",
@@ -7093,7 +7093,7 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
   "public-relations-manager": {
     "slug": "public-relations-manager",
     "title": "Public Relations Manager",
-    "world": "Business & Money",
+    "world": "Business & Finance",
     "photo": "/images/app/poster-public-relations-manager.webp",
     "summary": "Shapes how the public sees a company or person.",
     "scenario": "Imagine a product recall trending on social media by 9 a.m. Your statement goes out at 10 and every reporter is quoting it.",

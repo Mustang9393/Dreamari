@@ -263,7 +263,7 @@ const GLOSSARY_CAREERS: Record<string, GlossaryCareer> = {
   "investment-banking": {
     careerSlug: "investment-banking",
     careerTitle: "Investment Banking",
-    world: "Business & Money",
+    world: "Business & Finance",
     lessons: [FIN_LESSON_1],
   },
 };

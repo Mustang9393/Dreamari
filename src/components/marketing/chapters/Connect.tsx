@@ -139,7 +139,7 @@ function CardShell({ children, accentBorder = false }: { children: React.ReactNo
 // Screen 1 — a community landing card (headline, stat row, a single "Enter Community"
 // CTA) rather than dropping straight into the post thread, so the storyboard reads as
 // "here's a whole public community around this interest" before the specific example
-// post. Fixed to Business & Money since that's the only path Build actually lets a
+// post. Fixed to Business & Finance since that's the only path Build actually lets a
 // reader choose.
 function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
   return (
@@ -153,7 +153,7 @@ function CommunityOverviewCard({ onEnter }: { onEnter: () => void }) {
             Community Board
           </p>
           <p className="mt-2 font-extrabold" style={{ fontSize: "calc(var(--mu) * 18px)", lineHeight: 1.25, color: "var(--foreground)" }}>
-            Students Interested in Business &amp; Money
+            Students Interested in Business &amp; Finance
           </p>
         </div>
 

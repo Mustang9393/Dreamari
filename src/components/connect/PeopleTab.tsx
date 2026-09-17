@@ -138,7 +138,7 @@ function FollowCarousel({ pros, follows, onFollow }: { pros: Pro[]; follows: Fol
 // from Connect's own verified professionals; nothing here ranks students.
 
 const WORLD_ICON: Record<string, LucideIcon> = {
-  "Business & Money": Landmark,
+  "Business & Finance": Landmark,
   "Tech & Engineering": Code2,
   "Health & Medicine": Stethoscope,
   "Arts, Media & Sport": Palette,
@@ -174,7 +174,7 @@ const WORLDS = Object.keys(WORLD_COLORS);
 // orderable at a glance, following the same 15-world grid-position order as
 // WORLD_COLORS.
 const BROWSE_TILE_ACCENT: Record<string, string> = {
-  "Business & Money": "#7349d4",
+  "Business & Finance": "#7349d4",
   "Tech & Engineering": "#6d4ed5",
   "Health & Medicine": "#6752d5",
   "Arts, Media & Sport": "#6256d5",

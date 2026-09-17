@@ -1518,3 +1518,16 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   .school-card.poster-card:hover, .school-card.poster-card:focus-visible { transform: translateY(-4px) scale(1.012); }
   .school-card.poster-card:hover .poster-photo { transform: scale(1.03); }
 }
+
+/* "Working" chip (Resume Builder's Checking… and anything else that waits on
+   a model): a light sweeps through the label and three dots step in sequence,
+   the way OpenAI's and Gemini's thinking states read as alive (direct
+   feedback, 17 Sept 2026). Used by components/app/Working.tsx. */
+@keyframes dm-text-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes dm-dot-step {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-2px); }
+}

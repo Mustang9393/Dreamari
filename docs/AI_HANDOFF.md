@@ -9993,6 +9993,24 @@ scratchpad `ours-shots.mjs`) at 1440/768/390: sheet 900/656/350 px wide,
 no horizontal overflow. The desktop app's viewport emulation gave
 contradictory measurements for this page and should not be trusted for it.
 
+Then, on direct feedback that the plain pop-ups were "too basic": both
+Dreamy moments now use the shared `WelcomeSplash` (new `resume` surface,
+per-instance `scene` override for the live score card, optional
+`secondary` action rendered as a quiet link under the beam CTA). XP is a
+shared flight: `src/components/app/xpFlight.ts` lifts "+N XP" from the
+form card, holds, flies into the element marked `data-dream-score-target`
+and banks the points via `awardDreamScore` on landing (once per milestone).
+The main nav's Dream Score chip carries that attribute; routes with their
+own header render `DreamScoreChip` (builder tab bar, document header) so
+there is always a landing target. `Working` (components/app) is the app's
+thinking chip: beam, shimmering label, stepping dots; the ATS "Checking"
+state uses it, then shows a score chip that opens the panel (or a Retry).
+Two bugs fixed on the way: the auto-check cancelled itself when saving the
+result flipped its own dependency (Checking… never cleared), and a
+strict-mode mounted flag stayed false. Icon-only toolbar buttons now show a
+real tooltip below lg. App-wide copy: "Business & Money" is "Business &
+Finance" everywhere (84 occurrences, ids and token names unchanged).
+
 
 **AT&T × Connected Learning Centers board (`src/components/connect/att/`).**
 Joshua's three-view Connect update (Student / Volunteer / Enterprise, see

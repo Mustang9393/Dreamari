@@ -50,7 +50,7 @@ export const DECK: Career[] = [
   {
     id: "investment-banking",
     title: "Investment Banker",
-    world: "Business & Money",
+    world: "Business & Finance",
     color: "var(--color-world-business-money-office)",
     font: '"Viaoda Libre", serif',
     fontWeight: 400,
@@ -70,7 +70,7 @@ export const DECK: Career[] = [
   {
     id: "private-equity",
     title: "Private Equity Analyst",
-    world: "Business & Money",
+    world: "Business & Finance",
     color: "var(--color-world-business-money-office)",
     font: '"Viaoda Libre", serif',
     fontWeight: 400,
@@ -132,7 +132,7 @@ export const DECK: Career[] = [
   {
     id: "fashion-buyer",
     title: "Fashion Buyer",
-    world: "Business & Money",
+    world: "Business & Finance",
     color: "var(--color-world-business-money-office)",
     font: '"Viaoda Libre", serif',
     fontWeight: 400,

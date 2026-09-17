@@ -14,7 +14,7 @@ import type { Simulation, TrailerCard } from "./types";
 // teaches nothing, about 20 seconds. Cut like a AAA game trailer, not a
 // slideshow: cinema letterbox bars, a slow Ken Burns push on every plate,
 // film grain and a deep vignette, and title cards set in the career
-// world's own approved display face (Business & Money's poster serif) that
+// world's own approved display face (Business & Finance's poster serif) that
 // breathe in from a blur the way film titles do. Six of seven cards reuse
 // art that already exists; only the finale's ladder is new. Skip appears
 // from card 1 and is never hidden -- a student who skips goes straight to

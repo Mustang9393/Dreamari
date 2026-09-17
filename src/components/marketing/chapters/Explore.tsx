@@ -27,9 +27,9 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 type BrowseItem = { photo: string; title: string; world: string };
 
 const BROWSE_TOP5: BrowseItem[] = [
-  { photo: "/images/app/poster-asset-manager.webp", title: "Asset Manager", world: "Business & Money" },
-  { photo: "/images/app/poster-accountant.webp", title: "Accountant", world: "Business & Money" },
-  { photo: "/images/app/poster-fashion-buyer.webp", title: "Fashion Buyer", world: "Business & Money" },
+  { photo: "/images/app/poster-asset-manager.webp", title: "Asset Manager", world: "Business & Finance" },
+  { photo: "/images/app/poster-accountant.webp", title: "Accountant", world: "Business & Finance" },
+  { photo: "/images/app/poster-fashion-buyer.webp", title: "Fashion Buyer", world: "Business & Finance" },
   { photo: "/images/app/poster-food-scientist.webp", title: "Food Scientist", world: "Farming, Animals & Nature" },
   { photo: "/images/app/poster-video-game-designer.webp", title: "Video Game Designer", world: "Tech & Engineering" },
   { photo: "/images/app/poster-art-director.webp", title: "Art Director", world: "Arts, Media & Sport" },
@@ -37,14 +37,14 @@ const BROWSE_TOP5: BrowseItem[] = [
 ];
 
 // Poster-title typeface per world, mirroring the Browse Cards component:
-// Business & Money keeps Viaoda, Science & Research keeps Source Code Pro;
+// Business & Finance keeps Viaoda, Science & Research keeps Source Code Pro;
 // the rest use the site's own bold sans so tech/health don't wear a serif.
 // Career Poster Card component: every world has its OWN title face. These are
 // the component's real assignments (from the design context pull), loaded via
 // the marketing font stylesheet and tokenized in tokens.css.
 function browseTitleFont(world: string): React.CSSProperties {
   switch (world) {
-    case "Business & Money":
+    case "Business & Finance":
       return { fontFamily: "var(--font-poster)", fontWeight: 400 };
     case "Science & Research":
       return { fontFamily: "var(--font-poster-mono)", fontWeight: 600 };
