@@ -52,9 +52,10 @@ export const ENTERPRISE_TABS = [
 
 // ——— people ———
 
-// Portraits are synthetic faces (no real person), cropped to the same 512px
-// square as Connect's other headshots; pros never wear the generated
-// student avatars (direct feedback, 17 Sept 2026).
+// Portraits come from Connect's own retired headshot set (the pre-Sept-2026
+// volunteer portraits, no longer shown anywhere else, recovered from git
+// history), so no AT&T face repeats a current pro's; pros never wear the
+// generated student avatars (direct feedback, 17 Sept 2026).
 export type AttPro = { name: string; role: string; org: "AT&T"; photo: string };
 export const ATT_PROS: Record<string, AttPro> = {
   marcus: { name: "Marcus Reed", role: "Network Engineering Manager", org: "AT&T", photo: "/images/connect/avatars/att-marcus.jpg" },
@@ -151,10 +152,13 @@ export const OPPORTUNITY_GROUPS = [
   },
 ];
 
+// Row titles and sizes are the source's; the people in each row were spread
+// out so nobody appears in all three (direct feedback, 17 Sept 2026: "don't
+// repeat people too much"). The source repeats Marcus and Jordan in every row.
 export const PEOPLE_ROWS = [
   { title: "Recommended for You", pros: ["marcus", "jordan", "maya"] },
-  { title: "Most Active", pros: ["marcus", "jordan", "andre", "maya"] },
-  { title: "Technology & Engineering", pros: ["marcus", "jordan", "andre"] },
+  { title: "Most Active", pros: ["andre", "elena", "amina", "marcus"] },
+  { title: "Technology & Engineering", pros: ["jordan", "andre", "amina"] },
 ];
 export const FOLLOW = { follow: "Follow", following: "Following" };
 

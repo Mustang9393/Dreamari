@@ -1270,7 +1270,12 @@ export function ConnectExperience() {
     else if (params.get("partner")) setRole("partner");
   }, []);
   const setView = useCallback((next: View, as?: DemoRole) => {
-    setViewStack((stack) => [...stack, view]);
+    // Switching filter tabs inside the same board (Questions -> Insights) is
+    // not a step the user took away from anywhere, so it never lands on the
+    // back stack; otherwise "Back to all communities" from Insights popped
+    // to the board's own Questions tab (direct feedback, 17 Sept 2026).
+    const sameBoard = next.kind === "board" && view.kind === "board" && next.id === view.id;
+    if (!sameBoard) setViewStack((stack) => [...stack, view]);
     setViewState(next);
     const base = viewToQuery(next);
     const keep = as ?? new URLSearchParams(window.location.search).get("as");

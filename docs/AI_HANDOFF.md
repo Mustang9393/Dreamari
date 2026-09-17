@@ -9989,9 +9989,11 @@ and Connect's boards and dashboards now fill the shared 1440 column.
 Pre-build snapshot: local tag `connect-before-att-board-2026-09-17` and
 branch `connect-snapshot-2026-09-17`.
 
-The six AT&T professionals wear their own portraits (`att-*.jpg`, synthetic
-faces, no real person, cropped to the same 512px square as the other
-headshots; `Avatar` now takes an explicit `photo` for pros outside PROS).
+The six AT&T professionals wear their own portraits (`att-*.jpg`, taken
+from Connect's retired pre-Sept-2026 headshot set recovered from git
+history, so no face repeats a current pro's; `Avatar` now takes an explicit
+`photo` for pros outside PROS). People rows were spread out so nobody
+appears in all three.
 Rule from 17 Sept: generated avatars are for students only. Insight cards
 carry the other boards' action row (helpful pill with count, comment count,
 Ask as the one worded action); the counts are ours, the Replit shows none.
