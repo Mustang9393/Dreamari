@@ -1703,7 +1703,7 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
   const [done, setDone] = useState<Set<string>>(new Set(["g9-fall-build"]));
   const [openWindow, setOpenWindow] = useState<string | null>(null);
   const [noteStep, setNoteStep] = useState<GradeStep | null>(null);
-  const plan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { title: focus.title, world: focus.world } : null);
+  const plan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
   const levelLabel = stage === "hs" ? `Grade ${grade}` : `Year ${year}`;
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
   const doneCount = allSteps.filter((s) => done.has(s.id)).length;

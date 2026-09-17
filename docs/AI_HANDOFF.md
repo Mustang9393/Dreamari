@@ -10187,11 +10187,16 @@ GIVE BACK. `collegePlan(year, career)` fills `{career}` / `{field}` from the
 student's #1 career (Investment Banking when none), so headline steps
 already follow the career.
 
-**Product logic still to build (backend):** Joshua's message says the
-college plan should change with the primary career. The finance-specific
-recommendations inside OUT OF APP steps (Excel, PowerPoint, Bloomberg
-Terminal, financial modeling, valuation, the finance / accounting /
-economics course list, finance clubs) should be generated from the skills,
-software and classes Explore Careers already holds per career. The
-prototype ships the Investment Banking copy for every career and only
-swaps the career and field names.
+**Per-career college plans (mock of the Explore Careers join).** Every
+finance-specific phrase in Joshua's copy is a slot (`{clubs}`, `{classes}`,
+`{starterTools}`, `{coreSkills}`, `{courses}`, `{advancedTools}`,
+`{skillStack}`, `{employers}`, `{workProducts}`, `{majorExperience}`,
+`{gradPrograms}`, `{nextSteps}`, `{programs}`, `{y3Recruiting}`,
+`{y4Recruiting}`, `{field}`, `{career}`). `COLLEGE_RECIPES` fills those
+slots for the ten careers a student can hold as #1 (IB, PE, Asset
+Management, Software Engineer, Data Scientist, Game Designer, Airline
+Pilot, Registered Nurse, Food Scientist, Fashion Buyer), grounded in each
+Career Report's majors, skills, routes and employers. The IB recipe
+reproduces Joshua's text verbatim. In production these slots are the join
+onto the Explore Careers data (skills / software / classes per career); the
+recipes show the target output for that join.
