@@ -1698,8 +1698,24 @@ function DialogueBox({
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === " " || event.key === "Enter" || event.key === "ChevronRight" || event.key.toLowerCase() === "a") {
-        // Never hijack a key the player is aiming at a button.
-        if (document.activeElement instanceof HTMLButtonElement) return;
+        // Never hijack input while a blocking modal (Connect, a video
+        // lightbox, etc.) is open on top of the game -- direct feedback,
+        // 17 Sept 2026: "the spacebar is connected to the game behind the
+        // modal... when the modal is active all input should be locked to
+        // the modal." This listener stays live on window regardless of
+        // what's rendered on top of it, so checking only the focused
+        // element (a button, or a text field) isn't enough -- focus can
+        // land somewhere generic inside the modal and still leak through.
+        // Every modal in this app already sets this exact flag while
+        // open, to lock background scroll, so it doubles as a reliable
+        // "something modal is up" signal.
+        if (document.body.style.overflow === "hidden") return;
+        // Never hijack a key the player is aiming at a button, or typing
+        // into a field.
+        const active = document.activeElement;
+        if (active instanceof HTMLButtonElement) return;
+        if (active instanceof HTMLTextAreaElement || active instanceof HTMLInputElement) return;
+        if (active instanceof HTMLElement && active.isContentEditable) return;
         event.preventDefault();
         if (!done) {
           skip();

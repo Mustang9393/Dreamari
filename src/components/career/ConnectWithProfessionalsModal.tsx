@@ -195,18 +195,25 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
     // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target is client-only
     setHost(document.body);
   }, []);
+  // A ref, not a dependency -- if the parent ever passes a fresh inline
+  // onClose on re-render, this effect must not re-run (it would call
+  // dialog.current?.focus() again and rip focus out of whatever the
+  // student is typing into). See ConnectInterstitial.tsx for the same
+  // pattern and the fuller writeup.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
   useEffect(() => {
     if (!host) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     dialog.current?.focus();
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onCloseRef.current(); };
     document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKey);
     };
-  }, [host, onClose]);
+  }, [host]);
 
   function fly(amount: number, colorIndex: number) {
     const from = content.current?.getBoundingClientRect();

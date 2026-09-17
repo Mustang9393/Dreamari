@@ -178,6 +178,18 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
     // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target is client-only
     setHost(document.body);
   }, []);
+  // A ref, not a dependency -- direct feedback, 17 Sept 2026: "typing in
+  // [the Ask box] is a pain, it keeps getting kicked out of focus." Play's
+  // SimulationPlayer passes onContinue as a fresh inline arrow on every
+  // render (its own ticking beat timers re-render it constantly), so
+  // depending on onContinue here re-ran this effect -- including its own
+  // dialog.current?.focus() -- on every one of those renders, ripping
+  // focus back out of whatever the student was typing into. The mount
+  // effect below now depends only on `host` (which is set exactly once),
+  // so it runs exactly once for the life of this modal; the Escape
+  // handler still always calls the LATEST onContinue via this ref.
+  const onContinueRef = useRef(onContinue);
+  useEffect(() => { onContinueRef.current = onContinue; }, [onContinue]);
   useEffect(() => {
     if (!host) return;
     const previous = document.activeElement as HTMLElement | null;
@@ -185,7 +197,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
     document.body.style.overflow = "hidden";
     dialog.current?.focus();
     const trap = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); onContinue(); }
+      if (event.key === "Escape") { event.preventDefault(); onContinueRef.current(); }
       if (event.key !== "Tab") return;
       const controls = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), textarea, input, [tabindex="0"]') ?? []).filter((el) => el.getClientRects().length);
       const first = controls[0], last = controls[controls.length - 1];
@@ -201,7 +213,7 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
       document.removeEventListener("keydown", trap);
       if (previous?.isConnected) previous.focus({ preventScroll: true });
     };
-  }, [host, onContinue]);
+  }, [host]);
 
   function fly(amount: number, colorIndex: number) {
     const from = content.current?.getBoundingClientRect();
