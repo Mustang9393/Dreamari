@@ -1419,9 +1419,16 @@ export function ConnectExperience() {
            a slim right-aligned row like the AT&T board's own switcher, so
            boards, threads and profiles start at the same height as every
            other main screen (direct feedback, 17 Sept 2026). */}
-        {(view.kind === "home" || role !== "student") && (
+        {/* Never on the AT&T board: that board carries its own Student/
+           Volunteer/Enterprise demo switch, and stacking Connect's role
+           switcher above it read as two competing controls (direct
+           feedback, 18 Sept 2026: "the top demo thing isn't relevant in
+           this board"). Back to communities returns to a screen where
+           the role switcher is present again. */}
+        {(view.kind === "home" || role !== "student") && !(view.kind === "board" && view.id === ATT_ID) && (
           <div className="-mb-[var(--space-3)] flex flex-wrap items-center justify-end gap-[var(--space-3)]">
             <RoleTabs
+              key={role}
               role={role}
               onPick={(next) => {
                 setRole(next);
@@ -1705,10 +1712,12 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
 function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) => void }) {
   // The five roles stay hidden until Demo is pressed (Joshua Pierce, Slack,
   // 6 Sept 2026): a student sees a plain Connect page, a demo opens the
-  // switcher. Once a non-student role is showing, the switcher stays open so
-  // the way back is visible.
-  const [open, setOpen] = useState(false);
-  const showTabs = open || role !== "student";
+  // switcher. A non-student role opens it by default so the way back is
+  // visible, but the chip always toggles: a second press closes it (direct
+  // feedback, 18 Sept 2026). The parent re-keys this on the role, so
+  // switching roles re-opens it without an effect.
+  const [open, setOpen] = useState(role !== "student");
+  const showTabs = open;
   return (
     <div className="flex items-center gap-[10px]">
       <button

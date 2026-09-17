@@ -961,8 +961,12 @@ function EnterpriseTeam() {
  *  visible (direct feedback, 17 Sept 2026: "these are only for demo
  *  purposes and shouldn't feel part of the UI"). */
 function DemoViewSwitch({ view, onPick }: { view: D.AttView; onPick: (view: D.AttView) => void }) {
-  const [open, setOpen] = useState(false);
-  const show = open || view !== "student";
+  // Open by default while a non-student view is showing, but the chip
+  // always toggles: pressing Demo again closes it (direct feedback, 18
+  // Sept 2026). Re-keyed on the view by the parent so picking another
+  // view re-opens it without an effect.
+  const [open, setOpen] = useState(view !== "student");
+  const show = open;
   return (
     <div className="flex min-w-0 items-center justify-end gap-[10px]">
       <button
@@ -1022,7 +1026,7 @@ export function AttCommunityView({ onBack }: { onBack: () => void }) {
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> {D.BACK}
         </button>
-        <DemoViewSwitch view={view} onPick={setView} />
+        <DemoViewSwitch key={view} view={view} onPick={setView} />
       </div>
 
       {/* Same identity banner as every other board (BoardView), wearing
