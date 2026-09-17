@@ -47,6 +47,9 @@ export type Career = {
 };
 
 export const DECK: Career[] = [
+  // Grid order is by world, one industry per row of three (direct
+  // instruction, 17 Sept 2026): Business & Finance across the top,
+  // Tech & Engineering across the bottom.
   {
     id: "investment-banking",
     title: "Investment Banker",
@@ -86,6 +89,26 @@ export const DECK: Career[] = [
     goodFitIf: ["Business", "Research", "Deep focus"],
     schoolPath: ["4-year bachelor's degree", "Finance or Economics"],
     photo: "/images/app/poster-private-equity.webp",
+  },
+  {
+    id: "fashion-buyer",
+    title: "Fashion Buyer",
+    world: "Business & Finance",
+    color: "var(--color-world-business-money-office)",
+    font: '"Viaoda Libre", serif',
+    fontWeight: 400,
+    salary: "$78K median",
+    employers: "Nordstrom · Macy's · independent boutiques",
+    hook: "Decide which styles a store buys next season, negotiate with vendors, and read sales data to predict what will sell.",
+    classes: "Business Math, Statistics, Art/Design, Economics, Marketing",
+    skills: "Trend Forecasting, Vendor Negotiation, Sales Data Analysis, Budget Management, Visual Merchandising",
+    workStyle: "Fast Pace · Small Buying Team · Seasonal Deadlines",
+    pathway: "4-Year Bachelor's in Fashion Merchandising, Business, or a related field",
+    tradeoff: "You shape what people wear, and the seasons never really stop.",
+    whatYouDo: ["Pick which clothes a store sells next", "Study sales data and trends"],
+    goodFitIf: ["Fashion", "Business", "Spotting trends"],
+    schoolPath: ["4-year bachelor's degree", "Fashion or Business"],
+    photo: "/images/app/poster-fashion-buyer.webp",
   },
   {
     id: "software-engineer",
@@ -128,26 +151,6 @@ export const DECK: Career[] = [
     goodFitIf: ["Math", "Computers", "Solving puzzles"],
     schoolPath: ["4-year bachelor's degree", "Statistics, CS, or Data Science"],
     photo: "/images/app/poster-data-scientist.webp",
-  },
-  {
-    id: "fashion-buyer",
-    title: "Fashion Buyer",
-    world: "Business & Finance",
-    color: "var(--color-world-business-money-office)",
-    font: '"Viaoda Libre", serif',
-    fontWeight: 400,
-    salary: "$78K median",
-    employers: "Nordstrom · Macy's · independent boutiques",
-    hook: "Decide which styles a store buys next season, negotiate with vendors, and read sales data to predict what will sell.",
-    classes: "Business Math, Statistics, Art/Design, Economics, Marketing",
-    skills: "Trend Forecasting, Vendor Negotiation, Sales Data Analysis, Budget Management, Visual Merchandising",
-    workStyle: "Fast Pace · Small Buying Team · Seasonal Deadlines",
-    pathway: "4-Year Bachelor's in Fashion Merchandising, Business, or a related field",
-    tradeoff: "You shape what people wear, and the seasons never really stop.",
-    whatYouDo: ["Pick which clothes a store sells next", "Study sales data and trends"],
-    goodFitIf: ["Fashion", "Business", "Spotting trends"],
-    schoolPath: ["4-year bachelor's degree", "Fashion or Business"],
-    photo: "/images/app/poster-fashion-buyer.webp",
   },
   {
     id: "game-designer",
