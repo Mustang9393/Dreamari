@@ -10153,3 +10153,24 @@ loading primitive to roll out app-wide next.
 resume point in `docs/reference/light-mode-audit-2026-09-17/NOTES.md`.
 
 ESLint + `tsc --noEmit` clean on every touched file.
+
+## 2026-09-18 · Resume document on the phone, Connect demo chips, AT&T cards, Match grid rows
+
+**Resume document (phone, below sm).** One header row (title truncates,
+Tailored is an icon, score chip stays), the fitted sheet is a "Tap to
+read" thumbnail into the full-screen reader (`ZoomResumeModal`, now
+exported separately from `ZoomResumeButton`), and a fixed bottom bar
+(`MobileActionBar`: Tailor, ATS Check, Read, Export, More sheet with Text
+Preview / Edit Sections / Edit Selection) replaces the icon row, which is
+now sm+ only (`TopBar toolsFromSm`). Bar hides while a panel is open.
+
+**Connect.** The role switcher never renders on the AT&T board; both Demo
+chips (Connect roles, AT&T views) toggle closed on a second press and are
+re-keyed on the role/view so a change re-opens them. AT&T opportunity
+cards cut to kind, title, one line, status chip and Save (date tile, time
+and interest counts live in the sheet).
+
+**Match grid.** Deck ordered one industry per row: Business & Finance,
+then Tech & Engineering.
+
+ESLint + `tsc --noEmit` clean on every touched file.

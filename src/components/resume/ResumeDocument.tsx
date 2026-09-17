@@ -817,41 +817,49 @@ const ZOOM_MAX = 200;
  *  how much of that real size the container claims. */
 export function ZoomResumeButton({ resume, templateId, title, label = "Full Screen", iconOnly = false, sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId?: string | ResumeTemplateId; title: string; /** the toolbar word; "Preview" where there is no live preview beside the form */ label?: string; iconOnly?: boolean } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
   const [open, setOpen] = useState(false);
-  const [zoom, setZoom] = useState(100);
-
   return (
     <>
       <ToolbarButton iconOnly={iconOnly} label={label} onClick={() => setOpen(true)}>
         <Maximize2 className="h-4 w-4" aria-hidden />
       </ToolbarButton>
-      {open && (
-        <Portal>
-          <div className="fixed inset-0 z-[150] flex flex-col backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--color-night-background) 62%, transparent)" }}>
-            <div className="flex flex-none items-center justify-between px-5 py-4">
-              <span className="text-[13px] font-bold tracking-[0.06em] text-white uppercase">{title}</span>
-              <div className="flex items-center gap-[var(--space-3)]">
-                <div className="flex items-center gap-[2px] rounded-full border border-white/20 p-[2px]">
-                  <button type="button" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full text-white">
-                    <Minus className="h-4 w-4" aria-hidden />
-                  </button>
-                  <span className="w-[44px] text-center text-[12.5px] font-bold text-white tabular-nums">{zoom}%</span>
-                  <button type="button" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full text-white">
-                    <Plus className="h-4 w-4" aria-hidden />
-                  </button>
-                </div>
-                <button type="button" aria-label="Close" onClick={() => setOpen(false)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border border-white/20 text-white">
-                  <X className="h-4 w-4" aria-hidden />
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto px-8 pb-8">
-              <div className="mx-auto" style={{ width: Math.round(PAGE_WIDTH * (zoom / 100)) }}>
-                <ResumeDocument resume={resume} templateId={templateId} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
-              </div>
-            </div>
-          </div>
-        </Portal>
-      )}
+      <ZoomResumeModal open={open} onClose={() => setOpen(false)} resume={resume} templateId={templateId} title={title} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
     </>
+  );
+}
+
+/** The zoom window on its own, so a phone's bottom bar and a tap on the
+ *  thumbnail sheet can open the same view the toolbar button does. */
+export function ZoomResumeModal({ open, onClose, resume, templateId, title, sectionOrder, hiddenSections, sectionOverrides }: { open: boolean; onClose: () => void; resume: ResumeData; templateId?: string | ResumeTemplateId; title: string } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
+  const [zoom, setZoom] = useState(100);
+  if (!open) return null;
+  return (
+    <Portal>
+      <div className="fixed inset-0 z-[150] flex flex-col backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--color-night-background) 62%, transparent)" }}>
+        <div className="flex flex-none items-center justify-between gap-[var(--space-3)] px-4 py-3 sm:px-5 sm:py-4">
+          <span className="min-w-0 truncate text-[13px] font-bold tracking-[0.06em] text-white uppercase">{title}</span>
+          <div className="flex flex-none items-center gap-[var(--space-3)]">
+            <div className="flex items-center gap-[2px] rounded-full border border-white/20 p-[2px]">
+              <button type="button" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full text-white">
+                <Minus className="h-4 w-4" aria-hidden />
+              </button>
+              <span className="w-[44px] text-center text-[12.5px] font-bold text-white tabular-nums">{zoom}%</span>
+              <button type="button" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full text-white">
+                <Plus className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+            <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border border-white/20 text-white">
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+        </div>
+        {/* Pans in both directions: on a phone 100% is wider than the screen,
+           which is the point (real text size, the way a PDF viewer reads). */}
+        <div className="flex-1 overflow-auto px-4 pb-[max(24px,env(safe-area-inset-bottom))] sm:px-8 sm:pb-8">
+          <div className="mx-auto" style={{ width: Math.round(PAGE_WIDTH * (zoom / 100)) }}>
+            <ResumeDocument resume={resume} templateId={templateId} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
+          </div>
+        </div>
+      </div>
+    </Portal>
   );
 }

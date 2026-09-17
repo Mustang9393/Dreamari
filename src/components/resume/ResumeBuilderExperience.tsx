@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, Download, FileText, ListOrdered, Pencil, Wand2, X } from "lucide-react";
+import { ChevronLeft, Download, Expand, FileText, ListOrdered, Maximize2, MoreHorizontal, Pencil, Wand2, X, type LucideIcon } from "lucide-react";
 import { atsIsStale, runAtsCheck } from "@/lib/resumeAts";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useScrolled } from "@/components/app/chrome";
@@ -22,7 +22,8 @@ import { ExperienceModal } from "./ExperienceModal";
 import { ExportChecklistModal } from "./ExportChecklistModal";
 import { JobMatchPanel } from "./JobMatchPanel";
 import { ResumeExperience } from "./ResumeExperience";
-import { ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
+import { ResumeDocument, ZoomResumeButton, ZoomResumeModal } from "./ResumeDocument";
+import { Portal } from "@/components/profile/CareerReport";
 import { TailorScreen } from "./TailorScreen";
 import { TemplateGallery } from "./TemplateGallery";
 import { TextPreviewModal } from "./TextPreviewModal";
@@ -217,11 +218,14 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
   );
 }
 
-function TopBar({ label, badges, onClose, extra }: { label: string; /** status chips (Tailored, Checking…) that sit with the title, not in the button row */ badges?: ReactNode; onClose?: () => void; extra?: ReactNode }) {
+function TopBar({ label, badges, onClose, extra, toolsFromSm = false }: { label: string; /** status chips (Tailored, Checking…) that sit with the title, not in the button row */ badges?: ReactNode; onClose?: () => void; extra?: ReactNode; /** the button row only from sm up: the phone carries its actions in a bottom bar instead */ toolsFromSm?: boolean }) {
   return (
-    <div data-print-hide className="mb-[var(--space-5)] flex flex-none flex-wrap items-center justify-between gap-[var(--space-3)]">
-      <div className="flex min-w-0 flex-wrap items-center gap-[10px]">
-        <span className="text-[13px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+    <div data-print-hide className="mb-[var(--space-4)] flex flex-none flex-wrap items-center justify-between gap-[var(--space-3)] sm:mb-[var(--space-5)]">
+      {/* One row on the phone: the title truncates and the chips stay put,
+         instead of the title, then the chips, then the icon row stacking
+         three deep (direct feedback, 18 Sept 2026). */}
+      <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-[10px] sm:flex-none sm:flex-wrap">
+        <span className="min-w-0 truncate text-[13px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
         {badges}
       </div>
       {/* A tighter gap while the toolbar is icon-only (below `lg`) buys back
@@ -240,7 +244,7 @@ function TopBar({ label, badges, onClose, extra }: { label: string; /** status c
          2026: "the hover on the icons is cropping the top part"). The
          negative margin gives the padding back so the row's footprint is
          unchanged. */}
-      <div className="-my-[6px] flex max-w-full items-center gap-[6px] overflow-x-auto px-[2px] py-[6px] [scrollbar-width:none] lg:gap-[8px]">
+      <div className={`-my-[6px] max-w-full items-center gap-[6px] overflow-x-auto px-[2px] py-[6px] [scrollbar-width:none] lg:gap-[8px] ${toolsFromSm ? "hidden sm:flex" : "flex"}`}>
         {extra}
         {onClose && (
           <button
@@ -258,8 +262,54 @@ function TopBar({ label, badges, onClose, extra }: { label: string; /** status c
   );
 }
 
+/** The phone's actions, as a bottom bar of labelled icons (so no tooltip
+ *  is needed) instead of seven unlabelled icons under the title: the four
+ *  a student reaches for on a phone, and More for the rest (direct
+ *  feedback, 18 Sept 2026: "the mobile version is very badly optimised").
+ *  Hidden while a panel is open, since every panel has its own close. */
+type BarAction = { key: string; label: string; Icon: LucideIcon | typeof AtsIcon; onClick: () => void };
+function MobileActionBar({ primary, more }: { primary: BarAction[]; more: BarAction[] }) {
+  const [open, setOpen] = useState(false);
+  const item = (a: BarAction, big = false) => (
+    <button key={a.key} type="button" onClick={a.onClick} className="dm-quiet flex min-w-0 flex-1 cursor-pointer flex-col items-center gap-[3px] rounded-[var(--radius-md)] px-[4px] py-[6px]" style={{ color: "var(--foreground)" }}>
+      <a.Icon className={big ? "h-[22px] w-[22px]" : "h-[20px] w-[20px]"} aria-hidden />
+      <span className="max-w-full truncate text-[10.5px] leading-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{a.label}</span>
+    </button>
+  );
+  return (
+    <>
+      <nav data-print-hide aria-label="Resume actions" className="fixed inset-x-0 bottom-0 z-40 sm:hidden">
+        <div className="mx-3 mb-[max(10px,env(safe-area-inset-bottom))] flex items-stretch gap-[2px] rounded-[22px] border p-[4px]" style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", backdropFilter: "blur(18px) saturate(1.6)", WebkitBackdropFilter: "blur(18px) saturate(1.6)", borderColor: "var(--glass-border)", boxShadow: "0 -12px 32px -20px rgba(0,0,0,0.6), 0 12px 32px -16px rgba(0,0,0,0.55)" }}>
+          {primary.map((a) => item(a))}
+          {more.length > 0 && item({ key: "more", label: "More", Icon: MoreHorizontal, onClick: () => setOpen(true) })}
+        </div>
+      </nav>
+      {open && (
+        <Portal>
+          <div className="fixed inset-0 z-[120] flex items-end sm:hidden" onClick={() => setOpen(false)}>
+            <div aria-hidden className="absolute inset-0 backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)" }} />
+            <div role="dialog" aria-label="More actions" onClick={(e) => e.stopPropagation()} className="relative z-10 mx-3 mb-[max(10px,env(safe-area-inset-bottom))] w-full overflow-hidden rounded-[22px] border motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
+              {more.map((a) => (
+                <button key={a.key} type="button" onClick={() => { setOpen(false); a.onClick(); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] border-b px-[18px] py-[14px] text-left text-[14.5px] font-semibold last:border-b-0" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  <a.Icon className="h-[18px] w-[18px]" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {a.label}
+                </button>
+              ))}
+              <button type="button" onClick={() => setOpen(false)} className="dm-quiet flex w-full cursor-pointer items-center justify-center px-[18px] py-[13px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)", background: "var(--glass-surface-1)" }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </Portal>
+      )}
+    </>
+  );
+}
+
 function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, templateId, version, celebrate = false }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter>; templateId: string; version?: ResumeVersion; /** just created: show Dreamy's score card once the check lands */ celebrate?: boolean }) {
   const [panel, setPanel] = useState<"none" | "tailor" | "ats" | "text" | "export" | "sections">("none");
+  // The full-screen reader, shared by the toolbar button (sm+), the phone
+  // bar and a tap on the phone's thumbnail sheet.
+  const [zoomOpen, setZoomOpen] = useState(false);
   // Every saved resume is scored without being asked: the check runs the
   // moment the document opens with no result, or with a result computed
   // from older content, and stores it on the version (direct feedback, 17
@@ -317,8 +367,8 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         badges={
           <>
             {version?.jobDescription && (
-              <span className="inline-flex items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 45%, var(--glass-border))", color: "var(--accent-subtle)" }}>
-                <Wand2 className="h-3 w-3" aria-hidden /> Tailored
+              <span className="inline-flex flex-none items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold max-sm:size-[24px] max-sm:justify-center max-sm:px-0" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 45%, var(--glass-border))", color: "var(--accent-subtle)" }} aria-label="Tailored to a job description">
+                <Wand2 className="h-3 w-3" aria-hidden /> <span className="max-sm:hidden">Tailored</span>
               </span>
             )}
             {checking ? (
@@ -329,7 +379,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
               </button>
             ) : ats && !stale ? (
               // the score, always in view once it exists; opens the full report
-              <button type="button" onClick={() => setPanel("ats")} className="dm-quiet inline-flex cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold tabular-nums" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }} aria-label="Open ATS Check">
+              <button type="button" onClick={() => setPanel("ats")} className="dm-quiet inline-flex flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold tabular-nums" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }} aria-label="Open ATS Check">
                 <AtsIcon className="h-3.5 w-3.5" style={{ color: "var(--accent-subtle)" }} /> {ats.qualityScore}/100{ats.jobMatchScore !== null ? ` · Match ${ats.jobMatchScore}` : ""}
               </button>
             ) : null}
@@ -350,7 +400,9 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
             <ToolbarButton iconOnly label="Text Preview" onClick={() => setPanel("text")}>
               <FileText className="h-4 w-4" aria-hidden />
             </ToolbarButton>
-            <ZoomResumeButton iconOnly resume={resume} templateId={templateId} title={title} sectionOrder={version?.sectionOrder} hiddenSections={version?.hiddenSections} sectionOverrides={version?.sectionOverrides} />
+            <ToolbarButton iconOnly label="Full Screen" onClick={() => setZoomOpen(true)}>
+              <Maximize2 className="h-4 w-4" aria-hidden />
+            </ToolbarButton>
             {version && (
               <ToolbarButton iconOnly label="Edit Sections" onClick={() => setPanel("sections")}>
                 <ListOrdered className="h-4 w-4" aria-hidden />
@@ -366,6 +418,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
             )}
           </>
         }
+        toolsFromSm
       />
       {panel === "tailor" && version ? (
         <JobMatchPanel resume={resume} version={version} onClose={() => setPanel("none")} />
@@ -378,7 +431,32 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
       ) : panel === "sections" && version ? (
         <EditSectionsPanel resume={resume} version={version} onClose={() => setPanel("none")} />
       ) : (
-        <ResumeDocument resume={resume} templateId={templateId} sectionOrder={version?.sectionOrder} hiddenSections={version?.hiddenSections} sectionOverrides={version?.sectionOverrides} />
+        <div className="relative">
+          <ResumeDocument resume={resume} templateId={templateId} sectionOrder={version?.sectionOrder} hiddenSections={version?.hiddenSections} sectionOverrides={version?.sectionOverrides} />
+          {/* On a phone the fitted page is a thumbnail, not a reading size,
+             so the whole sheet is one tap into the full-screen reader, with
+             the hint saying so. */}
+          <button type="button" onClick={() => setZoomOpen(true)} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)] sm:hidden" aria-label="Read full screen">
+            <span className="absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-[12px] font-bold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", backdropFilter: "blur(12px)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <Expand className="h-3.5 w-3.5" aria-hidden /> Tap to read
+            </span>
+          </button>
+        </div>
+      )}
+      <ZoomResumeModal open={zoomOpen} onClose={() => setZoomOpen(false)} resume={resume} templateId={templateId} title={title} sectionOrder={version?.sectionOrder} hiddenSections={version?.hiddenSections} sectionOverrides={version?.sectionOverrides} />
+      {panel === "none" && (
+        <MobileActionBar
+          primary={[
+            ...(version ? [{ key: "tailor", label: "Tailor", Icon: Wand2, onClick: () => setPanel("tailor") }, { key: "ats", label: "ATS Check", Icon: AtsIcon, onClick: () => setPanel("ats") }] : []),
+            { key: "zoom", label: "Read", Icon: Maximize2, onClick: () => setZoomOpen(true) },
+            { key: "export", label: "Export", Icon: Download, onClick: () => setPanel("export") },
+          ]}
+          more={[
+            { key: "text", label: "Text Preview", Icon: FileText, onClick: () => setPanel("text") },
+            ...(version ? [{ key: "sections", label: "Edit Sections", Icon: ListOrdered, onClick: () => setPanel("sections") }] : []),
+            ...(editHref ? [{ key: "edit", label: "Edit Selection", Icon: Pencil, onClick: () => router.push(editHref) }] : []),
+          ]}
+        />
       )}
       {/* Dreamy's score card, once, right after a resume is generated: the
          two numbers and the single most useful tip, with the full report
@@ -411,7 +489,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         type="button"
         data-print-hide
         onClick={onBack}
-        className="dm-link mt-[var(--space-4)] cursor-pointer self-center text-[13.5px] font-bold"
+        className="dm-link mt-[var(--space-4)] mb-[84px] cursor-pointer self-center text-[13.5px] font-bold sm:mb-0"
         style={{ color: "var(--accent-subtle)" }}
       >
         {backLabel}
