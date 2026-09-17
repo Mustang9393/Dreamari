@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { AlertTriangle, Check, CheckCircle2, Sparkles } from "lucide-react";
-import { saveATSCheck, type ATSCheckResult, type ResumeData, type ResumeVersion } from "@/lib/resume";
+import { type ATSCheckResult, type ResumeData, type ResumeVersion } from "@/lib/resume";
+import { fingerprintFor, runAtsCheck } from "@/lib/resumeAts";
 import { CARD_CLASS, INSET, NOT_A_GUARANTEE_NOTE, ResumeModal } from "./ui";
 
 // The full "ATS Check" audit -- resume-quality rating (score + grade + a
@@ -12,19 +13,6 @@ import { CARD_CLASS, INSET, NOT_A_GUARANTEE_NOTE, ResumeModal } from "./ui";
 // same result instantly -- `fingerprintFor` below detects when the resume
 // has actually changed since that result was produced, so a stale check
 // never gets presented as current.
-
-function fingerprintFor(resume: ResumeData, version: ResumeVersion): string {
-  return JSON.stringify({
-    education: resume.education.map((e) => [e.schoolName, e.gradYear]),
-    experience: resume.experience.map((e) => [e.title, e.where, e.startDate, e.current, e.bullets]),
-    skills: resume.skills,
-    profile: [resume.profile.firstName, resume.profile.lastName, resume.profile.email, resume.profile.phone, resume.profile.bio],
-    jobDescription: version.jobDescription,
-    targetPosition: version.targetPosition,
-    targetCompany: version.targetCompany,
-    template: version.template,
-  });
-}
 
 function scoreTone(fraction: number) {
   return fraction >= 0.75 ? "var(--world-food-farming-nature, #3aa66b)" : fraction >= 0.5 ? "var(--color-amber-500, #f59e0b)" : "var(--color-feedback-error, #ff6b6b)";
@@ -72,55 +60,14 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
   async function run() {
     setRunning(true);
     setError(false);
-    try {
-      const res = await fetch("/api/resume-ats-check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jobDescription: version.jobDescription,
-          targetPosition: version.targetPosition,
-          targetCompany: version.targetCompany,
-          template: version.template,
-          profileName: `${resume.profile.firstName} ${resume.profile.lastName}`.trim(),
-          profileEmail: resume.profile.email,
-          profilePhone: resume.profile.phone,
-          bio: resume.profile.bio,
-          education: resume.education.map((e) => ({ schoolName: e.schoolName, gradYear: e.gradYear })),
-          experience: resume.experience.map((e) => ({ id: e.id, title: e.title, where: e.where, startDate: e.startDate, current: e.current, bullets: e.bullets })),
-          skills: resume.skills,
-        }),
-      });
-      const data = (await res.json()) as { ok: boolean } & Partial<Omit<ATSCheckResult, "generatedAt" | "analyzedFor">>;
-      if (data.ok && typeof data.qualityScore === "number") {
-        const next: ATSCheckResult = {
-          qualityScore: data.qualityScore,
-          qualityGrade: data.qualityGrade ?? "",
-          qualityBreakdown: data.qualityBreakdown ?? { experienceQuality: 0, bulletQuality: 0, atsFormatting: 0, completeness: 0, skills: 0, education: 0, focusConciseness: 0 },
-          qualityStrengths: data.qualityStrengths ?? [],
-          qualityImprovements: data.qualityImprovements ?? [],
-          jobMatchScore: data.jobMatchScore ?? null,
-          jobMatchLabel: data.jobMatchLabel ?? "",
-          verifiedMatches: data.verifiedMatches ?? [],
-          possibleMatches: data.possibleMatches ?? [],
-          jobGaps: data.jobGaps ?? [],
-          keywordMatches: data.keywordMatches ?? [],
-          readability: data.readability ?? [],
-          missingQualifications: data.missingQualifications ?? [],
-          aiAssisted: !!data.aiAssisted,
-          generatedAt: Date.now(),
-          analyzedFor: fingerprint,
-        };
-        setResult(next);
-        setStale(false);
-        saveATSCheck(version.id, next);
-      } else {
-        setError(true);
-      }
-    } catch {
+    const next = await runAtsCheck(resume, version);
+    if (next) {
+      setResult(next);
+      setStale(false);
+    } else {
       setError(true);
-    } finally {
-      setRunning(false);
     }
+    setRunning(false);
   }
 
   return (

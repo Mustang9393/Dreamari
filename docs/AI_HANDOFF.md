@@ -9969,6 +9969,24 @@ ESLint + `tsc --noEmit` clean on every file in every fix above.
 
 ## 2026-09-17 · Connect-before-next-level in Play, Career Detail Connect modal, Joshua's Replit reference capture
 
+**Resume Builder: aligning with Maisha's Replit (in progress, not pushed).**
+Reference walked end to end at desktop, tablet and phone and recorded in
+`docs/reference/resume-builder-replit-2026-09/` (README = map, features,
+the Replit's own gaps; walk-text.md = every screen's text and controls).
+Added so far: `src/lib/resumeAts.ts` (one shared ATS runner + fingerprint),
+automatic ATS scoring on the finished document whenever a version has no
+result or a stale one (direct request: "every resume that is generated
+should automatically be ATS checked and scored"), Dreamy's score card once
+after a resume is created ("Resume x/100 · Job Match y/100" + the single
+most useful tip, See Final Tips opens the panel), a first-run Dreamy welcome
+pop-up (`DreamyPopup` in ui.tsx, once per browser), XP toasts per completed
+wizard step (+10/+15, the reference's point values), a Tailored badge on the
+document toolbar, a Preview control in the wizard below lg (the live
+preview column is hidden there), and saved-card actions that drop under the
+title on phones. Report of gaps/glows/grows for the user comes after
+alignment is complete, in short bullets.
+
+
 **AT&T × Connected Learning Centers board (`src/components/connect/att/`).**
 Joshua's three-view Connect update (Student / Volunteer / Enterprise, see
 `docs/reference/joshua-connect-replit-2026-09/`) ported as one partner

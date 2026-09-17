@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -209,5 +210,39 @@ export function ResumeModal({ title, onClose, children }: { title: string; onClo
       </div>
       <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Dreamy pop-up -- the reference's centred Dreamy moments (the first-run
+// welcome, the "you've got a good start" nudge, the score card after a
+// resume is generated), in the app's own sheet chrome: blurred page behind,
+// Dreamy's sprite, one short line, one or two actions. Escape and the
+// backdrop close it. Used only for moments that deserve a stop; everything
+// else Dreamy says goes through the inline DreamyGuide.
+// ---------------------------------------------------------------------------
+export function DreamyPopup({ sprite, title, children, actions, onClose, labelledBy = "dreamy-popup-title" }: { sprite: string; title: string; children?: ReactNode; actions: ReactNode; onClose: () => void; labelledBy?: string }) {
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [onClose]);
+  return (
+    <Portal>
+      <div className="fixed inset-0 z-[120] flex items-end justify-center p-[var(--space-5)] sm:items-center" role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
+        <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.55)" }} />
+        <div className="relative z-[1] flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+          <div className="flex items-start gap-[var(--space-3)]">
+            <Image src={sprite} alt="" width={112} height={112} className="h-[56px] w-[56px] flex-none object-contain" />
+            <div className="flex min-w-0 flex-col gap-[6px] pt-[2px]">
+              <span className="text-[11px] leading-[15px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>Dreamy</span>
+              <h3 id={labelledBy} className="text-[17px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
+              {children && <div className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{children}</div>}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-end gap-[8px]">{actions}</div>
+        </div>
+      </div>
+    </Portal>
   );
 }

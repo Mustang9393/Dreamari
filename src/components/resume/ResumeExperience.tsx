@@ -144,7 +144,9 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
       className="relative flex flex-col gap-[8px] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-3)] backdrop-blur-md"
       style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, var(--inset-surface) 85%, ${accent} 15%)` }}
     >
-      <div className="flex items-start justify-between gap-[var(--space-3)]">
+      {/* Title and actions share a row from sm up; on phones the actions
+         drop under the title so it is not squeezed to "Retail As…" */}
+      <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-start sm:justify-between sm:gap-[var(--space-3)]">
         <div
           role="button"
           tabIndex={0}
@@ -170,7 +172,7 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
             <span className="truncate text-[12px] font-semibold" style={{ color: accent }}>Tailored for {version.targetPosition}</span>
           )}
         </div>
-        <div className="flex flex-none flex-col items-end gap-[6px]">
+        <div className="flex flex-none flex-row-reverse items-center justify-between gap-[6px] sm:flex-col sm:items-end">
           {/* The updated date moves to its own corner instead of stacked
              into that meta sentence -- a timestamp reads as metadata, not
              something to say in the same breath as what the resume is
