@@ -274,7 +274,13 @@
    direct feedback, 17 Sept 2026: "people should be more like replit, a
    list of people and their info to follow, not a whole post by them." */
 .peopleCard {
-  width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+  /* This gap is the floor between peopleCardMain and the Follow button
+     below it -- followBtn's own margin-top:auto only adds MORE space on
+     a shorter card (pushing it down to match the tallest one); on the
+     tallest card itself there's no slack for auto to consume, so it falls
+     back to exactly this value. 4px read as the follower count sitting
+     right on top of the button (direct feedback, 17 Sept 2026). */
+  width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px;
   padding: 18px 14px; border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--background) 90%, transparent);
 }
