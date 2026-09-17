@@ -156,12 +156,12 @@ const AVATAR_PHOTO: Record<string, string> = {
 // Sept 2026: "just like Instagram and Twitter, not on the pfp but after the
 // name" -- moved to VerifiedBadge below, rendered by each caller next to the
 // person's name text instead. Avatar itself no longer knows about verification.
-export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
+export function Avatar({ name, size = 34, photo: explicitPhoto }: { name: string; size?: number; /** a portrait for a professional who is not in PROS (a partner board's own people); generated avatars are for students only */ photo?: string }) {
   // Professionals always wear their portrait; students stay behind the flag
   // (Jordan included -- their pin lives in studentAvatarSrc, the fallback
   // below, not here).
   const isPro = PROS.some((p) => p.name === name);
-  const photo = USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined;
+  const photo = explicitPhoto ?? (USE_PHOTO_AVATARS || isPro ? AVATAR_PHOTO[name] : undefined);
   // The seed is the FIRST word only, so "Jordan Rivera" (a full name, shown
   // on the student's own profile) and "Jordan" (the community handle, per
   // the app's first-name-only identity rule) generate the identical

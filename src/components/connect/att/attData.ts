@@ -52,23 +52,26 @@ export const ENTERPRISE_TABS = [
 
 // ——— people ———
 
-export type AttPro = { name: string; role: string; org: "AT&T" };
+// Portraits are synthetic faces (no real person), cropped to the same 512px
+// square as Connect's other headshots; pros never wear the generated
+// student avatars (direct feedback, 17 Sept 2026).
+export type AttPro = { name: string; role: string; org: "AT&T"; photo: string };
 export const ATT_PROS: Record<string, AttPro> = {
-  marcus: { name: "Marcus Reed", role: "Network Engineering Manager", org: "AT&T" },
-  jordan: { name: "Jordan Lee", role: "Cybersecurity Analyst", org: "AT&T" },
-  maya: { name: "Maya Patel", role: "AI Product Manager", org: "AT&T" },
-  andre: { name: "Andre Johnson", role: "Cloud Solutions Architect", org: "AT&T" },
-  elena: { name: "Elena Rodriguez", role: "Customer Experience Director", org: "AT&T" },
-  amina: { name: "Amina Thompson", role: "Technology Program Manager", org: "AT&T" },
+  marcus: { name: "Marcus Reed", role: "Network Engineering Manager", org: "AT&T", photo: "/images/connect/avatars/att-marcus.jpg" },
+  jordan: { name: "Jordan Lee", role: "Cybersecurity Analyst", org: "AT&T", photo: "/images/connect/avatars/att-jordan.jpg" },
+  maya: { name: "Maya Patel", role: "AI Product Manager", org: "AT&T", photo: "/images/connect/avatars/att-maya.jpg" },
+  andre: { name: "Andre Johnson", role: "Cloud Solutions Architect", org: "AT&T", photo: "/images/connect/avatars/att-andre.jpg" },
+  elena: { name: "Elena Rodriguez", role: "Customer Experience Director", org: "AT&T", photo: "/images/connect/avatars/att-elena.jpg" },
+  amina: { name: "Amina Thompson", role: "Technology Program Manager", org: "AT&T", photo: "/images/connect/avatars/att-amina.jpg" },
 };
 
 // ——— Student View ———
 
 export const INSIGHTS_SECTION = { title: "Professional Insights", sub: "Advice from AT&T professionals." };
 export const STUDENT_INSIGHTS = [
-  { id: "att-i1", pro: "marcus", question: "How is AI changing your work?", quote: "AI helps our teams identify network issues faster, while communication and problem-solving matter more than ever." },
-  { id: "att-i2", pro: "jordan", question: "What skill matters most in cybersecurity?", quote: "Curiosity matters. The strongest analysts keep asking why something happened and explain risk clearly to others." },
-  { id: "att-i3", pro: "maya", question: "What surprised you most about working in AI?", quote: "The work is as much about understanding people and their needs as it is about building the technology." },
+  { id: "att-i1", pro: "marcus", question: "How is AI changing your work?", quote: "AI helps our teams identify network issues faster, while communication and problem-solving matter more than ever.", helpful: 64, comments: 7 },
+  { id: "att-i2", pro: "jordan", question: "What skill matters most in cybersecurity?", quote: "Curiosity matters. The strongest analysts keep asking why something happened and explain risk clearly to others.", helpful: 51, comments: 4 },
+  { id: "att-i3", pro: "maya", question: "What surprised you most about working in AI?", quote: "The work is as much about understanding people and their needs as it is about building the technology.", helpful: 38, comments: 3 },
 ];
 export const INSIGHT_ACTIONS = { like: "Like", comment: "Comment", ask: "Ask", commentPlaceholder: "Add a comment...", post: "Post" };
 

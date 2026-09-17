@@ -9989,10 +9989,13 @@ and Connect's boards and dashboards now fill the shared 1440 column.
 Pre-build snapshot: local tag `connect-before-att-board-2026-09-17` and
 branch `connect-snapshot-2026-09-17`.
 
-Open: the six AT&T professionals still render generated avatars (rule from
-17 Sept: illustrated avatars are for students only, pros need real
-photos, and neither names nor photos may clash with existing pros or
-students); five first names clash (Marcus/Andre/Elena with existing pros,
+The six AT&T professionals wear their own portraits (`att-*.jpg`, synthetic
+faces, no real person, cropped to the same 512px square as the other
+headshots; `Avatar` now takes an explicit `photo` for pros outside PROS).
+Rule from 17 Sept: generated avatars are for students only. Insight cards
+carry the other boards' action row (helpful pill with count, comment count,
+Ask as the one worded action); the counts are ours, the Replit shows none.
+Open: five first names clash (Marcus/Andre/Elena with existing pros,
 Jordan/Maya with students) and need a decision since renaming would change
 Joshua's copy.
 

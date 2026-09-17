@@ -13,7 +13,7 @@ import Image from "next/image";
 import { useState, type ReactNode } from "react";
 import {
   Bookmark, BookmarkCheck, Briefcase, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, Eye, Lightbulb, Megaphone,
-  MessageCircle, MessageSquarePlus, MessagesSquare, ThumbsUp, UserRound, Users,
+  MessageCircleQuestion, MessagesSquare, ThumbsUp, UserRound, Users,
 } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { Avatar, CompanyChip, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
@@ -54,7 +54,7 @@ function ProLine({ id, size = 36 }: { id: string; size?: number }) {
   const pro = D.ATT_PROS[id];
   return (
     <div className="flex min-w-0 flex-1 items-center gap-[10px]">
-      <Avatar name={pro.name} size={size} />
+      <Avatar name={pro.name} size={size} photo={pro.photo} />
       <div className="min-w-0 flex-1">
         <span className="flex items-center gap-[5px] text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>
           <span className="truncate">{pro.name}</span> <VerifiedBadge size={14} />
@@ -77,25 +77,33 @@ function InsightCard({ item, onAsk }: { item: typeof D.STUDENT_INSIGHTS[number];
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState("");
   const [comment, setComment] = useState<string>();
-  const pill = (on: boolean) => ({
-    borderColor: on ? `color-mix(in srgb, ${accent} 55%, var(--glass-border))` : "var(--glass-border)",
-    background: on ? `color-mix(in srgb, ${accent} 16%, transparent)` : "var(--glass-surface-1)",
-    color: on ? accent : "var(--foreground)",
-  });
+  const helpful = item.helpful + (liked ? 1 : 0);
+  const comments = item.comments + (comment ? 1 : 0);
   return (
     <article className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
       <ProLine id={item.pro} />
       <h3 className="text-[16px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.question}</h3>
       <p className="text-[14.5px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{item.quote}&rdquo;</p>
-      <div className="mt-auto flex flex-wrap gap-[8px] pt-[4px]">
-        <button type="button" aria-pressed={liked} onClick={() => setLiked((v) => !v)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-[999px] border px-[12px] text-[12.5px] font-semibold" style={pill(liked)}>
-          <ThumbsUp className="h-[13px] w-[13px]" aria-hidden fill={liked ? "currentColor" : "none"} /> {D.INSIGHT_ACTIONS.like}
+      {/* Same row the other boards' insight cards carry: the helpful pill
+         with its count, the comment count, then the secondary action pushed
+         to the far edge. Ask is the one action that keeps its word (direct
+         feedback, 17 Sept 2026). */}
+      <div className="mt-auto flex items-center gap-[var(--space-4)] pt-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <button
+          type="button"
+          onClick={() => setLiked((v) => !v)}
+          aria-pressed={liked}
+          aria-label={D.INSIGHT_ACTIONS.like}
+          className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
+          style={liked ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
+        >
+          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {helpful}
         </button>
-        <button type="button" aria-pressed={composing || !!comment} onClick={() => setComposing((v) => !v)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-[999px] border px-[12px] text-[12.5px] font-semibold" style={pill(composing || !!comment)}>
-          <MessageCircle className="h-[13px] w-[13px]" aria-hidden /> {D.INSIGHT_ACTIONS.comment}
+        <button type="button" onClick={() => setComposing((v) => !v)} aria-pressed={composing} aria-label={D.INSIGHT_ACTIONS.comment} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[5px] tabular-nums" style={{ color: composing ? "var(--accent-subtle)" : undefined }}>
+          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
         </button>
-        <button type="button" onClick={onAsk} className="dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-[999px] border px-[12px] text-[12.5px] font-semibold" style={pill(false)}>
-          <MessageSquarePlus className="h-[13px] w-[13px]" aria-hidden /> {D.INSIGHT_ACTIONS.ask}
+        <button type="button" onClick={onAsk} className="dm-quiet ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+          <MessageCircleQuestion className="h-4 w-4" aria-hidden /> {D.INSIGHT_ACTIONS.ask}
         </button>
       </div>
       {comment ? (
@@ -144,13 +152,17 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave }: { onAsk: () => void
       </section>
 
       <Panel id="att-poll-title" title={D.POLL.eyebrow}>
-        <h3 className="text-[17px] leading-[23px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.POLL.question}</h3>
-        <div className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
-          {D.POLL.options.map((option) => (
-            <QuietCta key={option} size="sm" done={pick === option} onClick={() => setPick(option)}>{option}</QuietCta>
-          ))}
+        {/* the poll is a card inside its panel, lifted like the insight and
+           opportunity cards around it (direct feedback, 17 Sept 2026) */}
+        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={ITEM}>
+          <h3 className="text-[17px] leading-[23px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.POLL.question}</h3>
+          <div className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
+            {D.POLL.options.map((option) => (
+              <QuietCta key={option} size="sm" done={pick === option} onClick={() => setPick(option)}>{option}</QuietCta>
+            ))}
+          </div>
+          {pick && <Submitted text={D.POLL.saved} />}
         </div>
-        {pick && <Submitted text={D.POLL.saved} />}
       </Panel>
 
       <section className="flex flex-col gap-[var(--space-4)]">
@@ -239,7 +251,7 @@ function StudentPeople({ follows, toggleFollow }: { follows: Record<string, bool
               const pro = D.ATT_PROS[id];
               return (
                 <div key={id} className="flex flex-col items-center gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-center" style={ITEM}>
-                  <Avatar name={pro.name} size={56} />
+                  <Avatar name={pro.name} size={56} photo={pro.photo} />
                   <span className="mt-[4px] flex items-center gap-[5px] text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={14} /></span>
                   <span className="max-w-full truncate text-[12.5px] leading-[17px]" title={pro.role} style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
                   <CompanyChip name={pro.org} tone="surface" size="sm" />
@@ -643,7 +655,7 @@ function EnterpriseTeam() {
                 const pro = D.ATT_PROS[r.pro];
                 return (
                   <tr key={r.pro} className="border-t" style={{ borderColor: RULE }}>
-                    <td className="py-[12px] pr-[12px]"><span className="flex items-center gap-[8px] font-bold" style={{ color: "var(--foreground)" }}><Avatar name={pro.name} size={28} /> {pro.name}</span></td>
+                    <td className="py-[12px] pr-[12px]"><span className="flex items-center gap-[8px] font-bold" style={{ color: "var(--foreground)" }}><Avatar name={pro.name} size={28} photo={pro.photo} /> {pro.name}</span></td>
                     <td className="py-[12px] pr-[12px]" style={{ color: "var(--muted-foreground)" }}>{pro.role}</td>
                     <td className="py-[12px] pr-[12px]"><span className="rounded-[999px] px-[10px] py-[3px] text-[12px] font-bold" style={activityStyle(r.activity)}>{r.activity}</span></td>
                     <td className="py-[12px] pr-[12px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{r.reached} {T.topLabels.reached}</td>
