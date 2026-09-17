@@ -156,6 +156,12 @@ export type Community = {
   joined: boolean;
   unreadAnswers: number;
   recommendedBecause?: string; // explicit-interest explanation (Top 3), never internal rankings
+  /** A partner community's third headline number (the AT&T board counts its
+   *  Connected Learning Centers, not companies) -- the card shows it in the
+   *  third stat tile when present. */
+  centers?: number;
+  /** A partner community's own mark, shown large on its card (the AT&T board). */
+  brandMark?: string;
 };
 
 export const PROS: Pro[] = [
@@ -290,6 +296,33 @@ export const COMMUNITIES: Community[] = [
     professionalsFrom: ["Disney", "Nike", "Spotify", "Netflix", "Adobe", "Warner Music Group", "Paramount", "Condé Nast"],
     responseWindow: "Most questions answered within 3 days",
     joined: false,
+    unreadAnswers: 0,
+  },
+  // AT&T x Connected Learning Centers -- the partner community from Joshua's
+  // Connect update (dceeai.replit.app/community-boards, 17 Sept 2026), copy
+  // verbatim. Its board is its own component (connect/att/), not BoardView;
+  // ConnectExperience routes `?board=` here by id. LAST on purpose: several
+  // places pick a board with COMMUNITIES.find(c => c.world === ...) and must
+  // keep landing on the general Tech & Engineering board.
+  {
+    id: "att-connected-learning-centers",
+    name: "AT&T × Connected Learning Centers",
+    world: "Tech & Engineering",
+    purpose: "An ongoing career access network connecting students with AT&T professionals and opportunities.",
+    // AT&T's own newsroom photo of a Connected Learning Center (about.att.com,
+    // "AT&T Opens 100th Connected Learning Center", July 2026), not one of
+    // our covers (direct feedback, 17 Sept 2026: "fetch official stuff...
+    // standard AT&T marketing material or press kit").
+    photo: "/images/connect/covers/att-connected-learning-center.jpg",
+    brandMark: "/images/connect/partners/att-white.png",
+    topics: ["Career Access", "Technology", "Programs", "Virtual Panels"],
+    students: 620,
+    activePros: 54,
+    posts: 0,
+    centers: 8,
+    professionalsFrom: ["AT&T"],
+    responseWindow: "Most questions answered within 2 days",
+    joined: true,
     unreadAnswers: 0,
   },
 ];

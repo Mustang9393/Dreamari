@@ -9969,6 +9969,34 @@ ESLint + `tsc --noEmit` clean on every file in every fix above.
 
 ## 2026-09-17 · Connect-before-next-level in Play, Career Detail Connect modal, Joshua's Replit reference capture
 
+**AT&T × Connected Learning Centers board (`src/components/connect/att/`).**
+Joshua's three-view Connect update (Student / Volunteer / Enterprise, see
+`docs/reference/joshua-connect-replit-2026-09/`) ported as one partner
+board inside Connect, in the app's own language and with the Replit's copy
+verbatim. `attData.ts` holds every string (do not edit copy there; the
+Replit is the source of truth), `AttCommunityView.tsx` renders the views
+with the shared primitives (BoardView banner, Segmented, Panel,
+PrimaryCta/QuietCta, FollowButton, MetricTile, AreaChart). Routed from
+ConnectExperience's board branch by `ATT_ID`; the community entry sits LAST
+in `COMMUNITIES` so `find(c => c.world === ...)` lookups still land on the
+general Tech board. The Student/Volunteer/Enterprise switch is a demo-only
+control (a Demo chip reveals it, same as RoleTabs). Cover and card photo
+are AT&T's own newsroom image (`att-connected-learning-center.jpg`, from
+about.att.com "AT&T Opens 100th Connected Learning Center", July 2026);
+the card wears the AT&T white mark via the new `Community.brandMark`.
+Community cards were also brightened (progressive blur 34%, lighter scrim)
+and Connect's boards and dashboards now fill the shared 1440 column.
+Pre-build snapshot: local tag `connect-before-att-board-2026-09-17` and
+branch `connect-snapshot-2026-09-17`.
+
+Open: the six AT&T professionals still render generated avatars (rule from
+17 Sept: illustrated avatars are for students only, pros need real
+photos, and neither names nor photos may clash with existing pros or
+students); five first names clash (Marcus/Andre/Elena with existing pros,
+Jordan/Maya with students) and need a decision since renaming would change
+Joshua's copy.
+
+
 **Connect interstitial in Play (`ConnectInterstitial.tsx`).** Skippable
 modal between simulation levels, ported from Joshua's Replit
 (`dceeai.replit.app/ib-career-game`, "CONNECT BEFORE LEVEL 2"): three

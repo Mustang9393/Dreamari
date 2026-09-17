@@ -20,6 +20,8 @@ import { PeopleTab, PeopleWelcome } from "./PeopleTab";
 import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
+import { AttCommunityView } from "./att/AttCommunityView";
+import { ATT_ID } from "./att/attData";
 
 // Resource cards on an event board: one icon and one chip per file kind.
 const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: string }> = {
@@ -1393,12 +1395,17 @@ export function ConnectExperience() {
       <main
         style={{ fontFamily: FEED_FONT }}
         // Same side padding as every other tab (px-5, then the 56px rail from
-        // sm). The home view fills the shared 1440 column; reading views (a
-        // board, a thread, a profile) keep a centred 880px column, because a
-        // reading column pinned to the left rail sat awkwardly on wide
-        // screens (direct feedback, 4 Sept 2026).
+        // sm). Home, the boards and the dashboards fill the shared 1440
+        // column -- the same width every other main screen caps at, sized
+        // to a 13" MacBook Air so wider monitors get margin, not a wider
+        // page (direct feedback, 17 Sept 2026: "use more of the screen
+        // width... match margins to the other main screens and lock a max
+        // width"). Reading views (a thread, an insight, a profile) keep a
+        // centred 992px column, because a reading column pinned to the
+        // left rail sat awkwardly on wide screens (direct feedback, 4 Sept
+        // 2026).
         className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)] ${
-          view.kind === "home" ? "max-w-[1440px]" : "max-w-[992px]"
+          view.kind === "home" || view.kind === "board" || view.kind === "partner" || view.kind === "proDashboard" || view.kind === "admin" ? "max-w-[1440px]" : "max-w-[992px]"
         }`}
       >
         <RoleTabs
@@ -1481,6 +1488,9 @@ export function ConnectExperience() {
 
         {view.kind === "board" &&
           (() => {
+            // The AT&T partner community has its own board (three views), not
+            // the general BoardView; everything else in Connect is unchanged.
+            if (view.id === ATT_ID) return <AttCommunityView onBack={goBack} />;
             const community = COMMUNITIES.find((c) => c.id === view.id);
             if (!community) return null;
             return (

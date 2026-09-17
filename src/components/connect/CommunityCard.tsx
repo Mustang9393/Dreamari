@@ -149,10 +149,15 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
          title, then the accent tint and grain. */}
       <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
         <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
-        <CardProgressiveBlur size="40%" />
+        {/* Lighter than it was (direct feedback, 17 Sept 2026: "brighten the
+           images of the other cards, they look too dim now... make sure
+           legibility is not affected"): the photo shows through the upper
+           two thirds, while the band under the tiles, marks and Open button
+           stays as heavy as before, and the title keeps its top scrim. */}
+        <CardProgressiveBlur size="34%" />
         <span
           className="absolute inset-0"
-          style={{ background: `linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.84) 26%, rgba(12,16,35,0.4) 52%, rgba(12,16,35,0.08) 72%, transparent 100%), ${cardTopScrim()}` }}
+          style={{ background: `linear-gradient(to top, rgba(12,16,35,0.94) 0%, rgba(12,16,35,0.78) 24%, rgba(12,16,35,0.26) 48%, rgba(12,16,35,0.04) 68%, transparent 100%), ${cardTopScrim()}` }}
         />
       </span>
       {/* the whole card is the tap target (direct feedback) */}
@@ -160,6 +165,12 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
         <span className="sr-only">Open {community.name}</span>
       </button>
 
+      {/* A partner community wears its own mark where the Most Popular badge
+         would sit (direct feedback, 17 Sept 2026: the AT&T card needs its
+         logo and real imagery, not a tinted gradient). */}
+      {community.brandMark && !featured && (
+        <Image src={community.brandMark} alt={community.professionalsFrom[0] ?? ""} width={96} height={40} unoptimized className="absolute top-[16px] right-[18px] z-20 h-[26px] w-auto" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.45))" }} />
+      )}
       {featured && (
         <span className="absolute top-[14px] right-[16px] z-20 inline-flex items-center gap-[5px] rounded-[var(--radius-sm)] px-[11px] py-[4px] text-[11px] leading-[15px] font-medium" style={{ background: "rgba(9,10,20,0.72)", color: "#FFFFFF" }}>
           <Star className="h-[11px] w-[11px]" fill="currentColor" aria-hidden style={{ color: "#f5c04e" }} /> Most Popular
@@ -170,7 +181,7 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
          stat tiles; the companies row; one action at the right. */}
       <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
         {/* the title carries the card: bigger than anything under it */}
-        <h3 className={`text-[24px] leading-[28px] font-extrabold text-balance ${featured ? "pr-[104px]" : ""}`} style={{ color: "#FFFFFF" }}>{community.name.replace(/ Careers$/, "")}</h3>
+        <h3 className={`text-[24px] leading-[28px] font-extrabold text-balance ${featured || community.brandMark ? "pr-[104px]" : ""}`} style={{ color: "#FFFFFF" }}>{community.name.replace(/ Careers$/, "")}</h3>
 
         {/* three tiles fill the card's width, the same on every card; the
            marks sit centred under them */}
@@ -180,7 +191,7 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
         <div className="mt-auto grid grid-cols-3 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
           <StatTile value={community.students.toLocaleString("en-US")} label="Students" />
           <StatTile value={community.activePros} label="Pros" />
-          <StatTile value={community.professionalsFrom.length} label="Companies" />
+          {community.centers ? <StatTile value={community.centers} label="Centers" /> : <StatTile value={community.professionalsFrom.length} label="Companies" />}
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
         {/* wraps when the column is narrow (two columns on a 768px tablet), so
