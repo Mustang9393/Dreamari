@@ -1330,6 +1330,24 @@ export const INSIGHTS: Insight[] = [
     ],
   },
   {
+    // Matches the reference's own "Connect before Level 2" content
+    // (dceeai.replit.app/ib-career-game, same real professional) --
+    // deliberately a lower `helpful` count than the board's other posts so
+    // this stays a quiet, real part of the board rather than the top
+    // result someone browsing Connect directly would see first.
+    id: "i-first-year-analyst",
+    boardId: "business-money",
+    type: "insight",
+    proId: "pro-okafor",
+    title: "What your first year as an Analyst is really about",
+    body: "Your first year is less about knowing everything and more about learning quickly, checking your work, and communicating clearly.",
+    postedAgo: "6d ago",
+    helpful: 62,
+    replies: [
+      { handle: "Priya", grade: "Sophomore", body: "Checking your own work before anyone else has to, that's the real skill.", postedAgo: "5d ago", likes: 41 },
+    ],
+  },
+  {
     id: "i-tell-me-about-yourself",
     boardId: "teaching-education",
     type: "insight",
@@ -1413,6 +1431,9 @@ export const INSIGHTS: Insight[] = [
     ],
   },
   {
+    // Featured by Play's Connect-before-Level-3 stage-match -- kept at a
+    // modest `helpful` count on purpose, same reasoning as
+    // i-first-year-analyst above.
     id: "i-analyst-morning",
     boardId: "business-money",
     type: "insight",
@@ -1420,7 +1441,7 @@ export const INSIGHTS: Insight[] = [
     title: "What an analyst actually does before 10 AM",
     body: "Check overnight market moves, update the numbers that changed, and flag anything weird before your team's morning call. It's less glamorous than the movies and more about being the person who noticed first.",
     postedAgo: "2d ago",
-    helpful: 139,
+    helpful: 58,
     replies: [
       { handle: "Maya", grade: "Junior", body: "Being the person who noticed first, that's basically the nurse game's lesson too.", postedAgo: "1d ago", likes: 98 },
       { handle: "Diego", grade: "Sophomore", body: "What time does that mean you wake up?", postedAgo: "1d ago", likes: 59 },

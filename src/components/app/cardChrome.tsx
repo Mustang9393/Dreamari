@@ -20,7 +20,13 @@ export function CardProgressiveBlur({ direction = "up", size = "52%", maxBlur }:
   const box = direction === "up" ? { insetInline: 0, bottom: 0, height: size } : { insetBlock: 0, left: 0, width: size };
   const toward = direction === "up" ? "to bottom" : "to left";
   return (
-    <span aria-hidden className="pointer-events-none absolute overflow-hidden" style={box}>
+    // borderRadius: inherit -- a rounded ancestor's overflow:hidden doesn't
+    // reliably clip a backdrop-filter child in every browser (the blur
+    // layer can render in its own compositing pass that ignores the
+    // ancestor's clip), which showed up as sharp square corners poking out
+    // of the board banner's otherwise-rounded bottom corners. Inheriting
+    // the radius here clips it directly, regardless of that quirk.
+    <span aria-hidden className="pointer-events-none absolute overflow-hidden" style={{ ...box, borderRadius: "inherit" }}>
       {stops.map((blur, index) => {
         /* every band -- including the first -- fades in from transparent, so
            the ramp truly starts at 0px with no visible seam */

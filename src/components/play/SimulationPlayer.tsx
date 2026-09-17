@@ -692,6 +692,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       {connectOpen && nextLevel && (
         <ConnectInterstitial
           simulation={simulation}
+          stageRole={level.role}
           nextLevelLabel={`Level ${nextLevel.n} · ${nextLevel.role}`}
           onContinue={() => router.push(`/play/${simulation.id}?level=${nextLevel.n}`)}
         />

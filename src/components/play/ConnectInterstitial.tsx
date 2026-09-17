@@ -71,6 +71,18 @@ type Flight = { id: number; amount: number; colorIndex: number; x: number; y: nu
 const ACTION_XP: Record<Step, number> = { like: 5, comment: 10, ask: 20 };
 const BONUS_XP = 15;
 
+// Which real insight to feature for which simulation stage -- Connect has
+// no real topic-tagging pipeline yet (that's a bigger Connect-wide data
+// model change, tracked separately), so this hardcodes the couple of real
+// transitions the demo has rather than always surfacing the board's single
+// most-helpful post regardless of where the student actually is.
+const STAGE_INSIGHT: Record<string, string> = {
+  // Matches the actual reference's own "Connect before Level 2" content
+  // (dceeai.replit.app/ib-career-game, confirmed live 17 Sept 2026).
+  "investment-banking:Intern": "i-first-year-analyst", // finishing the internship, about to become an Analyst
+  "investment-banking:Analyst": "i-analyst-morning", // finishing as an Analyst, about to become an Associate
+};
+
 /** A real rolling count-up (not just a scale-pop) -- direct feedback, 17
  *  Sept 2026: "make the XP animations and counting much richer." */
 function useCountUp(target: number, duration = 1100) {
@@ -107,7 +119,14 @@ function similarQuestion(text: string, threads: Thread[]) {
     .map((thread) => {
       const candidate = questionWords(thread.title);
       const shared = [...words].filter((word) => candidate.has(word)).length;
-      return { thread, score: shared >= 3 ? shared / Math.max(words.size, candidate.size) : 0 };
+      // Coverage of the CANDIDATE's own key words, not a ratio against the
+      // student's total input length -- a real question is almost always
+      // longer than a terse board title ("...when they get their first
+      // job" added on the end used to tank the score even though every
+      // one of the title's own words was present), so scoring against
+      // Math.max(words.size, candidate.size) punished exactly the kind of
+      // elaboration a real student types.
+      return { thread, score: shared >= 3 ? shared / candidate.size : 0 };
     })
     .sort((a, b) => b.score - a.score)
     .find((item) => item.score >= 0.6)?.thread;
@@ -135,8 +154,18 @@ function HeroGlow({ accent }: { accent: string }) {
   );
 }
 
-export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: {
-  simulation: Simulation; nextLevelLabel: string; onContinue: () => void;
+export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onContinue }: {
+  simulation: Simulation;
+  /** The role of the level just finished (e.g. "Intern", "Analyst") --
+   *  picks a stage-appropriate insight instead of always the board's single
+   *  most-helpful one. Real per-topic matching needs tags across Connect
+   *  that don't exist yet (flagged separately); this hardcodes the couple
+   *  of transitions the demo actually has, per direct feedback 17 Sept
+   *  2026: "update the content to be contextually relevant for the game
+   *  for where it fires now." */
+  stageRole?: string;
+  nextLevelLabel: string;
+  onContinue: () => void;
 }) {
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [view, setView] = useState<View>("intro");
@@ -167,8 +196,10 @@ export function ConnectInterstitial({ simulation, nextLevelLabel, onContinue }: 
   const { insight, thread } = useMemo(() => {
     const insights = INSIGHTS.filter((item) => item.boardId === community?.id).slice().sort((a, b) => b.helpful - a.helpful);
     const threadsHere = THREADS.filter((item) => item.boardId === community?.id);
-    return { insight: insights[0], thread: threadsHere };
-  }, [community?.id]);
+    const stageInsightId = stageRole ? STAGE_INSIGHT[`${simulation.id}:${stageRole}`] : undefined;
+    const staged = stageInsightId && insights.find((item) => item.id === stageInsightId);
+    return { insight: staged || insights[0], thread: threadsHere };
+  }, [community?.id, simulation.id, stageRole]);
   const pro = PROS.find((item) => item.id === insight?.proId);
   const matchAnswer = match?.responses.find((item) => item.kind === "answer" && item.primary) ?? match?.responses.find((item) => item.kind === "answer");
   const matchAnswerPro = matchAnswer?.kind === "answer" ? PROS.find((item) => item.id === matchAnswer.proId) : undefined;

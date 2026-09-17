@@ -70,7 +70,10 @@ function similarQuestion(text: string, threads: Thread[]) {
     .map((thread) => {
       const candidate = questionWords(thread.title);
       const shared = [...words].filter((word) => candidate.has(word)).length;
-      return { thread, score: shared >= 3 ? shared / Math.max(words.size, candidate.size) : 0 };
+      // Coverage of the CANDIDATE's own key words -- see ConnectInterstitial.tsx
+      // for the full reasoning (a longer, more realistic student question
+      // used to fail this even when it covered every word in the title).
+      return { thread, score: shared >= 3 ? shared / candidate.size : 0 };
     })
     .sort((a, b) => b.score - a.score)
     .find((item) => item.score >= 0.6)?.thread;
