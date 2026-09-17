@@ -62,9 +62,9 @@ function ProLine({ id, size = 36 }: { id: string; size?: number }) {
         {/* one line, always: the designation truncates rather than wrapping,
            so every card's header is the same height and the question below
            starts at the same place (direct feedback, 17 Sept 2026) */}
-        <span className="flex min-w-0 items-center gap-[6px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
-          <span className="min-w-0 truncate" title={pro.role}>{pro.role}</span> <span className="flex-none"><CompanyChip name={pro.org} tone="surface" size="sm" /></span>
-        </span>
+        {/* no company chip here: everyone on this board is AT&T, the banner
+           already says so (direct feedback, 17 Sept 2026) */}
+        <span className="block min-w-0 truncate text-[12.5px] leading-[17px]" title={pro.role} style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
       </div>
     </div>
   );
