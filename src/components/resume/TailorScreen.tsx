@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, upsertVersion, type ResumeData, type ResumeVersion } from "@/lib/resume";
@@ -70,6 +70,23 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
   const [draft, setDraft] = useState<ResumeVersion>(
     initial ?? { ...EMPTY_VERSION, id: makeId(), educationIds: resume.education.map((e) => e.id), experienceIds: resume.experience.map((e) => e.id), template: initialTemplateId ?? DEFAULT_RESUME_TEMPLATE },
   );
+  // On a fresh page load the store's first snapshot is the empty server
+  // one, so a new version's "everything selected" default was computed
+  // against nothing and every row came up unchecked (headless capture, 17
+  // Sept 2026). Once the real profile arrives, fill the untouched default
+  // in, exactly once.
+  const seeded = useRef(!!initial);
+  useEffect(() => {
+    if (seeded.current) return;
+    if (resume.education.length + resume.experience.length === 0) return;
+    seeded.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing with the persisted store's first real snapshot
+    setDraft((d) => ({
+      ...d,
+      educationIds: d.educationIds.length ? d.educationIds : resume.education.map((e) => e.id),
+      experienceIds: d.experienceIds.length ? d.experienceIds : resume.experience.map((e) => e.id),
+    }));
+  }, [resume, initial]);
   const canSave = draft.name.trim().length > 0;
   const [matching, setMatching] = useState(false);
   const [matchError, setMatchError] = useState(false);

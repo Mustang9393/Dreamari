@@ -9983,8 +9983,15 @@ pop-up (`DreamyPopup` in ui.tsx, once per browser), XP toasts per completed
 wizard step (+10/+15, the reference's point values), a Tailored badge on the
 document toolbar, a Preview control in the wizard below lg (the live
 preview column is hidden there), and saved-card actions that drop under the
-title on phones. Report of gaps/glows/grows for the user comes after
-alignment is complete, in short bullets.
+title on phones. Later the same session: the document toolbar wraps from
+lg (the labelled row overflowed the 900px column), status chips sit beside
+the title, a fresh load of Choose & Tailor pre-selects every entry (the
+first store snapshot is the empty server one, so the default was computed
+against nothing), and the sheet's scale measurement retries on a zero
+width and listens to window resize. Verified headlessly (Playwright,
+scratchpad `ours-shots.mjs`) at 1440/768/390: sheet 900/656/350 px wide,
+no horizontal overflow. The desktop app's viewport emulation gave
+contradictory measurements for this page and should not be trusted for it.
 
 
 **AT&T × Connected Learning Centers board (`src/components/connect/att/`).**

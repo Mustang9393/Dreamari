@@ -531,11 +531,33 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField, s
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const measure = () => setScale(el.offsetWidth / PAGE_WIDTH);
+    // Measure the box as painted, not a stale offsetWidth: on tablet and
+    // phone the first layout pass can report 0 (or a transitional width
+    // while the viewport settles), which left the page hidden or scaled
+    // too large and clipped on the right (seen live, 17 Sept 2026). A
+    // zero width keeps the page hidden and tries again next frame; the
+    // observer and a window resize listener catch every later change.
+    let frame = 0;
+    const measure = () => {
+      // offsetWidth, not getBoundingClientRect: the rect is 0 while the
+      // desktop app's viewport emulation is mid-transition, and never
+      // recovered in testing; layout width does.
+      const width = el.offsetWidth;
+      if (width <= 0) {
+        frame = window.requestAnimationFrame(measure);
+        return;
+      }
+      setScale(width / PAGE_WIDTH);
+    };
     measure();
-    const ro = new ResizeObserver(measure);
+    const ro = new ResizeObserver(() => measure());
     ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   // Fits either the focused FIELD (while a drawer input for it is

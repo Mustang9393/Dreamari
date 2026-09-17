@@ -194,17 +194,24 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
   );
 }
 
-function TopBar({ label, onClose, extra }: { label: string; onClose?: () => void; extra?: ReactNode }) {
+function TopBar({ label, badges, onClose, extra }: { label: string; /** status chips (Tailored, Checking…) that sit with the title, not in the button row */ badges?: ReactNode; onClose?: () => void; extra?: ReactNode }) {
   return (
     <div data-print-hide className="mb-[var(--space-5)] flex flex-none flex-wrap items-center justify-between gap-[var(--space-3)]">
-      <span className="text-[13px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+      <div className="flex min-w-0 flex-wrap items-center gap-[10px]">
+        <span className="text-[13px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+        {badges}
+      </div>
       {/* A tighter gap while the toolbar is icon-only (below `lg`) buys back
          just enough width that the full icon row -- Tailor/ATS/Text
          Preview/Full Screen/Edit Sections/Export/Edit Selection/Close --
          fits even on the narrowest phones without a horizontal scrollbar;
          `overflow-x-auto` is still there as a hard floor if a future button
          gets added. */}
-      <div className="flex max-w-full items-center gap-[6px] overflow-x-auto [scrollbar-width:none] lg:gap-[var(--space-3)]">
+      {/* Wraps from lg up instead of scrolling: with the label column on
+         the left the full labelled row did not fit a 900px document column
+         and the last buttons were simply off-screen (headless capture, 17
+         Sept 2026). Phones keep the icon-only single row. */}
+      <div className="flex max-w-full items-center gap-[6px] overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:justify-end lg:gap-[var(--space-3)] lg:overflow-visible">
         {extra}
         {onClose && (
           <button
@@ -255,18 +262,22 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
       <TopBar
         label={title}
         onClose={() => router.push("/profile?tab=resume")}
-        extra={
+        badges={
           <>
             {version?.jobDescription && (
-              <span data-print-hide className="hidden items-center gap-[5px] rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold sm:inline-flex" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 45%, var(--glass-border))", color: "var(--accent-subtle)" }}>
+              <span className="inline-flex items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 45%, var(--glass-border))", color: "var(--accent-subtle)" }}>
                 <Wand2 className="h-3 w-3" aria-hidden /> Tailored
               </span>
             )}
             {checking && (
-              <span data-print-hide role="status" className="inline-flex items-center gap-[5px] rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+              <span role="status" className="inline-flex items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
                 <Sparkles className="h-3 w-3 motion-safe:animate-pulse" aria-hidden /> Checking…
               </span>
             )}
+          </>
+        }
+        extra={
+          <>
             {version && (
               <ToolbarButton label="Tailor Resume" onClick={() => setPanel("tailor")}>
                 <Wand2 className="h-4 w-4" aria-hidden />
