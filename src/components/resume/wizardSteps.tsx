@@ -1,5 +1,7 @@
 "use client";
 
+import { WelcomeSplash } from "@/components/app/WelcomeSplash";
+
 import { useEffect, useState } from "react";
 import { Award, Briefcase, Check, CircleDashed, GraduationCap, HelpCircle, Pencil, Plus, Sparkles, Trash2, User } from "lucide-react";
 import {
@@ -636,32 +638,25 @@ export function ReviewStep({ resume, onEditStep, onFinish }: { resume: ResumeDat
           <ChecklistRow key={i.label} Icon={i.Icon} label={i.label} optional={i.optional} subtitle={i.subtitle} done={i.done} onEdit={() => onEditStep(i.step)} last={idx === items.length - 1} />
         ))}
       </div>
-      <WizardFooter onNext={() => setShowTip(true)} nextLabel="Save & Export" nextDisabled={!complete} />
-      {showTip && (
-        <div
-          className="fixed inset-0 z-[130] flex items-end justify-center p-4 sm:items-center"
-          style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }}
-          onPointerDown={(e) => { if (e.target === e.currentTarget) setShowTip(false); }}
-        >
-          <div className="flex w-full max-w-[380px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            <div className="flex items-center gap-[10px]">
-              <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--accent-subtle)" }}>
-                <Sparkles className="h-4 w-4" aria-hidden />
-              </span>
-              <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>You&apos;ve got a good start! ☁️</span>
-            </div>
-            <p className="text-[13px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>More experiences can make your resume stronger. Explore activities or ask a counselor for ideas.</p>
-            <div className="flex items-center justify-end gap-[var(--space-3)]">
-              <button type="button" onClick={() => { setShowTip(false); onEditStep(2); }} className="dm-tap cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                Add Experiences
-              </button>
-              <button type="button" onClick={() => { setShowTip(false); onFinish(); }} className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[13.5px] font-bold text-white" style={{ background: "var(--primary)" }}>
-                Got it! 👍
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <WizardFooter onNext={() => (resume.experience.length < 2 ? setShowTip(true) : onFinish())} nextLabel="Save & Export" nextDisabled={!complete} />
+      {/* The "good start" nudge as the same cinematic splash every other
+         Dreamy moment uses (direct feedback, 17 Sept 2026). Continue saves
+         and moves on; Add Experiences goes back to step 3. Shown only while
+         there is genuinely room to add (fewer than two experiences); with
+         more, Save & Export just proceeds. */}
+      <WelcomeSplash
+        surface="resume"
+        open={showTip}
+        onDone={() => { setShowTip(false); onFinish(); }}
+        onSecondary={() => { setShowTip(false); onEditStep(2); }}
+        scene={{
+          sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",
+          title: "GOOD START",
+          line: "More experiences can make your resume stronger. Explore activities or ask a counselor for ideas.",
+          cta: "Continue",
+          secondary: "Add Experiences",
+        }}
+      />
     </div>
   );
 }

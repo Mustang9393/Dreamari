@@ -547,6 +547,7 @@ function ResumeBuilderInner() {
           router={router}
           templateId={latest.template}
           version={latest}
+          celebrate={searchParams.get("from") === "create"}
         />
       );
     }
@@ -685,7 +686,11 @@ function ResumeBuilderInner() {
                     upsertVersion(version);
                     router.push(`/resume-builder?view=tailor&version=${version.id}`);
                   } else {
-                    router.push("/resume-builder?view=document");
+                    // Straight to the scored resume: the document runs the
+                    // ATS check on arrival and shows the score card, so the
+                    // check is the wizard's real last step, not a tool kept
+                    // for saved resumes (direct feedback, 17 Sept 2026).
+                    router.push("/resume-builder?view=document&from=create");
                   }
                 }}
               />
