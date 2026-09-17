@@ -311,7 +311,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
   const showStage = celebrate && !staged && !!version;
   const showResult = celebrate && staged && !resultSeen && !!ats && !stale;
   return (
-    <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active={null} router={router} onClose={() => router.push("/profile?tab=resume")} />}>
+    <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active="saved" router={router} onClose={() => router.push("/profile?tab=resume")} />}>
       <TopBar
         label={title}
         badges={
