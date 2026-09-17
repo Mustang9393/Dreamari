@@ -282,29 +282,25 @@ function Signals({ id, className = "" }: { id: string; className?: string }) {
 
 function OpportunityCard({ item, saved, onSave, onOpen, showKind = true }: { item: Opportunity; saved: boolean; onSave: () => void; onOpen: () => void; /** false inside a section whose heading already names the kind */ showKind?: boolean }) {
   const d = D.REPLIT_ONLY ? undefined : D.OPPORTUNITY_DETAILS[item.id];
+  // Four things, not eight (direct feedback, 18 Sept 2026: "so super
+  // cluttered, minimize the components"): the kind, the title, one line
+  // for when and who, and a footer with the status and Save. The date
+  // tile, the time and the interest counts all moved into the sheet; the
+  // date itself is folded into the line as plain text.
+  // A date on a not-yet-open item is when it opens, so say so.
+  const when = d?.date ? `${d.status === "soon" ? `${D.OPPORTUNITY_UI.opens} ` : ""}${d.date.month} ${d.date.day}` : null;
+  const line = [when, d ? lineForCard(item.line, d) : item.line].filter(Boolean).join(" · ");
   return (
-    <div className="dm-tap group relative flex h-full flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
+    <div className="dm-tap group relative flex h-full flex-col gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
       {/* the whole card opens the detail sheet; Save stays its own control */}
       {d && <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {item.title}</span></button>}
       {d && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />}
       {d && <HoverChevron />}
       {showKind && <Eyebrow>{item.kind}</Eyebrow>}
-      <div className="flex items-start gap-[12px]">
-        {d?.date && d.status !== "soon" && <DateTile month={d.date.month} day={d.date.day} />}
-        <div className="min-w-0 flex-1">
-          {/* title and status share one row: the title takes two lines at
-             most and shows its full name on hover; the one-word chip sits
-             at the right (direct feedback, 17 Sept 2026) */}
-          <div className="flex items-start justify-between gap-[10px]">
-            <h3 className="line-clamp-2 min-w-0 text-[16px] leading-[22px] font-bold" title={item.title} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.title}</h3>
-            {d && <span className="mt-[2px] flex-none"><StatusChip id={item.id} short /></span>}
-          </div>
-          {/* deadlines live in the sheet, not on the card (direct feedback, 17 Sept 2026) */}
-          <Muted className="mt-[3px]">{d ? lineForCard(item.line, d) : item.line}{d?.date?.time && d.status !== "soon" ? ` · ${d.date.time}` : ""}</Muted>
-        </div>
-      </div>
-      <div className="relative z-20 mt-auto flex items-center justify-between gap-[10px] pt-[4px]">
-        {d ? <Signals id={item.id} /> : <span />}
+      <h3 className="line-clamp-2 min-w-0 text-[16px] leading-[22px] font-bold" title={item.title} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.title}</h3>
+      <Muted>{line}</Muted>
+      <div className="relative z-20 mt-auto flex items-center justify-between gap-[10px] pt-[8px]">
+        {d ? <StatusChip id={item.id} short /> : <span />}
         <QuietCta size="sm" done={saved} onClick={onSave} className="flex-none">
           {saved ? <><BookmarkCheck className="h-4 w-4" aria-hidden /> {D.SAVE.saved}</> : <><Bookmark className="h-4 w-4" aria-hidden /> {D.SAVE.save}</>}
         </QuietCta>
