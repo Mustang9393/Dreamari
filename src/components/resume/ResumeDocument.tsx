@@ -815,13 +815,13 @@ const ZOOM_MAX = 200;
  *  Reuses ScaledSheet's own container-width scaling: at 100% the container
  *  is exactly PAGE_WIDTH (true actual size on screen), so +/- just changes
  *  how much of that real size the container claims. */
-export function ZoomResumeButton({ resume, templateId, title, label = "Full Screen", sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId?: string | ResumeTemplateId; title: string; /** the toolbar word; "Preview" where there is no live preview beside the form */ label?: string } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
+export function ZoomResumeButton({ resume, templateId, title, label = "Full Screen", iconOnly = false, sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId?: string | ResumeTemplateId; title: string; /** the toolbar word; "Preview" where there is no live preview beside the form */ label?: string; iconOnly?: boolean } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
   const [open, setOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
 
   return (
     <>
-      <ToolbarButton label={label} onClick={() => setOpen(true)}>
+      <ToolbarButton iconOnly={iconOnly} label={label} onClick={() => setOpen(true)}>
         <Maximize2 className="h-4 w-4" aria-hidden />
       </ToolbarButton>
       {open && (

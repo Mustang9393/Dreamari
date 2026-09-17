@@ -10111,3 +10111,45 @@ Enterprise) with a screenshot per state and the captured text, plus
 `walk.mjs` to regenerate it. Read that before re-walking the site.
 
 ESLint + `tsc --noEmit` clean on every touched file.
+
+## 2026-09-17 · Resume Builder aligned with Maisha's Replit, AT&T board, Business & Finance rename
+
+**Reference:** `docs/reference/resume-builder-replit-2026-09/` (README +
+walk-text.md) records every route, control and gap of
+resume-builder-maishak.replit.app. Read it instead of re-clicking.
+
+**Resume Builder (`src/components/resume/`, `src/lib/resumeAts.ts`).**
+Every saved resume is ATS-checked on open (fingerprint-based staleness,
+`runAtsCheck` shared by the header chip and the panel). A just-created
+resume opens INTO the check: `AtsCheckStage` (splash chrome, "Scanning
+your resume" Working chip, readability items ticking in) then the score
+card on the shared `WelcomeSplash` ("RESUME READY" / "STRONG MATCH", two
+scores, one tip, Continue banks +25 XP, See Final Tips opens the panel).
+Welcome and the Review nudge use the same splash. XP for each wizard
+milestone flies as a glowing capsule (`app/xpFlight.ts`) into the Dream
+Score chip; the builder's tabs bar carries `DreamScoreChip` so the chip
+position is consistent with the main nav. Document header is one line:
+title + status chips left, icon-only toolbar right (bespoke `AtsIcon`:
+scanner corners around "ATS"). Tooltips (`Tip`/`IconTip`/`ToolbarButton`
+in `ui.tsx`) are portalled to the body: rendered inline they painted
+behind the sheet because fill-mode animations leave a transform on
+neighbours. Saved list rows are a single dense row (identity, inline score
+badges, actions, Open). Phone: tabs shorten to Builder/Saved/Tailor so
+they share the row with the XP chip and close; document opens scrolled to
+top (same-route pushes kept the Tailor form's offset).
+
+**Replit gaps fixed on our side** (see README): skills count bug, three
+tips under "one small tip", Save & Export dead end, manual ATS,
+non-clickable stepper, delete without confirm, tablet preview ~200px,
+phone nav tabs vanishing, blank `/create` and `/resumes` below desktop.
+
+**Elsewhere:** AT&T × Connected Learning Centers board in Connect
+(`connect/att/`, `REPLIT_ONLY` switch, additions note under
+docs/reference). "Business & Money" renamed "Business & Finance" app-wide
+(ids unchanged). `Working` chip (beam + shimmer + stepping dots) is the
+loading primitive to roll out app-wide next.
+
+**Open:** app-wide loading-states pass with `Working`; light-mode audit
+resume point in `docs/reference/light-mode-audit-2026-09-17/NOTES.md`.
+
+ESLint + `tsc --noEmit` clean on every touched file.

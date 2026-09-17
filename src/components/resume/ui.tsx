@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Portal } from "@/components/profile/CareerReport";
@@ -181,37 +181,64 @@ export function useResumeToast() {
 // height (direct feedback, 17 Sept 2026: "too many controls on top of the
 // preview on tablet mode... can we do icons only"). `title` carries the
 // label as a native tooltip once the visible text is gone.
-export function ToolbarButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+export function ToolbarButton({ label, onClick, children, iconOnly = false }: { label: string; onClick: () => void; children: ReactNode; /** icon at every width, label only in the tooltip (the document header, direct feedback 17 Sept 2026: "one line is enough") */ iconOnly?: boolean }) {
   // Below lg the button is icon-only, so the label comes back as a real
   // tooltip on hover and keyboard focus, in the same bubble the Dream
   // Score chip uses (direct feedback, 17 Sept 2026: "anywhere we use only
   // icons... a tooltip should show on hover with the label"). Hidden from
   // lg up, where the label is already printed.
-  const [tip, setTip] = useState(false);
-  const id = useId();
   return (
-    <span className="relative flex flex-none" onMouseEnter={() => setTip(true)} onMouseLeave={() => setTip(false)} onFocus={() => setTip(true)} onBlur={() => setTip(false)}>
+    <Tip label={label} hideFromLg={!iconOnly}>
       <button
         type="button"
         data-print-hide
         aria-label={label}
-        aria-describedby={tip ? id : undefined}
         onClick={onClick}
-        className="dm-tap flex size-9 flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold whitespace-nowrap lg:h-auto lg:w-auto lg:px-[var(--space-4)] lg:py-[10px]"
+        className={`dm-tap flex size-9 flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold whitespace-nowrap ${iconOnly ? "" : "lg:h-auto lg:w-auto lg:px-[var(--space-4)] lg:py-[10px]"}`}
         style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
       >
         {children}
-        <span className="hidden lg:inline">{label}</span>
+        {!iconOnly && <span className="hidden lg:inline">{label}</span>}
       </button>
+    </Tip>
+  );
+}
+
+/** The tooltip bubble itself, portalled to the body and positioned from the
+ *  trigger's rect. Rendering it inline under the trigger looked right in
+ *  the DOM but painted BEHIND whatever came next (the resume sheet, the
+ *  next saved-resume row): those neighbours carry their own stacking
+ *  contexts (entrance animations that keep a transform after they fill),
+ *  so no z-index inside the header could win (17 Sept 2026). */
+function Tip({ label, children, hideFromLg = false, className = "" }: { label: string; children: ReactNode; hideFromLg?: boolean; className?: string }) {
+  const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+  const id = useId();
+  const show = () => {
+    const r = ref.current?.getBoundingClientRect();
+    if (r) setTip({ x: r.left + r.width / 2, y: r.bottom + 8 });
+  };
+  const hide = () => setTip(null);
+  // Scrolling under an open tooltip would leave it stranded; dismiss instead.
+  useEffect(() => {
+    if (!tip) return;
+    window.addEventListener("scroll", hide, { passive: true, capture: true });
+    return () => window.removeEventListener("scroll", hide, { capture: true } as EventListenerOptions);
+  }, [tip]);
+  return (
+    <span ref={ref} className={`relative flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide} aria-describedby={tip ? id : undefined}>
+      {children}
       {tip && (
-        <span
-          id={id}
-          role="tooltip"
-          className="pointer-events-none absolute top-[calc(100%+8px)] left-1/2 z-50 -translate-x-1/2 rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap motion-safe:animate-[fade-slide-up_0.18s_ease-out_both] lg:hidden"
-          style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 14px 30px -16px rgba(0,0,0,0.7)" }}
-        >
-          {label}
-        </span>
+        <Portal>
+          <span
+            id={id}
+            role="tooltip"
+            className={`pointer-events-none fixed z-[9999] -translate-x-1/2 rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap motion-safe:animate-[fade-slide-up_0.18s_ease-out_both] ${hideFromLg ? "lg:hidden" : ""}`}
+            style={{ left: tip.x, top: tip.y, background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 14px 30px -16px rgba(0,0,0,0.7)", fontFamily: "var(--font-body)" }}
+          >
+            {label}
+          </span>
+        </Portal>
       )}
     </span>
   );
@@ -229,4 +256,10 @@ export function ResumeModal({ title, onClose, children }: { title: string; onClo
       <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
     </div>
   );
+}
+
+/** Universal rule (direct feedback, 17 Sept 2026): anything icon-only shows
+ *  its label as a tooltip on hover and keyboard focus. Wrap the control. */
+export function IconTip({ label, children, className = "" }: { label: string; children: ReactNode; className?: string }) {
+  return <Tip label={label} className={className}>{children}</Tip>;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { BorderBeam } from "border-beam";
-import { Sparkles } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 
 /** The app's one "it's thinking" chip: beam running round the pill, a light
  *  sweeping through the label, three dots stepping in turn. Pass the verb
@@ -10,7 +10,7 @@ export function Working({ label, className = "" }: { label: string; className?: 
   return (
     <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={2.6} strength={0.9} active>
       <span role="status" aria-live="polite" aria-label={`${label}…`} className={`inline-flex items-center gap-[6px] rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold ${className}`} style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)" }}>
-        <Sparkles className="h-3 w-3 motion-safe:animate-pulse" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+        <LoaderCircle className="h-3 w-3 motion-safe:animate-spin" aria-hidden style={{ color: "var(--accent-subtle)", animationDuration: "1.4s" }} />
         <span
           aria-hidden
           className="bg-clip-text text-transparent motion-safe:animate-[dm-text-shimmer_2.2s_linear_infinite]"

@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, Download, FileText, ListOrdered, Pencil, Sparkles, Wand2, X } from "lucide-react";
+import { ChevronLeft, Download, FileText, ListOrdered, Pencil, Wand2, X } from "lucide-react";
 import { atsIsStale, runAtsCheck } from "@/lib/resumeAts";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useScrolled } from "@/components/app/chrome";
@@ -11,9 +11,11 @@ import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { flyXp } from "@/components/app/xpFlight";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
+import { AtsIcon } from "./AtsIcon";
 import { Working } from "@/components/app/Working";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
 import { ATSCheckPanel } from "./ATSCheckPanel";
+import { AtsCheckStage } from "./AtsCheckStage";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
 import { EditSectionsPanel } from "./EditSectionsPanel";
 import { ExperienceModal } from "./ExperienceModal";
@@ -24,7 +26,7 @@ import { ResumeDocument, ZoomResumeButton } from "./ResumeDocument";
 import { TailorScreen } from "./TailorScreen";
 import { TemplateGallery } from "./TemplateGallery";
 import { TextPreviewModal } from "./TextPreviewModal";
-import { ToolbarButton, useResumeToast, WizardProgress } from "./ui";
+import { IconTip, ToolbarButton, useResumeToast, WizardProgress } from "./ui";
 import { CertificationsStep, EducationStep, ExperienceStep, PersonalInfoStep, ReviewStep, SkillsStep } from "./wizardSteps";
 
 const WELCOME_KEY = "dreamari-resume-welcome";
@@ -95,12 +97,15 @@ function Shell({ children, contentMaxWidth, tabs }: { children: ReactNode; conte
 // (template pick + wizard, the saved list, and name/education/template
 // selection); the finished document keeps its own header, which already
 // covers the reference's equivalent actions (ATS Check, Export, etc.).
-function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "saved" | "tailor"; router: ReturnType<typeof useRouter>; onClose: () => void }) {
+function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "saved" | "tailor" | null; router: ReturnType<typeof useRouter>; onClose: () => void }) {
   const scrolled = useScrolled();
-  const items: { key: typeof active; label: string; href: string }[] = [
-    { key: "builder", label: "Resume Builder", href: "/resume-builder" },
-    { key: "saved", label: "Saved Resumes", href: "/resume-builder?view=list" },
-    { key: "tailor", label: "Choose & Tailor", href: "/resume-builder?view=tailor" },
+  const items: { key: "builder" | "saved" | "tailor"; label: string; short: string; href: string }[] = [
+    // Short labels below sm: the full three plus the Dream Score chip and
+    // the close button cannot share a 375px row, and letting the list
+    // scroll left "Sav|" clipped mid-word under the chip (17 Sept 2026).
+    { key: "builder", label: "Resume Builder", short: "Builder", href: "/resume-builder" },
+    { key: "saved", label: "Saved Resumes", short: "Saved", href: "/resume-builder?view=list" },
+    { key: "tailor", label: "Choose & Tailor", short: "Tailor", href: "/resume-builder?view=tailor" },
   ];
   return (
     // Sticky, not just top-of-page -- it was scrolling out of view on
@@ -135,7 +140,7 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
             boxShadow: scrolled ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
           }}
         >
-      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-[var(--space-4)] px-5 pt-[max(14px,env(safe-area-inset-top))] pb-[14px] sm:px-[var(--space-14)]">
+      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-[var(--space-3)] px-4 pt-[max(14px,env(safe-area-inset-top))] pb-[14px] sm:gap-[var(--space-4)] sm:px-[var(--space-14)]">
         {/* Active tab already says what this page is -- a separate
            "Resume Builder" title repeated the same word right below it
            (direct feedback, 16 Sept 2026: "it already says what it is in
@@ -149,7 +154,7 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
            above -- unrelated to that change, confirmed by reproducing it
            against the untouched original markup too). Scrolling the tab
            list alone keeps the close button always reachable. */}
-        <div role="tablist" aria-label="Resume Builder sections" className="flex min-w-0 gap-[var(--space-6)] overflow-x-auto [scrollbar-width:none]">
+        <div role="tablist" aria-label="Resume Builder sections" className="flex min-w-0 gap-[var(--space-4)] overflow-x-auto [scrollbar-width:none] sm:gap-[var(--space-6)]">
           {items.map((item) => {
             const isActive = item.key === active;
             return (
@@ -162,7 +167,8 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
                 className="relative cursor-pointer pb-[14px] text-[16px] font-extrabold whitespace-nowrap sm:text-[17px]"
                 style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-display)" }}
               >
-                {item.label}
+                <span className="sm:hidden">{item.short}</span>
+                <span className="hidden sm:inline">{item.label}</span>
                 {/* A muted underline, not the brand color -- it was
                    clashing with the page's own blue CTAs right below it
                    (direct feedback, 16 Sept 2026: "the higlhight color
@@ -184,19 +190,25 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
             );
           })}
         </div>
-        <div className="flex flex-none items-center gap-[var(--space-3)]">
+        {/* mb-[14px] mirrors the tabs' pb-[14px] (the underline's room), so
+           the labels, the chip and the close button share one centre line
+           instead of the chip sitting a step lower (direct feedback, 17
+           Sept 2026: "should be in line"). */}
+        <div className="mb-[14px] flex flex-none items-center gap-[var(--space-3)]">
         {/* The Dream Score lives here too: this route has no main nav, and
            the XP earned in the wizard needs the chip to fly into. */}
-        <DreamScoreChip />
+        <DreamScoreChip className="max-sm:gap-[4px] max-sm:px-[10px]" />
+        <IconTip label="Close">
         <button
           type="button"
           aria-label="Close and return to Profile"
           onClick={onClose}
-          className="dm-quiet mb-[10px] flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+          className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
           style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
         >
           <X className="h-4 w-4" aria-hidden />
         </button>
+        </IconTip>
         </div>
       </div>
         </div>
@@ -222,9 +234,14 @@ function TopBar({ label, badges, onClose, extra }: { label: string; /** status c
          the left the full labelled row did not fit a 900px document column
          and the last buttons were simply off-screen (headless capture, 17
          Sept 2026). Phones keep the icon-only single row. */}
-      <div className="flex max-w-full items-center gap-[6px] overflow-x-auto [scrollbar-width:none] lg:flex-wrap lg:justify-end lg:gap-[var(--space-3)] lg:overflow-visible">
+      {/* Vertical breathing room inside the scroll container: overflow-x
+         also clips on the y axis, so the buttons' 1px hover lift and their
+         shadow were sliced off at the row's edge (direct feedback, 17 Sept
+         2026: "the hover on the icons is cropping the top part"). The
+         negative margin gives the padding back so the row's footprint is
+         unchanged. */}
+      <div className="-my-[6px] flex max-w-full items-center gap-[6px] overflow-x-auto px-[2px] py-[6px] [scrollbar-width:none] lg:gap-[8px]">
         {extra}
-        <DreamScoreChip className="hidden sm:flex" />
         {onClose && (
           <button
             type="button"
@@ -281,12 +298,22 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when the fingerprint changes
   }, [version?.id, stale]);
   const ats = version?.atsCheck ?? null;
-  const showResult = celebrate && !resultSeen && !!ats && !stale;
+  // A just-created resume opens INTO the check: the stage runs first (paced
+  // reveal of the readability items, waiting on the real result), then the
+  // score card. Revisits with stale content only get the header chip.
+  const [staged, setStaged] = useState(false);
+  // Same-route navigation (only the search params change) keeps the
+  // previous scroll offset, so a resume created from the bottom of the
+  // Tailor form opened already scrolled past its own header (17 Sept 2026).
+  useEffect(() => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }, [version?.id]);
+  const showStage = celebrate && !staged && !!version;
+  const showResult = celebrate && staged && !resultSeen && !!ats && !stale;
   return (
-    <Shell contentMaxWidth={900}>
+    <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active={null} router={router} onClose={() => router.push("/profile?tab=resume")} />}>
       <TopBar
         label={title}
-        onClose={() => router.push("/profile?tab=resume")}
         badges={
           <>
             {version?.jobDescription && (
@@ -298,12 +325,12 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
               <Working label="Checking" />
             ) : failed ? (
               <button type="button" onClick={check} className="dm-quiet inline-flex cursor-pointer items-center gap-[5px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-                <Sparkles className="h-3 w-3" aria-hidden /> Check didn&apos;t finish · Retry
+                <AtsIcon className="h-3.5 w-3.5" /> Check didn&apos;t finish · Retry
               </button>
             ) : ats && !stale ? (
               // the score, always in view once it exists; opens the full report
               <button type="button" onClick={() => setPanel("ats")} className="dm-quiet inline-flex cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[3px] text-[11.5px] font-bold tabular-nums" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }} aria-label="Open ATS Check">
-                <Sparkles className="h-3 w-3" aria-hidden style={{ color: "var(--accent-subtle)" }} /> {ats.qualityScore}/100{ats.jobMatchScore !== null ? ` · Match ${ats.jobMatchScore}` : ""}
+                <AtsIcon className="h-3.5 w-3.5" style={{ color: "var(--accent-subtle)" }} /> {ats.qualityScore}/100{ats.jobMatchScore !== null ? ` · Match ${ats.jobMatchScore}` : ""}
               </button>
             ) : null}
           </>
@@ -311,29 +338,29 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         extra={
           <>
             {version && (
-              <ToolbarButton label="Tailor Resume" onClick={() => setPanel("tailor")}>
+              <ToolbarButton iconOnly label="Tailor Resume" onClick={() => setPanel("tailor")}>
                 <Wand2 className="h-4 w-4" aria-hidden />
               </ToolbarButton>
             )}
             {version && (
-              <ToolbarButton label="ATS Check" onClick={() => setPanel("ats")}>
-                <Sparkles className="h-4 w-4" aria-hidden />
+              <ToolbarButton iconOnly label="ATS Check" onClick={() => setPanel("ats")}>
+                <AtsIcon className="h-[18px] w-[18px]" />
               </ToolbarButton>
             )}
-            <ToolbarButton label="Text Preview" onClick={() => setPanel("text")}>
+            <ToolbarButton iconOnly label="Text Preview" onClick={() => setPanel("text")}>
               <FileText className="h-4 w-4" aria-hidden />
             </ToolbarButton>
-            <ZoomResumeButton resume={resume} templateId={templateId} title={title} sectionOrder={version?.sectionOrder} hiddenSections={version?.hiddenSections} sectionOverrides={version?.sectionOverrides} />
+            <ZoomResumeButton iconOnly resume={resume} templateId={templateId} title={title} sectionOrder={version?.sectionOrder} hiddenSections={version?.hiddenSections} sectionOverrides={version?.sectionOverrides} />
             {version && (
-              <ToolbarButton label="Edit Sections" onClick={() => setPanel("sections")}>
+              <ToolbarButton iconOnly label="Edit Sections" onClick={() => setPanel("sections")}>
                 <ListOrdered className="h-4 w-4" aria-hidden />
               </ToolbarButton>
             )}
-            <ToolbarButton label="Export" onClick={() => setPanel("export")}>
+            <ToolbarButton iconOnly label="Export" onClick={() => setPanel("export")}>
               <Download className="h-4 w-4" aria-hidden />
             </ToolbarButton>
             {editHref && (
-              <ToolbarButton label="Edit Selection" onClick={() => router.push(editHref)}>
+              <ToolbarButton iconOnly label="Edit Selection" onClick={() => router.push(editHref)}>
                 <Pencil className="h-4 w-4" aria-hidden />
               </ToolbarButton>
             )}
@@ -357,6 +384,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
          two numbers and the single most useful tip, with the full report
          one tap away (the reference's own moment, minus the three tips it
          listed under "one small tip"). */}
+      {showStage && <AtsCheckStage result={ats && !stale ? ats : null} onDone={() => setStaged(true)} />}
       {/* The score card, once, as the same cinematic splash the rest of
          the app opens with: the headline by match strength, the two
          numbers, the single most useful tip; Continue banks the "first

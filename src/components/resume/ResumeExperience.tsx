@@ -8,7 +8,7 @@ import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, 
 import { readStudentProfile } from "@/lib/studentProfile";
 import { STUDENT } from "@/components/profile/data";
 import { downloadDocx } from "./ExportChecklistModal";
-import { CARD_CLASS, INSET, useResumeToast } from "./ui";
+import { CARD_CLASS, INSET, useResumeToast, IconTip } from "./ui";
 
 // Resume Quality and Job Match scores, right on the card, same tone rule
 // ScoreChip/ATSCheckPanel already use elsewhere -- the replit reference
@@ -140,89 +140,74 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
     // sight (direct feedback: "i dont like the dark colored line on the
     // left of the card either") -- the small dot beside the name is a
     // quieter nod to the same thing instead.
+    // One dense row from sm up (direct feedback, 17 Sept 2026: the stacked
+    // card "wastes so much space"): identity left, the score chips beside
+    // it, then date, actions and Open pushed to the right. Phones stack
+    // title, chips, actions in three short rows.
     <div
-      className="relative flex flex-col gap-[8px] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-3)] backdrop-blur-md"
+      className="relative flex flex-col gap-[10px] overflow-hidden rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[12px] backdrop-blur-md sm:flex-row sm:items-center sm:gap-[var(--space-4)]"
       style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, var(--inset-surface) 85%, ${accent} 15%)` }}
     >
-      {/* Title and actions share a row from sm up; on phones the actions
-         drop under the title so it is not squeezed to "Retail As…" */}
-      <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-start sm:justify-between sm:gap-[var(--space-3)]">
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={onOpen}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
-          className="dm-link flex min-w-0 cursor-pointer flex-col gap-[3px] text-left"
-        >
-          <div className="flex flex-wrap items-center gap-[6px]">
-            <TagDot color={accent} onPick={(color) => upsertVersion({ ...version, color, updatedAt: Date.now() })} />
-            <span className="truncate text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
-          </div>
-          {/* Only the one thing worth saying, and only when there IS one --
-             "2 education · 2 experience" told a student nothing they
-             didn't already know about their own resume, and "updated"
-             doesn't belong in a sentence with it either (direct feedback,
-             17 Sept 2026: "too much copy... we dont need to show the
-             count of how many stuff there are"). "Standard" and
-             "Approved" didn't hold up under a straight question either
-             ("what is approved saying? who approved it?"): nothing here
-             backs an actual approval action, and "Standard" just meant
-             "nothing to say yet." */}
-          {version.targetPosition && (
-            <span className="truncate text-[12px] font-semibold" style={{ color: accent }}>Tailored for {version.targetPosition}</span>
-          )}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onOpen}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
+        className="dm-link flex min-w-0 cursor-pointer flex-col gap-[2px] text-left sm:w-[220px] xl:w-[260px] sm:flex-none"
+      >
+        <div className="flex items-center gap-[6px]">
+          <TagDot color={accent} onPick={(color) => upsertVersion({ ...version, color, updatedAt: Date.now() })} />
+          <span className="truncate text-[15.5px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
         </div>
-        <div className="flex flex-none flex-row-reverse items-center justify-between gap-[6px] sm:flex-col sm:items-end">
-          {/* The updated date moves to its own corner instead of stacked
-             into that meta sentence -- a timestamp reads as metadata, not
-             something to say in the same breath as what the resume is
-             for (direct feedback, 17 Sept 2026: "move the updated date to
-             a corner"). */}
-          <span className="text-[11px] font-semibold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{formatDate(version.updatedAt)}</span>
-          <div className="flex flex-none items-center gap-[4px]">
-          <button type="button" aria-label={`Edit ${version.name}`} onClick={onEdit} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-            <Pencil className="h-4 w-4" aria-hidden />
-          </button>
-          <button
-            type="button"
-            aria-label={`Download ${version.name}`}
-            disabled={downloading}
-            onClick={async () => {
-              setDownloading(true);
-              try {
-                await downloadDocx(resumeForVersion(resume, version));
-              } finally {
-                setDownloading(false);
-              }
-            }}
-            className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ color: "var(--muted-foreground)" }}
-          >
-            <Download className="h-4 w-4" aria-hidden />
-          </button>
-          <button type="button" aria-label={`Duplicate ${version.name}`} onClick={onDuplicate} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-            <Copy className="h-4 w-4" aria-hidden />
-          </button>
-          <button type="button" aria-label={`Delete ${version.name}`} onClick={onDelete} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-            <Trash2 className="h-4 w-4" aria-hidden />
-          </button>
-          <button
-            type="button"
-            onClick={onOpen}
-            className="dm-tap ml-[4px] flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
-            style={{ borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, background: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent }}
-          >
-            Open <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </button>
-          </div>
-        </div>
+        {version.targetPosition ? (
+          <span className="truncate pl-[16px] text-[12px] font-semibold" style={{ color: accent }}>Tailored for {version.targetPosition}</span>
+        ) : (
+          <span className="truncate pl-[16px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{formatDate(version.updatedAt)}</span>
+        )}
       </div>
       {ats && (
-        <div className="flex flex-wrap items-center gap-[8px]">
+        <div className="flex flex-wrap items-center gap-[8px] sm:min-w-0 sm:flex-1 sm:flex-nowrap">
           <ScoreBadge category="Resume Rating" label={gradeLabel} value={ats.qualityScore} />
           {ats.jobMatchScore !== null && <ScoreBadge category="Job Match" label={ats.jobMatchLabel || "Possible Match"} value={ats.jobMatchScore} />}
         </div>
       )}
+      <div className="flex flex-none items-center gap-[4px] sm:ml-auto">
+        {version.targetPosition && <span className="mr-[6px] hidden text-[11px] font-semibold whitespace-nowrap lg:inline" style={{ color: "var(--muted-foreground)" }}>{formatDate(version.updatedAt)}</span>}
+        <IconTip label="Edit"><button type="button" aria-label={`Edit ${version.name}`} onClick={onEdit} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+          <Pencil className="h-4 w-4" aria-hidden />
+        </button></IconTip>
+        <IconTip label="Download"><button
+          type="button"
+          aria-label={`Download ${version.name}`}
+          disabled={downloading}
+          onClick={async () => {
+            setDownloading(true);
+            try {
+              await downloadDocx(resumeForVersion(resume, version));
+            } finally {
+              setDownloading(false);
+            }
+          }}
+          className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-50"
+          style={{ color: "var(--muted-foreground)" }}
+        >
+          <Download className="h-4 w-4" aria-hidden />
+        </button></IconTip>
+        <IconTip label="Duplicate"><button type="button" aria-label={`Duplicate ${version.name}`} onClick={onDuplicate} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+          <Copy className="h-4 w-4" aria-hidden />
+        </button></IconTip>
+        <IconTip label="Delete"><button type="button" aria-label={`Delete ${version.name}`} onClick={onDelete} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+          <Trash2 className="h-4 w-4" aria-hidden />
+        </button></IconTip>
+        <button
+          type="button"
+          onClick={onOpen}
+          className="dm-tap ml-[4px] flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
+          style={{ borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, background: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent }}
+        >
+          Open <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </button>
+      </div>
     </div>
   );
 }
