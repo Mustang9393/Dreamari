@@ -530,6 +530,26 @@ function ResumeBuilderInner() {
   }
 
   if (view === "document") {
+    // "Your Resume" used to be a version-less document, which silently lost
+    // every version tool (ATS Check, Tailor, Edit Sections -- direct
+    // feedback, 17 Sept 2026: "where did the ATS check go?"). Open the most
+    // recently updated saved resume instead; only with nothing saved yet
+    // does the bare preview remain.
+    const latest = [...resume.versions].sort((a, b) => b.updatedAt - a.updatedAt)[0];
+    if (latest) {
+      return (
+        <DocumentScreen
+          resume={resumeForVersion(resume, latest)}
+          title={latest.name}
+          onBack={backToProfile}
+          backLabel="Back to Resumes"
+          editHref={`/resume-builder?view=tailor&version=${latest.id}&edit=1`}
+          router={router}
+          templateId={latest.template}
+          version={latest}
+        />
+      );
+    }
     return <DocumentScreen resume={resume} title="Your Resume" onBack={backToProfile} backLabel="Back to Resumes" router={router} templateId={DEFAULT_RESUME_TEMPLATE} />;
   }
 
