@@ -27,7 +27,7 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
-import { gradePlan, type GradeStep } from "./gradePlanData";
+import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type PlanStage } from "./gradePlanData";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
@@ -1693,11 +1693,18 @@ const GRADE_WINDOW_DUE: Record<string, string> = { fall: "Due by Nov", winter: "
 // deadline-bound step names the term's closing month.
 function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onGoRoutes: () => void }) {
   const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
+  // High School | College (Joshua Pierce, Slack, 18 Sept 2026: "expand it
+  // so students can continue using it through college"). Same Fall /
+  // Winter / Spring windows and In app / Out of app split either way; the
+  // college copy fills in the student's #1 career where it names one.
+  const [stage, setStage] = useState<PlanStage>("hs");
   const [grade, setGrade] = useState<9 | 10 | 11 | 12>(defaultGrade);
+  const [year, setYear] = useState<CollegeYear>(1);
   const [done, setDone] = useState<Set<string>>(new Set(["g9-fall-build"]));
   const [openWindow, setOpenWindow] = useState<string | null>(null);
   const [noteStep, setNoteStep] = useState<GradeStep | null>(null);
-  const plan = gradePlan(grade);
+  const plan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { title: focus.title, world: focus.world } : null);
+  const levelLabel = stage === "hs" ? `Grade ${grade}` : `Year ${year}`;
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
   const doneCount = allSteps.filter((s) => done.has(s.id)).length;
   const RULE = "var(--inset-border)";
@@ -1721,34 +1728,66 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
               </h2>
               {focus && <button type="button" onClick={onGoRoutes} className="dm-link flex-none cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route</button>}
             </span>
-            <span key={grade} className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Grade {grade} · {plan.title}</span>
+            <span key={`${stage}-${grade}-${year}`} className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{levelLabel} · {plan.title}</span>
           </div>
-          <div role="tablist" aria-label="Choose grade" className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-            {([9, 10, 11, 12] as const).map((g) => {
-              const active = g === grade;
-              return (
-                <button
-                  key={g}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setGrade(g)}
-                  className="dm-quiet relative flex size-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[14px] font-bold"
-                  style={{ color: active ? "var(--primary-foreground)" : "var(--foreground)" }}
-                >
-                  {active && (
-                    <motion.span
-                      layoutId="grade-plan-pill"
-                      aria-hidden
-                      className="absolute inset-0 rounded-[var(--radius-sm)]"
-                      style={{ background: "var(--primary)" }}
-                      transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                    />
-                  )}
-                  <span className="relative">{g}</span>
-                </button>
-              );
-            })}
+          {/* Wraps onto two rows on a phone (both pills together are wider
+             than 375px); from sm the pair sits right of the title. */}
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-[var(--space-2)] sm:w-auto sm:flex-none sm:justify-end">
+            {/* Stage first, then the level within it: 9 to 12, or Yr 1 to 4. */}
+            <div role="tablist" aria-label="High school or college" className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              {([["hs", "High School"], ["college", "College"]] as const).map(([key, label]) => {
+                const active = key === stage;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setStage(key)}
+                    className="dm-quiet relative flex h-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[12px] text-[13.5px] font-bold whitespace-nowrap"
+                    style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="grade-plan-stage-pill"
+                        aria-hidden
+                        className="absolute inset-0 rounded-[var(--radius-sm)]"
+                        style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}
+                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                      />
+                    )}
+                    <span className="relative">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div role="tablist" aria-label={stage === "hs" ? "Choose grade" : "Choose year"} className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              {(stage === "hs" ? ([9, 10, 11, 12] as const) : ([1, 2, 3, 4] as const)).map((level) => {
+                const active = stage === "hs" ? level === grade : level === year;
+                return (
+                  <button
+                    key={`${stage}-${level}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => (stage === "hs" ? setGrade(level as 9 | 10 | 11 | 12) : setYear(level as CollegeYear))}
+                    className="dm-quiet relative flex h-[34px] min-w-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[8px] text-[14px] font-bold whitespace-nowrap"
+                    style={{ color: active ? "var(--primary-foreground)" : "var(--foreground)" }}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="grade-plan-pill"
+                        aria-hidden
+                        className="absolute inset-0 rounded-[var(--radius-sm)]"
+                        style={{ background: "var(--primary)" }}
+                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                      />
+                    )}
+                    <span className="relative">{stage === "hs" ? level : `Yr ${level}`}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
         <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
@@ -1786,7 +1825,7 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                         const complete = !s.counselorVerified && done.has(s.id);
                         const body = (
                           <span className="flex min-w-0 flex-1 flex-col gap-[2px] sm:flex-row sm:items-center sm:gap-[10px]">
-                            <span className="flex-none text-[11px] leading-[16px] font-bold tracking-[0.08em] uppercase sm:w-[92px] sm:leading-[22px]" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
+                            <span className="flex-none text-[11px] leading-[16px] font-bold tracking-[0.08em] uppercase sm:w-[104px] sm:leading-[22px]" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
                             <span className={`min-w-0 flex-1 text-[15px] leading-[22px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
                               {s.optional && "(Optional) "}{s.title}
                             </span>

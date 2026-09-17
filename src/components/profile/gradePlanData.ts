@@ -30,13 +30,16 @@
 // are genuinely self-reported, like tracking your own applications) stays
 // student-checkable.
 
-export type GradeStepLabel = "BUILD" | "EXPLORE" | "PLAY" | "CONNECT" | "DECIDE" | "PLAN" | "REVIEW" | "APPLY" | "FUND" | "TRACK" | "RESULT";
+export type GradeStepLabel = "BUILD" | "EXPLORE" | "PLAY" | "CONNECT" | "DECIDE" | "PLAN" | "REVIEW" | "APPLY" | "FUND" | "TRACK" | "RESULT" | "MENTOR" | "VOLUNTEER" | "JOIN" | "STUDY" | "LEARN" | "SKILL" | "EXPERIENCE" | "LEAD" | "PREPARE" | "TRANSITION" | "GIVE BACK";
 
 export type GradeStep = { id: string; label: GradeStepLabel; inApp: boolean; title: string; href?: string; deadlineBound?: boolean; optional?: boolean; counselorVerified?: boolean; counselorNote?: string };
 
 export type GradeWindow = { id: "fall" | "winter" | "spring"; title: string; steps: GradeStep[] };
 
+export type PlanStage = "hs" | "college";
 export type GradePlan = { grade: 9 | 10 | 11 | 12; title: string; tagline: string; windows: GradeWindow[] };
+export type CollegeYear = 1 | 2 | 3 | 4;
+export type CollegePlan = { year: CollegeYear; title: string; windows: GradeWindow[] };
 
 function step(id: string, label: GradeStepLabel, inApp: boolean, title: string, opts?: { href?: string; deadlineBound?: boolean; optional?: boolean; counselorVerified?: boolean; counselorNote?: string }): GradeStep {
   return { id, label, inApp, title, href: opts?.href, deadlineBound: opts?.deadlineBound, optional: opts?.optional, counselorVerified: opts?.counselorVerified, counselorNote: opts?.counselorNote };
@@ -182,4 +185,175 @@ export const GRADE_PLANS: GradePlan[] = [
 
 export function gradePlan(grade: 9 | 10 | 11 | 12): GradePlan {
   return GRADE_PLANS.find((g) => g.grade === grade) ?? GRADE_PLANS[0];
+}
+
+// ---------------------------------------------------------------------------
+// College, Year 1 to 4. Copy verbatim from Joshua Pierce (Slack, 18 Sept
+// 2026: "expand it so students can continue using it through college"),
+// same Fall / Winter / Spring windows and IN APP / OUT OF APP split as high
+// school. Nothing here is counselor-verified or deadline-bound; a college
+// student checks their own steps.
+//
+// Product logic from the same message: the college plan should change with
+// the student's primary career. The copy below is the Investment Banking
+// version. `{career}` and `{field}` are swapped for the student's #1 career
+// and its field at render time (collegePlan), so the headline steps read
+// right for any career now. The finance-specific recommendations inside the
+// OUT OF APP steps (Excel, PowerPoint, Bloomberg Terminal, financial
+// modeling, valuation, the finance/accounting/economics course list, finance
+// clubs) still need to be driven from the same skills / software / classes
+// data Explore Careers already holds for each career. That is a data join
+// for the production app, not prototype copy; flagged in AI_HANDOFF.
+
+const c = (id: string, label: GradeStepLabel, inApp: boolean, title: string, href?: string): GradeStep => ({ id, label, inApp, title, href });
+const GLOSSARY = "/play";
+const CAREER_DETAIL = "/explore?tab=browse";
+const MY_PLAN_REPORT = "/profile?tab=report";
+
+export const COLLEGE_PLANS: CollegePlan[] = [
+  {
+    year: 1,
+    title: "Explore + Build a Foundation",
+    windows: [
+      { id: "fall", title: "Fall", steps: [
+        c("c1-fall-explore", "EXPLORE", true, "Learn the skills, software, classes, and education needed for {career}", CAREER_DETAIL),
+        c("c1-fall-play", "PLAY", true, "Try the {career} Day-in-the-Life simulation", PLAY),
+        c("c1-fall-build", "BUILD", true, "Create your college resume", BUILD_RESUME),
+        c("c1-fall-connect", "CONNECT", true, "Follow {field} and {career} professionals", CONNECT),
+        c("c1-fall-join", "JOIN", false, "Join a finance, investing, business, or related club"),
+        c("c1-fall-study", "STUDY", false, "Join or create a study group"),
+        c("c1-fall-learn", "LEARN", false, "Focus on strong grades in relevant classes like math, economics, accounting, and statistics"),
+        c("c1-fall-volunteer", "VOLUNTEER", false, "Volunteer on campus or in your community"),
+      ] },
+      { id: "winter", title: "Winter", steps: [
+        c("c1-winter-connect", "CONNECT", true, "Join {field} Community Boards", CONNECT),
+        c("c1-winter-mentor", "MENTOR", true, "Connect with a professional mentor and meet at least once a month", CONNECT),
+        c("c1-winter-play", "PLAY", true, "Start learning {field} vocabulary through Glossary Games", GLOSSARY),
+        c("c1-winter-explore", "EXPLORE", true, "Review the skills needed for {career}", CAREER_DETAIL),
+        c("c1-winter-skill", "SKILL", false, "Start learning Excel and PowerPoint"),
+        c("c1-winter-connect2", "CONNECT", false, "Build a relationship with a professor, academic mentor, or advisor"),
+        c("c1-winter-experience", "EXPERIENCE", false, "Get involved in a club, project, part-time job, research, or volunteer activity"),
+      ] },
+      { id: "spring", title: "Spring", steps: [
+        c("c1-spring-build", "BUILD", true, "Add your first-year experiences to your resume", BUILD_RESUME),
+        c("c1-spring-connect", "CONNECT", true, "Ask professionals how they got their first experience", CONNECT),
+        c("c1-spring-play", "PLAY", true, "Complete another career simulation to confirm the career still interests you", PLAY),
+        c("c1-spring-apply", "APPLY", false, "Apply for summer jobs, internships, finance programs, research, or volunteer opportunities"),
+        c("c1-spring-plan", "PLAN", false, "Decide how you want to become more involved next year"),
+      ] },
+    ],
+  },
+  {
+    year: 2,
+    title: "Build Skills + Step Up",
+    windows: [
+      { id: "fall", title: "Fall", steps: [
+        c("c2-fall-explore", "EXPLORE", true, "Review the software, skills, and classes needed for your target career", CAREER_DETAIL),
+        c("c2-fall-build", "BUILD", true, "Update your resume", BUILD_RESUME),
+        c("c2-fall-mentor", "MENTOR", true, "Continue meeting with your mentor monthly", CONNECT),
+        c("c2-fall-volunteer", "VOLUNTEER", true, "Join a Dreamari student group or mentor high school students interested in college", CONNECT),
+        c("c2-fall-lead", "LEAD", false, "Apply for an E-board or club leadership position"),
+        c("c2-fall-skill", "SKILL", false, "Build stronger Excel and financial modeling skills"),
+        c("c2-fall-study", "STUDY", false, "Join study groups for important classes"),
+        c("c2-fall-learn", "LEARN", false, "Take relevant finance, accounting, economics, math, or statistics courses"),
+      ] },
+      { id: "winter", title: "Winter", steps: [
+        c("c2-winter-connect", "CONNECT", true, "Follow and engage with professionals in your target career", CONNECT),
+        c("c2-winter-play", "PLAY", true, "Complete {career} simulations", PLAY),
+        c("c2-winter-play2", "PLAY", true, "Build industry vocabulary through Glossary Games", GLOSSARY),
+        c("c2-winter-skill", "SKILL", false, "Learn tools like Bloomberg Terminal if available through your school"),
+        c("c2-winter-connect2", "CONNECT", false, "Meet with professors, alumni, your academic advisor, or career center"),
+        c("c2-winter-prepare", "PREPARE", false, "Research internships and other career-building opportunities"),
+      ] },
+      { id: "spring", title: "Spring", steps: [
+        c("c2-spring-build", "BUILD", true, "Make your resume internship-ready", BUILD_RESUME),
+        c("c2-spring-connect", "CONNECT", true, "Ask your mentor and professionals for application advice", CONNECT),
+        c("c2-spring-play", "PLAY", true, "Review industry vocabulary before interviews", GLOSSARY),
+        c("c2-spring-apply", "APPLY", false, "Apply for internships, finance programs, research, jobs, or other opportunities"),
+        c("c2-spring-lead", "LEAD", false, "Secure a club or campus leadership role for next year"),
+      ] },
+    ],
+  },
+  {
+    year: 3,
+    title: "Lead + Gain Serious Experience",
+    windows: [
+      { id: "fall", title: "Fall", steps: [
+        c("c3-fall-build", "BUILD", true, "Make your resume recruiting-ready", BUILD_RESUME),
+        c("c3-fall-connect", "CONNECT", true, "Grow your {career} network", CONNECT),
+        c("c3-fall-mentor", "MENTOR", true, "Continue meeting with your mentor monthly", CONNECT),
+        c("c3-fall-play", "PLAY", true, "Complete a Day-in-the-Life simulation before internship recruiting", PLAY),
+        c("c3-fall-lead", "LEAD", false, "Hold a meaningful club or E-board leadership role"),
+        c("c3-fall-skill", "SKILL", false, "Strengthen financial modeling, valuation, Excel, Bloomberg, and presentation skills"),
+        c("c3-fall-connect2", "CONNECT", false, "Attend career fairs, employer events, and alumni events"),
+      ] },
+      { id: "winter", title: "Winter", steps: [
+        c("c3-winter-play", "PLAY", true, "Practice career simulations before interviews", PLAY),
+        c("c3-winter-play2", "PLAY", true, "Use Glossary Games to learn the vocabulary of the industry you're interviewing for", GLOSSARY),
+        c("c3-winter-connect", "CONNECT", true, "Learn from professionals at banks and finance companies", CONNECT),
+        c("c3-winter-volunteer", "VOLUNTEER", true, "Mentor high school students through Dreamari", CONNECT),
+        c("c3-winter-apply", "APPLY", false, "Apply for internships, research, fellowships, or career-related opportunities"),
+        c("c3-winter-build", "BUILD", false, "Complete finance projects, investment pitches, research, or other work you can show employers"),
+        c("c3-winter-study", "STUDY", false, "Maintain strong performance in career-relevant classes"),
+      ] },
+      { id: "spring", title: "Spring", steps: [
+        c("c3-spring-explore", "EXPLORE", true, "Confirm {career} is still your strongest career direction", CAREER_DETAIL),
+        c("c3-spring-build", "BUILD", true, "Add new experience, skills, and leadership to your resume", BUILD_RESUME),
+        c("c3-spring-connect", "CONNECT", true, "Ask your mentor how to prepare for your internship", CONNECT),
+        c("c3-spring-experience", "EXPERIENCE", false, "Complete a major internship, finance project, research experience, or other career-building opportunity"),
+        c("c3-spring-lead", "LEAD", false, "Help younger students get involved in your club or organization"),
+      ] },
+    ],
+  },
+  {
+    year: 4,
+    title: "Launch + Give Back",
+    windows: [
+      { id: "fall", title: "Fall", steps: [
+        c("c4-fall-build", "BUILD", true, "Complete your job-ready resume", BUILD_RESUME),
+        c("c4-fall-connect", "CONNECT", true, "Engage with mentors and professionals in your target career", CONNECT),
+        c("c4-fall-play", "PLAY", true, "Refresh your career simulation before recruiting", PLAY),
+        c("c4-fall-explore", "EXPLORE", true, "Explore MBA, master's, or other graduate programs if they are part of your plan", POSTSECONDARY_LIST),
+        c("c4-fall-apply", "APPLY", false, "Begin applying for full-time roles, graduate programs, fellowships, or other next steps"),
+        c("c4-fall-lead", "LEAD", false, "Continue your leadership role and prepare someone else to take over"),
+        c("c4-fall-connect2", "CONNECT", false, "Ask professors, mentors, and alumni for guidance and references"),
+      ] },
+      { id: "winter", title: "Winter", steps: [
+        c("c4-winter-play", "PLAY", true, "Practice career simulations before interviews", PLAY),
+        c("c4-winter-play2", "PLAY", true, "Review industry vocabulary through Glossary Games", GLOSSARY),
+        c("c4-winter-mentor", "MENTOR", true, "Meet with your mentor for job-search guidance", CONNECT),
+        c("c4-winter-volunteer", "VOLUNTEER", true, "Mentor younger college or high school students through Dreamari", CONNECT),
+        c("c4-winter-apply", "APPLY", false, "Continue applications and interviews"),
+        c("c4-winter-skill", "SKILL", false, "Close any remaining skill or software gaps for your target role"),
+        c("c4-winter-connect", "CONNECT", false, "Stay active with alumni, professors, employers, and professional organizations"),
+      ] },
+      { id: "spring", title: "Spring", steps: [
+        c("c4-spring-plan", "PLAN", true, "Confirm your post-college career or education plan", MY_PLAN_REPORT),
+        c("c4-spring-connect", "CONNECT", true, "Identify the mentors and professional relationships you want to maintain", CONNECT),
+        c("c4-spring-build", "BUILD", true, "Complete your final resume", BUILD_RESUME),
+        c("c4-spring-decide", "DECIDE", false, "Compare job, graduate-school, or other opportunities"),
+        c("c4-spring-transition", "TRANSITION", false, "Prepare for your first full-time role or next education step"),
+        c("c4-spring-giveback", "GIVE BACK", false, "Mentor younger students and hand off your campus leadership responsibilities"),
+      ] },
+    ],
+  },
+];
+
+/** The field word for a career's world: "Business & Finance" reads as
+ *  Finance, "Tech & Engineering" as Tech, otherwise the world's first part. */
+export function careerField(world: string | undefined): string {
+  if (!world) return "Finance";
+  if (/finance/i.test(world)) return "Finance";
+  if (/tech/i.test(world)) return "Tech";
+  return world.split(/\s*[&·]\s*/)[0] ?? world;
+}
+
+/** The college plan for a year, with `{career}` / `{field}` filled in for
+ *  the student's #1 career (Investment Banking when none is chosen yet). */
+export function collegePlan(year: CollegeYear, career?: { title: string; world: string } | null): CollegePlan {
+  const base = COLLEGE_PLANS.find((p) => p.year === year) ?? COLLEGE_PLANS[0];
+  const name = career?.title ?? "Investment Banking";
+  const field = careerField(career?.world);
+  const fill = (text: string) => text.replaceAll("{career}", name).replaceAll("{field}", field);
+  return { ...base, windows: base.windows.map((w) => ({ ...w, steps: w.steps.map((s) => ({ ...s, title: fill(s.title) })) })) };
 }

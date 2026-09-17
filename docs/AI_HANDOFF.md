@@ -10174,3 +10174,24 @@ and interest counts live in the sheet).
 then Tech & Engineering.
 
 ESLint + `tsc --noEmit` clean on every touched file.
+
+## 2026-09-18 · My Plan: High School | College toggle, College Years 1 to 4
+
+`GradePlanCard` (Profile > My Plan) now has a stage toggle at the top
+(High School | College) with 9 | 10 | 11 | 12 or Yr 1 | Yr 2 | Yr 3 | Yr 4
+beneath it. Same Fall / Winter / Spring windows and In app / Out of app
+split. College content is verbatim from Joshua Pierce (Slack, 18 Sept
+2026) in `COLLEGE_PLANS` (`gradePlanData.ts`), with new labels MENTOR,
+VOLUNTEER, JOIN, STUDY, LEARN, SKILL, EXPERIENCE, LEAD, PREPARE, TRANSITION,
+GIVE BACK. `collegePlan(year, career)` fills `{career}` / `{field}` from the
+student's #1 career (Investment Banking when none), so headline steps
+already follow the career.
+
+**Product logic still to build (backend):** Joshua's message says the
+college plan should change with the primary career. The finance-specific
+recommendations inside OUT OF APP steps (Excel, PowerPoint, Bloomberg
+Terminal, financial modeling, valuation, the finance / accounting /
+economics course list, finance clubs) should be generated from the skills,
+software and classes Explore Careers already holds per career. The
+prototype ships the Investment Banking copy for every career and only
+swaps the career and field names.
