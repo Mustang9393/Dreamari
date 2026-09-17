@@ -60,8 +60,16 @@ export const ENTERPRISE_TABS = [
 // history, shown nowhere else) until three more headshots arrive. No AT&T
 // face repeats a current pro's; pros never wear the
 // generated student avatars (direct feedback, 17 Sept 2026).
+/** Flip to true to show ONLY what Joshua's Replit has: original first names,
+ *  no opportunity details or signals, no poll tally, no counts on insight
+ *  and answer actions, no openable profiles. Everything we added beyond the
+ *  source is gated on this (see docs/reference/att-board-additions-2026-09-17.md). */
+export const REPLIT_ONLY = false;
+
 export type AttPro = { name: string; role: string; org: "AT&T"; photo: string };
-export const ATT_PROS: Record<string, AttPro> = {
+/** Joshua's original first names, used when REPLIT_ONLY is on. */
+const SOURCE_NAMES: Record<string, string> = { marcus: "Marcus Reed", jordan: "Jordan Lee", maya: "Maya Patel", andre: "Andre Johnson", elena: "Elena Rodriguez", amina: "Amina Thompson" };
+const RENAMED_PROS: Record<string, AttPro> = {
   marcus: { name: "Terrence Reed", role: "Network Engineering Manager", org: "AT&T", photo: PARTNER_PORTRAITS["Terrence Reed"] },
   jordan: { name: "Calvin Lee", role: "Cybersecurity Analyst", org: "AT&T", photo: PARTNER_PORTRAITS["Calvin Lee"] },
   maya: { name: "Nisha Patel", role: "AI Product Manager", org: "AT&T", photo: PARTNER_PORTRAITS["Nisha Patel"] },
@@ -69,6 +77,9 @@ export const ATT_PROS: Record<string, AttPro> = {
   elena: { name: "Lucia Rodriguez", role: "Customer Experience Director", org: "AT&T", photo: PARTNER_PORTRAITS["Lucia Rodriguez"] },
   amina: { name: "Amina Thompson", role: "Technology Program Manager", org: "AT&T", photo: PARTNER_PORTRAITS["Amina Thompson"] },
 };
+export const ATT_PROS: Record<string, AttPro> = REPLIT_ONLY
+  ? Object.fromEntries(Object.entries(RENAMED_PROS).map(([k, p]) => [k, { ...p, name: SOURCE_NAMES[k] ?? p.name }]))
+  : RENAMED_PROS;
 
 // ——— Student View ———
 
@@ -124,6 +135,8 @@ export const OPPORTUNITY_UI = {
   soon: "Opening soon",
   registration: "Registration open",
   upcoming: "Upcoming",
+  // one-word versions for the cards; the sheet uses the full ones
+  short: { open: "Open", soon: "Soon", registration: "Open", upcoming: "Upcoming" },
   closes: "Closes",
   opens: "Opens",
   aboutFull: "About this opportunity",

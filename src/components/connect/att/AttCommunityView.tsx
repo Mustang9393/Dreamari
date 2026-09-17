@@ -114,7 +114,7 @@ function InsightCard({ item, onAsk }: { item: typeof D.STUDENT_INSIGHTS[number];
           className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
           style={liked ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
         >
-          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {helpful}
+          <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {D.REPLIT_ONLY ? D.INSIGHT_ACTIONS.like : helpful}
         </button>
         {/* the same pill as Like: both act in place on this card (there is no
            thread to open here), so they share one grammar; Ask, which leaves
@@ -127,7 +127,7 @@ function InsightCard({ item, onAsk }: { item: typeof D.STUDENT_INSIGHTS[number];
           className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
           style={composing || comment ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
         >
-          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments}
+          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {D.REPLIT_ONLY ? D.INSIGHT_ACTIONS.comment : comments}
         </button>
         <button type="button" onClick={onAsk} className="dm-quiet ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
           <MessageCircleQuestion className="h-4 w-4" aria-hidden /> {D.INSIGHT_ACTIONS.ask}
@@ -198,13 +198,20 @@ function InsightRail({ onAsk }: { onAsk: () => void }) {
 
 type Opportunity = { id: string; kind: string; title: string; line: string };
 
+/** A chevron that fades in on a clickable card's hover, absolutely placed so
+ *  the layout never moves (direct feedback, 17 Sept 2026). Parent: group + relative. */
+function HoverChevron({ className = "top-1/2 right-[12px] -translate-y-1/2" }: { className?: string }) {
+  return <ChevronRight aria-hidden className={`pointer-events-none absolute h-[18px] w-[18px] opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100 ${className}`} style={{ color: "var(--muted-foreground)" }} />;
+}
+
 /** Open / Registration open / Opening soon / Upcoming, colored by whether a
  *  student can act now (direct feedback, 17 Sept 2026). */
-function StatusChip({ id }: { id: string }) {
+function StatusChip({ id, short = false }: { id: string; short?: boolean }) {
   const d = D.OPPORTUNITY_DETAILS[id];
   if (!d) return null;
   const U = D.OPPORTUNITY_UI;
-  const label = d.status === "open" ? U.open : d.status === "soon" ? U.soon : d.status === "registration" ? U.registration : U.upcoming;
+  const key = d.status === "scheduled" ? "upcoming" : d.status;
+  const label = short ? U.short[key] : key === "open" ? U.open : key === "soon" ? U.soon : key === "registration" ? U.registration : U.upcoming;
   const live = d.status === "open" || d.status === "registration";
   const tone = live ? "var(--world-food-farming-nature)" : d.status === "soon" ? "var(--world-business-money-office)" : "var(--muted-foreground)";
   return (
@@ -234,11 +241,16 @@ function DeadlineChip({ month, day, soon = false }: { month: string; day: number
   );
 }
 const MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December";
-/** The card's line without the date it now shows as a tile or chip, so
- *  nothing is said twice: "Detroit, MI · November 14" -> "Detroit, MI". */
-function lineWithoutDate(line: string, d?: D.OpportunityDetail): string {
-  if (!d || (!d.date && !d.deadline)) return line;
-  return line.split(" · ").filter((part) => !new RegExp(`^(Apply by )?(${MONTHS}) \\d`).test(part)).join(" · ");
+const STATUS_WORDS = /^(Applications open|Opening soon|Registration open)$/;
+/** The card's line without what the card already shows elsewhere: the date
+ *  (a tile) and the status (the chip), so nothing is said twice:
+ *  "College sophomores · Applications open" -> "College sophomores". */
+function lineForCard(line: string, d?: D.OpportunityDetail): string {
+  const hasDate = !!(d?.date || d?.deadline);
+  return line
+    .split(" · ")
+    .filter((part) => !STATUS_WORDS.test(part) && !(hasDate && new RegExp(`^(Apply by )?(${MONTHS}) \\d`).test(part)))
+    .join(" · ");
 }
 /** When, compact: the tile or the span, the time, and the deadline. */
 function WhenLine({ d }: { d: D.OpportunityDetail }) {
@@ -269,23 +281,30 @@ function Signals({ id, className = "" }: { id: string; className?: string }) {
 }
 
 function OpportunityCard({ item, saved, onSave, onOpen, showKind = true }: { item: Opportunity; saved: boolean; onSave: () => void; onOpen: () => void; /** false inside a section whose heading already names the kind */ showKind?: boolean }) {
-  const d = D.OPPORTUNITY_DETAILS[item.id];
+  const d = D.REPLIT_ONLY ? undefined : D.OPPORTUNITY_DETAILS[item.id];
   return (
     <div className="dm-tap group relative flex h-full flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
       {/* the whole card opens the detail sheet; Save stays its own control */}
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {item.title}</span></button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />
-      <div className={`flex flex-wrap items-center gap-[6px] ${showKind ? "justify-between" : "justify-end"}`}>{showKind && <Eyebrow>{item.kind}</Eyebrow>}<StatusChip id={item.id} /></div>
+      {d && <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {item.title}</span></button>}
+      {d && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />}
+      {d && <HoverChevron />}
+      {showKind && <Eyebrow>{item.kind}</Eyebrow>}
       <div className="flex items-start gap-[12px]">
         {d?.date && d.status !== "soon" && <DateTile month={d.date.month} day={d.date.day} />}
-        <div className="min-w-0">
-          <h3 className="text-[16px] leading-[22px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.title}</h3>
+        <div className="min-w-0 flex-1">
+          {/* title and status share one row: the title takes two lines at
+             most and shows its full name on hover; the one-word chip sits
+             at the right (direct feedback, 17 Sept 2026) */}
+          <div className="flex items-start justify-between gap-[10px]">
+            <h3 className="line-clamp-2 min-w-0 text-[16px] leading-[22px] font-bold" title={item.title} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.title}</h3>
+            {d && <span className="mt-[2px] flex-none"><StatusChip id={item.id} short /></span>}
+          </div>
           {/* deadlines live in the sheet, not on the card (direct feedback, 17 Sept 2026) */}
-          <Muted className="mt-[3px]">{lineWithoutDate(item.line, d)}{d?.date?.time && d.status !== "soon" ? ` · ${d.date.time}` : ""}</Muted>
+          <Muted className="mt-[3px]">{d ? lineForCard(item.line, d) : item.line}{d?.date?.time && d.status !== "soon" ? ` · ${d.date.time}` : ""}</Muted>
         </div>
       </div>
       <div className="relative z-20 mt-auto flex items-center justify-between gap-[10px] pt-[4px]">
-        <Signals id={item.id} />
+        {d ? <Signals id={item.id} /> : <span />}
         <QuietCta size="sm" done={saved} onClick={onSave} className="flex-none">
           {saved ? <><BookmarkCheck className="h-4 w-4" aria-hidden /> {D.SAVE.saved}</> : <><Bookmark className="h-4 w-4" aria-hidden /> {D.SAVE.save}</>}
         </QuietCta>
@@ -370,7 +389,7 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity }: { 
            opportunity cards around it (direct feedback, 17 Sept 2026) */}
         <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={ITEM}>
           <h3 className="text-[17px] leading-[23px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.POLL.question}</h3>
-          {pick ? (
+          {pick && !D.REPLIT_ONLY ? (
             // the tally, the way a story poll flips once you have voted: your
             // pick in the brand blue, everyone else's share behind it
             <ul className="flex flex-col gap-[8px]">
@@ -391,12 +410,12 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity }: { 
           ) : (
             <div className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
               {D.POLL.options.map((option) => (
-                <QuietCta key={option} size="sm" onClick={() => setPick(option)}>{option}</QuietCta>
+                <QuietCta key={option} size="sm" done={pick === option} onClick={() => setPick(option)}>{option}</QuietCta>
               ))}
             </div>
           )}
           <div className="flex flex-wrap items-center justify-between gap-[8px]">
-            <Muted>{D.POLL.responses + (pick ? 1 : 0)} {D.POLL.answered}</Muted>
+            {!D.REPLIT_ONLY && <Muted>{D.POLL.responses + (pick ? 1 : 0)} {D.POLL.answered}</Muted>}
             {pick && <Submitted text={D.POLL.saved} />}
           </div>
         </div>
@@ -448,8 +467,8 @@ function StudentQuestions() {
                 <ProLine id={item.pro} size={32} />
                 {isOpen && <PullQuote>{item.answer}</PullQuote>}
                 <div className="mt-auto flex items-center gap-[var(--space-3)] pt-[2px]">
-                  <CountPill icon={ThumbsUp} count={item.helpful + (liked[item.id] ? 1 : 0)} on={!!liked[item.id]} onClick={() => setLiked((m) => ({ ...m, [item.id]: !m[item.id] }))} label={D.INSIGHT_ACTIONS.like} />
-                  <CountPill icon={MessagesSquare} count={item.comments} on={false} onClick={() => setOpen(item.id)} label={D.INSIGHT_ACTIONS.comment} />
+                  {!D.REPLIT_ONLY && <CountPill icon={ThumbsUp} count={item.helpful + (liked[item.id] ? 1 : 0)} on={!!liked[item.id]} onClick={() => setLiked((m) => ({ ...m, [item.id]: !m[item.id] }))} label={D.INSIGHT_ACTIONS.like} />}
+                  {!D.REPLIT_ONLY && <CountPill icon={MessagesSquare} count={item.comments} on={false} onClick={() => setOpen(item.id)} label={D.INSIGHT_ACTIONS.comment} />}
                   <span className="ml-auto"><LinkButton onClick={() => setOpen(isOpen ? undefined : item.id)}>{isOpen ? D.RECENT_ANSWERS.hide : D.RECENT_ANSWERS.read} <ChevronRight className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-90" : ""}`} aria-hidden /></LinkButton></span>
                 </div>
               </li>
@@ -501,6 +520,7 @@ function StudentPeople({ follows, toggleFollow }: { follows: Record<string, bool
                 <div key={id} className="dm-tap group relative flex flex-col items-center gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-center" style={ITEM}>
                   <button type="button" onClick={() => openPro(id)} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {pro.name}</span></button>
                   <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />
+                  {!D.REPLIT_ONLY && <HoverChevron className="top-[12px] right-[12px]" />}
                   <Avatar name={pro.name} size={56} photo={pro.photo} />
                   <span className="mt-[4px] flex items-center gap-[5px] text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={14} /></span>
                   <span className="max-w-full truncate text-[12.5px] leading-[17px]" title={pro.role} style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
@@ -996,7 +1016,7 @@ export function AttCommunityView({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <OpenPro.Provider value={setProfile}>
+    <OpenPro.Provider value={D.REPLIT_ONLY ? () => {} : setProfile}>
       {opportunity && <OpportunitySheet item={opportunity} saved={!!saves[opportunity.id]} onSave={() => toggleSave(opportunity.id)} inPlan={!!plan[opportunity.id]} onPlan={() => togglePlan(opportunity.id)} onClose={() => setOpportunity(undefined)} />}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
