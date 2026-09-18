@@ -25,7 +25,8 @@ export type Inbox = {
   resolved: Record<string, string>;
 };
 
-const EMPTY: Inbox = { dock: "closed", unread: 0, mentorship: false, program: false, meetingDecision: null, read: [], resolved: {} };
+// unread starts at 1: the mentor's latest message is waiting when the demo opens
+const EMPTY: Inbox = { dock: "closed", unread: 1, mentorship: false, program: false, meetingDecision: null, read: [], resolved: {} };
 let state: Inbox = EMPTY;
 const listeners = new Set<() => void>();
 

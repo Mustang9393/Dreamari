@@ -74,7 +74,7 @@ function NavIconButton({ label, open, onClick, badge, dot, children }: { label: 
 /** Messages: only inside a mentorship program. Opens the chat dock. */
 export function MessagesButton() {
   const inbox = useInbox();
-  if (!inbox.program) return null;
+  if (!inbox.mentorship) return null;
   return (
     <NavIconButton label="Messages" badge={inbox.unread} onClick={() => openDock()} open={inbox.dock === "open" || inbox.dock === "full"}>
       <Send className="h-5 w-5" aria-hidden />

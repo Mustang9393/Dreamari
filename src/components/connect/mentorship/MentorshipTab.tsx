@@ -154,8 +154,15 @@ function DemoViewSwitch({ view, onPick }: { view: D.MentorshipView; onPick: (vie
 // Tab root: the tiled list, then the program
 
 export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" | "partner" | "admin" }) {
-  // the Mentorship tab is on screen: mentorship notifications may show
-  useEffect(() => { setMentorshipContext(true); return () => setMentorshipContext(false); }, []);
+  // the Mentorship tab is on screen: mentorship notifications may show.
+  // The cleanup waits a tick so StrictMode's mount, unmount, mount in dev
+  // does not flicker the flag (and close the dock) on a real mount.
+  const alive = useRef(false);
+  useEffect(() => {
+    alive.current = true;
+    setMentorshipContext(true);
+    return () => { alive.current = false; window.setTimeout(() => { if (!alive.current) setMentorshipContext(false); }, 0); };
+  }, []);
   // The open program and its sub-tab ride the URL (?program=coach&sub=messages),
   // so a refresh lands where you were and the browser's Back walks the same
   // steps as ours (direct feedback, 18 Sept 2026).
@@ -168,6 +175,12 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
     router.push(`/connect?${q.toString()}`, { scroll: false });
   };
   const [toast, onToast] = useToast();
+  // the nav's Messages icon works from the tiles too: it opens the one
+  // program the student is in, with the chat up
+  const inbox = useInbox();
+  useEffect(() => {
+    if (open !== D.PROGRAM.id && inbox.dock !== "closed") setOpen(D.PROGRAM.id);
+  }, [inbox.dock, open]); // eslint-disable-line react-hooks/exhaustive-deps
   if (open === D.PROGRAM.id) return <ProgramView role={role} onBack={() => setOpen(null)} />;
   return (
     <section className="flex flex-col gap-[var(--space-4)]" aria-label="Mentorship programs">
@@ -259,7 +272,12 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   const unread = unreadFor(view);
   const [toast, onToast] = useToast();
   const [nudge, setNudge] = useState<string | null>(null);
-  useEffect(() => { setProgramContext(true); return () => { setProgramContext(false); setDock("closed"); }; }, []);
+  const aliveProgram = useRef(false);
+  useEffect(() => {
+    aliveProgram.current = true;
+    setProgramContext(true);
+    return () => { aliveProgram.current = false; window.setTimeout(() => { if (!aliveProgram.current) { setProgramContext(false); setDock("closed"); } }, 0); };
+  }, []);
   useEffect(() => { setUnreadMessages(unread); }, [unread]);
   // syncing with the inbox store (an external system), which is what these rules allow
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
@@ -429,8 +447,7 @@ function ChatDock({ me, state, unread, messages, setMessages, onToast, onOpenPro
                 <button type="button" aria-label="More" title="More" aria-expanded={menu} onClick={() => setMenu((v) => !v)} className={iconBtn}><MoreHorizontal className="h-4 w-4" aria-hidden /></button>
                 {menu && (
                   <div role="menu" className="absolute top-[calc(100%+6px)] right-0 z-20 min-w-[260px] overflow-hidden rounded-[var(--radius-md)] border motion-safe:animate-[fade-slide-up_0.16s_ease-out_both]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 50px -20px rgba(0,0,0,0.8)" }}>
-                    <div className="flex items-start gap-[8px] px-[14px] py-[10px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="mt-[1px] h-4 w-4 flex-none" aria-hidden style={{ color: GOOD }} /> {D.THREAD_FOOT}</div>
-                    <button type="button" role="menuitem" onClick={() => { setMenu(false); setDock(full ? "open" : "full"); }} className="dm-quiet hidden w-full cursor-pointer items-center gap-[10px] border-t px-[14px] py-[10px] text-left text-[13.5px] font-semibold sm:flex" style={{ borderColor: RULE, color: "var(--foreground)" }}>{full ? <Minimize2 className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> : <Maximize2 className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} {full ? "Exit full screen" : "Full screen"}</button>
+                    <button type="button" role="menuitem" onClick={() => { setMenu(false); setDock(full ? "open" : "full"); }} className="dm-quiet hidden w-full cursor-pointer items-center gap-[10px] px-[14px] py-[10px] text-left text-[13.5px] font-semibold sm:flex" style={{ color: "var(--foreground)" }}>{full ? <Minimize2 className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> : <Maximize2 className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} {full ? "Exit full screen" : "Full screen"}</button>
                     <button type="button" role="menuitem" onClick={() => { setMenu(false); setReport((n) => n + 1); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] border-t px-[14px] py-[10px] text-left text-[13.5px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}><Flag className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> Report a problem</button>
                   </div>
                 )}
@@ -708,7 +725,15 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
   const endRef = useRef<HTMLDivElement>(null);
   const other = me === "mentee" ? { name: D.MENTOR.name, line: `${D.MENTOR.title} · ${D.MENTOR.org}`, photo: D.MENTOR.photo } : { name: D.MENTEE.name, line: D.MENTEE.line, photo: studentAvatarSrc(D.MENTEE.name) };
   // in the dock, open on the latest message and follow new ones
-  useEffect(() => { if (embedded) endRef.current?.scrollIntoView({ block: "end" }); }, [embedded, messages.length]);
+  const listRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!embedded) return;
+    const toEnd = () => { const el = listRef.current; if (el) el.scrollTop = el.scrollHeight; };
+    toEnd();
+    const raf = requestAnimationFrame(toEnd);
+    const t = window.setTimeout(toEnd, 320); // after the dock's rise
+    return () => { cancelAnimationFrame(raf); window.clearTimeout(t); };
+  }, [embedded, messages.length]);
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (reportSignal) setSheet("escalate"); }, [reportSignal]);
   const suggested = me === "mentee" ? D.STUDENT_SUGGESTED : D.MENTOR_SUGGESTED;
@@ -762,7 +787,13 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
         </div>
       </div>}
 
-      <div className={embedded ? "flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-[var(--space-4)] py-[var(--space-4)]" : "flex min-h-[320px] flex-col justify-end gap-[22px] px-[var(--space-5)] py-[var(--space-5)] sm:min-h-[380px]"}>
+      <div ref={listRef} className={embedded ? "flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-[var(--space-4)] py-[var(--space-4)]" : "flex min-h-[320px] flex-col justify-end gap-[22px] px-[var(--space-5)] py-[var(--space-5)] sm:min-h-[380px]"}>
+        {/* the safety line sits at the start of the conversation and scrolls
+           away with it, the way messaging apps note encryption (direct
+           feedback, 18 Sept 2026) */}
+        {embedded && (
+          <p className="flex items-center justify-center gap-[5px] px-[12px] text-center text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: GOOD }} /> {D.THREAD_FOOT}</p>
+        )}
         {groups.map((g, gi) => {
           const mine = g.from === me;
           return (
