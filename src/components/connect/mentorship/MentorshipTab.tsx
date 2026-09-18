@@ -1129,10 +1129,10 @@ function PlayPrepCard({ onClick }: { onClick: () => void }) {
   const { ref, height } = useCaptionHeight();
   return (
     <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", textShadow: CARD_TEXT_SHADOW }}>
-      {/* l2-10 is a wide 16:9 scene cropped into this taller card; favor
-         center-right where Christina and Marcus stand, over dead window
-         space on the left. */}
-      <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" style={{ objectPosition: "64% 38%" }} />
+      {/* A wide atelier scene cropped into this taller card; favor the
+         mannequins and the buyer's desk (center-left) over the display bag
+         on the far right. */}
+      <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" style={{ objectPosition: "40% 45%" }} />
       <CardProgressiveBlur size={height ? `${height}px` : "58%"} maxBlur={34} />
       <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" aria-hidden style={{ height: height ? `${height}px` : "58%", background: cardBottomScrim("heavy") }} />
       <span className="absolute top-[14px] right-[14px] z-[2] flex size-[38px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>

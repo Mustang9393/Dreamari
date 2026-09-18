@@ -106,17 +106,14 @@ export const MEETING = {
 /** The real cards for the prep row: the Fashion Buyer poster, the Play
  *  card, the student's own resume. */
 export const PREP_CAREER = { label: "Explore", title: "Fashion Buyer", why: "Learn more about a career you want to discuss.", cta: "Explore Career", world: "Business & Finance", photo: "/images/app/poster-fashion-buyer.webp", href: "/career/fashion-buyer" } as const;
-// No Fashion Buyer simulation exists yet; stands in with real simulation
-// art until the fashion one is illustrated. Was a generic lounge photo (18
-// Sept 2026); now IB Level 2's "Deal Team Kickoff" scene -- the Maison
-// Laurent pitch's opening beat, one of the four beats restored with clean
-// (no baked-in Louis Vuitton branding) art after the trademark sweep (see
-// L2-09/L2-10/L2-19/L3-19/L3-20's own comments in ib-level-2.ts/
-// ib-level-3.ts) -- direct ask, 19 Sept 2026: use "whatever codex made for
-// the maison lauret part of the game". L2-09 (the more literal "first big
-// deal" title card) is excluded on purpose: it's still flagged internal-
-// only, raw handoff art with real branding baked in.
-export const PREP_PLAY = { label: "Play", title: "Fashion Buyer Day in the Life", why: "Experience the career before talking about it.", cta: "Play Simulation", world: "Business & Finance", cover: "/images/play/ib/l2-10.webp", href: "/play" } as const;
+// No Fashion Buyer simulation exists yet; stands in with real Maison
+// Laurent concept art until the fashion one is illustrated. Was a generic
+// lounge photo, then briefly an IB-level scene that turned out to be the
+// wrong "Maison Laurent" -- the boutique's own Fashion Buyer-track atelier
+// concept art (Codex, provided by the user, 19 Sept 2026): the Maison
+// Laurent showroom, mannequins, sketches and fabric swatches on the buyer's
+// desk, and a Dreamari-branded bag on display (no real luxury trademark).
+export const PREP_PLAY = { label: "Play", title: "Fashion Buyer Day in the Life", why: "Experience the career before talking about it.", cta: "Play Simulation", world: "Business & Finance", cover: "/images/play/fashion-buyer/maison-laurent-atelier.webp", href: "/play" } as const;
 export const PREP_RESUME = { label: "Resume", why: "Bring something your mentor can help improve.", cta: "View Resume" } as const;
 export const PREP_RESUME_HREF = "/resume-builder?view=document";
 export const PREP_RESUME_NAME = "Fashion Buyer Resume";

@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Play tile: corrected to the real Maison Laurent atelier concept art
+
+- The IB Level 2 swap was the wrong "Maison Laurent" -- the user meant a Fashion Buyer-track boutique concept image (Codex-generated, saved to their Downloads), not the Investment Banking simulation's own unrelated client storyline. Corrected: copied the image to `public/images/play/fashion-buyer/maison-laurent-atelier.webp` and pointed `PREP_PLAY.cover` at it. Checked the bag's brand plate before using it publicly (a recurring concern in this codebase after the earlier Louis Vuitton trademark sweep) -- it reads "DREAMARI", not a real luxury brand.
+- Crop position adjusted to favor the mannequins and the buyer's sketch desk over the display bag at the far right (`objectPosition: "40% 45%"`).
+- Checked headless at 1280: atelier scene reads clean, caption legible over the frosted zone, consistent with its two siblings.
+
 ### 2026-09-19 Play tile: real Maison Laurent scene art instead of a generic lounge photo
 
 - `PREP_PLAY.cover` (mentorshipData.ts) changed from the placeholder `cafe-lounge-sunset.webp` to `/images/play/ib/l2-10.webp` -- IB Level 2's "Deal Team Kickoff" beat (Christina and Marcus, "Client: Leading Luxury Brand", the Maison Laurent pitch's opening scene). Direct ask: "whatever codex made for the maison lauret part of the game."
