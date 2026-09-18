@@ -10,7 +10,7 @@ import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, 
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
-import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardBottomScrim, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { studentAvatarSrc } from "@/lib/avatar";
@@ -1070,7 +1070,7 @@ const PREP_CARD = "dm-tap group relative flex h-[240px] w-full cursor-pointer fl
 
 function PrepFoot({ label, title, why, cta, tone }: { label: string; title: string; why: string; cta: string; tone?: string }) {
   return (
-    <span className="relative z-[1] flex flex-col gap-[4px] px-[16px] pt-[56px] pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+    <span className="relative z-[2] flex flex-col gap-[4px] px-[16px] pt-[56px] pb-[14px]">
       <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: tone ?? accent }}>{label}</span>
       <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{title}</span>
       <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</span>
@@ -1082,8 +1082,13 @@ function PrepFoot({ label, title, why, cta, tone }: { label: string; title: stri
 function CareerPrepCard({ onClick }: { onClick: () => void }) {
   const c = D.PREP_CAREER;
   return (
-    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)" }}>
+    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", textShadow: CARD_TEXT_SHADOW }}>
       <Image src={c.photo} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" style={{ objectPosition: "50% 30%" }} />
+      {/* Same frosted-caption recipe as the resume card, not the flat
+         --poster-scrim (direct feedback, 19 Sept 2026: "they should also
+         use the blur effect"). */}
+      <CardProgressiveBlur size="46%" />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[46%]" aria-hidden style={{ background: cardBottomScrim() }} />
       <PrepFoot label={c.label} title={c.title} why={c.why} cta={c.cta} tone={WORLD_COLORS[c.world]} />
     </button>
   );
@@ -1092,8 +1097,10 @@ function CareerPrepCard({ onClick }: { onClick: () => void }) {
 function PlayPrepCard({ onClick }: { onClick: () => void }) {
   const p = D.PREP_PLAY;
   return (
-    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", textShadow: CARD_TEXT_SHADOW }}>
       <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+      <CardProgressiveBlur size="46%" />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[46%]" aria-hidden style={{ background: cardBottomScrim() }} />
       <span className="absolute top-[14px] right-[14px] z-[2] flex size-[38px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
         <Play className="ml-[2px] h-[16px] w-[16px]" fill="currentColor" aria-hidden />
       </span>
