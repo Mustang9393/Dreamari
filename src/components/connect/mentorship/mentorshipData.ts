@@ -9,13 +9,39 @@
 // of matching; Tapestry-wide goal of 500,000 volunteer hours by 2030 and a
 // Coach Foundation goal of 10,000 scholarships by 2030.
 
+// Coach's own language and assets (coach.com/content/coachfoundation and
+// coachfoundation-impact, the Foundation's press releases on 3BL / PR
+// Newswire, 18 Sept 2026): the initiative is Dream It Real, scholars are
+// "Dream It Real Scholars", each "matched with a Coach employee mentor
+// throughout their college journey". Cover: Coach Foundation press photo of
+// Dream It Real scholars at Tapestry HQ, Hudson Yards (3BL Media). Lockup:
+// the Foundation's white logo from cms.coach.com. Wordmark: Wikimedia
+// Commons "Coach New Logo.svg". Brand tan is Coach's signature saddle.
 export const PROGRAM = {
+  id: "coach",
   partner: "Coach Foundation",
-  title: "Dreamer Mentorship Program",
-  cohort: "2026–27 Cohort · October – April",
+  initiative: "Dream It Real",
+  title: "Dream It Real Mentorship",
+  mission: "To create opportunities and remove barriers for the next generation of young people who have the courage to dream it real.",
+  cohort: "2026-27 Cohort · October to April",
   counts: "450 Scholars · 450 Mentors",
-  safeguard: "Formal mentorship is private, matched, and safeguarded.",
+  safeguard: "Private, matched, and safeguarded.",
+  cover: "/images/connect/covers/coach-dream-it-real.jpg",
+  logoWhite: "/images/connect/partners/coach-foundation-white.png",
+  brand: "#D2B48C",
+  facts: ["8,000+ scholarships funded", "94% first-generation scholars", "88% less debt at graduation", "7 programs globally"],
 } as const;
+
+/** The tiled Mentorship landing: Coach's program is live for this student;
+ *  the other partners' real mentorship programs are listed as they would
+ *  appear once onboarded. Names are the programs these companies run. */
+export type ProgramTile = { id: string; company: string; title: string; line: string; cover: string; state: "yours" | "enrolling" | "soon"; meta: string };
+export const PROGRAM_TILES: ProgramTile[] = [
+  { id: "coach", company: "Coach", title: "Dream It Real Mentorship", line: "Coach Foundation · 1:1 with a Coach employee mentor for all four years of college", cover: "/images/connect/covers/coach-dream-it-real.jpg", state: "yours", meta: "450 scholars · 450 mentors · October to April" },
+  { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", line: "JPMorgan Chase · Mentoring and leadership for young men of color through high school", cover: "/images/connect/covers/do-event-jpmc.webp", state: "enrolling", meta: "Enrolling for January 2027" },
+  { id: "ey", company: "EY", title: "College MAP", line: "EY · Group mentoring for access and persistence, sophomore year through college", cover: "/images/connect/covers/do-event-ey.webp", state: "soon", meta: "Coming soon" },
+  { id: "att", company: "AT&T", title: "Aspire Mentoring Academy", line: "AT&T · Employee mentors for high school students, in person and online", cover: "/images/connect/covers/do-event-att.webp", state: "soon", meta: "Coming soon" },
+];
 
 export type MentorshipView = "student" | "mentor" | "enterprise";
 export const VIEWS: { key: MentorshipView; label: string }[] = [
@@ -29,13 +55,11 @@ export const MENTOR = {
   title: "Senior Manager, Merchandising",
   org: "Coach",
   photo: "/images/connect/avatars/pro-doyle-2.png",
-  years: "12 years at Coach",
 } as const;
 
 export const MENTEE = {
   name: "Maya",
   line: "College Freshman",
-  sub: "Formally matched mentee",
   exploring: ["Fashion Buyer", "Marketing", "Product Management"],
 } as const;
 
@@ -48,16 +72,18 @@ export const MEETING = {
   reschedule: ["Thu, Oct 30 · 5:00 PM", "Mon, Nov 3 · 4:00 PM", "Wed, Nov 5 · 6:30 PM"],
 } as const;
 
-export const PREP = [
-  { key: "explore", label: "EXPLORE", line: "Learn more about a career you want to discuss.", item: "Fashion Buyer", cta: "Explore Career", href: "/explore?tab=browse" },
-  { key: "play", label: "PLAY", line: "Experience the career before talking about it.", item: "Fashion / Marketing Day-in-the-Life", cta: "Play Simulation", href: "/play" },
-  { key: "resume", label: "RESUME", line: "Bring something your mentor can help improve.", item: "Resume Draft", cta: "View Resume", href: "/resume-builder?view=document" },
-] as const;
+/** The real cards for the prep row: the Fashion Buyer poster, the Play
+ *  card, the student's own resume. */
+export const PREP_CAREER = { title: "Fashion Buyer", world: "Business & Finance", photo: "/images/app/poster-fashion-buyer.webp", salary: "$78K median", href: "/career/fashion-buyer" } as const;
+export const PREP_PLAY = { title: "Fashion Buyer", world: "Business & Finance", cover: "/images/connect/covers/creative.webp", href: "/play" } as const;
+export const PREP_RESUME_HREF = "/resume-builder?view=document";
 
 export type Message = { from: "mentor" | "mentee"; text: string; when: string };
 export const THREAD: Message[] = [
   { from: "mentor", text: "Hi Maya, I’m looking forward to our conversation about exploring careers.", when: "Mon 9:14 AM" },
+  { from: "mentor", text: "I started as a buyer’s assistant before merchandising, so ask me anything about that path.", when: "Mon 9:15 AM" },
   { from: "mentee", text: "Thank you. I saved Fashion Buyer and would love to hear how you found your first experience.", when: "Mon 6:02 PM" },
+  { from: "mentee", text: "Also, does Tuesday at 4 still work for you?", when: "Mon 6:03 PM" },
 ];
 
 export const STUDENT_SUGGESTED = [
@@ -71,7 +97,15 @@ export const MENTOR_SUGGESTED = [
   "Is there anything you want to know about becoming a Fashion Buyer?",
 ] as const;
 
-export const MENTOR_TOOLS = ["Share approved resource", "Send meeting link", "Suggest meeting time"] as const;
+/** The composer's plus menu, like any messaging app: attachments and the
+ *  mentorship actions live off the canvas. */
+export const COMPOSER_ACTIONS = [
+  { key: "file", label: "Attach file", who: "both" },
+  { key: "photo", label: "Photo or video", who: "both" },
+  { key: "link", label: "Send meeting link", who: "mentor" },
+  { key: "time", label: "Suggest a meeting time", who: "both" },
+  { key: "resource", label: "Share approved resource", who: "mentor" },
+] as const;
 export const APPROVED_RESOURCES = [
   { title: "How a buyer plans a season", kind: "Article · Coach Learning", min: "6 min" },
   { title: "Retail math basics", kind: "Worksheet · Dreamari", min: "10 min" },

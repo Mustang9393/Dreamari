@@ -69,3 +69,16 @@ SETTINGS: "Program configuration". Mentorship Format 1:1 | Group. Matching Auto 
   by 2030, 10,000 scholarships by 2030, least debt at graduation).
 - Year Plan filler line repeats on five of seven months.
 - Placeholder initials instead of portraits; "Matched" chip repeated on every message header.
+
+## Coach brand sources used in our version (18 Sept 2026)
+- Program name and language: coach.com/content/coachfoundation ("Dream It Real", the mission line, "Dream It Real
+  Scholars", "matched with a Coach employee mentor throughout their college journey"), coachfoundation-impact
+  (8,000+ scholarships, 7 programs, 10,000 by 2030, partners SEO London / Katariba / China Youth Development Foundation),
+  PR Newswire 17 Jun 2025 ($20M, 94% first-generation, 88% less debt).
+- Cover photo: Coach Foundation press photo of Dream It Real scholars at Tapestry HQ (3BL Media, "Coach Foundation
+  Hosts Dream It Real Scholars From Pensole Lewis College"), saved as public/images/connect/covers/coach-dream-it-real.jpg.
+  Two more from the same set: coach-foundation-scholars.jpg, coach-foundation-impact.webp (coach.com impact page still).
+- Lockup: Coach Foundation white logo from cms.coach.com (public/images/connect/partners/coach-foundation-white.png).
+- Wordmark for chips: Wikimedia Commons "Coach New Logo.svg" (public domain as simple text; trademark Coach's),
+  public/images/logos/companies/coach.svg, registered in COMPANY_MARKS as "Coach".
+- Brand tan (#D2B48C) is used as the program accent, the way AT&T's blue is on its board.

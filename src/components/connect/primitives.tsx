@@ -496,6 +496,10 @@ export const COMPANY_MARKS: Record<string, MarkMeta> = {
   // "Chase" entirely — flagged 5 Sept 2026). Glyphs fill the full box, no
   // crop needed.
   "JPMorgan Chase": { file: "jpmorgan-chase", aspect: 7.05 },
+  // Coach wordmark (Wikimedia Commons "Coach New Logo.svg", public domain as
+  // simple text; trademark still Coach's). For the Coach Foundation's Dream
+  // It Real mentorship program in Connect (18 Sept 2026).
+  Coach: { file: "coach", aspect: 3.58 },
   // Mars wordmark (one colour as published); Kellogg's script (one colour);
   // WildBrain: grey letters and pupils go white, the W creature keeps its
   // blue and its eye whites (Wikimedia Commons files, 4 Sept 2026).
@@ -682,6 +686,7 @@ export function CompanyChip({ name, tone = "photo", size = "md" }: { name: strin
  *  reads on it (dark ink on the light brands: EY yellow, Amazon orange). */
 export const COMPANY_BRAND: Record<string, { bg: string; ink: string }> = {
   "JPMorgan Chase": { bg: "#5B3A29", ink: "#FFFFFF" },
+  Coach: { bg: "#1A1613", ink: "#FFFFFF" },
   Amazon: { bg: "#FF9900", ink: "#131921" },
   EY: { bg: "#FFE600", ink: "#2E2E38" },
   Google: { bg: "#4285F4", ink: "#FFFFFF" },

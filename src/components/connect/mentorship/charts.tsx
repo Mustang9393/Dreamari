@@ -163,7 +163,7 @@ export function GoalTrack({ logged, target, pace, accent, unit }: { logged: numb
         <span aria-hidden className="absolute top-[-4px] h-[16px] w-[2px] rounded-full" style={{ left: `calc(${pacePct}% - 1px)`, background: "#FFFFFF", opacity: 0.85 }} />
       </div>
       <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: MUTED }}>
-        {Math.round(pct)}% done · pace line {Math.round(pacePct)}%
+        {Math.round(pct)}% · pace {Math.round(pacePct)}%
       </span>
     </div>
   );
