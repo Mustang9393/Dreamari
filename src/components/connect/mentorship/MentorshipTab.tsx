@@ -1203,29 +1203,51 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
              a full-width row each, side by side only from lg up where each
              card has real room. */}
           <div className="grid gap-[var(--space-5)] lg:grid-cols-2">
-          {/* Corporate ID badge, take three (direct feedback, 19 Sept
-             2026): back to Next Meeting's literal two-row shape -- the
-             identity row with the CTA in the same place, a plain divider
-             (not a colored line), and the badge content -- Coach's mark and
-             where Avery is based -- in the row underneath, the same way
-             Next Meeting's own second row carries its meter. */}
-          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`}>
-            <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
-              <div className="flex items-center gap-[14px]">
-                <Avatar name={D.MENTOR.name} size={52} photo={D.MENTOR.photo} ring={accent} />
-                <div className="flex min-w-0 flex-col gap-[2px]">
-                  <Eyebrow>My mentor</Eyebrow>
-                  <span className="flex items-center gap-[6px] text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.MENTOR.name} <VerifiedBadge size={15} /></span>
-                  <Muted>{D.MENTOR.title}</Muted>
-                </div>
+          {/* Corporate ID badge, take four (direct feedback, 19 Sept
+             2026): Next Meeting's identity block sits ABOVE its CTA row,
+             not beside it -- Message Mentor now stacks under the name/title
+             the same way Join/Reschedule stack under "Tuesday 4:00 PM".
+             The divider bleeds edge to edge (a negative margin against
+             ClickPanel's own padding, same trick a card's printed rule
+             would use) so it no longer crowds the avatar right above it.
+             The badge content underneath -- Coach's mark and where Avery is
+             based -- gets the tinted band treatment as its own full-bleed
+             footer strip, rounded to match the card's own corners. */}
+          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="relative flex h-full flex-col overflow-hidden">
+            <div className="flex items-center gap-[14px]">
+              <Avatar name={D.MENTOR.name} size={52} photo={D.MENTOR.photo} ring={accent} />
+              <div className="flex min-w-0 flex-col gap-[2px]">
+                <Eyebrow>My mentor</Eyebrow>
+                <span className="flex items-center gap-[6px] text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.MENTOR.name} <VerifiedBadge size={15} /></span>
+                <Muted>{D.MENTOR.title}</Muted>
               </div>
-              {/* No View profile button -- the whole card already opens
-                 it (direct feedback, 19 Sept 2026). */}
-              <PrimaryCta size="sm" className={ABOVE} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-[10px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
-              <Muted className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {D.MENTOR.location}</Muted>
-              <Image src={D.PROGRAM.logoWhite} alt="Coach Foundation" width={600} height={150} className="h-[15px] w-auto opacity-90" />
+            {/* No View profile button -- the whole card already opens
+               it (direct feedback, 19 Sept 2026). Same left edge as the
+               date tile above it, exactly where Join sits under "Tuesday
+               4:00 PM" -- not indented to the text. */}
+            <div className={`${ABOVE} mt-[var(--space-3)]`}>
+              <PrimaryCta size="sm" onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
+            </div>
+            {/* Pinned to the card's true bottom edge with mt-auto, the same
+               place Next Meeting's own meter row lands once the grid
+               stretches this shorter card to match it (direct feedback, 19
+               Sept 2026: "the bottom banner should be aligned to the
+               bottom"). The divider bleeds edge to edge; the footer band
+               bleeds to all three remaining edges and picks up the card's
+               own bottom corners. */}
+            <div className="mt-auto pt-[var(--space-4)]">
+              {/* A colored accent, not the plain grey rule Next Meeting
+                 uses (direct feedback, 19 Sept 2026), touching the tinted
+                 band directly below it -- no gap between them. */}
+              <div className="-mx-[var(--space-5)] border-t-2" style={{ borderColor: `color-mix(in srgb, ${accent} 55%, transparent)` }} />
+              <div
+                className="relative z-[1] -mx-[var(--space-5)] -mb-[var(--space-5)] flex flex-wrap items-center justify-between gap-[10px] rounded-b-[var(--radius-lg)] px-[var(--space-5)] py-[10px]"
+                style={{ background: `linear-gradient(120deg, color-mix(in srgb, ${accent} 24%, var(--glass-surface-1)) 0%, color-mix(in srgb, ${accent} 8%, var(--glass-surface-1)) 100%)` }}
+              >
+                <Muted className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {D.MENTOR.location}</Muted>
+                <Image src={D.PROGRAM.logoWhite} alt="Coach Foundation" width={600} height={150} className="h-[15px] w-auto opacity-90" />
+              </div>
             </div>
           </ClickPanel>
 

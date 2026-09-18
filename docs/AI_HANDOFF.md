@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 My mentor ID badge, fourth pass: CTA under the text, bottom-pinned band, colored accent touching it (local, not pushed)
+
+- Message Mentor now sits directly under the name/title block, at the identity row's own left edge -- the same position Join occupies under "Tuesday · 4:00 PM" in Next Meeting, not beside the text (direct feedback, 19 Sept 2026, after two earlier misreads of that placement).
+- The badge footer (location + Coach mark) is pinned to the card's true bottom edge with `mt-auto` inside a `flex h-full flex-col` ClickPanel, so it lands where Next Meeting's own meter row sits once the grid stretches this shorter card to match -- not just placed under the content with a fixed gap.
+- The divider bleeds edge to edge (negative margin against the card's own padding) and is now a 2px accent-tinted line (`color-mix` with the Coach brand color), touching the tinted footer band directly beneath it with no gap -- not the plain grey rule Next Meeting uses.
+- Checked headless at 1280: divider spans the full card width, CTA left-aligned under the text at the same X as Join, band sits flush against the bottom border with no gap above it. tsc and eslint clean.
+
 ### 2026-09-19 My mentor ID badge, third pass: back to Next Meeting's plain two-row shape (local, not pushed)
 
 - Two earlier badge treatments (a top accent line + corner logo, then a full-bleed letterhead strip) both missed on composition, the logo reading too small/squished, and the CTA crowding it (direct feedback, 19 Sept 2026). Landed on the literal thing asked for: Next Meeting's own two-row shape, unchanged -- identity + CTA on row one, a plain `border-t` divider (not a colored line), then a second row underneath carrying the badge content instead of a meter: `MapPin` + `MENTOR.location` ("New York, NY", Coach/Tapestry's real HQ, the same building `PROGRAM.cover`'s photo was shot in) on the left, the Coach Foundation wordmark at a legible 15px on the right.
