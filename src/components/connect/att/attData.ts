@@ -444,25 +444,34 @@ export const HELP = {
   // Devices are gated the way Compudopt gates them: enrolled, no working
   // computer at home, household qualifies, one per household, random
   // draw before an event. The board joins the list; it never promises one.
+  // Plain questions only. Eligibility (Compudopt's enrolment and
+  // need checks, PCs for People's income rules) runs behind the scenes with
+  // the school; the student is never shown criteria (direct feedback, 18
+  // Sept 2026: "that seems negative, don't tell the students that").
   device: {
     kind: "Device",
     title: "Get a laptop or hotspot",
-    line: "Free. Join the list for the next distribution near you.",
-    via: "Through Compudopt and PCs for People. Limited supply, one per household, names drawn at random before each event.",
+    line: "Free. We check with your school, then ship it or hand it over at an event.",
+    via: "Through Compudopt and PCs for People, AT&T's device partners.",
     what: "What do you need?",
     options: ["Laptop", "Wi-Fi hotspot", "Both"],
-    check: "Confirm you qualify",
-    eligibility: ["I'm enrolled in school", "No working computer at home", "My household qualifies"],
-    note: "School-issued devices don't count. Qualifies means an income-based program or under 200% of the poverty line. Your center or counselor can verify.",
-    submit: "Join the list",
-    done: "You're on the list. Compudopt draws names three days before the next Detroit event and texts you.",
+    have: "Do you have a working computer at home?",
+    haveOptions: ["No", "Yes, but shared", "Yes"],
+    use: "You'll use it mostly for",
+    useOptions: ["School work", "Applications", "Both"],
+    get: "How would you like to get it?",
+    getOptions: ["Pick up at a Detroit event", "Ship to me"],
+    onFile: "Your school and grade are on file.",
+    submit: "Send request",
+    done: "Request received. We confirm with your school and Compudopt. You'll hear back within five days.",
+    status: "Under review · reply within five days",
   },
   tutor: {
     kind: "Tutoring",
     title: "Homework help now",
     line: "An AT&T volunteer, online, usually within ten minutes.",
-    via: "Free for grades 8 to 12 at Title I schools or in low-income ZIP codes. Online here, in a moderated chat with an AT&T volunteer.",
-    qualifies: "Your school is on file. You qualify.",
+    via: "Online here, in a moderated chat with an AT&T volunteer. Free for grades 8 to 12.",
+    qualifies: "Your school is on file.",
     what: "Subject",
     options: ["Algebra", "Geometry", "Biology", "Chemistry", "Essay", "College apps"],
     submit: "Find a tutor",
@@ -605,6 +614,15 @@ export const IMPACT = {
     { key: "units", month: "310", year: "1,240", label: "Achievery Units Completed" },
     { key: "steps", month: "196", year: "812", label: "Career Steps Completed" },
   ],
+  devices: {
+    eyebrow: "Devices",
+    requests: 71,
+    fulfilled: 48,
+    waiting: 23,
+    parts: [{ label: "Laptops", value: 31 }, { label: "Hotspots", value: 17 }],
+    line: "of {requests} requests fulfilled · {waiting} waiting",
+    next: "Next distribution · Oct 4 · Detroit",
+  },
   outcome: {
     eyebrow: "Outcome",
     value: "62%",

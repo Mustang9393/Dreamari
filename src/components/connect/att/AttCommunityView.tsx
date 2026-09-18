@@ -15,7 +15,7 @@ import Image from "next/image";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Bookmark, BookmarkCheck, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, Eye, GraduationCap, Lightbulb, MapPin, Megaphone,
+  Bookmark, BookmarkCheck, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, Eye, GraduationCap, Lightbulb, MapPin, Megaphone,
   ExternalLink, Laptop, LifeBuoy, MessageCircleQuestion, MessagesSquare, Sparkles, ThumbsUp, Timer, UserRound, Users, X, FileText, ListChecks,
 } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
@@ -578,24 +578,36 @@ function ContinueLearning({ progress, openModule }: LearnState) {
 
 /** Device and tutoring requests: the two things AT&T already provides at
  *  scale, from anywhere, one tap each. */
+/** One question, chips for answers. */
+function ChoiceQuestion({ label, options, value, onPick }: { label: string; options: readonly string[]; value?: string; onPick: (v: string) => void }) {
+  return (
+    <div className="flex flex-col gap-[8px]">
+      <Eyebrow tone="var(--muted-foreground)">{label}</Eyebrow>
+      <div className="flex flex-wrap gap-[6px]">
+        {options.map((o) => <QuietCta key={o} size="sm" done={value === o} onClick={() => onPick(o)}>{o}</QuietCta>)}
+      </div>
+    </div>
+  );
+}
+
 function HelpRow({ onToast }: { onToast: (t: string) => void }) {
   const [open, setOpen] = useState<"device" | "tutor">();
-  const [choice, setChoice] = useState<string>();
-  const [elig, setElig] = useState<Record<string, boolean>>({});
-  const close = () => { setOpen(undefined); setChoice(undefined); setElig({}); };
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [requested, setRequested] = useState(false);
+  const close = () => { setOpen(undefined); setAnswers({}); };
   const H = D.HELP;
+  const pick = (k: string, v: string) => setAnswers((a) => ({ ...a, [k]: v }));
+  const deviceReady = ["what", "have", "use", "get"].every((k) => answers[k]);
   const tiles = [
-    { key: "device" as const, Icon: Laptop, title: H.device.title, line: H.device.line },
-    { key: "tutor" as const, Icon: LifeBuoy, title: H.tutor.title, line: H.tutor.line },
+    { key: "device" as const, Icon: Laptop, title: H.device.title, line: requested ? H.device.status : H.device.line, done: requested },
+    { key: "tutor" as const, Icon: LifeBuoy, title: H.tutor.title, line: H.tutor.line, done: false },
   ];
-  const qualifies = H.device.eligibility.every((e) => elig[e]);
-  const canSubmit = !!choice && (open === "tutor" || qualifies);
   return (
     <>
       <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
         {tiles.map((t) => (
           <button key={t.key} type="button" onClick={() => setOpen(t.key)} className="dm-quiet group flex cursor-pointer items-center gap-[14px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={ITEM}>
-            <span className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><t.Icon className="h-5 w-5" aria-hidden /></span>
+            <span className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${t.done ? "var(--world-food-farming-nature)" : accent} 16%, transparent)`, color: t.done ? "var(--world-food-farming-nature)" : accent }}>{t.done ? <CheckCircle2 className="h-5 w-5" aria-hidden /> : <t.Icon className="h-5 w-5" aria-hidden />}</span>
             <span className="min-w-0 flex-1">
               <span className="block text-[15.5px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{t.title}</span>
               <Muted>{t.line}</Muted>
@@ -606,47 +618,33 @@ function HelpRow({ onToast }: { onToast: (t: string) => void }) {
       </div>
       {open === "device" && (
         <Sheet title={H.device.title} label={H.device.kind} onClose={close} titleId="att-help-title">
-          <Muted>{H.device.via}</Muted>
-          <div className="flex flex-col gap-[8px]">
-            <Eyebrow tone="var(--muted-foreground)">{H.device.what}</Eyebrow>
-            <div className="flex flex-wrap gap-[6px]">
-              {H.device.options.map((o) => <QuietCta key={o} size="sm" done={choice === o} onClick={() => setChoice(o)}>{o}</QuietCta>)}
-            </div>
-          </div>
-          <div className="flex flex-col gap-[8px]">
-            <Eyebrow tone="var(--muted-foreground)">{H.device.check}</Eyebrow>
-            <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-              {H.device.eligibility.map((e) => {
-                const on = !!elig[e];
-                return (
-                  <li key={e} style={{ borderColor: RULE }}>
-                    <button type="button" role="checkbox" aria-checked={on} onClick={() => setElig((m) => ({ ...m, [e]: !m[e] }))} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] py-[9px] text-left text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>
-                      <span className="flex size-[20px] flex-none items-center justify-center rounded-[6px] border" style={{ borderColor: on ? accent : "var(--glass-border)", background: on ? accent : "transparent", color: "#FFFFFF" }}>{on && <Check className="h-3.5 w-3.5" aria-hidden />}</span>
-                      {e}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            <Muted>{H.device.note}</Muted>
-          </div>
-          <div className="pt-[4px]">
-            <PrimaryCta size="sm" className={canSubmit ? "" : "pointer-events-none opacity-50"} onClick={() => { if (!canSubmit) return; onToast(H.device.done); close(); }}>{H.device.submit}</PrimaryCta>
-          </div>
+          {requested ? (
+            <>
+              <Submitted text={H.device.status} />
+              <Muted>{H.device.done}</Muted>
+            </>
+          ) : (
+            <>
+              <Muted>{H.device.via}</Muted>
+              <ChoiceQuestion label={H.device.what} options={H.device.options} value={answers.what} onPick={(v) => pick("what", v)} />
+              <ChoiceQuestion label={H.device.have} options={H.device.haveOptions} value={answers.have} onPick={(v) => pick("have", v)} />
+              <ChoiceQuestion label={H.device.use} options={H.device.useOptions} value={answers.use} onPick={(v) => pick("use", v)} />
+              <ChoiceQuestion label={H.device.get} options={H.device.getOptions} value={answers.get} onPick={(v) => pick("get", v)} />
+              <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}><CheckCircle2 className="h-4 w-4" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> {H.device.onFile}</span>
+              <div className="pt-[4px]">
+                <PrimaryCta size="sm" className={deviceReady ? "" : "pointer-events-none opacity-50"} onClick={() => { if (!deviceReady) return; setRequested(true); onToast(H.device.done); close(); }}>{H.device.submit}</PrimaryCta>
+              </div>
+            </>
+          )}
         </Sheet>
       )}
       {open === "tutor" && (
         <Sheet title={H.tutor.title} label={H.tutor.kind} onClose={close} titleId="att-help-title">
           <Muted>{H.tutor.via}</Muted>
           <span className="flex items-center gap-[6px] text-[13.5px] leading-[19px] font-bold" style={{ color: "var(--world-food-farming-nature)" }}><CheckCircle2 className="h-4 w-4" aria-hidden /> {H.tutor.qualifies}</span>
-          <div className="flex flex-col gap-[8px]">
-            <Eyebrow tone="var(--muted-foreground)">{H.tutor.what}</Eyebrow>
-            <div className="flex flex-wrap gap-[6px]">
-              {H.tutor.options.map((o) => <QuietCta key={o} size="sm" done={choice === o} onClick={() => setChoice(o)}>{o}</QuietCta>)}
-            </div>
-          </div>
+          <ChoiceQuestion label={H.tutor.what} options={H.tutor.options} value={answers.subject} onPick={(v) => pick("subject", v)} />
           <div className="pt-[4px]">
-            <PrimaryCta size="sm" className={canSubmit ? "" : "pointer-events-none opacity-50"} onClick={() => { if (!canSubmit) return; onToast(H.tutor.done); close(); }}>{H.tutor.submit}</PrimaryCta>
+            <PrimaryCta size="sm" className={answers.subject ? "" : "pointer-events-none opacity-50"} onClick={() => { if (!answers.subject) return; onToast(H.tutor.done); close(); }}>{H.tutor.submit}</PrimaryCta>
           </div>
         </Sheet>
       )}
@@ -856,7 +854,12 @@ function StudentOpportunities({ saves, toggleSave, openOpportunity }: { saves: R
   };
   return (
     <>
-      <div className="w-full sm:w-fit"><Segmented ariaLabel="Where" value={filter} onChange={setFilter} options={[...D.OPPORTUNITY_FILTERS]} grow /></div>
+      {/* a filter, drawn as light chips so it never reads as a second tab
+         bar under the board's tabs (direct feedback, 18 Sept 2026) */}
+      <div className="flex flex-wrap items-center gap-[10px]">
+        <Eyebrow tone="var(--muted-foreground)">Where</Eyebrow>
+        <PeriodChips options={[...D.OPPORTUNITY_FILTERS]} value={filter} onChange={setFilter} />
+      </div>
       {D.OPPORTUNITY_GROUPS.map((group) => {
         const items = group.items.filter((i) => keep(i.id));
         if (items.length === 0) return null;
@@ -1208,7 +1211,12 @@ function EnterpriseImpact() {
       </SectionSurface>
       {/* reach beyond the centers, and the hours goal: the two numbers a
          CSR lead is asked for first */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2 xl:grid-cols-4">
+        <Panel id="att-devices-title" title={I.devices.eyebrow}>
+          <ShareBar parts={I.devices.parts} accent={accent} />
+          <span className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}><strong className="font-extrabold tabular-nums">{I.devices.fulfilled}</strong> {I.devices.line.replace("{requests}", String(I.devices.requests)).replace("{waiting}", String(I.devices.waiting))}</span>
+          <Muted>{I.devices.next}</Muted>
+        </Panel>
         <Panel id="att-reach-title" title={I.reach.eyebrow}>
           <ShareBar parts={I.reach.parts} accent={accent} />
           <Muted>{I.reach.note}</Muted>
