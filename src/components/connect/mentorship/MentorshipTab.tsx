@@ -13,7 +13,7 @@ import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { DEFAULT_RESUME_TEMPLATE } from "@/components/resume/data";
 import { resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
-import { Avatar, CompanyMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { Avatar, CompanyMark, InsightMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
 import { ProProfileView, type Follows } from "../ProProfile";
 import type { Pro } from "../data";
 import type { ResumeData } from "@/lib/resume";
@@ -50,6 +50,26 @@ function Panel({ children, className = "" }: { children: ReactNode; className?: 
 function Item({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={`rounded-[var(--radius-md)] border p-[var(--space-4)] ${className}`} style={ITEM}>{children}</div>;
 }
+/** The one hover cue every clickable card in this tab shares: a chevron
+ *  that fades in and nudges right, the same as the AT&T board's cards. */
+function HoverChevron({ className = "top-1/2 right-[14px] -translate-y-1/2" }: { className?: string }) {
+  return <ChevronRight aria-hidden className={`pointer-events-none absolute z-20 h-[18px] w-[18px] opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100 ${className}`} style={{ color: "var(--muted-foreground)" }} />;
+}
+/** A panel that opens something: the whole surface is the button, any
+ *  control inside keeps working because it sits above the hit layer. */
+function ClickPanel({ children, onClick, label, className = "" }: { children: ReactNode; onClick: () => void; label: string; className?: string }) {
+  return (
+    <section className={`dm-tap group relative rounded-[var(--radius-lg)] border p-[var(--space-5)] ${className}`} style={PANEL}>
+      <button type="button" onClick={onClick} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">{label}</span></button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />
+      <HoverChevron />
+      {children}
+    </section>
+  );
+}
+/** Controls inside a ClickPanel sit above its hit layer. */
+const ABOVE = "relative z-20";
+
 function Chip({ children, tone = accent }: { children: ReactNode; tone?: string }) {
   return <span className="inline-flex items-center gap-[5px] rounded-full px-[8px] py-[1px] text-[11px] leading-[15px] font-bold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${tone} 16%, transparent)`, color: tone }}>{children}</span>;
 }
@@ -206,6 +226,7 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   // Tapping an avatar in the thread opens that person's profile; Back
   // returns to the same chat, so the program stays mounted underneath.
   const [profile, setProfile] = useState<"mentor" | "mentee" | null>(null);
+  const [mentorSheet, setMentorSheet] = useState<D.PairActivity | null>(null);
   const [follows, setFollows] = useState<Follows>({});
   return (
     <section className="flex flex-col gap-[var(--space-5)]" aria-label={D.PROGRAM.title}>
@@ -213,6 +234,7 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
          so Back lands on the same tab and the same thread */}
       {profile === "mentor" && <ProProfileView pro={D.MENTOR_PRO as unknown as Pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={() => setProfile(null)} backLabel="Back to chat" />}
       {profile === "mentee" && <MenteeProfile onBack={() => setProfile(null)} />}
+      {mentorSheet && <MentorSheet row={mentorSheet} onClose={() => setMentorSheet(null)} />}
       <div className={profile === "mentor" ? "hidden" : "flex flex-col gap-[var(--space-5)]"}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
@@ -242,7 +264,7 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
         {view === "student" && <StudentView onOpenProfile={() => setProfile("mentor")} />}
         {view === "mentor" && <MentorView onOpenProfile={() => setProfile("mentee")} />}
-        {view === "enterprise" && <EnterpriseView />}
+        {view === "enterprise" && <EnterpriseView onOpenMentor={(row) => (row.mentor === D.MENTOR.name ? setProfile("mentor") : setMentorSheet(row))} />}
       </SectionSurface>
       </div>
     </section>
@@ -283,10 +305,12 @@ function MenteeProfile({ onBack }: { onBack: () => void }) {
 function ScheduleCard({ onToast, showMeter }: { onToast: (t: string) => void; showMeter?: boolean }) {
   const [slot, setSlot] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [details, setDetails] = useState(false);
   const when = slot ?? `${D.MEETING.date.weekday} · ${D.MEETING.time}`;
+  const request = D.THREAD.find((m) => m.meeting)?.meeting;
   return (
-    <Panel>
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
+    <ClickPanel onClick={() => setDetails(true)} label="Meeting details">
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
         <div className="flex items-center gap-[14px]">
           <DateTile month={slot ? slot.split(" ")[1] : D.MEETING.date.month} day={slot ? Number(slot.split(" ")[2]) : D.MEETING.date.day} />
           <div className="flex min-w-0 flex-col gap-[2px]">
@@ -295,7 +319,7 @@ function ScheduleCard({ onToast, showMeter }: { onToast: (t: string) => void; sh
             <Muted className="flex items-center gap-[5px]"><Video className="h-3.5 w-3.5" aria-hidden /> {D.MEETING.where}</Muted>
           </div>
         </div>
-        <div className="flex items-center gap-[8px]">
+        <div className={`${ABOVE} flex items-center gap-[8px]`}>
           {/* The beam marks the one thing to do next, the way NextStepBanner does. */}
           <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.2} strength={0.7} active>
             <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="dm-solid relative flex min-h-[36px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
@@ -311,6 +335,25 @@ function ScheduleCard({ onToast, showMeter }: { onToast: (t: string) => void; sh
           <Meter value={D.MEETING.completed} max={D.MEETING.required} accent={GOOD} label="completed" />
         </div>
       )}
+      {details && (
+        <Sheet title={request?.title ?? "Next meeting"} label="Next meeting" onClose={() => setDetails(false)}>
+          {request && <Muted>{request.agenda}</Muted>}
+          <div className="flex flex-col gap-[2px] border-t pt-[var(--space-3)] text-[14px] leading-[20px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}>
+            <span className="flex items-center gap-[6px]"><Clock className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {D.MEETING.date.weekday}, {D.MEETING.date.month} {D.MEETING.date.day} · {D.MEETING.time}</span>
+            <span className="flex items-center gap-[6px]"><Video className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {D.MEETING.where}</span>
+            <span className="flex items-center gap-[6px]"><Handshake className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> Meeting {D.MEETING.completed + 1} of {D.MEETING.required} required this year</span>
+          </div>
+          <Item className="flex flex-col gap-[4px]">
+            <Eyebrow tone="var(--muted-foreground)">Bring</Eyebrow>
+            <span className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>Your Fashion Buyer resume draft and one question from the Day in the Life simulation.</span>
+          </Item>
+          <div className="flex flex-wrap gap-[8px]">
+            <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="dm-solid flex min-h-[36px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}><Video className="h-4 w-4" aria-hidden /> Join Meeting</a>
+            {request && <QuietCta size="sm" onClick={() => { downloadIcs(request); onToast("Added to your calendar."); }}><CalendarPlus className="h-4 w-4" aria-hidden /> Add to calendar</QuietCta>}
+            <QuietCta size="sm" onClick={() => { setDetails(false); setOpen(true); }}>Reschedule</QuietCta>
+          </div>
+        </Sheet>
+      )}
       {open && (
         <Sheet title="Pick a new time" label="Reschedule" onClose={() => setOpen(false)}>
           <Muted>Both calendars are free at these times.</Muted>
@@ -324,7 +367,30 @@ function ScheduleCard({ onToast, showMeter }: { onToast: (t: string) => void; sh
           </div>
         </Sheet>
       )}
-    </Panel>
+    </ClickPanel>
+  );
+}
+
+/** A mentor without a full Connect profile yet: the pair's activity and the
+ *  ways to reach them, in a sheet so the dashboard stays put behind it. */
+function MentorSheet({ row, onClose }: { row: D.PairActivity; onClose: () => void }) {
+  return (
+    <Sheet title={row.mentor} label="Coach employee mentor" onClose={onClose}>
+      <Muted>Matched with {row.mentee} · Last contact {row.lastContact}</Muted>
+      <div className="grid grid-cols-3 gap-[var(--space-3)]">
+        {([[row.messages, "Messages"], [row.meetings, "Meetings"], [`${row.hours}h`, "Hours"]] as [number | string, string][]).map(([v, l]) => (
+          <div key={l} className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border p-[12px]" style={ITEM}>
+            <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: l === "Hours" ? accent : "var(--foreground)" }}>{v}</span>
+            <Muted className="text-[12px] leading-[16px]">{l}</Muted>
+          </div>
+        ))}
+      </div>
+      {row.quiet && <Item className="flex items-start gap-[10px]"><AlertTriangle className="mt-[2px] h-4 w-4 flex-none" aria-hidden style={{ color: "var(--world-business-money-office)" }} /><span className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>No contact in 30 days. The program lead is nudged automatically; you can also message the mentor.</span></Item>}
+      <div className="flex gap-[8px]">
+        <PrimaryCta size="sm" onClick={onClose}><MessageCircle className="h-4 w-4" aria-hidden /> Message mentor</PrimaryCta>
+        <QuietCta size="sm" onClick={onClose}>View full profile</QuietCta>
+      </div>
+    </Sheet>
   );
 }
 
@@ -807,7 +873,7 @@ function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
       <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "messages", label: "Messages" }, { key: "plan", label: "Year Plan" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
-          <Panel className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
+          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
             <div className="flex items-center gap-[14px]">
               <Avatar name={D.MENTOR.name} size={56} photo={D.MENTOR.photo} />
               <div className="flex min-w-0 flex-col gap-[2px]">
@@ -816,8 +882,8 @@ function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
                 <Muted>{D.MENTOR.title} · {D.MENTOR.org}</Muted>
               </div>
             </div>
-            <PrimaryCta size="sm" onClick={() => setTab("messages")}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
-          </Panel>
+            <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={() => setTab("messages")}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
+          </ClickPanel>
 
           <ScheduleCard onToast={onToast} showMeter />
 
@@ -862,7 +928,7 @@ function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
       <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "messages", label: "Messages" }, { key: "journey", label: "Journey" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
-          <Panel className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
+          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTEE.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
             <div className="flex items-center gap-[14px]">
               <Avatar name={D.MENTEE.name} size={56} />
               <div className="flex min-w-0 flex-col gap-[2px]">
@@ -871,10 +937,10 @@ function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
                 <Muted>{D.MENTEE.line}</Muted>
               </div>
             </div>
-            <PrimaryCta size="sm" onClick={() => setTab("messages")}><MessageCircle className="h-4 w-4" aria-hidden /> Message</PrimaryCta>
-          </Panel>
+            <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={() => setTab("messages")}><MessageCircle className="h-4 w-4" aria-hidden /> Message</PrimaryCta>
+          </ClickPanel>
 
-          <Panel className="flex flex-col gap-[var(--space-3)]">
+          <ClickPanel onClick={() => setPrep(true)} label="Prepare for meeting" className="flex flex-col gap-[var(--space-3)]">
             <Eyebrow>Your next conversation</Eyebrow>
             <div className="flex flex-wrap items-center gap-[8px]">
               <Title>{D.NEXT_CONVERSATION.head}</Title>
@@ -884,8 +950,8 @@ function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
               <Sparkles className="mt-[2px] h-4 w-4 flex-none" aria-hidden style={{ color: accent }} />
               <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{D.NEXT_CONVERSATION.prompt}</span>
             </Item>
-            <QuietCta size="sm" className="w-fit" onClick={() => setPrep(true)}>{D.NEXT_CONVERSATION.cta} <ChevronRight className="h-4 w-4" aria-hidden /></QuietCta>
-          </Panel>
+            <QuietCta size="sm" className={`${ABOVE} w-fit`} onClick={() => setPrep(true)}>{D.NEXT_CONVERSATION.cta} <ChevronRight className="h-4 w-4" aria-hidden /></QuietCta>
+          </ClickPanel>
 
           <ScheduleCard onToast={onToast} showMeter />
           <OrientationRow onToast={onToast} />
@@ -920,8 +986,9 @@ function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
 
 const KPI_ICON = { hours: Timer, students: GraduationCap, mentors: Users, meetings: Handshake } as const;
 
-function EnterpriseView() {
+function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) => void }) {
   const [tab, setTab] = useState<"overview" | "countries" | "settings">("overview");
+  const [sheet, setSheet] = useState<{ kind: "kpi"; key: D.Kpi["key"] } | { kind: "goals" } | { kind: "impact"; key: string } | { kind: "pairs" } | { kind: "cohort"; start: number } | null>(null);
   const [period, setPeriod] = useState<"month" | "year">("year");
   const [grain, setGrain] = useState<"monthly" | "weekly">("monthly");
   const [program, setProgram] = useState<D.ProgramId>("all");
@@ -960,14 +1027,15 @@ function EnterpriseView() {
               const value = period === "year" ? k.year : k.month;
               const delta = period === "year" ? k.deltaYear : k.deltaMonth;
               return (
-                <div key={k.key} className={`flex flex-col gap-[10px] ${ruledCell(i, 4)}`} style={{ borderColor: RULE }}>
+                <button key={k.key} type="button" onClick={() => setSheet({ kind: "kpi", key: k.key })} className={`dm-quiet group relative flex cursor-pointer flex-col gap-[10px] text-left ${ruledCell(i, 4)}`} style={{ borderColor: RULE }}>
+                  <HoverChevron className="top-[14px] right-[12px]" />
                   <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><Icon className="h-3.5 w-3.5" aria-hidden style={{ color: accent }} /> {k.label}</span>
                   <span className="flex items-baseline gap-[8px]">
                     <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
                     <span className="text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: GOOD }}>+{delta}%</span>
                   </span>
                   <Sparkline values={k.spark} accent={accent} />
-                </div>
+                </button>
               );
             })}
           </Panel>
@@ -985,7 +1053,7 @@ function EnterpriseView() {
           </Panel>
 
           <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-            <Panel className="flex flex-col gap-[var(--space-4)]">
+            <ClickPanel onClick={() => setSheet({ kind: "goals" })} label="2030 goals, details" className="flex flex-col gap-[var(--space-4)]">
               <Title className="flex items-center gap-[8px]"><Target className="h-4 w-4" aria-hidden style={{ color: accent }} /> 2030 goals</Title>
               {D.GOALS.map((g) => (
                 <div key={g.key} className="flex flex-col gap-[8px] border-t pt-[var(--space-3)] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
@@ -996,19 +1064,19 @@ function EnterpriseView() {
                   <GoalTrack logged={g.logged} target={g.target} pace={g.pace} accent={accent} unit={g.unit} />
                 </div>
               ))}
-            </Panel>
+            </ClickPanel>
 
             <Panel className="flex flex-col gap-[var(--space-4)]">
               <Title>Student impact</Title>
               <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-4">
                 {D.IMPACT.map((m) => (
-                  <div key={m.key} className="flex flex-col items-center gap-[8px] text-center">
+                  <button key={m.key} type="button" onClick={() => setSheet({ kind: "impact", key: m.key })} className="dm-quiet group relative flex cursor-pointer flex-col items-center gap-[8px] rounded-[var(--radius-md)] p-[6px] text-center">
                     <Ring pct={m.pct} size={84} stroke={7} accent={accent}>
                       <span className="text-[18px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.pct}%</span>
                     </Ring>
                     <span className="text-[12.5px] leading-[16px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{m.label}</span>
                     <span className="text-[11.5px] leading-[14px] font-bold tabular-nums" style={{ color: GOOD }}>+{m.delta} pts</span>
-                  </div>
+                  </button>
                 ))}
               </div>
               {/* the outcome the partner actually reports on */}
@@ -1020,13 +1088,14 @@ function EnterpriseView() {
                   </div>
                 ))}
               </div>
-              <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
-                <span className="flex items-baseline justify-between gap-[10px]">
+              <button type="button" onClick={() => setSheet({ kind: "pairs" })} className="dm-quiet group relative flex cursor-pointer flex-col gap-[6px] border-t pt-[var(--space-3)] text-left" style={{ borderColor: RULE }}>
+                <HoverChevron className="top-[14px] right-0" />
+                <span className="flex items-baseline justify-between gap-[10px] pr-[24px]">
                   <span className="text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Meetings completed per pair</span>
                   <span className="text-[12.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong style={{ color: "var(--foreground)" }}>{Math.round((onTrackPairs / allPairs) * 100)}%</strong> met twice or more</span>
                 </span>
                 <Histogram values={D.MEETINGS_PER_PAIR.map((r) => r.pairs)} labels={D.MEETINGS_PER_PAIR.map((r) => r.label)} accent={accent} emphasisFrom={2} height={110} ariaLabel="Pairs by number of required meetings completed" />
-              </div>
+              </button>
             </Panel>
           </div>
 
@@ -1042,15 +1111,15 @@ function EnterpriseView() {
                   <span>Pair</span><span className="text-right">Messages</span><span className="text-right">Meetings</span><span className="text-right">Hours</span><span className="text-right">Last contact</span>
                 </div>
                 {D.PAIR_ACTIVITY.map((row) => (
-                  <div key={row.mentor} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[var(--space-3)] gap-y-[4px] py-[10px] sm:grid-cols-[minmax(0,1.6fr)_repeat(3,72px)_110px]" style={{ borderColor: RULE }}>
+                  <button key={row.mentor} type="button" onClick={() => onOpenMentor(row)} className="dm-quiet group relative -mx-[8px] grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[var(--space-3)] gap-y-[4px] rounded-[var(--radius-sm)] px-[8px] py-[10px] text-left sm:grid-cols-[minmax(0,1.6fr)_repeat(3,72px)_110px]" style={{ borderColor: RULE }}>
                     <span className="flex min-w-0 items-center gap-[10px]">
-                      <span className="flex min-w-0 flex-col"><span className="truncate text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{row.mentor}</span><span className="truncate text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>with {row.mentee}</span></span>
+                      <span className="flex min-w-0 flex-col"><span className="flex items-center gap-[4px] truncate text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{row.mentor} <ChevronRight className="h-3.5 w-3.5 flex-none opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100" aria-hidden style={{ color: "var(--muted-foreground)" }} /></span><span className="truncate text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>with {row.mentee}</span></span>
                     </span>
                     <span className="text-right text-[12.5px] leading-[17px] font-semibold tabular-nums sm:order-last" style={{ color: row.quiet ? "var(--world-business-money-office)" : "var(--muted-foreground)" }}>{row.quiet && <AlertTriangle className="mr-[4px] inline h-3.5 w-3.5" aria-hidden />}{row.lastContact}</span>
                     <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{row.messages}</span>
                     <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{row.meetings}</span>
                     <span className="hidden text-right text-[14px] font-extrabold tabular-nums sm:block" style={{ color: accent }}>{row.hours}h</span>
-                  </div>
+                  </button>
                 ))}
               </div>
               <div className="flex flex-col gap-[var(--space-4)] border-t pt-[var(--space-4)] lg:border-t-0 lg:border-l lg:pt-0 lg:pl-[var(--space-4)]" style={{ borderColor: RULE }}>
@@ -1058,10 +1127,15 @@ function EnterpriseView() {
                   <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Where mentors come from</span>
                   <ShareBar parts={D.MENTOR_MIX} accent={accent} />
                 </div>
-                <div className="flex flex-col gap-[4px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
-                  <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.MENTOR_PULSE.pct}%</span>
-                  <Muted>{D.MENTOR_PULSE.line}</Muted>
-                  <span className="text-[13px] leading-[19px] italic" style={{ color: "var(--foreground)" }}>&ldquo;{D.MENTOR_PULSE.quote}&rdquo;</span>
+                {/* the mentors' own words, set like an insight card: the big
+                   mark, the quote as the headline, the number as the line under it */}
+                <div className="relative flex flex-1 flex-col justify-end gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)] pt-[var(--space-6)]" style={ITEM}>
+                  <InsightMark color={accent} size={64} />
+                  <blockquote className="text-[20px] leading-[26px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.MENTOR_PULSE.quote}</blockquote>
+                  <span className="flex items-baseline gap-[6px] border-t pt-[10px]" style={{ borderColor: RULE }}>
+                    <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }}>{D.MENTOR_PULSE.pct}%</span>
+                    <Muted className="text-[12.5px] leading-[17px]">{D.MENTOR_PULSE.line}</Muted>
+                  </span>
                 </div>
               </div>
             </div>
@@ -1076,13 +1150,13 @@ function EnterpriseView() {
             <ShareBar parts={D.PROGRAMS.map((p) => ({ label: p.name, value: p.hours }))} accent={accent} />
             <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
               {D.PROGRAMS.map((p) => (
-                <div key={p.id} className="grid grid-cols-[1fr_auto] items-center gap-x-[var(--space-4)] gap-y-[8px] py-[12px] sm:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(72px,0.6fr))_120px_auto]" style={{ borderColor: RULE }}>
+                <div key={p.id} role="button" tabIndex={0} onClick={() => { setProgram(p.id); setTab("overview"); }} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setProgram(p.id); setTab("overview"); } }} className="dm-quiet group -mx-[8px] grid cursor-pointer grid-cols-[1fr_auto] items-center gap-x-[var(--space-4)] gap-y-[8px] rounded-[var(--radius-sm)] px-[8px] py-[12px] sm:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(72px,0.6fr))_120px_auto]" style={{ borderColor: RULE }}>
                   <div className="flex min-w-0 flex-col gap-[2px]">
                     <span className="text-[15.5px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{p.name}</span>
                     <Muted className="text-[12px] leading-[16px]">{p.window} · {p.cadence}</Muted>
                     <Muted className="text-[12px] leading-[16px]">Scholars via {p.via}</Muted>
                   </div>
-                  <button type="button" onClick={() => { setProgram(p.id); setTab("overview"); }} className="dm-link flex cursor-pointer items-center gap-[4px] text-[13px] font-bold sm:order-last" style={{ color: accent }}>View report <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
+                  <span className="flex items-center gap-[4px] text-[13px] font-bold sm:order-last" style={{ color: accent }}>View report <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
                   {([[p.students, "Students"], [p.mentors, p.mentorLabel], [p.hours, "Hours"]] as [number, string][]).map(([n, l]) => (
                     <span key={l} className="flex flex-col">
                       <span className="text-[17px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: l === "Hours" ? accent : "var(--foreground)" }}>{l === "Hours" ? compact(n) : n.toLocaleString("en-US")}</span>
@@ -1109,14 +1183,14 @@ function EnterpriseView() {
                 <span>Cohort</span><span className="text-right">Scholars</span><span className="text-right">Still enrolled</span><span className="text-right">Meetings / yr</span><span className="text-right">Explored 3+</span><span className="text-right">Resume</span>
               </div>
               {D.COHORTS.map((c) => (
-                <div key={c.start} className="grid grid-cols-2 items-center gap-x-[var(--space-3)] gap-y-[4px] py-[10px] sm:grid-cols-[minmax(0,1.2fr)_repeat(5,minmax(80px,0.7fr))]" style={{ borderColor: RULE }}>
-                  <span className="flex flex-col"><span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Class of {c.start + 4}</span><span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{c.year} · started {c.start}</span></span>
+                <button key={c.start} type="button" onClick={() => setSheet({ kind: "cohort", start: c.start })} className="dm-quiet group -mx-[8px] grid cursor-pointer grid-cols-2 items-center gap-x-[var(--space-3)] gap-y-[4px] rounded-[var(--radius-sm)] px-[8px] py-[10px] text-left sm:grid-cols-[minmax(0,1.2fr)_repeat(5,minmax(80px,0.7fr))]" style={{ borderColor: RULE }}>
+                  <span className="flex flex-col"><span className="flex items-center gap-[4px] text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Class of {c.start + 4} <ChevronRight className="h-3.5 w-3.5 opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100" aria-hidden style={{ color: "var(--muted-foreground)" }} /></span><span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{c.year} · started {c.start}</span></span>
                   <span className="text-right text-[14px] font-semibold tabular-nums" style={{ color: "var(--foreground)" }}>{c.scholars}</span>
                   <span className="text-right text-[14px] font-extrabold tabular-nums" style={{ color: c.enrolled / c.scholars >= 0.95 ? GOOD : "var(--foreground)" }}>{Math.round((c.enrolled / c.scholars) * 100)}%</span>
                   <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.meetingsAvg}</span>
                   <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.explored}%</span>
                   <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.resume}%</span>
-                </div>
+                </button>
               ))}
             </div>
           </Panel>
@@ -1125,6 +1199,71 @@ function EnterpriseView() {
 
       {tab === "settings" && <SettingsView onToast={onToast} />}
 
+      {sheet?.kind === "kpi" && (() => {
+        const k = D.KPIS.find((x) => x.key === sheet.key)!;
+        const per = D.PROGRAMS.map((p) => ({ label: p.name, value: sheet.key === "hours" ? p.hours : sheet.key === "students" ? p.students : sheet.key === "mentors" ? p.mentors : Math.round(p.hours * 0.18) }));
+        return (
+          <Sheet title={k.label} label="By program, this year" onClose={() => setSheet(null)}>
+            <span className="flex items-baseline gap-[8px]"><span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(k.year)}</span><span className="text-[13px] font-bold" style={{ color: GOOD }}>+{k.deltaYear}% vs last year</span></span>
+            <ShareBar parts={per} accent={accent} />
+            <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+              {per.map((r) => <div key={r.label} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>{r.label}</span><span className="font-bold tabular-nums">{r.value.toLocaleString("en-US")}</span></div>)}
+            </div>
+          </Sheet>
+        );
+      })()}
+      {sheet?.kind === "goals" && (
+        <Sheet title="2030 goals" label="How they are counted" onClose={() => setSheet(null)}>
+          {D.GOALS.map((g) => (
+            <div key={g.key} className="flex flex-col gap-[8px] border-t pt-[var(--space-3)] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
+              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{g.title} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {g.scope}</span></span>
+              <GoalTrack logged={g.logged} target={g.target} pace={g.pace} accent={accent} unit={g.unit} />
+              <Muted className="text-[12.5px] leading-[17px]">{g.key === "hours" ? "Hours counted through Dreamari under the program's hour rules. Pace is a straight line from program start to December 2030." : "Scholarships funded across all seven Dream It Real programs. Pace is a straight line from 2018 to 2030."}</Muted>
+            </div>
+          ))}
+          <QuietCta size="sm" className="w-fit" onClick={() => { setSheet(null); setTab("settings"); }}>Hour rules <ChevronRight className="h-4 w-4" aria-hidden /></QuietCta>
+        </Sheet>
+      )}
+      {sheet?.kind === "impact" && (() => {
+        const m = D.IMPACT.find((x) => x.key === sheet.key)!;
+        const col = sheet.key === "resume" ? "resume" : "explored";
+        return (
+          <Sheet title={m.label} label="Student impact" onClose={() => setSheet(null)}>
+            <span className="flex items-baseline gap-[8px]"><span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.pct}%</span><span className="text-[13px] font-bold" style={{ color: GOOD }}>+{m.delta} pts vs last year</span></span>
+            <Muted>{sheet.key === "graduate" ? "Coach Foundation's published Dream It Real outcome, all US cohorts." : "Share of US scholars, by cohort."}</Muted>
+            {sheet.key !== "graduate" && sheet.key !== "simulation" && (
+              <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+                {D.COHORTS.map((c) => <div key={c.start} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>Class of {c.start + 4} · {c.year}</span><span className="font-bold tabular-nums">{c[col]}%</span></div>)}
+              </div>
+            )}
+          </Sheet>
+        );
+      })()}
+      {sheet?.kind === "pairs" && (
+        <Sheet title="Meetings completed per pair" label="450 US pairs" onClose={() => setSheet(null)}>
+          <Muted>Three to four meetings are required each year. Two by now counts as on track.</Muted>
+          <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+            {D.MEETINGS_PER_PAIR.map((r, i) => <div key={r.label} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>{r.label} {r.label === "1" ? "meeting" : "meetings"}{i < 2 ? " · needs a nudge" : ""}</span><span className="font-bold tabular-nums">{r.pairs} pairs</span></div>)}
+          </div>
+        </Sheet>
+      )}
+      {sheet?.kind === "cohort" && (() => {
+        const c = D.COHORTS.find((x) => x.start === sheet.start)!;
+        return (
+          <Sheet title={`Class of ${c.start + 4}`} label={`${c.year} · started ${c.start}`} onClose={() => setSheet(null)}>
+            <div className="grid grid-cols-3 gap-[var(--space-3)]">
+              {([[c.scholars, "Scholars"], [`${Math.round((c.enrolled / c.scholars) * 100)}%`, "Still enrolled"], [c.meetingsAvg, "Meetings a year"]] as [number | string, string][]).map(([v, l]) => (
+                <div key={l} className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border p-[12px]" style={ITEM}><span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{v}</span><Muted className="text-[12px] leading-[16px]">{l}</Muted></div>
+              ))}
+            </div>
+            <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+              <div className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>Explored 3+ careers</span><span className="font-bold tabular-nums">{c.explored}%</span></div>
+              <div className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>Built or updated a resume</span><span className="font-bold tabular-nums">{c.resume}%</span></div>
+              <div className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>Left the program</span><span className="font-bold tabular-nums">{c.scholars - c.enrolled}</span></div>
+            </div>
+          </Sheet>
+        );
+      })()}
       {exporting && (
         <Sheet title="Export report" label={selected ? selected.name : "All programs"} onClose={() => setExporting(false)}>
           <Muted>Figures for {period === "month" ? "this month" : "this year"}. Message content is never included.</Muted>

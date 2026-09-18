@@ -10286,3 +10286,20 @@ video calls and message counting are backend.
 - Share from Dreamari: the school shortlist card carries estimated debt at
   graduation per school.
 - Tiles: one status per card; JPMC and EY lines shortened.
+
+## 2026-09-18 · Mentorship, round five (everything clickable, one hover cue)
+
+Universal rule (direct feedback): every card opens something, every
+person's avatar or name opens their profile, Back returns to the exact
+spot, one shared hover affordance. In the Mentorship tab: `ClickPanel` +
+`HoverChevron` (mentor / mentee cards open profiles; the next-meeting card
+opens a details sheet with agenda, join, add to calendar, reschedule; the
+next-conversation card opens the prep sheet; KPI tiles open a by-program
+sheet; 2030 goals, impact rings, meetings-per-pair, cohort rows and program
+rows open sheets or filter). Mentor activity rows open Avery's full profile
+or a `MentorSheet` for mentors without one. The profile is a layer, so the
+program stays mounted underneath. Mentor pulse quote set like an insight
+card (`InsightMark`). Connect's demo role switcher is hidden on the
+Mentorship tab (it has its own Demo chip), as on the AT&T board.
+Open: the same clickable-card audit across Home, Explore, Play, Profile and
+the other Connect surfaces (memory: feedback-clickable-cards-profiles).

@@ -1426,7 +1426,7 @@ export function ConnectExperience() {
            feedback, 18 Sept 2026: "the top demo thing isn't relevant in
            this board"). Back to communities returns to a screen where
            the role switcher is present again. */}
-        {(view.kind === "home" || role !== "student") && !(view.kind === "board" && view.id === ATT_ID) && (
+        {(view.kind === "home" || role !== "student") && !(view.kind === "board" && view.id === ATT_ID) && !(view.kind === "home" && view.tab === "mentorship") && (
           <div className="-mb-[var(--space-3)] flex flex-wrap items-center justify-end gap-[var(--space-3)]">
             <RoleTabs
               key={role}
