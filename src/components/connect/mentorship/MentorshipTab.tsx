@@ -1006,26 +1006,31 @@ function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) 
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Enterprise sections" value={tab} onChange={setTab} options={[{ key: "overview", label: "Overview" }, { key: "countries", label: "Programs" }, { key: "settings", label: "Settings" }]} /></div>
+      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Enterprise sections" value={tab} onChange={setTab} options={[{ key: "overview", label: "Overview" }, { key: "countries", label: "Regions" }, { key: "settings", label: "Settings" }]} /></div>
 
       {tab === "overview" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <div className="flex flex-wrap items-center gap-[10px]">
-              <SectionHead>{selected ? selected.name : "Global impact"}</SectionHead>
-              {selected && <button type="button" onClick={() => setProgram("all")} className="dm-link cursor-pointer text-[12.5px] font-bold" style={{ color: accent }}>All programs</button>}
-            </div>
+            <SectionHead>{selected ? selected.name : "Global impact"}</SectionHead>
             <div className="flex flex-wrap items-center gap-[8px]">
               <Segmented ariaLabel="Period" value={period} onChange={setPeriod} options={[{ key: "month", label: "This Month" }, { key: "year", label: "This Year" }]} />
               <QuietCta size="sm" onClick={() => setExporting(true)}><Download className="h-4 w-4" aria-hidden /> Export</QuietCta>
             </div>
           </div>
+          {/* the region, one tap: every number below follows it */}
+          <div className="w-full sm:w-fit">
+            <Segmented grow ariaLabel="Region" value={program} onChange={setProgram} options={[{ key: "all" as D.ProgramId, label: "All regions" }, ...D.PROGRAMS.map((p) => ({ key: p.id as D.ProgramId, label: p.name }))]} />
+          </div>
 
           <Panel className="grid grid-cols-2 !p-0 sm:grid-cols-4">
             {D.KPIS.map((k, i) => {
               const Icon = KPI_ICON[k.key];
-              const value = period === "year" ? k.year : k.month;
+              // a region's share of the global figure, with its own hours curve
+              const regionValue = selected ? (k.key === "hours" ? selected.hours : k.key === "students" ? selected.students : k.key === "mentors" ? selected.mentors : Math.round(selected.hours * 0.18)) : null;
+              const ratio = regionValue !== null ? regionValue / k.year : 1;
+              const value = regionValue !== null ? (period === "year" ? regionValue : Math.round(k.month * ratio)) : period === "year" ? k.year : k.month;
               const delta = period === "year" ? k.deltaYear : k.deltaMonth;
+              const spark = selected && k.key === "hours" ? selected.monthly : k.spark.map((v) => Math.round(v * ratio));
               return (
                 <button key={k.key} type="button" onClick={() => setSheet({ kind: "kpi", key: k.key })} className={`dm-quiet group relative flex cursor-pointer flex-col gap-[10px] text-left ${ruledCell(i, 4)}`} style={{ borderColor: RULE }}>
                   <HoverChevron className="top-[14px] right-[12px]" />
@@ -1034,7 +1039,7 @@ function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) 
                     <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
                     <span className="text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: GOOD }}>+{delta}%</span>
                   </span>
-                  <Sparkline values={k.spark} accent={accent} />
+                  <Sparkline values={spark} accent={accent} />
                 </button>
               );
             })}
@@ -1067,7 +1072,7 @@ function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) 
             </ClickPanel>
 
             <Panel className="flex flex-col gap-[var(--space-4)]">
-              <Title>Student impact</Title>
+              <Title>Student impact <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected && selected.id !== "us" ? "· United States scholars" : ""}</span></Title>
               <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-4">
                 {D.IMPACT.map((m) => (
                   <button key={m.key} type="button" onClick={() => setSheet({ kind: "impact", key: m.key })} className="dm-quiet group relative flex cursor-pointer flex-col items-center gap-[8px] rounded-[var(--radius-md)] p-[6px] text-center">
@@ -1102,7 +1107,7 @@ function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) 
           {/* activity without reading a word: what counts, who has gone quiet */}
           <Panel className="flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-              <Title>Mentor activity</Title>
+              <Title>Mentor activity <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected && selected.id !== "us" ? "· United States pairs" : ""}</span></Title>
               <Muted className="text-[12px] leading-[16px]">Messages and meetings become hours under the hour rules. Content is never read.</Muted>
             </div>
             <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -1145,7 +1150,7 @@ function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) 
 
       {tab === "countries" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          <SectionHead>Programs</SectionHead>
+          <SectionHead>Regions</SectionHead>
           <Panel className="flex flex-col gap-[var(--space-4)]">
             <ShareBar parts={D.PROGRAMS.map((p) => ({ label: p.name, value: p.hours }))} accent={accent} />
             <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
@@ -1204,7 +1209,7 @@ function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) 
         const per = D.PROGRAMS.map((p) => ({ label: p.name, value: sheet.key === "hours" ? p.hours : sheet.key === "students" ? p.students : sheet.key === "mentors" ? p.mentors : Math.round(p.hours * 0.18) }));
         return (
           <Sheet title={k.label} label="By program, this year" onClose={() => setSheet(null)}>
-            <span className="flex items-baseline gap-[8px]"><span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(k.year)}</span><span className="text-[13px] font-bold" style={{ color: GOOD }}>+{k.deltaYear}% vs last year</span></span>
+            <span className="flex items-baseline gap-[8px]"><span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(k.year)}</span><span className="text-[13px] font-bold" style={{ color: GOOD }}>+{k.deltaYear}% vs last year</span><span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· all regions</span></span>
             <ShareBar parts={per} accent={accent} />
             <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
               {per.map((r) => <div key={r.label} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>{r.label}</span><span className="font-bold tabular-nums">{r.value.toLocaleString("en-US")}</span></div>)}
