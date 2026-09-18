@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Prep row: Explore/Play captions genuinely legible now
+
+- The size/maxBlur match to the resume card wasn't enough on its own -- blur softens detail but doesn't darken a bright patch of photo, so EXPLORE/PLAY still read poorly over light parts of their images (direct feedback: "I can barely read explore and play"). Switched their scrim from `cardBottomScrim()` (regular, base 0.55) to `cardBottomScrim("heavy")` (base 0.82) and pushed the zone/strength further: `size="58%" maxBlur={34}`.
+- Checked headless and by eye at 1280 (desktop), 768 (tablet) and 390 (phone): both labels read clearly at every width now, confirmed via screenshots at each size per direct request ("check visually on all device sizes too").
+
 ### 2026-09-19 Prep row: blur zone and strength now exactly match the resume card
 
 - `CareerPrepCard`/`PlayPrepCard` moved from `size="46%" maxBlur={22}` to `size="50%" maxBlur={26}`, identical to the resume card, so the EXPLORE/PLAY eyebrow labels sit comfortably inside the frosted zone instead of near its edge (direct feedback: "it should fit the eyebrow comfortably, just like the resume card"). Checked headless at 1280.
