@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Play tile: real Maison Laurent scene art instead of a generic lounge photo
+
+- `PREP_PLAY.cover` (mentorshipData.ts) changed from the placeholder `cafe-lounge-sunset.webp` to `/images/play/ib/l2-10.webp` -- IB Level 2's "Deal Team Kickoff" beat (Christina and Marcus, "Client: Leading Luxury Brand", the Maison Laurent pitch's opening scene). Direct ask: "whatever codex made for the maison lauret part of the game."
+- Picked from the four Maison-Laurent-story beats that were actually cleaned of a real Louis Vuitton trademark baked into the original handoff art (l2-10, l2-19, l3-19, l3-20 -- see 6089e617). L2-09, the more literal "Your First Big Deal" title card, was deliberately excluded: its own code comment still flags it "TEMPORARY PLACEHOLDER... live on the pre-launch internal deployment ONLY... swap for the corrected Maison Laurent art before any public release" -- it still has the real branding baked in.
+- `PlayPrepCard`'s `Image` gets `objectPosition: "64% 38%"` -- the source is a wide 16:9 render, cropped into a much taller card; centered crop cut into Marcus, so the position now favors the two standing figures over the window/skyline on the left.
+- Checked headless at 1280: both characters in frame, the "DEAL TEAM KICKOFF" slide legible at the edge, caption still reads clean over the frosted zone. tsc and eslint clean.
+
 ### 2026-09-19 Corner bleed fixed at the root, resume label color matched, Messages tab shows notifications + the conversation, tablet stacking restored
 
 - **Corner bleed, real root-cause fix**: `CardProgressiveBlur` (cardChrome.tsx, shared by many pages) only put `border-radius: inherit` on its own OUTER wrapper span, not on each individual `backdrop-filter` blur-stop span inside it. Chromium can promote a backdrop-filter element to its own compositing layer and clip it before the ancestor's radius is baked in, leaving a hairline sliver of the unblurred edge visible right along the curve -- confirmed by comparison against `PosterCard` (same border/rounding, no backdrop-filter, no artifact). Each blur-stop span now carries `border-radius: inherit` itself. This fixes it everywhere the shared component is used, not just the three prep cards. A separate, unrelated attempt (wrapping the blur in an extra clipping span) broke the blur outright and was reverted before this fix.
