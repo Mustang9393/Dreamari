@@ -1702,14 +1702,10 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
   const storedStage = useStage();
   const [stage, setStageLocal] = useState<PlanStage>(storedStage);
   const setStage = (next: PlanStage) => { setStageLocal(next); writeStage(next); };
-  // Progressive disclosure (Joshua Pierce, Slack, 18 Sept 2026: "have the
-  // HS and College toggle and then once you press either 9 10 11 and 12
-  // comes up"). The level row only appears after a stage is pressed and
-  // folds away once a level is chosen; the subtitle names the level.
-  const [pickingLevel, setPickingLevel] = useState(false);
   // The stage and level controls are demo tools: a real student's grade is
-  // known. They sit behind the same small Demo chip Connect uses, so they
-  // are never mistaken for part of the product (direct feedback, 18 Sept 2026).
+  // known. They live in a small Demo row above the card, the same chip
+  // Connect uses, so the card itself never carries toggles (direct
+  // feedback, 18 and 19 Sept 2026: "we never have the big toggle stuff").
   const [demoOpen, setDemoOpen] = useState(false);
   const [grade, setGrade] = useState<9 | 10 | 11 | 12>(defaultGrade);
   const [year, setYear] = useState<CollegeYear>(1);
@@ -1730,8 +1726,41 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
       return next;
     });
 
+  const chip = (on: boolean, onClick: () => void, label: string, key: string, group: string) => (
+    <button key={key} type="button" role="tab" aria-selected={on} onClick={onClick} className="dm-quiet relative flex h-[24px] min-w-[24px] cursor-pointer items-center justify-center rounded-[6px] px-[8px] text-[12px] leading-[16px] font-semibold whitespace-nowrap" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+      {on && <motion.span layoutId={`grade-plan-demo-${group}`} aria-hidden className="absolute inset-0 rounded-[6px]" style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }} transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
+      <span className="relative">{label}</span>
+    </button>
+  );
   return (
-    <div className="flex flex-col gap-[var(--space-5)]">
+    <div className="flex flex-col gap-[var(--space-3)]">
+      {/* Demo row: sits above the card, right-aligned and quiet, so the plan
+         itself reads as the product. One press shows two small chip groups,
+         stage then level, and a second press hides them again. */}
+      <div className="-mb-[2px] flex min-h-[24px] flex-wrap items-center justify-end gap-[8px]">
+        {demoOpen && (
+          <>
+            <div id="grade-plan-demo" role="tablist" aria-label="High school or college" className="flex items-center gap-[2px] rounded-[8px] border p-[2px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              {([["hs", "High school"], ["college", "College"]] as const).map(([key, label]) => chip(key === stage, () => setStage(key), label, key, "stage"))}
+            </div>
+            <div role="tablist" aria-label={stage === "hs" ? "Grade" : "Year"} className="flex items-center gap-[2px] rounded-[8px] border p-[2px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              {stage === "hs"
+                ? ([9, 10, 11, 12] as const).map((g) => chip(g === grade, () => setGrade(g), String(g), `g${g}`, "level"))
+                : ([1, 2, 3, 4] as const).map((y) => chip(y === year, () => setYear(y), `Yr ${y}`, `y${y}`, "level"))}
+            </div>
+          </>
+        )}
+        <button
+          type="button"
+          aria-expanded={demoOpen}
+          aria-controls="grade-plan-demo"
+          onClick={() => setDemoOpen((v) => !v)}
+          className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+          style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+        >
+          Demo
+        </button>
+      </div>
       <section className="dm-glass-2 flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] backdrop-blur-[24px] backdrop-saturate-[1.65] sm:p-[var(--space-6)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
         <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
           <div className="flex min-w-0 flex-col gap-[2px]">
@@ -1742,84 +1771,6 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
               {focus && <button type="button" onClick={onGoRoutes} className="dm-link flex-none cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Change route</button>}
             </span>
             <span key={`${stage}-${grade}-${year}`} className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{levelLabel} · {plan.title}</span>
-          </div>
-          {/* Wraps onto two rows on a phone (both pills together are wider
-             than 375px); from sm the pair sits right of the title. */}
-          <div className="flex w-full min-w-0 flex-wrap items-center gap-[var(--space-2)] sm:w-auto sm:flex-none sm:justify-end">
-            <button
-              type="button"
-              aria-expanded={demoOpen}
-              aria-controls="grade-plan-demo"
-              onClick={() => { setDemoOpen((v) => !v); setPickingLevel(false); }}
-              className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
-              style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-            >
-              Demo
-            </button>
-            {demoOpen && (
-            <div id="grade-plan-demo" className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
-            {/* Stage first, then the level within it: 9 to 12, or Yr 1 to 4. */}
-            <div role="tablist" aria-label="High school or college" className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-              {([["hs", "High School"], ["college", "College"]] as const).map(([key, label]) => {
-                const active = key === stage;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => { setStage(key); setPickingLevel(true); }}
-                    aria-expanded={pickingLevel && active}
-                    className="dm-quiet relative flex h-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[12px] text-[13.5px] font-bold whitespace-nowrap"
-                    style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="grade-plan-stage-pill"
-                        aria-hidden
-                        className="absolute inset-0 rounded-[var(--radius-sm)]"
-                        style={{ background: "var(--glass-surface-2)", boxShadow: "inset 0 0 0 1px var(--glass-border)" }}
-                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                      />
-                    )}
-                    <span className="relative">{label}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <AnimatePresence initial={false}>
-              {pickingLevel && (
-            <motion.div key={stage} role="tablist" aria-label={stage === "hs" ? "Choose grade" : "Choose year"} initial={{ opacity: 0, x: -8, scale: 0.96 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, x: -8, scale: 0.96 }} transition={{ duration: 0.18, ease: "easeOut" }} className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-              {(stage === "hs" ? ([9, 10, 11, 12] as const) : ([1, 2, 3, 4] as const)).map((level) => {
-                const active = stage === "hs" ? level === grade : level === year;
-                return (
-                  <button
-                    key={`${stage}-${level}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => { if (stage === "hs") setGrade(level as 9 | 10 | 11 | 12); else setYear(level as CollegeYear); setPickingLevel(false); }}
-                    className="dm-quiet relative flex h-[34px] min-w-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[8px] text-[14px] font-bold whitespace-nowrap"
-                    style={{ color: active ? "var(--primary-foreground)" : "var(--foreground)" }}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="grade-plan-pill"
-                        aria-hidden
-                        className="absolute inset-0 rounded-[var(--radius-sm)]"
-                        style={{ background: "var(--primary)" }}
-                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                      />
-                    )}
-                    <span className="relative">{stage === "hs" ? level : `Yr ${level}`}</span>
-                  </button>
-                );
-              })}
-            </motion.div>
-              )}
-            </AnimatePresence>
-            </div>
-            )}
           </div>
         </div>
         <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>

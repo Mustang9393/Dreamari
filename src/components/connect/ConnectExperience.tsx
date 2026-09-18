@@ -17,7 +17,7 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/component
 import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
-import { PeopleTab, PeopleWelcome } from "./PeopleTab";
+import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
 import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
@@ -2554,7 +2554,18 @@ function BoardView({
   const [firm, setFirm] = useState<string>("All");
   const shownUpdates = firm === "All" ? updates : updates.filter((o) => o.org === firm);
   const about = filter === "about";
-  const tab = filter === "about" ? "about" : filter === "insights" ? "insights" : filter === "updates" ? "updates" : "questions";
+  const tab = filter === "about" ? "about" : filter === "pros" ? "pros" : filter === "insights" ? "insights" : filter === "updates" ? "updates" : "questions";
+  // Who answers here: every verified pro in this board's world, with the
+  // ones who have already answered or posted on this board first, then by
+  // how recently they were active. Same card as Connect > People, so a
+  // student meets the same face in both places (direct ask, 19 Sept 2026).
+  const boardPros = useMemo(() => {
+    const active = new Set<string>();
+    for (const t of THREADS) if (t.boardId === community.id) for (const r of t.responses) if (r.kind === "answer") active.add(r.proId);
+    for (const i of INSIGHTS) if (i.boardId === community.id) active.add(i.proId);
+    const inWorld = PROS.filter((p) => p.world === community.world || active.has(p.id));
+    return inWorld.sort((a, b) => Number(active.has(b.id)) - Number(active.has(a.id)) || a.activeDaysAgo - b.activeDaysAgo);
+  }, [community.id, community.world]);
   const bannerCover = PHOTO_COVER[community.id];
   const bannerInk = "#f6f5fb";
   const nav = useContext(ConnectNav);
@@ -2622,7 +2633,18 @@ function BoardView({
          two-level hierarchy (section, then item) reads the same way it now
          does on Connect > People. */}
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
-      <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Insights" }, { key: "updates", label: "Updates" }, { key: "about", label: "About" }]} />
+      <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Insights" }, { key: "updates", label: "Updates" }, { key: "pros", label: "Pros" }, { key: "about", label: "About" }]} />
+
+      {tab === "pros" && (
+        <div className="flex flex-col gap-[var(--space-4)]">
+          <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
+            <strong className="font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{boardPros.length}</strong> verified {boardPros.length === 1 ? "professional answers" : "professionals answer"} here. Follow one and their answers reach you first.
+          </p>
+          <ul className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
+            {boardPros.map((pro) => <PersonCard key={pro.id} pro={pro} following={!!nav?.isFollowing(pro.id)} onFollow={() => nav?.toggleFollow(pro.id)} />)}
+          </ul>
+        </div>
+      )}
 
       {about && (
         <Panel id="about-community-title" title="About this community">

@@ -224,7 +224,7 @@ function WorldTile({ world, count, unit, onOpen, tintStrength = 14 }: { world: s
 
 /** One professional: portrait, name with the verified mark, role, company,
  *  View profile and Follow, the two public numbers. */
-function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pro; following: boolean; onFollow: () => void; badge?: string; quote?: string }) {
+export function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pro; following: boolean; onFollow: () => void; badge?: string; quote?: string }) {
   const nav = useContext(ConnectNav);
   // Whole card opens the profile now, not just the avatar/name/"View
   // profile" text (direct feedback, 9 Sept 2026) -- see FollowCard above

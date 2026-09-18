@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Profile Demo row above My Plan; Pros tab on community boards (PUSHED, user-authorized)
+
+- `ProfileExperience.tsx` GradePlanCard: the Demo chip moved out of the card header into a quiet right-aligned row above the card. One press shows two small chip groups (High school | College, then 9 to 12 or Yr 1 to 4), a second press hides them. Progressive disclosure and the 34px tablists are gone; the card never carries toggles (direct feedback, 19 Sept 2026: "we never have the big toggle stuff"). Stage still writes the app-wide store.
+- `ConnectExperience.tsx` BoardView: a Pros tab between Updates and About. It lists every verified pro in the board's world plus anyone who answered or posted on that board, board-active first then most recently active, using the Connect > People card (`PersonCard` now exported from `PeopleTab.tsx`). Follow uses ConnectNav; a card opens the profile and Back reads "Back to <board>". About keeps its "Pros from" company chips.
+- Checked headless at 1280 and 390: Demo chips toggle stage and level and the subtitle follows; Finance Careers shows 10 pros, card opens Amara Okafor with the right Back label; no page errors. tsc clean; eslint only pre-existing warnings.
+
 ### 2026-09-19 Explore: 161 poster careers imported, world pills become grids, search word forms (PUSHED, user-authorized)
 
 - `public/images/app/browse/*.webp` (161, 11 MB): the team's poster folder ("BROWSE Images-3", 14 worlds) converted with sharp, attention crop to 840x1188, webp q80. 39 titles skipped because the Figma catalog already had them. `src/components/app/browseLibrary.ts` lists them as `BROWSE_LIBRARY`; the source folder itself stays out of git.
