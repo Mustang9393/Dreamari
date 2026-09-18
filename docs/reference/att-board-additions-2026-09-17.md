@@ -33,3 +33,24 @@ Full pre-build snapshot of Connect: tag `connect-before-att-board-2026-09-17`, b
 | Student, Volunteer, Enterprise switch behind a Demo chip | The three audiences are demo views, not tabs a student would see |
 
 Demo content we wrote, to be replaced by AT&T's own text before anything ships: opportunity descriptions and details, profile stories, all counts.
+
+## 18 Sept 2026: reach first, one theme, a launchpad, closed loops
+
+Direction: the board extends AT&T's program to students anywhere; a Connected Learning Center is one optional way in, never the entry point. Sources: the AT&T Connected Learning Integration & Role Analysis report and the six observations at the end of `joshua-connect-replit-2026-09/README.md`.
+
+| Change | Report or observation it answers |
+| --- | --- |
+| `THEME` in attData drives the student Home card, the volunteer Today prompt and the Program planner; September everywhere | Observation 1 (topic drift across views); the planner header and topic can no longer disagree |
+| Student tabs: Home · Learn · Ask · Opportunities. People folded into Ask as "Professionals who answer here", with answer counts | Observation 5 (tiles carried nothing to choose on); one fewer tab |
+| Learn: The Achievery and DigitalLearn modules, virtual, with progress, a sheet, XP flight and Add to My Plan | Report: the curricular launchpad, done without a center |
+| Home: theme + poll in one card, Continue learning, "Prefer in person?" card marked Optional | Report: local center visibility, reframed as optional; density: one question per block |
+| Opportunities: All · Virtual · In person filter | Reach first; in person is a choice |
+| Volunteer Today: theme prompt plus three time-boxed requests with minutes; Accept counts toward hours | Report: structured, time-bounded micro-volunteering, skill matched |
+| Volunteer Questions: "Your answers" with reads and helpful; sending shows "Live in Recent Answers" | Observation 2 (one-directional loop) |
+| Volunteer Impact replaces Year-Round: hours by month, students you have helped, AT&T Believes sync, calendar collapsed | Report: hour logging and the Believes bridge; observation 3 (nothing carries across the year) |
+| Share chip reworded to "What do you wish students knew about your career?" | Observation 6 (negative framing) |
+| Enterprise opens on Impact; This Month and This Year differ; "Students Active" and "Reads" instead of "reached"; How students take part (virtual vs center); 2026 volunteer hours goal | Observation 4 (units and identical ranges); report: ESG telemetry, reach beyond centers |
+| Program planner: one card per period, Students see / Volunteers see, source as chips, one vocabulary | Cognitive load; the source's three panels and three vocabularies |
+| Banner: "Students anywhere connect..." and 15 States instead of a center count | Reach first |
+
+Not built, on purpose: a site-coordinator view (center staff scheduling, hardware loans), consent and COPPA/FERPA flows, and any real integration. All module copy, requests and counts are demo text.

@@ -10350,3 +10350,16 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   the arrival tab is Resume, so two splashes never stack.
 - Country select: explicit 44px height, native arrow off, our chevron; it
   matched the text fields' 44px in the headless check.
+
+## 2026-09-18 · AT&T board rebuilt reach-first (local only, not pushed)
+
+- See `docs/reference/att-board-additions-2026-09-17.md`, section "18 Sept
+  2026", for the change-to-source table. In short: one shared `THEME`, a
+  Learn tab (Achievery and DigitalLearn modules with progress, sheet, XP
+  flight, My Plan), People folded into Ask, virtual/in-person filter,
+  volunteer Today with time-boxed requests, Your answers, Impact instead of
+  Year-Round, enterprise opens on Impact with reach split and hours goal,
+  planner simplified to one card with Students see / Volunteers see.
+- Verified headless at 1280 and 390 (no horizontal overflow, sheet, XP
+  flight, Accept, filter, program edit). tsc and eslint clean.
+- Kept local by request; push only when told.

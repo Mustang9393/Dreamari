@@ -4,18 +4,24 @@
 // (Student / Volunteer / Enterprise views) rendered in this app's own
 // language -- Connect's board banner, Segmented tabs, Panel surfaces, the
 // shared CTA/Follow/Avatar/CompanyChip primitives and the dashboards' metric
-// tiles and area chart. Every string comes from attData.ts (verbatim from
-// the source); nothing here invents copy. Self-contained on purpose: the
-// rest of Connect is untouched, and ConnectExperience routes `?board=` here
-// by id.
+// tiles and area chart. Every string comes from attData.ts: the source's
+// copy, plus the demo additions noted there (Learn, requests, My Impact,
+// reach). Reach first: the board works from anywhere, and a Connected
+// Learning Center is one optional way in (direct feedback, 18 Sept 2026).
+// Self-contained on purpose: the rest of Connect is untouched, and
+// ConnectExperience routes `?board=` here by id.
 
 import Image from "next/image";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Bookmark, BookmarkCheck, Briefcase, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, Eye, Lightbulb, Megaphone,
-  MessageCircleQuestion, MessagesSquare, ThumbsUp, UserRound, Users, X, FileText, ListChecks,
+  Bookmark, BookmarkCheck, BookOpen, Briefcase, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, Eye, GraduationCap, Lightbulb, MapPin, Megaphone,
+  MessageCircleQuestion, MessagesSquare, Play, ThumbsUp, Timer, UserRound, Users, X, FileText, ListChecks,
 } from "lucide-react";
+import { Portal } from "@/components/profile/CareerReport";
+import { flyXp } from "@/components/app/xpFlight";
+import { studentAvatarSrc } from "@/lib/avatar";
+import { BarChart, GoalTrack, ShareBar } from "../mentorship/charts";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { Avatar, Composer, InlineAsk, InsightMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
 import { AreaChart, MetricTile, Segmented, ruledCell } from "../viz";
@@ -368,54 +374,162 @@ function OpportunitySheet({ item, saved, onSave, inPlan, onPlan, onClose }: { it
   );
 }
 
-function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity }: { onAsk: () => void; onSeeAll: () => void; saves: Record<string, boolean>; toggleSave: (id: string) => void; openOpportunity: (item: Opportunity) => void }) {
+// ——— shared chrome (sheet, toast) ———
+
+/** The Mentorship tab's sheet, in this board's colours: a centred card on
+ *  desktop, a bottom sheet on the phone, Escape closes. */
+function Sheet({ title, label, onClose, children, titleId }: { title: string; label?: string; onClose: () => void; children: ReactNode; titleId: string }) {
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [onClose]);
+  return (
+    <Portal>
+      <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+        <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+        <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet absolute top-[14px] right-[14px] z-10 flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+          <div className="flex flex-col gap-[6px] pr-[40px]">
+            {label && <Eyebrow>{label}</Eyebrow>}
+            <h2 id={titleId} className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h2>
+          </div>
+          {children}
+        </div>
+      </div>
+    </Portal>
+  );
+}
+
+function useToast(): [ReactNode, (text: string) => void] {
+  const [toast, setToast] = useState<string | null>(null);
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 2600);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+  const node = toast ? (
+    <Portal>
+      <div role="status" className="fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 z-[95] -translate-x-1/2 rounded-full border px-[16px] py-[10px] text-[13.5px] font-semibold whitespace-nowrap" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 18px 44px -20px rgba(0,0,0,0.7)" }}>
+        {toast}
+      </div>
+    </Portal>
+  ) : null;
+  return [node, setToast];
+}
+
+/** A thin progress bar in the brand blue; complete turns green. */
+function Progress({ pct, label }: { pct: number; label: string }) {
+  const done = pct >= 100;
+  return (
+    <div className="h-[6px] w-full overflow-hidden rounded-full" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={label} style={{ background: "rgba(255,255,255,0.1)" }}>
+      <span className="block h-full rounded-full transition-[width] duration-700 ease-out" style={{ width: `${Math.max(pct, 2)}%`, background: done ? "var(--world-food-farming-nature)" : accent }} />
+    </div>
+  );
+}
+
+// ——— Student ———
+
+/** The one program theme, with the poll folded in as the student's part
+ *  of it: what the month is about, then one question to answer. */
+function ThemeCard() {
   const [pick, setPick] = useState<string>();
   return (
-    <>
-      <section className="flex flex-col gap-[var(--space-4)]">
-        <div>
-          <SectionHead>{D.INSIGHTS_SECTION.title}</SectionHead>
-          <Muted className="mt-[2px]">{D.INSIGHTS_SECTION.sub}</Muted>
-        </div>
-        <InsightRail onAsk={onAsk} />
-      </section>
-
-      <Panel id="att-poll-title" title={D.POLL.eyebrow}>
-        {/* the poll is a card inside its panel, lifted like the insight and
-           opportunity cards around it (direct feedback, 17 Sept 2026) */}
-        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={ITEM}>
-          <h3 className="text-[17px] leading-[23px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.POLL.question}</h3>
-          {pick && !D.REPLIT_ONLY ? (
-            // the tally, the way a story poll flips once you have voted: your
-            // pick in the brand blue, everyone else's share behind it
-            <ul className="flex flex-col gap-[8px]">
-              {D.POLL.options.map((option) => {
-                const pct = D.POLL.results[option] ?? 0;
-                const mine = option === pick;
-                return (
-                  <li key={option} className="relative overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: mine ? `color-mix(in srgb, ${accent} 55%, var(--glass-border))` : "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                    <span aria-hidden className="absolute inset-y-0 left-0 transition-[width] duration-700 ease-out" style={{ width: `${pct}%`, background: mine ? `color-mix(in srgb, ${accent} 30%, transparent)` : "rgba(255,255,255,0.06)" }} />
-                    <span className="relative flex items-center justify-between gap-[10px] px-[14px] py-[9px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
-                      <span className="flex items-center gap-[6px]">{option} {mine && <CheckCircle2 className="h-4 w-4" aria-hidden style={{ color: accent }} />}</span>
-                      <span className="tabular-nums" style={{ color: mine ? accent : "var(--muted-foreground)" }}>{pct}%</span>
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <div className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
-              {D.POLL.options.map((option) => (
-                <QuietCta key={option} size="sm" done={pick === option} onClick={() => setPick(option)}>{option}</QuietCta>
-              ))}
-            </div>
-          )}
-          <div className="flex flex-wrap items-center justify-between gap-[8px]">
-            {!D.REPLIT_ONLY && <Muted>{D.POLL.responses + (pick ? 1 : 0)} {D.POLL.answered}</Muted>}
-            {pick && <Submitted text={D.POLL.saved} />}
+    <div className="relative flex flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 18%, transparent), transparent 70%), var(--glass-surface-1)`, borderColor: `color-mix(in srgb, ${accent} 30%, var(--glass-border))` }}>
+      <Eyebrow>{D.THEME.eyebrow} · {D.THEME.month}</Eyebrow>
+      <h3 className="text-[20px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.THEME.theme}</h3>
+      <Muted>{D.THEME.student}</Muted>
+      <div className="mt-[4px] flex flex-col gap-[10px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+        <span className="text-[15px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.POLL.question}</span>
+        {pick ? (
+          <ul className="flex flex-col gap-[6px]">
+            {D.POLL.options.map((option) => {
+              const pct = D.POLL.results[option] ?? 0;
+              const mine = option === pick;
+              return (
+                <li key={option} className="relative overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: mine ? `color-mix(in srgb, ${accent} 55%, var(--glass-border))` : "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                  <span aria-hidden className="absolute inset-y-0 left-0 transition-[width] duration-700 ease-out" style={{ width: `${pct}%`, background: mine ? `color-mix(in srgb, ${accent} 30%, transparent)` : "rgba(255,255,255,0.06)" }} />
+                  <span className="relative flex items-center justify-between gap-[10px] px-[14px] py-[8px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    <span className="flex items-center gap-[6px]">{option} {mine && <CheckCircle2 className="h-4 w-4" aria-hidden style={{ color: accent }} />}</span>
+                    <span className="tabular-nums" style={{ color: mine ? accent : "var(--muted-foreground)" }}>{pct}%</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
+            {D.POLL.options.map((option) => <QuietCta key={option} size="sm" onClick={() => setPick(option)}>{option}</QuietCta>)}
           </div>
+        )}
+        <div className="flex flex-wrap items-center justify-between gap-[8px]">
+          <Muted>{D.POLL.responses + (pick ? 1 : 0)} {D.POLL.answered}</Muted>
+          {pick && <Submitted text={D.POLL.saved} />}
         </div>
-      </Panel>
+      </div>
+    </div>
+  );
+}
+
+type LearnState = { progress: Record<string, number>; openModule: (m: D.LearnModule) => void };
+
+/** One module in progress, so Home always has a next step that takes
+ *  fifteen minutes and works from anywhere. */
+function ContinueLearning({ progress, openModule, onLearn }: LearnState & { onLearn: () => void }) {
+  const next = D.LEARN_MODULES.find((m) => progress[m.id] > 0 && progress[m.id] < 100) ?? D.LEARN_MODULES.find((m) => progress[m.id] < 100) ?? D.LEARN_MODULES[0];
+  const pct = progress[next.id];
+  const left = Math.max(1, Math.round((next.minutes * (100 - pct)) / 100));
+  return (
+    <div className="dm-tap group relative flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
+      <button type="button" onClick={() => openModule(next)} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {next.title}</span></button>
+      <HoverChevron className="top-[14px] right-[14px]" />
+      <div className="flex items-center justify-between gap-[10px] pr-[28px]">
+        <Eyebrow>{D.LEARN.continueEyebrow}</Eyebrow>
+        <span className="relative z-20"><LinkButton onClick={onLearn}>{D.LEARN.seeAll} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton></span>
+      </div>
+      <div className="flex items-start gap-[12px]">
+        <span className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><BookOpen className="h-5 w-5" aria-hidden /></span>
+        <div className="min-w-0 flex-1">
+          <span className="block text-[15.5px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{next.title}</span>
+          <Muted>{left} {D.LEARN.sheet.minutes} left · {next.xp} {D.LEARN.sheet.xp}</Muted>
+        </div>
+      </div>
+      <div className="mt-auto pt-[2px]"><Progress pct={pct} label={`${next.title} progress`} /></div>
+    </div>
+  );
+}
+
+/** In person is optional: one quiet card, low on the page, that says so. */
+function NearYou({ onToast }: { onToast: (t: string) => void }) {
+  const N = D.NEAR_YOU;
+  return (
+    <div className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
+      <div className="flex items-center justify-between gap-[10px]">
+        <Eyebrow tone="var(--muted-foreground)">{N.eyebrow}</Eyebrow>
+        <span className="rounded-full border px-[8px] py-[1px] text-[10.5px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{N.optional}</span>
+      </div>
+      <div className="flex items-start gap-[12px]">
+        <span className="flex size-[40px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}><MapPin className="h-5 w-5" aria-hidden /></span>
+        <div className="min-w-0 flex-1">
+          <span className="block text-[15.5px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{N.name}</span>
+          <Muted>{N.line}</Muted>
+        </div>
+      </div>
+      <Muted>{N.note}</Muted>
+      <QuietCta size="sm" className="w-fit" onClick={() => onToast("Centers near you open in Maps")}><MapPin className="h-4 w-4" aria-hidden /> {N.cta}</QuietCta>
+    </div>
+  );
+}
+
+function StudentHome({ onAsk, onSeeAll, onLearn, saves, toggleSave, openOpportunity, progress, openModule, onToast }: { onAsk: () => void; onSeeAll: () => void; onLearn: () => void; saves: Record<string, boolean>; toggleSave: (id: string) => void; openOpportunity: (item: Opportunity) => void; onToast: (t: string) => void } & LearnState) {
+  return (
+    <>
+      <ThemeCard />
+
+      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
+        <ContinueLearning progress={progress} openModule={openModule} onLearn={onLearn} />
+        <NearYou onToast={onToast} />
+      </div>
 
       <section className="flex flex-col gap-[var(--space-4)]">
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -426,11 +540,98 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity }: { 
           {D.HOME_OPPORTUNITIES.items.map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} onOpen={() => openOpportunity(item)} />)}
         </div>
       </section>
+
+      <section className="flex flex-col gap-[var(--space-4)]">
+        <div>
+          <SectionHead>{D.INSIGHTS_SECTION.title}</SectionHead>
+          <Muted className="mt-[2px]">{D.INSIGHTS_SECTION.sub}</Muted>
+        </div>
+        <InsightRail onAsk={onAsk} />
+      </section>
     </>
   );
 }
 
-function StudentQuestions() {
+function ModuleCard({ m, pct, onOpen }: { m: D.LearnModule; pct: number; onOpen: () => void }) {
+  const done = pct >= 100;
+  return (
+    <div className="dm-tap group relative flex flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {m.title}</span></button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />
+      <HoverChevron className="top-[14px] right-[14px]" />
+      <Eyebrow>{m.career}</Eyebrow>
+      <span className="pr-[20px] text-[15.5px] leading-[21px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.title}</span>
+      <Muted>{m.minutes} {D.LEARN.sheet.minutes} · {m.xp} {D.LEARN.sheet.xp}</Muted>
+      <div className="mt-auto flex items-center gap-[10px] pt-[4px]">
+        <Progress pct={pct} label={`${m.title} progress`} />
+        <span className="flex-none text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: done ? "var(--world-food-farming-nature)" : "var(--muted-foreground)" }}>{done ? <CheckCircle2 className="h-4 w-4" aria-label={D.LEARN.done} /> : `${pct}%`}</span>
+      </div>
+    </div>
+  );
+}
+
+function StudentLearn({ progress, openModule }: LearnState) {
+  return (
+    <section className="flex flex-col gap-[var(--space-6)]">
+      <div>
+        <SectionHead>{D.LEARN.title}</SectionHead>
+        <Muted className="mt-[2px]">{D.LEARN.sub}</Muted>
+      </div>
+      {D.LEARN.groups.map((g) => (
+        <section key={g.provider} className="flex flex-col gap-[var(--space-4)]">
+          <div className="flex flex-wrap items-baseline gap-x-[10px] gap-y-[2px]">
+            <span className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{g.provider}</span>
+            <Muted>{g.line}</Muted>
+          </div>
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
+            {g.modules.map((m) => <ModuleCard key={m.id} m={m} pct={progress[m.id]} onOpen={() => openModule(m)} />)}
+          </div>
+        </section>
+      ))}
+    </section>
+  );
+}
+
+function ModuleSheet({ m, pct, inPlan, onPlan, onAdvance, onClose }: { m: D.LearnModule; pct: number; inPlan: boolean; onPlan: () => void; onAdvance: (from: Element | null) => void; onClose: () => void }) {
+  const S = D.LEARN.sheet;
+  const provider = D.LEARN.groups.find((g) => g.modules.some((x) => x.id === m.id))?.provider ?? "";
+  const done = pct >= 100;
+  // the XP capsule lifts off from the button itself
+  const ctaRef = useRef<HTMLSpanElement>(null);
+  return (
+    <Sheet title={m.title} label={provider} onClose={onClose} titleId="att-module-title">
+      <p className="text-[15px] leading-[23px]" style={{ color: "var(--foreground)" }}>{m.about}</p>
+      <div className="flex flex-col gap-[6px]">
+        <Eyebrow tone="var(--muted-foreground)">{S.steps}</Eyebrow>
+        <ol className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+          {m.steps.map((step, i) => (
+            <li key={step} className="flex items-start gap-[10px] py-[9px] text-[14px] leading-[20px]" style={{ borderColor: RULE, color: "var(--foreground)" }}>
+              <span className="flex size-[20px] flex-none items-center justify-center rounded-full text-[11px] font-extrabold tabular-nums" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>{i + 1}</span> {step}
+            </li>
+          ))}
+        </ol>
+      </div>
+      <dl className="grid grid-cols-3 gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+        {([[S.minutes, String(m.minutes)], [S.xp, `+${m.xp}`], [S.counts, m.career]] as [string, string][]).map(([k, v]) => (
+          <div key={k} className="min-w-0">
+            <dt className="text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+            <dd className="text-[14.5px] leading-[20px] font-bold tabular-nums text-balance" style={{ color: "var(--foreground)" }}>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="flex flex-col gap-[6px]">
+        <div className="flex items-center justify-between"><Eyebrow tone="var(--muted-foreground)">{S.progress}</Eyebrow><span className="text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{pct}%</span></div>
+        <Progress pct={pct} label={`${m.title} progress`} />
+      </div>
+      <div className="flex flex-wrap items-center gap-[10px]">
+        {done ? <QuietCta size="sm" done>{D.LEARN.done}</QuietCta> : <span ref={ctaRef} className="contents"><PrimaryCta size="sm" onClick={() => onAdvance(ctaRef.current?.firstElementChild ?? null)}><Play className="h-4 w-4" aria-hidden /> {pct > 0 ? D.LEARN.resume : D.LEARN.start}</PrimaryCta></span>}
+        {inPlan ? <QuietCta size="sm" done onClick={onPlan}><ListChecks className="h-4 w-4" aria-hidden /> {S.inPlan}</QuietCta> : <QuietCta size="sm" onClick={onPlan}><ListChecks className="h-4 w-4" aria-hidden /> {S.plan}</QuietCta>}
+      </div>
+    </Sheet>
+  );
+}
+
+function StudentQuestions({ follows, toggleFollow }: { follows: Record<string, boolean>; toggleFollow: (id: string) => void }) {
   const [asked, setAsked] = useState(false);
   const [open, setOpen] = useState<string>();
   const [more, setMore] = useState(false);
@@ -450,10 +651,6 @@ function StudentQuestions() {
       </Panel>
 
       <Panel id="att-answers-title" title={D.RECENT_ANSWERS.eyebrow}>
-        {/* Each answer is its own lifted card, composed like the insight
-           cards: the question as the title, who answered, the answer as a
-           pull quote once opened, then the counts (direct feedback, 17 Sept
-           2026: "more editorial, better composed... show likes and comments"). */}
         <ul className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
           {shown.map((item) => {
             const isOpen = open === item.id;
@@ -475,24 +672,35 @@ function StudentQuestions() {
           <LinkButton onClick={() => setMore((v) => !v)}>{more ? D.RECENT_ANSWERS.less : <>{D.RECENT_ANSWERS.more} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></>}</LinkButton>
         </div>
       </Panel>
+
+      <StudentPeople follows={follows} toggleFollow={toggleFollow} />
     </>
   );
 }
 
 function StudentOpportunities({ saves, toggleSave, openOpportunity }: { saves: Record<string, boolean>; toggleSave: (id: string) => void; openOpportunity: (item: Opportunity) => void }) {
+  // Virtual first is a filter, not a default: the whole list is one tap
+  // away, and "In person" is there for students who want it.
+  const [filter, setFilter] = useState<D.OpportunityFilter>("all");
+  const keep = (id: string) => {
+    if (filter === "all") return true;
+    const virtual = D.VIRTUAL_WHERE.test(D.OPPORTUNITY_DETAILS[id]?.where ?? "");
+    return filter === "virtual" ? virtual : !virtual;
+  };
   return (
     <>
+      <div className="w-full sm:w-fit"><Segmented ariaLabel="Where" value={filter} onChange={setFilter} options={[...D.OPPORTUNITY_FILTERS]} grow /></div>
       {D.OPPORTUNITY_GROUPS.map((group) => {
-        // the kind eyebrow only where a section mixes kinds; "Internships"
-        // already says it (direct feedback, 17 Sept 2026)
-        const mixed = new Set(group.items.map((i) => i.kind)).size > 1;
+        const items = group.items.filter((i) => keep(i.id));
+        if (items.length === 0) return null;
+        const mixed = new Set(items.map((i) => i.kind)).size > 1;
         return (
-        <section key={group.title} className="flex flex-col gap-[var(--space-4)]">
-          <SectionHead>{group.title}</SectionHead>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
-            {group.items.map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} onOpen={() => openOpportunity(item)} showKind={mixed} />)}
-          </div>
-        </section>
+          <section key={group.title} className="flex flex-col gap-[var(--space-4)]">
+            <SectionHead>{group.title}</SectionHead>
+            <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} onOpen={() => openOpportunity(item)} showKind={mixed} />)}
+            </div>
+          </section>
         );
       })}
     </>
@@ -501,33 +709,32 @@ function StudentOpportunities({ saves, toggleSave, openOpportunity }: { saves: R
 
 function StudentPeople({ follows, toggleFollow }: { follows: Record<string, boolean>; toggleFollow: (id: string) => void }) {
   const openPro = useContext(OpenPro);
+  // One row of everyone who answers here, with the number that helps a
+  // student choose (the source's tiles carried only a name and repeated
+  // the same people in every row).
+  const ids = Array.from(new Set(D.PEOPLE_ROWS.flatMap((r) => r.pros)));
   return (
-    // One AT&T mark for the whole section, faint in the corner, instead of a
-    // chip on every card (direct feedback, 17 Sept 2026)
-    <div className="relative flex flex-col gap-[var(--space-6)]">
-      <Image src={D.ATT.brand.markWhite} alt="" width={96} height={40} unoptimized aria-hidden className="pointer-events-none absolute top-[-6px] right-0 h-[64px] w-auto select-none" style={{ opacity: 0.07 }} />
-      {D.PEOPLE_ROWS.map((row) => (
-        <section key={row.title} className="flex flex-col gap-[var(--space-4)]">
-          <SectionHead>{row.title}</SectionHead>
-          <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-3 lg:grid-cols-4">
-            {row.pros.map((id) => {
-              const pro = D.ATT_PROS[id];
-              return (
-                <div key={id} className="dm-tap group relative flex flex-col items-center gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-center" style={ITEM}>
-                  <button type="button" onClick={() => openPro(id)} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {pro.name}</span></button>
-                  <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />
-                  {!D.REPLIT_ONLY && <HoverChevron className="top-[12px] right-[12px]" />}
-                  <Avatar name={pro.name} size={56} photo={pro.photo} />
-                  <span className="mt-[4px] flex items-center gap-[5px] text-[14.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={14} /></span>
-                  <span className="max-w-full truncate text-[12.5px] leading-[17px]" title={pro.role} style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
-                  <FollowButton compact following={!!follows[id]} onToggle={() => toggleFollow(id)} className="relative z-20 mt-[8px] w-full" tone={{ background: accent, color: "#FFFFFF" }} />
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ))}
-    </div>
+    <section className="relative flex flex-col gap-[var(--space-4)]">
+      <Image src={D.ATT.brand.markWhite} alt="" width={96} height={40} unoptimized aria-hidden className="pointer-events-none absolute top-[-6px] right-0 h-[48px] w-auto select-none" style={{ opacity: 0.07 }} />
+      <SectionHead>{D.PEOPLE_ANSWER.title}</SectionHead>
+      <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-3">
+        {ids.map((id) => {
+          const pro = D.ATT_PROS[id];
+          return (
+            <div key={id} className="dm-tap group relative flex flex-col items-center gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-center" style={ITEM}>
+              <button type="button" onClick={() => openPro(id)} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"><span className="sr-only">Open {pro.name}</span></button>
+              <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "rgba(255,255,255,0.03)" }} />
+              {!D.REPLIT_ONLY && <HoverChevron className="top-[12px] right-[12px]" />}
+              <Avatar name={pro.name} size={56} photo={pro.photo} />
+              <span className="mt-[4px] flex items-center gap-[5px] text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={14} /></span>
+              <span className="max-w-full truncate text-[12px] leading-[16px]" title={pro.role} style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
+              <span className="text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: accent }}>{D.ANSWER_COUNTS[id]} {D.PEOPLE_ANSWER.answers}</span>
+              <FollowButton compact following={!!follows[id]} onToggle={() => toggleFollow(id)} className="relative z-20 mt-[6px] w-full" tone={{ background: accent, color: "#FFFFFF" }} />
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -540,44 +747,299 @@ function AnswerForm({ id, placeholder, submit, cancel, onCancel, onDone, rows = 
 
 function VolunteerHome() {
   const [state, setState] = useState<"idle" | "composing" | "done">("idle");
+  const [accepted, setAccepted] = useState<Record<string, boolean>>({});
   const H = D.VOLUNTEER_HOME;
+  const R = D.REQUESTS;
   return (
-    <Panel id="att-now-title" title={H.title}>
-      <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 18%, transparent), transparent 70%), var(--glass-surface-1)`, borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))` }}>
-        <h3 className="text-[20px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{H.topic}</h3>
-        <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{H.prompt}</p>
-        {state === "idle" && <PrimaryCta size="sm" className="w-fit" onClick={() => setState("composing")}>{H.cta}</PrimaryCta>}
-        {state === "composing" && <AnswerForm id="att-now-answer" placeholder={H.placeholder} submit={H.submit} cancel={H.cancel} onCancel={() => setState("idle")} onDone={() => setState("done")} />}
-        {state === "done" && <Submitted />}
-      </div>
-      <Muted>{H.footer}</Muted>
-    </Panel>
+    <>
+      <Panel id="att-now-title" title={H.title}>
+        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 18%, transparent), transparent 70%), var(--glass-surface-1)`, borderColor: `color-mix(in srgb, ${accent} 30%, var(--glass-border))` }}>
+          <Eyebrow>{D.THEME.eyebrow} · {D.THEME.month}</Eyebrow>
+          <h3 className="text-[20px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.THEME.theme}</h3>
+          <p className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>{D.THEME.volunteer}</p>
+          {state === "idle" && <PrimaryCta size="sm" className="w-fit" onClick={() => setState("composing")}>{H.cta}</PrimaryCta>}
+          {state === "composing" && <AnswerForm id="att-now-answer" placeholder={H.placeholder} submit={H.submit} cancel={H.cancel} onCancel={() => setState("idle")} onDone={() => setState("done")} />}
+          {state === "done" && <Submitted text={D.YOUR_ANSWERS.live} />}
+        </div>
+      </Panel>
+
+      <Panel id="att-requests-title" title={R.title} aside={<Muted>{R.sub}</Muted>}>
+        <ul className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3">
+          {R.items.map((r) => {
+            const on = !!accepted[r.id];
+            return (
+              <li key={r.id} className="flex flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
+                <div className="flex items-center justify-between gap-[8px]">
+                  <Eyebrow>{r.kind}</Eyebrow>
+                  <span className="flex items-center gap-[4px] rounded-full px-[8px] py-[2px] text-[11.5px] leading-[15px] font-bold tabular-nums" style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }}><Timer className="h-3 w-3" aria-hidden /> {r.minutes} {R.minutes}</span>
+                </div>
+                <span className="text-[15.5px] leading-[21px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.title}</span>
+                <Muted>{r.why}</Muted>
+                <div className="mt-auto pt-[4px]">
+                  {on ? <Submitted text={`${R.accepted} · ${R.acceptedLine}`} /> : <PrimaryCta size="sm" className="w-fit" onClick={() => setAccepted((m) => ({ ...m, [r.id]: true }))}>{R.accept}</PrimaryCta>}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+        <Muted>{D.YOUR_ANSWERS.summary}</Muted>
+      </Panel>
+    </>
   );
 }
 
 function VolunteerQuestions() {
   const Q = D.QUESTIONS_WAITING;
+  const Y = D.YOUR_ANSWERS;
   const [more, setMore] = useState(false);
   const [openIdx, setOpenIdx] = useState<number>();
   const [sent, setSent] = useState<Record<number, boolean>>({});
   const shown = more ? Q.items : Q.items.slice(0, 2);
   return (
-    <Panel id="att-waiting-title" title={Q.title} aside={<Muted>{Q.sub}</Muted>}>
-      <ul className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
-        {shown.map((question, i) => (
-          <li key={question} className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
-            <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-              <span className="min-w-0 flex-1 text-[15.5px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{question}</span>
-              {sent[i] ? <Submitted /> : <PrimaryCta size="sm" onClick={() => setOpenIdx(openIdx === i ? undefined : i)}>{Q.answer}</PrimaryCta>}
-            </div>
-            {openIdx === i && !sent[i] && <AnswerForm id={`att-waiting-${i}`} placeholder={Q.placeholder} submit={Q.send} onDone={() => { setSent((s) => ({ ...s, [i]: true })); setOpenIdx(undefined); }} />}
-          </li>
-        ))}
-      </ul>
-      <div className="border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-        <LinkButton onClick={() => setMore((v) => !v)}>{more ? Q.fewer : <>{Q.more} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></>}</LinkButton>
+    <>
+      <Panel id="att-waiting-title" title={Q.title} aside={<Muted>{Q.sub}</Muted>}>
+        <ul className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
+          {shown.map((question, i) => (
+            <li key={question} className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
+              <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+                <span className="min-w-0 flex-1 text-[15.5px] leading-[21px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{question}</span>
+                {sent[i] ? <Submitted text={Y.live} /> : <PrimaryCta size="sm" onClick={() => setOpenIdx(openIdx === i ? undefined : i)}>{Q.answer}</PrimaryCta>}
+              </div>
+              {openIdx === i && !sent[i] && <AnswerForm id={`att-waiting-${i}`} placeholder={Q.placeholder} submit={Q.send} onDone={() => { setSent((s) => ({ ...s, [i]: true })); setOpenIdx(undefined); }} />}
+            </li>
+          ))}
+        </ul>
+        <div className="border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+          <LinkButton onClick={() => setMore((v) => !v)}>{more ? Q.fewer : <>{Q.more} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></>}</LinkButton>
+        </div>
+      </Panel>
+
+      {/* the loop closed: what happened to the answers already given */}
+      <Panel id="att-your-answers-title" title={Y.title} aside={<Muted>{Y.summary}</Muted>}>
+        <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+          {Y.items.map((a) => (
+            <li key={a.question} className="flex flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[4px] py-[10px]" style={{ borderColor: RULE }}>
+              <span className="min-w-0 flex-1 text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{a.question}</span>
+              <span className="flex items-center gap-[12px] text-[12.5px] leading-[17px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+                <span className="flex items-center gap-[4px]"><Eye className="h-3.5 w-3.5" aria-hidden /> {a.reads}</span>
+                <span className="flex items-center gap-[4px]"><ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {a.helpful}</span>
+                <span>{a.when}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Panel>
+    </>
+  );
+}
+
+const IMPACT_ICONS = [Clock, MessagesSquare, Eye, Users];
+
+/** The volunteer's own year: hours climbing, the students behind them, the
+ *  ERG sync, and the program calendar folded underneath. */
+function VolunteerImpact() {
+  const M = D.MY_IMPACT;
+  const [calendar, setCalendar] = useState(false);
+  return (
+    <section className="flex flex-col gap-[var(--space-4)]">
+      <div>
+        <SectionHead>{M.title}</SectionHead>
+        <Muted className="mt-[2px]">{M.sub}</Muted>
       </div>
-    </Panel>
+      <SectionSurface>
+        <div className="grid grid-cols-2 sm:grid-cols-4">
+          {M.tiles.map((tile, i) => (
+            <div key={tile.key} className={`p-[var(--space-4)] ${ruledCell(i, 4)}`} style={{ borderColor: RULE }}>
+              <MetricTile icon={IMPACT_ICONS[i]} value={tile.value} label={tile.label} accent={accent} />
+            </div>
+          ))}
+        </div>
+      </SectionSurface>
+      <Panel id="att-my-hours-title" title={M.hoursEyebrow} aside={<span className="flex items-center gap-[6px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}><CheckCircle2 className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--world-food-farming-nature)" }} /> {M.believes}</span>}>
+        <BarChart values={M.hours} labels={M.months} accent={accent} highlight={M.hours.length - 1} height={150} unit="hours" ariaLabel="Volunteer hours by month" />
+      </Panel>
+      <Panel id="att-students-helped-title" title={M.studentsEyebrow}>
+        <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
+          {M.students.map((s) => (
+            <li key={s.name} className="flex items-center gap-[12px] rounded-[var(--radius-md)] border px-[14px] py-[10px]" style={ITEM}>
+              <Avatar name={s.name} size={36} photo={studentAvatarSrc(s.name)} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
+                <Muted>{s.what}</Muted>
+              </span>
+              <span className="flex-none text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{s.when}</span>
+            </li>
+          ))}
+        </ul>
+      </Panel>
+      <div className="flex flex-col gap-[var(--space-4)]">
+        <LinkButton onClick={() => setCalendar((v) => !v)}>{calendar ? M.hideCalendar : <>{M.calendar} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></>}</LinkButton>
+        {calendar && (
+          <ol className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-4">
+            {D.YEAR_ROUND.year.map(([month, theme]) => {
+              const current = month === D.THEME.month;
+              return (
+                <li key={month} className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border px-[14px] py-[10px]" style={{ background: current ? `color-mix(in srgb, ${accent} 14%, var(--glass-surface-1))` : "var(--glass-surface-1)", borderColor: current ? `color-mix(in srgb, ${accent} 45%, var(--glass-border))` : "var(--glass-border)" }}>
+                  <Eyebrow>{month}</Eyebrow>
+                  <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{theme}</span>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ——— Enterprise ———
+
+function Switch({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onToggle} className="dm-quiet relative h-[26px] w-[46px] flex-none cursor-pointer rounded-full border transition-colors" style={{ background: on ? accent : "var(--glass-surface-1)", borderColor: on ? accent : "var(--glass-border)" }}>
+      <span className="absolute top-[3px] size-[18px] rounded-full bg-white transition-[left] duration-200" style={{ left: on ? 23 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.35)" }} />
+    </button>
+  );
+}
+
+function Field({ id, value, placeholder, onChange }: { id: string; value: string; placeholder: string; onChange: (v: string) => void }) {
+  return (
+    <>
+      <label className="sr-only" htmlFor={id}>{placeholder}</label>
+      <input id={id} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={FIELD_CLASS} style={FIELD_STYLE} />
+    </>
+  );
+}
+
+type PeriodState = { source: D.TopicSource; selected: boolean; saved: boolean; editing: boolean; approved: boolean; att: { student: string; volunteer: string } };
+
+/** One card per period: the theme, what students see, what volunteers see.
+ *  The source is a chip row underneath, not three panels with three
+ *  vocabularies; the header and the chosen topic can no longer disagree. */
+function EnterpriseProgram() {
+  const P = D.PROGRAM;
+  const [autopilot, setAutopilot] = useState(true);
+  const [cadence, setCadence] = useState<"monthly" | "biweekly">("monthly");
+  const list = cadence === "monthly" ? P.monthly : P.biweekly;
+  const [period, setPeriod] = useState<string>(list[0].key);
+  const card = list.find((p) => p.key === period) ?? list[0];
+  const [states, setStates] = useState<Record<string, PeriodState>>({});
+  const st: PeriodState = states[card.key] ?? { source: card.defaultSource, selected: card.dreamari.selected, saved: card.att.saved, editing: false, approved: false, att: { student: card.att.student, volunteer: card.att.volunteer } };
+  const set = (patch: Partial<PeriodState>) => setStates((m) => ({ ...m, [card.key]: { ...st, ...patch } }));
+  const prompts = st.source === "dreamari" ? { students: card.dreamari.students, volunteers: card.dreamari.employees } : st.source === "att" ? { students: st.att.student, volunteers: st.att.volunteer } : { students: card.school.student, volunteers: card.school.employee };
+  const inUse = st.source === "dreamari" ? st.selected : st.source === "att" ? st.saved : st.approved;
+  const live = card.period === D.THEME.month;
+  return (
+    <section className="flex flex-col gap-[var(--space-4)]">
+      <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
+        <div>
+          <SectionHead>{P.title}</SectionHead>
+          <Muted className="mt-[2px]">{P.sub}</Muted>
+        </div>
+        <div className="flex items-center gap-[12px] rounded-[var(--radius-lg)] border px-[14px] py-[10px]" style={ITEM}>
+          <div>
+            <Eyebrow>{P.autopilot.label}</Eyebrow>
+            <Muted>{P.autopilot.sub}</Muted>
+          </div>
+          <Switch on={autopilot} onToggle={() => setAutopilot((v) => !v)} label={P.autopilot.label} />
+        </div>
+      </div>
+
+      <Panel id="att-program-title" title={card.period} aside={<Segmented ariaLabel="Cadence" value={cadence} onChange={(k) => { setCadence(k); setPeriod((k === "monthly" ? P.monthly : P.biweekly)[0].key); }} options={[...D.YEAR_ROUND.cadence]} />}>
+        <PeriodChips options={list.map((p) => ({ key: p.key, label: p.period }))} value={card.key} onChange={setPeriod} />
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 14%, transparent), transparent 70%), var(--glass-surface-2)`, borderColor: `color-mix(in srgb, ${accent} 28%, var(--glass-border))` }}>
+          <div className="flex flex-wrap items-center justify-between gap-[8px]">
+            <Eyebrow>{card.period}</Eyebrow>
+            {live && <span className="flex items-center gap-[5px] rounded-full px-[8px] py-[2px] text-[11px] leading-[15px] font-bold" style={{ background: "color-mix(in srgb, var(--world-food-farming-nature) 16%, transparent)", color: "var(--world-food-farming-nature)" }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: "currentColor" }} /> {P.current}</span>}
+          </div>
+          <h3 className="text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{card.theme}</h3>
+          {st.source === "att" && st.editing ? (
+            <form className="flex flex-col gap-[8px]" onSubmit={(e) => { e.preventDefault(); set({ saved: true, editing: false }); }}>
+              <Field id={`att-stu-${card.key}`} value={st.att.student} placeholder={P.fields.student} onChange={(v) => set({ att: { ...st.att, student: v } })} />
+              <Field id={`att-vol-${card.key}`} value={st.att.volunteer} placeholder={P.fields.volunteer} onChange={(v) => set({ att: { ...st.att, volunteer: v } })} />
+            </form>
+          ) : (
+            <dl className="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
+              {([[P.studentsSee, prompts.students, GraduationCap], [P.volunteersSee, prompts.volunteers, UserRound]] as [string, string, typeof Users][]).map(([k, v, Icon]) => (
+                <div key={k} className="flex items-start gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+                  <span className="flex size-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><Icon className="h-4 w-4" aria-hidden /></span>
+                  <span className="min-w-0">
+                    <dt className="text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k}</dt>
+                    <dd className="text-[14.5px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{v}</dd>
+                  </span>
+                </div>
+              ))}
+            </dl>
+          )}
+          <div className="flex flex-wrap items-center justify-between gap-[10px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+            <div className="flex flex-wrap items-center gap-[8px]">
+              <Eyebrow tone="var(--muted-foreground)">{P.topicSource}</Eyebrow>
+              <PeriodChips options={D.TOPIC_SOURCES.map((s) => ({ key: s.key, label: s.name }))} value={st.source} onChange={(source) => set({ source })} />
+            </div>
+            <div className="flex flex-wrap items-center gap-[8px]">
+              {st.source === "att" && (st.editing
+                ? <PrimaryCta size="sm" onClick={() => set({ saved: true, editing: false })}>{P.actions.save}</PrimaryCta>
+                : <QuietCta size="sm" onClick={() => set({ editing: true })}>{P.actions.editShort}</QuietCta>)}
+              {st.source === "dreamari" && !inUse && <QuietCta size="sm" onClick={() => set({ selected: false })}>{P.actions.another}</QuietCta>}
+              {!st.editing && (inUse
+                ? <QuietCta size="sm" done>{P.inUse}</QuietCta>
+                : <PrimaryCta size="sm" onClick={() => set(st.source === "dreamari" ? { selected: true } : st.source === "att" ? { saved: true } : { approved: true })}>{st.source === "school" ? P.actions.approve : P.actions.use}</PrimaryCta>)}
+            </div>
+          </div>
+        </div>
+      </Panel>
+    </section>
+  );
+}
+
+const TILE_ICONS = [Users, UserRound, Eye, MessagesSquare, Clock, Briefcase];
+
+function EnterpriseImpact({ onTeam }: { onTeam: () => void }) {
+  const I = D.IMPACT;
+  const [range, setRange] = useState<"month" | "year">("year");
+  const [metric, setMetric] = useState<string>(I.trend.metrics[0].key);
+  return (
+    <section className="flex flex-col gap-[var(--space-4)]">
+      <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
+        <div>
+          <SectionHead>{I.title}</SectionHead>
+          <Muted className="mt-[2px]">{I.sub}</Muted>
+        </div>
+        <Segmented ariaLabel="Range" value={range} onChange={setRange} options={[...I.range]} />
+      </div>
+      <SectionSurface>
+        <div className="grid grid-cols-2 sm:grid-cols-3">
+          {I.tiles.map((tile, i) => (
+            <div key={tile.key} className={`p-[var(--space-4)] ${ruledCell(i, 3)}`} style={{ borderColor: RULE }}>
+              <MetricTile icon={TILE_ICONS[i]} value={range === "month" ? tile.month : tile.year} label={tile.label} accent={accent} />
+            </div>
+          ))}
+        </div>
+      </SectionSurface>
+      {/* reach beyond the centers, and the hours goal: the two numbers a
+         CSR lead is asked for first */}
+      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
+        <Panel id="att-reach-title" title={I.reach.eyebrow}>
+          <ShareBar parts={I.reach.parts} accent={accent} />
+          <Muted>{I.reach.note}</Muted>
+        </Panel>
+        <Panel id="att-goal-title" title={I.goal.eyebrow}>
+          <GoalTrack logged={I.goal.logged} target={I.goal.target} pace={I.goal.pace} accent={accent} unit={I.goal.unit} />
+        </Panel>
+      </div>
+      <Panel id="att-trend-title" title={I.trend.metrics.find((m) => m.key === metric)?.label ?? ""} aside={<Segmented ariaLabel={I.trend.eyebrow} value={metric} onChange={setMetric} options={I.trend.metrics.map((m) => ({ key: m.key, label: m.label }))} />}>
+        <AreaChart points={I.trend.series[metric]} accent={accent} height={170} labels={[I.trend.months[0], I.trend.months[3], I.trend.months[5]]} />
+      </Panel>
+      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:flex-row sm:items-center sm:justify-between" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 26%, #0e0c20), #0e0c20)`, borderColor: `color-mix(in srgb, ${accent} 40%, transparent)` }}>
+        <div className="flex flex-col gap-[8px]">
+          <Eyebrow tone="#FFFFFFB3">{I.employee.eyebrow}</Eyebrow>
+          <div className="grid grid-cols-1 gap-x-[var(--space-5)] gap-y-[4px] sm:grid-cols-2">
+            {I.employee.lines.map((line) => <span key={line} className="text-[14.5px] leading-[20px] font-bold" style={{ color: "#FFFFFF" }}>{line}</span>)}
+          </div>
+        </div>
+        <PrimaryCta size="sm" className="w-fit" onClick={onTeam} style={{ background: "#FFFFFF", color: "#0e0c20" }}>{I.employee.cta} <ChevronRight className="h-4 w-4" aria-hidden /></PrimaryCta>
+      </div>
+    </section>
   );
 }
 
@@ -654,222 +1116,6 @@ function PeriodChips<K extends string>({ options, value, onChange }: { options: 
         );
       })}
     </div>
-  );
-}
-
-function VolunteerYearRound() {
-  const Y = D.YEAR_ROUND;
-  const [cadence, setCadence] = useState<"monthly" | "biweekly">("biweekly");
-  const list = cadence === "monthly" ? Y.monthly : Y.biweekly;
-  const [period, setPeriod] = useState<string>(list[0].key);
-  const card = list.find((p) => p.key === period) ?? list[0];
-  const [state, setState] = useState<Record<string, "idle" | "composing" | "done">>({});
-  const [fullYear, setFullYear] = useState(false);
-  const s = state[card.key] ?? "idle";
-  return (
-    <section className="flex flex-col gap-[var(--space-4)]">
-      <div>
-        <SectionHead>{Y.title}</SectionHead>
-        <Muted className="mt-[2px]">{Y.sub}</Muted>
-      </div>
-      <Panel id="att-year-round-title" title={card.period} aside={<Segmented ariaLabel="Cadence" value={cadence} onChange={(k) => { setCadence(k); setPeriod((k === "monthly" ? Y.monthly : Y.biweekly)[0].key); }} options={[...Y.cadence]} />}>
-        <PeriodChips options={list.map((p) => ({ key: p.key, label: p.period }))} value={card.key} onChange={setPeriod} />
-        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 16%, transparent), transparent 70%), var(--glass-surface-1)`, borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))` }}>
-          <Eyebrow>{card.period}</Eyebrow>
-          <h3 className="text-[20px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{card.theme}</h3>
-          <p className="text-[16px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{card.prompt}</p>
-          <Muted>{card.students}</Muted>
-          {s === "idle" && <PrimaryCta size="sm" className="w-fit" onClick={() => setState((m) => ({ ...m, [card.key]: "composing" }))}>{card.cta}</PrimaryCta>}
-          {s === "composing" && <AnswerForm id={`att-year-${card.key}`} placeholder={card.prompt} submit={Y.submit} cancel={Y.cancel} onCancel={() => setState((m) => ({ ...m, [card.key]: "idle" }))} onDone={() => setState((m) => ({ ...m, [card.key]: "done" }))} />}
-          {s === "done" && <Submitted />}
-        </div>
-        <div className="flex flex-col gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <LinkButton onClick={() => setFullYear((v) => !v)}>{fullYear ? Y.hideYear : <>{Y.fullYear} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></>}</LinkButton>
-          {fullYear && (
-            <ol className="grid grid-cols-1 gap-[8px] sm:grid-cols-2">
-              {Y.year.map(([month, theme]) => {
-                const current = cadence === "monthly" ? card.period === month : card.period.startsWith(month.slice(0, 3));
-                return (
-                  <li key={month} className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border px-[14px] py-[10px]" style={{ background: current ? `color-mix(in srgb, ${accent} 14%, var(--glass-surface-1))` : "var(--glass-surface-1)", borderColor: current ? `color-mix(in srgb, ${accent} 45%, var(--glass-border))` : "var(--glass-border)" }}>
-                    <Eyebrow>{month}</Eyebrow>
-                    <span className="text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{theme}</span>
-                  </li>
-                );
-              })}
-            </ol>
-          )}
-        </div>
-      </Panel>
-    </section>
-  );
-}
-
-// ——— Enterprise ———
-
-function Switch({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
-  return (
-    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onToggle} className="dm-quiet relative h-[26px] w-[46px] flex-none cursor-pointer rounded-full border transition-colors" style={{ background: on ? accent : "var(--glass-surface-2)", borderColor: on ? accent : "var(--glass-border)" }}>
-      <span className="absolute top-[3px] size-[18px] rounded-full bg-white transition-[left] duration-200" style={{ left: on ? 23 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.35)" }} />
-    </button>
-  );
-}
-
-function Field({ id, value, placeholder, onChange }: { id: string; value: string; placeholder: string; onChange: (v: string) => void }) {
-  return (
-    <>
-      <label className="sr-only" htmlFor={id}>{placeholder}</label>
-      <input id={id} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={FIELD_CLASS} style={FIELD_STYLE} />
-    </>
-  );
-}
-
-type PeriodState = { source: D.TopicSource; selected: boolean; saved: boolean; editing: boolean; approved: boolean; att: { topic: string; volunteer: string; student: string } };
-
-function EnterpriseProgram() {
-  const P = D.PROGRAM;
-  const [autopilot, setAutopilot] = useState(true);
-  const [cadence, setCadence] = useState<"monthly" | "biweekly">("monthly");
-  const list = cadence === "monthly" ? P.monthly : P.biweekly;
-  const [period, setPeriod] = useState<string>(list[0].key);
-  const card = list.find((p) => p.key === period) ?? list[0];
-  const [states, setStates] = useState<Record<string, PeriodState>>({});
-  const st: PeriodState = states[card.key] ?? { source: card.defaultSource, selected: card.dreamari.selected, saved: card.att.saved, editing: !card.att.saved, approved: false, att: { topic: card.att.topic, volunteer: card.att.volunteer, student: card.att.student } };
-  const set = (patch: Partial<PeriodState>) => setStates((m) => ({ ...m, [card.key]: { ...st, ...patch } }));
-  const labelStyle = { color: "var(--foreground)" } as const;
-  return (
-    <section className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
-        <div>
-          <SectionHead>{P.title}</SectionHead>
-          <Muted className="mt-[2px]">{P.sub}</Muted>
-        </div>
-        <div className="flex items-center gap-[12px] rounded-[var(--radius-lg)] border px-[14px] py-[10px]" style={ITEM}>
-          <div>
-            <Eyebrow>{P.autopilot.label}</Eyebrow>
-            <Muted>{P.autopilot.sub}</Muted>
-          </div>
-          <Switch on={autopilot} onToggle={() => setAutopilot((v) => !v)} label={P.autopilot.label} />
-        </div>
-      </div>
-
-      <Panel id="att-program-title" title={card.period} aside={<Segmented ariaLabel="Cadence" value={cadence} onChange={(k) => { setCadence(k); setPeriod((k === "monthly" ? P.monthly : P.biweekly)[0].key); }} options={[...D.YEAR_ROUND.cadence]} />}>
-        <PeriodChips options={list.map((p) => ({ key: p.key, label: p.period }))} value={card.key} onChange={setPeriod} />
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
-          <div>
-            <Eyebrow>{card.period}</Eyebrow>
-            <h3 className="mt-[2px] text-[20px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{card.theme}</h3>
-          </div>
-          <div className="flex flex-col gap-[8px]">
-            <Eyebrow tone="var(--muted-foreground)">{P.topicSource}</Eyebrow>
-            <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-3">
-              {D.TOPIC_SOURCES.map((s) => {
-                const on = st.source === s.key;
-                return (
-                  <button key={s.key} type="button" aria-pressed={on} onClick={() => set({ source: s.key })} className="dm-quiet flex cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[14px] py-[10px] text-left" style={{ borderColor: on ? `color-mix(in srgb, ${accent} 60%, var(--glass-border))` : "var(--glass-border)", background: on ? `color-mix(in srgb, ${accent} 14%, var(--glass-surface-1))` : "var(--glass-surface-2)" }}>
-                    <span className="min-w-0">
-                      <span className="block text-[14px] leading-[19px] font-bold" style={labelStyle}>{s.name}</span>
-                      <span className="block text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{s.sub}</span>
-                    </span>
-                    {on && <CheckCircle2 className="h-4 w-4 flex-none" aria-hidden style={{ color: accent }} />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
-            {st.source === "dreamari" && (
-              <>
-                <Eyebrow>{P.labels.dreamari}</Eyebrow>
-                <span className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", ...labelStyle }}>{card.dreamari.topic}</span>
-                <p className="text-[14px] leading-[20px]" style={labelStyle}><strong className="font-bold">{P.labels.employees}</strong> {card.dreamari.employees}</p>
-                <p className="text-[14px] leading-[20px]" style={labelStyle}><strong className="font-bold">{P.labels.students}</strong> {card.dreamari.students}</p>
-                <div className="flex flex-wrap gap-[8px] pt-[4px]">
-                  {st.selected ? <QuietCta size="sm" done>{P.actions.selected}</QuietCta> : <PrimaryCta size="sm" onClick={() => set({ selected: true })}>{P.actions.use}</PrimaryCta>}
-                  <QuietCta size="sm" onClick={() => set({ selected: false })}>{P.actions.another}</QuietCta>
-                </div>
-              </>
-            )}
-            {st.source === "att" && (
-              <>
-                <Eyebrow>{P.labels.att}</Eyebrow>
-                {st.editing ? (
-                  <form className="flex flex-col gap-[8px]" onSubmit={(e) => { e.preventDefault(); set({ saved: true, editing: false }); }}>
-                    <Field id={`att-topic-${card.key}`} value={st.att.topic} placeholder={P.fields.topic} onChange={(v) => set({ att: { ...st.att, topic: v } })} />
-                    <Field id={`att-vol-${card.key}`} value={st.att.volunteer} placeholder={P.fields.volunteer} onChange={(v) => set({ att: { ...st.att, volunteer: v } })} />
-                    <Field id={`att-stu-${card.key}`} value={st.att.student} placeholder={P.fields.student} onChange={(v) => set({ att: { ...st.att, student: v } })} />
-                    <PrimaryCta size="sm" className="w-fit" onClick={() => set({ saved: true, editing: false })}>{P.actions.save}</PrimaryCta>
-                  </form>
-                ) : (
-                  <>
-                    <span className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", ...labelStyle }}>{st.att.topic}</span>
-                    <p className="text-[14px] leading-[20px]" style={labelStyle}><strong className="font-bold">{P.labels.volunteer}</strong> {st.att.volunteer}</p>
-                    <p className="text-[14px] leading-[20px]" style={labelStyle}><strong className="font-bold">{P.labels.student}</strong> {st.att.student}</p>
-                    <div className="flex flex-wrap items-center gap-[14px] pt-[4px]">
-                      <LinkButton onClick={() => set({ editing: true })}>{P.actions.edit}</LinkButton>
-                      <Submitted text={P.actions.saved} />
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-            {st.source === "school" && (
-              <>
-                <Eyebrow>{P.labels.school}</Eyebrow>
-                <span className="text-[17px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", ...labelStyle }}>{card.school.topic}</span>
-                <Muted>{card.school.by}</Muted>
-                <p className="text-[14px] leading-[20px]" style={labelStyle}><strong className="font-bold">{P.labels.employee}</strong> {card.school.employee}</p>
-                <p className="text-[14px] leading-[20px]" style={labelStyle}><strong className="font-bold">{P.labels.schoolStudent}</strong> {card.school.student}</p>
-                <div className="flex flex-wrap gap-[8px] pt-[4px]">
-                  {st.approved ? <QuietCta size="sm" done>{P.actions.approve}</QuietCta> : <PrimaryCta size="sm" onClick={() => set({ approved: true })}>{P.actions.approve}</PrimaryCta>}
-                  <QuietCta size="sm" onClick={() => set({ approved: false })}>{P.actions.editShort}</QuietCta>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </Panel>
-    </section>
-  );
-}
-
-const TILE_ICONS = [Users, UserRound, Eye, MessagesSquare, Clock, Briefcase];
-
-function EnterpriseImpact({ onTeam }: { onTeam: () => void }) {
-  const I = D.IMPACT;
-  const [range, setRange] = useState<"month" | "year">("month");
-  const [metric, setMetric] = useState<string>(I.trend.metrics[0].key);
-  return (
-    <section className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
-        <div>
-          <SectionHead>{I.title}</SectionHead>
-          <Muted className="mt-[2px]">{I.sub}</Muted>
-        </div>
-        <Segmented ariaLabel="Range" value={range} onChange={setRange} options={[...I.range]} />
-      </div>
-      <SectionSurface>
-        <div className="grid grid-cols-2 sm:grid-cols-3">
-          {I.tiles.map((tile, i) => (
-            <div key={tile.key} className={`p-[var(--space-4)] ${ruledCell(i, 3)}`} style={{ borderColor: RULE }}>
-              <MetricTile icon={TILE_ICONS[i]} value={tile.value} label={tile.label} accent={accent} />
-            </div>
-          ))}
-        </div>
-      </SectionSurface>
-      <Panel id="att-trend-title" title={I.trend.metrics.find((m) => m.key === metric)?.label ?? ""} aside={<Segmented ariaLabel={I.trend.eyebrow} value={metric} onChange={setMetric} options={I.trend.metrics.map((m) => ({ key: m.key, label: m.label }))} />}>
-        <AreaChart points={I.trend.series[metric]} accent={accent} height={170} labels={[I.trend.months[0], I.trend.months[3], I.trend.months[5]]} />
-      </Panel>
-      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:flex-row sm:items-center sm:justify-between" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 26%, #0e0c20), #0e0c20)`, borderColor: `color-mix(in srgb, ${accent} 45%, transparent)` }}>
-        <div className="flex flex-col gap-[8px]">
-          <Eyebrow tone="#FFFFFFB3">{I.employee.eyebrow}</Eyebrow>
-          <div className="grid grid-cols-1 gap-x-[var(--space-5)] gap-y-[4px] sm:grid-cols-2">
-            {I.employee.lines.map((line) => <span key={line} className="text-[14.5px] leading-[20px] font-bold" style={{ color: "#FFFFFF" }}>{line}</span>)}
-          </div>
-        </div>
-        <PrimaryCta size="sm" className="w-fit" onClick={onTeam} style={{ background: "#FFFFFF", color: "#0e0c20" }}>{I.employee.cta} <ChevronRight className="h-4 w-4" aria-hidden /></PrimaryCta>
-      </div>
-    </section>
   );
 }
 
@@ -995,7 +1241,18 @@ export function AttCommunityView({ onBack, backLabel = D.BACK }: { onBack: () =>
   const [view, setView] = useState<D.AttView>("student");
   const [studentTab, setStudentTab] = useState<typeof D.STUDENT_TABS[number]["key"]>("home");
   const [volunteerTab, setVolunteerTab] = useState<typeof D.VOLUNTEER_TABS[number]["key"]>("home");
-  const [enterpriseTab, setEnterpriseTab] = useState<typeof D.ENTERPRISE_TABS[number]["key"]>("program");
+  const [enterpriseTab, setEnterpriseTab] = useState<typeof D.ENTERPRISE_TABS[number]["key"]>("impact");
+  // Learn: progress per module, the module open in its sheet, and the toast
+  // that confirms XP and plan changes. Local to the prototype.
+  const [progress, setProgress] = useState<Record<string, number>>(() => Object.fromEntries(D.LEARN_MODULES.map((m) => [m.id, m.progress])));
+  const [module, setModule] = useState<D.LearnModule>();
+  const [toast, onToast] = useToast();
+  const advance = (m: D.LearnModule, from: Element | null) => {
+    const next = Math.min(100, (progress[m.id] ?? 0) + 40);
+    setProgress((p) => ({ ...p, [m.id]: next }));
+    const flew = flyXp({ from, amount: m.xp, milestone: `${D.LEARN.xpMilestone} · ${m.id} · ${next}`, tone: accent });
+    onToast(next >= 100 ? `${D.LEARN.done} · +${m.xp} ${D.LEARN.sheet.xp}` : flew ? `+${m.xp} ${D.LEARN.sheet.xp} · ${next}%` : `${next}% · progress saved`);
+  };
   const [saves, setSaves] = useState<Record<string, boolean>>({});
   const [plan, setPlan] = useState<Record<string, boolean>>({});
   const [follows, setFollows] = useState<Record<string, boolean>>({});
@@ -1024,6 +1281,8 @@ export function AttCommunityView({ onBack, backLabel = D.BACK }: { onBack: () =>
   return (
     <OpenPro.Provider value={D.REPLIT_ONLY ? () => {} : setProfile}>
       {opportunity && <OpportunitySheet item={opportunity} saved={!!saves[opportunity.id]} onSave={() => toggleSave(opportunity.id)} inPlan={!!plan[opportunity.id]} onPlan={() => togglePlan(opportunity.id)} onClose={() => setOpportunity(undefined)} />}
+      {module && <ModuleSheet m={module} pct={progress[module.id]} inPlan={!!plan[module.id]} onPlan={() => { togglePlan(module.id); onToast(plan[module.id] ? "Removed from My Plan" : "Added to My Plan"); }} onAdvance={(from) => advance(module, from)} onClose={() => setModule(undefined)} />}
+      {toast}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
@@ -1064,15 +1323,15 @@ export function AttCommunityView({ onBack, backLabel = D.BACK }: { onBack: () =>
         </div>
 
         <div className="flex flex-col gap-[var(--space-6)]">
-          {view === "student" && studentTab === "home" && <StudentHome onAsk={() => setStudentTab("questions")} onSeeAll={() => setStudentTab("opportunities")} saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} />}
-          {view === "student" && studentTab === "questions" && <StudentQuestions />}
+          {view === "student" && studentTab === "home" && <StudentHome onAsk={() => setStudentTab("questions")} onSeeAll={() => setStudentTab("opportunities")} onLearn={() => setStudentTab("learn")} saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} progress={progress} openModule={setModule} onToast={onToast} />}
+          {view === "student" && studentTab === "learn" && <StudentLearn progress={progress} openModule={setModule} />}
+          {view === "student" && studentTab === "questions" && <StudentQuestions follows={follows} toggleFollow={toggleFollow} />}
           {view === "student" && studentTab === "opportunities" && <StudentOpportunities saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} />}
-          {view === "student" && studentTab === "people" && <StudentPeople follows={follows} toggleFollow={toggleFollow} />}
 
           {view === "volunteer" && volunteerTab === "home" && <VolunteerHome />}
           {view === "volunteer" && volunteerTab === "questions" && <VolunteerQuestions />}
           {view === "volunteer" && volunteerTab === "share" && <VolunteerShare />}
-          {view === "volunteer" && volunteerTab === "yearRound" && <VolunteerYearRound />}
+          {view === "volunteer" && volunteerTab === "yearRound" && <VolunteerImpact />}
 
           {view === "enterprise" && enterpriseTab === "program" && <EnterpriseProgram />}
           {view === "enterprise" && enterpriseTab === "impact" && <EnterpriseImpact onTeam={() => setEnterpriseTab("team")} />}
