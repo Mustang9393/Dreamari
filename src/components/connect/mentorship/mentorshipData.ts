@@ -42,9 +42,9 @@ export const PROGRAM = {
 /** `lockup` is a partner's own lockup image (the Coach Foundation); otherwise the tile wears the company mark from COMPANY_MARKS at a matched cap height. */
 export type ProgramTile = { id: string; company: string; title: string; kind: string; line: string; cover: string; focus?: string; lockup?: string; state: "yours" | "enrolling" | "soon"; meta: string };
 export const PROGRAM_TILES: ProgramTile[] = [
-  { id: "coach", company: "Coach", title: "Dream It Real Mentorship", kind: "1:1 mentorship", line: "A Coach employee mentor for all four years of college.", cover: "/images/connect/covers/coach-dream-it-real.jpg", focus: "50% 30%", lockup: "/images/connect/partners/coach-foundation-white.png", state: "yours", meta: "450 scholars · 450 mentors · October to April" },
-  { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", kind: "1:1 mentorship", line: "Three years with a JPMorganChase mentor, sophomore year through college enrollment.", cover: "/images/connect/covers/jpmc-fellowship-initiative.jpg", focus: "50% 40%", state: "enrolling", meta: "January 2027 · 2 to 3 Saturdays a month" },
-  { id: "ey", company: "EY", title: "College MAP", kind: "Group mentorship", line: "EY mentors work with small groups through the college and financial aid process.", cover: "/images/connect/covers/ey-college-map.jpg", focus: "60% 40%", state: "soon", meta: "35 cities · groups of 6 to 8" },
+  { id: "coach", company: "Coach", title: "Dream It Real Mentorship", kind: "1:1 mentorship", line: "A Coach employee mentor for all four years of college.", cover: "/images/connect/covers/coach-dream-it-real.jpg", focus: "50% 30%", lockup: "/images/connect/partners/coach-foundation-white.png", state: "yours", meta: "" },
+  { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", kind: "1:1 mentorship", line: "Three years with a JPMorganChase mentor, sophomore year through college enrollment.", cover: "/images/connect/covers/jpmc-fellowship-initiative.jpg", focus: "50% 40%", state: "enrolling", meta: "January 2027" },
+  { id: "ey", company: "EY", title: "College MAP", kind: "Group mentorship", line: "EY mentors work with small groups through the college and financial aid process.", cover: "/images/connect/covers/ey-college-map.jpg", focus: "60% 40%", state: "soon", meta: "" },
 ];
 
 export type MentorshipView = "student" | "mentor" | "enterprise";
