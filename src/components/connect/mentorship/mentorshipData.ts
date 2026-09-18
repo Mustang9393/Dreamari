@@ -33,14 +33,17 @@ export const PROGRAM = {
 } as const;
 
 /** The tiled Mentorship landing: Coach's program is live for this student;
- *  the other partners' real mentorship programs are listed as they would
- *  appear once onboarded. Names are the programs these companies run. */
-export type ProgramTile = { id: string; company: string; title: string; line: string; cover: string; state: "yours" | "enrolling" | "soon"; meta: string };
+ *  the other partners' real, current mentorship programs are listed as they
+ *  would appear once onboarded, each with the partner's own imagery.
+ *  JPMorganChase: The Fellowship Initiative (since 2010, 1:1 employee
+ *  mentors, three years; photo from jpmorganchase.com newsroom, TFI New York
+ *  graduation). EY: College MAP (since 2009, group mentoring, 5,000+ students
+ *  in 35 cities; photo from ey.com's College MAP page). */
+export type ProgramTile = { id: string; company: string; title: string; kind: string; line: string; cover: string; focus?: string; mark?: string; state: "yours" | "enrolling" | "soon"; meta: string };
 export const PROGRAM_TILES: ProgramTile[] = [
-  { id: "coach", company: "Coach", title: "Dream It Real Mentorship", line: "Coach Foundation · 1:1 with a Coach employee mentor for all four years of college", cover: "/images/connect/covers/coach-dream-it-real.jpg", state: "yours", meta: "450 scholars · 450 mentors · October to April" },
-  { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", line: "JPMorgan Chase · Mentoring and leadership for young men of color through high school", cover: "/images/connect/covers/do-event-jpmc.webp", state: "enrolling", meta: "Enrolling for January 2027" },
-  { id: "ey", company: "EY", title: "College MAP", line: "EY · Group mentoring for access and persistence, sophomore year through college", cover: "/images/connect/covers/do-event-ey.webp", state: "soon", meta: "Coming soon" },
-  { id: "att", company: "AT&T", title: "Aspire Mentoring Academy", line: "AT&T · Employee mentors for high school students, in person and online", cover: "/images/connect/covers/do-event-att.webp", state: "soon", meta: "Coming soon" },
+  { id: "coach", company: "Coach", title: "Dream It Real Mentorship", kind: "1:1 mentorship", line: "A Coach employee mentor for all four years of college.", cover: "/images/connect/covers/coach-dream-it-real.jpg", focus: "50% 30%", mark: "/images/connect/partners/coach-foundation-white.png", state: "yours", meta: "450 scholars · 450 mentors · October to April" },
+  { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", kind: "1:1 mentorship", line: "Three years with a JPMorganChase mentor, sophomore year through college enrollment.", cover: "/images/connect/covers/jpmc-fellowship-initiative.jpg", focus: "50% 40%", state: "enrolling", meta: "January 2027 · 2 to 3 Saturdays a month" },
+  { id: "ey", company: "EY", title: "College MAP", kind: "Group mentorship", line: "EY mentors work with small groups through the college and financial aid process.", cover: "/images/connect/covers/ey-college-map.jpg", focus: "60% 40%", state: "soon", meta: "35 cities · groups of 6 to 8" },
 ];
 
 export type MentorshipView = "student" | "mentor" | "enterprise";
@@ -48,6 +51,22 @@ export const VIEWS: { key: MentorshipView; label: string }[] = [
   { key: "student", label: "Student View" },
   { key: "mentor", label: "Mentor View" },
   { key: "enterprise", label: "Enterprise View" },
+];
+
+/** What a college student shares with a mentor from inside the app, sent
+ *  into the chat as a card the mentor can open: the plan for the season,
+ *  the resume, saved careers, a simulation result, the career report, a
+ *  school shortlist, an opportunity. Each is the real feature's page. */
+export type ShareKind = "plan" | "resume" | "careers" | "sim" | "report" | "schools" | "opportunity";
+export type Share = { kind: ShareKind; title: string; line: string; href: string; meta: string[] };
+export const SHAREABLES: Share[] = [
+  { kind: "plan", title: "My Plan · Year 1, Fall", line: "Explore + Build a Foundation. 8 steps, 3 done.", href: "/profile?tab=plan", meta: ["EXPLORE Fashion Buyer", "BUILD College resume", "JOIN Retail Club"] },
+  { kind: "resume", title: "Fashion Buyer Resume", line: "Updated Sep 12 · 69/100 ATS", href: "/resume-builder?view=document", meta: ["1 job", "1 club", "Excel · Canva · Spanish"] },
+  { kind: "careers", title: "Saved careers", line: "Top 3 from Explore", href: "/profile?tab=top3", meta: ["Fashion Buyer", "Marketing", "Product Management"] },
+  { kind: "sim", title: "Fashion Buyer · Day in the Life", line: "Played once · 3 skills picked up", href: "/play", meta: ["Retail math", "Trend forecasting", "Vendor negotiation"] },
+  { kind: "report", title: "Fashion Buyer career report", line: "Pay, education, career ladder, related careers", href: "/career/fashion-buyer", meta: ["$78K median", "Merchandising degree", "Assistant buyer first"] },
+  { kind: "schools", title: "School shortlist", line: "3 schools compared for Fashion Merchandising", href: "/colleges", meta: ["FIT (SUNY)", "Baruch College", "Cornell"] },
+  { kind: "opportunity", title: "Coach Summer Internship", line: "Applications open · College sophomores", href: "/connect?tab=mentorship", meta: ["Merchandising track", "New York, NY", "Apply by Jan 31"] },
 ];
 
 export const MENTOR = {
@@ -74,17 +93,72 @@ export const MEETING = {
 
 /** The real cards for the prep row: the Fashion Buyer poster, the Play
  *  card, the student's own resume. */
-export const PREP_CAREER = { title: "Fashion Buyer", world: "Business & Finance", photo: "/images/app/poster-fashion-buyer.webp", salary: "$78K median", href: "/career/fashion-buyer" } as const;
-export const PREP_PLAY = { title: "Fashion Buyer", world: "Business & Finance", cover: "/images/connect/covers/creative.webp", href: "/play" } as const;
+export const PREP_CAREER = { title: "Fashion Buyer", world: "Business & Finance", photo: "/images/app/poster-fashion-buyer.webp", href: "/career/fashion-buyer" } as const;
+// No Fashion Buyer simulation exists yet; the warm lounge art from the IB
+// sim set stands in until the fashion one is illustrated (18 Sept 2026).
+export const PREP_PLAY = { title: "Fashion Buyer", world: "Business & Finance", cover: "/images/play/ib/locations/cafe-lounge-sunset.webp", href: "/play" } as const;
 export const PREP_RESUME_HREF = "/resume-builder?view=document";
+export const PREP_RESUME_NAME = "Fashion Buyer Resume";
+export const PREP_RESUME_META = "Updated Sep 12 · 69/100 ATS";
+/** The sample resume the file card shows when the student has not saved one
+ *  yet: Maya’s, matching the mentee in this program. */
+export const SAMPLE_RESUME = {
+  profile: { firstName: "Maya", lastName: "Reyes", email: "maya.reyes@baruch.cuny.edu", phone: "(917) 555-0142", country: "United States", state: "New York", city: "Brooklyn", bio: "" },
+  education: [{ id: "ed1", schoolName: "Baruch College, CUNY", cityState: "New York, NY", gradYear: "2030", program: "", gpa: "3.6", honors: ["Dream It Real Scholar"] }],
+  experience: [
+    { id: "ex1", type: "job" as const, where: "Zara, Atlantic Terminal", title: "Sales Associate", location: "Brooklyn, NY", startDate: "2025-06", endDate: "", current: true, bullets: ["Restocked and merchandised the women’s floor for a store doing 900 transactions a day", "Tracked sell-through on new arrivals and flagged fast movers to the visual lead"], aiAssisted: false },
+    { id: "ex2", type: "club" as const, where: "Baruch Retail Club", title: "Events Coordinator", location: "New York, NY", startDate: "2025-09", endDate: "", current: true, bullets: ["Organized a buyer panel with three alumni for 60 students"], aiAssisted: false },
+  ],
+  skills: { people: ["Customer service", "Teamwork"], tech: ["Excel", "Google Sheets", "Canva"], languages: ["Spanish"] },
+  certifications: [],
+  versions: [],
+};
 
-export type Message = { from: "mentor" | "mentee"; text: string; when: string };
+/** A meeting request lives in the thread as its own card: named, with an
+ *  agenda, a time and a place, and Accept / Decline / Add to calendar on the
+ *  receiving side (direct feedback, 18 Sept 2026). */
+export type MeetingRequest = { title: string; agenda: string; when: string; where: string; status: "pending" | "accepted" | "declined" };
+export type Message = { from: "mentor" | "mentee"; text: string; when: string; meeting?: MeetingRequest; share?: Share };
 export const THREAD: Message[] = [
   { from: "mentor", text: "Hi Maya, I’m looking forward to our conversation about exploring careers.", when: "Mon 9:14 AM" },
   { from: "mentor", text: "I started as a buyer’s assistant before merchandising, so ask me anything about that path.", when: "Mon 9:15 AM" },
   { from: "mentee", text: "Thank you. I saved Fashion Buyer and would love to hear how you found your first experience.", when: "Mon 6:02 PM" },
   { from: "mentee", text: "Also, does Tuesday at 4 still work for you?", when: "Mon 6:03 PM" },
+  { from: "mentee", text: "", when: "Mon 6:04 PM", share: { kind: "resume", title: "Fashion Buyer Resume", line: "Updated Sep 12 · 69/100 ATS", href: "/resume-builder?view=document", meta: ["1 job", "1 club", "Excel · Canva · Spanish"] } },
+  { from: "mentor", text: "", when: "Tue 8:40 AM", meeting: { title: "Explore Careers check-in", agenda: "How I got into merchandising, and two bullets for your resume draft.", when: "Tue, Oct 28 · 4:00 PM", where: "Microsoft Teams", status: "pending" } },
 ];
+
+/** One nudge at a time above the composer, the way an assistant offers a
+ *  next line: it changes with the conversation, can be dismissed, and never
+ *  sits there permanently. Indexed by how many messages the student has
+ *  sent. */
+export const NUDGES: Record<"mentee" | "mentor", string[]> = {
+  mentee: ["Ask Avery how the buyer’s assistant path worked day to day", "Share one thing from the Fashion Buyer simulation", "Ask what to bring to Tuesday’s meeting", "Say thanks and confirm Tuesday"],
+  mentor: ["Ask what Maya saved this week", "Offer to look at her resume before Tuesday", "Share one thing you wish you knew at her age", "Confirm Tuesday and send the link"],
+};
+export const EMOJI = ["👍", "🙌", "😊", "🎉", "🙏", "💯", "👀", "✨", "😂", "❤️", "🔥", "🤔", "👏", "✅", "📚", "☕️"] as const;
+
+/** Avery as a full Connect profile, so the avatar in the thread opens the
+ *  same profile page every professional has. */
+export const MENTOR_PRO = {
+  id: "coach-avery",
+  name: "Avery Thompson",
+  role: "Senior Manager, Merchandising",
+  org: "Coach",
+  scope: "Fashion, merchandising and buying careers",
+  verifiedBy: "Employment verified by Coach Foundation · Dream It Real mentor since 2023",
+  world: "Business & Finance",
+  field: "Merchandising",
+  story: "I started as a buyer’s assistant counting units in a stockroom. Twelve years later I plan what a hundred stores sell each season, and the instinct I still use most is asking what the customer will reach for first.",
+  followers: 184,
+  studentsReached: 2210,
+  totalLikes: 466,
+  questionsAnswered: 12,
+  activeDaysAgo: 1,
+  education: "B.S. Fashion Merchandising, Fashion Institute of Technology",
+  journey: "Buyer’s assistant, assistant buyer, buyer, then merchandising manager. Dream It Real mentor for three cohorts.",
+  topics: ["Fashion buying", "Merchandising", "Retail math", "First jobs in fashion"],
+} as const;
 
 export const STUDENT_SUGGESTED = [
   "Do you use the software Dreamari recommends for this career at Coach?",
@@ -105,6 +179,7 @@ export const COMPOSER_ACTIONS = [
   { key: "link", label: "Send meeting link", who: "mentor" },
   { key: "time", label: "Suggest a meeting time", who: "both" },
   { key: "resource", label: "Share approved resource", who: "mentor" },
+  { key: "share", label: "Share from Dreamari", who: "both" },
 ] as const;
 export const APPROVED_RESOURCES = [
   { title: "How a buyer plans a season", kind: "Article · Coach Learning", min: "6 min" },

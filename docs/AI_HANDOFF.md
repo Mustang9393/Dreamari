@@ -10230,3 +10230,31 @@ facts and the 2030 goals come from the Tapestry call
 Open: portraits for Maya are the student illustrated set (correct per the
 rule); Avery Thompson uses an unused pro headshot. Real mentor/mentee data,
 video calls and message counting are backend.
+
+## 2026-09-18 · Mentorship tab, round two (Coach branding, tiles, chat)
+
+- Landing is a tiled list on the community card's full-bleed anatomy (photo,
+  scrim, progressive blur, partner mark, one frosted status line). Coach's
+  Dream It Real spans the first row; JPMorganChase's The Fellowship Initiative
+  and EY's College MAP follow with the partners' own newsroom photos. AT&T
+  Aspire dropped: no current imagery, program dated. Sources in
+  docs/reference/joshua-mentorship-replit-2026-09-18/README.md.
+- Program banner wears the Coach Foundation white lockup, their press photo
+  and mission line; brand tan (#D2B48C) is the program accent.
+- Prep row: three equal poster-ratio cards filling the row (career poster
+  without the salary chip, Play card, the resume as a file with the page edge
+  to edge and a document strip; Maya Reyes' sample when the store is empty).
+  Hover lift is no longer clipped (padded rail on phones, grid from sm).
+- Chat: grouped bubbles under one avatar, avatar taps open the profile
+  (Avery = full ProProfileView, Maya = sheet) and Back returns to the chat;
+  one rotating nudge above the composer (NUDGES, indexed by messages sent,
+  dismissable); plus menu with Attach, Photo, GIF (toast), Send meeting
+  link, Suggest a meeting time (MeetingRequestSheet: name, agenda, slot),
+  Share approved resource, Share from Dreamari; emoji behind the smile;
+  suggested questions behind the sparkle.
+- In-thread cards: MeetingCard (Accept / Decline on the receiving side, Add
+  to calendar downloads a real .ics once accepted) and ShareCard (My Plan for
+  the season, resume, saved careers, simulation result, career report, school
+  shortlist, an opportunity; each opens the real page).
+- Still a placeholder: the Fashion Buyer simulation art (IB lounge scene until
+  the fashion one is illustrated); GIFs.

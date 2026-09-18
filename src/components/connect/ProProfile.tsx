@@ -748,11 +748,14 @@ export function ProProfileView({
   onBack,
   onAsked,
   onOpenDashboard,
+  backLabel = "View all professionals",
 }: {
   pro: Pro;
   follows: Follows;
   onFollow: (id: string) => void;
   onBack: () => void;
+  /** where Back goes when the profile was opened from somewhere other than People (the mentorship chat) */
+  backLabel?: string;
   onAsked?: (title: string) => void;
   /** Volunteer demo only: the professional looking at their own page can step into the private dashboard. */
   onOpenDashboard?: () => void;
@@ -780,7 +783,7 @@ export function ProProfileView({
          and About as connected cards. */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-          <ChevronLeft className="h-4 w-4" aria-hidden /> View all professionals
+          <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
         </button>
         <div className="flex items-center gap-[var(--space-3)]">
           {onOpenDashboard && (

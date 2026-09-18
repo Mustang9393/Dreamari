@@ -6,15 +6,17 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { Calendar, Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, MessageCircle, Paperclip, Play, Plus, Send, ShieldCheck, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, MessageCircle, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { PosterCard } from "@/components/app/PosterCard";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { DEFAULT_RESUME_TEMPLATE } from "@/components/resume/data";
 import { resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import { Avatar, CompanyChip, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { ProProfileView, type Follows } from "../ProProfile";
+import type { Pro } from "../data";
+import type { ResumeData } from "@/lib/resume";
 import { Meter, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart, GoalTrack, Histogram, ShareBar, Sparkline, compact } from "./charts";
 import * as D from "./mentorshipData";
@@ -140,7 +142,7 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
       </div>
       <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2">
         {D.PROGRAM_TILES.map((tile, i) => (
-          <motion.div key={tile.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+          <motion.div key={tile.id} className={tile.state === "yours" ? "sm:col-span-2" : ""} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
             <ProgramTile tile={tile} onOpen={() => (tile.state === "yours" ? setOpen(tile.id) : onToast(tile.state === "enrolling" ? "Enrollment opens in January. We will let you know." : "This program is not open yet."))} />
           </motion.div>
         ))}
@@ -150,28 +152,30 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
   );
 }
 
-/** One program, in the community card's language: the partner's photo,
- *  their mark, the state, the program name, one line, the facts. */
+/** One program on the community card's full-bleed anatomy (photo, top
+ *  scrim, progressive blur, the partner's mark), kept visibly distinct: a
+ *  mentorship-kind eyebrow, the partner's own lockup where they have one,
+ *  and a single frosted status line instead of three stat tiles. */
 function ProgramTile({ tile, onOpen }: { tile: D.ProgramTile; onOpen: () => void }) {
   const yours = tile.state === "yours";
+  const stateTone = yours ? GOOD : tile.state === "enrolling" ? accent : "rgba(255,255,255,0.7)";
+  const stateLabel = yours ? "Your program" : tile.state === "enrolling" ? "Enrolling" : "Coming soon";
   return (
-    <button type="button" onClick={onOpen} className="dm-tap group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: yours ? `color-mix(in srgb, ${accent} 45%, var(--glass-border))` : "var(--glass-border)", background: "var(--glass-surface-1)", boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
-      <span className="relative block h-[168px] w-full overflow-hidden" style={{ background: "#0e0c20" }}>
-        <Image src={tile.cover} alt="" fill sizes="(min-width: 640px) 50vw, 100vw" className={`object-cover transition-transform duration-500 group-hover:scale-[1.03] ${yours ? "" : "opacity-80"}`} />
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.85) 0%, rgba(12,16,35,0.25) 55%, transparent 100%)" }} />
-        <span className="absolute top-[12px] left-[12px]"><CompanyChip name={tile.company} tone="photo" size="md" /></span>
-        {/* dark glass behind the state so it reads on any photo, the way
-           the poster card's salary chip does */}
-        <span className="absolute top-[12px] right-[12px] rounded-full border px-[4px] py-[3px] backdrop-blur-[10px]" style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.16)" }}>
-          {yours ? <Chip tone={GOOD}><span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />Your program</Chip> : tile.state === "enrolling" ? <Chip>Enrolling</Chip> : <Chip tone="var(--muted-foreground)"><Lock className="h-3 w-3" aria-hidden /> Coming soon</Chip>}
-        </span>
-        <span className="absolute inset-x-[16px] bottom-[12px] text-[20px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: INK, textShadow: CARD_TEXT_SHADOW }}>{tile.title}</span>
+    <button type="button" onClick={onOpen} className={`dm-tap group relative flex w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] text-left ${yours ? "min-h-[320px] sm:min-h-[340px]" : "min-h-[300px]"}`} style={{ background: "#0e0c20", boxShadow: `inset 0 0 0 1px ${yours ? `color-mix(in srgb, ${accent} 45%, rgba(255,255,255,0.14))` : "rgba(255,255,255,0.14)"}, 0 18px 44px -22px rgba(0,0,0,0.65)`, textShadow: CARD_TEXT_SHADOW }}>
+      <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+        <Image src={tile.cover} alt="" fill sizes="(min-width: 640px) 700px, 100vw" className="object-cover" style={{ objectPosition: tile.focus ?? "50% 40%" }} />
       </span>
-      <span className="flex flex-1 flex-col gap-[8px] p-[var(--space-4)]">
-        <Muted>{tile.line}</Muted>
-        <span className="mt-auto flex items-center justify-between gap-[10px] pt-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {tile.meta}
-          <span className="flex items-center gap-[4px] font-bold" style={{ color: yours ? accent : "var(--muted-foreground)" }}>{yours ? "Open" : "Details"} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
+      <CardProgressiveBlur size="40%" />
+      <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.55) 38%, rgba(12,16,35,0.12) 68%, transparent 100%), ${cardTopScrim()}` }} />
+      <span className="absolute top-[14px] left-[14px] z-20"><CompanyChip name={tile.company} tone="photo" size="md" /></span>
+      {tile.mark && <Image src={tile.mark} alt="" width={1200} height={298} unoptimized className="absolute top-[16px] right-[18px] z-20 h-[22px] w-auto" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.45))" }} />}
+      <span className="relative z-20 mt-auto flex flex-col gap-[6px] px-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
+        <span className="text-[11px] leading-[15px] font-extrabold tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${accent} 75%, ${INK})`, fontFamily: "var(--font-body)" }}>{tile.kind} · {tile.company === "Coach" ? "Coach Foundation" : tile.company}</span>
+        <span className={`font-extrabold text-balance ${yours ? "text-[28px] leading-[32px]" : "text-[24px] leading-[28px]"}`} style={{ color: INK }}>{tile.title}</span>
+        <span className="max-w-[56ch] text-[13.5px] leading-[19px] font-semibold" style={{ color: `color-mix(in srgb, ${INK} 80%, transparent)`, fontFamily: "var(--font-body)" }}>{tile.line}</span>
+        <span className="mt-[8px] flex items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[12px] py-[8px] text-[12.5px] leading-[17px] font-semibold" style={{ background: "rgba(255,255,255,0.09)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.78)", fontFamily: "var(--font-body)", textShadow: "none" }}>
+          <span className="flex min-w-0 items-center gap-[8px]"><span className="flex items-center gap-[5px] font-bold whitespace-nowrap" style={{ color: stateTone }}>{yours && <span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />}{!yours && tile.state === "soon" && <Lock className="h-3 w-3" aria-hidden />}{stateLabel}</span><span className="truncate">· {tile.meta}</span></span>
+          <span className="flex flex-none items-center gap-[3px] font-bold" style={{ color: "#FFFFFF" }}>{yours ? "Open" : "Details"} <ChevronRight className="h-[14px] w-[14px] transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
         </span>
       </span>
     </button>
@@ -184,8 +188,16 @@ function ProgramTile({ tile, onOpen }: { tile: D.ProgramTile; onOpen: () => void
 function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | "partner" | "admin"; onBack: () => void }) {
   const defaultView: D.MentorshipView = role === "pro" ? "mentor" : role === "partner" || role === "admin" ? "enterprise" : "student";
   const [view, setView] = useState<D.MentorshipView>(defaultView);
+  // Tapping an avatar in the thread opens that person's profile; Back
+  // returns to the same chat, so the program stays mounted underneath.
+  const [profile, setProfile] = useState<"mentor" | "mentee" | null>(null);
+  const [follows, setFollows] = useState<Follows>({});
+  if (profile === "mentor") {
+    return <ProProfileView pro={D.MENTOR_PRO as unknown as Pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={() => setProfile(null)} backLabel="Back to chat" />;
+  }
   return (
     <section className="flex flex-col gap-[var(--space-5)]" aria-label={D.PROGRAM.title}>
+      {profile === "mentee" && <MenteeProfile onBack={() => setProfile(null)} />}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> Back to programs
@@ -212,11 +224,39 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
       </section>
 
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
-        {view === "student" && <StudentView />}
-        {view === "mentor" && <MentorView />}
+        {view === "student" && <StudentView onOpenProfile={() => setProfile("mentor")} />}
+        {view === "mentor" && <MentorView onOpenProfile={() => setProfile("mentee")} />}
         {view === "enterprise" && <EnterpriseView />}
       </SectionSurface>
     </section>
+  );
+}
+
+/** Maya's profile as her mentor sees it: the scholar, what she is
+ *  exploring, what she has done in Dreamari. A sheet, so the chat stays. */
+function MenteeProfile({ onBack }: { onBack: () => void }) {
+  return (
+    <Sheet title={D.MENTEE.name} label="Dream It Real Scholar" onClose={onBack}>
+      <div className="flex items-center gap-[14px]">
+        <Avatar name={D.MENTEE.name} size={64} />
+        <div className="flex flex-col gap-[2px]">
+          <span className="flex items-center gap-[6px] text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.MENTEE.name} Reyes <VerifiedBadge size={14} /></span>
+          <Muted>{D.MENTEE.line} · Baruch College, CUNY</Muted>
+        </div>
+      </div>
+      <div className="flex flex-col gap-[6px]">
+        <Eyebrow tone="var(--muted-foreground)">Exploring</Eyebrow>
+        <div className="flex flex-wrap gap-[6px]">{D.MENTEE.exploring.map((c) => <Chip key={c}>{c}</Chip>)}</div>
+      </div>
+      <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+        {D.NEXT_CONVERSATION.prep.map((line) => (
+          <li key={line} className="flex items-start gap-[10px] py-[10px] text-[14px] leading-[20px]" style={{ borderColor: RULE, color: "var(--foreground)" }}>
+            <Check className="mt-[3px] h-4 w-4 flex-none" aria-hidden style={{ color: GOOD }} /> {line}
+          </li>
+        ))}
+      </ul>
+      <QuietCta size="sm" className="w-fit" onClick={onBack}><ChevronLeft className="h-4 w-4" aria-hidden /> Back to chat</QuietCta>
+    </Sheet>
   );
 }
 
@@ -271,52 +311,153 @@ function ScheduleCard({ onToast, showMeter }: { onToast: (t: string) => void; sh
   );
 }
 
+/** Add-to-calendar as a real .ics download, no service needed. */
+function downloadIcs(m: D.MeetingRequest) {
+  const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Dreamari//Mentorship//EN", "BEGIN:VEVENT", `SUMMARY:${m.title}`, `DESCRIPTION:${m.agenda.replace(/,/g, "\\,")}`, `LOCATION:${m.where}`, "DTSTART:20261028T200000Z", "DTEND:20261028T204500Z", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  const url = URL.createObjectURL(new Blob([body], { type: "text/calendar" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${m.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.ics`;
+  a.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** A meeting request inside the thread: named, with an agenda, a time and
+ *  a place. The receiver accepts or declines here; either side can add it
+ *  to their calendar once it is accepted. */
+function MeetingCard({ m, mine, onDecide, onToast }: { m: D.MeetingRequest; mine: boolean; onDecide: (status: "accepted" | "declined") => void; onToast: (t: string) => void }) {
+  const tone = m.status === "accepted" ? GOOD : m.status === "declined" ? "var(--muted-foreground)" : accent;
+  return (
+    <div className="flex w-[300px] max-w-full flex-col gap-[10px] rounded-[18px] border p-[14px]" style={{ background: "var(--glass-surface-2)", borderColor: `color-mix(in srgb, ${tone} 45%, var(--glass-border))`, boxShadow: "0 14px 32px -22px rgba(0,0,0,0.6)" }}>
+      <div className="flex items-start justify-between gap-[8px]">
+        <span className="flex items-center gap-[6px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: tone }}><Calendar className="h-3.5 w-3.5" aria-hidden /> Meeting request</span>
+        <Chip tone={tone}>{m.status === "pending" ? (mine ? "Waiting" : "New") : m.status === "accepted" ? "Accepted" : "Declined"}</Chip>
+      </div>
+      <div className="flex flex-col gap-[2px]">
+        <span className="text-[15.5px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.title}</span>
+        <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{m.agenda}</span>
+      </div>
+      <div className="flex flex-col gap-[2px] border-t pt-[8px] text-[13px] leading-[18px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}>
+        <span className="flex items-center gap-[6px]"><Clock className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {m.when}</span>
+        <span className="flex items-center gap-[6px]"><Video className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {m.where}</span>
+      </div>
+      {m.status === "pending" && !mine && (
+        <div className="flex gap-[8px]">
+          <PrimaryCta size="sm" className="flex-1" onClick={() => onDecide("accepted")}><Check className="h-4 w-4" aria-hidden /> Accept</PrimaryCta>
+          <QuietCta size="sm" className="flex-1" onClick={() => onDecide("declined")}>Decline</QuietCta>
+        </div>
+      )}
+      {m.status === "accepted" && (
+        <QuietCta size="sm" className="w-full" onClick={() => { downloadIcs(m); onToast("Added to your calendar."); }}><CalendarPlus className="h-4 w-4" aria-hidden /> Add to calendar</QuietCta>
+      )}
+    </div>
+  );
+}
+
+const SHARE_ICON: Record<D.ShareKind, typeof FileText> = { plan: ClipboardList, resume: FileText, careers: Compass, sim: Play, report: BookOpen, schools: School, opportunity: Handshake };
+
+/** An app feature shared into the chat: what it is, one line, a few facts,
+ *  and Open into the real page. Same card either side sends it. */
+function ShareCard({ share, mine }: { share: D.Share; mine: boolean }) {
+  const Icon = SHARE_ICON[share.kind];
+  return (
+    <Link href={share.href} className="dm-tap group flex w-[300px] max-w-full flex-col gap-[10px] rounded-[18px] border p-[14px] text-left" style={{ background: mine ? `color-mix(in srgb, var(--primary) 18%, var(--glass-surface-2))` : "var(--glass-surface-2)", borderColor: mine ? "color-mix(in srgb, var(--primary) 45%, var(--glass-border))" : "var(--glass-border)", boxShadow: "0 14px 32px -22px rgba(0,0,0,0.6)" }}>
+      <span className="flex items-start gap-[10px]">
+        <span className="flex size-[36px] flex-none items-center justify-center rounded-[10px]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}><Icon className="h-[18px] w-[18px]" aria-hidden /></span>
+        <span className="flex min-w-0 flex-col gap-[2px]">
+          <span className="text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Shared from Dreamari</span>
+          <span className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{share.title}</span>
+          <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{share.line}</span>
+        </span>
+      </span>
+      <span className="flex flex-wrap gap-[6px]">
+        {share.meta.map((m) => <span key={m} className="rounded-full px-[8px] py-[2px] text-[11.5px] leading-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.08)", color: "var(--foreground)" }}>{m}</span>)}
+      </span>
+      <span className="flex items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>Open <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
+    </Link>
+  );
+}
+
+function ShareSheet({ onClose, onPick }: { onClose: () => void; onPick: (share: D.Share) => void }) {
+  return (
+    <Sheet title="Share from Dreamari" label="Into this chat" onClose={onClose}>
+      <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+        {D.SHAREABLES.map((sh) => {
+          const Icon = SHARE_ICON[sh.kind];
+          return (
+            <button key={sh.title} type="button" onClick={() => { onPick(sh); onClose(); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] py-[11px] text-left" style={{ borderColor: RULE }}>
+              <span className="flex size-[34px] flex-none items-center justify-center rounded-[10px]" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><Icon className="h-4 w-4" aria-hidden /></span>
+              <span className="flex min-w-0 flex-1 flex-col"><span className="text-[14.5px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{sh.title}</span><Muted className="truncate text-[12px] leading-[16px]">{sh.line}</Muted></span>
+              <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+            </button>
+          );
+        })}
+      </div>
+    </Sheet>
+  );
+}
+
 /** The private thread. Consecutive messages from one person group under one
  *  avatar and one timestamp, the way Instagram and TikTok DMs read; mine sit
- *  right with no avatar. Attachments and the mentorship actions live in the
- *  composer's plus menu, suggested questions behind the sparkle, so the
- *  canvas is just the conversation. */
-function Thread({ me, onToast }: { me: "mentee" | "mentor"; onToast: (t: string) => void }) {
+ *  right with no avatar. One rotating nudge above the composer, never a
+ *  permanent row of them. Attachments, GIFs and the mentorship actions live
+ *  in the plus menu; emoji behind the smile; suggested questions behind the
+ *  sparkle. Meeting requests are cards in the thread itself. */
+function Thread({ me, onToast, onOpenProfile }: { me: "mentee" | "mentor"; onToast: (t: string) => void; onOpenProfile: () => void }) {
   const [messages, setMessages] = useState<D.Message[]>(D.THREAD);
   const [draft, setDraft] = useState("");
-  const [menu, setMenu] = useState(false);
+  const [menu, setMenu] = useState<"none" | "plus" | "emoji">("none");
   const [suggest, setSuggest] = useState(false);
-  const [sheet, setSheet] = useState<"none" | "escalate" | "resource" | "time">("none");
+  const [sent, setSent] = useState(0);
+  const [nudgeGone, setNudgeGone] = useState(false);
+  const [sheet, setSheet] = useState<"none" | "escalate" | "resource" | "meeting" | "share">("none");
   const endRef = useRef<HTMLDivElement>(null);
   const other = me === "mentee" ? { name: D.MENTOR.name, line: `${D.MENTOR.title} · ${D.MENTOR.org}`, photo: D.MENTOR.photo } : { name: D.MENTEE.name, line: D.MENTEE.line, photo: undefined };
   const suggested = me === "mentee" ? D.STUDENT_SUGGESTED : D.MENTOR_SUGGESTED;
   const actions = D.COMPOSER_ACTIONS.filter((a) => a.who === "both" || a.who === me);
-  const send = (text: string) => {
-    if (!text.trim()) return;
-    setMessages((m) => [...m, { from: me, text: text.trim(), when: "Just now" }]);
+  const nudge = D.NUDGES[me][Math.min(sent, D.NUDGES[me].length - 1)];
+  const push = (m: D.Message) => {
+    setMessages((list) => [...list, m]);
     setDraft("");
     setSuggest(false);
+    setMenu("none");
+    setSent((n) => n + 1);
+    setNudgeGone(false);
     window.setTimeout(() => endRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 50);
   };
-  const groups: { from: D.Message["from"]; items: D.Message[] }[] = [];
-  for (const m of messages) {
+  const send = (text: string) => { if (text.trim()) push({ from: me, text: text.trim(), when: "Just now" }); };
+  const decide = (index: number, status: "accepted" | "declined") => {
+    setMessages((list) => list.map((m, i) => (i === index && m.meeting ? { ...m, meeting: { ...m.meeting, status } } : m)));
+    onToast(status === "accepted" ? "Meeting accepted. It is on both calendars." : "Declined. Suggest another time when you are ready.");
+  };
+  const groups: { from: D.Message["from"]; items: { m: D.Message; index: number }[] }[] = [];
+  messages.forEach((m, index) => {
     const last = groups[groups.length - 1];
-    if (last && last.from === m.from) last.items.push(m);
-    else groups.push({ from: m.from, items: [m] });
-  }
+    if (last && last.from === m.from) last.items.push({ m, index });
+    else groups.push({ from: m.from, items: [{ m, index }] });
+  });
   const act = (key: string) => {
-    setMenu(false);
+    setMenu("none");
     if (key === "link") { send("Here is our meeting link for Tuesday: teams.microsoft.com/l/meetup-join/coach-dreamer"); onToast("Meeting link sent."); }
-    else if (key === "time") setSheet("time");
+    else if (key === "time") setSheet("meeting");
     else if (key === "resource") setSheet("resource");
+    else if (key === "share") setSheet("share");
+    else if (key === "gif") onToast("GIFs are on the way. Emoji work today.");
     else onToast(key === "photo" ? "Photos are checked by Dreamari before they are delivered." : "Files are checked by Dreamari before they are delivered.");
   };
-  const ActionIcon = ({ k }: { k: string }) => k === "file" ? <Paperclip className="h-4 w-4" aria-hidden /> : k === "photo" ? <ImageIcon className="h-4 w-4" aria-hidden /> : k === "link" ? <Link2 className="h-4 w-4" aria-hidden /> : k === "time" ? <Calendar className="h-4 w-4" aria-hidden /> : <FileText className="h-4 w-4" aria-hidden />;
+  const ActionIcon = ({ k }: { k: string }) => k === "file" ? <Paperclip className="h-4 w-4" aria-hidden /> : k === "photo" ? <ImageIcon className="h-4 w-4" aria-hidden /> : k === "share" ? <Sparkles className="h-4 w-4" aria-hidden /> : k === "gif" ? <span className="text-[10px] font-extrabold tracking-[0.04em]">GIF</span> : k === "link" ? <Link2 className="h-4 w-4" aria-hidden /> : k === "time" ? <Calendar className="h-4 w-4" aria-hidden /> : <FileText className="h-4 w-4" aria-hidden />;
+  const menuClass = "absolute bottom-[calc(100%+8px)] left-0 z-20 overflow-hidden rounded-[var(--radius-md)] border motion-safe:animate-[fade-slide-up_0.16s_ease-out_both]";
+  const menuStyle = { background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 50px -20px rgba(0,0,0,0.8)" } as const;
   return (
     <section className="flex flex-col rounded-[var(--radius-lg)] border" style={{ background: "color-mix(in srgb, var(--background) 72%, var(--glass-surface-2))", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 60px -32px rgba(0,0,0,0.8)" }}>
       <div className="flex items-center justify-between gap-[10px] border-b px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
-        <div className="flex items-center gap-[12px]">
+        <button type="button" onClick={onOpenProfile} className="dm-quiet -mx-[8px] -my-[4px] flex cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] px-[8px] py-[4px] text-left" aria-label={`Open ${other.name}'s profile`}>
           <Avatar name={other.name} size={40} photo={other.photo} />
-          <div className="flex flex-col">
+          <span className="flex flex-col">
             <span className="flex items-center gap-[5px] text-[15.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{other.name} <VerifiedBadge size={14} /></span>
             <Muted className="text-[12.5px] leading-[16px]">{other.line}</Muted>
-          </div>
-        </div>
+          </span>
+        </button>
         <Chip tone={GOOD}><span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />Matched</Chip>
       </div>
 
@@ -325,19 +466,21 @@ function Thread({ me, onToast }: { me: "mentee" | "mentor"; onToast: (t: string)
           const mine = g.from === me;
           return (
             <div key={gi} className={`flex items-end gap-[10px] ${mine ? "justify-end" : "justify-start"}`}>
-              {!mine && <span className="mb-[22px] flex-none"><Avatar name={other.name} size={30} photo={other.photo} /></span>}
+              {!mine && <button type="button" onClick={onOpenProfile} aria-label={`Open ${other.name}'s profile`} className="dm-quiet mb-[22px] flex-none cursor-pointer rounded-full"><Avatar name={other.name} size={30} photo={other.photo} /></button>}
               <div className={`flex max-w-[78%] flex-col gap-[3px] ${mine ? "items-end" : "items-start"}`}>
-                {g.items.map((m, i) => {
+                {g.items.map(({ m, index }, i) => {
                   const first = i === 0;
                   const last = i === g.items.length - 1;
                   const radius = mine ? `${first ? 18 : 6}px 18px ${last ? 6 : 6}px 18px` : `18px ${first ? 18 : 6}px 18px ${last ? 6 : 6}px`;
+                  if (m.meeting) return <MeetingCard key={index} m={m.meeting} mine={mine} onDecide={(status) => decide(index, status)} onToast={onToast} />;
+                  if (m.share) return <ShareCard key={index} share={m.share} mine={mine} />;
                   return (
-                    <motion.div key={i} initial={m.when === "Just now" ? { opacity: 0, y: 6, scale: 0.98 } : false} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }} className="px-[16px] py-[10px] text-[15.5px] leading-[22px]" style={mine ? { background: "var(--primary)", color: "#FFFFFF", borderRadius: radius } : { background: "var(--glass-surface-2)", color: "var(--foreground)", border: "1px solid var(--glass-border)", borderRadius: radius }}>
+                    <motion.div key={index} initial={m.when === "Just now" ? { opacity: 0, y: 6, scale: 0.98 } : false} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }} className="px-[16px] py-[10px] text-[15.5px] leading-[22px]" style={mine ? { background: "var(--primary)", color: "#FFFFFF", borderRadius: radius } : { background: "var(--glass-surface-2)", color: "var(--foreground)", border: "1px solid var(--glass-border)", borderRadius: radius }}>
                       {m.text}
                     </motion.div>
                   );
                 })}
-                <span className="px-[4px] pt-[2px] text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{g.items[g.items.length - 1].when}</span>
+                <span className="px-[4px] pt-[2px] text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{g.items[g.items.length - 1].m.when}</span>
               </div>
             </div>
           );
@@ -346,6 +489,15 @@ function Thread({ me, onToast }: { me: "mentee" | "mentor"; onToast: (t: string)
       </div>
 
       <div className="flex flex-col gap-[10px] border-t px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
+        {/* one nudge, dismissable, rotates as the conversation moves */}
+        {!nudgeGone && !suggest && nudge && (
+          <div className="flex items-center gap-[6px] motion-safe:animate-[fade-slide-up_0.18s_ease-out_both]">
+            <button type="button" onClick={() => setDraft(nudge)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-left text-[12.5px] leading-[16px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 10%, transparent)`, color: "var(--foreground)" }}>
+              <Sparkles className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: accent }} /> <span className="truncate">{nudge}</span>
+            </button>
+            <button type="button" aria-label="Dismiss suggestion" onClick={() => setNudgeGone(true)} className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+          </div>
+        )}
         {suggest && (
           <div className="flex flex-wrap gap-[6px] motion-safe:animate-[fade-slide-up_0.18s_ease-out_both]">
             {suggested.map((q) => (
@@ -357,20 +509,32 @@ function Thread({ me, onToast }: { me: "mentee" | "mentor"; onToast: (t: string)
         )}
         <form className="relative flex items-center gap-[8px]" onSubmit={(e) => { e.preventDefault(); send(draft); }}>
           <div className="relative flex-none">
-            <button type="button" aria-label="Add" aria-expanded={menu} onClick={() => setMenu((v) => !v)} className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: menu ? "var(--glass-surface-2)" : "transparent" }}>
-              <Plus className="h-[18px] w-[18px] transition-transform" style={{ transform: menu ? "rotate(45deg)" : "none" }} aria-hidden />
+            <button type="button" aria-label="Add" aria-expanded={menu === "plus"} onClick={() => setMenu(menu === "plus" ? "none" : "plus")} className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: menu === "plus" ? "var(--glass-surface-2)" : "transparent" }}>
+              <Plus className="h-[18px] w-[18px] transition-transform" style={{ transform: menu === "plus" ? "rotate(45deg)" : "none" }} aria-hidden />
             </button>
-            {menu && (
-              <div role="menu" className="absolute bottom-[calc(100%+8px)] left-0 z-20 flex min-w-[240px] flex-col overflow-hidden rounded-[var(--radius-md)] border motion-safe:animate-[fade-slide-up_0.16s_ease-out_both]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 50px -20px rgba(0,0,0,0.8)" }}>
-                {actions.map((a) => (
+            {menu === "plus" && (
+              <div role="menu" className={`${menuClass} flex min-w-[240px] flex-col`} style={menuStyle}>
+                {[...actions, { key: "gif", label: "GIF", who: "both" as const }].map((a) => (
                   <button key={a.key} type="button" role="menuitem" onClick={() => act(a.key)} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] px-[14px] py-[10px] text-left text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
-                    <span style={{ color: "var(--muted-foreground)" }}><ActionIcon k={a.key} /></span> {a.label}
+                    <span className="flex w-[18px] justify-center" style={{ color: "var(--muted-foreground)" }}><ActionIcon k={a.key} /></span> {a.label}
                   </button>
                 ))}
               </div>
             )}
           </div>
-          <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : "Message Maya"} aria-label="Message" className="min-w-0 flex-1 rounded-full border px-[16px] py-[10px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+          <div className="relative flex min-w-0 flex-1 items-center">
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : "Message Maya"} aria-label="Message" className="min-w-0 flex-1 rounded-full border py-[10px] pr-[44px] pl-[16px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+            <button type="button" aria-label="Emoji" aria-expanded={menu === "emoji"} onClick={() => setMenu(menu === "emoji" ? "none" : "emoji")} className="dm-quiet absolute right-[6px] flex size-[30px] cursor-pointer items-center justify-center rounded-full" style={{ color: menu === "emoji" ? accent : "var(--muted-foreground)" }}>
+              <Smile className="h-[18px] w-[18px]" aria-hidden />
+            </button>
+            {menu === "emoji" && (
+              <div role="menu" className={`${menuClass} right-0 left-auto grid grid-cols-8 gap-[2px] p-[8px]`} style={menuStyle}>
+                {D.EMOJI.map((e) => (
+                  <button key={e} type="button" role="menuitem" onClick={() => { setDraft((d) => `${d}${d && !d.endsWith(" ") ? " " : ""}${e}`); setMenu("none"); }} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-[8px] text-[20px]">{e}</button>
+                ))}
+              </div>
+            )}
+          </div>
           <button type="button" aria-label="Suggested questions" aria-pressed={suggest} onClick={() => setSuggest((v) => !v)} className="dm-quiet flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: suggest ? `color-mix(in srgb, ${accent} 55%, var(--glass-border))` : "var(--glass-border)", color: suggest ? accent : "var(--muted-foreground)" }}>
             <Sparkles className="h-[18px] w-[18px]" aria-hidden />
           </button>
@@ -408,19 +572,41 @@ function Thread({ me, onToast }: { me: "mentee" | "mentor"; onToast: (t: string)
           </div>
         </Sheet>
       )}
-      {sheet === "time" && (
-        <Sheet title="Suggest a meeting time" onClose={() => setSheet("none")}>
-          <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-            {D.MEETING.reschedule.map((s) => (
-              <button key={s} type="button" onClick={() => { setSheet("none"); send(`Would ${s} work for our next meeting?`); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between py-[12px] text-left text-[14.5px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}>
-                <span className="flex items-center gap-[8px]"><Clock className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {s}</span>
-                <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-              </button>
-            ))}
-          </div>
-        </Sheet>
-      )}
+      {sheet === "share" && <ShareSheet onClose={() => setSheet("none")} onPick={(sh) => push({ from: me, text: "", when: "Just now", share: sh })} />}
+      {sheet === "meeting" && <MeetingRequestSheet onClose={() => setSheet("none")} onSend={(m) => { push({ from: me, text: "", when: "Just now", meeting: m }); onToast("Meeting request sent."); }} />}
     </section>
+  );
+}
+
+/** Name it, note the agenda, pick a slot: the request lands in the thread
+ *  as a card the other person can accept. */
+function MeetingRequestSheet({ onClose, onSend }: { onClose: () => void; onSend: (m: D.MeetingRequest) => void }) {
+  const [title, setTitle] = useState("Career check-in");
+  const [agenda, setAgenda] = useState("");
+  const [slot, setSlot] = useState<string>(D.MEETING.reschedule[0]);
+  const field = "w-full rounded-[var(--radius-md)] border px-[14px] py-[10px] text-[14.5px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]";
+  const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+  return (
+    <Sheet title="Request a meeting" label="In this chat" onClose={onClose}>
+      <label className="flex flex-col gap-[6px]">
+        <Eyebrow tone="var(--muted-foreground)">Name</Eyebrow>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} className={field} style={fieldStyle} />
+      </label>
+      <label className="flex flex-col gap-[6px]">
+        <Eyebrow tone="var(--muted-foreground)">Agenda</Eyebrow>
+        <textarea value={agenda} onChange={(e) => setAgenda(e.target.value)} rows={2} placeholder="What you want to cover" className={`${field} resize-none`} style={fieldStyle} />
+      </label>
+      <div className="flex flex-col gap-[6px]">
+        <Eyebrow tone="var(--muted-foreground)">Time · Microsoft Teams</Eyebrow>
+        <div role="radiogroup" className="flex flex-wrap gap-[6px]">
+          {D.MEETING.reschedule.map((s) => {
+            const on = s === slot;
+            return <button key={s} type="button" role="radio" aria-checked={on} onClick={() => setSlot(s)} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>{s}</button>;
+          })}
+        </div>
+      </div>
+      <PrimaryCta onClick={() => { onSend({ title: title.trim() || "Meeting", agenda: agenda.trim() || "Open conversation.", when: slot, where: D.MEETING.where, status: "pending" }); onClose(); }}><Send className="h-4 w-4" aria-hidden /> Send request</PrimaryCta>
+    </Sheet>
   );
 }
 
@@ -479,39 +665,62 @@ function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
 // ---------------------------------------------------------------------------
 // Prep row: the real cards
 
-/** The Play card at poster size, same anatomy as the Play hub's own. */
+/** The three prep cards share one poster proportion and fill the row. */
+const PREP_CARD = "dm-tap group relative flex w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left aspect-[3/4]";
+
+/** The career, the Browse poster's anatomy without the salary chip. */
+function CareerPrepCard({ onClick }: { onClick: () => void }) {
+  const c = D.PREP_CAREER;
+  return (
+    <button type="button" onClick={onClick} className={`${PREP_CARD} justify-end items-center text-center uppercase`} style={{ borderColor: "var(--glass-border)" }}>
+      <Image src={c.photo} alt="" fill sizes="(min-width: 640px) 33vw, 240px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+      <span className="relative z-[1] flex w-full flex-col items-center gap-[6px] px-[10px] pt-[48px] pb-[16px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+        <span className="block text-[24px] leading-[28px]" style={{ ...posterTitleFont(c.world), color: "var(--poster-title)" }}>{c.title}</span>
+        <span className="block text-[10px] leading-[14px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[c.world] }}>{c.world}</span>
+      </span>
+    </button>
+  );
+}
+
+/** The Play card, same anatomy as the Play hub's own. */
 function PlayPrepCard({ onClick }: { onClick: () => void }) {
   const p = D.PREP_PLAY;
   return (
-    <button type="button" onClick={onClick} className="dm-tap group relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-      <Image src={p.cover} alt="" fill sizes="210px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-      <span className="relative z-[1] flex flex-col gap-[4px] px-[14px] pt-[40px] pr-[60px] pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+    <button type="button" onClick={onClick} className={`${PREP_CARD} justify-end`} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 240px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+      <span className="relative z-[1] flex flex-col gap-[4px] px-[14px] pt-[48px] pr-[64px] pb-[16px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
         <span className="block text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.75 }}>Day in the Life</span>
-        <span className="block text-[22px] leading-[1.15] font-extrabold uppercase" style={{ ...posterTitleFont(p.world), color: "var(--poster-title)" }}>{p.title}</span>
+        <span className="block text-[24px] leading-[1.1] font-extrabold uppercase" style={{ ...posterTitleFont(p.world), color: "var(--poster-title)" }}>{p.title}</span>
         <span className="block text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[p.world] }}>{p.world}</span>
       </span>
-      <span className="absolute right-[12px] bottom-[12px] z-[2] flex size-[40px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
+      <span className="absolute right-[14px] bottom-[14px] z-[2] flex size-[42px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
         <Play className="ml-[2px] h-[18px] w-[18px]" fill="currentColor" aria-hidden />
       </span>
     </button>
   );
 }
 
-/** The student's own resume, live from the store, at poster width. */
+/** The resume as a file: the page itself fills the card edge to edge, live
+ *  from the store when the student has one, Maya's sample when not, with a
+ *  document strip along the bottom. */
 function ResumePrepCard({ onClick }: { onClick: () => void }) {
-  const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
-  const latest = resume.versions[0];
-  const data = latest ? resumeForVersion(resume, latest) : resume;
-  const score = latest?.atsCheck?.qualityScore;
+  const stored = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
+  const latest = stored.versions[0];
+  const own = !!latest && !!stored.profile.firstName;
+  const data: ResumeData = own ? resumeForVersion(stored, latest) : (D.SAMPLE_RESUME as ResumeData);
+  const name = own ? latest.name : D.PREP_RESUME_NAME;
+  const meta = own ? (latest.atsCheck ? `${latest.atsCheck.qualityScore}/100 ATS` : "Saved resume") : D.PREP_RESUME_META;
   return (
-    <button type="button" onClick={onClick} className="dm-tap group relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-      <span className="pointer-events-none block w-[210px] px-[14px] pt-[14px]">
+    <button type="button" onClick={onClick} className={`${PREP_CARD}`} style={{ borderColor: "var(--glass-border)", background: "#FFFFFF" }}>
+      <span className="pointer-events-none block w-full" aria-hidden>
         <ResumeDocument resume={data} templateId={DEFAULT_RESUME_TEMPLATE} sectionOrder={latest?.sectionOrder} hiddenSections={latest?.hiddenSections} sectionOverrides={latest?.sectionOverrides} />
       </span>
-      <span className="absolute inset-x-0 bottom-0 z-[1] flex flex-col gap-[3px] px-[14px] pt-[40px] pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
-        <span className="text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--poster-title)", opacity: 0.75 }}>Resume</span>
-        <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{latest?.name ?? "Resume Draft"}</span>
-        {typeof score === "number" && <span className="text-[11px] font-bold tabular-nums" style={{ color: accent }}>{score}/100 ATS</span>}
+      <span className="absolute inset-x-0 bottom-0 z-[1] flex items-center gap-[10px] px-[14px] pt-[36px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(8,10,22,0.96) 0%, rgba(8,10,22,0.86) 55%, rgba(8,10,22,0) 100%)" }}>
+        <span className="flex size-[34px] flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.12)", color: "#FFFFFF" }}><FileText className="h-4 w-4" aria-hidden /></span>
+        <span className="flex min-w-0 flex-col">
+          <span className="truncate text-[14.5px] leading-[19px] font-bold" style={{ color: "#FFFFFF", fontFamily: "var(--font-display)" }}>{name}</span>
+          <span className="truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{meta}</span>
+        </span>
       </span>
     </button>
   );
@@ -520,7 +729,7 @@ function ResumePrepCard({ onClick }: { onClick: () => void }) {
 // ---------------------------------------------------------------------------
 // Student
 
-function StudentView() {
+function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
   const router = useRouter();
   const [tab, setTab] = useState<"home" | "messages" | "plan">("home");
   const [toast, onToast] = useToast();
@@ -547,13 +756,15 @@ function StudentView() {
             <SectionHead>Prep for your mentor</SectionHead>
             {/* The real cards, not tiles about them: the career poster, the
                Play card, the student's own resume. */}
-            <div className="flex gap-[var(--space-4)] overflow-x-auto pb-[6px] [scrollbar-width:none]">
+            {/* Three cards, one row, the full width; a scroll rail only on
+               phones, with room so the hover lift is never clipped. */}
+            <div className="-mx-[6px] -my-[8px] flex gap-[var(--space-4)] overflow-x-auto px-[6px] py-[8px] [scrollbar-width:none] sm:mx-0 sm:my-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:py-0">
               {[
-                <PosterCard key="career" career={{ title: D.PREP_CAREER.title, world: D.PREP_CAREER.world, photo: D.PREP_CAREER.photo, salary: D.PREP_CAREER.salary }} onClick={() => router.push(D.PREP_CAREER.href)} />,
+                <CareerPrepCard key="career" onClick={() => router.push(D.PREP_CAREER.href)} />,
                 <PlayPrepCard key="play" onClick={() => router.push(D.PREP_PLAY.href)} />,
                 <ResumePrepCard key="resume" onClick={() => router.push(D.PREP_RESUME_HREF)} />,
               ].map((card, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 + i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] }} className="flex-none">
+                <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 + i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] }} className="w-[220px] flex-none sm:w-auto">
                   {card}
                 </motion.div>
               ))}
@@ -561,7 +772,7 @@ function StudentView() {
           </div>
         </div>
       )}
-      {tab === "messages" && <Thread me="mentee" onToast={onToast} />}
+      {tab === "messages" && <Thread me="mentee" onToast={onToast} onOpenProfile={onOpenProfile} />}
       {tab === "plan" && <YearPlan eyebrow="Year plan" title="Topics to discuss each month." />}
       {toast}
     </div>
@@ -571,7 +782,7 @@ function StudentView() {
 // ---------------------------------------------------------------------------
 // Mentor
 
-function MentorView() {
+function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
   const [tab, setTab] = useState<"home" | "messages" | "journey">("home");
   const [prep, setPrep] = useState(false);
   const [toast, onToast] = useToast();
@@ -608,7 +819,7 @@ function MentorView() {
           <ScheduleCard onToast={onToast} showMeter />
         </div>
       )}
-      {tab === "messages" && <Thread me="mentor" onToast={onToast} />}
+      {tab === "messages" && <Thread me="mentor" onToast={onToast} onOpenProfile={onOpenProfile} />}
       {tab === "journey" && <YearPlan eyebrow="Mentorship journey" title="A clear next step, every month." />}
       {prep && (
         <Sheet title="Before you meet Maya" label="Prepare for meeting" onClose={() => setPrep(false)}>

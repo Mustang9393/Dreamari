@@ -100,6 +100,8 @@ export const PARTNER_PORTRAITS: Record<string, string> = {
   "Dev Johnson": "/images/connect/avatars/att-johnson.jpg",
   "Lucia Rodriguez": "/images/connect/avatars/att-rodriguez.jpg",
   "Amina Thompson": "/images/connect/avatars/att-thompson.jpg",
+  // Coach Foundation Dream It Real mentor (Connect Mentorship tab)
+  "Avery Thompson": "/images/connect/avatars/pro-doyle-2.png",
 };
 
 const AVATAR_PHOTO: Record<string, string> = {
