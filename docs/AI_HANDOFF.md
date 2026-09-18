@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Resume card: icon removed, stronger blur (local, not pushed)
+
+- No icon chip -- matches `PrepFoot`'s own shape exactly now (the other two prep cards never had one either; direct feedback: "remove the icon from the resume card, the others don't have it").
+- `CardProgressiveBlur`'s `maxBlur` raised from the 14px default to 26px, and the zone grown from 46% to 50% of the card -- dense resume text needed more frost than a photo does to read clean under the caption (direct feedback: "legibility... maybe the blur can be higher").
+- For the record (direct question): CareerPrepCard and PlayPrepCard (the other two "Prep for your mentor" cards) still use the plain `--poster-scrim` flat black gradient, not `CardProgressiveBlur` -- that's the established pattern for poster-style cards app-wide (PosterCard, HomeExperience, PlayHub, CompanyVideoCards all use the same `--poster-scrim`). The resume card is the one exception now using real backdrop-filter blur, because its background is a document, not a photo, and a flat dark scrim over white paper was unreadable. Not changed unless asked.
+- Checked headless at 1280: no icon, caption text clean and legible, resume content behind it well-frosted rather than sharp-and-clashing. tsc and eslint clean.
+
 ### 2026-09-19 Card heights pixel-matched, ID badge divider tightened, resume card fixed for real (local, not pushed)
 
 - **Equal card heights everywhere, not just side by side**: `ClickPanel` for My mentor now carries `min-h-[197px]`, Next Meeting's own measured height at both desktop and tablet widths -- previously the two only matched when the grid's row-stretch applied (lg+); stacked full-width on tablet they were 15px apart (direct feedback: "the cards should be the same height on tablet etc too"). Verified: both now measure exactly 197px at 1280 and 768.

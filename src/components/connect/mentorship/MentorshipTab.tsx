@@ -1123,16 +1123,20 @@ function ResumePrepCard({ onClick }: { onClick: () => void }) {
       <span className="pointer-events-none absolute inset-x-0 top-0 block" aria-hidden>
         <ResumeDocument resume={data} templateId={DEFAULT_RESUME_TEMPLATE} sectionOrder={latest?.sectionOrder} hiddenSections={latest?.hiddenSections} sectionOverrides={latest?.sectionOverrides} />
       </span>
-      <CardProgressiveBlur size="46%" />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[46%]" aria-hidden style={{ background: "linear-gradient(to top, rgba(248,248,251,0.97) 0%, rgba(248,248,251,0.86) 45%, rgba(248,248,251,0.4) 75%, transparent 100%)" }} />
-      <span className="relative z-[2] flex items-center gap-[10px] px-[14px] pt-[56px] pb-[14px]">
-        <span className="flex size-[34px] flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(20,18,30,0.08)", color: "#232030" }}><FileText className="h-4 w-4" aria-hidden /></span>
-        <span className="flex min-w-0 flex-col gap-[2px]">
-          <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "#8a6d3d" }}>{D.PREP_RESUME.label}</span>
-          <span className="truncate text-[15px] leading-[19px] font-extrabold" style={{ color: "#18161f", fontFamily: "var(--font-display)" }}>{name}</span>
-          <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(24,22,31,0.68)" }}>{D.PREP_RESUME.why}</span>
-          <span className="mt-[4px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#18161f" }}>{D.PREP_RESUME.cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
-        </span>
+      {/* Stronger blur (maxBlur 26 vs the 14 default) -- dense resume text
+         needs more frost than a photo to read clean underneath a caption
+         (direct feedback: "legibility... is a little problem, blur can be
+         higher"). No icon chip -- the other two prep cards (PrepFoot) don't
+         have one either (direct feedback: "remove the icon... the others
+         don't have it"), same flex-col shape as PrepFoot now, just this
+         card's own paper-toned colors instead of PrepFoot's dark ones. */}
+      <CardProgressiveBlur size="50%" maxBlur={26} />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[50%]" aria-hidden style={{ background: "linear-gradient(to top, rgba(248,248,251,0.98) 0%, rgba(248,248,251,0.9) 40%, rgba(248,248,251,0.55) 70%, transparent 100%)" }} />
+      <span className="relative z-[2] flex flex-col gap-[2px] px-[16px] pt-[56px] pb-[14px]">
+        <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "#8a6d3d" }}>{D.PREP_RESUME.label}</span>
+        <span className="truncate text-[15px] leading-[19px] font-extrabold" style={{ color: "#18161f", fontFamily: "var(--font-display)" }}>{name}</span>
+        <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(24,22,31,0.68)" }}>{D.PREP_RESUME.why}</span>
+        <span className="mt-[4px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#18161f" }}>{D.PREP_RESUME.cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
       </span>
     </button>
   );
