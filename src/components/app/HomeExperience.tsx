@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
+import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
@@ -506,7 +507,7 @@ export function HomeExperience() {
           <span key={homeXp} className="flex items-center gap-[6px] tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ color: "var(--world-business-money-office)" }}>
             <Sparkle className="h-4 w-4" /> {homeXp.toLocaleString("en-US")} XP
           </span>
-          <QuickLinksMenu />
+          <HeaderActions><QuickLinksMenu /></HeaderActions>
         </span>
       </MobileHeaderShell>
 

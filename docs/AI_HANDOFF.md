@@ -10406,3 +10406,27 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   a tick when complete and a Now tag for the current month. Tapping a month
   expands it to fill the panel (Calendar back link, focus, note, previous
   and next month); the detail card under the grid is gone.
+
+## 2026-09-18 · Inbox: notifications in the nav, Messages as a chat dock, tablet chrome
+
+- `src/lib/inbox.ts` (store: dock state, unread, mentorship/program context,
+  meeting decision, read/resolved) and `src/lib/stage.ts` (demo stage hs |
+  college, set by My Plan's Demo toggle, persisted).
+- `src/components/app/Inbox.tsx`: NotificationsButton (bell, red count),
+  MessagesButton (paper plane, red count, only inside a mentorship program),
+  HeaderActions (XP chip + both icons for the phone/tablet header), and the
+  Instagram-shaped panel: All | Connect | Mentorship (Mentorship only on the
+  Mentorship tab), New and Earlier, inline Accept/Decline on a meeting
+  (applied to the chat thread), one tap to the thing. Two sets by stage
+  (`notificationsData.ts`): high school never sees mentorship or meetings.
+- Chrome: desktop nav only from lg; tablets use the phone chrome (logo, XP,
+  inbox, hamburger up top, bottom nav for destinations). XP icon is a filled
+  bolt. Connect's own bell is gone; the site-wide one carries it.
+- Mentorship: Messages is no longer a tab. `ChatDock` (Portal) rises bottom
+  right, minimises to a bar, goes full screen (from its menu), is the whole
+  screen on a phone; header lockup with presence; three-dot menu holds the
+  safety line and Report; one incoming demo message after 12s with a soft
+  tone, badge and a nudge card. Thread has an `embedded` mode. Bubbles have
+  more air. Sub-tab switches keep scroll (AT&T v2 too, useLayoutEffect).
+- Verified headless: HS vs college sets, filters, accept from notification
+  lands in the thread, dock states, nudge and badge, tablet and phone chrome.

@@ -7,6 +7,7 @@ import { ArrowLeftRight, Briefcase, ChevronDown, Search, SlidersHorizontal, X } 
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, SchoolCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
@@ -173,7 +174,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
           >
             <Briefcase className="h-4 w-4" />
           </Link>
-          <QuickLinksMenu />
+          <HeaderActions><QuickLinksMenu /></HeaderActions>
         </div>
       </div>
 

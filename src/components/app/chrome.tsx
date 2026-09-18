@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sparkle, Sun, Users, X } from "lucide-react";
+import { ChevronLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sun, Users, X, Zap } from "lucide-react";
+import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
 import { useDreamScore } from "@/lib/dreamScore";
 import { DreamScoreTip } from "@/components/app/DreamScoreTip";
@@ -336,7 +337,10 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
     // wrapper's own box (86px) clears the viewport top (16 Sept 2026 bug,
     // found on Profile and Career Detail, both of which used to wrap this
     // in their own `<div className="no-print">`).
-    <div className={`sticky top-0 z-40 hidden h-[86px] w-full md:block ${extraClassName ?? ""}`}>
+    // Desktop only from lg: tablets use the phone chrome (logo, XP, inbox,
+    // hamburger up top; the bottom nav for destinations), which is what the
+    // student learns on their phone anyway (direct feedback, 18 Sept 2026).
+    <div className={`sticky top-0 z-40 hidden h-[86px] w-full lg:block ${extraClassName ?? ""}`}>
       <div className="mx-auto flex h-[62px] max-w-[1320px] items-center justify-between px-3 pt-3">
         <header
           className="relative flex h-[62px] w-full items-center justify-between rounded-[28px] px-[var(--space-6)] transition-[background-color,border-color,box-shadow] duration-300"
@@ -353,8 +357,11 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
           {/* Absolutely centered on the viewport — the wordmark and the wider
              streak/XP cluster are unequal, so flex centering would sit left of
              true center. */}
+          {/* In flow on tablets so it can never sit under the right cluster;
+             dead-centred only from lg, where there is room (direct feedback,
+             18 Sept 2026: "cluttered and overlapping on tablet"). */}
           <nav
-            className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px]"
+            className="flex items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px] lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2"
             style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
           >
             {/* prefetch={false}: these 5 links render on every page, so Next's
@@ -371,7 +378,7 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
                   href={item.href}
                   prefetch={false}
                   aria-current={isActive ? "page" : undefined}
-                  className="dm-quiet rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase"
+                  className="dm-quiet rounded-[var(--radius-md)] px-[var(--space-3)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase lg:px-[var(--space-4)]"
                   style={{
                     background: isActive ? "var(--primary)" : "transparent",
                     color: isActive ? "var(--primary-foreground)" : "var(--foreground)",
@@ -385,7 +392,7 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
             })}
           </nav>
 
-          <div className="flex items-center gap-[var(--space-5)]">
+          <div className="flex items-center gap-[var(--space-3)] lg:gap-[var(--space-4)]">
             {/* Streak and Dream Score on every page, Profile included: the score
                stays at the top of the app the way it lands there after Build
                (Joshua Pierce, Slack, 6 Sept 2026). */}
@@ -404,7 +411,9 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
                    score follows them from Build and Match into the app. */}
                 <DreamScoreTip className="hidden md:flex">
                   <span key={xp} data-dream-score-target className="flex items-center gap-[6px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
-                    <Sparkle aria-hidden className="h-4 w-4" style={{ color: "var(--foreground)" }} />
+                    {/* a bolt, filled: the XP mark games already taught (direct
+                       feedback, 18 Sept 2026: "find a better icon for XP") */}
+                    <Zap aria-hidden className="h-4 w-4" fill="currentColor" style={{ color: "var(--accent)" }} />
                     <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
                       {xp.toLocaleString("en-US")} XP
                     </span>
@@ -412,6 +421,8 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
                 </DreamScoreTip>
               </>
             )}
+            <MessagesButton />
+            <NotificationsButton />
             <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
               <Image src={avatarSrc} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
             </Link>
@@ -437,7 +448,7 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
 export function MobileHeaderShell({ children, extraClassName }: { children: React.ReactNode; extraClassName?: string }) {
   const scrolled = useScrolled();
   return (
-    <div className={`sticky top-0 z-50 md:hidden ${extraClassName ?? ""}`}>
+    <div className={`sticky top-0 z-50 lg:hidden ${extraClassName ?? ""}`}>
       <div className="px-3 pt-3">
         <div
           className="flex items-center justify-between rounded-[22px] px-[14px] py-[10px] transition-[background-color,border-color,box-shadow] duration-300"
@@ -471,7 +482,7 @@ export function MobileNav({ active }: { active: string }) {
       // a fixed, full-width backdrop-blur bar costs a recomposite on every
       // scroll frame, on every page, which is a lot to pay for a bar that's
       // always on screen.
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t lg:hidden"
       style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {MOBILE_ITEMS.map(({ label, href, Icon }) => {

@@ -13,6 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { ChevronRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
 
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { hasGlossary } from "@/components/glossary/data";
@@ -71,7 +72,7 @@ export function PlayHub() {
 
       <MobileHeaderShell>
         <Wordmark />
-        <QuickLinksMenu />
+        <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">

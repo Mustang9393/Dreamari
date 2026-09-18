@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
+import { HeaderActions } from "./Inbox";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 
 import { CompanyVideoCards } from "./CompanyVideoCards";
@@ -771,7 +772,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
               <Search className="h-4 w-4" />
             </button>
           )}
-          <QuickLinksMenu />
+          <HeaderActions><QuickLinksMenu /></HeaderActions>
         </div>
       </div>
 

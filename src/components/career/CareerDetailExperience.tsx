@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, Users, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { ConnectWithProfessionalsModal } from "./ConnectWithProfessionalsModal";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -412,7 +413,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
       <DesktopNavigation active="Explore" extraClassName="no-print" />
       <MobileHeaderShell extraClassName="no-print">
         <Wordmark />
-        <QuickLinksMenu />
+        <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 pb-[120px] md:px-8 md:pt-[var(--space-4)]">

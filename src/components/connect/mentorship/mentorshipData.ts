@@ -193,6 +193,14 @@ export const APPROVED_RESOURCES = [
 ] as const;
 
 export const THREAD_FOOT = "Private mentorship conversation · Safeguarded by Dreamari";
+
+/** One message that arrives while the demo runs, from the other side of
+ *  the pair, so the dock's badge, tone and nudge can be seen working. */
+export const INCOMING: Record<"mentee" | "mentor", string> = {
+  mentee: "Just read your résumé draft. Strong bullets. Tuesday still good to go over it?",
+  mentor: "Finished the Fashion Buyer sim, scored 82! Can we talk about the buying math on Tuesday?",
+};
+export const PRESENCE = { online: "Online", matched: "Matched" };
 export const ESCALATE_REASONS = ["Inappropriate message", "Asked to move off the platform", "Missed meetings, no response", "Something else"] as const;
 
 export type Month = { key: string; month: string; title: string; focus: string; note?: string; state: "complete" | "current" | "upcoming" };

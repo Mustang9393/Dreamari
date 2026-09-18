@@ -13,10 +13,12 @@ import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
 import { AnimatePresence, motion } from "framer-motion";
+import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
 import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
@@ -374,7 +376,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         <Wordmark />
         {/* no streak or XP up here: the hero card below carries both */}
         <span className="flex items-center gap-[var(--space-4)] text-[15px] font-bold">
-          <QuickLinksMenu />
+          <HeaderActions><QuickLinksMenu /></HeaderActions>
         </span>
       </MobileHeaderShell>
 
@@ -1696,7 +1698,10 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
   // so students can continue using it through college"). Same Fall /
   // Winter / Spring windows and In app / Out of app split either way; the
   // college copy fills in the student's #1 career where it names one.
-  const [stage, setStage] = useState<PlanStage>("hs");
+  // the Demo toggle here sets the app-wide stage too (notifications, chat)
+  const storedStage = useStage();
+  const [stage, setStageLocal] = useState<PlanStage>(storedStage);
+  const setStage = (next: PlanStage) => { setStageLocal(next); writeStage(next); };
   // Progressive disclosure (Joshua Pierce, Slack, 18 Sept 2026: "have the
   // HS and College toggle and then once you press either 9 10 11 and 12
   // comes up"). The level row only appears after a stage is pressed and

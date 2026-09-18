@@ -23,7 +23,11 @@ function centerOf(el: Element | null | undefined, fallback: Point): Point {
 /** Where the number lands: the nav's Dream Score chip, or the top-right
  *  corner on screens where the chip is hidden. */
 function target(): Point {
-  return centerOf(document.querySelector(`[${DREAM_SCORE_TARGET_ATTR}]`), { x: window.innerWidth - 72, y: 32 });
+  // the chip that is actually on screen: the desktop nav and the phone
+  // header both carry one, only one is visible at a time
+  const chips = [...document.querySelectorAll(`[${DREAM_SCORE_TARGET_ATTR}]`)] as Element[];
+  const visible = chips.find((el) => el.getClientRects().length > 0) ?? chips[0] ?? null;
+  return centerOf(visible, { x: window.innerWidth - 72, y: 32 });
 }
 
 /**
@@ -62,7 +66,7 @@ export function flyXp({ from, amount, milestone, tone }: { from: Element | Point
 
   const land = () => {
     awardDreamScore(milestone, amount);
-    const chip = document.querySelector<HTMLElement>(`[${DREAM_SCORE_TARGET_ATTR}]`);
+    const chip = ([...document.querySelectorAll<HTMLElement>(`[${DREAM_SCORE_TARGET_ATTR}]`)].find((el) => el.getClientRects().length > 0) ?? document.querySelector<HTMLElement>(`[${DREAM_SCORE_TARGET_ATTR}]`));
     if (chip && !reduce) {
       chip.animate([{ transform: "scale(1)" }, { transform: "scale(1.3)", offset: 0.35 }, { transform: "scale(1)" }], { duration: 560, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
     }

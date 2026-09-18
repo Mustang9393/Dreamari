@@ -12,7 +12,7 @@
 // ConnectExperience routes `?board=` here by id.
 
 import Image from "next/image";
-import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bookmark, BookmarkCheck, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, Eye, GraduationCap, Lightbulb, MapPin, Megaphone,
@@ -1435,6 +1435,18 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
   const [studentTab, setStudentTab] = useState<typeof D.STUDENT_TABS[number]["key"]>("home");
   const [volunteerTab, setVolunteerTab] = useState<typeof D.VOLUNTEER_TABS[number]["key"]>("home");
   const [enterpriseTab, setEnterpriseTab] = useState<typeof D.ENTERPRISE_TABS[number]["key"]>("impact");
+  // Switching a section swaps the whole panel, and the browser reset the
+  // page to the top while the new one mounted (direct feedback, 18 Sept
+  // 2026: "keep me in my context"). Remember where the reader was and put
+  // them back before the paint.
+  const keepY = useRef<number | null>(null);
+  const keep = <T,>(set: (v: T) => void) => (v: T) => { keepY.current = window.scrollY; set(v); };
+  useLayoutEffect(() => {
+    if (keepY.current == null) return;
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    window.scrollTo(0, Math.min(keepY.current, max));
+    keepY.current = null;
+  }, [studentTab, volunteerTab, enterpriseTab]);
   // Learn: progress per module, the module open in its sheet, and the toast
   // that confirms XP and plan changes. Local to the prototype.
   const [progress, setProgress] = useState<Record<string, number>>(() => Object.fromEntries(D.LEARN_MODULES.map((m) => [m.id, m.progress])));
@@ -1515,9 +1527,9 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
         {/* the board's own tabs, the one row a student actually uses; full
            width on phones so four labels never truncate */}
         <div className="w-full sm:w-fit">
-          {view === "student" && <Segmented ariaLabel="Student section" value={studentTab} onChange={setStudentTab} options={[...D.STUDENT_TABS]} grow />}
-          {view === "volunteer" && <Segmented ariaLabel="Volunteer section" value={volunteerTab} onChange={setVolunteerTab} options={[...D.VOLUNTEER_TABS]} grow />}
-          {view === "enterprise" && <Segmented ariaLabel="Enterprise section" value={enterpriseTab} onChange={setEnterpriseTab} options={[...D.ENTERPRISE_TABS]} grow />}
+          {view === "student" && <Segmented ariaLabel="Student section" value={studentTab} onChange={keep(setStudentTab)} options={[...D.STUDENT_TABS]} grow />}
+          {view === "volunteer" && <Segmented ariaLabel="Volunteer section" value={volunteerTab} onChange={keep(setVolunteerTab)} options={[...D.VOLUNTEER_TABS]} grow />}
+          {view === "enterprise" && <Segmented ariaLabel="Enterprise section" value={enterpriseTab} onChange={keep(setEnterpriseTab)} options={[...D.ENTERPRISE_TABS]} grow />}
         </div>
 
         <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : enterpriseTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">

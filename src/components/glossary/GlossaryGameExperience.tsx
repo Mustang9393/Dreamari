@@ -8,6 +8,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { QuickLinksMenu } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
 import {
@@ -183,7 +184,7 @@ function TopBar({ onBack }: { onBack: () => void }) {
          app's one hamburger, same as every screen. */}
       <div className="flex items-center gap-[var(--space-2)]">
         <MuteToggle />
-        <QuickLinksMenu />
+        <HeaderActions><QuickLinksMenu /></HeaderActions>
       </div>
     </header>
   );

@@ -6,6 +6,7 @@ import { ArrowUpRight, ChevronDown, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money, similarSchools } from "./data";
@@ -148,7 +149,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
       <DesktopNavigation active="Explore" />
       <MobileHeaderShell>
         <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/colleges" /><Wordmark /></span>
-        <QuickLinksMenu />
+        <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]">

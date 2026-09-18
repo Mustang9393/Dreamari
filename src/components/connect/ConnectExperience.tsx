@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import { type LucideIcon as ResourceIcon, Handshake, UserRound } from "lucide-react";
 import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
@@ -1421,7 +1422,7 @@ export function ConnectExperience() {
       {/* Mobile header (matches Home's pattern) */}
       <MobileHeaderShell>
         <Wordmark />
-        <QuickLinksMenu />
+        <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
       {/* say()'s confirmations ("Saved insight. Find it under Saved.", "Added to
@@ -2214,18 +2215,8 @@ function HomeView({
         </div>
         <div className="flex items-center gap-[var(--space-3)]">
           <TopTabs tab={tab} onTab={onTab} />
-          {/* Notifications live behind the bell: your questions and what the
-             people you follow did lately */}
-          <button
-            type="button"
-            aria-label="Notifications"
-            aria-pressed={tab === "notifications"}
-            onClick={() => onTab(tab === "notifications" ? "communities" : "notifications")}
-            className="dm-quiet flex h-[48px] w-[48px] flex-none cursor-pointer items-center justify-center rounded-full border"
-            style={{ background: tab === "notifications" ? "var(--primary)" : "var(--glass-surface-1)", borderColor: tab === "notifications" ? "var(--primary)" : "var(--glass-border)", color: tab === "notifications" ? "#FFFFFF" : "var(--muted-foreground)" }}
-          >
-            <Bell className="h-[18px] w-[18px]" aria-hidden />
-          </button>
+          {/* The bell now lives in the top nav, site-wide (18 Sept 2026);
+             Your questions and New from following stay under Your activity. */}
         </div>
       </div>
 

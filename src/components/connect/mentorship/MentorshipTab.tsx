@@ -6,7 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, MessageCircle, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, Maximize2, MessageCircle, Minimize2, Minus, MoreHorizontal, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
+import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
@@ -152,6 +154,8 @@ function DemoViewSwitch({ view, onPick }: { view: D.MentorshipView; onPick: (vie
 // Tab root: the tiled list, then the program
 
 export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" | "partner" | "admin" }) {
+  // the Mentorship tab is on screen: mentorship notifications may show
+  useEffect(() => { setMentorshipContext(true); return () => setMentorshipContext(false); }, []);
   // The open program and its sub-tab ride the URL (?program=coach&sub=messages),
   // so a refresh lands where you were and the browser's Back walks the same
   // steps as ours (direct feedback, 18 Sept 2026).
@@ -245,6 +249,52 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   const [readCount, setReadCount] = useState<Record<D.MentorshipView, number>>({ student: D.THREAD.length - 1, mentor: D.THREAD.length - 1, enterprise: 0 });
   const unreadFor = (v: D.MentorshipView) => (v === "enterprise" ? 0 : messages.filter((m, i) => i >= readCount[v] && m.from !== (v === "student" ? "mentee" : "mentor")).length);
   const markRead = (v: D.MentorshipView) => setReadCount((r) => (r[v] === messages.length ? r : { ...r, [v]: messages.length }));
+  // The chat is a dock, not a tab (direct feedback, 18 Sept 2026: a window
+  // that rises from the bottom, minimise, full screen, sounds, nudges). Its
+  // state lives in the inbox store so the nav's Messages icon can open it
+  // and carry the unread count.
+  const inbox = useInbox();
+  const dock = view === "enterprise" ? "closed" : inbox.dock;
+  const me: "mentee" | "mentor" = view === "mentor" ? "mentor" : "mentee";
+  const unread = unreadFor(view);
+  const [toast, onToast] = useToast();
+  const [nudge, setNudge] = useState<string | null>(null);
+  useEffect(() => { setProgramContext(true); return () => { setProgramContext(false); setDock("closed"); }; }, []);
+  useEffect(() => { setUnreadMessages(unread); }, [unread]);
+  // syncing with the inbox store (an external system), which is what these rules allow
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { if (dock === "open" || dock === "full") { markRead(view); setNudge(null); } }, [dock, view, messages.length]);
+  // a decision taken from a notification lands on the pending request here
+  useEffect(() => {
+    const decision = inbox.meetingDecision;
+    if (!decision) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMessages((list) => {
+      const idx = [...list].reverse().findIndex((m) => m.meeting?.status === "pending");
+      if (idx < 0) return list;
+      const at = list.length - 1 - idx;
+      return list.map((m, i) => (i === at && m.meeting ? { ...m, meeting: { ...m.meeting, status: decision } } : m));
+    });
+    clearMeetingDecision();
+  }, [inbox.meetingDecision]);
+  // one incoming message while the demo runs: badge, tone, nudge
+  const arrived = useRef(false);
+  useEffect(() => {
+    if (view === "enterprise" || arrived.current) return;
+    const t = window.setTimeout(() => {
+      arrived.current = true;
+      const from = me === "mentee" ? "mentor" : "mentee";
+      setMessages((list) => [...list, { from, text: D.INCOMING[me], when: "Just now" }]);
+      playMessageTone();
+      if (inbox.dock !== "open" && inbox.dock !== "full") setNudge(D.INCOMING[me]);
+    }, 12000);
+    return () => window.clearTimeout(t);
+  }, [view, me]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!nudge) return;
+    const t = window.setTimeout(() => setNudge(null), 8000);
+    return () => window.clearTimeout(t);
+  }, [nudge]);
   const router = useRouter();
   const params = useSearchParams();
   const sub = params.get("sub") ?? "";
@@ -253,14 +303,17 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
     q.set("sub", next);
     router.replace(`/connect?${q.toString()}`, { scroll: false });
   };
-  const shared = { messages, setMessages, sub, setSub };
+  // `?sub=messages` from an old link or a notification opens the dock
+  useEffect(() => { if (sub === "messages") openDock(); }, [sub]);
+  const openChat = () => openDock();
+  const openProfile = (who: "mentor" | "mentee") => { setProfile(who); if (inbox.dock === "open" || inbox.dock === "full") setDock("min"); };
+  const shared = { messages, setMessages, sub, setSub, openChat };
   const [follows, setFollows] = useState<Follows>({});
   // Back from a profile names the section it was opened from: the chat says
   // "Back to Messages", the Year Plan says "Back to Year Plan", the enterprise
   // activity table says "Back to Overview"; a Home tab names the program.
   const backTo =
     view === "enterprise" ? (sub === "countries" ? "Regions" : sub === "settings" ? "Settings" : "Overview")
-    : sub === "messages" ? "Messages"
     : view === "student" && sub === "plan" ? "Year Plan"
     : view === "mentor" && sub === "journey" ? "Journey"
     : D.PROGRAM.initiative;
@@ -299,12 +352,121 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
       </section>
 
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
-        {view === "student" && <StudentView {...shared} unread={unreadFor("student")} onRead={() => markRead("student")} onOpenProfile={() => setProfile("mentor")} />}
-        {view === "mentor" && <MentorView {...shared} unread={unreadFor("mentor")} onRead={() => markRead("mentor")} onOpenProfile={() => setProfile("mentee")} />}
+        {view === "student" && <StudentView {...shared} onOpenProfile={() => openProfile("mentor")} />}
+        {view === "mentor" && <MentorView {...shared} onOpenProfile={() => openProfile("mentee")} />}
         {view === "enterprise" && <EnterpriseView sub={sub} setSub={setSub} onOpenMentor={(row) => (row.mentor === D.MENTOR.name ? setProfile("mentor") : setMentorSheet(row))} />}
       </SectionSurface>
       </div>
+      {dock !== "closed" && <ChatDock me={me} state={dock} unread={unread} messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={() => openProfile(me === "mentee" ? "mentor" : "mentee")} />}
+      {nudge && dock !== "open" && dock !== "full" && <IncomingNudge me={me} text={nudge} raised={dock === "min"} onOpen={() => { setNudge(null); openDock(); }} onClose={() => setNudge(null)} />}
+      {toast}
     </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// The chat dock: rises from the bottom right, minimises to a bar, goes full
+// screen, and is the whole screen on a phone.
+
+function ChatDock({ me, state, unread, messages, setMessages, onToast, onOpenProfile }: { me: "mentee" | "mentor"; state: "open" | "min" | "full"; unread: number; messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; onToast: (t: string) => void; onOpenProfile: () => void }) {
+  const other = me === "mentee" ? { name: D.MENTOR.name, line: `${D.MENTOR.title} · ${D.MENTOR.org}`, photo: D.MENTOR.photo } : { name: D.MENTEE.name, line: D.MENTEE.line, photo: studentAvatarSrc(D.MENTEE.name) };
+  useEffect(() => {
+    if (state === "min") return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setDock(state === "full" ? "open" : "min"); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [state]);
+  const surface = { background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" } as const;
+  const iconBtn = "dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-full";
+  const [menu, setMenu] = useState(false);
+  const [report, setReport] = useState(0);
+  if (state === "min") {
+    return (
+      <Portal>
+        <motion.button
+          type="button"
+          initial={{ y: 24, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          onClick={() => setDock("open")}
+          aria-label={`Open chat with ${other.name}${unread ? `, ${unread} unread` : ""}`}
+          className="fixed right-[16px] bottom-[calc(76px+env(safe-area-inset-bottom))] z-[85] flex w-[280px] cursor-pointer items-center gap-[10px] rounded-t-[16px] border px-[12px] py-[10px] text-left sm:right-[24px] sm:bottom-0"
+          style={surface}
+        >
+          <span className="flex flex-none items-center"><Avatar name={other.name} size={32} photo={other.photo} /></span>
+          <span className="flex min-w-0 flex-1 flex-col justify-center gap-[1px]">
+            <span className="block truncate text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{other.name}</span>
+            <span className="flex items-center gap-[5px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[7px] rounded-full" style={{ background: GOOD }} /> {D.PRESENCE.online}</span>
+          </span>
+          {unread > 0 && <span className="flex h-[20px] min-w-[20px] items-center justify-center rounded-full px-[6px] text-[11px] font-extrabold tabular-nums" style={{ background: accent, color: "#0e0c20" }}>{unread}</span>}
+          <Maximize2 className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+        </motion.button>
+      </Portal>
+    );
+  }
+  const full = state === "full";
+  return (
+    <Portal>
+      <motion.div
+        initial={{ y: 32, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 420, damping: 38 }}
+        className={full ? "fixed inset-0 z-[85] flex items-center justify-center sm:p-[24px]" : "fixed inset-0 z-[85] sm:inset-auto sm:right-[24px] sm:bottom-0"}
+        role="dialog"
+        aria-label={`Chat with ${other.name}`}
+      >
+        <div className={`flex flex-col overflow-hidden border ${full ? "h-full w-full max-w-[960px] sm:h-[min(880px,100%)] sm:rounded-[var(--radius-xl)]" : "h-full w-full sm:h-[min(660px,calc(100dvh-96px))] sm:w-[420px] sm:rounded-t-[var(--radius-xl)] sm:border-b-0"}`} style={surface}>
+          <div className="flex items-center justify-between gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: RULE }}>
+            <button type="button" onClick={onOpenProfile} className="dm-quiet -mx-[6px] -my-[4px] flex min-w-0 cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[6px] py-[4px] text-left" aria-label={`Open ${other.name}'s profile`}>
+              <span className="flex flex-none items-center"><Avatar name={other.name} size={36} photo={other.photo} /></span>
+              <span className="flex min-w-0 flex-col justify-center gap-[1px]">
+                <span className="flex items-center gap-[5px] text-[14.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}><span className="truncate">{other.name}</span> <VerifiedBadge size={13} /></span>
+                <span className="flex min-w-0 items-center gap-[5px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: GOOD }} /><span className="truncate">{D.PRESENCE.online} · {other.line}</span></span>
+              </span>
+            </button>
+            <span className="flex flex-none items-center gap-[2px]" style={{ color: "var(--muted-foreground)" }}>
+              <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" aria-label="Start a video call" title="Video call" className={iconBtn}><Video className="h-4 w-4" aria-hidden /></a>
+              <span className="relative">
+                <button type="button" aria-label="More" title="More" aria-expanded={menu} onClick={() => setMenu((v) => !v)} className={iconBtn}><MoreHorizontal className="h-4 w-4" aria-hidden /></button>
+                {menu && (
+                  <div role="menu" className="absolute top-[calc(100%+6px)] right-0 z-20 min-w-[260px] overflow-hidden rounded-[var(--radius-md)] border motion-safe:animate-[fade-slide-up_0.16s_ease-out_both]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 50px -20px rgba(0,0,0,0.8)" }}>
+                    <div className="flex items-start gap-[8px] px-[14px] py-[10px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="mt-[1px] h-4 w-4 flex-none" aria-hidden style={{ color: GOOD }} /> {D.THREAD_FOOT}</div>
+                    <button type="button" role="menuitem" onClick={() => { setMenu(false); setDock(full ? "open" : "full"); }} className="dm-quiet hidden w-full cursor-pointer items-center gap-[10px] border-t px-[14px] py-[10px] text-left text-[13.5px] font-semibold sm:flex" style={{ borderColor: RULE, color: "var(--foreground)" }}>{full ? <Minimize2 className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> : <Maximize2 className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} {full ? "Exit full screen" : "Full screen"}</button>
+                    <button type="button" role="menuitem" onClick={() => { setMenu(false); setReport((n) => n + 1); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] border-t px-[14px] py-[10px] text-left text-[13.5px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}><Flag className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> Report a problem</button>
+                  </div>
+                )}
+              </span>
+              <button type="button" aria-label="Minimise" title="Minimise" onClick={() => setDock("min")} className={`${iconBtn} hidden sm:flex`}><Minus className="h-4 w-4" aria-hidden /></button>
+              <button type="button" aria-label="Close" title="Close" onClick={() => setDock("closed")} className={iconBtn}><X className="h-4 w-4" aria-hidden /></button>
+            </span>
+          </div>
+          <div className="min-h-0 flex-1">
+            <Thread embedded me={me} messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={onOpenProfile} reportSignal={report} />
+          </div>
+        </div>
+      </motion.div>
+    </Portal>
+  );
+}
+
+/** A new message while the chat is closed: one small card, the sender and
+ *  the first line, tap to open. Goes away on its own. */
+function IncomingNudge({ me, text, raised, onOpen, onClose }: { me: "mentee" | "mentor"; text: string; raised: boolean; onOpen: () => void; onClose: () => void }) {
+  const other = me === "mentee" ? { name: D.MENTOR.name, photo: D.MENTOR.photo } : { name: D.MENTEE.name, photo: studentAvatarSrc(D.MENTEE.name) };
+  return (
+    <Portal>
+      <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} role="status" className={`fixed right-[16px] z-[86] w-[min(340px,calc(100vw-32px))] sm:right-[24px] ${raised ? "bottom-[calc(140px+env(safe-area-inset-bottom))] sm:bottom-[72px]" : "bottom-[calc(88px+env(safe-area-inset-bottom))] sm:bottom-[24px]"}`}>
+        <div className="flex items-start gap-[10px] rounded-[var(--radius-lg)] border p-[12px]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, boxShadow: "0 24px 60px -24px rgba(0,0,0,0.85)" }}>
+          <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 cursor-pointer items-start gap-[10px] text-left">
+            <Avatar name={other.name} size={36} photo={other.photo} />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{other.name}</span>
+              <span className="line-clamp-2 text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{text}</span>
+            </span>
+          </button>
+          <button type="button" aria-label="Dismiss" onClick={onClose} className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+        </div>
+      </motion.div>
+    </Portal>
   );
 }
 
@@ -536,7 +698,7 @@ function ShareSheet({ onClose, onPick }: { onClose: () => void; onPick: (share: 
  *  permanent row of them. Attachments, GIFs and the mentorship actions live
  *  in the plus menu; emoji behind the smile; suggested questions behind the
  *  sparkle. Meeting requests are cards in the thread itself. */
-function Thread({ me, messages, setMessages, onToast, onOpenProfile }: { me: "mentee" | "mentor"; messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; onToast: (t: string) => void; onOpenProfile: () => void }) {
+function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = false, reportSignal = 0 }: { me: "mentee" | "mentor"; messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; onToast: (t: string) => void; onOpenProfile: () => void; /** inside the chat dock: no header of its own, the list scrolls, the composer stays put */ embedded?: boolean; /** bumps when the dock's menu asks for the Report sheet */ reportSignal?: number }) {
   const [draft, setDraft] = useState("");
   const [menu, setMenu] = useState<"none" | "plus" | "emoji">("none");
   const [suggest, setSuggest] = useState(false);
@@ -545,6 +707,10 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile }: { me: "me
   const [sheet, setSheet] = useState<"none" | "escalate" | "resource" | "meeting" | "share">("none");
   const endRef = useRef<HTMLDivElement>(null);
   const other = me === "mentee" ? { name: D.MENTOR.name, line: `${D.MENTOR.title} · ${D.MENTOR.org}`, photo: D.MENTOR.photo } : { name: D.MENTEE.name, line: D.MENTEE.line, photo: studentAvatarSrc(D.MENTEE.name) };
+  // in the dock, open on the latest message and follow new ones
+  useEffect(() => { if (embedded) endRef.current?.scrollIntoView({ block: "end" }); }, [embedded, messages.length]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { if (reportSignal) setSheet("escalate"); }, [reportSignal]);
   const suggested = me === "mentee" ? D.STUDENT_SUGGESTED : D.MENTOR_SUGGESTED;
   const actions = D.COMPOSER_ACTIONS.filter((a) => a.who === "both" || a.who === me);
   const nudge = D.NUDGES[me][Math.min(sent, D.NUDGES[me].length - 1)];
@@ -581,8 +747,8 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile }: { me: "me
   const menuClass = "absolute bottom-[calc(100%+8px)] left-0 z-20 overflow-hidden rounded-[var(--radius-md)] border motion-safe:animate-[fade-slide-up_0.16s_ease-out_both]";
   const menuStyle = { background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 50px -20px rgba(0,0,0,0.8)" } as const;
   return (
-    <section className="flex flex-col rounded-[var(--radius-lg)] border" style={{ background: "color-mix(in srgb, var(--background) 72%, var(--glass-surface-2))", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 60px -32px rgba(0,0,0,0.8)" }}>
-      <div className="flex items-center justify-between gap-[10px] border-b px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
+    <section className={embedded ? "flex h-full min-h-0 flex-col" : "flex flex-col rounded-[var(--radius-lg)] border"} style={embedded ? undefined : { background: "color-mix(in srgb, var(--background) 72%, var(--glass-surface-2))", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 60px -32px rgba(0,0,0,0.8)" }}>
+      {!embedded && <div className="flex items-center justify-between gap-[10px] border-b px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
         <button type="button" onClick={onOpenProfile} className="dm-quiet -mx-[8px] -my-[4px] flex cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] px-[8px] py-[4px] text-left" aria-label={`Open ${other.name}'s profile`}>
           <Avatar name={other.name} size={40} photo={other.photo} />
           <span className="flex flex-col">
@@ -594,15 +760,15 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile }: { me: "me
           <Chip tone={GOOD}><span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />Matched</Chip>
           <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" aria-label="Start a video call" className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Video className="h-4 w-4" aria-hidden /></a>
         </div>
-      </div>
+      </div>}
 
-      <div className="flex min-h-[320px] flex-col justify-end gap-[16px] px-[var(--space-5)] py-[var(--space-5)] sm:min-h-[380px]">
+      <div className={embedded ? "flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-[var(--space-4)] py-[var(--space-4)]" : "flex min-h-[320px] flex-col justify-end gap-[22px] px-[var(--space-5)] py-[var(--space-5)] sm:min-h-[380px]"}>
         {groups.map((g, gi) => {
           const mine = g.from === me;
           return (
             <div key={gi} className={`flex items-end gap-[10px] ${mine ? "justify-end" : "justify-start"}`}>
               {!mine && <button type="button" onClick={onOpenProfile} aria-label={`Open ${other.name}'s profile`} className="dm-quiet mb-[22px] flex-none cursor-pointer rounded-full"><Avatar name={other.name} size={30} photo={other.photo} /></button>}
-              <div className={`flex max-w-[78%] flex-col gap-[3px] ${mine ? "items-end" : "items-start"}`}>
+              <div className={`flex max-w-[78%] flex-col gap-[6px] ${mine ? "items-end" : "items-start"}`}>
                 {g.items.map(({ m, index }, i) => {
                   const first = i === 0;
                   const last = i === g.items.length - 1;
@@ -623,12 +789,12 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile }: { me: "me
         <div ref={endRef} />
       </div>
 
-      <div className="flex flex-col gap-[10px] border-t px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
+      <div className={`flex flex-none flex-col gap-[10px] border-t py-[var(--space-4)] ${embedded ? "px-[var(--space-4)]" : "px-[var(--space-5)]"}`} style={{ borderColor: RULE }}>
         {/* one nudge, dismissable, rotates as the conversation moves */}
         {!nudgeGone && !suggest && nudge && (
           <div className="flex items-center gap-[6px] motion-safe:animate-[fade-slide-up_0.18s_ease-out_both]">
-            <button type="button" onClick={() => setDraft(nudge)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-left text-[12.5px] leading-[16px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 10%, transparent)`, color: "var(--foreground)" }}>
-              <Sparkles className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: accent }} /> <span className="truncate">{nudge}</span>
+            <button type="button" onClick={() => setDraft(nudge)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-left text-[12.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--muted-foreground)" }}>
+              <Sparkles className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} /> <span className="truncate">{nudge}</span>
             </button>
             <button type="button" aria-label="Dismiss suggestion" onClick={() => setNudgeGone(true)} className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
           </div>
@@ -677,10 +843,12 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile }: { me: "me
             <Send className="h-[16px] w-[16px]" aria-hidden />
           </button>
         </form>
+        {!embedded && (
         <div className="flex flex-wrap items-center justify-between gap-[8px]">
           <Muted className="flex items-center gap-[5px] text-[12px] leading-[16px]"><ShieldCheck className="h-3.5 w-3.5" aria-hidden style={{ color: GOOD }} /> {D.THREAD_FOOT}</Muted>
           <button type="button" onClick={() => setSheet("escalate")} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12px] leading-[16px] font-bold" style={{ color: "var(--muted-foreground)" }}><Flag className="h-3.5 w-3.5" aria-hidden /> Report</button>
         </div>
+        )}
       </div>
 
       {sheet === "escalate" && (
@@ -959,17 +1127,18 @@ function OrientationRow({ onToast }: { onToast: (t: string) => void }) {
 // ---------------------------------------------------------------------------
 // Student
 
-type ViewShared = { messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; sub: string; setSub: (s: string) => void; unread: number; onRead: () => void; onOpenProfile: () => void };
+type ViewShared = { messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; sub: string; setSub: (s: string) => void; openChat: () => void; onOpenProfile: () => void };
 
-function StudentView({ messages, setMessages, sub, setSub, unread, onRead, onOpenProfile }: ViewShared) {
+function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfile }: ViewShared) {
   const router = useRouter();
-  const tab = (["home", "messages", "plan"].includes(sub) ? sub : "home") as "home" | "messages" | "plan";
-  const setTab = (t: "home" | "messages" | "plan") => { setSub(t); if (t === "messages") onRead(); };
+  // Messages is the dock, not a tab: one conversation, one home
+  const tab = (["home", "plan"].includes(sub) ? sub : "home") as "home" | "plan";
+  const setTab = (t: "home" | "plan") => setSub(t);
   const [toast, onToast] = useToast();
   const postRequest = (m: D.MeetingRequest) => setMessages((list) => [...list, { from: "mentee", text: "", when: "Just now", meeting: m }]);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "messages", label: "Messages", badge: tab === "messages" ? 0 : unread }, { key: "plan", label: "Year Plan" }]} /></div>
+      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "plan", label: "Year Plan" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
           <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
@@ -981,7 +1150,7 @@ function StudentView({ messages, setMessages, sub, setSub, unread, onRead, onOpe
                 <Muted>{D.MENTOR.title} · {D.MENTOR.org}</Muted>
               </div>
             </div>
-            <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={() => setTab("messages")}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
+            <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
           </ClickPanel>
 
           <ScheduleCard me="mentee" messages={messages} onRequest={postRequest} onToast={onToast} showMeter />
@@ -1008,7 +1177,6 @@ function StudentView({ messages, setMessages, sub, setSub, unread, onRead, onOpe
           <RematchPanel who="Avery" onToast={onToast} />
         </div>
       )}
-      {tab === "messages" && <Thread me="mentee" messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={onOpenProfile} />}
       {tab === "plan" && <YearPlan eyebrow="Year plan" title="Topics to discuss each month." />}
       {toast}
     </div>
@@ -1018,15 +1186,15 @@ function StudentView({ messages, setMessages, sub, setSub, unread, onRead, onOpe
 // ---------------------------------------------------------------------------
 // Mentor
 
-function MentorView({ messages, setMessages, sub, setSub, unread, onRead, onOpenProfile }: ViewShared) {
-  const tab = (["home", "messages", "journey"].includes(sub) ? sub : "home") as "home" | "messages" | "journey";
-  const setTab = (t: "home" | "messages" | "journey") => { setSub(t); if (t === "messages") onRead(); };
+function MentorView({ messages, setMessages, sub, setSub, openChat, onOpenProfile }: ViewShared) {
+  const tab = (["home", "journey"].includes(sub) ? sub : "home") as "home" | "journey";
+  const setTab = (t: "home" | "journey") => setSub(t);
   const [prep, setPrep] = useState(false);
   const [toast, onToast] = useToast();
   const postRequest = (m: D.MeetingRequest) => setMessages((list) => [...list, { from: "mentor", text: "", when: "Just now", meeting: m }]);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "messages", label: "Messages", badge: tab === "messages" ? 0 : unread }, { key: "journey", label: "Journey" }]} /></div>
+      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "journey", label: "Journey" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
           <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTEE.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
@@ -1038,7 +1206,7 @@ function MentorView({ messages, setMessages, sub, setSub, unread, onRead, onOpen
                 <Muted>{D.MENTEE.line}</Muted>
               </div>
             </div>
-            <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={() => setTab("messages")}><MessageCircle className="h-4 w-4" aria-hidden /> Message</PrimaryCta>
+            <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message</PrimaryCta>
           </ClickPanel>
 
           <ClickPanel onClick={() => setPrep(true)} label="Prepare for meeting" className="flex flex-col gap-[var(--space-3)]">
@@ -1059,7 +1227,6 @@ function MentorView({ messages, setMessages, sub, setSub, unread, onRead, onOpen
           <RematchPanel who={D.MENTEE.name} onToast={onToast} />
         </div>
       )}
-      {tab === "messages" && <Thread me="mentor" messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={onOpenProfile} />}
       {tab === "journey" && <YearPlan eyebrow="Mentorship journey" title="A clear next step, every month." />}
       {prep && (
         <Sheet title={`Before you meet ${D.MENTEE.name}`} label="Prepare for meeting" onClose={() => setPrep(false)}>
