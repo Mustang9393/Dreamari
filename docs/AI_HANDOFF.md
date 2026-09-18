@@ -10303,3 +10303,19 @@ card (`InsightMark`). Connect's demo role switcher is hidden on the
 Mentorship tab (it has its own Demo chip), as on the AT&T board.
 Open: the same clickable-card audit across Home, Explore, Play, Profile and
 the other Connect surfaces (memory: feedback-clickable-cards-profiles).
+
+## 2026-09-18 · Mentorship, round six (one story: Jordan, shared thread, URL state)
+
+- The mentee is Jordan (Rivera), the demo account, everywhere in the tab:
+  copy, avatar (studentAvatarSrc), sample resume, activity table.
+- One thread state lives in ProgramView and feeds the student view, the
+  mentor view and the Next meeting card. Accepting a request in the chat sets
+  the card ("Next meeting · accepted"); Reschedule on the card posts a request
+  into the chat and the card reads "new time requested, waiting".
+- Messages tab shows an unread badge (Segmented `badge`), cleared on open.
+- `?program=coach&sub=messages` ride the URL: refresh keeps the place,
+  browser Back walks back to the tiles.
+- Prep cards: one shape (240px), the Replit's why line and CTA on each
+  (Explore Career, Play Simulation, View Resume).
+- Enterprise series read upward; the hours chart notes it is the calendar
+  year while the student's plan is the program year.

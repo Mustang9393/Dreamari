@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
@@ -11,6 +11,7 @@ import { Portal } from "@/components/profile/CareerReport";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
+import { studentAvatarSrc } from "@/lib/avatar";
 import { DEFAULT_RESUME_TEMPLATE } from "@/components/resume/data";
 import { resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import { Avatar, CompanyMark, InsightMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
@@ -151,7 +152,17 @@ function DemoViewSwitch({ view, onPick }: { view: D.MentorshipView; onPick: (vie
 // Tab root: the tiled list, then the program
 
 export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" | "partner" | "admin" }) {
-  const [open, setOpen] = useState<string | null>(null);
+  // The open program and its sub-tab ride the URL (?program=coach&sub=messages),
+  // so a refresh lands where you were and the browser's Back walks the same
+  // steps as ours (direct feedback, 18 Sept 2026).
+  const router = useRouter();
+  const params = useSearchParams();
+  const open = params.get("program");
+  const setOpen = (next: string | null) => {
+    const q = new URLSearchParams(params.toString());
+    if (next) q.set("program", next); else { q.delete("program"); q.delete("sub"); }
+    router.push(`/connect?${q.toString()}`, { scroll: false });
+  };
   const [toast, onToast] = useToast();
   if (open === D.PROGRAM.id) return <ProgramView role={role} onBack={() => setOpen(null)} />;
   return (
@@ -227,6 +238,22 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   // returns to the same chat, so the program stays mounted underneath.
   const [profile, setProfile] = useState<"mentor" | "mentee" | null>(null);
   const [mentorSheet, setMentorSheet] = useState<D.PairActivity | null>(null);
+  // One thread shared by the student and mentor views, and by the schedule
+  // card: accepting a request in the chat is what sets the next meeting.
+  const [messages, setMessages] = useState<D.Message[]>(D.THREAD);
+  // Unread: the other side's messages since this side last opened Messages.
+  const [readCount, setReadCount] = useState<Record<D.MentorshipView, number>>({ student: D.THREAD.length - 1, mentor: D.THREAD.length - 1, enterprise: 0 });
+  const unreadFor = (v: D.MentorshipView) => (v === "enterprise" ? 0 : messages.filter((m, i) => i >= readCount[v] && m.from !== (v === "student" ? "mentee" : "mentor")).length);
+  const markRead = (v: D.MentorshipView) => setReadCount((r) => (r[v] === messages.length ? r : { ...r, [v]: messages.length }));
+  const router = useRouter();
+  const params = useSearchParams();
+  const sub = params.get("sub") ?? "";
+  const setSub = (next: string) => {
+    const q = new URLSearchParams(params.toString());
+    q.set("sub", next);
+    router.replace(`/connect?${q.toString()}`, { scroll: false });
+  };
+  const shared = { messages, setMessages, sub, setSub };
   const [follows, setFollows] = useState<Follows>({});
   return (
     <section className="flex flex-col gap-[var(--space-5)]" aria-label={D.PROGRAM.title}>
@@ -262,9 +289,9 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
       </section>
 
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
-        {view === "student" && <StudentView onOpenProfile={() => setProfile("mentor")} />}
-        {view === "mentor" && <MentorView onOpenProfile={() => setProfile("mentee")} />}
-        {view === "enterprise" && <EnterpriseView onOpenMentor={(row) => (row.mentor === D.MENTOR.name ? setProfile("mentor") : setMentorSheet(row))} />}
+        {view === "student" && <StudentView {...shared} unread={unreadFor("student")} onRead={() => markRead("student")} onOpenProfile={() => setProfile("mentor")} />}
+        {view === "mentor" && <MentorView {...shared} unread={unreadFor("mentor")} onRead={() => markRead("mentor")} onOpenProfile={() => setProfile("mentee")} />}
+        {view === "enterprise" && <EnterpriseView sub={sub} setSub={setSub} onOpenMentor={(row) => (row.mentor === D.MENTOR.name ? setProfile("mentor") : setMentorSheet(row))} />}
       </SectionSurface>
       </div>
     </section>
@@ -275,11 +302,11 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
  *  exploring, what she has done in Dreamari. A sheet, so the chat stays. */
 function MenteeProfile({ onBack }: { onBack: () => void }) {
   return (
-    <Sheet title={D.MENTEE.name} label="Dream It Real Scholar" onClose={onBack}>
+    <Sheet title={D.MENTEE.fullName} label="Dream It Real Scholar" onClose={onBack}>
       <div className="flex items-center gap-[14px]">
-        <Avatar name={D.MENTEE.name} size={64} />
+        <Avatar name={D.MENTEE.name} size={64} photo={studentAvatarSrc(D.MENTEE.name)} />
         <div className="flex flex-col gap-[2px]">
-          <span className="flex items-center gap-[6px] text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.MENTEE.name} Reyes <VerifiedBadge size={14} /></span>
+          <span className="flex items-center gap-[6px] text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.MENTEE.fullName} <VerifiedBadge size={14} /></span>
           <Muted>{D.MENTEE.line} · Baruch College, CUNY</Muted>
         </div>
       </div>
@@ -302,21 +329,34 @@ function MenteeProfile({ onBack }: { onBack: () => void }) {
 // ---------------------------------------------------------------------------
 // Shared pieces: schedule, thread, plan
 
-function ScheduleCard({ onToast, showMeter }: { onToast: (t: string) => void; showMeter?: boolean }) {
-  const [slot, setSlot] = useState<string | null>(null);
+/** "Thu, Oct 30 · 5:00 PM" -> the pieces the card shows. */
+function parseWhen(when: string): { weekday: string; month: string; day: number; time: string } {
+  const m = when.match(/^(\w+), (\w+) (\d+) · (.+)$/);
+  return m ? { weekday: m[1], month: m[2], day: Number(m[3]), time: m[4] } : { weekday: D.MEETING.date.weekday, month: D.MEETING.date.month, day: D.MEETING.date.day, time: D.MEETING.time };
+}
+const WEEKDAYS: Record<string, string> = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday", Sun: "Sunday" };
+
+/** The next meeting is whatever the thread says it is: the latest accepted
+ *  request wins, a pending one shows as waiting, and Reschedule here posts a
+ *  request into the chat instead of changing the card on its own. */
+function ScheduleCard({ me, messages, onRequest, onToast, showMeter }: { me: "mentee" | "mentor"; messages: D.Message[]; onRequest: (m: D.MeetingRequest) => void; onToast: (t: string) => void; showMeter?: boolean }) {
   const [open, setOpen] = useState(false);
   const [details, setDetails] = useState(false);
-  const when = slot ?? `${D.MEETING.date.weekday} · ${D.MEETING.time}`;
-  const request = D.THREAD.find((m) => m.meeting)?.meeting;
+  const requests = messages.filter((m) => m.meeting);
+  const accepted = [...requests].reverse().find((m) => m.meeting?.status === "accepted")?.meeting;
+  const pending = [...requests].reverse().find((m) => m.meeting?.status === "pending");
+  const request = accepted ?? requests[0]?.meeting;
+  const at = parseWhen(accepted?.when ?? `${D.MEETING.date.weekday.slice(0, 3)}, ${D.MEETING.date.month} ${D.MEETING.date.day} · ${D.MEETING.time}`);
+  const when = `${WEEKDAYS[at.weekday] ?? at.weekday} · ${at.time}`;
   return (
     <ClickPanel onClick={() => setDetails(true)} label="Meeting details">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
         <div className="flex items-center gap-[14px]">
-          <DateTile month={slot ? slot.split(" ")[1] : D.MEETING.date.month} day={slot ? Number(slot.split(" ")[2]) : D.MEETING.date.day} />
+          <DateTile month={at.month} day={at.day} />
           <div className="flex min-w-0 flex-col gap-[2px]">
-            <Eyebrow>Next meeting</Eyebrow>
+            <Eyebrow>{accepted ? "Next meeting · accepted" : "Next meeting"}</Eyebrow>
             <span className="text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{when}</span>
-            <Muted className="flex items-center gap-[5px]"><Video className="h-3.5 w-3.5" aria-hidden /> {D.MEETING.where}</Muted>
+            <Muted className="flex items-center gap-[5px]"><Video className="h-3.5 w-3.5" aria-hidden /> {D.MEETING.where}{pending && pending.from === me ? " · new time requested, waiting" : pending ? " · new time proposed in Messages" : ""}</Muted>
           </div>
         </div>
         <div className={`${ABOVE} flex items-center gap-[8px]`}>
@@ -339,7 +379,7 @@ function ScheduleCard({ onToast, showMeter }: { onToast: (t: string) => void; sh
         <Sheet title={request?.title ?? "Next meeting"} label="Next meeting" onClose={() => setDetails(false)}>
           {request && <Muted>{request.agenda}</Muted>}
           <div className="flex flex-col gap-[2px] border-t pt-[var(--space-3)] text-[14px] leading-[20px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}>
-            <span className="flex items-center gap-[6px]"><Clock className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {D.MEETING.date.weekday}, {D.MEETING.date.month} {D.MEETING.date.day} · {D.MEETING.time}</span>
+            <span className="flex items-center gap-[6px]"><Clock className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {WEEKDAYS[at.weekday] ?? at.weekday}, {at.month} {at.day} · {at.time}</span>
             <span className="flex items-center gap-[6px]"><Video className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {D.MEETING.where}</span>
             <span className="flex items-center gap-[6px]"><Handshake className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> Meeting {D.MEETING.completed + 1} of {D.MEETING.required} required this year</span>
           </div>
@@ -359,7 +399,7 @@ function ScheduleCard({ onToast, showMeter }: { onToast: (t: string) => void; sh
           <Muted>Both calendars are free at these times.</Muted>
           <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
             {D.MEETING.reschedule.map((s) => (
-              <button key={s} type="button" onClick={() => { setSlot(s); setOpen(false); onToast("Request sent."); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[10px] py-[12px] text-left text-[14.5px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}>
+              <button key={s} type="button" onClick={() => { setOpen(false); onRequest({ title: request?.title ?? "Next meeting", agenda: request?.agenda ?? "Open conversation.", when: s, where: D.MEETING.where, status: "pending" }); onToast("New time requested in Messages."); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[10px] py-[12px] text-left text-[14.5px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}>
                 <span className="flex items-center gap-[8px]"><Clock className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {s}</span>
                 <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />
               </button>
@@ -486,8 +526,7 @@ function ShareSheet({ onClose, onPick }: { onClose: () => void; onPick: (share: 
  *  permanent row of them. Attachments, GIFs and the mentorship actions live
  *  in the plus menu; emoji behind the smile; suggested questions behind the
  *  sparkle. Meeting requests are cards in the thread itself. */
-function Thread({ me, onToast, onOpenProfile }: { me: "mentee" | "mentor"; onToast: (t: string) => void; onOpenProfile: () => void }) {
-  const [messages, setMessages] = useState<D.Message[]>(D.THREAD);
+function Thread({ me, messages, setMessages, onToast, onOpenProfile }: { me: "mentee" | "mentor"; messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; onToast: (t: string) => void; onOpenProfile: () => void }) {
   const [draft, setDraft] = useState("");
   const [menu, setMenu] = useState<"none" | "plus" | "emoji">("none");
   const [suggest, setSuggest] = useState(false);
@@ -495,7 +534,7 @@ function Thread({ me, onToast, onOpenProfile }: { me: "mentee" | "mentor"; onToa
   const [nudgeGone, setNudgeGone] = useState(false);
   const [sheet, setSheet] = useState<"none" | "escalate" | "resource" | "meeting" | "share">("none");
   const endRef = useRef<HTMLDivElement>(null);
-  const other = me === "mentee" ? { name: D.MENTOR.name, line: `${D.MENTOR.title} · ${D.MENTOR.org}`, photo: D.MENTOR.photo } : { name: D.MENTEE.name, line: D.MENTEE.line, photo: undefined };
+  const other = me === "mentee" ? { name: D.MENTOR.name, line: `${D.MENTOR.title} · ${D.MENTOR.org}`, photo: D.MENTOR.photo } : { name: D.MENTEE.name, line: D.MENTEE.line, photo: studentAvatarSrc(D.MENTEE.name) };
   const suggested = me === "mentee" ? D.STUDENT_SUGGESTED : D.MENTOR_SUGGESTED;
   const actions = D.COMPOSER_ACTIONS.filter((a) => a.who === "both" || a.who === me);
   const nudge = D.NUDGES[me][Math.min(sent, D.NUDGES[me].length - 1)];
@@ -511,7 +550,7 @@ function Thread({ me, onToast, onOpenProfile }: { me: "mentee" | "mentor"; onToa
   const send = (text: string) => { if (text.trim()) push({ from: me, text: text.trim(), when: "Just now" }); };
   const decide = (index: number, status: "accepted" | "declined") => {
     setMessages((list) => list.map((m, i) => (i === index && m.meeting ? { ...m, meeting: { ...m.meeting, status } } : m)));
-    onToast(status === "accepted" ? "Meeting accepted. It is on both calendars." : "Declined. Suggest another time when you are ready.");
+    onToast(status === "accepted" ? "Meeting accepted. Your Next meeting card is updated." : "Declined. Suggest another time when you are ready.");
   };
   const groups: { from: D.Message["from"]; items: { m: D.Message; index: number }[] }[] = [];
   messages.forEach((m, index) => {
@@ -609,7 +648,7 @@ function Thread({ me, onToast, onOpenProfile }: { me: "mentee" | "mentor"; onToa
             )}
           </div>
           <div className="relative flex min-w-0 flex-1 items-center">
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : "Message Maya"} aria-label="Message" className="min-w-0 flex-1 rounded-full border py-[10px] pr-[44px] pl-[16px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : `Message ${D.MENTEE.name}`} aria-label="Message" className="min-w-0 flex-1 rounded-full border py-[10px] pr-[44px] pl-[16px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
             <button type="button" aria-label="Emoji" aria-expanded={menu === "emoji"} onClick={() => setMenu(menu === "emoji" ? "none" : "emoji")} className="dm-quiet absolute right-[6px] flex size-[30px] cursor-pointer items-center justify-center rounded-full" style={{ color: menu === "emoji" ? accent : "var(--muted-foreground)" }}>
               <Smile className="h-[18px] w-[18px]" aria-hidden />
             </button>
@@ -751,61 +790,64 @@ function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
 // ---------------------------------------------------------------------------
 // Prep row: the real cards
 
-/** The three prep cards share one poster proportion and fill the row. */
-const PREP_CARD = "dm-tap group relative flex w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] border text-left aspect-[3/4]";
+/** The three prep cards: one shape, a why line and a CTA on every one, so
+ *  it is clear what the student is meant to do (the Replit's own copy). */
+const PREP_CARD = "dm-tap group relative flex h-[240px] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left";
 
-/** The career, the Browse poster's anatomy without the salary chip. */
+function PrepFoot({ label, title, why, cta, tone }: { label: string; title: string; why: string; cta: string; tone?: string }) {
+  return (
+    <span className="relative z-[1] flex flex-col gap-[4px] px-[16px] pt-[56px] pb-[14px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
+      <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: tone ?? accent }}>{label}</span>
+      <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{title}</span>
+      <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</span>
+      <span className="mt-[6px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#FFFFFF" }}>{cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
+    </span>
+  );
+}
+
 function CareerPrepCard({ onClick }: { onClick: () => void }) {
   const c = D.PREP_CAREER;
   return (
-    <button type="button" onClick={onClick} className={`${PREP_CARD} justify-end items-center text-center uppercase`} style={{ borderColor: "var(--glass-border)" }}>
-      <Image src={c.photo} alt="" fill sizes="(min-width: 640px) 33vw, 240px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-      <span className="relative z-[1] flex w-full flex-col items-center gap-[6px] px-[10px] pt-[48px] pb-[16px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
-        <span className="block text-[24px] leading-[28px]" style={{ ...posterTitleFont(c.world), color: "var(--poster-title)" }}>{c.title}</span>
-        <span className="block text-[10px] leading-[14px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[c.world] }}>{c.world}</span>
-      </span>
+    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)" }}>
+      <Image src={c.photo} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" style={{ objectPosition: "50% 30%" }} />
+      <PrepFoot label={c.label} title={c.title} why={c.why} cta={c.cta} tone={WORLD_COLORS[c.world]} />
     </button>
   );
 }
 
-/** The Play card, same anatomy as the Play hub's own. */
 function PlayPrepCard({ onClick }: { onClick: () => void }) {
   const p = D.PREP_PLAY;
   return (
-    <button type="button" onClick={onClick} className={`${PREP_CARD} justify-end`} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-      <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 240px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-      <span className="relative z-[1] flex flex-col gap-[4px] px-[14px] pt-[48px] pr-[64px] pb-[16px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
-        <span className="block text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", opacity: 0.75 }}>Day in the Life</span>
-        <span className="block text-[24px] leading-[1.1] font-extrabold uppercase" style={{ ...posterTitleFont(p.world), color: "var(--poster-title)" }}>{p.title}</span>
-        <span className="block text-[10px] font-semibold tracking-[0.6px] uppercase" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[p.world] }}>{p.world}</span>
+    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+      <span className="absolute top-[14px] right-[14px] z-[2] flex size-[38px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
+        <Play className="ml-[2px] h-[16px] w-[16px]" fill="currentColor" aria-hidden />
       </span>
-      <span className="absolute right-[14px] bottom-[14px] z-[2] flex size-[42px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
-        <Play className="ml-[2px] h-[18px] w-[18px]" fill="currentColor" aria-hidden />
-      </span>
+      <PrepFoot label={p.label} title={p.title} why={p.why} cta={p.cta} tone={WORLD_COLORS[p.world]} />
     </button>
   );
 }
 
-/** The resume as a file: the page itself fills the card edge to edge, live
- *  from the store when the student has one, Maya's sample when not, with a
- *  document strip along the bottom. */
+/** The student's own resume as a file: the page fills the card, live from
+ *  the store, Jordan's sample when nothing is saved yet. */
 function ResumePrepCard({ onClick }: { onClick: () => void }) {
   const stored = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const latest = stored.versions[0];
   const own = !!latest && !!stored.profile.firstName;
   const data: ResumeData = own ? resumeForVersion(stored, latest) : (D.SAMPLE_RESUME as ResumeData);
   const name = own ? latest.name : D.PREP_RESUME_NAME;
-  const meta = own ? (latest.atsCheck ? `${latest.atsCheck.qualityScore}/100 ATS` : "Saved resume") : D.PREP_RESUME_META;
   return (
-    <button type="button" onClick={onClick} className={`${PREP_CARD}`} style={{ borderColor: "var(--glass-border)", background: "#FFFFFF" }}>
-      <span className="pointer-events-none block w-full" aria-hidden>
+    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "#FFFFFF" }}>
+      <span className="pointer-events-none absolute inset-x-0 top-0 block" aria-hidden>
         <ResumeDocument resume={data} templateId={DEFAULT_RESUME_TEMPLATE} sectionOrder={latest?.sectionOrder} hiddenSections={latest?.hiddenSections} sectionOverrides={latest?.sectionOverrides} />
       </span>
-      <span className="absolute inset-x-0 bottom-0 z-[1] flex items-center gap-[10px] px-[14px] pt-[36px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(8,10,22,0.96) 0%, rgba(8,10,22,0.86) 55%, rgba(8,10,22,0) 100%)" }}>
+      <span className="relative z-[1] flex items-center gap-[10px] px-[14px] pt-[56px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(8,10,22,0.97) 0%, rgba(8,10,22,0.9) 60%, rgba(8,10,22,0) 100%)" }}>
         <span className="flex size-[34px] flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.12)", color: "#FFFFFF" }}><FileText className="h-4 w-4" aria-hidden /></span>
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-[14.5px] leading-[19px] font-bold" style={{ color: "#FFFFFF", fontFamily: "var(--font-display)" }}>{name}</span>
-          <span className="truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{meta}</span>
+        <span className="flex min-w-0 flex-col gap-[2px]">
+          <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: accent }}>{D.PREP_RESUME.label}</span>
+          <span className="truncate text-[15px] leading-[19px] font-extrabold" style={{ color: "#FFFFFF", fontFamily: "var(--font-display)" }}>{name}</span>
+          <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(255,255,255,0.78)" }}>{D.PREP_RESUME.why}</span>
+          <span className="mt-[4px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#FFFFFF" }}>{D.PREP_RESUME.cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
         </span>
       </span>
     </button>
@@ -837,12 +879,12 @@ function OrientationRow({ onToast }: { onToast: (t: string) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="dm-tap flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[14px] text-left" style={PANEL}>
+      <button type="button" onClick={() => setOpen(true)} className="dm-tap group relative flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[14px] text-left" style={PANEL}>
         <span className="flex items-center gap-[12px]">
           <span className="flex size-[34px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${GOOD} 16%, transparent)`, color: GOOD }}><Check className="h-4 w-4" aria-hidden /></span>
           <span className="flex flex-col"><span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{D.ORIENTATION.title}</span><Muted className="text-[12.5px] leading-[17px]">{D.ORIENTATION.status}</Muted></span>
         </span>
-        <span className="flex items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>Do&apos;s and don&apos;ts <ChevronRight className="h-3.5 w-3.5" aria-hidden /></span>
+        <span className="flex items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>Do&apos;s and don&apos;ts <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
       </button>
       {open && (
         <Sheet title="Working with a young person" label={D.ORIENTATION.title} onClose={() => setOpen(false)}>
@@ -864,13 +906,17 @@ function OrientationRow({ onToast }: { onToast: (t: string) => void }) {
 // ---------------------------------------------------------------------------
 // Student
 
-function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
+type ViewShared = { messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; sub: string; setSub: (s: string) => void; unread: number; onRead: () => void; onOpenProfile: () => void };
+
+function StudentView({ messages, setMessages, sub, setSub, unread, onRead, onOpenProfile }: ViewShared) {
   const router = useRouter();
-  const [tab, setTab] = useState<"home" | "messages" | "plan">("home");
+  const tab = (["home", "messages", "plan"].includes(sub) ? sub : "home") as "home" | "messages" | "plan";
+  const setTab = (t: "home" | "messages" | "plan") => { setSub(t); if (t === "messages") onRead(); };
   const [toast, onToast] = useToast();
+  const postRequest = (m: D.MeetingRequest) => setMessages((list) => [...list, { from: "mentee", text: "", when: "Just now", meeting: m }]);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "messages", label: "Messages" }, { key: "plan", label: "Year Plan" }]} /></div>
+      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "messages", label: "Messages", badge: tab === "messages" ? 0 : unread }, { key: "plan", label: "Year Plan" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
           <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
@@ -885,7 +931,7 @@ function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
             <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={() => setTab("messages")}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
           </ClickPanel>
 
-          <ScheduleCard onToast={onToast} showMeter />
+          <ScheduleCard me="mentee" messages={messages} onRequest={postRequest} onToast={onToast} showMeter />
 
           <div className="flex flex-col gap-[var(--space-3)]">
             <SectionHead>Prep for your mentor</SectionHead>
@@ -899,7 +945,7 @@ function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
                 <PlayPrepCard key="play" onClick={() => router.push(D.PREP_PLAY.href)} />,
                 <ResumePrepCard key="resume" onClick={() => router.push(D.PREP_RESUME_HREF)} />,
               ].map((card, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 + i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] }} className="w-[220px] flex-none sm:w-auto">
+                <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 + i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] }} className="w-[260px] flex-none sm:w-auto">
                   {card}
                 </motion.div>
               ))}
@@ -909,7 +955,7 @@ function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
           <RematchPanel who="Avery" onToast={onToast} />
         </div>
       )}
-      {tab === "messages" && <Thread me="mentee" onToast={onToast} onOpenProfile={onOpenProfile} />}
+      {tab === "messages" && <Thread me="mentee" messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={onOpenProfile} />}
       {tab === "plan" && <YearPlan eyebrow="Year plan" title="Topics to discuss each month." />}
       {toast}
     </div>
@@ -919,18 +965,20 @@ function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
 // ---------------------------------------------------------------------------
 // Mentor
 
-function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
-  const [tab, setTab] = useState<"home" | "messages" | "journey">("home");
+function MentorView({ messages, setMessages, sub, setSub, unread, onRead, onOpenProfile }: ViewShared) {
+  const tab = (["home", "messages", "journey"].includes(sub) ? sub : "home") as "home" | "messages" | "journey";
+  const setTab = (t: "home" | "messages" | "journey") => { setSub(t); if (t === "messages") onRead(); };
   const [prep, setPrep] = useState(false);
   const [toast, onToast] = useToast();
+  const postRequest = (m: D.MeetingRequest) => setMessages((list) => [...list, { from: "mentor", text: "", when: "Just now", meeting: m }]);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "messages", label: "Messages" }, { key: "journey", label: "Journey" }]} /></div>
+      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "messages", label: "Messages", badge: tab === "messages" ? 0 : unread }, { key: "journey", label: "Journey" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
           <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTEE.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
             <div className="flex items-center gap-[14px]">
-              <Avatar name={D.MENTEE.name} size={56} />
+              <Avatar name={D.MENTEE.name} size={56} photo={studentAvatarSrc(D.MENTEE.name)} />
               <div className="flex min-w-0 flex-col gap-[2px]">
                 <Eyebrow>My mentee</Eyebrow>
                 <span className="flex items-center gap-[6px] text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.MENTEE.name} <VerifiedBadge size={16} /></span>
@@ -953,15 +1001,15 @@ function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
             <QuietCta size="sm" className={`${ABOVE} w-fit`} onClick={() => setPrep(true)}>{D.NEXT_CONVERSATION.cta} <ChevronRight className="h-4 w-4" aria-hidden /></QuietCta>
           </ClickPanel>
 
-          <ScheduleCard onToast={onToast} showMeter />
+          <ScheduleCard me="mentor" messages={messages} onRequest={postRequest} onToast={onToast} showMeter />
           <OrientationRow onToast={onToast} />
-          <RematchPanel who="Maya" onToast={onToast} />
+          <RematchPanel who={D.MENTEE.name} onToast={onToast} />
         </div>
       )}
-      {tab === "messages" && <Thread me="mentor" onToast={onToast} onOpenProfile={onOpenProfile} />}
+      {tab === "messages" && <Thread me="mentor" messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={onOpenProfile} />}
       {tab === "journey" && <YearPlan eyebrow="Mentorship journey" title="A clear next step, every month." />}
       {prep && (
-        <Sheet title="Before you meet Maya" label="Prepare for meeting" onClose={() => setPrep(false)}>
+        <Sheet title={`Before you meet ${D.MENTEE.name}`} label="Prepare for meeting" onClose={() => setPrep(false)}>
           <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
             {D.NEXT_CONVERSATION.prep.map((line) => (
               <li key={line} className="flex items-start gap-[10px] py-[10px] text-[14.5px] leading-[20px]" style={{ borderColor: RULE, color: "var(--foreground)" }}>
@@ -973,7 +1021,7 @@ function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
             <Eyebrow tone="var(--muted-foreground)">Opening question</Eyebrow>
             <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{D.NEXT_CONVERSATION.prompt}</span>
           </Item>
-          <Link href="/explore?tab=browse" className="dm-link flex w-fit items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>Open Maya&apos;s saved careers <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>
+          <Link href="/explore?tab=browse" className="dm-link flex w-fit items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>Open {D.MENTEE.name}&apos;s saved careers <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>
         </Sheet>
       )}
       {toast}
@@ -986,8 +1034,9 @@ function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
 
 const KPI_ICON = { hours: Timer, students: GraduationCap, mentors: Users, meetings: Handshake } as const;
 
-function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) => void }) {
-  const [tab, setTab] = useState<"overview" | "countries" | "settings">("overview");
+function EnterpriseView({ sub, setSub, onOpenMentor }: { sub: string; setSub: (s: string) => void; onOpenMentor: (row: D.PairActivity) => void }) {
+  const tab = (["overview", "countries", "settings"].includes(sub) ? sub : "overview") as "overview" | "countries" | "settings";
+  const setTab = (t: "overview" | "countries" | "settings") => setSub(t);
   const [sheet, setSheet] = useState<{ kind: "kpi"; key: D.Kpi["key"] } | { kind: "goals" } | { kind: "impact"; key: string } | { kind: "pairs" } | { kind: "cohort"; start: number } | null>(null);
   const [period, setPeriod] = useState<"month" | "year">("year");
   const [grain, setGrain] = useState<"monthly" | "weekly">("monthly");
@@ -1053,6 +1102,7 @@ function EnterpriseView({ onOpenMentor }: { onOpenMentor: (row: D.PairActivity) 
             <BarChart values={values} labels={labels} accent={accent} highlight={values.length - 1} compare={lastYear} height={240} ariaLabel={`Volunteer hours by ${period === "month" ? "week" : grain === "monthly" ? "month" : "week"}`} />
             <Muted className="flex flex-wrap items-center gap-x-[12px] gap-y-[4px] text-[12px] leading-[16px]">
               {lastYear && <span className="flex items-center gap-[5px]"><span aria-hidden className="inline-block h-[10px] w-[14px] rounded-[3px] border border-dashed" style={{ borderColor: "rgba(255,255,255,0.4)" }} /> Last year</span>}
+              <span>{D.REPORTING_NOTE}</span>
               <button type="button" onClick={() => setTab("settings")} className="dm-link cursor-pointer font-bold" style={{ color: accent }}>Hour rules</button>
             </Muted>
           </Panel>

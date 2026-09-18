@@ -9,7 +9,7 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 // so every number on every dashboard is drawn the same way. Colours come from
 // the caller (the person's world accent); nothing here invents a palette.
 
-export function Segmented<K extends string>({ options, value, onChange, ariaLabel, grow = false }: { options: { key: K; label: string }[]; value: K; onChange: (key: K) => void; ariaLabel: string; grow?: boolean }) {
+export function Segmented<K extends string>({ options, value, onChange, ariaLabel, grow = false }: { options: { key: K; label: string; /** unread count, shown as a small badge after the label */ badge?: number }[]; value: K; onChange: (key: K) => void; ariaLabel: string; grow?: boolean }) {
   // The filled pill slides between options via a shared layoutId instead of
   // just appearing under whichever one is active (direct feedback: "have
   // whatever highlight we end up keeping for tabs... animate and slide over
@@ -41,7 +41,10 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
               />
             )}
-            <span className="relative">{option.label}</span>
+            <span className="relative flex items-center gap-[6px]">
+              {option.label}
+              {!!option.badge && <span aria-label={`${option.badge} unread`} className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-[4px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: on ? "#FFFFFF" : "var(--primary)", color: on ? "var(--primary)" : "#FFFFFF" }}>{option.badge}</span>}
+            </span>
           </button>
         );
       })}

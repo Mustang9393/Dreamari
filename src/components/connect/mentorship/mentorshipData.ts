@@ -77,8 +77,11 @@ export const MENTOR = {
   photo: "/images/connect/avatars/pro-doyle-2.png",
 } as const;
 
+// The demo account is Jordan Rivera everywhere in the app, so the mentee is
+// Jordan here too (direct feedback, 18 Sept 2026).
 export const MENTEE = {
-  name: "Maya",
+  name: "Jordan",
+  fullName: "Jordan Rivera",
   line: "College Freshman",
   exploring: ["Fashion Buyer", "Marketing", "Product Management"],
 } as const;
@@ -94,17 +97,18 @@ export const MEETING = {
 
 /** The real cards for the prep row: the Fashion Buyer poster, the Play
  *  card, the student's own resume. */
-export const PREP_CAREER = { title: "Fashion Buyer", world: "Business & Finance", photo: "/images/app/poster-fashion-buyer.webp", href: "/career/fashion-buyer" } as const;
+export const PREP_CAREER = { label: "Explore", title: "Fashion Buyer", why: "Learn more about a career you want to discuss.", cta: "Explore Career", world: "Business & Finance", photo: "/images/app/poster-fashion-buyer.webp", href: "/career/fashion-buyer" } as const;
 // No Fashion Buyer simulation exists yet; the warm lounge art from the IB
 // sim set stands in until the fashion one is illustrated (18 Sept 2026).
-export const PREP_PLAY = { title: "Fashion Buyer", world: "Business & Finance", cover: "/images/play/ib/locations/cafe-lounge-sunset.webp", href: "/play" } as const;
+export const PREP_PLAY = { label: "Play", title: "Fashion Buyer Day in the Life", why: "Experience the career before talking about it.", cta: "Play Simulation", world: "Business & Finance", cover: "/images/play/ib/locations/cafe-lounge-sunset.webp", href: "/play" } as const;
+export const PREP_RESUME = { label: "Resume", why: "Bring something your mentor can help improve.", cta: "View Resume" } as const;
 export const PREP_RESUME_HREF = "/resume-builder?view=document";
 export const PREP_RESUME_NAME = "Fashion Buyer Resume";
 export const PREP_RESUME_META = "Updated Sep 12 · 69/100 ATS";
 /** The sample resume the file card shows when the student has not saved one
- *  yet: Maya’s, matching the mentee in this program. */
+ *  yet: Jordan’s, the demo account. */
 export const SAMPLE_RESUME = {
-  profile: { firstName: "Maya", lastName: "Reyes", email: "maya.reyes@baruch.cuny.edu", phone: "(917) 555-0142", country: "United States", state: "New York", city: "Brooklyn", bio: "" },
+  profile: { firstName: "Jordan", lastName: "Rivera", email: "jordan.rivera@baruch.cuny.edu", phone: "(917) 555-0142", country: "United States", state: "New York", city: "Brooklyn", bio: "" },
   education: [{ id: "ed1", schoolName: "Baruch College, CUNY", cityState: "New York, NY", gradYear: "2030", program: "", gpa: "3.6", honors: ["Dream It Real Scholar"] }],
   experience: [
     { id: "ex1", type: "job" as const, where: "Zara, Atlantic Terminal", title: "Sales Associate", location: "Brooklyn, NY", startDate: "2025-06", endDate: "", current: true, bullets: ["Restocked and merchandised the women’s floor for a store doing 900 transactions a day", "Tracked sell-through on new arrivals and flagged fast movers to the visual lead"], aiAssisted: false },
@@ -121,7 +125,7 @@ export const SAMPLE_RESUME = {
 export type MeetingRequest = { title: string; agenda: string; when: string; where: string; status: "pending" | "accepted" | "declined" };
 export type Message = { from: "mentor" | "mentee"; text: string; when: string; meeting?: MeetingRequest; share?: Share };
 export const THREAD: Message[] = [
-  { from: "mentor", text: "Hi Maya, I’m looking forward to our conversation about exploring careers.", when: "Mon 9:14 AM" },
+  { from: "mentor", text: "Hi Jordan, I’m looking forward to our conversation about exploring careers.", when: "Mon 9:14 AM" },
   { from: "mentor", text: "I started as a buyer’s assistant before merchandising, so ask me anything about that path.", when: "Mon 9:15 AM" },
   { from: "mentee", text: "Thank you. I saved Fashion Buyer and would love to hear how you found your first experience.", when: "Mon 6:02 PM" },
   { from: "mentee", text: "Also, does Tuesday at 4 still work for you?", when: "Mon 6:03 PM" },
@@ -135,7 +139,7 @@ export const THREAD: Message[] = [
  *  sent. */
 export const NUDGES: Record<"mentee" | "mentor", string[]> = {
   mentee: ["Ask Avery how the buyer’s assistant path worked day to day", "Share one thing from the Fashion Buyer simulation", "Ask what to bring to Tuesday’s meeting", "Say thanks and confirm Tuesday"],
-  mentor: ["Ask what Maya saved this week", "Offer to look at her resume before Tuesday", "Share one thing you wish you knew at her age", "Confirm Tuesday and send the link"],
+  mentor: ["Ask what Jordan saved this week", "Offer to look at the resume before Tuesday", "Share one thing you wish you knew at that age", "Confirm Tuesday and send the link"],
 };
 export const EMOJI = ["👍", "🙌", "😊", "🎉", "🙏", "💯", "👀", "✨", "😂", "❤️", "🔥", "🤔", "👏", "✅", "📚", "☕️"] as const;
 
@@ -220,12 +224,12 @@ export const ORIENTATION = {
 } as const;
 
 export const NEXT_CONVERSATION = {
-  head: "Maya has been exploring:",
+  head: "Jordan has been exploring:",
   prompt: "What helped you figure out what kind of work you wanted to try first?",
   cta: "Prepare for Meeting",
   prep: [
-    "Maya saved Fashion Buyer two weeks ago and played the Day-in-the-Life once.",
-    "Her resume draft has one experience and no bullet points yet.",
+    "Jordan saved Fashion Buyer two weeks ago and played the Day-in-the-Life once.",
+    "The resume draft has one experience and no bullet points yet.",
     "This month's topic is Explore Careers: aim to discuss one career in depth.",
   ],
 } as const;
@@ -249,28 +253,32 @@ export type ProgramStat = {
   monthly: number[];
 };
 
-// Monthly hours follow the real calendars: the US and UK programs run
-// October to April and dip after Dream Day in June, Japan runs April to
-// September, China's quarterly events land in March, June and September.
+// Monthly hours rise through the year as pairs settle into a rhythm; the
+// series are demo data and read upward on purpose (direct feedback, 18 Sept
+// 2026: realistic, always positive).
 export const PROGRAMS: ProgramStat[] = [
-  { id: "us", name: "United States", via: "The Opportunity Network · Bottom Line", students: 450, mentors: 450, mentorLabel: "Mentors", hours: 8200, cadence: "3 to 4 meetings a year, most pairs monthly", window: "October to April, Dream Day in June", monthly: [1210, 1340, 1420, 1180, 620, 940, 310, 360, 820] },
-  { id: "uk", name: "United Kingdom", via: "SEO London", students: 35, mentors: 35, mentorLabel: "Mentors", hours: 1400, cadence: "Monthly", window: "October to April", monthly: [190, 210, 220, 200, 110, 90, 60, 80, 240] },
-  { id: "jp", name: "Japan", via: "Katariba", students: 33, mentors: 33, mentorLabel: "Mentors", hours: 1100, cadence: "Monthly", window: "April to September", monthly: [20, 20, 30, 170, 190, 200, 180, 160, 130] },
-  { id: "cn", name: "China", via: "China Youth Development Foundation", students: 1000, mentors: 18, mentorLabel: "Employee Contributors", hours: 7700, cadence: "Quarterly regional events", window: "1-year scholarship, no 1:1 matching", monthly: [420, 380, 1460, 510, 470, 1520, 440, 480, 2020] },
+  { id: "us", name: "United States", via: "The Opportunity Network · Bottom Line", students: 450, mentors: 450, mentorLabel: "Mentors", hours: 8200, cadence: "3 to 4 meetings a year, most pairs monthly", window: "October to April, Dream Day in June", monthly: [620, 700, 790, 860, 900, 1010, 980, 1090, 1250] },
+  { id: "uk", name: "United Kingdom", via: "SEO London", students: 35, mentors: 35, mentorLabel: "Mentors", hours: 1400, cadence: "Monthly", window: "October to April", monthly: [110, 120, 135, 145, 150, 165, 170, 190, 215] },
+  { id: "jp", name: "Japan", via: "Katariba", students: 33, mentors: 33, mentorLabel: "Mentors", hours: 1100, cadence: "Monthly", window: "April to September", monthly: [60, 75, 90, 110, 125, 135, 150, 170, 185] },
+  { id: "cn", name: "China", via: "China Youth Development Foundation", students: 1000, mentors: 18, mentorLabel: "Employee Contributors", hours: 7700, cadence: "Quarterly regional events", window: "1-year scholarship, no 1:1 matching", monthly: [560, 640, 720, 790, 850, 920, 980, 1060, 1180] },
 ];
 
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"] as const;
+/** The enterprise view reports on the calendar year, the way Tapestry rolls
+ *  hours up to its 2030 goal; the student's year plan runs on the program
+ *  year (October to June). Both are right, so the chart says which it is. */
+export const REPORTING_NOTE = "Calendar year, the way Tapestry reports hours. The program year runs October to June.";
 
 export type Kpi = { key: "hours" | "students" | "mentors" | "meetings"; label: string; year: number; month: number; deltaYear: number; deltaMonth: number; spark: number[] };
 export const KPIS: Kpi[] = [
-  { key: "hours", label: "Volunteer hours", year: 18400, month: 2200, deltaYear: 14, deltaMonth: 9, spark: [1840, 1950, 3130, 2060, 1390, 2750, 990, 1080, 3210] },
+  { key: "hours", label: "Volunteer hours", year: 18400, month: 2200, deltaYear: 14, deltaMonth: 9, spark: [1350, 1535, 1735, 1905, 2025, 2230, 2280, 2510, 2830] },
   { key: "students", label: "Students", year: 1518, month: 1180, deltaYear: 9, deltaMonth: 4, spark: [1290, 1310, 1350, 1380, 1400, 1420, 1440, 1470, 1518] },
   { key: "mentors", label: "Mentors", year: 536, month: 418, deltaYear: 7, deltaMonth: 12, spark: [470, 476, 482, 488, 490, 494, 500, 512, 536] },
-  { key: "meetings", label: "Mentor meetings", year: 3240, month: 386, deltaYear: 18, deltaMonth: 21, spark: [420, 445, 470, 380, 210, 260, 120, 140, 386] },
+  { key: "meetings", label: "Mentor meetings", year: 3240, month: 386, deltaYear: 18, deltaMonth: 21, spark: [280, 300, 330, 350, 360, 380, 390, 410, 440] },
 ];
 
 /** This month by week, instead of the Replit's single "M1" bar. */
-export const THIS_MONTH_WEEKS = [480, 530, 590, 600];
+export const THIS_MONTH_WEEKS = [640, 690, 720, 780];
 /** This year by week, 16 weeks. */
 export const THIS_YEAR_WEEKS = [920, 951, 981, 1012, 1043, 1073, 1104, 1135, 1165, 1196, 1227, 1257, 1288, 1319, 1349, 1380];
 
@@ -321,7 +329,7 @@ export const MENTOR_PULSE = { pct: 94, line: "of mentors would mentor again", qu
  *  it equates to this many volunteer hours"). */
 export type PairActivity = { mentor: string; mentee: string; messages: number; meetings: number; hours: number; lastContact: string; quiet?: boolean };
 export const PAIR_ACTIVITY: PairActivity[] = [
-  { mentor: "Avery Thompson", mentee: "Maya R.", messages: 15, meetings: 2, hours: 2.8, lastContact: "Today" },
+  { mentor: "Avery Thompson", mentee: "Jordan R.", messages: 15, meetings: 2, hours: 2.8, lastContact: "Today" },
   { mentor: "Julie Park", mentee: "Devon A.", messages: 22, meetings: 3, hours: 4.1, lastContact: "Yesterday" },
   { mentor: "Marcus Bell", mentee: "Priya S.", messages: 9, meetings: 2, hours: 2.5, lastContact: "4 days ago" },
   { mentor: "Dana Whitfield", mentee: "Theo L.", messages: 2, meetings: 0, hours: 0.1, lastContact: "34 days ago", quiet: true },
