@@ -64,6 +64,9 @@ const RANGE: Record<Range, { label: string; days: number; base: number; labels: 
 export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { pro?: Pro; onBack: () => void; backLabel?: string }) {
   const pro = given ?? PROS.find((p) => p.id === "pro-okafor") ?? PROS[0];
   const ROUTED = ROUTED_BY_WORLD[pro.world] ?? ROUTED_BY_WORLD["Teaching & Education"];
+  // the board these questions were asked on: students ask the community,
+  // never a named professional (direct feedback, 19 Sept 2026)
+  const homeBoard = COMMUNITIES.find((c) => c.world === pro.world) ?? COMMUNITIES[0];
   const nav = useContext(ConnectNav);
   // Dreamari blue for every volunteer's numbers, whatever their industry (direct feedback, 5 Sept 2026)
   const accent = "var(--accent-subtle)";
@@ -194,7 +197,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
           {/* My Profile's own inner structure (direct instruction, 13 Sept
              2026, the Catchafire reference): Overview lands first; Ask Me &
              Posts (with its own Answers | Posts toggle) is the second tab. */}
-          <Segmented<"overview" | "askme"> ariaLabel="Profile section" value={profileSection} onChange={setProfileSection} options={[{ key: "overview", label: "Overview" }, { key: "askme", label: "Ask Me & Posts" }]} />
+          <Segmented<"overview" | "askme"> ariaLabel="Profile section" value={profileSection} onChange={setProfileSection} options={[{ key: "overview", label: "Overview" }, { key: "askme", label: "Answers & Posts" }]} />
 
           {profileSection === "overview" && (
             <OverviewSection pro={pro} communities={myCommunities} onOpenCommunity={(id) => nav?.openBoard(id)} />
@@ -202,18 +205,20 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
 
           {profileSection === "askme" && (
             <>
-              <SubTabs<"answers" | "posts"> ariaLabel="Ask Me or Posts" value={askMeSection} onChange={setAskMeSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
+              <SubTabs<"answers" | "posts"> ariaLabel="Answers or Posts" value={askMeSection} onChange={setAskMeSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
 
               {askMeSection === "answers" && (
-          /* Ask Me: the primary engagement mechanism. A direct student
-             question is a far stronger reason to respond than a blank page. */
+          /* Waiting on the board: the primary engagement mechanism. A real
+             student question is a far stronger reason to respond than a
+             blank page. Questions are asked on the community board and
+             routed here by scope; nobody asks this pro by name. */
           <Panel
             id="ama-routed-title"
-            title="Ask Me"
+            title={`Waiting on ${homeBoard.name}`}
             aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{m.asked}</strong> asked · <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{pro.questionsAnswered + answeredNow}</strong> answered</span>}
           >
             <h3 className="text-[18px] leading-[24px] font-semibold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-              {openCount > 0 ? `${words} students asked about ${pro.field.toLowerCase()} this week. Answer one?` : "All answered. We will route the next one."}
+              {openCount > 0 ? `${words} students asked about ${pro.field.toLowerCase()} on ${homeBoard.name} this week. Answer one?` : "All answered. We will route the next one from the board."}
             </h3>
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {ROUTED.map((q) => {

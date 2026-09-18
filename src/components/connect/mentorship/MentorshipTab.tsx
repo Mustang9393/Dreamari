@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, Maximize2, MessageCircle, Minimize2, Minus, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
@@ -751,9 +751,8 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
     else if (key === "resource") setSheet("resource");
     else if (key === "share") setSheet("share");
     else if (key === "gif") onToast("GIFs are on the way. Emoji work today.");
-    else onToast(key === "photo" ? "Photos are checked by Dreamari before they are delivered." : "Files are checked by Dreamari before they are delivered.");
   };
-  const ActionIcon = ({ k }: { k: string }) => k === "file" ? <Paperclip className="h-4 w-4" aria-hidden /> : k === "photo" ? <ImageIcon className="h-4 w-4" aria-hidden /> : k === "share" ? <Sparkles className="h-4 w-4" aria-hidden /> : k === "gif" ? <span className="text-[10px] font-extrabold tracking-[0.04em]">GIF</span> : k === "link" ? <Link2 className="h-4 w-4" aria-hidden /> : k === "time" ? <Calendar className="h-4 w-4" aria-hidden /> : <FileText className="h-4 w-4" aria-hidden />;
+  const ActionIcon = ({ k }: { k: string }) => k === "share" ? <Sparkles className="h-4 w-4" aria-hidden /> : k === "gif" ? <span className="text-[10px] font-extrabold tracking-[0.04em]">GIF</span> : k === "link" ? <Link2 className="h-4 w-4" aria-hidden /> : k === "time" ? <Calendar className="h-4 w-4" aria-hidden /> : <FileText className="h-4 w-4" aria-hidden />;
   const menuClass = "absolute bottom-[calc(100%+8px)] left-0 z-20 overflow-hidden rounded-[var(--radius-md)] border motion-safe:animate-[fade-slide-up_0.16s_ease-out_both]";
   const menuStyle = { background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 50px -20px rgba(0,0,0,0.8)" } as const;
   return (
@@ -1148,6 +1147,9 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
       <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "plan", label: "Year Plan" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
+          {/* My mentor and Next meeting share one row from md up (direct
+             feedback, 19 Sept 2026: side by side, not stacked full width) */}
+          <div className="grid gap-[var(--space-5)] md:grid-cols-2">
           <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
             <div className="flex items-center gap-[14px]">
               <Avatar name={D.MENTOR.name} size={56} photo={D.MENTOR.photo} />
@@ -1161,6 +1163,7 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
           </ClickPanel>
 
           <ScheduleCard me="mentee" messages={messages} onRequest={postRequest} onToast={onToast} showMeter />
+          </div>
 
           <div className="flex flex-col gap-[var(--space-3)]">
             <SectionHead>Prep for your mentor</SectionHead>
@@ -1216,6 +1219,7 @@ function MentorView({ messages, setMessages, sub, setSub, openChat, onOpenProfil
             <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message</PrimaryCta>
           </ClickPanel>
 
+          <div className="grid gap-[var(--space-5)] md:grid-cols-2">
           <ClickPanel onClick={() => setPrep(true)} label="Prepare for meeting" className="flex flex-col gap-[var(--space-3)]">
             <Eyebrow>Your next conversation</Eyebrow>
             <div className="flex flex-wrap items-center gap-[8px]">
@@ -1230,6 +1234,7 @@ function MentorView({ messages, setMessages, sub, setSub, openChat, onOpenProfil
           </ClickPanel>
 
           <ScheduleCard me="mentor" messages={messages} onRequest={postRequest} onToast={onToast} showMeter />
+          </div>
           <OrientationRow onToast={onToast} />
           <RematchPanel who={D.MENTEE.name} onToast={onToast} />
         </div>

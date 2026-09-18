@@ -38,6 +38,14 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Review notes: mentor cards side by side, no chat attachments, no Skip before Level 2, questions belong to the boards (local, not pushed)
+
+- `MentorshipTab.tsx`: My mentor + Next meeting (student) and Your next conversation + Next meeting (mentor) sit in one two-column grid from md up; stacked on phones.
+- `mentorshipData.ts` COMPOSER_ACTIONS: Attach file and Photo or video removed; the plus menu is Suggest a meeting time, Share from Dreamari, GIF (mentor also gets meeting link and approved resource). Dead toast branches and icon imports removed.
+- `ConnectInterstitial.tsx` + module CSS: the Skip text button is gone; Close (X) stays as the one quiet way out, Escape and the backdrop still continue.
+- Ask Me removed as a concept. `ProProfile.tsx`: no composer on a professional's page; the tab is "Answers & Posts" and the Answers list opens with "Questions live on the boards. Ask in <board> and <first name> may pick it up." linking to the board. `onAsked` prop dropped (call site in ConnectExperience updated). `ProDashboard.tsx`: the panel is "Waiting on <board>" with copy naming the board; tab renamed the same way. Boards keep their composer.
+- Checked headless at 1280 and 390: the two cards share a row at 1280 (549px each) and stack at 390; plus menu lists three items; profile shows no composer, the board link opens Finance Careers; dashboard title "Waiting on Finance Careers"; interstitial toolbar is Replay and Close only. tsc clean, eslint only pre-existing warnings.
+
 ### 2026-09-19 Explore Browse: closing rail "New in Arts, Media & Sport" (PUSHED, user-authorized)
 
 - `catalog.ts`: `BROWSE_ARTS_NEW`, the 21 arts careers the poster library added (library arts minus the six Figma posters). `ExploreExperience.tsx`: rendered as the last rail on Browse, after Typical Pay, so the new faces are one scroll away in a demo; they also stay inside the Arts rail near the top.

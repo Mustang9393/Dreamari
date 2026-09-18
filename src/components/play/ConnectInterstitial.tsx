@@ -264,7 +264,7 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
    *  but this app's version deliberately asks for more). Each individual
    *  completion still earns its own escalating chain XP (5 -> 8 -> 12) with
    *  its own flying-number feedback; only the THIRD one closes the loop
-   *  and adds the +15 bonus. Skip/X always remain available regardless of
+   *  and adds the +15 bonus. Close (X) remains available regardless of
    *  progress -- required to finish the loop, never required to leave it. */
   function reward(action: Step) {
     if (done.has(action)) return;
@@ -352,8 +352,9 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
               memoryKey="connect-interstitial-chain"
             />
           </div>
-          <button className={styles.skip} onClick={onContinue}>Skip</button>
-          <button className={styles.iconButton} aria-label="Close" onClick={onContinue}><X size={18} /></button>
+          {/* No Skip button (direct feedback, 19 Sept 2026). Close stays as
+             the one quiet way out; the loop is what the screen offers. */}
+          <button className={`${styles.iconButton} ${styles.close}`} aria-label="Close" onClick={onContinue}><X size={18} /></button>
         </header>
 
         <div ref={content} className={styles.content}>

@@ -1526,14 +1526,13 @@ export function ConnectExperience() {
           (() => {
             const pro = PROS.find((p) => p.id === view.id);
             if (!pro) return null;
-            const boardId = COMMUNITIES.find((c) => c.world === pro.world)?.id ?? "teaching-education";
             // key={pro.id}: without it, navigating from one pro's profile to
             // a different one reused the same component instance, so its
             // useState(coverFor(pro.id)) never re-ran and every profile kept
             // showing whichever cover the FIRST one you viewed that session
             // had -- read as "they're all the same" / "no real cover" from
             // Connect and People (direct feedback, 8 Sept 2026).
-            return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={toggleFollow} onBack={goBack} backLabel={backLabel} onAsked={(title) => nav.noteAsked(title, boardId)} onOpenDashboard={role === "pro" ? () => setView({ kind: "proDashboard", id: pro.id }, "pro") : undefined} />;
+            return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={toggleFollow} onBack={goBack} backLabel={backLabel} onOpenDashboard={role === "pro" ? () => setView({ kind: "proDashboard", id: pro.id }, "pro") : undefined} />;
           })()}
         {view.kind === "proDashboard" && <ProDashboardView key={view.id} pro={PROS.find((p) => p.id === view.id)} onBack={goBack} backLabel={backLabel} />}
         {view.kind === "admin" && <AdminDashboardView onBack={goBack} backLabel={backLabel} />}

@@ -176,11 +176,10 @@ export const MENTOR_SUGGESTED = [
   "Is there anything you want to know about becoming a Fashion Buyer?",
 ] as const;
 
-/** The composer's plus menu, like any messaging app: attachments and the
- *  mentorship actions live off the canvas. */
+/** The composer's plus menu: the mentorship actions live off the canvas.
+ *  No file or photo attachments (direct feedback, 19 Sept 2026): a
+ *  safeguarded student-adult conversation stays text, links and cards. */
 export const COMPOSER_ACTIONS = [
-  { key: "file", label: "Attach file", who: "both" },
-  { key: "photo", label: "Photo or video", who: "both" },
   { key: "link", label: "Send meeting link", who: "mentor" },
   { key: "time", label: "Suggest a meeting time", who: "both" },
   { key: "resource", label: "Share approved resource", who: "mentor" },

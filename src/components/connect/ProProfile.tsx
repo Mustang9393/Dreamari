@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Fragment, useContext, useEffect, useId, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X, MessagesSquare } from "lucide-react";
 import { Meter, Ring, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
@@ -13,7 +13,7 @@ import { readPicks } from "@/lib/picks";
 import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Community, type Insight, type Pro, type Thread } from "./data";
 import { CommunityCard } from "./CommunityCard";
 import { schoolsIn } from "./schoolMarks";
-import { Avatar, CompanyChip, CompanyMark, ConnectNav, InlineAsk, LocalQuestionCard, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
+import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -746,7 +746,6 @@ export function ProProfileView({
   follows,
   onFollow,
   onBack,
-  onAsked,
   onOpenDashboard,
   backLabel = "Back",
 }: {
@@ -756,7 +755,6 @@ export function ProProfileView({
   onBack: () => void;
   /** the screen Back returns to, named: "Back to People", "Back to Messages", "Back to Saved" */
   backLabel?: string;
-  onAsked?: (title: string) => void;
   /** Volunteer demo only: the professional looking at their own page can step into the private dashboard. */
   onOpenDashboard?: () => void;
 }) {
@@ -765,12 +763,15 @@ export function ProProfileView({
   const posts = postsBy(pro.id);
   // the boards they answer in: their world's board plus the shared one
   const communities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
-  const [asked, setAsked] = useState<{ id: string; title: string }[]>([]);
   const [allAnswers, setAllAnswers] = useState(false);
   const [allPosts, setAllPosts] = useState(false);
   // Two tabs, not one long page (direct instruction, 13 Sept 2026, the
-  // Catchafire reference): Overview first, Ask Me & Posts (with its own
+  // Catchafire reference): Overview first, Answers & Posts (with its own
   // Answers | Posts toggle) second. The header above stays put across both.
+  // Nobody asks a professional directly here: questions live on the
+  // community boards and the pro's answers show up on this page (direct
+  // feedback, 19 Sept 2026: "no asking a professional questions specifically").
+  const homeBoard = communities.find((c) => c.world === pro.world) ?? communities[0];
   const [section, setSection] = useState<"overview" | "askme">("overview");
   const [askSection, setAskSection] = useState<"answers" | "posts">("answers");
   const following = !!follows[pro.id];
@@ -802,7 +803,7 @@ export function ProProfileView({
          first; Ask Me & Posts (what they've done, with its own Answers |
          Posts toggle) is the second tab. The header above stays visible
          across both. */}
-      <Segmented<"overview" | "askme"> ariaLabel="Profile section" value={section} onChange={setSection} options={[{ key: "overview", label: "Overview" }, { key: "askme", label: "Ask Me & Posts" }]} />
+      <Segmented<"overview" | "askme"> ariaLabel="Profile section" value={section} onChange={setSection} options={[{ key: "overview", label: "Overview" }, { key: "askme", label: "Answers & Posts" }]} />
 
       {section === "overview" && (
         <div className="flex w-full flex-col rounded-[var(--radius-lg)] border" style={CARD}>
@@ -817,25 +818,20 @@ export function ProProfileView({
              same-weight pill bars read as two levels of tabbing before any
              content. This is deliberately the quieter secondary choice
              under Ask Me & Posts' own primary one above. */}
-          <SubTabs<"answers" | "posts"> ariaLabel="Ask Me or Posts" value={askSection} onChange={setAskSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
+          <SubTabs<"answers" | "posts"> ariaLabel="Answers or Posts" value={askSection} onChange={setAskSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
 
           {askSection === "answers" && (
             <div className="flex flex-col gap-[var(--space-4)]">
-              {/* The composer stands alone on its own row -- pairing it
-                 beside a big "Ask Me" heading (direct feedback, 13 Sept
-                 2026: "composition is also bad") fought it for width and
-                 read as two mismatched columns; the tab is already titled
-                 "Ask Me & Posts", so the heading was purely repeated text. */}
-              <InlineAsk
-                joined
-                accent="var(--primary)"
-                placeholder="Ask a question…"
-                onPost={(text) => {
-                  setAsked((current) => [{ id: `${pro.id}-ama-${current.length}`, title: text }, ...current]);
-                  onAsked?.(text);
-                }}
-              />
-              {asked.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+              {/* Where to ask instead: the board this pro answers on. */}
+              {homeBoard && (
+                <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+                  <MessagesSquare className="mr-[6px] inline-block h-3.5 w-3.5 align-[-2px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+                  Questions live on the boards. Ask in{" "}
+                  <button type="button" onClick={() => nav?.openBoard(homeBoard.id)} className="dm-link cursor-pointer font-bold" style={{ color: "var(--accent-subtle)" }}>{homeBoard.name}</button>
+                  {" "}and {pro.name.split(" ")[0]} may pick it up.
+                </p>
+              )}
+              {answers.length === 0 && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>No answers yet.</p>}
               {answers.length > 0 && (
                 <ul className="flex flex-col gap-[var(--space-3)]">
                   {/* one question at rest, the rest behind View all: shorter section */}
