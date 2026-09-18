@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Explore Browse: one Arts, Media & Sport row, bottom of the page only (PUSHED, user-authorized)
+
+- `ExploreExperience.tsx`: removed the second Arts rail that sat near the top (second position, alongside Recommended/Tech). Only one Arts, Media & Sport row remains, at the very bottom of Browse after Typical Pay, titled plainly "Arts, Media & Sport" (not "New in...", not "More..."). It now shows the full 27-career world, not just the 19 Sept poster-library additions. Direct feedback: "I only want it at the bottom... no new in arts media and sport, just arts media and sport."
+- Verified against the running dev server: exactly one `<h2>` titled "Arts, Media & Sport" in the rendered Browse page, and it comes after every other rail heading (Recommended, Tech & Engineering, Top 5 Trending, Might Not Know, Skilled Trades, Videos, Typical Pay). tsc and eslint clean.
+
 ### 2026-09-19 Colleges mobile header matches Careers exactly; closing arts rail renamed (local, not pushed)
 
 - `CollegesExperience.tsx`: the old absolute text-tab overlay is gone. Phones and tablets now use the same `MobileHeaderShell` (logo, streak | XP, bell, hamburger) as Careers (Explore), with the For you | Browse All pill and a "Careers" button on their own row at the top of main, identical styling and spacing to Explore's toggle row. Direct feedback, 19 Sept 2026: "the navigation for careers and schools on smaller screens is very very different... Careers is the baseline." Checked headless at 375 and 820: no header overlaps, same item set and layout as Explore's Browse header, no page errors.

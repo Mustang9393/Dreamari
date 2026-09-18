@@ -17,7 +17,6 @@ import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
   ALL_CATALOG_CAREERS,
   BROWSE_ARTS,
-  BROWSE_ARTS_NEW,
   BROWSE_BECAUSE_LIKED,
   BROWSE_MIGHT_NOT_KNOW,
   BROWSE_TRADES,
@@ -257,14 +256,16 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
     ? searchCareers(query, effectiveWorld)
     : worldOnly ? applyCatalogView(ALL_CATALOG_CAREERS, effectiveWorld, "", effectiveSort).map((career) => ({ career, score: 0 })) : [];
   const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, "", effectiveSort);
-  const arts = view(BROWSE_ARTS);
   const becauseLiked = view(BROWSE_BECAUSE_LIKED);
   const trades = view(BROWSE_TRADES);
   const trending = view(BROWSE_TRENDING);
   const worldRail = view(BROWSE_WORLD_RAIL);
   const mightNotKnow = view(BROWSE_MIGHT_NOT_KNOW);
   const typicalPay = view(BROWSE_TYPICAL_PAY);
-  const artsNew = view(BROWSE_ARTS_NEW);
+  // Arts, Media & Sport: one row, at the bottom of the page only (direct
+  // feedback, 19 Sept 2026: no second appearance near the top, no "New in").
+  // The full world, not just the poster-library additions.
+  const arts = view(BROWSE_ARTS);
 
   return (
     <>
@@ -313,12 +314,6 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
           </Rail>
         )}
 
-        {arts.length > 0 && (
-          <Rail title="Arts, Media & Sport">
-            <PosterRail careers={arts} />
-          </Rail>
-        )}
-
         {worldRail.length > 0 && (
           <Rail title="Tech & Engineering">
             <PosterRail careers={worldRail} />
@@ -356,18 +351,9 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
             <PosterRail careers={typicalPay} />
           </Rail>
         )}
-        {/* The 21 arts careers added 19 Sept 2026 close the page as their own
-           row (direct ask), on top of sitting inside the Arts rail above.
-           Titled like every other curated rail here (Skilled Trades,
-           Typical Pay), not "New in ..." -- direct feedback, 19 Sept 2026:
-           a "new" framing implies a "view all" into the full world, which
-           this rail doesn't have. OPEN QUESTION for later, not decided or
-           built: should a world get its own "view all -> full grid" page
-           (the world-pill grid already does this for a filter, not a
-           rail), and if so does every curated rail need one too? */}
-        {artsNew.length > 0 && (
-          <Rail title="More Arts, Media & Sport Careers">
-            <PosterRail careers={artsNew} />
+        {arts.length > 0 && (
+          <Rail title="Arts, Media & Sport">
+            <PosterRail careers={arts} />
           </Rail>
         )}
       </div>
