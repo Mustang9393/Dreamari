@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 My mentor/mentee CTA: "Message" with the DM icon, same quiet style as Reschedule
+
+- Both the My mentor card and its mentor-side mirror (My mentee) had "Message Mentor"/"Message" as a filled `PrimaryCta` with a speech-bubble icon. Now `Send` (the paper-plane DM icon used everywhere else in the app for messaging) and `QuietCta`, matching Reschedule's outlined style exactly (direct feedback, 19 Sept 2026: "just say message and use the dm icon... same button style as reschedule").
+- Checked headless at 1280.
+
 ### 2026-09-19 Play tile: corrected to the real Maison Laurent atelier concept art
 
 - The IB Level 2 swap was the wrong "Maison Laurent" -- the user meant a Fashion Buyer-track boutique concept image (Codex-generated, saved to their Downloads), not the Investment Banking simulation's own unrelated client storyline. Corrected: copied the image to `public/images/play/fashion-buyer/maison-laurent-atelier.webp` and pointed `PREP_PLAY.cover` at it. Checked the bag's brand plate before using it publicly (a recurring concern in this codebase after the earlier Louis Vuitton trademark sweep) -- it reads "DREAMARI", not a real luxury brand.

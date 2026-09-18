@@ -1278,7 +1278,7 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
                date tile above it, exactly where Join sits under "Tuesday
                4:00 PM" -- not indented to the text. */}
             <div className={`${ABOVE} mt-[var(--space-3)]`}>
-              <PrimaryCta size="sm" onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
+              <QuietCta size="sm" onClick={openChat}><Send className="h-4 w-4" aria-hidden /> Message</QuietCta>
             </div>
             {/* Pinned to the card's true bottom edge with mt-auto, the same
                place Next Meeting's own meter row lands once the grid
@@ -1359,7 +1359,7 @@ function MentorView({ messages, setMessages, sub, setSub, openChat, onOpenProfil
                 <Muted>{D.MENTEE.line}</Muted>
               </div>
             </div>
-            <PrimaryCta size="sm" className={`${ABOVE} flex-none`} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message</PrimaryCta>
+            <QuietCta size="sm" className={`${ABOVE} flex-none`} onClick={openChat}><Send className="h-4 w-4" aria-hidden /> Message</QuietCta>
           </ClickPanel>
 
           {/* Same lg-only side-by-side as the student view, for the same
