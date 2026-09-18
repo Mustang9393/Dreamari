@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, MapPin, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
@@ -1203,16 +1203,14 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
              a full-width row each, side by side only from lg up where each
              card has real room. */}
           <div className="grid gap-[var(--space-5)] lg:grid-cols-2">
-          {/* Corporate ID badge (direct feedback, 19 Sept 2026): a Coach
-             tan header band, a Coach Foundation mark like a badge's
-             employer stamp, and a brand-colored photo ring, on the exact
-             same row shape and CTA placement as Next Meeting -- just a
-             different surface, not a different layout. */}
-          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="relative overflow-hidden">
-            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[3px]" style={{ background: accent }} />
-            <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `linear-gradient(180deg, color-mix(in srgb, ${accent} 14%, transparent) 0%, transparent 70%)` }} />
-            <Image src={D.PROGRAM.logoWhite} alt="" aria-hidden width={600} height={150} className="pointer-events-none absolute top-[var(--space-4)] right-[var(--space-4)] h-[13px] w-auto opacity-60" />
-            <div className="relative z-[1] flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
+          {/* Corporate ID badge, take three (direct feedback, 19 Sept
+             2026): back to Next Meeting's literal two-row shape -- the
+             identity row with the CTA in the same place, a plain divider
+             (not a colored line), and the badge content -- Coach's mark and
+             where Avery is based -- in the row underneath, the same way
+             Next Meeting's own second row carries its meter. */}
+          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`}>
+            <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
               <div className="flex items-center gap-[14px]">
                 <Avatar name={D.MENTOR.name} size={52} photo={D.MENTOR.photo} ring={accent} />
                 <div className="flex min-w-0 flex-col gap-[2px]">
@@ -1224,6 +1222,10 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
               {/* No View profile button -- the whole card already opens
                  it (direct feedback, 19 Sept 2026). */}
               <PrimaryCta size="sm" className={ABOVE} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-[10px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+              <Muted className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {D.MENTOR.location}</Muted>
+              <Image src={D.PROGRAM.logoWhite} alt="Coach Foundation" width={600} height={150} className="h-[15px] w-auto opacity-90" />
             </div>
           </ClickPanel>
 

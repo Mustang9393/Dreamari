@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 My mentor ID badge, third pass: back to Next Meeting's plain two-row shape (local, not pushed)
+
+- Two earlier badge treatments (a top accent line + corner logo, then a full-bleed letterhead strip) both missed on composition, the logo reading too small/squished, and the CTA crowding it (direct feedback, 19 Sept 2026). Landed on the literal thing asked for: Next Meeting's own two-row shape, unchanged -- identity + CTA on row one, a plain `border-t` divider (not a colored line), then a second row underneath carrying the badge content instead of a meter: `MapPin` + `MENTOR.location` ("New York, NY", Coach/Tapestry's real HQ, the same building `PROGRAM.cover`'s photo was shot in) on the left, the Coach Foundation wordmark at a legible 15px on the right.
+- `mentorshipData.ts`: `MENTOR.location` added with a sourcing comment.
+- Checked headless at 1280, 768, 390: divider and CTA position match Next Meeting exactly, wordmark renders full width with real letterforms (not squeezed), no overlap with the CTA at any width. tsc and eslint clean.
+
 ### 2026-09-19 Notifications and Messages merged into one bell; My mentor as a Coach ID badge (local, not pushed)
 
 - **Messages folded into Notifications** (direct feedback: "combine notifications and messages, just have messages as a tab inside notifications"): the standalone paper-plane Messages icon is gone from both the desktop nav and `HeaderActions` (mobile/tablet). A "Messages" tab now sits in the Notifications panel (mentorship students only, same as before), showing the app's one real conversation as a single preview row -- the mentor's photo, name, and a one-line summary of the thread's last real event (a message's own text, "Shared X", or "Proposed a meeting: <when>") read straight from the seeded `THREAD`, since a live preview would need that state lifted out of `MentorshipTab`. Tapping the row closes the panel and opens the chat dock, the same as the old button did. The bell's own badge now adds the chat's unread count to the notification count when showing "All", so one icon covers both; the Messages tab pill carries its own small red dot when there's unread chat. `MessagesButton` deleted.

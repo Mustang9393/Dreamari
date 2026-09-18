@@ -78,6 +78,10 @@ export const MENTOR = {
   name: "Avery Thompson",
   title: "Senior Manager, Merchandising",
   org: "Coach",
+  // Coach (Tapestry)'s HQ, the same real building the program's own cover
+  // photo was shot in (see PROGRAM.cover's sourcing note above: Hudson
+  // Yards, New York).
+  location: "New York, NY",
   photo: "/images/connect/avatars/pro-doyle-2.png",
 } as const;
 
