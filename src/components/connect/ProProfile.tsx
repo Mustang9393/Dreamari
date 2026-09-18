@@ -528,8 +528,11 @@ export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; lim
 // header is their own identity, never their employer's colours (direct
 // feedback, 5 Sept 2026). Picked per person from their id until profiles
 // carry a real cover choice.
-const PRO_COVERS = ["streaks", "fluted", "smoke", "molten", "frosted", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
-function coverFor(id: string) {
+export const PRO_COVERS = ["streaks", "fluted", "smoke", "molten", "frosted", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
+/** The same deterministic per-id cover a professional's own profile page
+ *  picks (ProfileHeaderCard below), reused wherever else a person needs one
+ *  -- e.g. the mentor identity card on Connect > Mentorship. */
+export function coverFor(id: string) {
   let h = 0;
   for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return PRO_COVERS[h % PRO_COVERS.length];

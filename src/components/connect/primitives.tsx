@@ -170,7 +170,7 @@ const AVATAR_PHOTO: Record<string, string> = {
 // Sept 2026: "just like Instagram and Twitter, not on the pfp but after the
 // name" -- moved to VerifiedBadge below, rendered by each caller next to the
 // person's name text instead. Avatar itself no longer knows about verification.
-export function Avatar({ name, size = 34, photo: explicitPhoto }: { name: string; size?: number; /** a portrait for a professional who is not in PROS (a partner board's own people); generated avatars are for students only */ photo?: string }) {
+export function Avatar({ name, size = 34, photo: explicitPhoto, ring }: { name: string; size?: number; /** a portrait for a professional who is not in PROS (a partner board's own people); generated avatars are for students only */ photo?: string; /** an accent ring around the avatar (e.g. an identity card); sized to `size` on this same box so it can never render oval */ ring?: string }) {
   // Professionals always wear their portrait; students stay behind the flag
   // (Jordan included -- their pin lives in studentAvatarSrc, the fallback
   // below, not here).
@@ -183,7 +183,10 @@ export function Avatar({ name, size = 34, photo: explicitPhoto }: { name: string
   const seed = name.split(" ")[0] || name;
   const avatarSrc = useStudentAvatarSrc(seed);
   return (
-    <span className="relative inline-flex flex-none" style={{ width: size, height: size }}>
+    <span
+      className="relative inline-flex flex-none rounded-full"
+      style={{ width: size, height: size, boxShadow: ring ? `0 0 0 2px ${ring}` : undefined }}
+    >
       {photo ? (
         <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
       ) : (
@@ -394,7 +397,7 @@ export function PrimaryCta({ children, onClick, className = "", style, size = "m
     <button
       type="button"
       onClick={onClick}
-      className={`dm-solid flex cursor-pointer items-center justify-center gap-[6px] font-semibold ${CTA_SIZE[size]} ${className}`}
+      className={`dm-solid flex cursor-pointer items-center justify-center gap-[6px] font-semibold whitespace-nowrap ${CTA_SIZE[size]} ${className}`}
       style={{ background: "var(--primary)", color: "#FFFFFF", ...style }}
     >
       {children}
@@ -412,7 +415,7 @@ export function QuietCta({ children, onClick, className = "", done = false, size
       type="button"
       onClick={onClick}
       aria-pressed={done || undefined}
-      className={`dm-quiet flex cursor-pointer items-center justify-center gap-[6px] border font-semibold ${CTA_SIZE[size]} ${className}`}
+      className={`dm-quiet flex cursor-pointer items-center justify-center gap-[6px] border font-semibold whitespace-nowrap ${CTA_SIZE[size]} ${className}`}
       style={
         done
           ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" }

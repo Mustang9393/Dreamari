@@ -71,6 +71,10 @@ export const SHAREABLES: Share[] = [
 ];
 
 export const MENTOR = {
+  // a stable id for the same per-person cover photo a professional's own
+  // profile page uses (coverFor in ProProfile.tsx) -- Avery isn't in PROS
+  // (mentorship-only, no public profile page), so this id exists just for that.
+  id: "avery-thompson",
   name: "Avery Thompson",
   title: "Senior Manager, Merchandising",
   org: "Coach",

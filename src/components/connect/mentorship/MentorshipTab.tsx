@@ -514,6 +514,27 @@ function parseWhen(when: string): { weekday: string; month: string; day: number;
   return m ? { weekday: m[1], month: m[2], day: Number(m[3]), time: m[4] } : { weekday: D.MEETING.date.weekday, month: D.MEETING.date.month, day: D.MEETING.date.day, time: D.MEETING.time };
 }
 const WEEKDAYS: Record<string, string> = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday", Sun: "Sunday" };
+const MONTHS: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+/** A real Date for "Oct" 28 "4:00 PM", defaulting to the current year --
+ *  demo data carries no year. Null when the pieces don't parse. */
+function meetingDateTime(month: string, day: number, time: string): Date | null {
+  const mi = MONTHS[month.slice(0, 3)];
+  const t = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (mi === undefined || !t) return null;
+  let hour = Number(t[1]) % 12;
+  if (/pm/i.test(t[3])) hour += 12;
+  return new Date(new Date().getFullYear(), mi, day, hour, Number(t[2]));
+}
+/** Join only makes sense once the meeting has actually started -- shown
+ *  from 10 minutes before through 60 minutes after (direct feedback, 19
+ *  Sept 2026: "it can only appear when the meeting is active"), never as a
+ *  standing button for something weeks away. */
+function meetingIsLive(month: string, day: number, time: string): boolean {
+  const start = meetingDateTime(month, day, time);
+  if (!start) return false;
+  const diff = Date.now() - start.getTime();
+  return diff >= -10 * 60_000 && diff <= 60 * 60_000;
+}
 
 /** The next meeting is whatever the thread says it is: the latest accepted
  *  request wins, a pending one shows as waiting, and Reschedule here posts a
@@ -538,13 +559,31 @@ function ScheduleCard({ me, messages, onRequest, onToast, showMeter }: { me: "me
             <Muted className="flex items-center gap-[5px]"><Video className="h-3.5 w-3.5" aria-hidden /> {D.MEETING.where}{pending && pending.from === me ? " · new time requested, waiting" : pending ? " · new time proposed in Messages" : ""}</Muted>
           </div>
         </div>
-        <div className={`${ABOVE} flex items-center gap-[8px]`}>
-          {/* The beam marks the one thing to do next, the way NextStepBanner does. */}
-          <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.2} strength={0.7} active>
-            <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="dm-solid relative flex min-h-[36px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-              <Video className="h-4 w-4" aria-hidden /> Join Meeting
-            </a>
-          </BorderBeam>
+        <div className={`${ABOVE} flex flex-wrap items-center gap-[8px]`}>
+          {/* Always present -- disabled and muted until the meeting is
+             actually live, rather than a standing active button for
+             something weeks out or the row's shape shifting by state
+             (direct feedback, 19 Sept 2026). The beam only runs once it's
+             the one real thing to do next. */}
+          {(() => {
+            const live = meetingIsLive(at.month, at.day, at.time);
+            const join = (
+              <a
+                href={live ? "https://teams.microsoft.com" : undefined}
+                target={live ? "_blank" : undefined}
+                rel={live ? "noreferrer" : undefined}
+                aria-disabled={!live}
+                title={live ? undefined : "Join opens once the meeting starts"}
+                className="dm-solid relative flex min-h-[32px] items-center justify-center gap-[6px] whitespace-nowrap rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold"
+                style={live ? { background: "var(--primary)", color: "#FFFFFF", cursor: "pointer" } : { background: "var(--glass-surface-2)", color: "var(--muted-foreground)", cursor: "default", pointerEvents: "none" }}
+              >
+                <Video className="h-4 w-4" aria-hidden /> Join
+              </a>
+            );
+            return live ? (
+              <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.2} strength={0.7} active>{join}</BorderBeam>
+            ) : join;
+          })()}
           <QuietCta size="sm" onClick={() => setOpen(true)}>Reschedule</QuietCta>
         </div>
       </div>
@@ -567,7 +606,15 @@ function ScheduleCard({ me, messages, onRequest, onToast, showMeter }: { me: "me
             <span className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>Your Fashion Buyer resume draft and one question from the Day in the Life simulation.</span>
           </Item>
           <div className="flex flex-wrap gap-[8px]">
-            <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" className="dm-solid flex min-h-[36px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold" style={{ background: "var(--primary)", color: "#FFFFFF" }}><Video className="h-4 w-4" aria-hidden /> Join Meeting</a>
+            <a
+              href={meetingIsLive(at.month, at.day, at.time) ? "https://teams.microsoft.com" : undefined}
+              target={meetingIsLive(at.month, at.day, at.time) ? "_blank" : undefined}
+              rel={meetingIsLive(at.month, at.day, at.time) ? "noreferrer" : undefined}
+              aria-disabled={!meetingIsLive(at.month, at.day, at.time)}
+              title={meetingIsLive(at.month, at.day, at.time) ? undefined : "Join opens once the meeting starts"}
+              className="dm-solid flex min-h-[32px] items-center justify-center gap-[6px] whitespace-nowrap rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold"
+              style={meetingIsLive(at.month, at.day, at.time) ? { background: "var(--primary)", color: "#FFFFFF", cursor: "pointer" } : { background: "var(--glass-surface-2)", color: "var(--muted-foreground)", cursor: "default", pointerEvents: "none" }}
+            ><Video className="h-4 w-4" aria-hidden /> Join</a>
             {request && <QuietCta size="sm" onClick={() => { downloadIcs(request); onToast("Added to your calendar."); }}><CalendarPlus className="h-4 w-4" aria-hidden /> Add to calendar</QuietCta>}
             <QuietCta size="sm" onClick={() => { setDetails(false); setOpen(true); }}>Reschedule</QuietCta>
           </div>
@@ -1064,11 +1111,12 @@ function ResumePrepCard({ onClick }: { onClick: () => void }) {
   const data: ResumeData = own ? resumeForVersion(stored, latest) : (D.SAMPLE_RESUME as ResumeData);
   const name = own ? latest.name : D.PREP_RESUME_NAME;
   return (
-    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "#FFFFFF" }}>
-      <span className="pointer-events-none absolute inset-x-0 top-0 block" aria-hidden>
+    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <span className="pointer-events-none absolute inset-x-0 top-0 block opacity-70" aria-hidden>
         <ResumeDocument resume={data} templateId={DEFAULT_RESUME_TEMPLATE} sectionOrder={latest?.sectionOrder} hiddenSections={latest?.hiddenSections} sectionOverrides={latest?.sectionOverrides} />
       </span>
-      <span className="relative z-[1] flex items-center gap-[10px] px-[14px] pt-[56px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(8,10,22,0.97) 0%, rgba(8,10,22,0.9) 60%, rgba(8,10,22,0) 100%)" }}>
+      <span className="pointer-events-none absolute inset-0 z-[1]" aria-hidden style={{ background: "linear-gradient(to top, rgba(8,10,22,0.6) 0%, rgba(8,10,22,0.15) 55%, rgba(8,10,22,0.35) 100%)" }} />
+      <span className="relative z-[2] flex items-center gap-[10px] px-[14px] pt-[56px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(8,10,22,0.97) 0%, rgba(8,10,22,0.9) 60%, rgba(8,10,22,0) 100%)" }}>
         <span className="flex size-[34px] flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.12)", color: "#FFFFFF" }}><FileText className="h-4 w-4" aria-hidden /></span>
         <span className="flex min-w-0 flex-col gap-[2px]">
           <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: accent }}>{D.PREP_RESUME.label}</span>
@@ -1147,19 +1195,29 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
       <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "plan", label: "Year Plan" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
-          {/* My mentor and Next meeting share one row from md up (direct
-             feedback, 19 Sept 2026: side by side, not stacked full width) */}
-          <div className="grid gap-[var(--space-5)] md:grid-cols-2">
-          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-            <div className="flex items-center gap-[14px]">
-              <Avatar name={D.MENTOR.name} size={56} photo={D.MENTOR.photo} />
-              <div className="flex min-w-0 flex-col gap-[2px]">
-                <Eyebrow>My mentor</Eyebrow>
-                <span className="flex items-center gap-[6px] text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.MENTOR.name} <VerifiedBadge size={16} /></span>
-                <Muted>{D.MENTOR.title} · {D.MENTOR.org}</Muted>
+          {/* My mentor and Next meeting share one row on desktop only.
+             Started at md (768px, direct feedback: side by side, not
+             stacked full width), but tablet widths right at md were
+             squeezing Next Meeting's CTAs and info into an ugly wrap
+             (direct feedback, 19 Sept 2026) -- every tablet width now gets
+             a full-width row each, side by side only from lg up where each
+             card has real room. */}
+          <div className="grid gap-[var(--space-5)] lg:grid-cols-2">
+          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`}>
+            <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
+              <div className="flex items-center gap-[14px]">
+                <Avatar name={D.MENTOR.name} size={52} photo={D.MENTOR.photo} ring={`color-mix(in srgb, ${accent} 45%, var(--glass-border))`} />
+                <div className="flex min-w-0 flex-col gap-[2px]">
+                  <Eyebrow>My mentor</Eyebrow>
+                  <span className="flex items-center gap-[6px] text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.MENTOR.name} <VerifiedBadge size={15} /></span>
+                  <Muted>{D.MENTOR.title}</Muted>
+                </div>
+              </div>
+              <div className={`${ABOVE} flex flex-wrap items-center gap-[8px]`}>
+                <PrimaryCta size="sm" onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
+                <QuietCta size="sm" onClick={onOpenProfile}>View profile</QuietCta>
               </div>
             </div>
-            <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
           </ClickPanel>
 
           <ScheduleCard me="mentee" messages={messages} onRequest={postRequest} onToast={onToast} showMeter />
@@ -1207,19 +1265,21 @@ function MentorView({ messages, setMessages, sub, setSub, openChat, onOpenProfil
       <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Mentorship sections" value={tab} onChange={setTab} options={[{ key: "home", label: "Home" }, { key: "journey", label: "Journey" }]} /></div>
       {tab === "home" && (
         <div className="flex flex-col gap-[var(--space-5)]">
-          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTEE.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
+          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTEE.name}'s profile`} className="flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
             <div className="flex items-center gap-[14px]">
-              <Avatar name={D.MENTEE.name} size={56} photo={studentAvatarSrc(D.MENTEE.name)} />
+              <Avatar name={D.MENTEE.name} size={56} photo={studentAvatarSrc(D.MENTEE.name)} ring={`color-mix(in srgb, ${accent} 55%, transparent)`} />
               <div className="flex min-w-0 flex-col gap-[2px]">
                 <Eyebrow>My mentee</Eyebrow>
                 <span className="flex items-center gap-[6px] text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.MENTEE.name} <VerifiedBadge size={16} /></span>
                 <Muted>{D.MENTEE.line}</Muted>
               </div>
             </div>
-            <PrimaryCta size="sm" className={`${ABOVE} mr-[28px]`} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message</PrimaryCta>
+            <PrimaryCta size="sm" className={`${ABOVE} flex-none`} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message</PrimaryCta>
           </ClickPanel>
 
-          <div className="grid gap-[var(--space-5)] md:grid-cols-2">
+          {/* Same lg-only side-by-side as the student view, for the same
+             tablet-squeeze reason. */}
+          <div className="grid gap-[var(--space-5)] lg:grid-cols-2">
           <ClickPanel onClick={() => setPrep(true)} label="Prepare for meeting" className="flex flex-col gap-[var(--space-3)]">
             <Eyebrow>Your next conversation</Eyebrow>
             <div className="flex flex-wrap items-center gap-[8px]">

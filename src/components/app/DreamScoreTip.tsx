@@ -8,8 +8,11 @@ import { useId, useState, type ReactNode } from "react";
 // keyboard focus, closes on leave, blur or Escape. Compact by design: 240px,
 // two lines of 12.5px body text, no title.
 export const DREAM_SCORE_TIP = "Earn Dream Score by exploring careers, playing games, and building your profile. The higher your score, the more you unlock.";
+// The chip's other half (direct feedback, 19 Sept 2026: hovering the streak
+// showed the Dream Score explanation instead of a streak one).
+export const STREAK_TIP = "Your streak counts the days in a row you've opened Dreamari. Come back tomorrow to keep it going.";
 
-export function DreamScoreTip({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function DreamScoreTip({ children, className = "", text = DREAM_SCORE_TIP }: { children: ReactNode; className?: string; /** which explanation this hover target shows; defaults to the Dream Score one */ text?: string }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   return (
@@ -32,7 +35,7 @@ export function DreamScoreTip({ children, className = "" }: { children: ReactNod
           style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))", color: "var(--foreground)", boxShadow: "0 18px 40px -20px rgba(0,0,0,0.7), 0 0 24px -12px var(--primary)", fontFamily: "var(--font-body)" }}
         >
           <span aria-hidden className="absolute -top-[6px] right-[18px] block size-[11px] rotate-45 border-t border-l" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "color-mix(in srgb, var(--primary) 40%, var(--glass-border))" }} />
-          {DREAM_SCORE_TIP}
+          {text}
         </span>
       )}
     </span>
