@@ -38,6 +38,10 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Prep row: stronger blur on Explore and Play too
+
+- `CareerPrepCard`/`PlayPrepCard`'s `CardProgressiveBlur` gets `maxBlur={22}` (was the 14px default), matching the resume card's own boosted legibility fix (direct feedback: "make sure the blur is high enough to ensure readability"). Checked headless at 1280: all three captions read cleanly, photos visibly frost toward the caption rather than just darken.
+
 ### 2026-09-19 Explore and Play prep cards get the same progressive blur as the resume card (local, pushed with the rest of today's session)
 
 - `CareerPrepCard` and `PlayPrepCard` (the other two "Prep for your mentor" cards) now use the same `CardProgressiveBlur` + `cardBottomScrim()` recipe the resume card was given, instead of the flat `--poster-scrim` gradient (direct feedback, 19 Sept 2026: "they should also use the blur effect"). `PrepFoot` (shared by both) no longer paints its own scrim -- the blur+scrim layer sits behind it now, same z-index shape as the resume card's caption.
