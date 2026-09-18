@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore, useState } from "react";
-import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
 import { ArrowRight, Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
@@ -222,10 +222,9 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
 // has at least one entry.
 /** Dreamy's resume welcome. Once per browser for students; while the
  *  app-wide demo switch is on, once per session and again after a refresh,
- *  like every other surface. Shared by the Profile tab (arrival) and the
- *  builder route, so whichever a student reaches first greets them and
- *  the other stays quiet (direct feedback, 18 Sept 2026: "I don't see the
- *  welcome and Dreamy intro"). */
+ *  like every other surface. Used by the builder route only: the Profile
+ *  Resume tab never greets (direct feedback, 18 Sept 2026: "it should only
+ *  pop up when I click Create resume"). */
 export const RESUME_WELCOME_KEY = "dreamari:welcome:resume";
 export function useResumeWelcome(/** show regardless of what was seen: every "Create a new resume" starts with Dreamy (direct feedback, 18 Sept 2026) */ always = false): [boolean, () => void] {
   const [open, setOpen] = useState(false);
@@ -250,7 +249,6 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
   const router = useRouter();
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const { toast } = useResumeToast();
-  const [welcome, dismissWelcome] = useResumeWelcome();
   const [confirmDelete, setConfirmDelete] = useState<ResumeVersion | null>(null);
 
   const startBuilding = () => {
@@ -285,7 +283,6 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
           </button>
         </BorderBeam>
         {toast}
-        <WelcomeSplash surface="resume" open={welcome} onDone={dismissWelcome} />
       </div>
     );
   }
@@ -365,7 +362,6 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
         </div>
       )}
       {toast}
-      <WelcomeSplash surface="resume" open={welcome} onDone={dismissWelcome} />
     </div>
   );
 }

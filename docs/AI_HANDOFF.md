@@ -10363,3 +10363,10 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
 - Verified headless at 1280 and 390 (no horizontal overflow, sheet, XP
   flight, Accept, filter, program edit). tsc and eslint clean.
 - Kept local by request; push only when told.
+
+## 2026-09-18 · Resume welcome: Create only
+
+- The Profile Resume tab no longer shows Dreamy's welcome (it rendered inside
+  the tab panel and could not be reached). The welcome fires only on
+  `/resume-builder?view=templates`, every Create click. Profile's own
+  splash behaves as before on arrival.

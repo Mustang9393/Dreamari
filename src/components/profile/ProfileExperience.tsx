@@ -107,16 +107,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // (direct feedback, 10 Sept 2026: "the pop up isn't happening on my
   // profile"); once DEMO_ALWAYS_SHOW_SPLASH is off it's arrival-only again.
   useEffect(() => {
-    // Arriving straight on the Resume tab: that tab has its own Dreamy
-    // welcome, so the Profile one stays quiet instead of stacking two.
-    if (initialTab === "resume") return;
     if (!initialWelcome && !(DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
     const open = setTimeout(() => {
       setWelcomeOpen(true);
       playMilestoneChime();
     }, 900);
     return () => clearTimeout(open);
-  }, [initialWelcome, initialTab]);
+  }, [initialWelcome]);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
     markDemoSeenThisSession("dreamari:welcome:profile");
