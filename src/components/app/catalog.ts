@@ -120,9 +120,21 @@ export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
 // Every catalogued career, deduped by title, for lookups that need to search
 // across rails instead of rendering one specific rail (Career Detail's
 // "Similar careers" and its own title/world/photo resolution).
+// Arts, Media & Sport (added 18 Sept 2026 for an arts-focused demo): every
+// arts career we hold a real poster for, in one rail, so the world reads as
+// full rather than three cards scattered across other rows.
+export const BROWSE_ARTS: CatalogCareer[] = [
+  C("Animator", "Arts, Media & Sport", "/images/app/poster-animator.webp"),
+  C("Art Director", "Arts, Media & Sport", "/images/app/poster-art-director.webp"),
+  C("Film Director", "Arts, Media & Sport", "/images/app/poster-film-director.webp"),
+  C("Journalist", "Arts, Media & Sport", "/images/app/poster-journalist.webp"),
+  C("Sound Engineering Technician", "Arts, Media & Sport", "/images/app/poster-sound-engineering-technician.webp"),
+  C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.webp"),
+];
+
 export const ALL_CATALOG_CAREERS: CatalogCareer[] = (() => {
   const seen = new Map<string, CatalogCareer>();
-  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TYPICAL_PAY]) {
+  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...BROWSE_ARTS, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TYPICAL_PAY]) {
     if (!seen.has(career.title)) seen.set(career.title, career);
   }
   return [...seen.values()];

@@ -10476,3 +10476,20 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   view: four rows (reads, thank-you quote with the student's avatar, résumé
   notes used, new questions), each navigating to Questions or Home.
 
+
+## 2026-09-18 · Explore: Netflix-style career search, arts rail
+
+- `careerSearch.ts`: fuzzy scorer over title words, a career's own keywords,
+  its world's keywords and the world name (own keywords outrank world
+  keywords; typo tolerance one edit from five letters, two from eight, never
+  against the world name). `relatedTerms` builds the "Explore careers
+  related to" chips from what the top results share. `TOP_SEARCHES` is
+  arts-leaning for the arts demo.
+- Browse: a typed query replaces the rails with one ranked grid, related
+  chips above, a no-match state that offers the top searches; opening search
+  with nothing typed shows Top searches under the filters. New rail "Arts,
+  Media & Sport" (Animator, Art Director, Film Director, Journalist, Sound
+  Engineering Technician, Lighting Technician) using posters already in the
+  repo; Art Director, Film Director and Journalist are new to the catalog.
+- Verified headless: "finanace", "codng", "hospital", "planes", "arts",
+  "drawing", "netflix", and "xyzq" (no match).

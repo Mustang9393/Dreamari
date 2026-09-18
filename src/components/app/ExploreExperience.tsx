@@ -15,6 +15,7 @@ import { PosterCard, RankedPosterCard } from "./PosterCard";
 
 import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
+  BROWSE_ARTS,
   BROWSE_BECAUSE_LIKED,
   BROWSE_MIGHT_NOT_KNOW,
   BROWSE_TRADES,
@@ -29,6 +30,7 @@ import {
   type VideoReel,
 } from "./catalog";
 import { WORLD_LABELS } from "./worlds";
+import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "./careerSearch";
 import { careerSlug } from "@/components/career/slug";
 import "./app.css";
 
@@ -153,7 +155,50 @@ function FilterPill({ label, selected, onClick }: { label: string; selected: boo
   );
 }
 
-function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolean }) {
+/** Netflix's search page: "Explore careers related to" chips built from
+ *  what the results share, then the ranked grid; a no-match state that
+ *  offers the top searches instead of a dead end. */
+function SearchResults({ query, hits, onQuery }: { query: string; hits: SearchHit[]; onQuery: (q: string) => void }) {
+  const router = useRouter();
+  const related = relatedTerms(query, hits);
+  return (
+    <section className="flex w-full flex-col gap-[var(--space-5)]" aria-live="polite">
+      {related.length > 0 && (
+        <div className="flex flex-wrap items-center gap-[8px]">
+          <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Explore careers related to:</span>
+          {related.map((t) => <FilterPill key={t} label={t} selected={false} onClick={() => onQuery(t)} />)}
+        </div>
+      )}
+      {hits.length > 0 ? (
+        <>
+          <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
+            Results for “{query.trim()}” <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({hits.length})</span>
+          </h2>
+          <div className="flex flex-wrap gap-[var(--space-5)]">
+            {hits.map(({ career }) => <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />)}
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col gap-[var(--space-4)] py-[var(--space-6)]">
+          <p className="text-[17px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)" }}>No careers match “{query.trim()}”.</p>
+          <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Try a career, a world like Arts or Finance, or something you like doing, like drawing or coding.</p>
+          <TopSearches onQuery={onQuery} />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function TopSearches({ onQuery }: { onQuery: (q: string) => void }) {
+  return (
+    <div className="flex flex-wrap items-center gap-[8px]">
+      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Top searches:</span>
+      {TOP_SEARCHES.map((t) => <FilterPill key={t} label={t} selected={false} onClick={() => onQuery(t)} />)}
+    </div>
+  );
+}
+
+function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpen: boolean; onQuery: (q: string) => void }) {
   const [world, setWorld] = useState<string>("All");
   const [sort, setSort] = useState<SortOption>("Recommended");
 
@@ -162,7 +207,12 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
   // restores the previous selection.
   const effectiveWorld = filtersOpen ? world : "All";
   const effectiveSort: SortOption = filtersOpen ? sort : "Recommended";
-  const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, query, effectiveSort);
+  // A typed query becomes the search page (Netflix): one ranked grid across
+  // the whole catalog, not seven rails each losing most of their cards.
+  const searching = query.trim().length > 0;
+  const hits = searching ? searchCareers(query, effectiveWorld) : [];
+  const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, "", effectiveSort);
+  const arts = view(BROWSE_ARTS);
   const becauseLiked = view(BROWSE_BECAUSE_LIKED);
   const trades = view(BROWSE_TRADES);
   const trending = view(BROWSE_TRENDING);
@@ -198,6 +248,11 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
         </div>
       )}
 
+      {filtersOpen && !searching && <TopSearches onQuery={onQuery} />}
+      {searching && <SearchResults query={query} hits={hits} onQuery={onQuery} />}
+
+      {!searching && (
+      <>
       {/* Rail order + content per Joshua (2026-08-21): merged recommended
          rail, then Tech, Top 5, Might Not Know, Skilled Trades (added 11
          Sept 2026), Videos, Typical Pay. `contents` keeps
@@ -208,6 +263,12 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
         {becauseLiked.length > 0 && (
           <Rail title="Recommended Because You Liked Business & Finance">
             <PosterRail careers={becauseLiked} />
+          </Rail>
+        )}
+
+        {arts.length > 0 && (
+          <Rail title="Arts, Media & Sport">
+            <PosterRail careers={arts} />
           </Rail>
         )}
 
@@ -249,6 +310,8 @@ function BrowseFace({ query, filtersOpen }: { query: string; filtersOpen: boolea
           </Rail>
         )}
       </div>
+      </>
+      )}
     </>
   );
 }
@@ -880,7 +943,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
           </BorderBeam>
         )}
 
-        {tab === "browse" ? <BrowseFace query={query} filtersOpen={searchOpen} /> : <ForYouFace />}
+        {tab === "browse" ? <BrowseFace query={query} filtersOpen={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} /> : <ForYouFace />}
       </main>
 
       <MobileNav active="Explore" />
