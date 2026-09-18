@@ -728,7 +728,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
       <DesktopNavigation active="Explore" />
 
       {/* Mobile top tabs (the mobile frames' "Top Nav Scrim") */}
-      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[160px] md:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
+      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[160px] lg:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
         <button
           type="button"
           onClick={() => switchTab("foryou")}
@@ -779,14 +779,14 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
       {/* One standard gap between the navbar and page content everywhere
          (space-10); For You fits the viewport with the card centered. */}
       <main
-        className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 sm:px-[var(--space-14)] md:pt-[var(--space-10)] ${
+        className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 sm:px-[var(--space-14)] lg:pt-[var(--space-10)] ${
           tab === "browse"
             ? "gap-[var(--space-10)] pt-[72px] pb-[120px]"
-            : "gap-[var(--space-6)] pt-[64px] pb-0 md:h-[calc(100dvh-62px)] md:overflow-hidden md:pb-[var(--space-6)]"
+            : "gap-[var(--space-6)] pt-[64px] pb-0 lg:h-[calc(100dvh-62px)] lg:overflow-hidden lg:pb-[var(--space-6)]"
         }`}
       >
         {/* Explore Header (desktop) */}
-        <div className="hidden w-full flex-col gap-[var(--space-6)] md:flex">
+        <div className="hidden w-full flex-col gap-[var(--space-6)] lg:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
             <div className="flex flex-col gap-[var(--space-2)]">
               <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>

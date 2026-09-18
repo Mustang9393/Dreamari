@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, Maximize2, MessageCircle, Minimize2, Minus, MoreHorizontal, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, Maximize2, MessageCircle, Minimize2, Minus, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
@@ -396,8 +396,6 @@ function ChatDock({ me, state, unread, messages, setMessages, onToast, onOpenPro
   }, [state]);
   const surface = { background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" } as const;
   const iconBtn = "dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-full";
-  const [menu, setMenu] = useState(false);
-  const [report, setReport] = useState(0);
   if (state === "min") {
     return (
       <Portal>
@@ -443,21 +441,13 @@ function ChatDock({ me, state, unread, messages, setMessages, onToast, onOpenPro
             </button>
             <span className="flex flex-none items-center gap-[2px]" style={{ color: "var(--muted-foreground)" }}>
               <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" aria-label="Start a video call" title="Video call" className={iconBtn}><Video className="h-4 w-4" aria-hidden /></a>
-              <span className="relative">
-                <button type="button" aria-label="More" title="More" aria-expanded={menu} onClick={() => setMenu((v) => !v)} className={iconBtn}><MoreHorizontal className="h-4 w-4" aria-hidden /></button>
-                {menu && (
-                  <div role="menu" className="absolute top-[calc(100%+6px)] right-0 z-20 min-w-[260px] overflow-hidden rounded-[var(--radius-md)] border motion-safe:animate-[fade-slide-up_0.16s_ease-out_both]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 50px -20px rgba(0,0,0,0.8)" }}>
-                    <button type="button" role="menuitem" onClick={() => { setMenu(false); setDock(full ? "open" : "full"); }} className="dm-quiet hidden w-full cursor-pointer items-center gap-[10px] px-[14px] py-[10px] text-left text-[13.5px] font-semibold sm:flex" style={{ color: "var(--foreground)" }}>{full ? <Minimize2 className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> : <Maximize2 className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} {full ? "Exit full screen" : "Full screen"}</button>
-                    <button type="button" role="menuitem" onClick={() => { setMenu(false); setReport((n) => n + 1); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] border-t px-[14px] py-[10px] text-left text-[13.5px] font-semibold" style={{ borderColor: RULE, color: "var(--foreground)" }}><Flag className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /> Report a problem</button>
-                  </div>
-                )}
-              </span>
               <button type="button" aria-label="Minimise" title="Minimise" onClick={() => setDock("min")} className={`${iconBtn} hidden sm:flex`}><Minus className="h-4 w-4" aria-hidden /></button>
+              <button type="button" aria-label={full ? "Exit full screen" : "Full screen"} title={full ? "Exit full screen" : "Full screen"} onClick={() => setDock(full ? "open" : "full")} className={`${iconBtn} hidden sm:flex`}>{full ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}</button>
               <button type="button" aria-label="Close" title="Close" onClick={() => setDock("closed")} className={iconBtn}><X className="h-4 w-4" aria-hidden /></button>
             </span>
           </div>
           <div className="min-h-0 flex-1">
-            <Thread embedded me={me} messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={onOpenProfile} reportSignal={report} />
+            <Thread embedded me={me} messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={onOpenProfile} />
           </div>
         </div>
       </motion.div>
@@ -715,10 +705,9 @@ function ShareSheet({ onClose, onPick }: { onClose: () => void; onPick: (share: 
  *  permanent row of them. Attachments, GIFs and the mentorship actions live
  *  in the plus menu; emoji behind the smile; suggested questions behind the
  *  sparkle. Meeting requests are cards in the thread itself. */
-function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = false, reportSignal = 0 }: { me: "mentee" | "mentor"; messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; onToast: (t: string) => void; onOpenProfile: () => void; /** inside the chat dock: no header of its own, the list scrolls, the composer stays put */ embedded?: boolean; /** bumps when the dock's menu asks for the Report sheet */ reportSignal?: number }) {
+function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = false }: { me: "mentee" | "mentor"; messages: D.Message[]; setMessages: React.Dispatch<React.SetStateAction<D.Message[]>>; onToast: (t: string) => void; onOpenProfile: () => void; /** inside the chat dock: no header of its own, the list scrolls, the composer stays put */ embedded?: boolean }) {
   const [draft, setDraft] = useState("");
   const [menu, setMenu] = useState<"none" | "plus" | "emoji">("none");
-  const [suggest, setSuggest] = useState(false);
   const [sent, setSent] = useState(0);
   const [nudgeGone, setNudgeGone] = useState(false);
   const [sheet, setSheet] = useState<"none" | "escalate" | "resource" | "meeting" | "share">("none");
@@ -734,15 +723,11 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
     const t = window.setTimeout(toEnd, 320); // after the dock's rise
     return () => { cancelAnimationFrame(raf); window.clearTimeout(t); };
   }, [embedded, messages.length]);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { if (reportSignal) setSheet("escalate"); }, [reportSignal]);
-  const suggested = me === "mentee" ? D.STUDENT_SUGGESTED : D.MENTOR_SUGGESTED;
   const actions = D.COMPOSER_ACTIONS.filter((a) => a.who === "both" || a.who === me);
   const nudge = D.NUDGES[me][Math.min(sent, D.NUDGES[me].length - 1)];
   const push = (m: D.Message) => {
     setMessages((list) => [...list, m]);
     setDraft("");
-    setSuggest(false);
     setMenu("none");
     setSent((n) => n + 1);
     setNudgeGone(false);
@@ -792,7 +777,10 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
            away with it, the way messaging apps note encryption (direct
            feedback, 18 Sept 2026) */}
         {embedded && (
-          <p className="flex items-center justify-center gap-[5px] px-[12px] text-center text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: GOOD }} /> {D.THREAD_FOOT}</p>
+          <p className="flex flex-wrap items-center justify-center gap-x-[6px] gap-y-[2px] px-[12px] text-center text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+            <ShieldCheck className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: GOOD }} /> {D.THREAD_FOOT} ·
+            <button type="button" onClick={() => setSheet("escalate")} className="dm-link cursor-pointer font-bold" style={{ color: "var(--muted-foreground)" }}>Report</button>
+          </p>
         )}
         {groups.map((g, gi) => {
           const mine = g.from === me;
@@ -822,21 +810,12 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
 
       <div className={`flex flex-none flex-col gap-[10px] border-t py-[var(--space-4)] ${embedded ? "px-[var(--space-4)]" : "px-[var(--space-5)]"}`} style={{ borderColor: RULE }}>
         {/* one nudge, dismissable, rotates as the conversation moves */}
-        {!nudgeGone && !suggest && nudge && (
+        {!nudgeGone && nudge && (
           <div className="flex items-center gap-[6px] motion-safe:animate-[fade-slide-up_0.18s_ease-out_both]">
             <button type="button" onClick={() => setDraft(nudge)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-left text-[12.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--muted-foreground)" }}>
               <Sparkles className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} /> <span className="truncate">{nudge}</span>
             </button>
             <button type="button" aria-label="Dismiss suggestion" onClick={() => setNudgeGone(true)} className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
-          </div>
-        )}
-        {suggest && (
-          <div className="flex flex-wrap gap-[6px] motion-safe:animate-[fade-slide-up_0.18s_ease-out_both]">
-            {suggested.map((q) => (
-              <button key={q} type="button" onClick={() => { setDraft(q); setSuggest(false); }} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[5px] text-left text-[12.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
-                {q}
-              </button>
-            ))}
           </div>
         )}
         <form className="relative flex items-center gap-[8px]" onSubmit={(e) => { e.preventDefault(); send(draft); }}>
@@ -867,9 +846,6 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
               </div>
             )}
           </div>
-          <button type="button" aria-label="Suggested questions" aria-pressed={suggest} onClick={() => setSuggest((v) => !v)} className="dm-quiet flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: suggest ? `color-mix(in srgb, ${accent} 55%, var(--glass-border))` : "var(--glass-border)", color: suggest ? accent : "var(--muted-foreground)" }}>
-            <Sparkles className="h-[18px] w-[18px]" aria-hidden />
-          </button>
           <button type="submit" aria-label="Send" disabled={!draft.trim()} className="dm-solid flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-40" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
             <Send className="h-[16px] w-[16px]" aria-hidden />
           </button>

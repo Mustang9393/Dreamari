@@ -5,11 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, CirclePlay, Compass, Flame, House, Menu, Moon, Sun, Users, X, Zap } from "lucide-react";
+import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Sun, Users, X } from "lucide-react";
 import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
-import { useDreamScore } from "@/lib/dreamScore";
-import { DreamScoreTip } from "@/components/app/DreamScoreTip";
+import { DreamScoreChip } from "@/components/app/DreamScoreChip";
 import { useStudentAvatarSrc } from "@/lib/avatar";
 import { STUDENT } from "@/components/profile/data";
 
@@ -319,9 +318,6 @@ export function useScrolled(threshold = 12) {
 }
 
 export function DesktopNavigation({ active, extraClassName }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile"; extraClassName?: string }) {
-  const score = useDreamScore();
-  // one number everywhere: the live Dream Score (100 after Build), never a placeholder
-  const xp = score;
   const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
   const scrolled = useScrolled();
   return (
@@ -393,34 +389,10 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
           </nav>
 
           <div className="flex items-center gap-[var(--space-3)] lg:gap-[var(--space-4)]">
-            {/* Streak and Dream Score on every page, Profile included: the score
-               stays at the top of the app the way it lands there after Build
-               (Joshua Pierce, Slack, 6 Sept 2026). */}
-            {(
-              <>
-                {/* Streak/XP yield below lg so the dead-centered nav pill never
-                   collides with them on narrow desktop widths. */}
-                <span className="hidden items-center gap-[6px] lg:flex">
-                  <Flame aria-hidden className="h-4 w-4" style={{ color: "var(--accent)" }} />
-                  <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent)", fontFamily: "var(--font-body)" }}>
-                    12
-                  </span>
-                </span>
-                {/* Dream Score, live: the student's own XP once they have earned any
-                   the same figure Build and Match show. Shown from md so the
-                   score follows them from Build and Match into the app. */}
-                <DreamScoreTip className="hidden md:flex">
-                  <span key={xp} data-dream-score-target className="flex items-center gap-[6px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" aria-label={`Dream Score ${xp} XP`}>
-                    {/* a bolt, filled: the XP mark games already taught (direct
-                       feedback, 18 Sept 2026: "find a better icon for XP") */}
-                    <Zap aria-hidden className="h-4 w-4" fill="currentColor" style={{ color: "var(--accent)" }} />
-                    <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-                      {xp.toLocaleString("en-US")} XP
-                    </span>
-                  </span>
-                </DreamScoreTip>
-              </>
-            )}
+            {/* One chip for streak and Dream Score on every page, Profile
+               included: the score stays at the top of the app the way it
+               lands there after Build (Joshua Pierce, Slack, 6 Sept 2026). */}
+            <DreamScoreChip />
             <MessagesButton />
             <NotificationsButton />
             <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">

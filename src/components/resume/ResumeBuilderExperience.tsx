@@ -11,6 +11,7 @@ import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { flyXp } from "@/components/app/xpFlight";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
+import { NotificationsButton } from "@/components/app/Inbox";
 import { AtsIcon } from "./AtsIcon";
 import { Working } from "@/components/app/Working";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
@@ -197,7 +198,8 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
         <div className="mb-[14px] flex flex-none items-center gap-[var(--space-3)]">
         {/* The Dream Score lives here too: this route has no main nav, and
            the XP earned in the wizard needs the chip to fly into. */}
-        <DreamScoreChip className="max-sm:gap-[4px] max-sm:px-[10px]" />
+        <DreamScoreChip />
+        <NotificationsButton />
         <IconTip label="Close">
         <button
           type="button"

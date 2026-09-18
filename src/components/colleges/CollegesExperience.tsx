@@ -148,7 +148,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
          on explore/careers and schools need to be the same, positions
          etc."). The briefcase goes back to Careers the way Careers' cap
          comes here. */}
-      <div className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[160px] md:hidden">
+      <div className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[160px] lg:hidden">
         <button
           type="button"
           onClick={() => setView("foryou")}
@@ -178,11 +178,11 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         </div>
       </div>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-[72px] pb-[140px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-[72px] pb-[140px] sm:px-[var(--space-14)] lg:pt-[var(--space-10)]">
         {/* Desktop header, laid out exactly like Explore Careers': title and
            the Careers/Schools strip on the left, the For you / Browse All
            pill on the right. Phones use the top bar above instead. */}
-        <div className="hidden w-full items-center justify-between gap-[var(--space-6)] md:flex">
+        <div className="hidden w-full items-center justify-between gap-[var(--space-6)] lg:flex">
           <div className="flex flex-col gap-[var(--space-2)]">
             {/* "Explore", not "Explore Schools": the Schools tab right under it
                already says which section this is, and the repeated word was

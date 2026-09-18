@@ -10,8 +10,7 @@ import Image from "next/image";
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, Briefcase, Calendar, FileText, Send, Sparkles, X, Zap } from "lucide-react";
-import { useDreamScore } from "@/lib/dreamScore";
-import { DreamScoreTip } from "./DreamScoreTip";
+import { DreamScoreChip } from "./DreamScoreChip";
 import { Portal } from "@/components/profile/CareerReport";
 import { decideMeeting, markNotificationRead, openDock, resolveNotification, useInbox } from "@/lib/inbox";
 import { NOTIFICATIONS, UNREAD_BY_DEFAULT, type Notification } from "./notificationsData";
@@ -210,26 +209,12 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
   );
 }
 
-/** The compact Dream Score for the phone and tablet header: the bolt and
- *  the number, the flight target when the desktop chip is off screen. */
-function XpChip() {
-  const xp = useDreamScore();
-  return (
-    <DreamScoreTip className="flex">
-      <span key={xp} data-dream-score-target className="flex h-10 items-center gap-[5px] rounded-[var(--radius-lg)] border px-[10px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }} aria-label={`Dream Score ${xp} XP`}>
-        <Zap aria-hidden className="h-4 w-4" fill="currentColor" style={{ color: "var(--accent)" }} />
-        <span className="text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{xp.toLocaleString("en-US")}</span>
-      </span>
-    </DreamScoreTip>
-  );
-}
-
 /** The phone and tablet header's right-hand cluster: XP, Messages
  *  (mentorship only), Notifications, then the hamburger the page renders. */
 export function HeaderActions({ children }: { children?: ReactNode }) {
   return (
     <div className="flex items-center gap-[8px]">
-      <XpChip />
+      <DreamScoreChip />
       <MessagesButton />
       <NotificationsButton />
       {children}

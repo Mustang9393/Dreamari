@@ -3,7 +3,6 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { useDreamScore } from "@/lib/dreamScore";
 import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
@@ -487,9 +486,6 @@ function ActivityCard({ activity }: { activity: Activity }) {
 }
 
 export function HomeExperience() {
-  const liveScore = useDreamScore();
-  // one number everywhere: the live Dream Score (100 after Build), never a placeholder
-  const homeXp = liveScore;
   const router = useRouter();
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
@@ -500,15 +496,7 @@ export function HomeExperience() {
       {/* Mobile header (logo + streak/XP, per the mobile frame) */}
       <MobileHeaderShell>
         <Wordmark />
-        <span className="flex items-center gap-[var(--space-4)] text-[13px] font-bold" style={{ fontFamily: "var(--font-body)" }}>
-          <span className="flex items-center gap-[6px]" style={{ color: "var(--accent-subtle)" }}>
-            <Flame className="h-4 w-4" /> 12
-          </span>
-          <span key={homeXp} className="flex items-center gap-[6px] tabular-nums motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ color: "var(--world-business-money-office)" }}>
-            <Sparkle className="h-4 w-4" /> {homeXp.toLocaleString("en-US")} XP
-          </span>
-          <HeaderActions><QuickLinksMenu /></HeaderActions>
-        </span>
+        <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-10)] px-5 pt-4 pb-[120px] sm:gap-[var(--space-14)] sm:px-[var(--space-14)] sm:pt-[var(--space-10)]">

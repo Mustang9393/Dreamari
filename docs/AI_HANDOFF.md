@@ -10437,3 +10437,16 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   vertically instead of 10, so the card shadow and hover lift are never
   clipped by the scroller; shelves sit 44px apart; cards carry a little
   more padding and gap between name, chips, stats and Compare.
+
+## 2026-09-18 · One top bar everywhere
+
+- `DreamScoreChip` is the single streak + XP chip: flame and streak, a
+  divider, filled bolt and XP. Desktop nav, phone and tablet header and the
+  Resume Builder's own header all render it; the old Sparkle counter and
+  Home's separate streak/XP are gone. Explore and Colleges now switch to the
+  desktop chrome at lg like everything else. Verified on nine routes at
+  three widths: exactly one chip, a bell everywhere (Resume Builder too).
+- Chat dock header: video, minimise, full screen, close. No three-dot menu;
+  Report sits on the safety line at the start of the conversation. The
+  sparkles suggestions button is gone; the single muted inline chip is the
+  suggestion, the way ChatGPT and Claude do it.
