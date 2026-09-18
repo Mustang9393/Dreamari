@@ -1,6 +1,6 @@
 "use client";
 
-import { Flame, Zap } from "lucide-react";
+import { ScoreBolt, StreakFlame } from "./ScoreIcons";
 import { useDreamScore } from "@/lib/dreamScore";
 import { DREAM_SCORE_TARGET_ATTR } from "./xpFlight";
 import { DreamScoreTip } from "./DreamScoreTip";
@@ -22,10 +22,10 @@ export function DreamScoreChip({ className = "" }: { className?: string }) {
         style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
         aria-label={`12 day streak, Dream Score ${xp} XP`}
       >
-        <span className="flex items-center gap-[4px]"><Flame aria-hidden className="h-4 w-4" style={{ color: "var(--accent)" }} /> 12</span>
+        <span className="flex items-center gap-[5px]"><StreakFlame size={17} /> 12</span>
         <span aria-hidden className="h-[14px] w-px" style={{ background: "var(--glass-border)" }} />
-        <span key={xp} {...{ [DREAM_SCORE_TARGET_ATTR]: "" }} className="flex items-center gap-[4px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]">
-          <Zap aria-hidden className="h-4 w-4" fill="currentColor" style={{ color: "var(--accent)" }} /> {xp.toLocaleString("en-US")}
+        <span key={xp} {...{ [DREAM_SCORE_TARGET_ATTR]: "" }} className="flex items-center gap-[5px] motion-safe:animate-[xp-slot-in_0.75s_cubic-bezier(0.16,1,0.3,1)_both]">
+          <ScoreBolt size={17} /> {xp.toLocaleString("en-US")}
         </span>
       </span>
     </DreamScoreTip>

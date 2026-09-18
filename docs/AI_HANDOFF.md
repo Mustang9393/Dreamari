@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Illustrated streak and XP icons; For you nudge made visible (local, not pushed)
+
+- `src/components/app/ScoreIcons.tsx`: `StreakFlame` (warm amber to red gradient, pale inner flame ending in brand blue) and `ScoreBolt` (brand blue into accent purple with a white shine). `DreamScoreChip` uses them at 17px instead of the flat blue lucide Flame and Zap (direct feedback: "either make them white or use proper illustration svgs").
+- Explore toggle: the unselected label is muted so the white sweep has contrast; the sweep band is wider and brighter; a 9px four-point sparkle twinkles at the label's corner in step with the sweep (`.dm-nudge-spark`). Still text only, still ends after the first For you visit.
+- Checked headless at 1280 and 3x: chip icons render with gradients; sampled the visible toggle every 200ms across a cycle, sweep and sparkle both appear (frames saved), rest the remainder of the 5.2s cycle. tsc and eslint clean.
+
 ### 2026-09-19 For you nudge, Explore phone header rebuilt, header icons without surfaces (local, not pushed)
 
 - `ExploreExperience.tsx`: `useForYouNudge` (localStorage "dreamari:nudge:foryou") turns on a repeating light sweep across the words "For you" in the toggle until the student opens For you once, then never again. Text only, no tint or beam on the pill, so Browse All is not outshone (direct feedback). `app.css` gains `.dm-text-nudge` (5.2s cycle, sweep for a third of it, reduced motion off).

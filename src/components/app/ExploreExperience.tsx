@@ -97,10 +97,20 @@ export function ForYouBrowseToggle({ tab, onTab, nudge = false }: { tab: "foryou
           style={{
             fontFamily: "var(--font-body)",
             background: tab === item.key ? "var(--primary)" : "transparent",
-            color: tab === item.key ? "var(--primary-foreground)" : "var(--foreground)",
+            // the unselected label is muted so the nudge's white sweep has
+            // something to travel over (direct feedback, 19 Sept 2026)
+            color: tab === item.key ? "var(--primary-foreground)" : "var(--muted-foreground)",
           }}
         >
-          <span className={item.key === "foryou" && nudge ? "dm-text-nudge" : undefined}>{item.label}</span>
+          <span className={`relative ${item.key === "foryou" && nudge ? "dm-text-nudge" : ""}`}>
+            {item.label}
+            {/* a small sparkle twinkles at the corner in step with the sweep */}
+            {item.key === "foryou" && nudge && (
+              <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+              </svg>
+            )}
+          </span>
         </button>
       ))}
     </div>
