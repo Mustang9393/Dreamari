@@ -10460,3 +10460,12 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   Talking points for the team are in the Google Doc "AT&T × Connected
   Learning Board v2.0 · Talking Points" (Drive, ux@dreamopportunity.org).
 
+
+## 2026-09-18 · AT&T v2.0: Business & Finance on the board
+
+- Danielle Marshall (AT&T Finance) joins the roster with a profile, an
+  answer, a People row and a Team seat (portrait pro-marshall.png, unused
+  until now). AT&T Finance Internship and the Business Sales Leadership
+  Development Program added. Home sorts opportunities by the student's
+  picks; Learn regroups by the student ("For <picks>" first, technology
+  units after) with the provider named on each unit. v1 untouched.

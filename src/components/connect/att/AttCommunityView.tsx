@@ -241,7 +241,7 @@ function InsightRail({ onAsk }: { onAsk: () => void }) {
   );
 }
 
-type Opportunity = { id: string; kind: string; title: string; line: string };
+type Opportunity = { id: string; kind: string; title: string; line: string; /** the Dreamari world, so Home can put the student's own field first */ world?: string };
 
 /** A chevron that fades in on a clickable card's hover, absolutely placed so
  *  the layout never moves (direct feedback, 17 Sept 2026). Parent: group + relative. */
@@ -679,6 +679,7 @@ function NearYou({ onToast }: { onToast: (t: string) => void }) {
 }
 
 function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity, progress, openModule, onToast }: { onAsk: () => void; onSeeAll: () => void; saves: Record<string, boolean>; toggleSave: (id: string) => void; openOpportunity: (item: Opportunity) => void; onToast: (t: string) => void } & LearnState) {
+  const picks = useContext(PicksCtx);
   return (
     <>
       <ThemeCard />
@@ -693,7 +694,7 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity, prog
           <LinkButton onClick={onSeeAll}>{D.HOME_OPPORTUNITIES.seeAll} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-          {D.HOME_OPPORTUNITIES.items.map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} onOpen={() => openOpportunity(item)} />)}
+          {[...D.HOME_OPPORTUNITIES.items].sort((a, b) => Number(!!b.world && picks.some((c) => c.world === b.world)) - Number(!!a.world && picks.some((c) => c.world === a.world))).slice(0, 4).map((item) => <OpportunityCard key={item.id} item={item} saved={!!saves[item.id]} onSave={() => toggleSave(item.id)} onOpen={() => openOpportunity(item)} />)}
         </div>
       </section>
 
@@ -718,7 +719,7 @@ function ModuleCard({ m, pct, onOpen }: { m: D.LearnModule; pct: number; onOpen:
       <HoverChevron className="top-[14px] right-[14px]" />
       <div className="flex items-center justify-between gap-[8px] pr-[20px]"><Eyebrow tone="var(--muted-foreground)">{m.career}</Eyebrow>{!done && <XpPill xp={m.xp} />}</div>
       <span className="pr-[20px] text-[15.5px] leading-[21px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.title}</span>
-      <span className="flex items-center gap-[8px]"><Muted>{m.minutes} {D.LEARN.sheet.minutes}</Muted>{fits && <span className="rounded-full border px-[7px] py-[1px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))`, color: accent }}>{D.LEARN.fits}</span>}</span>
+      <span className="flex items-center gap-[8px]"><Muted>{m.minutes} {D.LEARN.sheet.minutes} · {D.LEARN.groups.find((g) => g.modules.some((x) => x.id === m.id))?.provider}</Muted>{fits && <span className="rounded-full border px-[7px] py-[1px] text-[10.5px] leading-[15px] font-bold tracking-[0.04em] uppercase" style={{ borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))`, color: accent }}>{D.LEARN.fits}</span>}</span>
       <div className="mt-auto flex items-center gap-[10px] pt-[4px]">
         <Progress pct={pct} label={`${m.title} progress`} />
         <span className="flex-none text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: done ? "var(--world-food-farming-nature)" : "var(--muted-foreground)" }}>{done ? <CheckCircle2 className="h-4 w-4" aria-label={D.LEARN.done} /> : `${pct}%`}</span>
@@ -728,13 +729,26 @@ function ModuleCard({ m, pct, onOpen }: { m: D.LearnModule; pct: number; onOpen:
 }
 
 function StudentLearn({ progress, openModule }: LearnState) {
+  // Grouped by the student, not the provider: what fits their picks (plus
+  // the skills every career needs) first, AT&T's technology units after
+  // (direct feedback, 18 Sept 2026: an Investment Banking student "won't
+  // have anything to learn here").
+  const picks = useContext(PicksCtx);
+  const fits = (m: D.LearnModule) => !m.world || picks.some((c) => c.world === m.world);
+  const forYou = D.LEARN_MODULES.filter(fits);
+  const rest = D.LEARN_MODULES.filter((m) => !fits(m));
+  const names = picks.map((c) => c.title).join(" and ");
+  const groups = [
+    { key: "you", title: names ? `For ${names}` : D.LEARN.forYou, line: D.LEARN.forYouLine, modules: forYou },
+    { key: "tech", title: D.LEARN.techTitle, line: D.LEARN.techLine, modules: rest },
+  ].filter((g) => g.modules.length > 0);
   return (
     <section className="flex flex-col gap-[var(--space-6)]">
-      {D.LEARN.groups.map((g) => (
-        <section key={g.provider} className="flex flex-col gap-[var(--space-4)]">
-          <div className="flex flex-wrap items-baseline gap-x-[10px] gap-y-[2px]">
-            <span className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{g.provider}</span>
-            <Muted>{g.line} · {D.LEARN.opens} {g.provider}</Muted>
+      {groups.map((g) => (
+        <section key={g.key} className="flex flex-col gap-[var(--space-4)]">
+          <div className="flex flex-col gap-[2px]">
+            <span className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{g.title}</span>
+            <Muted>{g.line}</Muted>
           </div>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
             {g.modules.map((m) => <ModuleCard key={m.id} m={m} pct={progress[m.id]} onOpen={() => openModule(m)} />)}

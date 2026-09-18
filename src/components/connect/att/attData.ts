@@ -104,6 +104,11 @@ const RENAMED_PROS: Record<string, AttPro> = {
   andre: { name: "Dev Johnson", role: "Cloud Solutions Architect", org: "AT&T", photo: PARTNER_PORTRAITS["Dev Johnson"] },
   elena: { name: "Lucia Rodriguez", role: "Customer Experience Director", org: "AT&T", photo: PARTNER_PORTRAITS["Lucia Rodriguez"] },
   amina: { name: "Amina Thompson", role: "Technology Program Manager", org: "AT&T", photo: PARTNER_PORTRAITS["Amina Thompson"] },
+  // Ours: AT&T is not only a technology employer. A finance leader makes
+  // the board real for a student exploring Business & Finance (direct
+  // feedback, 18 Sept 2026: "a student exploring investment banking won't
+  // have anything here").
+  danielle: { name: "Danielle Marshall", role: "Senior Manager, Financial Planning & Analysis", org: "AT&T", photo: "/images/connect/avatars/pro-marshall.png" },
 };
 export const ATT_PROS: Record<string, AttPro> = REPLIT_ONLY
   ? Object.fromEntries(Object.entries(RENAMED_PROS).map(([k, p]) => [k, { ...p, name: SOURCE_NAMES[k] ?? p.name }]))
@@ -146,10 +151,13 @@ export const PULSE = {
 export const HOME_OPPORTUNITIES = {
   title: "Opportunities for You",
   seeAll: "See all",
+  // `world` lets Home put the student's own field first
   items: [
-    { id: "att-o-internship", kind: "Internship", title: "AT&T Technology Internship", line: "College sophomores" },
-    { id: "att-o-summer", kind: "Program", title: "Summer Technology Exploration Program", line: "High school students · Virtual" },
-    { id: "att-o-panel", kind: "Virtual Panel", title: "Inside AT&T Cybersecurity", line: "October 22 · Online" },
+    { id: "att-o-finance", kind: "Internship", title: "AT&T Finance Internship", line: "College juniors · Dallas", world: "Business & Finance" },
+    { id: "att-o-internship", kind: "Internship", title: "AT&T Technology Internship", line: "College sophomores", world: "Tech & Engineering" },
+    { id: "att-o-bsldp", kind: "Program", title: "Business Sales Leadership Development Program", line: "New graduates · Atlanta", world: "Business & Finance" },
+    { id: "att-o-summer", kind: "Program", title: "Summer Technology Exploration Program", line: "High school students · Virtual", world: "Tech & Engineering" },
+    { id: "att-o-panel", kind: "Virtual Panel", title: "Inside AT&T Cybersecurity", line: "October 22 · Online", world: "Tech & Engineering" },
     { id: "att-o-careerday", kind: "Event", title: "Connected Learning Center Career Day", line: "Detroit, MI · November 14" },
   ],
 };
@@ -193,6 +201,8 @@ export type OpportunityDetail = {
   span?: string;
 };
 export const OPPORTUNITY_DETAILS: Record<string, OpportunityDetail> = {
+  "att-o-finance": { about: "A 10-week paid summer internship inside AT&T Finance: financial planning, treasury, investor relations or the controller's team. Interns build the models the business runs on and present to finance leadership at the end.", who: "College juniors in finance, accounting, economics or business.", when: "June to August · Applications close January 31", where: "Dallas, TX", how: "Apply through AT&T Careers with a résumé and a short statement. Selected students interview with two finance managers.", status: "open", interested: 264, applied: 39, span: "Jun to Aug", deadline: { month: "Jan", day: 31 } },
+  "att-o-bsldp": { about: "AT&T's 16-week paid program for new graduates who want a career in business sales: classroom and hands-on training in Atlanta, then a sales role in one of AT&T's markets.", who: "Graduating seniors with a bachelor's degree, any major, willing to relocate.", when: "Cohorts start through the year · Applications open now", where: "Atlanta, GA, then a market near you", how: "Apply through AT&T Careers. Add it to My Plan to hear when your cohort opens.", status: "open", interested: 172, applied: 21, span: "16 weeks" },
   "att-o-internship": { about: "A 10-week paid summer internship inside one of AT&T's technology teams. Interns join a real product or network team, ship work that matters, and finish with a presentation to leadership and a mentor who stays in touch.", who: "College sophomores and juniors in computer science, engineering, information systems, or a related major.", when: "June to August · Applications close January 31", where: "Dallas, Atlanta, or remote, depending on team", how: "Apply through AT&T Careers with a résumé and a short statement. Selected students interview with two team members.", status: "open", interested: 312, applied: 47, span: "Jun to Aug", deadline: { month: "Jan", day: 31 } },
   "att-o-network-internship": { about: "Work alongside the engineers who plan, build, and monitor AT&T's network. Interns rotate through design, operations, and reliability, and leave understanding how a national network actually runs.", who: "College students in electrical engineering, computer engineering, networking, or telecommunications.", when: "June to August · Applications close February 15", where: "Dallas, TX, with some hybrid roles", how: "Apply through AT&T Careers. A short technical conversation follows for shortlisted students.", status: "open", interested: 186, applied: 29, span: "Jun to Aug", deadline: { month: "Feb", day: 15 } },
   "att-o-cyber-internship": { about: "Join AT&T's security teams to learn threat monitoring, incident response, and how risk is explained to the rest of the business. Interns pair with a security analyst for the summer.", who: "College sophomores in cybersecurity, computer science, or information assurance.", when: "June to August · Applications open March 1", where: "Dallas or Atlanta", how: "Applications open on AT&T Careers in March. Add it to My Plan to be reminded the week they open.", status: "soon", interested: 241, span: "Jun to Aug", date: { month: "Mar", day: 1 } },
@@ -221,8 +231,9 @@ export const RECENT_ANSWERS = {
   hide: "Hide answer",
   more: "Show more",
   less: "Show less",
-  // the first two show by default; Show more reveals the third
+  // the first two show by default; Show more reveals the rest
   items: [
+    { id: "att-q0", question: "How do I get into finance at a big company without a target school?", pro: "danielle", answer: "Corporate finance hires from everywhere. Learn spreadsheets properly, follow one company's earnings for a quarter, and apply to a rotational program. Ours takes state school graduates every year.", helpful: 96, comments: 8 },
     { id: "att-q1", question: "What should I learn now if I want to work in cybersecurity?", pro: "jordan", answer: "Build strong technology fundamentals, practice explaining how you solve problems, and start with small security projects.", helpful: 112, comments: 9 },
     { id: "att-q2", question: "What surprised you most when you started working in technology?", pro: "marcus", answer: "The best work is rarely done alone. Clear questions and thoughtful collaboration make a bigger difference than having every answer.", helpful: 86, comments: 5 },
     { id: "att-q3", question: "What skills matter most in network engineering?", pro: "andre", answer: "Strong fundamentals matter, but curiosity, careful troubleshooting, and clear communication are what help teams solve real network problems.", helpful: 74, comments: 6 },
@@ -233,6 +244,7 @@ export const OPPORTUNITY_GROUPS = [
   {
     title: "Internships",
     items: [
+      { id: "att-o-finance", kind: "Internship", title: "AT&T Finance Internship", line: "College juniors · Dallas · Applications open" },
       { id: "att-o-internship", kind: "Internship", title: "AT&T Technology Internship", line: "College sophomores · Applications open" },
       { id: "att-o-network-internship", kind: "Internship", title: "Network Engineering Internship", line: "College students · Applications open" },
       { id: "att-o-cyber-internship", kind: "Internship", title: "Cybersecurity Internship", line: "College sophomores · Opening soon" },
@@ -241,6 +253,7 @@ export const OPPORTUNITY_GROUPS = [
   {
     title: "Programs",
     items: [
+      { id: "att-o-bsldp", kind: "Program", title: "Business Sales Leadership Development Program", line: "New graduates · 16 weeks · Atlanta" },
       { id: "att-o-summer", kind: "Program", title: "Summer Technology Exploration Program", line: "High school students · Virtual" },
       { id: "att-o-futures", kind: "Program", title: "Connected Futures Program", line: "Grades 10–12 · Summer" },
       { id: "att-o-discovery", kind: "Program", title: "Career Discovery Program", line: "Students · Registration open" },
@@ -269,14 +282,14 @@ export const OPPORTUNITY_GROUPS = [
 // out so nobody appears in all three (direct feedback, 17 Sept 2026: "don't
 // repeat people too much"). The source repeats Marcus and Jordan in every row.
 export const PEOPLE_ROWS = [
-  { title: "Recommended for You", pros: ["marcus", "jordan", "maya"] },
-  { title: "Most Active", pros: ["andre", "elena", "amina", "marcus"] },
-  { title: "Technology & Engineering", pros: ["jordan", "andre", "amina"] },
+  { title: "Recommended for You", pros: ["danielle", "marcus", "jordan", "maya"] },
+  { title: "Business & Finance", pros: ["danielle", "elena"] },
+  { title: "Technology & Engineering", pros: ["jordan", "andre", "amina", "marcus"] },
 ];
 export const FOLLOW = { follow: "Follow", following: "Following" };
 /** Something to choose on: how many questions each professional has
  *  answered here (the source's tiles carried nothing but a name). */
-export const ANSWER_COUNTS: Record<string, number> = { marcus: 31, jordan: 24, maya: 19, elena: 14, andre: 11, amina: 8 };
+export const ANSWER_COUNTS: Record<string, number> = { marcus: 31, jordan: 24, maya: 19, danielle: 17, elena: 14, andre: 11, amina: 8 };
 export const PEOPLE_ANSWER = { answers: "answers" };
 
 // ——— Volunteer View ———
@@ -409,6 +422,10 @@ export const LEARN = {
   sheet: { about: "About", steps: "You'll", counts: "Counts toward", plan: "Add to My Plan", inPlan: "In My Plan", minutes: "min", xp: "XP", progress: "Progress" },
   xpMilestone: "Module progress",
   fits: "Fits your picks",
+  forYou: "For your picks",
+  forYouLine: "AT&T's partners teach skills, not majors. These fit what you are exploring.",
+  techTitle: "Technology careers at AT&T",
+  techLine: "The Achievery · for students exploring tech",
   // what a finished unit turns into here: a résumé skill, a plan step, a
   // question to a pro. The unit opens on AT&T's platform; the value stays.
   bank: { eyebrow: "Bank it in Dreamari", resume: "Add to résumé skills", onResume: "On your résumé", ask: "Ask an AT&T pro about this", resumeToast: "Added to your résumé skills", resumeFull: "Tech skills are full on your résumé. Swap one in Resume Builder." },
@@ -418,6 +435,7 @@ export const LEARN = {
       href: "https://www.theachievery.com/en",
       line: "Free · K to 12",
       modules: [
+        { id: "l-plan", skill: "Career planning", world: "", title: "College and Career Readiness: Your First Plan", minutes: 20, xp: 15, career: "Every career", progress: 0, about: "Pick a direction, name the next three steps, and know what a first job in it looks like.", steps: ["Compare two careers you like", "Write three next steps", "Save them to My Plan"] },
         { id: "l-internet", skill: "Network fundamentals", world: "Tech & Engineering", title: "How the Internet Actually Works", minutes: 20, xp: 15, career: "Network Engineer", progress: 60, about: "Follow one message from your phone to a server and back.", steps: ["Trace one request across the network", "Spot the three places it can slow down", "Meet the roles that fix each one"] },
         { id: "l-defender", skill: "Security awareness", world: "Tech & Engineering", title: "Cybersecurity: Think Like a Defender", minutes: 25, xp: 20, career: "Cybersecurity Analyst", progress: 0, about: "Spot an attack in progress and decide what to do first.", steps: ["Read an alert the way an analyst does", "Decide what to check first", "Write a two-line summary for your manager"] },
         { id: "l-ai", skill: "AI literacy", world: "Tech & Engineering", title: "AI in Everyday Life", minutes: 15, xp: 15, career: "AI Product Manager", progress: 100, about: "Where AI already shows up in your day, and what a PM asks before shipping it.", steps: ["Find five AI moments in your day", "Sort them into helpful and risky", "Pitch one improvement"] },
@@ -429,6 +447,9 @@ export const LEARN = {
       href: "https://www.digitallearn.org",
       line: "Digital skills · with the Public Library Association",
       modules: [
+        { id: "l-sheets", skill: "Spreadsheets", world: "Business & Finance", title: "Google Sheets Basics", minutes: 20, xp: 15, career: "Business & Finance", progress: 0, about: "Build a budget, sort a list, make a chart. The tool every business role opens first.", steps: ["Set up a monthly budget sheet", "Sort and filter a list", "Turn the numbers into one chart"] },
+        { id: "l-excel", skill: "Excel formulas", world: "Business & Finance", title: "Excel: Formulas and Charts", minutes: 25, xp: 20, career: "Business & Finance", progress: 0, about: "Totals, percentages and a chart from real numbers. What a finance intern does on day one.", steps: ["Write formulas for totals and percentages", "Build a table", "Chart a quarter"] },
+        { id: "l-jobsearch", skill: "Job search", world: "", title: "Online Job Searching", minutes: 20, xp: 15, career: "Every career", progress: 0, about: "Find openings, read a posting like a recruiter, apply without losing track.", steps: ["Set up two job alerts", "Decode one posting", "Track applications in one sheet"] },
         { id: "l-safety", skill: "Online safety", world: "", title: "Online Safety Basics", minutes: 20, xp: 15, career: "Every career", progress: 0, about: "Passwords, phishing, privacy. The habits every employer expects on day one.", steps: ["Check three of your own settings", "Spot the phishing email", "Set up a password manager"] },
         { id: "l-calls", skill: "Video communication", world: "", title: "Video Calls for School and Interviews", minutes: 15, xp: 10, career: "Every career", progress: 35, about: "Camera, sound, background. Look ready on any call.", steps: ["Set up your frame and light", "Practice a 60-second intro", "Record and review it once"] },
         { id: "l-resume", skill: "Résumé writing", world: "", title: "Build a Résumé in Google Docs", minutes: 30, xp: 20, career: "Every career", progress: 0, about: "A clean one-pager from a blank doc, then an ATS check in Resume Builder.", steps: ["Start from the one-page layout", "Write three bullets that show results", "Import it into Resume Builder"], link: { label: "Open Resume Builder", href: "/profile?tab=resume" } },
@@ -664,6 +685,7 @@ export const TEAM = {
     { pro: "jordan", reached: "9.4K", answers: 24, hours: 11 },
     { pro: "maya", reached: "7.8K", answers: 19, hours: 9 },
   ],
+  // Danielle sits fourth: newest to the board, already past two of the six
   topLabels: { reached: "reads", answers: "answers", hours: "hours" },
   rosterTitle: "All Volunteers",
   filters: [{ key: "all", label: "All" }, { key: "active", label: "Most Active" }, { key: "needs", label: "Needs Engagement" }] as const,
@@ -672,6 +694,7 @@ export const TEAM = {
     { pro: "marcus", activity: "Active this week", reached: "12.8K", hours: 14 },
     { pro: "jordan", activity: "Active this week", reached: "9.4K", hours: 11 },
     { pro: "maya", activity: "Active this month", reached: "7.8K", hours: 9 },
+    { pro: "danielle", activity: "Active this week", reached: "4.9K", hours: 8 },
     { pro: "elena", activity: "Active this month", reached: "4.2K", hours: 7 },
     { pro: "andre", activity: "Needs engagement", reached: "2.8K", hours: 5 },
     { pro: "amina", activity: "Needs engagement", reached: "2.1K", hours: 4 },
@@ -716,5 +739,6 @@ export const ATT_PRO_RECORDS: Record<string, Pro> = {
   maya: rec("maya", { scope: "AI and product management careers", field: "Product Management", story: "I studied psychology first and came to technology through user research. Product management turned out to be the job where understanding people and understanding systems are the same skill.", followers: 296, studentsReached: 4410, totalLikes: 812, questionsAnswered: 19, activeDaysAgo: 3, education: "B.A. Psychology, University of Michigan; M.S. Human-Computer Interaction, Georgia Tech", journey: "User researcher, then associate product manager, now leading AI product work.", topics: ["Product management", "AI careers", "User research", "Career switches"] }),
   andre: rec("andre", { scope: "Cloud and infrastructure careers", field: "Cloud Architecture", story: "My first job was fixing computers at a repair shop. Cloud architecture is the same instinct at a much bigger scale: understand how the pieces fit, then design something that keeps working when one of them fails.", followers: 231, studentsReached: 3720, totalLikes: 640, questionsAnswered: 16, activeDaysAgo: 4, education: "B.S. Information Systems, University of Houston", journey: "Repair shop, systems administrator, cloud engineer, now designing platforms teams build on.", topics: ["Cloud computing", "Systems", "Certifications", "First jobs"] }),
   elena: rec("elena", { scope: "Customer experience and operations careers", field: "Customer Experience", story: "I started in a call center in college. Every role since has been about the same question: what would make this easier for the person on the other end? Now I lead teams that answer it at scale.", followers: 274, studentsReached: 4020, totalLikes: 705, questionsAnswered: 21, activeDaysAgo: 2, education: "B.B.A. Management, Florida International University", journey: "Call center agent, team lead, operations manager, now a director of customer experience.", topics: ["Customer experience", "Operations", "Leadership", "Career growth"] }),
+  danielle: { ...rec("danielle", { scope: "Corporate finance careers", field: "Corporate Finance", story: "I did not know corporate finance existed until a rotational program recruited at my state school. Now I help decide where a Fortune 15 company puts its money, and the skill I use most is explaining a spreadsheet to someone who will never open it.", followers: 337, studentsReached: 4890, totalLikes: 902, questionsAnswered: 17, activeDaysAgo: 1, education: "B.S. Finance, Howard University; M.B.A., University of Texas at Austin", journey: "State school, a finance rotational program, three roles across planning and treasury, now leading a planning team.", topics: ["Corporate finance", "Financial analysis", "Rotational programs", "Business school"] }), world: "Business & Finance" },
   amina: rec("amina", { scope: "Technology program management careers", field: "Program Management", story: "I am the person who makes sure fifty moving parts land on the same day. Program management is for people who like both the plan and the people, and I found it through an internship I almost did not apply for.", followers: 203, studentsReached: 3150, totalLikes: 548, questionsAnswered: 14, activeDaysAgo: 5, education: "B.S. Industrial Engineering, North Carolina A&T State University", journey: "Engineering internship, project coordinator, program manager on network rollouts, now leading technology programs.", topics: ["Program management", "Internships", "Engineering", "Organization"] }),
 };
