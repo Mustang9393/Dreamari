@@ -991,7 +991,7 @@ function DemoViewSwitch({ view, onPick }: { view: D.AttView; onPick: (view: D.At
   );
 }
 
-export function AttCommunityView({ onBack }: { onBack: () => void }) {
+export function AttCommunityView({ onBack, backLabel = D.BACK }: { onBack: () => void; backLabel?: string }) {
   const [view, setView] = useState<D.AttView>("student");
   const [studentTab, setStudentTab] = useState<typeof D.STUDENT_TABS[number]["key"]>("home");
   const [volunteerTab, setVolunteerTab] = useState<typeof D.VOLUNTEER_TABS[number]["key"]>("home");
@@ -1012,7 +1012,13 @@ export function AttCommunityView({ onBack }: { onBack: () => void }) {
   // profiles").
   if (profile) {
     const pro = D.ATT_PRO_RECORDS[profile];
-    return <ProProfileView key={pro.id} pro={pro} follows={Object.fromEntries(Object.entries(follows).map(([k, v]) => [`att-${k}`, v]))} onFollow={() => toggleFollow(profile)} onBack={() => setProfile(undefined)} />;
+    // Back names the tab the person was opened from ("Back to People",
+    // "Back to Questions"); from a Home tab it names the community itself.
+    const tabs = view === "student" ? D.STUDENT_TABS : view === "volunteer" ? D.VOLUNTEER_TABS : D.ENTERPRISE_TABS;
+    const key = view === "student" ? studentTab : view === "volunteer" ? volunteerTab : enterpriseTab;
+    const tab = (tabs as readonly { key: string; label: string }[]).find((t) => t.key === key);
+    const profileBack = `Back to ${!tab || tab.key === "home" ? "the AT&T community" : tab.label}`;
+    return <ProProfileView key={pro.id} pro={pro} follows={Object.fromEntries(Object.entries(follows).map(([k, v]) => [`att-${k}`, v]))} onFollow={() => toggleFollow(profile)} onBack={() => setProfile(undefined)} backLabel={profileBack} />;
   }
 
   return (
@@ -1020,7 +1026,7 @@ export function AttCommunityView({ onBack }: { onBack: () => void }) {
       {opportunity && <OpportunitySheet item={opportunity} saved={!!saves[opportunity.id]} onSave={() => toggleSave(opportunity.id)} inPlan={!!plan[opportunity.id]} onPlan={() => togglePlan(opportunity.id)} onClose={() => setOpportunity(undefined)} />}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-          <ChevronLeft className="h-4 w-4" aria-hidden /> {D.BACK}
+          <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
         </button>
         <DemoViewSwitch key={view} view={view} onPick={setView} />
       </div>

@@ -47,7 +47,7 @@ const FEATURES = [
   { name: "Connect", users: 3970, of: 12480, delta: 22 },
 ];
 
-export function AdminDashboardView({ onBack }: { onBack: () => void }) {
+export function AdminDashboardView({ onBack, backLabel = "Back" }: { onBack: () => void; backLabel?: string }) {
   const nav = useContext(ConnectNav);
   const [tab, setTab] = useState<Tab>("overview");
   const [decided, setDecided] = useState<Record<string, "kept" | "removed" | "approved">>({});
@@ -63,7 +63,7 @@ export function AdminDashboardView({ onBack }: { onBack: () => void }) {
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
 
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">

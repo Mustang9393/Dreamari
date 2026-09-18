@@ -255,12 +255,22 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   };
   const shared = { messages, setMessages, sub, setSub };
   const [follows, setFollows] = useState<Follows>({});
+  // Back from a profile names the section it was opened from: the chat says
+  // "Back to Messages", the Year Plan says "Back to Year Plan", the enterprise
+  // activity table says "Back to Overview"; a Home tab names the program.
+  const backTo =
+    view === "enterprise" ? (sub === "countries" ? "Regions" : sub === "settings" ? "Settings" : "Overview")
+    : sub === "messages" ? "Messages"
+    : view === "student" && sub === "plan" ? "Year Plan"
+    : view === "mentor" && sub === "journey" ? "Journey"
+    : D.PROGRAM.initiative;
+  const backLabel = `Back to ${backTo}`;
   return (
     <section className="flex flex-col gap-[var(--space-5)]" aria-label={D.PROGRAM.title}>
       {/* the profile is a layer over the program, which stays mounted (hidden)
          so Back lands on the same tab and the same thread */}
-      {profile === "mentor" && <ProProfileView pro={D.MENTOR_PRO as unknown as Pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={() => setProfile(null)} backLabel="Back to chat" />}
-      {profile === "mentee" && <MenteeProfile onBack={() => setProfile(null)} />}
+      {profile === "mentor" && <ProProfileView pro={D.MENTOR_PRO as unknown as Pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={() => setProfile(null)} backLabel={backLabel} />}
+      {profile === "mentee" && <MenteeProfile onBack={() => setProfile(null)} backLabel={backLabel} />}
       {mentorSheet && <MentorSheet row={mentorSheet} onClose={() => setMentorSheet(null)} />}
       <div className={profile === "mentor" ? "hidden" : "flex flex-col gap-[var(--space-5)]"}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -298,9 +308,9 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   );
 }
 
-/** Maya's profile as her mentor sees it: the scholar, what she is
+/** Jordan's profile as their mentor sees it: the scholar, what they are
  *  exploring, what she has done in Dreamari. A sheet, so the chat stays. */
-function MenteeProfile({ onBack }: { onBack: () => void }) {
+function MenteeProfile({ onBack, backLabel }: { onBack: () => void; backLabel: string }) {
   return (
     <Sheet title={D.MENTEE.fullName} label="Dream It Real Scholar" onClose={onBack}>
       <div className="flex items-center gap-[14px]">
@@ -321,7 +331,7 @@ function MenteeProfile({ onBack }: { onBack: () => void }) {
           </li>
         ))}
       </ul>
-      <QuietCta size="sm" className="w-fit" onClick={onBack}><ChevronLeft className="h-4 w-4" aria-hidden /> Back to chat</QuietCta>
+      <QuietCta size="sm" className="w-fit" onClick={onBack}><ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}</QuietCta>
     </Sheet>
   );
 }

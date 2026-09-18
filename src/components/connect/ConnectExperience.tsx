@@ -119,6 +119,29 @@ function viewToQuery(view: View): string {
   return `?thread=${view.id}`;
 }
 
+/** What the Back button on a screen should say: the name of the screen the
+ *  user actually came from (the top of the view stack), never a hardcoded
+ *  parent. A profile opened from Saved says "Back to Saved"; the same
+ *  profile opened from a board says "Back to <that board>". */
+const LANDING_TAB_NAMES: Record<LandingTab, string> = { communities: "Communities", mentorship: "Mentorship", people: "People", events: "Events", notifications: "Notifications" };
+function backLabelFor(prev: View | undefined): string {
+  if (!prev) return "Back to Connect";
+  switch (prev.kind) {
+    case "home": return `Back to ${LANDING_TAB_NAMES[prev.tab]}`;
+    case "board": return `Back to ${prev.id === ATT_ID ? "the AT&T community" : COMMUNITIES.find((c) => c.id === prev.id)?.name ?? "the community"}`;
+    case "pro": return `Back to ${PROS.find((p) => p.id === prev.id)?.name ?? "the profile"}`;
+    case "proDashboard": return "Back to my dashboard";
+    case "event": return `Back to ${EVENTS.find((e) => e.id === prev.id)?.name ?? "the event"}`;
+    case "thread": return "Back to the question";
+    case "insight": return "Back to the insight";
+    case "saved": return "Back to Saved";
+    case "followingFeed": return "Back to Following";
+    case "activity": return "Back to your activity";
+    case "admin": return "Back to the dashboard";
+    case "partner": return `Back to ${prev.org}`;
+  }
+}
+
 function queryToView(search: string): View {
   const q = new URLSearchParams(search);
   if (q.get("saved")) return { kind: "saved" };
@@ -1310,6 +1333,7 @@ export function ConnectExperience() {
     window.history.replaceState(null, "", "/connect" + base + (keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : ""));
     window.scrollTo(0, 0);
   }, [viewStack]);
+  const backLabel = backLabelFor(viewStack[viewStack.length - 1]);
 
   const say = useCallback((message: string) => {
     setAnnounce(message);
@@ -1492,29 +1516,30 @@ export function ConnectExperience() {
             // showing whichever cover the FIRST one you viewed that session
             // had -- read as "they're all the same" / "no real cover" from
             // Connect and People (direct feedback, 8 Sept 2026).
-            return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={toggleFollow} onBack={goBack} onAsked={(title) => nav.noteAsked(title, boardId)} onOpenDashboard={role === "pro" ? () => setView({ kind: "proDashboard", id: pro.id }, "pro") : undefined} />;
+            return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={toggleFollow} onBack={goBack} backLabel={backLabel} onAsked={(title) => nav.noteAsked(title, boardId)} onOpenDashboard={role === "pro" ? () => setView({ kind: "proDashboard", id: pro.id }, "pro") : undefined} />;
           })()}
-        {view.kind === "proDashboard" && <ProDashboardView key={view.id} pro={PROS.find((p) => p.id === view.id)} onBack={goBack} />}
-        {view.kind === "admin" && <AdminDashboardView onBack={goBack} />}
-        {view.kind === "partner" && <PartnerView org={view.org} onBack={goBack} />}
+        {view.kind === "proDashboard" && <ProDashboardView key={view.id} pro={PROS.find((p) => p.id === view.id)} onBack={goBack} backLabel={backLabel} />}
+        {view.kind === "admin" && <AdminDashboardView onBack={goBack} backLabel={backLabel} />}
+        {view.kind === "partner" && <PartnerView org={view.org} onBack={goBack} backLabel={backLabel} />}
         {view.kind === "activity" && (
           <ActivityView
             asked={asked}
             follows={follows}
             savedCount={Object.values(saves).filter(Boolean).length}
             onBack={goBack}
+            backLabel={backLabel}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onDeleteAsked={(id) => { setAsked((a) => a.filter((q) => q.id !== id)); say("Question deleted."); }}
           />
         )}
-        {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={goBack} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
-        {view.kind === "followingFeed" && <FollowingFeedView follows={follows} onBack={goBack} />}
+        {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={goBack} backLabel={backLabel} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
+        {view.kind === "followingFeed" && <FollowingFeedView follows={follows} onBack={goBack} backLabel={backLabel} />}
 
         {view.kind === "board" &&
           (() => {
             // The AT&T partner community has its own board (three views), not
             // the general BoardView; everything else in Connect is unchanged.
-            if (view.id === ATT_ID) return <AttCommunityView onBack={goBack} />;
+            if (view.id === ATT_ID) return <AttCommunityView onBack={goBack} backLabel={backLabel} />;
             const community = COMMUNITIES.find((c) => c.id === view.id);
             if (!community) return null;
             return (
@@ -1525,6 +1550,7 @@ export function ConnectExperience() {
             onJoin={() => setJoinFor(view.id)}
             onFilter={(filter) => setView({ kind: "board", id: view.id, filter })}
             onBack={goBack}
+            backLabel={backLabel}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onOpenInsight={(id) => setView({ kind: "insight", id })}
             cardProps={cardProps}
@@ -1541,6 +1567,7 @@ export function ConnectExperience() {
               <InsightThreadView
                 insight={insight}
                 onBack={goBack}
+                backLabel={backLabel}
                 saved={p.saved}
                 onSave={p.onSave}
                 helpful={p.helpful}
@@ -1562,6 +1589,7 @@ export function ConnectExperience() {
                   filter={view.filter}
                   onFilter={(filter) => setView({ kind: "event", id: event.id, filter })}
                   onBack={goBack}
+                  backLabel={backLabel}
                   onOpenCommunity={(id) => setView({ kind: "board", id, filter: "questions" })}
                   onOpenThread={(id) => setView({ kind: "thread", id })}
                   onSaveTakeaway={() => toggleSave("recap-" + event.id, "takeaway")}
@@ -1597,6 +1625,7 @@ export function ConnectExperience() {
           <ThreadView
             thread={thread}
             onBack={goBack}
+            backLabel={backLabel}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             cardProps={cardProps}
             saves={saves}
@@ -1825,11 +1854,11 @@ function YourQuestions({ asked, onOpenThread, savedCount, onDeleteAsked }: { ask
 
 /** Everything of yours in one place: the "See all" page. Your questions and their
  *  answers, what the people you follow did, and the way into Saved. */
-function ActivityView({ asked, follows, savedCount, onBack, onOpenThread, onDeleteAsked }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; onOpenThread: (id: string) => void; onDeleteAsked: (id: string) => void }) {
+function ActivityView({ asked, follows, savedCount, onBack, backLabel = "Back", onOpenThread, onDeleteAsked }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; backLabel?: string; onOpenThread: (id: string) => void; onDeleteAsked: (id: string) => void }) {
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
       <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} onDeleteAsked={onDeleteAsked} />
       <NewFromFollowing follows={follows} />
@@ -1947,7 +1976,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
 
 /** Everything the student saved, resolved from the one saves map: whole
  *  questions, single answers, posts and event takeaways. */
-function SavedView({ saves, onUnsave, onBack, onOpenThread, onOpenInsight }: { saves: Record<string, boolean>; onUnsave: (id: string) => void; onBack: () => void; onOpenThread: (id: string) => void; onOpenInsight: (id: string) => void }) {
+function SavedView({ saves, onUnsave, onBack, backLabel = "Back", onOpenThread, onOpenInsight }: { saves: Record<string, boolean>; onUnsave: (id: string) => void; onBack: () => void; backLabel?: string; onOpenThread: (id: string) => void; onOpenInsight: (id: string) => void }) {
   const rows: { key: string; kicker: string; title: string; open: () => void }[] = [];
   for (const id of Object.keys(saves).filter((k) => saves[k])) {
     const thread = ALL_THREADS.find((t) => t.id === id);
@@ -1969,7 +1998,7 @@ function SavedView({ saves, onUnsave, onBack, onOpenThread, onOpenInsight }: { s
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
       <Panel id="saved-title" title="Saved" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rows.length} saved</span>}>
         {rows.length === 0 ? (
@@ -2002,7 +2031,7 @@ function SavedView({ saves, onUnsave, onBack, onOpenThread, onOpenInsight }: { s
  *  of "View all" link Browse by industry already uses. Each row's name and
  *  avatar open that pro's profile directly, answering the second half of
  *  the note. */
-function FollowingFeedView({ follows, onBack }: { follows: Follows; onBack: () => void }) {
+function FollowingFeedView({ follows, onBack, backLabel = "Back" }: { follows: Follows; onBack: () => void; backLabel?: string }) {
   const nav = useContext(ConnectNav);
   const ids = Object.keys(follows).filter((id) => follows[id]);
   const rows: { key: string; pro: Pro; verb: "answered" | "posted"; topic: string; postedAgo: string; open: () => void }[] = [];
@@ -2015,7 +2044,7 @@ function FollowingFeedView({ follows, onBack }: { follows: Follows; onBack: () =
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
       <Panel id="following-feed-title" title="New from people you follow" aside={<span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rows.length} {rows.length === 1 ? "update" : "updates"}</span>}>
         {rows.length === 0 ? (
@@ -2481,6 +2510,7 @@ function BoardView({
   onJoin,
   onFilter,
   onBack,
+  backLabel = "Back to all communities",
   onOpenThread,
   onOpenInsight,
   cardProps,
@@ -2491,6 +2521,7 @@ function BoardView({
   onJoin: () => void;
   onFilter: (f: string) => void;
   onBack: () => void;
+  backLabel?: string;
   onOpenThread: (id: string) => void;
   onOpenInsight: (id: string) => void;
   cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
@@ -2523,7 +2554,7 @@ function BoardView({
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft className="h-4 w-4" aria-hidden /> Back to all communities
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
 
       {/* Identity banner in the community-card language: pastel accent
@@ -2714,6 +2745,7 @@ function EventView({
   filter,
   onFilter,
   onBack,
+  backLabel = "Connect",
   onOpenCommunity,
   onOpenThread,
   onSaveTakeaway,
@@ -2725,6 +2757,7 @@ function EventView({
   filter: string;
   onFilter: (f: string) => void;
   onBack: () => void;
+  backLabel?: string;
   onOpenCommunity?: (id: string) => void;
   onOpenThread: (id: string) => void;
   onSaveTakeaway: () => void;
@@ -2760,7 +2793,7 @@ function EventView({
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft className="h-4 w-4" aria-hidden /> Connect
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
       {qrOpen && (
         <QrSheet name={event.name} seed={event.id} accent={pAccent} lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} onClose={() => setQrOpen(false)} />
@@ -3079,6 +3112,7 @@ function EventView({
 function ThreadView({
   thread,
   onBack,
+  backLabel,
   onOpenThread,
   cardProps,
   saves,
@@ -3088,6 +3122,7 @@ function ThreadView({
 }: {
   thread: Thread;
   onBack: () => void;
+  backLabel?: string;
   onOpenThread: (id: string) => void;
   cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
   saves: Record<string, boolean>;
@@ -3113,7 +3148,7 @@ function ThreadView({
         className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold"
         style={{ color: "var(--muted-foreground)" }}
       >
-        <ChevronLeft className="h-4 w-4" aria-hidden /> {boardName}
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel ?? boardName}
       </button>
 
       <article className="flex flex-col gap-[var(--space-5)]">
@@ -3605,6 +3640,7 @@ type LocalReply = { id: string; body: string };
 function InsightThreadView({
   insight,
   onBack,
+  backLabel,
   saved,
   onSave,
   helpful,
@@ -3614,6 +3650,7 @@ function InsightThreadView({
 }: {
   insight: Insight;
   onBack: () => void;
+  backLabel?: string;
   saved: boolean;
   onSave: () => void;
   helpful: boolean;
@@ -3635,7 +3672,7 @@ function InsightThreadView({
         className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold"
         style={{ color: "var(--muted-foreground)" }}
       >
-        <ChevronLeft className="h-4 w-4" aria-hidden /> {boardName}
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel ?? boardName}
       </button>
 
       <article className="flex flex-col gap-[var(--space-5)]">

@@ -61,7 +61,7 @@ const RANGE: Record<Range, { label: string; days: number; base: number; labels: 
   "90d": { label: "Last 90 days", days: 90, base: 22, labels: ["90 days ago", "45 days ago", "Today"] },
 };
 
-export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: () => void }) {
+export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { pro?: Pro; onBack: () => void; backLabel?: string }) {
   const pro = given ?? PROS.find((p) => p.id === "pro-okafor") ?? PROS[0];
   const ROUTED = ROUTED_BY_WORLD[pro.world] ?? ROUTED_BY_WORLD["Teaching & Education"];
   const nav = useContext(ConnectNav);
@@ -166,7 +166,7 @@ export function ProDashboardView({ pro: given, onBack }: { pro?: Pro; onBack: ()
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
 
       {/* The identity card is the exact same component ProProfileView uses

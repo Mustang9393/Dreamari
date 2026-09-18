@@ -748,13 +748,13 @@ export function ProProfileView({
   onBack,
   onAsked,
   onOpenDashboard,
-  backLabel = "View all professionals",
+  backLabel = "Back",
 }: {
   pro: Pro;
   follows: Follows;
   onFollow: (id: string) => void;
   onBack: () => void;
-  /** where Back goes when the profile was opened from somewhere other than People (the mentorship chat) */
+  /** the screen Back returns to, named: "Back to People", "Back to Messages", "Back to Saved" */
   backLabel?: string;
   onAsked?: (title: string) => void;
   /** Volunteer demo only: the professional looking at their own page can step into the private dashboard. */
@@ -909,7 +909,7 @@ const PARTNER_EVENTS = [
   { name: "Career Exposure Panel", where: "Park Ave, New York", when: "Oct 14", volunteers: 61, students: 0, done: false },
 ];
 
-export function PartnerView({ org, onBack }: { org: string; onBack: () => void }) {
+export function PartnerView({ org, onBack, backLabel = "Back" }: { org: string; onBack: () => void; backLabel?: string }) {
   const nav = useContext(ConnectNav);
   const people = PROS.filter((p) => p.org === org);
   const accent = WORLD_COLORS[people[0]?.world ?? "Business & Finance"] ?? "var(--primary)";
@@ -920,7 +920,7 @@ export function PartnerView({ org, onBack }: { org: string; onBack: () => void }
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft className="h-4 w-4" aria-hidden /> Back
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
 
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">

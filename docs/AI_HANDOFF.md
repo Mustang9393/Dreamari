@@ -10319,3 +10319,21 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   (Explore Career, Play Simulation, View Resume).
 - Enterprise series read upward; the hours chart notes it is the calendar
   year while the student's plan is the program year.
+
+## 2026-09-18 · Connect: Back always names the screen you came from
+
+- Reported: a mentor's profile opened from the Mentorship Home said "Back to
+  chat". Every Back label in Connect was a hardcoded parent ("View all
+  professionals", "Back to all communities", "Connect", a bare "Back").
+- `backLabelFor(prev)` in ConnectExperience derives the label from the top
+  of the existing view stack ("Back to People", "Back to Saved", "Back to the
+  question", "Back to <community>", "Back to <event>", "Back to Connect" on a
+  fresh load). Every view with an onBack takes `backLabel` (profile, both
+  dashboards, PartnerView, board, event, thread, insight, Saved, Following,
+  Activity, AT&T board).
+- Mentorship derives it from view + sub: Home tabs say "Back to Dream It
+  Real", the chat "Back to Messages", the plan "Back to Year Plan", the
+  enterprise table "Back to Overview". Same label on Jordan's sheet.
+- AT&T board profiles say "Back to <tab>" or "Back to the AT&T community".
+- Verified headless (scratchpad replit-walk/back-check.mjs): 11 entry points,
+  label and landing tab after Back. tsc and eslint clean.
