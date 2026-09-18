@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { type LucideIcon as ResourceIcon, UserRound } from "lucide-react";
+import { type LucideIcon as ResourceIcon, Handshake, UserRound } from "lucide-react";
 import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
@@ -22,6 +22,7 @@ import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
 import { AttCommunityView } from "./att/AttCommunityView";
 import { ATT_ID } from "./att/attData";
+import { MentorshipTab } from "./mentorship/MentorshipTab";
 
 // Resource cards on an event board: one icon and one chip per file kind.
 const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: string }> = {
@@ -88,7 +89,7 @@ const STATE_COLOR: Record<Thread["state"], string> = {
 // warm event accent (handoff 20): the theme-aware gold
 const EVENT_ACCENT = "#f59e0b";
 
-type LandingTab = "communities" | "events" | "people" | "notifications";
+type LandingTab = "communities" | "mentorship" | "events" | "people" | "notifications";
 type View =
   | { kind: "home"; tab: LandingTab }
   | { kind: "board"; id: string; filter: string }
@@ -132,7 +133,7 @@ function queryToView(search: string): View {
   if (q.get("dashboard")) { const id = q.get("dashboard")!; return { kind: "proDashboard", id: id === "pro" ? "pro-okafor" : id }; }
   if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
   const tab = q.get("tab");
-  return { kind: "home", tab: tab === "events" || tab === "people" || tab === "notifications" ? tab : "communities" };
+  return { kind: "home", tab: tab === "events" || tab === "people" || tab === "notifications" || tab === "mentorship" ? tab : "communities" };
 }
 
 const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
@@ -1263,7 +1264,7 @@ export function ConnectExperience() {
     // ?as=pro with no view named opens the volunteer's profile as students
     // see it, the same place the Volunteer tab lands (direct feedback, 5 Sept 2026)
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setViewState(as === "pro" && restored.kind === "home" ? { kind: "pro", id: "pro-okafor" } : restored);
+    setViewState(as === "pro" && restored.kind === "home" && restored.tab === "communities" ? { kind: "pro", id: "pro-okafor" } : restored);
     if (as && ROLES.some((r) => r.key === as)) setRole(as as DemoRole);
     else if (params.get("admin")) setRole("admin");
     else if (params.get("dashboard")) setRole("pro");
@@ -1458,6 +1459,7 @@ export function ConnectExperience() {
         {view.kind === "home" && (
           <HomeView
             tab={view.tab}
+            role={role}
             onTab={(tab) => setView({ kind: "home", tab })}
             eventJoined={eventJoined}
             onOpenBoard={(id) => setView({ kind: "board", id, filter: "questions" })}
@@ -2097,9 +2099,12 @@ function HomeView({
   onDeleteAsked,
   peopleWelcomeShown,
   onPeopleWelcomeShown,
+  role,
 }: {
   tab: LandingTab;
   onTab: (tab: LandingTab) => void;
+  /** demo role, so the Mentorship tab opens as the student, the mentor or the enterprise */
+  role: DemoRole;
   eventJoined: Record<string, boolean>;
   onOpenBoard: (id: string) => void;
   onOpenEvent: (id: string) => void;
@@ -2184,7 +2189,7 @@ function HomeView({
          search bar is above its title Find a professional... match the
          Replit"). */}
       {tab === "people" && !peopleFocused && <SectionHead>Find a professional</SectionHead>}
-      {tab !== "notifications" && !(tab === "people" && peopleFocused) && (
+      {tab !== "notifications" && tab !== "mentorship" && !(tab === "people" && peopleFocused) && (
         // The shared search field lights up on focus, same beam family as
         // everywhere else (direct feedback, 9 Sept 2026: "any active state
         // of search bars... in connect").
@@ -2261,6 +2266,11 @@ function HomeView({
       {/* People: search companies or careers and find people to follow
          (Joshua Pierce, Slack, 6 Sept 2026) */}
       {tab === "people" && <PeopleTab follows={follows} onFollow={onFollow} query={query} onFocusChange={setPeopleFocused} />}
+
+      {/* The Coach Foundation Dreamer Mentorship Program: formal, matched,
+         private 1:1 mentorship beside the open boards (Joshua Pierce's
+         Replit, 18 Sept 2026; Tapestry call for the program facts). */}
+      {tab === "mentorship" && <MentorshipTab role={role} />}
 
       {tab === "events" && (
         <section className="flex flex-col gap-[var(--space-4)]" aria-label="Your events">
@@ -2368,8 +2378,11 @@ function HomeView({
 // Communities, People, Events (direct feedback, 8 Sept 2026): People moved
 // to the middle slot -- more valuable and scalable than Events, so it reads
 // second, not last. Notifications moved to the bell beside them.
+// Mentorship second (Joshua Pierce's Replit, 18 Sept 2026): the formal
+// 1:1 program sits beside the open boards, before People and Events.
 const LANDING_TABS = [
   { key: "communities", label: "Communities", Icon: Users },
+  { key: "mentorship", label: "Mentorship", Icon: Handshake },
   { key: "people", label: "People", Icon: UserRound },
   { key: "events", label: "Events", Icon: Calendar },
 ] as const;
@@ -2379,12 +2392,12 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
     <div
       role="tablist"
       aria-label="Connect sections"
-      className="relative grid w-full grid-cols-3 rounded-full border p-[4px] sm:w-auto sm:min-w-[420px]"
+      className="relative grid w-full grid-cols-4 rounded-full border p-[4px] sm:w-auto sm:min-w-[560px]"
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)" }}
     >
       <span
         aria-hidden
-        className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(33.333%-2.667px)] rounded-full transition-transform duration-300 ease-out"
+        className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(25%-2px)] rounded-full transition-transform duration-300 ease-out"
         style={{ background: "var(--primary)", transform: `translateX(${Math.max(index, 0) * 100}%)`, opacity: index < 0 ? 0 : 1, boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
       />
       {LANDING_TABS.map(({ key, label, Icon }) => (

@@ -10200,3 +10200,33 @@ Career Report's majors, skills, routes and employers. The IB recipe
 reproduces Joshua's text verbatim. In production these slots are the join
 onto the Explore Careers data (skills / software / classes per career); the
 recipes show the target output for that join.
+
+## 2026-09-18 · Connect: Mentorship tab (Coach Foundation Dreamer Mentorship Program)
+
+New landing tab in Connect (Communities | Mentorship | People | Events, the
+Replit's order) at `src/components/connect/mentorship/`. Structure and copy
+follow Joshua Pierce's Replit MENTORSHIP tab (walk in
+`docs/reference/joshua-mentorship-replit-2026-09-18/README.md`); program
+facts and the 2030 goals come from the Tapestry call
+(`docs/reference/partner-calls/tapestry-coach-foundation-2026-09-18.md`).
+
+- `mentorshipData.ts`: program, mentor/mentee, thread, year plan, four
+  programs (US / UK / Japan / China) with monthly hours that follow their
+  real calendars, KPIs with sparklines and distinct deltas, meetings-per-pair
+  distribution, 2030 goals with pace, settings, hour rules, export items.
+- `charts.tsx`: `BarChart` (labelled y axis, gridlines, dashed average,
+  current period emphasised, last-year ghost outlines, hover/focus values,
+  measured pixel width so text never scales), `Sparkline`, `GoalTrack`
+  (fill + pace tick + ahead/behind), `Histogram`, `ShareBar`.
+- `MentorshipTab.tsx`: Student (Home / Messages / Year Plan), Mentor
+  (Home / Messages / Journey), Enterprise (Overview / Programs / Settings).
+  Opens by Connect's demo role (student, pro = mentor, partner/admin =
+  enterprise); Demo chip switches. Every Replit dead end works here as a
+  sheet or state: Reschedule, Prepare for Meeting, Report / escalate, Share
+  approved resource, Send meeting link, Suggest meeting time, Export, View
+  report (filters Overview to that program), settings chips and hour-rule
+  toggles. `?as=pro&tab=mentorship` no longer redirects to the pro profile.
+
+Open: portraits for Maya are the student illustrated set (correct per the
+rule); Avery Thompson uses an unused pro headshot. Real mentor/mentee data,
+video calls and message counting are backend.
