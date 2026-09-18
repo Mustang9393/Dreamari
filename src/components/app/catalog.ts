@@ -146,6 +146,10 @@ export const ALL_CATALOG_CAREERS: CatalogCareer[] = (() => {
 /** The whole arts world in one rail (added 18 Sept 2026 for an arts-focused demo). */
 export const BROWSE_ARTS: CatalogCareer[] = ALL_CATALOG_CAREERS.filter((c) => c.world === "Arts, Media & Sport");
 
+/** The arts careers the team's poster library added on 19 Sept 2026, as their own
+ *  closing rail on Browse so the new faces are easy to find in a demo. */
+export const BROWSE_ARTS_NEW: CatalogCareer[] = BROWSE_LIBRARY.filter((c) => c.world === "Arts, Media & Sport" && !ARTS_FIGMA.some((f) => f.title === c.title));
+
 // Explore — For You reel: all 8 Env Card variants (section 2530:46431,
 // "Explore: Mobile Reel"), copy and photos verbatim from each variant.
 // (The card UI doesn't render the world; it's kept for data completeness.)

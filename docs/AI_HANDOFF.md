@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Explore Browse: closing rail "New in Arts, Media & Sport" (PUSHED, user-authorized)
+
+- `catalog.ts`: `BROWSE_ARTS_NEW`, the 21 arts careers the poster library added (library arts minus the six Figma posters). `ExploreExperience.tsx`: rendered as the last rail on Browse, after Typical Pay, so the new faces are one scroll away in a demo; they also stay inside the Arts rail near the top.
+- Checked headless at 1280: last heading is the new rail, 21 posters, none broken, no page errors. tsc and eslint clean.
+
 ### 2026-09-19 Profile Demo row above My Plan; Pros tab on community boards (PUSHED, user-authorized)
 
 - `ProfileExperience.tsx` GradePlanCard: the Demo chip moved out of the card header into a quiet right-aligned row above the card. One press shows two small chip groups (High school | College, then 9 to 12 or Yr 1 to 4), a second press hides them. Progressive disclosure and the 34px tablists are gone; the card never carries toggles (direct feedback, 19 Sept 2026: "we never have the big toggle stuff"). Stage still writes the app-wide store.

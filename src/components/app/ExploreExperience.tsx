@@ -17,6 +17,7 @@ import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
   ALL_CATALOG_CAREERS,
   BROWSE_ARTS,
+  BROWSE_ARTS_NEW,
   BROWSE_BECAUSE_LIKED,
   BROWSE_MIGHT_NOT_KNOW,
   BROWSE_TRADES,
@@ -225,6 +226,7 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
   const worldRail = view(BROWSE_WORLD_RAIL);
   const mightNotKnow = view(BROWSE_MIGHT_NOT_KNOW);
   const typicalPay = view(BROWSE_TYPICAL_PAY);
+  const artsNew = view(BROWSE_ARTS_NEW);
 
   return (
     <>
@@ -314,6 +316,13 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
         {typicalPay.length > 0 && (
           <Rail title="Typical Pay: $100K +">
             <PosterRail careers={typicalPay} />
+          </Rail>
+        )}
+        {/* The 21 arts careers added 19 Sept 2026 close the page as their own
+           row (direct ask), on top of sitting inside the Arts rail above. */}
+        {artsNew.length > 0 && (
+          <Rail title="New in Arts, Media & Sport">
+            <PosterRail careers={artsNew} />
           </Rail>
         )}
       </div>
