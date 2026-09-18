@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Colleges mobile header matches Careers exactly; closing arts rail renamed (local, not pushed)
+
+- `CollegesExperience.tsx`: the old absolute text-tab overlay is gone. Phones and tablets now use the same `MobileHeaderShell` (logo, streak | XP, bell, hamburger) as Careers (Explore), with the For you | Browse All pill and a "Careers" button on their own row at the top of main, identical styling and spacing to Explore's toggle row. Direct feedback, 19 Sept 2026: "the navigation for careers and schools on smaller screens is very very different... Careers is the baseline." Checked headless at 375 and 820: no header overlaps, same item set and layout as Explore's Browse header, no page errors.
+- `ExploreExperience.tsx`: the closing arts rail is retitled "More Arts, Media & Sport Careers" (was "New in..."). Direct feedback: a "new" framing implies a "view all" into the full world that this rail doesn't have. Left an open-question comment in the code, not decided or built: should a rail get its own "view all -> full world grid" page, and if so does every curated rail need one.
+
 ### 2026-09-19 Arts, Media & Sport: real career content for the 24 poster-library careers (local, not pushed)
 
 - `src/components/career/profiles.arts.ts` (new): full `CareerProfile` entries (summary, scenario, four facts, pay by state, know about, good at, software, three-rung ladder, education, fact details) for the 24 arts careers the poster library added on 19 Sept -- Actor, Audio and Video Technician, Broadcast Technician, Choreographer, Coach or Scout, Court Reporter or Captioner, Dancer, Fashion Designer, Film and Video Editor, Floral Designer, Game Producer, Graphic Designer, Interior Designer, Interpreter or Translator, Musician or Singer, Photographer, Professional Athlete, Public Relations Specialist, Set Designer, Visual Merchandiser, Writer or Copywriter, Art Director, Film Director, Journalist. Same US-context sourcing convention as `profiles.generated.ts`: knowledge/skills from O*NET, pay and outlook from BLS OOH/OEWS (May 2024), rounded, not sourced to the dollar. Hourly-wage BLS occupations (actors, dancers, musicians) show an hourly figure instead of an invented annual one.

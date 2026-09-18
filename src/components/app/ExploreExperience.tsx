@@ -357,9 +357,16 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
           </Rail>
         )}
         {/* The 21 arts careers added 19 Sept 2026 close the page as their own
-           row (direct ask), on top of sitting inside the Arts rail above. */}
+           row (direct ask), on top of sitting inside the Arts rail above.
+           Titled like every other curated rail here (Skilled Trades,
+           Typical Pay), not "New in ..." -- direct feedback, 19 Sept 2026:
+           a "new" framing implies a "view all" into the full world, which
+           this rail doesn't have. OPEN QUESTION for later, not decided or
+           built: should a world get its own "view all -> full grid" page
+           (the world-pill grid already does this for a filter, not a
+           rail), and if so does every curated rail need one too? */}
         {artsNew.length > 0 && (
-          <Rail title="New in Arts, Media & Sport">
+          <Rail title="More Arts, Media & Sport Careers">
             <PosterRail careers={artsNew} />
           </Rail>
         )}
