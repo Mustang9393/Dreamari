@@ -10401,3 +10401,8 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   URL (kept across Connect navigation so a demo link lands on it).
 - Pushed on the user's explicit instruction (18 Sept 2026). The rule stays:
   further AT&T changes are pushed only when asked by name.
+- Follow-up: the Year Plan is now calendar pages. Each month tile has a top
+  band in its state colour, the month large with its year, the topic small,
+  a tick when complete and a Now tag for the current month. Tapping a month
+  expands it to fill the panel (Calendar back link, focus, note, previous
+  and next month); the detail card under the grid is gone.

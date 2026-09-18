@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, MessageCircle, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
@@ -746,14 +746,18 @@ function MeetingRequestSheet({ onClose, onSend }: { onClose: () => void; onSend:
 }
 
 function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
-  // A calendar, not a numbered list (Joshua Pierce, Slack, 18 Sept 2026:
-  // "all the user really needs to see is the month and topic... the month
-  // should be larger than the topic so you know where you are"). One tile
-  // per month, the month big, the topic small; tap a tile for the focus.
-  const [open, setOpen] = useState<string>(D.YEAR_PLAN.find((m) => m.state === "current")?.key ?? D.YEAR_PLAN[0].key);
-  const done = D.YEAR_PLAN.filter((m) => m.state === "complete").length;
-  const sel = D.YEAR_PLAN.find((m) => m.key === open) ?? D.YEAR_PLAN[0];
+  // A calendar (Joshua Pierce, Slack, 18 Sept 2026): one page per program
+  // month, the month large, the topic small. Tapping a month expands that
+  // page to fill the panel; Back returns to the calendar (direct feedback:
+  // the detail card under the grid "isn't really intuitive").
+  const [open, setOpen] = useState<string | null>(null);
+  const months = D.YEAR_PLAN;
+  const done = months.filter((m) => m.state === "complete").length;
+  const idx = months.findIndex((m) => m.key === open);
+  const sel = idx >= 0 ? months[idx] : null;
   const toneOf = (state: D.Month["state"]) => (state === "complete" ? GOOD : state === "current" ? accent : "var(--muted-foreground)");
+  const yearOf = (i: number) => (i < 3 ? "2026" : "2027");
+  const stateLabel = (state: D.Month["state"]) => (state === "complete" ? "Complete" : state === "current" ? "This month" : "Upcoming");
   return (
     <Panel className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
@@ -761,49 +765,77 @@ function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
           <Eyebrow>{eyebrow}</Eyebrow>
           <Title className="text-[20px] leading-[25px]">{title}</Title>
         </div>
-        <Meter value={done} max={D.YEAR_PLAN.length} accent={GOOD} label="months" />
+        <Meter value={done} max={months.length} accent={GOOD} label="months" />
       </div>
-      <div role="tablist" aria-label="Program months" className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
-        {D.YEAR_PLAN.map((m) => {
-          const active = m.key === open;
-          const tone = toneOf(m.state);
-          const current = m.state === "current";
-          return (
-            <button
-              key={m.key}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setOpen(m.key)}
-              className="dm-quiet relative flex min-h-[92px] cursor-pointer flex-col justify-between rounded-[var(--radius-md)] border p-[12px] text-left"
-              style={{
-                background: current ? `color-mix(in srgb, ${accent} 14%, var(--glass-surface-2))` : "var(--glass-surface-2)",
-                borderColor: active ? `color-mix(in srgb, ${tone} 70%, var(--glass-border))` : current ? `color-mix(in srgb, ${accent} 40%, var(--glass-border))` : "var(--glass-border)",
-                boxShadow: active ? `0 0 0 1px color-mix(in srgb, ${tone} 60%, transparent)` : "none",
-                opacity: m.state === "upcoming" && !active ? 0.8 : 1,
-              }}
-            >
-              <span className="flex items-start justify-between gap-[6px]">
-                <span className="text-[22px] leading-[24px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: m.state === "upcoming" ? "var(--foreground)" : tone }}>{m.month.slice(0, 3)}</span>
-                {m.state === "complete" && <Check className="h-4 w-4 flex-none" aria-hidden style={{ color: GOOD }} />}
-                {current && <span aria-hidden className="mt-[6px] size-[8px] flex-none rounded-full" style={{ background: accent }} />}
-              </span>
-              <span className="text-[12.5px] leading-[16px] font-semibold text-balance" style={{ color: "var(--muted-foreground)" }}>{m.title}</span>
-            </button>
-          );
-        })}
-      </div>
-      <Item key={sel.key} className="flex flex-col gap-[6px]">
-        <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
-          <span className="text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{sel.month} · {sel.title}</span>
-          <Chip tone={toneOf(sel.state)}>{sel.state === "complete" ? "Complete" : sel.state === "current" ? "This month" : "Upcoming"}</Chip>
-        </div>
-        <span className="text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>{sel.focus}</span>
-        {sel.note && <Muted>{sel.note}</Muted>}
-        {sel.state === "current" && (
-          <Link href="/explore?tab=browse" className="dm-link mt-[2px] flex w-fit items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>View Careers <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>
+      <AnimatePresence mode="wait" initial={false}>
+        {sel ? (
+          <motion.div key={`page-${sel.key}`} layoutId={`ym-${sel.key}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: sel.state === "current" ? `color-mix(in srgb, ${accent} 12%, var(--glass-surface-2))` : "var(--glass-surface-2)", borderColor: `color-mix(in srgb, ${toneOf(sel.state)} 45%, var(--glass-border))` }}>
+            <span aria-hidden className="absolute inset-x-0 top-0 h-[4px]" style={{ background: toneOf(sel.state) }} />
+            <div className="flex flex-col gap-[var(--space-4)] p-[var(--space-5)] pt-[calc(var(--space-5)+4px)]">
+              <div className="flex flex-wrap items-center justify-between gap-[8px]">
+                <button type="button" onClick={() => setOpen(null)} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /> Calendar</button>
+                <Chip tone={toneOf(sel.state)}>{stateLabel(sel.state)}</Chip>
+              </div>
+              <div className="flex flex-col gap-[2px]">
+                <span className="text-[12px] leading-[16px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>{yearOf(idx)}</span>
+                <span className="text-[34px] leading-[38px] font-extrabold tracking-[0.01em] uppercase" style={{ fontFamily: "var(--font-display)", color: toneOf(sel.state) === "var(--muted-foreground)" ? "var(--foreground)" : toneOf(sel.state) }}>{sel.month}</span>
+                <span className="text-[18px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{sel.title}</span>
+              </div>
+              <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+                <Eyebrow tone="var(--muted-foreground)">Focus</Eyebrow>
+                <span className="text-[15.5px] leading-[22px]" style={{ color: "var(--foreground)" }}>{sel.focus}</span>
+                {sel.note && <Muted>{sel.note}</Muted>}
+                {sel.state === "current" && (
+                  <Link href="/explore?tab=browse" className="dm-link mt-[4px] flex w-fit items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>View Careers <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-[8px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+                <button type="button" disabled={idx === 0} onClick={() => setOpen(months[idx - 1].key)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-sm)] px-[6px] text-[12.5px] font-bold disabled:cursor-default disabled:opacity-40" style={{ color: "var(--muted-foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /> {idx > 0 ? months[idx - 1].month : ""}</button>
+                <button type="button" disabled={idx === months.length - 1} onClick={() => setOpen(months[idx + 1].key)} className="dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-sm)] px-[6px] text-[12.5px] font-bold disabled:cursor-default disabled:opacity-40" style={{ color: "var(--muted-foreground)" }}>{idx < months.length - 1 ? months[idx + 1].month : ""} <ChevronRight className="h-4 w-4" aria-hidden /></button>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div key="grid" role="list" aria-label="Program months" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="grid grid-cols-2 gap-[10px] sm:grid-cols-4">
+            {months.map((m, i) => {
+              const tone = toneOf(m.state);
+              const current = m.state === "current";
+              return (
+                <motion.button
+                  key={m.key}
+                  layoutId={`ym-${m.key}`}
+                  type="button"
+                  role="listitem"
+                  aria-label={`${m.month}: ${m.title}, ${stateLabel(m.state)}`}
+                  onClick={() => setOpen(m.key)}
+                  whileHover={{ y: -2 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                  className="dm-quiet relative flex min-h-[112px] cursor-pointer flex-col overflow-hidden rounded-[var(--radius-md)] border text-left"
+                  style={{
+                    background: current ? `color-mix(in srgb, ${accent} 14%, var(--glass-surface-2))` : "var(--glass-surface-2)",
+                    borderColor: current ? `color-mix(in srgb, ${accent} 45%, var(--glass-border))` : "var(--glass-border)",
+                    opacity: m.state === "upcoming" ? 0.85 : 1,
+                  }}
+                >
+                  {/* the calendar page's top band, in the month's state colour */}
+                  <span aria-hidden className="block h-[4px] w-full" style={{ background: m.state === "upcoming" ? "color-mix(in srgb, var(--muted-foreground) 35%, transparent)" : tone }} />
+                  <span className="flex flex-1 flex-col justify-between gap-[8px] p-[12px]">
+                    <span className="flex items-start justify-between gap-[6px]">
+                      <span className="flex flex-col">
+                        <span className="text-[24px] leading-[26px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: m.state === "upcoming" ? "var(--foreground)" : tone }}>{m.month.slice(0, 3)}</span>
+                        <span className="text-[10.5px] leading-[14px] font-bold tracking-[0.08em]" style={{ color: "var(--muted-foreground)" }}>{yearOf(i)}</span>
+                      </span>
+                      {m.state === "complete" && <Check className="h-4 w-4 flex-none" aria-hidden style={{ color: GOOD }} />}
+                      {current && <span className="rounded-full px-[6px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.06em] uppercase" style={{ background: accent, color: "#0e0c20" }}>Now</span>}
+                    </span>
+                    <span className="text-[12.5px] leading-[16px] font-semibold text-balance" style={{ color: "var(--muted-foreground)" }}>{m.title}</span>
+                  </span>
+                </motion.button>
+              );
+            })}
+          </motion.div>
         )}
-      </Item>
+      </AnimatePresence>
     </Panel>
   );
 }
