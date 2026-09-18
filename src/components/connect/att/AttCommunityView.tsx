@@ -944,7 +944,45 @@ function AnswerForm({ id, placeholder, submit, cancel, onCancel, onDone, rows = 
   return <Composer id={id} rows={rows} maxLength={400} autoFocus accent={accent} value={draft} onChange={setDraft} placeholder={placeholder} submitLabel={submit} cancelLabel={cancel} onCancel={onCancel} onSubmit={onDone} />;
 }
 
-function VolunteerHome() {
+/** What happened since the volunteer's last visit: one slim list, each
+ *  row a way in, the thank-you as a quote with the student's face. */
+function SinceYouWereHere({ onGo }: { onGo: (tab: "home" | "questions") => void }) {
+  const S = D.SINCE;
+  const icon = (kind: string) => kind === "reads" ? Eye : kind === "resume" ? FileText : MessageCircleQuestion;
+  return (
+    <Panel id="att-since-title" title={S.eyebrow} aside={<Muted>{S.ago}</Muted>}>
+      <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+        {S.items.map((it) => {
+          const Icon = icon(it.kind);
+          return (
+            <li key={it.key} style={{ borderColor: RULE }}>
+              <button type="button" onClick={() => onGo(it.go as "home" | "questions")} className="dm-quiet group relative flex w-full cursor-pointer items-center gap-[12px] py-[10px] pr-[28px] text-left">
+                {it.kind === "thanks" ? (
+                  <Avatar name={it.who ?? ""} size={36} photo={studentAvatarSrc(it.who ?? "")} />
+                ) : (
+                  <span className="flex size-[36px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 14%, transparent)`, color: accent }}><Icon className="h-4 w-4" aria-hidden /></span>
+                )}
+                <span className="min-w-0 flex-1">
+                  {it.kind === "thanks" ? (
+                    <>
+                      <span className="block text-[14.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>“{it.text}”</span>
+                      <Muted>{it.who} · {it.line}</Muted>
+                    </>
+                  ) : (
+                    <span className="block text-[14.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>{it.text}</span>
+                  )}
+                </span>
+                <HoverChevron className="top-1/2 right-[4px] -translate-y-1/2" />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </Panel>
+  );
+}
+
+function VolunteerHome({ onGo }: { onGo: (tab: "home" | "questions") => void }) {
   const [state, setState] = useState<"idle" | "composing" | "done">("idle");
   const [accepted, setAccepted] = useState<Record<string, boolean>>({});
   const H = D.VOLUNTEER_HOME;
@@ -955,6 +993,7 @@ function VolunteerHome() {
   const title = (t: string) => t.replace("{resume}", latest ? `“${latest.name}”` : R.defaultResume);
   return (
     <>
+      <SinceYouWereHere onGo={onGo} />
       <Panel id="att-now-title" title={H.title}>
         <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 18%, transparent), transparent 70%), var(--glass-surface-1)`, borderColor: `color-mix(in srgb, ${accent} 30%, var(--glass-border))` }}>
           <Eyebrow>{D.THEME.eyebrow} · {D.THEME.month}</Eyebrow>
@@ -1593,7 +1632,7 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
           {view === "student" && studentTab === "opportunities" && <StudentOpportunities saves={saves} toggleSave={toggleSave} openOpportunity={setOpportunity} />}
           {view === "student" && studentTab === "people" && <StudentPeople follows={follows} toggleFollow={toggleFollow} />}
 
-          {view === "volunteer" && volunteerTab === "home" && <VolunteerHome />}
+          {view === "volunteer" && volunteerTab === "home" && <VolunteerHome onGo={(t) => setVolunteerTab(t)} />}
           {view === "volunteer" && volunteerTab === "questions" && <VolunteerQuestions />}
           {view === "volunteer" && volunteerTab === "share" && <VolunteerShare />}
           {view === "volunteer" && volunteerTab === "yearRound" && <VolunteerImpact />}

@@ -322,6 +322,20 @@ export const REQUESTS = {
     { id: "r3", kind: "Live session", title: "Take student questions at Inside AT&T Cybersecurity", minutes: 45, why: "Oct 22 · 4 PM ET · Online" },
   ],
 };
+/** The first thing a returning volunteer sees: what their last visit did.
+ *  Reads, a thank-you, a student acting on their notes, new questions in
+ *  their area. The reason to come back (proposal, 18 Sept 2026). */
+export const SINCE = {
+  eyebrow: "Since you were last here",
+  ago: "3 days ago",
+  items: [
+    { key: "reads", kind: "reads", text: "112 students read your cybersecurity answer", go: "questions" },
+    { key: "thanks", kind: "thanks", who: "Priya", line: "10th grade · Ohio", text: "This is the first answer that actually made sense. Thank you.", go: "questions" },
+    { key: "resume", kind: "resume", text: "Jordan opened your résumé notes and rewrote two bullets", go: "home" },
+    { key: "new", kind: "question", text: "2 new questions in network engineering are waiting", go: "questions" },
+  ],
+};
+
 /** Closing the loop: what happened to the answers a volunteer already gave. */
 export const YOUR_ANSWERS = {
   title: "Your answers",

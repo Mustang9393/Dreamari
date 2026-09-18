@@ -10469,3 +10469,10 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   Development Program added. Home sorts opportunities by the student's
   picks; Learn regroups by the student ("For <picks>" first, technology
   units after) with the provider named on each unit. v1 untouched.
+
+## 2026-09-18 · AT&T v2.0: Since you were last here (volunteers)
+
+- `SINCE` in attData, `SinceYouWereHere` panel first on the volunteer Today
+  view: four rows (reads, thank-you quote with the student's avatar, résumé
+  notes used, new questions), each navigating to Questions or Home.
+
