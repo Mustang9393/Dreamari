@@ -69,13 +69,16 @@ export function BrowseShelves({
   }, [pathway, profile.states]);
 
   return (
-    <div className="flex flex-col gap-[var(--space-7)]">
+    <div className="flex flex-col gap-[44px]">
       {shelves.map((shelf) => (
-        <section key={shelf.key} className="flex flex-col gap-[var(--space-3)]">
+        <section key={shelf.key} className="flex flex-col gap-[var(--space-4)]">
           <h2 className="min-w-0 text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
             {shelf.title} <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({shelf.items.length})</span>
           </h2>
-          <ul className="dreamari-card-rail -mx-5 -my-[10px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[10px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" aria-label={shelf.title}>
+          {/* the rail's vertical bleed has to hold the card's shadow (44px
+             blur, 18px drop) and the hover lift, or the scroller clips them
+             (direct feedback, 18 Sept 2026: "shadows are cropping") */}
+          <ul className="dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-5)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" aria-label={shelf.title}>
             {shelf.items.map((c) => (
               <li key={c.slug} className="w-[min(86vw,320px)] flex-none">
                 <SchoolCard c={c} saved={saved.has(c.slug)} onSave={() => onSave(c.slug)} compared={compare.includes(c.slug)} onCompare={() => onCompare(c.slug)} program={shelf.program} />

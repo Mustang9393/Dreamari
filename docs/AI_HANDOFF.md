@@ -10430,3 +10430,10 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   more air. Sub-tab switches keep scroll (AT&T v2 too, useLayoutEffect).
 - Verified headless: HS vs college sets, filters, accept from notification
   lands in the thread, dock states, nudge and badge, tablet and phone chrome.
+
+## 2026-09-18 · Schools shelves: room for shadows, looser cards
+
+- Every school rail (Browse shelves, For you, Similar schools) bleeds 28px
+  vertically instead of 10, so the card shadow and hover lift are never
+  clipped by the scroller; shelves sit 44px apart; cards carry a little
+  more padding and gap between name, chips, stats and Compare.

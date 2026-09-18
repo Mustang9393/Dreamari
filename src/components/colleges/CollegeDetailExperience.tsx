@@ -535,7 +535,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           if (matches.length === 0) return null;
           return (
             <TabPanel id="similar-schools-title" title="Similar Schools">
-              <ul className="dreamari-card-rail -mx-5 -my-[10px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[10px] sm:-mx-6 sm:px-6" aria-label="Schools similar to this one">
+              <ul className="dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-5)] overflow-x-auto px-5 py-[28px] sm:-mx-6 sm:px-6" aria-label="Schools similar to this one">
                 {matches.map(({ college: m, reason }) => (
                   <li key={m.slug} className="w-[min(84vw,320px)] flex-none">
                     <SchoolCard c={m} saved={saved.has(m.slug)} onSave={() => toggleSaved(m.slug)} compared={false} why={reason} />

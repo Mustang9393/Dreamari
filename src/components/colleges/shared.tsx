@@ -369,7 +369,7 @@ export function SchoolCard({
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={() => { onSave(); announce(saved ? `Removed ${c.name} from saved` : `Saved ${c.name}`); }} size={36} /></span>
 
-      <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[12px] px-[16px] pt-[118px] pb-[14px]">
+      <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[14px] px-[18px] pt-[118px] pb-[18px]">
         {/* mark, name and place, over the blurred tail of the photo */}
         {/* Mark beside the name like a profile picture, centred on the
            name + place block, so the mark-to-name relationship is identical
@@ -380,7 +380,7 @@ export function SchoolCard({
         <div className="flex min-h-[77px] flex-col justify-end" style={{ textShadow: CARD_TEXT_SHADOW }}>
           <div className="flex items-center gap-[10px]">
             <MarkBadge c={c} size={44} />
-            <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+            <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
               <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
               {/* wraps rather than truncates; the block above reserves the
                  second line (two name lines + two place lines = 77) */}
@@ -418,9 +418,9 @@ export function SchoolCard({
            actual rule, which read as a stray line rather than a deliberate
            one once nothing else on the card had one (direct feedback: "so
            many random lines on a card"). */}
-        <dl className="flex items-start gap-[20px]">
+        <dl className="flex items-start gap-[22px]">
           {stats.map((x, i) => (
-            <div key={x.k} className="flex min-w-0 flex-col" style={i > 0 ? { borderLeft: `1px solid ${RULE}`, paddingLeft: 20 } : undefined}>
+            <div key={x.k} className="flex min-w-0 flex-col gap-[2px]" style={i > 0 ? { borderLeft: `1px solid ${RULE}`, paddingLeft: 22 } : undefined}>
               <dd className="m-0 text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.v}</dd>
               <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.k}</dt>
             </div>
@@ -441,7 +441,7 @@ export function SchoolCard({
            button and neither of these reads as the primary. "Not for me" is
            plain text on the left; Compare is a ghost button on the right. */}
         {(onCompare || onDismiss) && (
-          <div className="pointer-events-auto relative z-20 mt-auto flex items-center justify-between gap-[8px] pt-[2px]">
+          <div className="pointer-events-auto relative z-20 mt-auto flex items-center justify-between gap-[8px] pt-[6px]">
             {onDismiss ? (
               <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>Not for me</button>
             ) : <span />}

@@ -199,7 +199,7 @@ export function ForYouSchools({
       />
     </li>
   );
-  const rail = "dreamari-card-rail -mx-5 -my-[10px] flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[10px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
+  const rail = "dreamari-card-rail -mx-5 -my-[28px] flex list-none gap-[var(--space-5)] overflow-x-auto px-5 py-[28px] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]";
 
   return (
     <div className="flex flex-col gap-[var(--space-10)]">
