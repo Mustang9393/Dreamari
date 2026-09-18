@@ -21,7 +21,7 @@ import { EditSectionsPanel } from "./EditSectionsPanel";
 import { ExperienceModal } from "./ExperienceModal";
 import { ExportChecklistModal } from "./ExportChecklistModal";
 import { JobMatchPanel } from "./JobMatchPanel";
-import { ResumeExperience } from "./ResumeExperience";
+import { ResumeExperience, useResumeWelcome } from "./ResumeExperience";
 import { ResumeDocument, ZoomResumeButton, ZoomResumeModal } from "./ResumeDocument";
 import { Portal } from "@/components/profile/CareerReport";
 import { TailorScreen } from "./TailorScreen";
@@ -30,7 +30,6 @@ import { TextPreviewModal } from "./TextPreviewModal";
 import { IconTip, ToolbarButton, useResumeToast, WizardProgress } from "./ui";
 import { CertificationsStep, EducationStep, ExperienceStep, PersonalInfoStep, ReviewStep, SkillsStep } from "./wizardSteps";
 
-const WELCOME_KEY = "dreamari-resume-welcome";
 /** XP per finished wizard step (the reference's point values), banked into
  *  the Dream Score once per milestone. */
 const STEP_XP: Record<number, { xp: number; milestone: string }> = {
@@ -536,20 +535,10 @@ function ResumeBuilderInner() {
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const { toast, showToast } = useResumeToast();
-  // First-run welcome, once per browser (the reference greets every visit;
-  // once is enough for a guide who then stays on screen).
-  const [welcome, setWelcome] = useState(false);
-  useEffect(() => {
-    try {
-      // reading browser storage after mount, so the server render never disagrees
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (!window.localStorage.getItem(WELCOME_KEY)) setWelcome(true);
-    } catch { /* storage unavailable: no welcome */ }
-  }, []);
-  const dismissWelcome = () => {
-    setWelcome(false);
-    try { window.localStorage.setItem(WELCOME_KEY, "1"); } catch { /* ignore */ }
-  };
+  // Dreamy's welcome, shared with the Profile tab (see useResumeWelcome).
+  // Every Create a new resume lands on the templates view, and every one of
+  // them opens with Dreamy, seen before or not.
+  const [welcome, dismissWelcome] = useResumeWelcome(searchParams.get("view") === "templates");
   // XP for finishing a step with something in it: a "+N XP" lifts off the
   // form card and slots into the nav's Dream Score (the reference's
   // "+10 pts" toasts, as the app's own XP moment). Once per milestone,
@@ -587,6 +576,9 @@ function ResumeBuilderInner() {
             router.push(isFirstResume ? `/resume-builder?view=wizard&template=${templateId}` : `/resume-builder?view=tailor&template=${templateId}`);
           }}
         />
+        {/* Dreamy opens every new resume, here on the template gallery,
+           the first screen after Create (direct feedback, 18 Sept 2026). */}
+        <WelcomeSplash surface="resume" open={welcome} onDone={dismissWelcome} />
       </Shell>
     );
   }

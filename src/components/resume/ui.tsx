@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Portal } from "@/components/profile/CareerReport";
 
@@ -56,10 +56,16 @@ export function TextInput({ id, value, onChange, placeholder, type = "text", inv
 }
 
 export function SelectInput({ id, value, onChange, children }: { id: string; value: string; onChange: (v: string) => void; children: ReactNode }) {
+  // The native select ignored the shared min-height and painted a thin
+  // control next to 44px text fields (direct feedback, 18 Sept 2026), so
+  // the height is explicit, the native arrow is off and the chevron is ours.
   return (
-    <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={`${FIELD_CLASS} cursor-pointer`} style={FIELD_STYLE}>
-      {children}
-    </select>
+    <span className="relative block">
+      <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={`${FIELD_CLASS} h-[44px] cursor-pointer appearance-none pr-[40px]`} style={FIELD_STYLE}>
+        {children}
+      </select>
+      <ChevronDown aria-hidden className="pointer-events-none absolute top-1/2 right-[12px] h-4 w-4 -translate-y-1/2" style={{ color: "var(--muted-foreground)" }} />
+    </span>
   );
 }
 

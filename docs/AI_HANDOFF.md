@@ -10337,3 +10337,16 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
 - AT&T board profiles say "Back to <tab>" or "Back to the AT&T community".
 - Verified headless (scratchpad replit-walk/back-check.mjs): 11 entry points,
   label and landing tab after Back. tsc and eslint clean.
+
+## 2026-09-18 · Resume Builder: Dreamy welcome on entry and on every Create, select height
+
+- Live check (dreamari.vercel.app, fresh browser): the Profile splash showed
+  on `/profile?tab=resume` and the resume welcome never did, because it
+  only lived in the wizard route and was gated once per browser.
+- `useResumeWelcome` (ResumeExperience.tsx) is shared by the Profile Resume
+  tab and the builder route: once per session under the demo switch, back
+  after a refresh, and always on `/resume-builder?view=templates`, which is
+  where every Create a new resume lands. The Profile splash stays quiet when
+  the arrival tab is Resume, so two splashes never stack.
+- Country select: explicit 44px height, native arrow off, our chevron; it
+  matched the text fields' 44px in the headless check.
