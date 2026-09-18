@@ -1112,17 +1112,26 @@ function ResumePrepCard({ onClick }: { onClick: () => void }) {
   const name = own ? latest.name : D.PREP_RESUME_NAME;
   return (
     <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-      <span className="pointer-events-none absolute inset-x-0 top-0 block opacity-70" aria-hidden>
+      {/* Full brightness, no dimming (direct feedback, 19 Sept 2026: "the
+         resume can be brighter"). The caption reads off the same
+         progressive-blur recipe every other full-bleed card in the app
+         uses, but paper-toned rather than dark -- the source underneath is
+         white paper, so a dark scrim with white text was fighting it and
+         came out unreadable (direct feedback: "legibility... is bad").
+         Frosted white instead: dark text on a blurred light plate, like a
+         label printed on the page itself. */}
+      <span className="pointer-events-none absolute inset-x-0 top-0 block" aria-hidden>
         <ResumeDocument resume={data} templateId={DEFAULT_RESUME_TEMPLATE} sectionOrder={latest?.sectionOrder} hiddenSections={latest?.hiddenSections} sectionOverrides={latest?.sectionOverrides} />
       </span>
-      <span className="pointer-events-none absolute inset-0 z-[1]" aria-hidden style={{ background: "linear-gradient(to top, rgba(8,10,22,0.6) 0%, rgba(8,10,22,0.15) 55%, rgba(8,10,22,0.35) 100%)" }} />
-      <span className="relative z-[2] flex items-center gap-[10px] px-[14px] pt-[56px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(8,10,22,0.97) 0%, rgba(8,10,22,0.9) 60%, rgba(8,10,22,0) 100%)" }}>
-        <span className="flex size-[34px] flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(255,255,255,0.12)", color: "#FFFFFF" }}><FileText className="h-4 w-4" aria-hidden /></span>
+      <CardProgressiveBlur size="46%" />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[46%]" aria-hidden style={{ background: "linear-gradient(to top, rgba(248,248,251,0.97) 0%, rgba(248,248,251,0.86) 45%, rgba(248,248,251,0.4) 75%, transparent 100%)" }} />
+      <span className="relative z-[2] flex items-center gap-[10px] px-[14px] pt-[56px] pb-[14px]">
+        <span className="flex size-[34px] flex-none items-center justify-center rounded-[8px]" style={{ background: "rgba(20,18,30,0.08)", color: "#232030" }}><FileText className="h-4 w-4" aria-hidden /></span>
         <span className="flex min-w-0 flex-col gap-[2px]">
-          <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: accent }}>{D.PREP_RESUME.label}</span>
-          <span className="truncate text-[15px] leading-[19px] font-extrabold" style={{ color: "#FFFFFF", fontFamily: "var(--font-display)" }}>{name}</span>
-          <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(255,255,255,0.78)" }}>{D.PREP_RESUME.why}</span>
-          <span className="mt-[4px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#FFFFFF" }}>{D.PREP_RESUME.cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
+          <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "#8a6d3d" }}>{D.PREP_RESUME.label}</span>
+          <span className="truncate text-[15px] leading-[19px] font-extrabold" style={{ color: "#18161f", fontFamily: "var(--font-display)" }}>{name}</span>
+          <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(24,22,31,0.68)" }}>{D.PREP_RESUME.why}</span>
+          <span className="mt-[4px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#18161f" }}>{D.PREP_RESUME.cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
         </span>
       </span>
     </button>
@@ -1213,7 +1222,12 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
              The badge content underneath -- Coach's mark and where Avery is
              based -- gets the tinted band treatment as its own full-bleed
              footer strip, rounded to match the card's own corners. */}
-          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="relative flex h-full flex-col overflow-hidden">
+          {/* min-h-[197px]: Next Meeting's own measured height, so the two
+             cards match even stacked full-width on tablet, not just side by
+             side where grid stretch already equalizes them (direct
+             feedback, 19 Sept 2026: "the cards should be the same height on
+             tablet etc too"). */}
+          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="relative flex h-full min-h-[197px] flex-col overflow-hidden">
             <div className="flex items-center gap-[14px]">
               <Avatar name={D.MENTOR.name} size={52} photo={D.MENTOR.photo} ring={accent} />
               <div className="flex min-w-0 flex-col gap-[2px]">
@@ -1240,9 +1254,12 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
               {/* A colored accent, not the plain grey rule Next Meeting
                  uses (direct feedback, 19 Sept 2026), touching the tinted
                  band directly below it -- no gap between them. */}
-              <div className="-mx-[var(--space-5)] border-t-2" style={{ borderColor: `color-mix(in srgb, ${accent} 55%, transparent)` }} />
+              <div className="-mx-[var(--space-5)] border-t" style={{ borderColor: `color-mix(in srgb, ${accent} 65%, transparent)` }} />
+              {/* min-h-[53px]: Next Meeting's own measured divider-to-bottom
+                 distance, so the two bottom sections align exactly, not
+                 just approximately (direct feedback, 19 Sept 2026). */}
               <div
-                className="relative z-[1] -mx-[var(--space-5)] -mb-[var(--space-5)] flex flex-wrap items-center justify-between gap-[10px] rounded-b-[var(--radius-lg)] px-[var(--space-5)] py-[10px]"
+                className="relative z-[1] -mx-[var(--space-5)] -mb-[var(--space-5)] flex min-h-[53px] flex-wrap items-center justify-between gap-[10px] rounded-b-[var(--radius-lg)] px-[var(--space-5)]"
                 style={{ background: `linear-gradient(120deg, color-mix(in srgb, ${accent} 24%, var(--glass-surface-1)) 0%, color-mix(in srgb, ${accent} 8%, var(--glass-surface-1)) 100%)` }}
               >
                 <Muted className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {D.MENTOR.location}</Muted>

@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Card heights pixel-matched, ID badge divider tightened, resume card fixed for real (local, not pushed)
+
+- **Equal card heights everywhere, not just side by side**: `ClickPanel` for My mentor now carries `min-h-[197px]`, Next Meeting's own measured height at both desktop and tablet widths -- previously the two only matched when the grid's row-stretch applied (lg+); stacked full-width on tablet they were 15px apart (direct feedback: "the cards should be the same height on tablet etc too"). Verified: both now measure exactly 197px at 1280 and 768.
+- **Badge band pixel-aligned to the meeting card's own bottom section**: measured Next Meeting's real divider-to-bottom distance (53px, consistent at every width) and set the badge footer's `min-h-[53px]` to match; the divider's border width also dropped from 2px to 1px, matching Next Meeting's own rule weight exactly while keeping the accent tint. Diff is now 2px (a sub-pixel/line-height rounding artifact), down from 15px.
+- **Resume prep card legibility, actually fixed this time**: the previous pass brightened the resume page but kept white caption text, which went unreadable against the now-bright white paper underneath (direct feedback: "legibility... is bad"). The caption band is now paper-toned (a light frosted plate, not dark) with dark text -- reads like a label printed on the page itself, keeps the resume at full brightness above it, and still uses `CardProgressiveBlur` under it so it works over any resume content.
+- Checked headless at 1280 and 768: card heights exactly equal, badge alignment within 2px, resume caption legible in a fresh screenshot. tsc and eslint clean (one pre-existing unused-var warning, unrelated).
+
 ### 2026-09-19 My mentor ID badge, fourth pass: CTA under the text, bottom-pinned band, colored accent touching it (local, not pushed)
 
 - Message Mentor now sits directly under the name/title block, at the identity row's own left edge -- the same position Join occupies under "Tuesday · 4:00 PM" in Next Meeting, not beside the text (direct feedback, 19 Sept 2026, after two earlier misreads of that placement).
