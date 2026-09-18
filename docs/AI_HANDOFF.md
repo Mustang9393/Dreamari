@@ -38,6 +38,14 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Prep row: dynamic blur sizing, resume unified with the other two, corner-bleed fix, bigger Coach logo
+
+- **Blur adapts to the caption's real size, not a guessed percentage**: new `useCaptionHeight` hook (a ResizeObserver on the caption's own DOM node) measures its actual rendered height -- reflowing on a wrapped title, a font swap, or a resize -- and both `CardProgressiveBlur`'s `size` and the scrim's height now use that measured pixel value instead of a fixed `58%` (direct feedback: "have the blur adapt dynamically to wherever the eyebrow sits on different devices"). `PrepFoot` takes a ref now (`forwardRef`) so all three cards can attach it.
+- **Resume card unified with its two siblings**: dropped the paper-toned light-mode exception (dark text on a light scrim) in favor of the same dark `cardBottomScrim("heavy")` + white `PrepFoot` every other card uses -- the heavy scrim is dark enough to hold up over white paper too (direct feedback: "same blur as the other cards on resume so it doesn't have to be light mode").
+- **Corner bleed fixed**: `CardProgressiveBlur`'s backdrop-filter was leaking a bright sliver past the card's rounded corners in Chrome/Safari despite its own overflow-hidden + border-radius:inherit (a known cross-browser compositing quirk). `PREP_CARD` now adds `isolate` and `[transform:translateZ(0)]`, forcing the card onto its own compositing layer so the blur clips at the true rounded edge (direct feedback: "bright borders on the rounded corners"). Verified corner-by-corner at 3x scale on all three cards -- clean.
+- Coach Foundation logo on the My mentor ID badge bumped from 15px to 19px tall (direct feedback: "a little bigger").
+- Checked headless at 1280, 768, 390. tsc and eslint clean (one pre-existing unused-var warning).
+
 ### 2026-09-19 Prep row: Explore/Play captions genuinely legible now
 
 - The size/maxBlur match to the resume card wasn't enough on its own -- blur softens detail but doesn't darken a bright patch of photo, so EXPLORE/PLAY still read poorly over light parts of their images (direct feedback: "I can barely read explore and play"). Switched their scrim from `cardBottomScrim()` (regular, base 0.55) to `cardBottomScrim("heavy")` (base 0.82) and pushed the zone/strength further: `size="58%" maxBlur={34}`.

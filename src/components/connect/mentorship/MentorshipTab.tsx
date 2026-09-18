@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, MapPin, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
@@ -1066,45 +1066,76 @@ function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
 
 /** The three prep cards: one shape, a why line and a CTA on every one, so
  *  it is clear what the student is meant to do (the Replit's own copy). */
-const PREP_CARD = "dm-tap group relative flex h-[240px] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left";
+// isolate + [transform:translateZ(0)]: backdrop-filter blur (CardProgressiveBlur)
+// can bleed a bright sliver past an ancestor's rounded corners in Chrome/Safari
+// despite overflow-hidden + border-radius:inherit -- both force the browser to
+// composite this card as its own layer, which clips the blur at the true
+// rounded edge instead of the corner square it renders to before clipping
+// (direct feedback, 19 Sept 2026: "bright borders on the rounded corners").
+const PREP_CARD = "dm-tap group relative isolate flex h-[240px] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left [transform:translateZ(0)]";
 
-function PrepFoot({ label, title, why, cta, tone }: { label: string; title: string; why: string; cta: string; tone?: string }) {
+/** Measures a caption's actual rendered height (re-measuring whenever it
+ *  reflows -- a wrapped title on a narrow phone, a font swap, a resize) so
+ *  the frosted zone behind it can be sized to fit exactly, not guessed as a
+ *  fixed percentage of the card (direct feedback, 19 Sept 2026: "have the
+ *  blur adapt dynamically to wherever the eyebrow sits on different
+ *  devices"). `pad` adds headroom above the caption's own top edge so the
+ *  frost feathers in before the text starts, not right at its first line. */
+function useCaptionHeight(pad = 24) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [height, setHeight] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setHeight(Math.ceil(el.getBoundingClientRect().height) + pad);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [pad]);
+  return { ref, height };
+}
+
+const PrepFoot = forwardRef<HTMLSpanElement, { label: string; title: string; why: string; cta: string; tone?: string }>(function PrepFoot({ label, title, why, cta, tone }, ref) {
   return (
-    <span className="relative z-[2] flex flex-col gap-[4px] px-[16px] pt-[56px] pb-[14px]">
+    <span ref={ref} className="relative z-[2] flex flex-col gap-[4px] px-[16px] pt-[56px] pb-[14px]">
       <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: tone ?? accent }}>{label}</span>
       <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{title}</span>
       <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</span>
       <span className="mt-[6px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#FFFFFF" }}>{cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
     </span>
   );
-}
+});
 
 function CareerPrepCard({ onClick }: { onClick: () => void }) {
   const c = D.PREP_CAREER;
+  const { ref, height } = useCaptionHeight();
   return (
     <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", textShadow: CARD_TEXT_SHADOW }}>
       <Image src={c.photo} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" style={{ objectPosition: "50% 30%" }} />
-      {/* Same frosted-caption recipe as the resume card, not the flat
-         --poster-scrim (direct feedback, 19 Sept 2026: "they should also
-         use the blur effect"). */}
-      <CardProgressiveBlur size="58%" maxBlur={34} />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[58%]" aria-hidden style={{ background: cardBottomScrim("heavy") }} />
-      <PrepFoot label={c.label} title={c.title} why={c.why} cta={c.cta} tone={WORLD_COLORS[c.world]} />
+      {/* Frosted-caption recipe, sized to the caption's own measured
+         height, not a guessed percentage (direct feedback, 19 Sept 2026:
+         "have the blur adapt dynamically to wherever the eyebrow sits on
+         different devices"). */}
+      <CardProgressiveBlur size={height ? `${height}px` : "58%"} maxBlur={34} />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" aria-hidden style={{ height: height ? `${height}px` : "58%", background: cardBottomScrim("heavy") }} />
+      <PrepFoot ref={ref} label={c.label} title={c.title} why={c.why} cta={c.cta} tone={WORLD_COLORS[c.world]} />
     </button>
   );
 }
 
 function PlayPrepCard({ onClick }: { onClick: () => void }) {
   const p = D.PREP_PLAY;
+  const { ref, height } = useCaptionHeight();
   return (
     <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", textShadow: CARD_TEXT_SHADOW }}>
       <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-      <CardProgressiveBlur size="58%" maxBlur={34} />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[58%]" aria-hidden style={{ background: cardBottomScrim("heavy") }} />
+      <CardProgressiveBlur size={height ? `${height}px` : "58%"} maxBlur={34} />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" aria-hidden style={{ height: height ? `${height}px` : "58%", background: cardBottomScrim("heavy") }} />
       <span className="absolute top-[14px] right-[14px] z-[2] flex size-[38px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
         <Play className="ml-[2px] h-[16px] w-[16px]" fill="currentColor" aria-hidden />
       </span>
-      <PrepFoot label={p.label} title={p.title} why={p.why} cta={p.cta} tone={WORLD_COLORS[p.world]} />
+      <PrepFoot ref={ref} label={p.label} title={p.title} why={p.why} cta={p.cta} tone={WORLD_COLORS[p.world]} />
     </button>
   );
 }
@@ -1117,34 +1148,21 @@ function ResumePrepCard({ onClick }: { onClick: () => void }) {
   const own = !!latest && !!stored.profile.firstName;
   const data: ResumeData = own ? resumeForVersion(stored, latest) : (D.SAMPLE_RESUME as ResumeData);
   const name = own ? latest.name : D.PREP_RESUME_NAME;
+  const { ref, height } = useCaptionHeight();
   return (
-    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+    <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", textShadow: CARD_TEXT_SHADOW }}>
       {/* Full brightness, no dimming (direct feedback, 19 Sept 2026: "the
-         resume can be brighter"). The caption reads off the same
-         progressive-blur recipe every other full-bleed card in the app
-         uses, but paper-toned rather than dark -- the source underneath is
-         white paper, so a dark scrim with white text was fighting it and
-         came out unreadable (direct feedback: "legibility... is bad").
-         Frosted white instead: dark text on a blurred light plate, like a
-         label printed on the page itself. */}
+         resume can be brighter"). Same dark scrim and white PrepFoot as
+         the other two cards now, not a paper-toned light exception (direct
+         feedback, 19 Sept 2026: "same blur as the other cards on resume so
+         it doesn't have to be light mode") -- the heavy scrim is dark
+         enough to hold up even over white paper. */}
       <span className="pointer-events-none absolute inset-x-0 top-0 block" aria-hidden>
         <ResumeDocument resume={data} templateId={DEFAULT_RESUME_TEMPLATE} sectionOrder={latest?.sectionOrder} hiddenSections={latest?.hiddenSections} sectionOverrides={latest?.sectionOverrides} />
       </span>
-      {/* Stronger blur (maxBlur 26 vs the 14 default) -- dense resume text
-         needs more frost than a photo to read clean underneath a caption
-         (direct feedback: "legibility... is a little problem, blur can be
-         higher"). No icon chip -- the other two prep cards (PrepFoot) don't
-         have one either (direct feedback: "remove the icon... the others
-         don't have it"), same flex-col shape as PrepFoot now, just this
-         card's own paper-toned colors instead of PrepFoot's dark ones. */}
-      <CardProgressiveBlur size="50%" maxBlur={26} />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[50%]" aria-hidden style={{ background: "linear-gradient(to top, rgba(248,248,251,0.98) 0%, rgba(248,248,251,0.9) 40%, rgba(248,248,251,0.55) 70%, transparent 100%)" }} />
-      <span className="relative z-[2] flex flex-col gap-[2px] px-[16px] pt-[56px] pb-[14px]">
-        <span className="text-[10.5px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "#8a6d3d" }}>{D.PREP_RESUME.label}</span>
-        <span className="truncate text-[15px] leading-[19px] font-extrabold" style={{ color: "#18161f", fontFamily: "var(--font-display)" }}>{name}</span>
-        <span className="text-[12.5px] leading-[17px]" style={{ color: "rgba(24,22,31,0.68)" }}>{D.PREP_RESUME.why}</span>
-        <span className="mt-[4px] flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "#18161f" }}>{D.PREP_RESUME.cta} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
-      </span>
+      <CardProgressiveBlur size={height ? `${height}px` : "58%"} maxBlur={34} />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" aria-hidden style={{ height: height ? `${height}px` : "58%", background: cardBottomScrim("heavy") }} />
+      <PrepFoot ref={ref} label={D.PREP_RESUME.label} title={name} why={D.PREP_RESUME.why} cta={D.PREP_RESUME.cta} />
     </button>
   );
 }
@@ -1274,7 +1292,7 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
                 style={{ background: `linear-gradient(120deg, color-mix(in srgb, ${accent} 24%, var(--glass-surface-1)) 0%, color-mix(in srgb, ${accent} 8%, var(--glass-surface-1)) 100%)` }}
               >
                 <Muted className="flex items-center gap-[5px]"><MapPin className="h-3.5 w-3.5" aria-hidden /> {D.MENTOR.location}</Muted>
-                <Image src={D.PROGRAM.logoWhite} alt="Coach Foundation" width={600} height={150} className="h-[15px] w-auto opacity-90" />
+                <Image src={D.PROGRAM.logoWhite} alt="Coach Foundation" width={600} height={150} className="h-[19px] w-auto opacity-90" />
               </div>
             </div>
           </ClickPanel>
