@@ -147,9 +147,11 @@ export const CAREER_PROFILES: Record<string, CareerProfile> = {
 };
 
 import { GENERATED_PROFILES } from "./profiles.generated";
+import { ARTS_PROFILES } from "./profiles.arts";
 
 export function careerProfile(slug: string): CareerProfile | undefined {
   // Hand-transcribed production data wins; the generated blueprint fills
   // every other catalog career.
-  return CAREER_PROFILES[slug] ?? GENERATED_PROFILES[slug];
+  // the arts world's 24 poster-library careers (19 Sept 2026) come last
+  return CAREER_PROFILES[slug] ?? GENERATED_PROFILES[slug] ?? ARTS_PROFILES[slug];
 }

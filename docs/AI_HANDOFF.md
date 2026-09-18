@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Arts, Media & Sport: real career content for the 24 poster-library careers (local, not pushed)
+
+- `src/components/career/profiles.arts.ts` (new): full `CareerProfile` entries (summary, scenario, four facts, pay by state, know about, good at, software, three-rung ladder, education, fact details) for the 24 arts careers the poster library added on 19 Sept -- Actor, Audio and Video Technician, Broadcast Technician, Choreographer, Coach or Scout, Court Reporter or Captioner, Dancer, Fashion Designer, Film and Video Editor, Floral Designer, Game Producer, Graphic Designer, Interior Designer, Interpreter or Translator, Musician or Singer, Photographer, Professional Athlete, Public Relations Specialist, Set Designer, Visual Merchandiser, Writer or Copywriter, Art Director, Film Director, Journalist. Same US-context sourcing convention as `profiles.generated.ts`: knowledge/skills from O*NET, pay and outlook from BLS OOH/OEWS (May 2024), rounded, not sourced to the dollar. Hourly-wage BLS occupations (actors, dancers, musicians) show an hourly figure instead of an invented annual one.
+- `profiles.ts` `careerProfile()`: falls back to `ARTS_PROFILES` after `CAREER_PROFILES` and `GENERATED_PROFILES`, so these 24 career pages now show the full report instead of the "coming soon" placeholder.
+- Not yet checked live; next step is a headless pass on a few career pages (e.g. `/career/photographer`, `/career/film-director`) plus tsc/eslint (both already clean on this file).
+
 ### 2026-09-19 Search results fill the width; lighter bolt; smaller badge (PUSHED, user-authorized)
 
 - `ExploreExperience.tsx` SearchResults (also the world grids): an auto-fill CSS grid (min 150px on phones, 180px from sm) so cards share the full row instead of fixed 210px posters clustering left. `PosterCard` gains `fill` (aspect 210/297, width 100%, responsive `sizes`). Checked: 6 columns at 1440, 5 at 1280, 3 at 820, 2 at 375, grid right edge equals the last card's.
