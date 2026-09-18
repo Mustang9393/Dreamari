@@ -275,8 +275,8 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
         aria-label={open ? "Close quick links" : "Quick links"}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-[var(--radius-lg)] border backdrop-blur-[10px]"
-        style={{ background: "var(--glass-surface-2)", borderColor: open ? "var(--primary)" : "var(--glass-border)", color: "var(--foreground)" }}
+        className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full"
+        style={{ color: open ? "var(--primary)" : "var(--foreground)" }}
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>

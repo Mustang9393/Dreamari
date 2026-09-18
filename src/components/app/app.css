@@ -529,3 +529,18 @@ html.light .dm-report {
 @keyframes dm-title-sweep { from { background-position: -160% 0, 0 0; } to { background-position: 260% 0, 0 0; } }
 @media (prefers-reduced-motion: reduce) { .dm-title-shimmer { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .dm-tab-nudge { animation: none; } }
+
+/* A quiet, repeating sweep of light across a label (Explore's "For you"
+   until first opened). Text only: no tint, no beam on the pill around it.
+   The sweep takes a third of each cycle, then rests, so it reads as an
+   occasional glint rather than a constant animation. */
+.dm-text-nudge {
+  background:
+    linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, .9) 50%, transparent 60%) no-repeat -160% 0 / 60% 100%,
+    linear-gradient(currentColor, currentColor);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: dm-text-nudge 5.2s ease-in-out 0.9s infinite;
+}
+@keyframes dm-text-nudge { 0% { background-position: -160% 0, 0 0; } 32%, 100% { background-position: 260% 0, 0 0; } }
+@media (prefers-reduced-motion: reduce) { .dm-text-nudge { animation: none; } }

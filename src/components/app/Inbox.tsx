@@ -56,8 +56,10 @@ function NavIconButton({ label, open, onClick, badge, dot, children }: { label: 
       aria-expanded={open}
       title={label}
       onClick={onClick}
-      className="dm-quiet relative flex size-10 cursor-pointer items-center justify-center rounded-[var(--radius-lg)] border backdrop-blur-[10px]"
-      style={{ background: "var(--glass-surface-2)", borderColor: open ? "var(--primary)" : "var(--glass-border)", color: "var(--foreground)" }}
+      // plain icon, no bordered surface (direct feedback, 19 Sept 2026:
+      // "remove the surfaces... make them have breathing room")
+      className="dm-quiet relative flex size-10 cursor-pointer items-center justify-center rounded-full"
+      style={{ color: open ? "var(--primary)" : "var(--foreground)" }}
     >
       {children}
       {!!badge && (
@@ -213,7 +215,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
  *  (mentorship only), Notifications, then the hamburger the page renders. */
 export function HeaderActions({ children }: { children?: ReactNode }) {
   return (
-    <div className="flex items-center gap-[8px]">
+    <div className="flex items-center gap-[6px] sm:gap-[10px]">
       <DreamScoreChip />
       <MessagesButton />
       <NotificationsButton />

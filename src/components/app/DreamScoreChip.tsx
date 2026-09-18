@@ -16,8 +16,10 @@ export function DreamScoreChip({ className = "" }: { className?: string }) {
   return (
     <DreamScoreTip className={`flex ${className}`}>
       <span
-        className="flex h-10 flex-none items-center gap-[8px] rounded-[var(--radius-lg)] border px-[10px] text-[13px] leading-[18px] font-bold tabular-nums"
-        style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+        // no bordered surface: the two numbers sit plain in the bar with air
+        // around them (direct feedback, 19 Sept 2026)
+        className="flex h-10 flex-none items-center gap-[10px] px-[6px] text-[13px] leading-[18px] font-bold tabular-nums"
+        style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
         aria-label={`12 day streak, Dream Score ${xp} XP`}
       >
         <span className="flex items-center gap-[4px]"><Flame aria-hidden className="h-4 w-4" style={{ color: "var(--accent)" }} /> 12</span>

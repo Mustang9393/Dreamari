@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 For you nudge, Explore phone header rebuilt, header icons without surfaces (local, not pushed)
+
+- `ExploreExperience.tsx`: `useForYouNudge` (localStorage "dreamari:nudge:foryou") turns on a repeating light sweep across the words "For you" in the toggle until the student opens For you once, then never again. Text only, no tint or beam on the pill, so Browse All is not outshone (direct feedback). `app.css` gains `.dm-text-nudge` (5.2s cycle, sweep for a third of it, reduced motion off).
+- Explore on phones and tablets now uses the shared `MobileHeaderShell` (logo, streak | XP, bell, hamburger) like every other page. The For you | Browse All pill, Search (Browse only) and the Schools button sit on their own row at the top of main (z-20 so it stays above the fixed For you reel). Fixes the old absolute tab row colliding with the icon cluster at 375 to 430px, and keeps search off the top bar (direct feedback).
+- Header icons lose their bordered surfaces: `DreamScoreChip`, the bell and Messages (`NavIconButton`), the hamburger (`QuickLinksMenu`) are plain with wider gaps; `xp-slot-in` no longer leaves a 1px ring on the XP number.
+- Checked headless at 375, 820 and 1280 on Explore, Home, Connect, Profile, Resume Builder: no header overlaps, no horizontal scroll, no surfaces on the three controls; nudge class present on first Browse and gone after one For you visit; no page errors. tsc and eslint clean.
+
 ### 2026-09-19 Review notes: mentor cards side by side, no chat attachments, no Skip before Level 2, questions belong to the boards (local, not pushed)
 
 - `MentorshipTab.tsx`: My mentor + Next meeting (student) and Your next conversation + Next meeting (mentor) sit in one two-column grid from md up; stacked on phones.

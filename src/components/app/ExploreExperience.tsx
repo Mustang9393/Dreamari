@@ -9,7 +9,7 @@ import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
-import { DesktopNavigation, MobileNav, QuickLinksMenu, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 
@@ -51,7 +51,32 @@ import "./app.css";
 // as a pill deliberately (9 Sept 2026) once Careers/Schools became a text
 // tab strip of its own -- reserving the pill shape for this local, same-page
 // toggle keeps it visually distinct from that page-level section switch.
-export function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void }) {
+// Until the student has opened For you once, the label nudges them there:
+// a light sweep across the words "For you" every few seconds, on the text
+// only, no tint or beam on the pill (direct feedback, 19 Sept 2026: "only
+// on the text", "not too much that they ignore Browse All"). Browse is the
+// landing view, so without this For you would sit unnoticed. One visit ends
+// it for good; the flag lives in localStorage so it never comes back.
+const FOR_YOU_SEEN_KEY = "dreamari:nudge:foryou";
+function readForYouSeen(): boolean {
+  try { return window.localStorage.getItem(FOR_YOU_SEEN_KEY) === "1"; } catch { return false; }
+}
+export function markForYouSeen(): void {
+  try { window.localStorage.setItem(FOR_YOU_SEEN_KEY, "1"); } catch { /* no storage */ }
+}
+/** true while the nudge should show: on Browse, For you never opened. */
+export function useForYouNudge(tab: "foryou" | "browse"): boolean {
+  const [seen, setSeen] = useState(true); // assume seen until the client checks, so SSR never flashes the sweep
+  useEffect(() => {
+    if (tab === "foryou") markForYouSeen();
+    // deliberate: syncing a client-only store into state after mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSeen(tab === "foryou" ? true : readForYouSeen());
+  }, [tab]);
+  return tab === "browse" && !seen;
+}
+
+export function ForYouBrowseToggle({ tab, onTab, nudge = false }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void; /** text sweep on For you until first opened */ nudge?: boolean }) {
   return (
     <div
       className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-1)]"
@@ -75,7 +100,7 @@ export function ForYouBrowseToggle({ tab, onTab }: { tab: "foryou" | "browse"; o
             color: tab === item.key ? "var(--primary-foreground)" : "var(--foreground)",
           }}
         >
-          {item.label}
+          <span className={item.key === "foryou" && nudge ? "dm-text-nudge" : undefined}>{item.label}</span>
         </button>
       ))}
     </div>
@@ -792,6 +817,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   // ?q= from the sitewide search lands here with the box already open
   const [searchOpen, setSearchOpen] = useState(initialQuery.length > 0);
   const [query, setQuery] = useState(initialQuery);
+  const nudgeForYou = useForYouNudge(tab);
 
   function switchTab(next: "foryou" | "browse") {
     setTab(next);
@@ -806,64 +832,56 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
 
       <DesktopNavigation active="Explore" />
 
-      {/* Mobile top tabs (the mobile frames' "Top Nav Scrim") */}
-      <div data-night-scene={tab === "foryou" ? "" : undefined} className="absolute inset-x-0 top-0 z-30 flex h-[56px] items-center justify-start gap-[20px] pl-5 pr-[160px] lg:hidden" style={{ background: tab === "browse" ? "transparent" : "linear-gradient(180deg, var(--scrim-medium), var(--scrim-transparent))" }}>
-        <button
-          type="button"
-          onClick={() => switchTab("foryou")}
-          className="dm-link -my-[12px] cursor-pointer py-[12px] text-[14px] font-bold tracking-wide uppercase whitespace-nowrap"
-          style={{ fontFamily: "var(--font-body)", color: tab === "foryou" ? "var(--foreground)" : "var(--muted-foreground)" }}
-        >
-          For You
-        </button>
-        <button
-          type="button"
-          onClick={() => switchTab("browse")}
-          className="dm-link -my-[12px] cursor-pointer py-[12px] text-[14px] font-bold tracking-wide uppercase whitespace-nowrap"
-          style={{ fontFamily: "var(--font-body)", color: tab === "browse" ? "var(--foreground)" : "var(--muted-foreground)" }}
-        >
-          Browse All
-        </button>
-        {/* Hamburger anchored top-right, same corner as every other page's
-           mobile header -- it used to sit at the LEFT edge here, the one
-           page out of step with the rest of the app. Search (Browse tab
-           only) and the Colleges pill sit just to its left instead of
-           competing with For You/Browse All for the same row. */}
-        <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center gap-[10px]">
-          <button
-            type="button"
-            aria-label="Find a college"
-            onClick={() => router.push("/colleges")}
-            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-            style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-          >
-            <GraduationCap className="h-4 w-4" />
-          </button>
-          {tab === "browse" && (
-            <button
-              type="button"
-              aria-label="Search"
-              aria-pressed={searchOpen}
-              onClick={() => setSearchOpen((value) => !value)}
-              className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
-              style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: searchOpen ? "var(--primary)" : "var(--foreground)" }}
-            >
-              <Search className="h-4 w-4" />
-            </button>
-          )}
-          <HeaderActions><QuickLinksMenu /></HeaderActions>
-        </div>
-      </div>
+      {/* Phones and tablets: the same header shell as every other page
+         (logo, search on Browse, streak | XP, bell, hamburger). The For you |
+         Browse All pill and the Schools button sit on their own row at the
+         top of main, so nothing overlaps the icon cluster at 375px (the old
+         absolute tab row collided with it, 19 Sept 2026). */}
+      <MobileHeaderShell>
+        <Wordmark />
+        <HeaderActions><QuickLinksMenu /></HeaderActions>
+      </MobileHeaderShell>
 
       {/* One standard gap between the navbar and page content everywhere
          (space-10); For You fits the viewport with the card centered. */}
       <main
         className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 sm:px-[var(--space-14)] lg:pt-[var(--space-10)] ${
           tab === "browse"
-            ? "gap-[var(--space-10)] pt-[72px] pb-[120px]"
-            : "gap-[var(--space-6)] pt-[64px] pb-0 lg:h-[calc(100dvh-62px)] lg:overflow-hidden lg:pb-[var(--space-6)]"
+            ? "gap-[var(--space-10)] pt-4 pb-[120px]"
+            : "gap-[var(--space-6)] pt-4 pb-0 lg:h-[calc(100dvh-62px)] lg:overflow-hidden lg:pb-[var(--space-6)]"
         }`}
       >
+        {/* Phone row: the view toggle, then Search (Browse only) and Schools;
+           search stays off the top bar (direct feedback, 19 Sept 2026) */}
+        {/* z-20: on phones the For you reel is a fixed layer inside main, so
+           this row has to sit above it to stay tappable over the photo */}
+        <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
+          <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou} />
+          <div className="flex items-center gap-[10px]">
+            {tab === "browse" && (
+              <button
+                type="button"
+                aria-label="Search"
+                aria-pressed={searchOpen}
+                onClick={() => setSearchOpen((value) => !value)}
+                className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+                style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: searchOpen ? "var(--primary)" : "var(--foreground)" }}
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label="Find a college"
+              title="Schools"
+              onClick={() => router.push("/colleges")}
+              className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+              style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+            >
+              <GraduationCap className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
         {/* Explore Header (desktop) */}
         <div className="hidden w-full flex-col gap-[var(--space-6)] lg:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
@@ -925,7 +943,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                 className="flex-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
               >
-                <ForYouBrowseToggle tab={tab} onTab={switchTab} />
+                <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou} />
               </div>
             </div>
           </div>
