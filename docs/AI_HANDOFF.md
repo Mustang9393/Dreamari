@@ -10390,3 +10390,14 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   month tinted; tapping a tile shows its focus in one detail card. Joshua
   Pierce, Slack, 18 Sept 2026: "all the user really needs to see is the
   month and topic... the month should be larger than the topic".
+
+## 2026-09-18 · AT&T board: v1 live, v2.0 behind a demo chip
+
+- `src/components/connect/att/v1/` is the board as it shipped (Joshua's
+  Replit, faithfully); `src/components/connect/att/` is the reach-first
+  rebuild (see docs/reference/att-board-additions-2026-09-17.md for every
+  change and why). ConnectExperience renders v1 by default and v2.0 when
+  the small "v1 | v2.0" chip beside Demo is switched, or with `?v=2` in the
+  URL (kept across Connect navigation so a demo link lands on it).
+- Pushed on the user's explicit instruction (18 Sept 2026). The rule stays:
+  further AT&T changes are pushed only when asked by name.

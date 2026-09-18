@@ -21,6 +21,8 @@ import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFoll
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
 import { AttCommunityView } from "./att/AttCommunityView";
+import { AttCommunityView as AttCommunityViewV1 } from "./att/v1/AttCommunityView";
+import type { AttVersion } from "./att/VersionChip";
 import { ATT_ID } from "./att/attData";
 import { MentorshipTab } from "./mentorship/MentorshipTab";
 
@@ -1241,6 +1243,15 @@ export function ConnectExperience() {
   // a board's insights tab, another thread). This stack is that missing
   // history: pushed once per setView call, popped by goBack below.
   const [viewStack, setViewStack] = useState<View[]>([]);
+  // Demo only: which build of the AT&T board shows. v1 is the live default;
+  // `?v=2` opens the reach-first rebuild, so a demo link can land on it.
+  const [attVersion, setAttVersion] = useState<AttVersion>("v1");
+  const pickAttVersion = (v: AttVersion) => {
+    setAttVersion(v);
+    const url = new URL(window.location.href);
+    if (v === "v2") url.searchParams.set("v", "2"); else url.searchParams.delete("v");
+    window.history.replaceState(null, "", url.pathname + url.search);
+  };
   // People tab's welcome modal: shown once per Connect visit, not once per
   // PeopleTab mount (see PeopleWelcome in PeopleTab.tsx for why).
   const [peopleWelcomeShown, setPeopleWelcomeShown] = useState(false);
@@ -1288,6 +1299,7 @@ export function ConnectExperience() {
     // see it, the same place the Volunteer tab lands (direct feedback, 5 Sept 2026)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setViewState(as === "pro" && restored.kind === "home" && restored.tab === "communities" ? { kind: "pro", id: "pro-okafor" } : restored);
+    if (params.get("v") === "2") setAttVersion("v2");
     if (as && ROLES.some((r) => r.key === as)) setRole(as as DemoRole);
     else if (params.get("admin")) setRole("admin");
     else if (params.get("dashboard")) setRole("pro");
@@ -1303,9 +1315,11 @@ export function ConnectExperience() {
     setViewState(next);
     const base = viewToQuery(next);
     const keep = as ?? new URLSearchParams(window.location.search).get("as");
-    window.history.replaceState(null, "", "/connect" + base + (keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : ""));
+    const asPart = keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : "";
+    const vPart = attVersion === "v2" ? (base || asPart ? "&" : "?") + "v=2" : "";
+    window.history.replaceState(null, "", "/connect" + base + asPart + vPart);
     window.scrollTo(0, 0);
-  }, [view]);
+  }, [view, attVersion]);
 
   /** Real "back": pop the last view off the stack and restore it exactly,
    *  rather than jumping to a hardcoded parent. Every onBack handler below
@@ -1330,9 +1344,11 @@ export function ConnectExperience() {
     setViewState(prev);
     const base = viewToQuery(prev);
     const keep = new URLSearchParams(window.location.search).get("as");
-    window.history.replaceState(null, "", "/connect" + base + (keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : ""));
+    const asPart = keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : "";
+    const vPart = attVersion === "v2" ? (base || asPart ? "&" : "?") + "v=2" : "";
+    window.history.replaceState(null, "", "/connect" + base + asPart + vPart);
     window.scrollTo(0, 0);
-  }, [viewStack]);
+  }, [viewStack, attVersion]);
   const backLabel = backLabelFor(viewStack[viewStack.length - 1]);
 
   const say = useCallback((message: string) => {
@@ -1539,7 +1555,9 @@ export function ConnectExperience() {
           (() => {
             // The AT&T partner community has its own board (three views), not
             // the general BoardView; everything else in Connect is unchanged.
-            if (view.id === ATT_ID) return <AttCommunityView onBack={goBack} backLabel={backLabel} />;
+            if (view.id === ATT_ID) return attVersion === "v2"
+              ? <AttCommunityView onBack={goBack} backLabel={backLabel} version={attVersion} onVersion={pickAttVersion} />
+              : <AttCommunityViewV1 onBack={goBack} backLabel={backLabel} version={attVersion} onVersion={pickAttVersion} />;
             const community = COMMUNITIES.find((c) => c.id === view.id);
             if (!community) return null;
             return (

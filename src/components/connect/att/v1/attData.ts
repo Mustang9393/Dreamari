@@ -1,6 +1,6 @@
 // AT&T x Connected Learning Centers -- every string here is copied verbatim
-import type { Pro } from "../data";
-import { PARTNER_PORTRAITS } from "../primitives";
+import type { Pro } from "../../data";
+import { PARTNER_PORTRAITS } from "../../primitives";
 // from Joshua's Connect update on Replit (dceeai.replit.app/community-boards
 // -> AT&T x Connected Learning Centers -> Enter Community, captured 17 Sept
 // 2026; see docs/reference/joshua-connect-replit-2026-09). Content and copy
@@ -13,8 +13,6 @@ export const ATT = {
   id: ATT_ID,
   eyebrow: "ACTIVE COMMUNITY",
   name: "AT&T × Connected Learning Centers",
-  // Banner copy stays the source's, word for word (direct feedback, 18
-  // Sept 2026: "do not expand on the copy in the banner").
   about: "A moderated career community connecting students with AT&T professionals and opportunities.",
   stats: [
     { value: "620", label: "Students" },
@@ -36,49 +34,23 @@ export const VIEWS = [
 ] as const;
 export type AttView = typeof VIEWS[number]["key"];
 
-// Four student tabs: Learn is the virtual launchpad the AT&T report asks
-// for; People folded into Ask (the people worth following are the ones who
-// answer). Volunteers get a time-boxed Today and their own impact instead
-// of a calendar; the enterprise view opens on Impact.
 export const STUDENT_TABS = [
   { key: "home", label: "Home" },
-  { key: "learn", label: "Learn" },
-  { key: "questions", label: "Ask" },
+  { key: "questions", label: "Questions" },
   { key: "opportunities", label: "Opportunities" },
   { key: "people", label: "People" },
 ] as const;
 export const VOLUNTEER_TABS = [
-  { key: "home", label: "Today" },
+  { key: "home", label: "Home" },
   { key: "questions", label: "Questions" },
   { key: "share", label: "Share" },
-  { key: "yearRound", label: "Impact" },
+  { key: "yearRound", label: "Year-Round Impact" },
 ] as const;
 export const ENTERPRISE_TABS = [
-  { key: "impact", label: "Impact" },
   { key: "program", label: "Program" },
+  { key: "impact", label: "Impact" },
   { key: "team", label: "Team" },
 ] as const;
-
-// ——— the one program theme every view reads (fixes the source's drift
-// between the student poll, the volunteer prompt and the planner) ———
-export const THEME = {
-  eyebrow: "AT&T theme",
-  month: "September",
-  theme: "Back to School + Career Access",
-  // the planner's "Students see" line, as something a student can do now.
-  // With picks saved (the usual case), the card speaks to them instead of
-  // asking the student to choose again (direct feedback, 18 Sept 2026).
-  student: "Pick the careers you'll explore this year.",
-  explore: "Explore careers",
-  exploreHref: "/explore",
-  // Career Access is the theme; "exploring careers" is the signal AT&T
-  // asked for, so the card says it and shows the student's own picks
-  withPicks: "You're exploring",
-  plan: "Open My Plan",
-  planHref: "/profile?tab=plan",
-  ask: "Ask a pro",
-  volunteer: "Share one thing you wish you knew before your first job.",
-};
 
 // ——— people ———
 
@@ -119,28 +91,16 @@ export const STUDENT_INSIGHTS = [
 ];
 export const INSIGHT_ACTIONS = { like: "Like", comment: "Comment", ask: "Ask", commentPlaceholder: "Add a comment...", post: "Post" };
 
-/** The student pulse: one question per period, set in the Program planner
- *  (the biweekly "Skills + Student Pulse" period). Answering pays XP and
- *  picks the student's next module; the same answers show volunteers what
- *  students care about (Today) and AT&T how the month is landing (Impact). */
 export const POLL = {
-  eyebrow: "Weekly pulse · Sep 15 to 21",
-  cadence: "New question every Monday · +5 XP",
-  question: "Which skill matters most for your future?",
+  eyebrow: "This Week",
+  question: "Which skill will matter most in your future career?",
   options: ["Communication", "Technology", "Problem solving", "Leadership"],
-  saved: "Saved",
-  xp: 5,
-  nextLabel: "Next for you",
-  next: { Communication: "l-calls", Technology: "l-internet", "Problem solving": "l-defender", Leadership: "l-roles" } as Record<string, string>,
+  saved: "Your response is saved.",
   // Ours: the source shows no results. After voting the options become the
   // tally, the way Instagram's poll sticker flips to percentages.
   results: { Communication: 34, Technology: 31, "Problem solving": 22, Leadership: 13 } as Record<string, number>,
   responses: 148,
   answered: "students have answered",
-};
-export const PULSE = {
-  volunteer: "Students this month: Communication leads at 34%.",
-  enterprise: "Student pulse",
 };
 
 export const HOME_OPPORTUNITIES = {
@@ -274,10 +234,6 @@ export const PEOPLE_ROWS = [
   { title: "Technology & Engineering", pros: ["jordan", "andre", "amina"] },
 ];
 export const FOLLOW = { follow: "Follow", following: "Following" };
-/** Something to choose on: how many questions each professional has
- *  answered here (the source's tiles carried nothing but a name). */
-export const ANSWER_COUNTS: Record<string, number> = { marcus: 31, jordan: 24, maya: 19, elena: 14, andre: 11, amina: 8 };
-export const PEOPLE_ANSWER = { answers: "answers" };
 
 // ——— Volunteer View ———
 
@@ -290,35 +246,6 @@ export const VOLUNTEER_HOME = {
   submit: "Submit answer",
   cancel: "Cancel",
   footer: "23 students engaged this month.",
-};
-/** Time-boxed asks matched to the volunteer (the report's "structured,
- *  time-bounded micro-volunteering"). Accepting one counts toward hours. */
-export const REQUESTS = {
-  title: "Requests for you",
-  sub: "Matched to you. Each fits in a break.",
-  accept: "Accept",
-  accepted: "Accepted",
-  acceptedLine: "Added to your hours",
-  minutes: "min",
-  defaultResume: "Jordan Rivera's résumé",
-  items: [
-    { id: "r0", kind: "Tutoring", title: "Algebra II homework help, a 9th grader in Detroit", minutes: 30, why: "Requested 4 min ago · online" },
-    { id: "r1", kind: "Question", title: "A 10th grader in Ohio asks what to learn now for cybersecurity", minutes: 10, why: "Matches your role" },
-    // {resume} is the student's latest saved résumé name when one exists
-    { id: "r2", kind: "Résumé review", title: "Review {resume} for the Technology Internship", minutes: 20, why: "Applying this month" },
-    { id: "r3", kind: "Live session", title: "Take student questions at Inside AT&T Cybersecurity", minutes: 45, why: "Oct 22 · 4 PM ET · Online" },
-  ],
-};
-/** Closing the loop: what happened to the answers a volunteer already gave. */
-export const YOUR_ANSWERS = {
-  title: "Your answers",
-  summary: "4 answers this month · read 312 times",
-  reads: "reads",
-  live: "Live in Recent Answers",
-  items: [
-    { question: "What should I learn now if I want to work in cybersecurity?", reads: 186, helpful: 112, when: "3d ago" },
-    { question: "What skills matter most in network engineering?", reads: 126, helpful: 74, when: "1w ago" },
-  ],
 };
 export const QUESTIONS_WAITING = {
   title: "Questions waiting",
@@ -345,7 +272,7 @@ export const SHARE = {
     cta: "Share insight",
     heading: "Share an insight",
     question: "What would you like students to know?",
-    chips: ["What is changing in your industry?", "What skill matters most?", "What do you wish students knew about your career?"],
+    chips: ["What is changing in your industry?", "What skill matters most?", "What do students misunderstand about your career?"],
     placeholder: "What would you like students to know?",
     post: "Post insight",
   },
@@ -361,133 +288,6 @@ export const SHARE = {
   },
 };
 export const SUBMITTED = "Submitted for moderation";
-
-/** The volunteer's own year (replaces the calendar-first Year-Round tab; the
- *  calendar stays, collapsed, under it). Hours by month read upward. */
-export const MY_IMPACT = {
-  title: "My Impact",
-  sub: "Your year with students, in one place.",
-  tiles: [
-    { key: "hours", value: "14", label: "Hours this year" },
-    { key: "answers", value: "31", label: "Answers" },
-    { key: "reads", value: "12.8K", label: "Reads" },
-    { key: "students", value: "26", label: "Students helped" },
-  ],
-  hoursEyebrow: "Hours by month",
-  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"],
-  hours: [0, 1, 1, 1, 2, 2, 2, 2, 3],
-  believes: "Synced to AT&T Believes · Volunteers Network",
-  rewards: { eyebrow: "Believes Volunteer Rewards", logged: 14, target: 25, pace: 12, unit: "hours", line: "25 hours unlocks a $1,000 grant to the nonprofit you choose." },
-  studentsEyebrow: "Students you have helped",
-  students: [
-    { name: "Jordan Rivera", what: "Résumé review", when: "Sep" },
-    { name: "Priya", what: "Cybersecurity question", when: "Sep" },
-    { name: "Marcus", what: "Career fair question", when: "Aug" },
-    { name: "Sana", what: "Network engineering question", when: "Jun" },
-  ],
-  calendar: "Program calendar",
-  hideCalendar: "Hide calendar",
-};
-
-/** The Learn tab: AT&T's free, virtual learning partners as modules a
- *  student can finish from anywhere. Progress banks XP like the rest of
- *  the app. Provider names are real (The Achievery, DigitalLearn); module
- *  titles and copy are demo text until the partners supply their own. */
-export type LearnModule = { id: string; title: string; minutes: number; xp: number; career: string; /** the résumé skill a finished unit banks in Dreamari */ skill: string; /** the Dreamari world the career sits in; empty for modules every career needs */ world: string; progress: number; about: string; steps: string[]; /** an app feature the module hands off to */ link?: { label: string; href: string } };
-export const LEARN = {
-  title: "Learn",
-  sub: "Free. Virtual. Every module banks XP.",
-  // Units live on AT&T's platforms and open there; Dreamari holds the plan
-  // and the progress (direct decision, 18 Sept 2026: import, never replicate)
-  opens: "Opens in",
-  sync: "Progress syncs from your account",
-  start: "Open unit",
-  resume: "Continue unit",
-  done: "Completed",
-  continueEyebrow: "Continue learning",
-  seeAll: "See all",
-  sheet: { about: "About", steps: "You'll", counts: "Counts toward", plan: "Add to My Plan", inPlan: "In My Plan", minutes: "min", xp: "XP", progress: "Progress" },
-  xpMilestone: "Module progress",
-  fits: "Fits your picks",
-  // what a finished unit turns into here: a résumé skill, a plan step, a
-  // question to a pro. The unit opens on AT&T's platform; the value stays.
-  bank: { eyebrow: "Bank it in Dreamari", resume: "Add to résumé skills", onResume: "On your résumé", ask: "Ask an AT&T pro about this", resumeToast: "Added to your résumé skills", resumeFull: "Tech skills are full on your résumé. Swap one in Resume Builder." },
-  groups: [
-    {
-      provider: "The Achievery",
-      href: "https://www.theachievery.com/en",
-      line: "Free · K to 12",
-      modules: [
-        { id: "l-internet", skill: "Network fundamentals", world: "Tech & Engineering", title: "How the Internet Actually Works", minutes: 20, xp: 15, career: "Network Engineer", progress: 60, about: "Follow one message from your phone to a server and back.", steps: ["Trace one request across the network", "Spot the three places it can slow down", "Meet the roles that fix each one"] },
-        { id: "l-defender", skill: "Security awareness", world: "Tech & Engineering", title: "Cybersecurity: Think Like a Defender", minutes: 25, xp: 20, career: "Cybersecurity Analyst", progress: 0, about: "Spot an attack in progress and decide what to do first.", steps: ["Read an alert the way an analyst does", "Decide what to check first", "Write a two-line summary for your manager"] },
-        { id: "l-ai", skill: "AI literacy", world: "Tech & Engineering", title: "AI in Everyday Life", minutes: 15, xp: 15, career: "AI Product Manager", progress: 100, about: "Where AI already shows up in your day, and what a PM asks before shipping it.", steps: ["Find five AI moments in your day", "Sort them into helpful and risky", "Pitch one improvement"] },
-        { id: "l-roles", skill: "Career research", world: "Tech & Engineering", title: "Careers Behind the Network", minutes: 15, xp: 15, career: "Network Engineering Manager", progress: 0, about: "Six roles you've never heard of, and what a week looks like in each.", steps: ["Match six roles to what they do", "Pick the two that fit you", "Save them to Explore"] },
-      ],
-    },
-    {
-      provider: "DigitalLearn",
-      href: "https://www.digitallearn.org",
-      line: "Digital skills · with the Public Library Association",
-      modules: [
-        { id: "l-safety", skill: "Online safety", world: "", title: "Online Safety Basics", minutes: 20, xp: 15, career: "Every career", progress: 0, about: "Passwords, phishing, privacy. The habits every employer expects on day one.", steps: ["Check three of your own settings", "Spot the phishing email", "Set up a password manager"] },
-        { id: "l-calls", skill: "Video communication", world: "", title: "Video Calls for School and Interviews", minutes: 15, xp: 10, career: "Every career", progress: 35, about: "Camera, sound, background. Look ready on any call.", steps: ["Set up your frame and light", "Practice a 60-second intro", "Record and review it once"] },
-        { id: "l-resume", skill: "Résumé writing", world: "", title: "Build a Résumé in Google Docs", minutes: 30, xp: 20, career: "Every career", progress: 0, about: "A clean one-pager from a blank doc, then an ATS check in Resume Builder.", steps: ["Start from the one-page layout", "Write three bullets that show results", "Import it into Resume Builder"], link: { label: "Open Resume Builder", href: "/profile?tab=resume" } },
-      ],
-    },
-  ],
-};
-export const LEARN_MODULES: LearnModule[] = LEARN.groups.flatMap((g) => g.modules);
-
-/** The two asks AT&T already fulfils at scale, 194,000 devices and
- *  UPchieve tutoring by employees, as one-tap requests from anywhere. */
-export const HELP = {
-  // Devices are gated the way Compudopt gates them: enrolled, no working
-  // computer at home, household qualifies, one per household, random
-  // draw before an event. The board joins the list; it never promises one.
-  device: {
-    kind: "Device",
-    title: "Get a laptop or hotspot",
-    line: "Free. Join the list for the next distribution near you.",
-    via: "Through Compudopt and PCs for People. Limited supply, one per household, names drawn at random before each event.",
-    what: "What do you need?",
-    options: ["Laptop", "Wi-Fi hotspot", "Both"],
-    check: "Confirm you qualify",
-    eligibility: ["I'm enrolled in school", "No working computer at home", "My household qualifies"],
-    note: "School-issued devices don't count. Qualifies means an income-based program or under 200% of the poverty line. Your center or counselor can verify.",
-    submit: "Join the list",
-    done: "You're on the list. Compudopt draws names three days before the next Detroit event and texts you.",
-  },
-  tutor: {
-    kind: "Tutoring",
-    title: "Homework help now",
-    line: "An AT&T volunteer, online, usually within ten minutes.",
-    via: "Free for grades 8 to 12 at Title I schools or in low-income ZIP codes. Online here, in a moderated chat with an AT&T volunteer.",
-    qualifies: "Your school is on file. You qualify.",
-    what: "Subject",
-    options: ["Algebra", "Geometry", "Biology", "Chemistry", "Essay", "College apps"],
-    submit: "Find a tutor",
-    done: "Request sent. A volunteer is on the way.",
-  },
-};
-
-/** In person is an option, never the entry point. One quiet card, low on
- *  the student's Home. */
-export const NEAR_YOU = {
-  eyebrow: "Prefer in person?",
-  name: "Detroit Connected Learning Center",
-  line: "Open today until 7 PM · Career Day Nov 14",
-  note: "Everything here works from anywhere. Centers add Wi-Fi, computers and a person to help.",
-  cta: "Find a center",
-  optional: "Optional",
-};
-
-export const OPPORTUNITY_FILTERS = [
-  { key: "all", label: "All" },
-  { key: "virtual", label: "Virtual" },
-  { key: "inPerson", label: "In person" },
-] as const;
-export type OpportunityFilter = typeof OPPORTUNITY_FILTERS[number]["key"];
-export const VIRTUAL_WHERE = /virtual|online|remote|anytime|nationwide/i;
 
 export type PeriodCard = { key: string; period: string; theme: string; prompt: string; students: string; cta: "Answer Prompt" | "Share Insight" };
 export const YEAR_ROUND = {
@@ -554,14 +354,9 @@ const attBiweekly = (topic: string) => ({ topic, volunteer: "How is your work ch
 
 export const PROGRAM = {
   title: "Community Program",
-  sub: "One theme a month, seen by everyone.",
+  sub: "Plan how AT&T stays connected with students.",
   autopilot: { label: "Auto-pilot", sub: "Dreamari fills unscheduled periods." },
-  topicSource: "Source",
-  // one vocabulary for the same two fields, whoever wrote them
-  studentsSee: "Students see",
-  volunteersSee: "Volunteers see",
-  current: "Live now",
-  inUse: "In use",
+  topicSource: "Topic source",
   labels: {
     dreamari: "Dreamari suggestion",
     att: "AT&T topic",
@@ -576,10 +371,10 @@ export const PROGRAM = {
   actions: { selected: "Topic selected", use: "Use This Topic", another: "Suggest Another", save: "Save", edit: "Edit Topic", saved: "Saved", approve: "Approve", editShort: "Edit" },
   fields: { topic: "Enter topic", volunteer: "What should employees respond to?", student: "What should students explore or answer?" },
   monthly: [
-    { key: "sep", period: "September", theme: "Back to School + Career Access", defaultSource: "dreamari", dreamari: { topic: "Back to School + Career Access", employees: "Share one thing you wish you knew before your first job.", students: "Which career do you want to explore this year?", selected: true }, att: { topic: "Back to School + Career Access", volunteer: "What do you wish you knew before your first job?", student: "Which career do you want to explore?", saved: false }, school: { topic: "Back to School + Career Access", by: SCHOOL_BY, employee: "What do you wish you knew before your first job?", student: "Which career do you want to explore?" } },
-    { key: "oct", period: "October", theme: "AI & Future of Work", defaultSource: "att", dreamari: { ...DREAMARI_AI, selected: false }, att: { topic: "AI & Future of Work", volunteer: "How is AI changing your role?", student: "Explore AI-related careers", saved: true }, school: { topic: "Careers Behind AT&T", by: SCHOOL_BY, employee: "How is AI changing your role?", student: "Explore AI-related careers" } },
-    { key: "nov", period: "November", theme: "Careers Behind AT&T", defaultSource: "school", dreamari: { ...DREAMARI_AI, selected: false }, att: { topic: "Career Readiness Month", volunteer: "What skill has helped you most professionally?", student: "Ask one professional about that skill.", saved: false }, school: { topic: "Careers Behind AT&T", by: SCHOOL_BY, employee: "Introduce students to a role they may not know exists.", student: "Find one role inside AT&T you had never heard of." } },
-    { key: "dec", period: "December", theme: "Advice Worth Keeping", defaultSource: "dreamari", dreamari: { topic: "Advice Worth Keeping", employees: "Share one career lesson you hope students remember.", students: "Save one piece of advice to your career plan.", selected: true }, att: { topic: "Advice Worth Keeping", volunteer: "Which career lesson has stayed with you?", student: "Save one piece of advice for your career plan.", saved: false }, school: { topic: "Advice Worth Keeping", by: SCHOOL_BY, employee: "Which career lesson has stayed with you?", student: "Save one piece of advice for your career plan." } },
+    { key: "sep", period: "September", theme: "Back to School + Career Access", defaultSource: "dreamari", dreamari: { ...DREAMARI_AI, selected: true }, att: { topic: "Back to School + Career Access", volunteer: "What do you wish you knew before your first job?", student: "Which career do you want to explore?", saved: false }, school: { topic: "Back to School + Career Access", by: SCHOOL_BY, employee: "What do you wish you knew before your first job?", student: "Which career do you want to explore?" } },
+    { key: "oct", period: "October", theme: "AI & Future of Work", defaultSource: "att", dreamari: { ...DREAMARI_AI, selected: false }, att: { topic: "Careers Behind AT&T", volunteer: "How is AI changing your role?", student: "Explore AI-related careers", saved: true }, school: { topic: "Careers Behind AT&T", by: SCHOOL_BY, employee: "How is AI changing your role?", student: "Explore AI-related careers" } },
+    { key: "nov", period: "November", theme: "Careers Behind AT&T", defaultSource: "school", dreamari: { ...DREAMARI_AI, selected: false }, att: { topic: "Career Readiness Month", volunteer: "What skill has helped you most professionally?", student: "Ask one professional about that skill.", saved: false }, school: { topic: "Career Readiness Month", by: SCHOOL_BY, employee: "What skill has helped you most professionally?", student: "Ask one professional about that skill." } },
+    { key: "dec", period: "December", theme: "Advice Worth Keeping", defaultSource: "dreamari", dreamari: { topic: "Skills That Matter", employees: "Which skill has mattered most in your career?", students: "Which skill do you want to build next?", selected: true }, att: { topic: "Advice Worth Keeping", volunteer: "Which career lesson has stayed with you?", student: "Save one piece of advice for your career plan.", saved: false }, school: { topic: "Advice Worth Keeping", by: SCHOOL_BY, employee: "Which career lesson has stayed with you?", student: "Save one piece of advice for your career plan." } },
   ] as ProgramPeriod[],
   biweekly: [
     { key: "sep1", period: "Sep 1–15", theme: "Welcome + Career Access", defaultSource: "dreamari", dreamari: { ...DREAMARI_AI, selected: false }, att: attBiweekly("Welcome + Career Access"), school: { topic: "Welcome + Career Access", by: SCHOOL_BY, employee: "How is your work changing?", student: "Which career interests you most?" } },
@@ -593,41 +388,24 @@ export const IMPACT = {
   title: "Community Impact",
   sub: "A clear view of AT&T’s community contribution.",
   range: [{ key: "month", label: "This Month" }, { key: "year", label: "This Year" }] as const,
-  // This Month and This Year are different numbers (the source showed the
-  // same six in both); "reached" means views, students are students.
-  // AT&T's own vocabulary (people served, devices, hours) plus the two
-  // numbers only Dreamari can add: Achievery units and career steps.
   tiles: [
-    { key: "students", month: "214", year: "620", label: "People Served" },
-    { key: "devices", month: "9", year: "48", label: "Devices Placed" },
-    { key: "volunteers", month: "31", year: "54", label: "AT&T Volunteers" },
-    { key: "hours", month: "28", year: "174", label: "Volunteer Hours" },
-    { key: "units", month: "310", year: "1,240", label: "Achievery Units Completed" },
-    { key: "steps", month: "196", year: "812", label: "Career Steps Completed" },
+    { key: "students", value: "620", label: "Students Reached" },
+    { key: "volunteers", value: "54", label: "AT&T Volunteers" },
+    { key: "views", value: "48.2K", label: "Content Views" },
+    { key: "answered", value: "286", label: "Questions Answered" },
+    { key: "hours", value: "174", label: "Volunteer Hours" },
+    { key: "opportunities", value: "37", label: "Opportunities Shared" },
   ],
-  outcome: {
-    eyebrow: "Outcome",
-    value: "62%",
-    line: "of students with an AT&T touch completed a career step within 30 days",
-    funnel: [{ label: "Unit done", value: 1240 }, { label: "Plan step", value: 812 }, { label: "Résumé", value: 214 }, { label: "Applied", value: 96 }],
-    funnelLabel: "From access to outcome",
-  },
-  reach: {
-    eyebrow: "How students take part",
-    parts: [{ label: "Virtual", value: 441 }, { label: "At a center", value: 179 }],
-    note: "15 states. A center is one way in.",
-  },
-  goal: { eyebrow: "2026 volunteer hours", logged: 174, target: 240, pace: 170, unit: "hours" },
   trend: {
     eyebrow: "Impact trend",
-    metrics: [{ key: "reached", label: "People Served" }, { key: "views", label: "Achievery Units" }, { key: "engagements", label: "Career Steps" }] as const,
+    metrics: [{ key: "reached", label: "Students Reached" }, { key: "views", label: "Views" }, { key: "engagements", label: "Engagements" }] as const,
     months: ["Apr", "May", "Jun", "Jul", "Aug", "Sep"],
     // Only the line's shape is shown in the source (no data labels); these
     // series reproduce that rising curve ending on the headline totals.
     series: {
       reached: [180, 240, 310, 400, 500, 620],
-      views: [210, 380, 540, 760, 990, 1240],
-      engagements: [120, 240, 360, 510, 660, 812],
+      views: [12400, 17800, 24100, 31500, 39800, 48200],
+      engagements: [640, 890, 1210, 1580, 1990, 2460],
     } as Record<string, number[]>,
   },
   employee: {
@@ -646,10 +424,10 @@ export const TEAM = {
     { pro: "jordan", reached: "9.4K", answers: 24, hours: 11 },
     { pro: "maya", reached: "7.8K", answers: 19, hours: 9 },
   ],
-  topLabels: { reached: "reads", answers: "answers", hours: "hours" },
+  topLabels: { reached: "reached", answers: "answers", hours: "hours" },
   rosterTitle: "All Volunteers",
   filters: [{ key: "all", label: "All" }, { key: "active", label: "Most Active" }, { key: "needs", label: "Needs Engagement" }] as const,
-  columns: ["Name", "Role", "Activity", "Reads", "Hours"],
+  columns: ["Name", "Role", "Activity", "Students Reached", "Hours"],
   roster: [
     { pro: "marcus", activity: "Active this week", reached: "12.8K", hours: 14 },
     { pro: "jordan", activity: "Active this week", reached: "9.4K", hours: 11 },
