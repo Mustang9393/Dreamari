@@ -45,12 +45,14 @@ export function ScoreBolt({ size = 16, className = "" }: { size?: number; classN
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden className={className}>
       <defs>
         <linearGradient id={`${id}-fill`} x1="6" y1="3" x2="18" y2="21" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#7FA8FF" />
-          <stop offset="0.5" stopColor="#2F6BF2" />
-          <stop offset="1" stopColor="#7D5CFF" />
+          {/* light, electric: pale sky at the top through brand-400 to a
+             soft violet, never the deep brand blue (direct feedback) */}
+          <stop offset="0" stopColor="#E3EDFF" />
+          <stop offset="0.45" stopColor="#7FA8FF" />
+          <stop offset="1" stopColor="#9D86FF" />
         </linearGradient>
         <linearGradient id={`${id}-shine`} x1="9" y1="3" x2="12" y2="12" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.85" />
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.95" />
           <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
         </linearGradient>
       </defs>

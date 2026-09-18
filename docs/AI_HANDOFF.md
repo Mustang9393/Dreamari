@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Search results fill the width; lighter bolt; smaller badge (PUSHED, user-authorized)
+
+- `ExploreExperience.tsx` SearchResults (also the world grids): an auto-fill CSS grid (min 150px on phones, 180px from sm) so cards share the full row instead of fixed 210px posters clustering left. `PosterCard` gains `fill` (aspect 210/297, width 100%, responsive `sizes`). Checked: 6 columns at 1440, 5 at 1280, 3 at 820, 2 at 375, grid right edge equals the last card's.
+- `ScoreIcons.tsx` bolt: pale sky through brand-400 to soft violet, no deep brand blue. `Inbox.tsx` badge: 15px, 9.5px text, sits over the bell's top-right corner instead of outside it.
+
 ### 2026-09-19 Illustrated streak and XP icons; For you nudge made visible (local, not pushed)
 
 - `src/components/app/ScoreIcons.tsx`: `StreakFlame` (warm amber to red gradient, pale inner flame ending in brand blue) and `ScoreBolt` (brand blue into accent purple with a white shine). `DreamScoreChip` uses them at 17px instead of the flat blue lucide Flame and Zap (direct feedback: "either make them white or use proper illustration svgs").

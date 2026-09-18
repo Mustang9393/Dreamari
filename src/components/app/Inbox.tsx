@@ -63,7 +63,7 @@ function NavIconButton({ label, open, onClick, badge, dot, children }: { label: 
     >
       {children}
       {!!badge && (
-        <span aria-hidden className="absolute -top-[5px] -right-[5px] flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: "#FF3040", color: "#FFFFFF", boxShadow: "0 0 0 2px var(--background)" }}>
+        <span aria-hidden className="absolute top-[5px] right-[5px] flex h-[15px] min-w-[15px] items-center justify-center rounded-full px-[4px] text-[9.5px] leading-none font-extrabold tabular-nums" style={{ background: "#FF3040", color: "#FFFFFF", boxShadow: "0 0 0 1.5px var(--background)" }}>
           {badge > 9 ? "9+" : badge}
         </span>
       )}

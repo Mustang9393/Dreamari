@@ -99,16 +99,16 @@ export function OpenCue() {
   );
 }
 
-export function PosterCard({ career, className = "", onClick }: { career: CatalogCareer; className?: string; onClick?: () => void }) {
+export function PosterCard({ career, className = "", onClick, fill = false }: { career: CatalogCareer; className?: string; onClick?: () => void; /** fill a grid cell (search results, world grids) instead of the rail's fixed 210x297 */ fill?: boolean }) {
   const titleSize = posterTitleSize(career.title, career.world);
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`dm-tap poster-card relative flex h-[297px] w-[210px] flex-none cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${className}`}
+      className={`dm-tap poster-card relative flex ${fill ? "aspect-[210/297] w-full" : "h-[297px] w-[210px] flex-none"} cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${className}`}
       style={{ borderColor: "var(--glass-border)" }}
     >
-      <Image src={career.photo} alt="" fill sizes="210px" className="poster-photo rounded-[var(--radius-lg)] object-cover" draggable={false} />
+      <Image src={career.photo} alt="" fill sizes={fill ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px" : "210px"} className="poster-photo rounded-[var(--radius-lg)] object-cover" draggable={false} />
       <OpenCue />
       {career.salary && (
         /* dark glass chip (approved) + large gradient figure — legible on

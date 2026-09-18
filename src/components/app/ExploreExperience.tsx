@@ -211,8 +211,11 @@ function SearchResults({ query, hits, onQuery, heading }: { query: string; hits:
           <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
             {heading ?? <>Results for “{query.trim()}”</>} <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({hits.length})</span>
           </h2>
-          <div className="flex flex-wrap gap-[var(--space-5)]">
-            {hits.map(({ career }) => <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />)}
+          {/* a grid that fills the width: as many columns as fit, cards
+             stretching to share the row, instead of fixed 210px posters
+             clustering at the left (direct feedback, 19 Sept 2026) */}
+          <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
+            {hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />)}
           </div>
         </>
       ) : (
