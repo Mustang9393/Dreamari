@@ -10450,3 +10450,13 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   Report sits on the safety line at the start of the conversation. The
   sparkles suggestions button is gone; the single muted inline chip is the
   suggestion, the way ChatGPT and Claude do it.
+
+## 2026-09-18 · AT&T v2.0 safeguarding pass
+
+- Report on every insight and answer card via a `ReportCtx` and one sheet in
+  the shell; SAFETY and REPORT data in attData; Safety panel on enterprise
+  Impact; verification line now includes the background check; tutoring copy
+  names the moderated room and transcript. v1 untouched (0 Report buttons).
+  Talking points for the team are in the Google Doc "AT&T × Connected
+  Learning Board v2.0 · Talking Points" (Drive, ux@dreamopportunity.org).
+

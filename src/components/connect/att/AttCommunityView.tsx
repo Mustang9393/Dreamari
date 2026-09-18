@@ -16,7 +16,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef,
 import { useRouter } from "next/navigation";
 import {
   Bookmark, BookmarkCheck, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, Eye, GraduationCap, Lightbulb, MapPin, Megaphone,
-  ExternalLink, Laptop, LifeBuoy, MessageCircleQuestion, MessagesSquare, Sparkles, ThumbsUp, Timer, UserRound, Users, X, FileText, ListChecks,
+  ExternalLink, Flag, Laptop, LifeBuoy, MessageCircleQuestion, MessagesSquare, Sparkles, ThumbsUp, Timer, UserRound, Users, X, FileText, ListChecks,
 } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { flyXp } from "@/components/app/xpFlight";
@@ -76,6 +76,17 @@ function CountPill({ icon: Icon, count, on, onClick, label }: { icon: typeof Thu
 }
 /** Opens a professional's profile from anywhere on the board. */
 const OpenPro = createContext<(id: string) => void>(() => {});
+/** Opens the Report sheet for a card, from anywhere on the board. */
+const ReportCtx = createContext<(what: string) => void>(() => {});
+/** Icon-only Report on a card's action row, with its label as the tooltip. */
+function ReportButton({ what }: { what: string }) {
+  const report = useContext(ReportCtx);
+  return (
+    <button type="button" onClick={() => report(what)} aria-label={D.REPORT.label} title={D.REPORT.label} className="dm-quiet flex size-[30px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+      <Flag className="h-3.5 w-3.5" aria-hidden />
+    </button>
+  );
+}
 /** The student's saved picks (or the demo default), so the board speaks to
  *  what they already chose instead of asking again. */
 const PicksCtx = createContext<ProfileCareer[]>([]);
@@ -165,6 +176,7 @@ function InsightCard({ item, onAsk }: { item: typeof D.STUDENT_INSIGHTS[number];
         <button type="button" onClick={onAsk} className="dm-quiet ml-auto flex min-h-[36px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] px-[8px] text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
           <MessageCircleQuestion className="h-4 w-4" aria-hidden /> {D.INSIGHT_ACTIONS.ask}
         </button>
+        <ReportButton what={`insight ${item.id}`} />
       </div>
       {comment ? (
         <div className="flex items-start gap-[10px] rounded-[var(--radius-md)] p-[12px] text-[13.5px] leading-[19px]" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
@@ -829,7 +841,7 @@ function StudentQuestions() {
                 <div className="mt-auto flex items-center gap-[var(--space-3)] pt-[2px]">
                   {!D.REPLIT_ONLY && <CountPill icon={ThumbsUp} count={item.helpful + (liked[item.id] ? 1 : 0)} on={!!liked[item.id]} onClick={() => setLiked((m) => ({ ...m, [item.id]: !m[item.id] }))} label={D.INSIGHT_ACTIONS.like} />}
                   {!D.REPLIT_ONLY && <CountPill icon={MessagesSquare} count={item.comments} on={false} onClick={() => setOpen(item.id)} label={D.INSIGHT_ACTIONS.comment} />}
-                  <span className="ml-auto"><LinkButton onClick={() => setOpen(isOpen ? undefined : item.id)}>{isOpen ? D.RECENT_ANSWERS.hide : D.RECENT_ANSWERS.read} <ChevronRight className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-90" : ""}`} aria-hidden /></LinkButton></span>
+                  <span className="ml-auto flex items-center gap-[4px]"><ReportButton what={`answer ${item.id}`} /><LinkButton onClick={() => setOpen(isOpen ? undefined : item.id)}>{isOpen ? D.RECENT_ANSWERS.hide : D.RECENT_ANSWERS.read} <ChevronRight className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-90" : ""}`} aria-hidden /></LinkButton></span>
                 </div>
               </li>
             );
@@ -1229,6 +1241,18 @@ function EnterpriseImpact() {
           <Muted>{D.POLL.question} · {D.POLL.responses} {D.POLL.answered}</Muted>
         </Panel>
       </div>
+      {/* the line legal asks for: who is verified, what was flagged, how fast */}
+      <Panel id="att-safety-title" title={D.SAFETY.eyebrow} aside={<Muted>{D.SAFETY.note}</Muted>}>
+        <dl className="grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
+          {D.SAFETY.rows.map((r) => (
+            <div key={r.label} className="flex flex-col gap-[2px]">
+              <dt className="text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{r.label}</dt>
+              <dd className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.value}</dd>
+              <dd className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.sub}</dd>
+            </div>
+          ))}
+        </dl>
+      </Panel>
       <Panel id="att-trend-title" title={I.trend.metrics.find((m) => m.key === metric)?.label ?? ""} aside={<Segmented ariaLabel={I.trend.eyebrow} value={metric} onChange={setMetric} options={I.trend.metrics.map((m) => ({ key: m.key, label: m.label }))} />}>
         <AreaChart points={I.trend.series[metric]} accent={accent} height={170} labels={[I.trend.months[0], I.trend.months[3], I.trend.months[5]]} />
       </Panel>
@@ -1452,6 +1476,7 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
   const [progress, setProgress] = useState<Record<string, number>>(() => Object.fromEntries(D.LEARN_MODULES.map((m) => [m.id, m.progress])));
   const [module, setModule] = useState<D.LearnModule>();
   const [toast, onToast] = useToast();
+  const [reportFor, setReportFor] = useState<string>();
   const picks = useStudentPicks();
   const advance = (m: D.LearnModule, from: Element | null) => {
     const next = Math.min(100, (progress[m.id] ?? 0) + 40);
@@ -1486,7 +1511,22 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
 
   return (
     <OpenPro.Provider value={D.REPLIT_ONLY ? () => {} : setProfile}>
+    <ReportCtx.Provider value={setReportFor}>
     <PicksCtx.Provider value={picks}>
+      {reportFor && (
+        <Sheet title={D.REPORT.title} label={D.REPORT.label} onClose={() => setReportFor(undefined)} titleId="att-report-title">
+          <Muted>{D.REPORT.note}</Muted>
+          <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+            {D.REPORT.reasons.map((r) => (
+              <li key={r} style={{ borderColor: RULE }}>
+                <button type="button" onClick={() => { setReportFor(undefined); onToast(D.REPORT.sent); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between py-[12px] text-left text-[14.5px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>
+                  {r} <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Sheet>
+      )}
       {opportunity && <OpportunitySheet item={opportunity} saved={!!saves[opportunity.id]} onSave={() => toggleSave(opportunity.id)} inPlan={!!plan[opportunity.id]} onPlan={() => togglePlan(opportunity.id)} onClose={() => setOpportunity(undefined)} />}
       {module && <ModuleSheet m={module} pct={progress[module.id]} inPlan={!!plan[module.id]} onPlan={() => { togglePlan(module.id); onToast(plan[module.id] ? "Removed from My Plan" : "Added to My Plan"); }} onAdvance={(from) => advance(module, from)} onAsk={() => { setView("student"); setStudentTab("questions"); }} onToast={onToast} onClose={() => setModule(undefined)} />}
       {toast}
@@ -1550,6 +1590,7 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
         </motion.div>
       </SectionSurface>
     </PicksCtx.Provider>
+    </ReportCtx.Provider>
     </OpenPro.Provider>
   );
 }

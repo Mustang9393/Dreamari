@@ -470,7 +470,7 @@ export const HELP = {
     kind: "Tutoring",
     title: "Homework help now",
     line: "An AT&T volunteer, online, usually within ten minutes.",
-    via: "Online here, in a moderated chat with an AT&T volunteer. Free for grades 8 to 12.",
+    via: "Online here, in a moderated room with an AT&T volunteer. A transcript is kept and program staff can join. Free for grades 8 to 12.",
     qualifies: "Your school is on file.",
     what: "Subject",
     options: ["Algebra", "Geometry", "Biology", "Chemistry", "Essay", "College apps"],
@@ -685,10 +685,30 @@ export const TEAM = {
 
 export const BACK = "Back to communities";
 
+// ——— Safeguarding (ours): every card can be reported, and the program
+// team sees the numbers. Minors never have a private channel here. ———
+export const REPORT = {
+  label: "Report",
+  title: "What happened?",
+  note: "Dreamari moderators and the AT&T program lead see this. The person is not told who reported.",
+  reasons: ["Asked for personal contact details", "Inappropriate or unsafe", "Not about careers or school", "Something else"],
+  sent: "Sent to moderators. Thank you.",
+};
+export const SAFETY = {
+  eyebrow: "Safety",
+  rows: [
+    { label: "Volunteers verified", value: "54 of 54", sub: "background check and work email" },
+    { label: "Open flags", value: "0", sub: "2 resolved this month" },
+    { label: "Average review", value: "4 min", sub: "volunteer posts before they go live" },
+    { label: "Live sessions logged", value: "100%", sub: "transcript kept, staff can join" },
+  ],
+  note: "Under 18: public questions only, no private messages.",
+};
+
 // ——— Full profiles (ours). The six AT&T professionals open the same
 // profile page every other professional has (direct feedback, 17 Sept 2026);
 // these records fill that page. Positive, career-story copy only.
-const V = "Work email verified by Dreamari · Sep 2026";
+const V = "Background checked · Work email verified · AT&T Believes volunteer";
 const rec = (key: string, extra: Omit<Pro, "id" | "name" | "role" | "org" | "verifiedBy" | "world">): Pro => ({ id: `att-${key}`, name: ATT_PROS[key].name, role: ATT_PROS[key].role, org: "AT&T", verifiedBy: V, world: "Tech & Engineering", ...extra });
 export const ATT_PRO_RECORDS: Record<string, Pro> = {
   marcus: rec("marcus", { scope: "Network engineering careers", field: "Network Engineering", story: "I started as a field technician climbing towers. Fifteen years later I lead the team that keeps a region's network running, and the instinct I still use most is asking what the customer is actually experiencing.", followers: 412, studentsReached: 6280, totalLikes: 1140, questionsAnswered: 31, activeDaysAgo: 1, education: "B.S. Electrical Engineering, University of Texas at Dallas", journey: "Field technician, then network operations, then a decade of engineering roles before leading a regional team.", topics: ["Network engineering", "Field technician paths", "Leadership", "Internships"] }),
