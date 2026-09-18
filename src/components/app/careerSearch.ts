@@ -49,10 +49,10 @@ const TITLE_KEYWORDS: Record<string, string[]> = {
   "Cardiologist": ["heart", "cardiology", "physician", "md"],
   "Therapist": ["mental health", "counseling", "psychology", "talk", "helping people"],
   "School Counselor": ["guidance", "students", "college applications", "school", "helping"],
-  "Airline Pilot": ["pilot", "flying", "planes", "aviation", "cockpit", "travel", "captain"],
+  "Airline Pilot": ["planes", "pilot", "flying", "aviation", "cockpit", "travel", "captain"],
   "Drone Pilot": ["drones", "uav", "flying", "cameras", "remote"],
   "Air Traffic Controller": ["atc", "airport", "planes", "radar", "aviation"],
-  "Truck Driver": ["trucking", "cdl", "driving", "roads", "logistics"],
+  "Truck Driver": ["trucks", "trucking", "cdl", "driving", "roads", "freight", "logistics"],
   "Forklift Operator": ["warehouse", "logistics", "driving", "shipping"],
   "Electrician": ["wiring", "electrical", "trades", "apprenticeship", "hands-on"],
   "Roofer": ["roofing", "construction", "trades", "outdoors", "hands-on"],
@@ -67,6 +67,42 @@ const TITLE_KEYWORDS: Record<string, string[]> = {
   "Film Director": ["film", "movies", "directing", "cinema", "hollywood", "storytelling", "camera", "tv", "netflix"],
   "Journalist": ["journalism", "news", "writing", "reporter", "media", "stories", "interviews", "tv", "newspaper"],
   "Lighting Technician": ["stage", "concerts", "theater", "lights", "film", "live events"],
+  "Photographer": ["photos", "camera", "photography", "portraits", "instagram", "shoots"],
+  "Plumber": ["pipes", "water", "bathrooms", "trade", "plumbing"],
+  "Welder": ["welding", "metal", "torch", "fabrication", "trade"],
+  "Carpenter": ["wood", "framing", "building", "furniture", "trade"],
+  "Auto Mechanic": ["cars", "engines", "garage", "repair", "trucks"],
+  "X-Ray Technologist": ["xray", "xrays", "scans", "imaging", "hospital", "radiology"],
+  "EMT": ["ambulance", "emergency", "911", "paramedic", "rescue", "first responder"],
+  "Dental Hygienist": ["teeth", "dentist", "cleaning", "smile"],
+  "Barber": ["hair", "haircuts", "fades", "shop", "grooming"],
+  "Esthetician": ["skincare", "facials", "beauty", "salon", "spa"],
+  "Makeup Artist": ["makeup", "beauty", "glam", "film", "weddings"],
+  "Nail Technician": ["nails", "manicure", "beauty", "salon"],
+  "Real Estate Agent": ["houses", "homes", "property", "selling", "listings"],
+  "Police Officer": ["law enforcement", "police", "safety", "patrol", "community"],
+  "Firefighter": ["fire", "rescue", "emergency", "trucks", "hero"],
+  "Paralegal": ["law", "legal", "lawyer", "court", "research"],
+  "HVAC Technician": ["heating", "cooling", "air conditioning", "ac", "trade"],
+  "Graphic Designer": ["design", "logos", "posters", "figma", "illustrator", "branding", "visual"],
+  "Musician or Singer": ["music", "singing", "band", "songs", "concerts", "spotify", "performing"],
+  "Dancer": ["dancing", "dance", "performing", "stage", "choreography"],
+  "Choreographer": ["dance", "dancing", "routines", "stage", "music videos"],
+  "Actor": ["acting", "theater", "film", "tv", "stage", "auditions", "hollywood"],
+  "Fashion Designer": ["fashion", "clothes", "style", "sketching", "runway", "sewing"],
+  "Film and Video Editor": ["editing", "video", "youtube", "premiere", "film", "cuts"],
+  "Game Producer": ["games", "gaming", "video games", "studio", "shipping games"],
+  "Interior Designer": ["design", "spaces", "rooms", "architecture", "decor"],
+  "Set Designer": ["theater", "film", "stage", "sets", "building"],
+  "Writer or Copywriter": ["writing", "words", "stories", "ads", "blog", "author"],
+  "Professional Athlete": ["sports", "athlete", "team", "training", "competition", "nba", "nfl"],
+  "Coach or Scout": ["sports", "team", "training", "recruiting", "athletes"],
+  "Broadcast Technician": ["tv", "radio", "live", "studio", "equipment"],
+  "Audio and Video Technician": ["av", "events", "sound", "video", "live"],
+  "Public Relations Specialist": ["pr", "communications", "media", "press", "writing"],
+  "Visual Merchandiser": ["retail", "displays", "fashion", "stores", "design"],
+  "Floral Designer": ["flowers", "design", "weddings", "events"],
+  "Interpreter or Translator": ["languages", "spanish", "translation", "bilingual"],
   "Sound Engineering Technician": ["audio", "music", "studio", "recording", "concerts", "mixing"],
   "Lawyer": ["law", "attorney", "court", "law school", "justice", "argue"],
   "Hairstylist": ["hair", "salon", "beauty", "barber", "styling"],
@@ -98,13 +134,16 @@ function distance(a: string, b: string, cap = 2): number {
   return prev[b.length];
 }
 
-type Indexed = { career: CatalogCareer; titleWords: string[]; worldWords: string[]; ownKeywords: string[]; worldKeywords: string[]; keywords: string[] };
+type Indexed = { career: CatalogCareer; titleWords: string[]; worldWords: string[]; ownKeywords: string[]; worldKeywords: string[]; keywords: string[]; /** a word's position in the career's own keyword list, earlier is more central */ rank: Map<string, number> };
 const INDEX: Indexed[] = ALL_CATALOG_CAREERS.map((career) => {
   const titleWords = words(career.title);
   const worldWords = words(career.world);
-  const ownKeywords = (TITLE_KEYWORDS[career.title] ?? []).flatMap(words);
+  const raw = TITLE_KEYWORDS[career.title] ?? [];
+  const ownKeywords = raw.flatMap(words);
   const worldKeywords = (WORLD_KEYWORDS[career.world] ?? []).flatMap(words);
-  return { career, titleWords, worldWords, ownKeywords, worldKeywords, keywords: [...new Set([...ownKeywords, ...worldKeywords])] };
+  const rank = new Map<string, number>();
+  raw.forEach((k, i) => { for (const w of words(k)) if (!rank.has(w)) rank.set(w, i); });
+  return { career, titleWords, worldWords, ownKeywords, worldKeywords, keywords: [...new Set([...ownKeywords, ...worldKeywords])], rank };
 });
 
 function scoreToken(token: string, item: Indexed): number {
@@ -113,16 +152,30 @@ function scoreToken(token: string, item: Indexed): number {
     for (const w of candidates) {
       if (w === token) best = Math.max(best, exact);
       else if (w.startsWith(token)) best = Math.max(best, starts);
-      else if (token.length >= 3 && w.includes(token)) best = Math.max(best, contains);
+      // five letters before a word counts by containing the token, so
+      // "real" never lights up "unreal"
+      else if (token.length >= 5 && w.includes(token)) best = Math.max(best, contains);
     }
   };
   // the career's own words beat its world's, so "planes" ranks pilots
   // above truck drivers even though both live in Driving, Flying & Shipping
   consider(item.titleWords, 100, 85, 60);
   consider(item.ownKeywords, 80, 65, 50);
+  // a career's first keywords are what it is about: "coding" is Software
+  // Engineer before Quant, "planes" is Airline Pilot before Air Traffic Controller
+  if (best === 80) best += Math.max(0, 4 - (item.rank.get(token) ?? 4));
   consider(item.worldKeywords, 55, 45, 35);
   consider(item.worldWords, 50, 40, 30);
   if (best >= 60) return best;
+  // word forms: "plumbing" finds Plumber, "welding" finds Welder. Five
+  // shared leading letters on words of at least six, so "drawing" and
+  // "driving" (three shared) stay apart
+  if (token.length >= 6) {
+    const stem = token.slice(0, 5);
+    for (const w of item.titleWords) if (w.length >= 6 && w.startsWith(stem)) best = Math.max(best, 78);
+    for (const w of item.ownKeywords) if (w.length >= 6 && w.startsWith(stem)) best = Math.max(best, 58);
+  }
+  if (best >= 58) return best;
   // typo tolerance, kept tight so "drawing" never becomes "driving": one
   // edit from five letters, two from eight; only against title words and
   // keywords, never the world name

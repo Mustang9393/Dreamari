@@ -12,6 +12,7 @@ export type CatalogCareer = {
 };
 
 const C = (title: string, world: string, photo: string, salary?: string): CatalogCareer => ({ title, world, photo, salary });
+import { BROWSE_LIBRARY } from "./browseLibrary";
 
 // "Careers Picked for You" (Home) — 14 posters in the design's order.
 export const HOME_PICKS: CatalogCareer[] = [
@@ -120,10 +121,9 @@ export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
 // Every catalogued career, deduped by title, for lookups that need to search
 // across rails instead of rendering one specific rail (Career Detail's
 // "Similar careers" and its own title/world/photo resolution).
-// Arts, Media & Sport (added 18 Sept 2026 for an arts-focused demo): every
-// arts career we hold a real poster for, in one rail, so the world reads as
-// full rather than three cards scattered across other rows.
-export const BROWSE_ARTS: CatalogCareer[] = [
+// Arts careers with Figma posters, first in the arts rail; the rest of the
+// world comes from the team's poster library below.
+const ARTS_FIGMA: CatalogCareer[] = [
   C("Animator", "Arts, Media & Sport", "/images/app/poster-animator.webp"),
   C("Art Director", "Arts, Media & Sport", "/images/app/poster-art-director.webp"),
   C("Film Director", "Arts, Media & Sport", "/images/app/poster-film-director.webp"),
@@ -132,13 +132,19 @@ export const BROWSE_ARTS: CatalogCareer[] = [
   C("Lighting Technician", "Arts, Media & Sport", "/images/app/poster-lighting-technician.webp"),
 ];
 
+// Every career the app knows, first occurrence wins: the Figma rails, then
+// the team's poster library (161 more careers across 14 worlds, 18 Sept
+// 2026). Search and the world filter read from this.
 export const ALL_CATALOG_CAREERS: CatalogCareer[] = (() => {
   const seen = new Map<string, CatalogCareer>();
-  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...BROWSE_ARTS, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TYPICAL_PAY]) {
+  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...ARTS_FIGMA, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TYPICAL_PAY, ...BROWSE_LIBRARY]) {
     if (!seen.has(career.title)) seen.set(career.title, career);
   }
   return [...seen.values()];
 })();
+
+/** The whole arts world in one rail (added 18 Sept 2026 for an arts-focused demo). */
+export const BROWSE_ARTS: CatalogCareer[] = ALL_CATALOG_CAREERS.filter((c) => c.world === "Arts, Media & Sport");
 
 // Explore — For You reel: all 8 Env Card variants (section 2530:46431,
 // "Explore: Mobile Reel"), copy and photos verbatim from each variant.

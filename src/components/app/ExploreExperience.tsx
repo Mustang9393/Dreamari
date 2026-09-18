@@ -15,6 +15,7 @@ import { PosterCard, RankedPosterCard } from "./PosterCard";
 
 import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
+  ALL_CATALOG_CAREERS,
   BROWSE_ARTS,
   BROWSE_BECAUSE_LIKED,
   BROWSE_MIGHT_NOT_KNOW,
@@ -158,9 +159,9 @@ function FilterPill({ label, selected, onClick }: { label: string; selected: boo
 /** Netflix's search page: "Explore careers related to" chips built from
  *  what the results share, then the ranked grid; a no-match state that
  *  offers the top searches instead of a dead end. */
-function SearchResults({ query, hits, onQuery }: { query: string; hits: SearchHit[]; onQuery: (q: string) => void }) {
+function SearchResults({ query, hits, onQuery, heading }: { query: string; hits: SearchHit[]; onQuery: (q: string) => void; /** a world's name when the grid is a filter, not a search */ heading?: string }) {
   const router = useRouter();
-  const related = relatedTerms(query, hits);
+  const related = query.trim() ? relatedTerms(query, hits) : [];
   return (
     <section className="flex w-full flex-col gap-[var(--space-5)]" aria-live="polite">
       {related.length > 0 && (
@@ -172,7 +173,7 @@ function SearchResults({ query, hits, onQuery }: { query: string; hits: SearchHi
       {hits.length > 0 ? (
         <>
           <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>
-            Results for “{query.trim()}” <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({hits.length})</span>
+            {heading ?? <>Results for “{query.trim()}”</>} <span className="text-[15px] font-bold sm:text-[16px]" style={{ color: "var(--muted-foreground)" }}>({hits.length})</span>
           </h2>
           <div className="flex flex-wrap gap-[var(--space-5)]">
             {hits.map(({ career }) => <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />)}
@@ -210,7 +211,12 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
   // A typed query becomes the search page (Netflix): one ranked grid across
   // the whole catalog, not seven rails each losing most of their cards.
   const searching = query.trim().length > 0;
-  const hits = searching ? searchCareers(query, effectiveWorld) : [];
+  // a world pill with nothing typed is a filter: the whole world as a grid,
+  // sorted like the rails, instead of seven rails each losing most cards
+  const worldOnly = !searching && effectiveWorld !== "All";
+  const hits: SearchHit[] = searching
+    ? searchCareers(query, effectiveWorld)
+    : worldOnly ? applyCatalogView(ALL_CATALOG_CAREERS, effectiveWorld, "", effectiveSort).map((career) => ({ career, score: 0 })) : [];
   const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, "", effectiveSort);
   const arts = view(BROWSE_ARTS);
   const becauseLiked = view(BROWSE_BECAUSE_LIKED);
@@ -248,10 +254,11 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
         </div>
       )}
 
-      {filtersOpen && !searching && <TopSearches onQuery={onQuery} />}
+      {filtersOpen && !searching && !worldOnly && <TopSearches onQuery={onQuery} />}
       {searching && <SearchResults query={query} hits={hits} onQuery={onQuery} />}
+      {worldOnly && <SearchResults query="" heading={effectiveWorld} hits={hits} onQuery={onQuery} />}
 
-      {!searching && (
+      {!searching && !worldOnly && (
       <>
       {/* Rail order + content per Joshua (2026-08-21): merged recommended
          rail, then Tech, Top 5, Might Not Know, Skilled Trades (added 11

@@ -38,6 +38,15 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Explore: 161 poster careers imported, world pills become grids, search word forms (PUSHED, user-authorized)
+
+- `public/images/app/browse/*.webp` (161, 11 MB): the team's poster folder ("BROWSE Images-3", 14 worlds) converted with sharp, attention crop to 840x1188, webp q80. 39 titles skipped because the Figma catalog already had them. `src/components/app/browseLibrary.ts` lists them as `BROWSE_LIBRARY`; the source folder itself stays out of git.
+- `catalog.ts`: `ALL_CATALOG_CAREERS` appends the library after the Figma rails (first occurrence wins, so Figma art stays). `BROWSE_ARTS` is now every career in Arts, Media & Sport (27) for the arts-focused demo. World "Business, Money, Sales & Office" was normalised to "Business & Finance" at import.
+- `ExploreExperience.tsx`: a world pill with nothing typed shows that world as one grid with a heading and count, instead of seven rails each losing most cards. Top searches hide while a world is chosen.
+- `careerSearch.ts`: a shared five-letter stem now counts on words of six or more (plumbing finds Plumber, welding finds Welder); a token has to be five letters before containing it in a keyword counts (real no longer lights up "unreal"); a career's earlier keywords break ties (coding is Software Engineer before Quant, planes is Airline Pilot first); keywords for the trades, health, beauty and safety titles the library brought in; duplicate keyword keys removed.
+- Checked: tsc and eslint clean; headless at 1280: arts rail 27 posters, world grid 27, no broken images, no page errors; search harness: plumbng, plumbing, welding, xrays, cars, real estate, photography each return the one right career; drawing stays Animator only; xyzq empty.
+- Next: the other 13 worlds have posters but no rail of their own; the world pills cover them for now.
+
 ### 2026-09-16 Sitewide no-pill-CTAs sweep (local only, not pushed, e628e2f)
 
 Follow-through on the Resume Builder's "no pill-shaped CTAs" pass (direct
