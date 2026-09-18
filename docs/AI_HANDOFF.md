@@ -10258,3 +10258,18 @@ video calls and message counting are backend.
   shortlist, an opportunity; each opens the real page).
 - Still a placeholder: the Fashion Buyer simulation art (IB lounge scene until
   the fashion one is illustrated); GIFs.
+
+## 2026-09-18 · Mentorship, round three (lockups, Tapestry gaps)
+
+- Every program tile wears its partner's mark in one slot at a matched cap
+  height (`PartnerLockup`): the Coach Foundation lockup image, otherwise the
+  white company wordmark from COMPANY_MARKS. Banner lockup scaled up.
+- From the Tapestry call: Dream Day (June) as the year plan's summer
+  touchpoint; year-two rematch preference on both Home views (`REMATCH`);
+  mentor orientation row with the do's and don'ts sheet (`ORIENTATION`);
+  Student impact adds "On track to graduate" (Coach's own figure); Enterprise
+  gains a Mentor activity panel (messages and meetings to hours per pair,
+  quiet pairs flagged, corporate vs retail mentor split, mentor pulse); a
+  video call button in the thread header.
+- `ProProfileView` takes an optional `backLabel`; the profile is a layer over
+  the program so Back returns to the same tab and thread.

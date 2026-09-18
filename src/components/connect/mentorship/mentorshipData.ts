@@ -39,9 +39,10 @@ export const PROGRAM = {
  *  mentors, three years; photo from jpmorganchase.com newsroom, TFI New York
  *  graduation). EY: College MAP (since 2009, group mentoring, 5,000+ students
  *  in 35 cities; photo from ey.com's College MAP page). */
-export type ProgramTile = { id: string; company: string; title: string; kind: string; line: string; cover: string; focus?: string; mark?: string; state: "yours" | "enrolling" | "soon"; meta: string };
+/** `lockup` is a partner's own lockup image (the Coach Foundation); otherwise the tile wears the company mark from COMPANY_MARKS at a matched cap height. */
+export type ProgramTile = { id: string; company: string; title: string; kind: string; line: string; cover: string; focus?: string; lockup?: string; state: "yours" | "enrolling" | "soon"; meta: string };
 export const PROGRAM_TILES: ProgramTile[] = [
-  { id: "coach", company: "Coach", title: "Dream It Real Mentorship", kind: "1:1 mentorship", line: "A Coach employee mentor for all four years of college.", cover: "/images/connect/covers/coach-dream-it-real.jpg", focus: "50% 30%", mark: "/images/connect/partners/coach-foundation-white.png", state: "yours", meta: "450 scholars · 450 mentors · October to April" },
+  { id: "coach", company: "Coach", title: "Dream It Real Mentorship", kind: "1:1 mentorship", line: "A Coach employee mentor for all four years of college.", cover: "/images/connect/covers/coach-dream-it-real.jpg", focus: "50% 30%", lockup: "/images/connect/partners/coach-foundation-white.png", state: "yours", meta: "450 scholars · 450 mentors · October to April" },
   { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", kind: "1:1 mentorship", line: "Three years with a JPMorganChase mentor, sophomore year through college enrollment.", cover: "/images/connect/covers/jpmc-fellowship-initiative.jpg", focus: "50% 40%", state: "enrolling", meta: "January 2027 · 2 to 3 Saturdays a month" },
   { id: "ey", company: "EY", title: "College MAP", kind: "Group mentorship", line: "EY mentors work with small groups through the college and financial aid process.", cover: "/images/connect/covers/ey-college-map.jpg", focus: "60% 40%", state: "soon", meta: "35 cities · groups of 6 to 8" },
 ];
@@ -199,7 +200,24 @@ export const YEAR_PLAN: Month[] = [
   { key: "feb", month: "February", title: "Networking", focus: "Practice one authentic networking introduction.", state: "upcoming" },
   { key: "mar", month: "March", title: "Internships + Opportunities", focus: "Identify one internship or program to explore.", state: "upcoming" },
   { key: "apr", month: "April", title: "Reflection + Next Steps", focus: "Reflect on progress and choose a next step.", state: "upcoming" },
+  // The summer touchpoint every US scholar gets (Tapestry call): Dream Day
+  // at Coach, the signature conference of Dream It Real.
+  { key: "jun", month: "June", title: "Dream Day at Coach", focus: "Meet your mentor in person at Coach headquarters.", note: "Coach Foundation's signature conference. Invitations go out in May.", state: "upcoming" },
 ];
+
+/** Year two: mentor and mentee each say whether to continue together
+ *  (Tapestry: "a puzzle piece phase" they do by hand today). */
+export const REMATCH = { question: "Next year, continue with Avery?", options: ["Continue together", "Match me with someone new"], note: "Both of you answer in April. The program lead pairs everyone in September." } as const;
+
+/** The mentor orientation every Coach mentor takes before the cohort starts
+ *  (Tapestry: "best practices around mentorship... the do's and don'ts of
+ *  working with a young person"). */
+export const ORIENTATION = {
+  title: "Mentor orientation",
+  status: "Completed Sep 9 · 45 min",
+  dos: ["Meet at least 3 to 4 times a year, monthly if you can", "Keep every conversation on Dreamari, never personal numbers or socials", "Ask about school and life before career", "Share your own path, including the detours"],
+  donts: ["Never meet a scholar alone off campus or outside program hours", "Do not offer money, gifts or job promises", "Do not give medical, legal or mental health advice; escalate to the program lead"],
+} as const;
 
 export const NEXT_CONVERSATION = {
   head: "Maya has been exploring:",
@@ -258,7 +276,27 @@ export const IMPACT = [
   { key: "explored", pct: 89, label: "Explored 3+ careers", delta: 6 },
   { key: "simulation", pct: 76, label: "Completed a simulation", delta: 11 },
   { key: "resume", pct: 68, label: "Built or updated a resume", delta: 9 },
+  // Coach's own headline outcome (coach.com/content/coachfoundation).
+  { key: "graduate", pct: 97, label: "On track to graduate", delta: 2 },
 ] as const;
+
+/** Where the mentors come from (Tapestry: about half corporate, half
+ *  retail store teams) and how they feel about it. */
+export const MENTOR_MIX = [{ label: "Corporate", value: 228 }, { label: "Retail stores", value: 222 }];
+export const MENTOR_PULSE = { pct: 94, line: "of mentors would mentor again", quote: "This is the best part of working at Coach." };
+
+/** Activity without reading a word: messages and meetings per pair turn into
+ *  hours under the program's rules, and pairs that have gone quiet surface
+ *  (Tapestry: "Julie has been messaging this person 15 times this month...
+ *  it equates to this many volunteer hours"). */
+export type PairActivity = { mentor: string; mentee: string; messages: number; meetings: number; hours: number; lastContact: string; quiet?: boolean };
+export const PAIR_ACTIVITY: PairActivity[] = [
+  { mentor: "Avery Thompson", mentee: "Maya R.", messages: 15, meetings: 2, hours: 2.8, lastContact: "Today" },
+  { mentor: "Julie Park", mentee: "Devon A.", messages: 22, meetings: 3, hours: 4.1, lastContact: "Yesterday" },
+  { mentor: "Marcus Bell", mentee: "Priya S.", messages: 9, meetings: 2, hours: 2.5, lastContact: "4 days ago" },
+  { mentor: "Dana Whitfield", mentee: "Theo L.", messages: 2, meetings: 0, hours: 0.1, lastContact: "34 days ago", quiet: true },
+  { mentor: "Sam Okafor", mentee: "Zoe M.", messages: 0, meetings: 1, hours: 1, lastContact: "41 days ago", quiet: true },
+];
 
 /** Required meetings completed so far, across the 450 US pairs. */
 export const MEETINGS_PER_PAIR = [

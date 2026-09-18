@@ -6,14 +6,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, MessageCircle, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, MessageCircle, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { DEFAULT_RESUME_TEMPLATE } from "@/components/resume/data";
 import { resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
-import { Avatar, CompanyChip, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { Avatar, CompanyMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
 import { ProProfileView, type Follows } from "../ProProfile";
 import type { Pro } from "../data";
 import type { ResumeData } from "@/lib/resume";
@@ -152,6 +152,16 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
   );
 }
 
+/** The partner's mark at a shared cap height so every tile scales the same:
+ *  a real lockup image when the partner has one, otherwise the white
+ *  company wordmark. Wordmark heights are tuned so the three read as one
+ *  size (EY is a square symbol, JPMorganChase a long word). */
+function PartnerLockup({ tile, height }: { tile: D.ProgramTile; height: number }) {
+  if (tile.lockup) return <Image src={tile.lockup} alt={`${tile.company} Foundation`} width={1200} height={298} unoptimized className="w-auto" style={{ height }} />;
+  const h = tile.company === "EY" ? height : Math.round(height * 0.62);
+  return <CompanyMark name={tile.company} ink="#FFFFFF" height={h} />;
+}
+
 /** One program on the community card's full-bleed anatomy (photo, top
  *  scrim, progressive blur, the partner's mark), kept visibly distinct: a
  *  mentorship-kind eyebrow, the partner's own lockup where they have one,
@@ -167,8 +177,12 @@ function ProgramTile({ tile, onOpen }: { tile: D.ProgramTile; onOpen: () => void
       </span>
       <CardProgressiveBlur size="40%" />
       <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.55) 38%, rgba(12,16,35,0.12) 68%, transparent 100%), ${cardTopScrim()}` }} />
-      <span className="absolute top-[14px] left-[14px] z-20"><CompanyChip name={tile.company} tone="photo" size="md" /></span>
-      {tile.mark && <Image src={tile.mark} alt="" width={1200} height={298} unoptimized className="absolute top-[16px] right-[18px] z-20 h-[22px] w-auto" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.45))" }} />}
+      {/* every partner wears its own mark in the same slot at the same cap
+         height: the Foundation's lockup for Coach, the company wordmark
+         from COMPANY_MARKS for the rest */}
+      <span className="absolute top-[18px] right-[20px] z-20 flex h-[36px] items-center" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }}>
+        <PartnerLockup tile={tile} height={36} />
+      </span>
       <span className="relative z-20 mt-auto flex flex-col gap-[6px] px-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
         <span className="text-[11px] leading-[15px] font-extrabold tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${accent} 75%, ${INK})`, fontFamily: "var(--font-body)" }}>{tile.kind} · {tile.company === "Coach" ? "Coach Foundation" : tile.company}</span>
         <span className={`font-extrabold text-balance ${yours ? "text-[28px] leading-[32px]" : "text-[24px] leading-[28px]"}`} style={{ color: INK }}>{tile.title}</span>
@@ -192,12 +206,13 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   // returns to the same chat, so the program stays mounted underneath.
   const [profile, setProfile] = useState<"mentor" | "mentee" | null>(null);
   const [follows, setFollows] = useState<Follows>({});
-  if (profile === "mentor") {
-    return <ProProfileView pro={D.MENTOR_PRO as unknown as Pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={() => setProfile(null)} backLabel="Back to chat" />;
-  }
   return (
     <section className="flex flex-col gap-[var(--space-5)]" aria-label={D.PROGRAM.title}>
+      {/* the profile is a layer over the program, which stays mounted (hidden)
+         so Back lands on the same tab and the same thread */}
+      {profile === "mentor" && <ProProfileView pro={D.MENTOR_PRO as unknown as Pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={() => setProfile(null)} backLabel="Back to chat" />}
       {profile === "mentee" && <MenteeProfile onBack={() => setProfile(null)} />}
+      <div className={profile === "mentor" ? "hidden" : "flex flex-col gap-[var(--space-5)]"}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> Back to programs
@@ -211,7 +226,7 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
         <Image src={D.PROGRAM.cover} alt="" fill sizes="1280px" className="object-cover" style={{ objectPosition: "50% 30%" }} />
         <CardProgressiveBlur size="64%" />
         <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.92) 0%, rgba(12,16,35,0.6) 40%, rgba(12,16,35,0.18) 70%, transparent 100%), ${cardTopScrim()}` }} />
-        <Image src={D.PROGRAM.logoWhite} alt="Coach Foundation" width={1200} height={298} unoptimized className="absolute top-[var(--space-5)] right-[var(--space-6)] z-10 h-[26px] w-auto sm:top-[var(--space-6)] sm:right-[var(--space-8)] sm:h-[32px]" />
+        <Image src={D.PROGRAM.logoWhite} alt="Coach Foundation" width={1200} height={298} unoptimized className="absolute top-[var(--space-5)] right-[var(--space-6)] z-10 h-[34px] w-auto sm:top-[var(--space-6)] sm:right-[var(--space-8)] sm:h-[44px]" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }} />
         <div className="relative z-10 min-w-0 pr-[110px] sm:pr-[150px]">
           <span className="text-[11.5px] leading-[15px] font-extrabold tracking-[0.1em] uppercase" style={{ color: `color-mix(in srgb, ${accent} 70%, ${INK})` }}>{D.PROGRAM.partner} · {D.PROGRAM.initiative}</span>
           <h2 className="mt-[6px] text-[26px] leading-[30px] font-extrabold text-balance sm:text-[34px] sm:leading-[38px]" style={{ color: INK }}>{D.PROGRAM.title}</h2>
@@ -228,6 +243,7 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
         {view === "mentor" && <MentorView onOpenProfile={() => setProfile("mentee")} />}
         {view === "enterprise" && <EnterpriseView />}
       </SectionSurface>
+      </div>
     </section>
   );
 }
@@ -458,7 +474,10 @@ function Thread({ me, onToast, onOpenProfile }: { me: "mentee" | "mentor"; onToa
             <Muted className="text-[12.5px] leading-[16px]">{other.line}</Muted>
           </span>
         </button>
-        <Chip tone={GOOD}><span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />Matched</Chip>
+        <div className="flex items-center gap-[10px]">
+          <Chip tone={GOOD}><span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />Matched</Chip>
+          <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" aria-label="Start a video call" className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Video className="h-4 w-4" aria-hidden /></a>
+        </div>
       </div>
 
       <div className="flex min-h-[320px] flex-col justify-end gap-[16px] px-[var(--space-5)] py-[var(--space-5)] sm:min-h-[380px]">
@@ -726,6 +745,55 @@ function ResumePrepCard({ onClick }: { onClick: () => void }) {
   );
 }
 
+/** Year two, decided in the app instead of by hand (Tapestry). */
+function RematchPanel({ who, onToast }: { who: string; onToast: (t: string) => void }) {
+  const [pick, setPick] = useState<string | null>(null);
+  return (
+    <Panel className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+      <div className="flex min-w-0 flex-col gap-[2px]">
+        <Eyebrow>Year 1 of 4</Eyebrow>
+        <span className="text-[15.5px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.REMATCH.question.replace("Avery", who)}</span>
+        <Muted className="text-[12.5px] leading-[17px]">{D.REMATCH.note}</Muted>
+      </div>
+      <div role="radiogroup" aria-label="Next year" className="flex flex-wrap gap-[6px]">
+        {D.REMATCH.options.map((o) => {
+          const on = pick === o;
+          return <button key={o} type="button" role="radio" aria-checked={on} onClick={() => { setPick(o); onToast("Saved. You can change this until April 30."); }} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { borderColor: `color-mix(in srgb, ${GOOD} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${GOOD} 14%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>{on && <Check className="mr-[4px] inline h-3.5 w-3.5" aria-hidden style={{ color: GOOD }} />}{o}</button>;
+        })}
+      </div>
+    </Panel>
+  );
+}
+
+/** The orientation every mentor completes, with the do's and don'ts one tap away. */
+function OrientationRow({ onToast }: { onToast: (t: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} className="dm-tap flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[14px] text-left" style={PANEL}>
+        <span className="flex items-center gap-[12px]">
+          <span className="flex size-[34px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${GOOD} 16%, transparent)`, color: GOOD }}><Check className="h-4 w-4" aria-hidden /></span>
+          <span className="flex flex-col"><span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{D.ORIENTATION.title}</span><Muted className="text-[12.5px] leading-[17px]">{D.ORIENTATION.status}</Muted></span>
+        </span>
+        <span className="flex items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>Do&apos;s and don&apos;ts <ChevronRight className="h-3.5 w-3.5" aria-hidden /></span>
+      </button>
+      {open && (
+        <Sheet title="Working with a young person" label={D.ORIENTATION.title} onClose={() => setOpen(false)}>
+          <div className="flex flex-col gap-[6px]">
+            <Eyebrow tone={GOOD}>Do</Eyebrow>
+            <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>{D.ORIENTATION.dos.map((d) => <li key={d} className="flex items-start gap-[10px] py-[9px] text-[14px] leading-[20px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><Check className="mt-[3px] h-4 w-4 flex-none" aria-hidden style={{ color: GOOD }} /> {d}</li>)}</ul>
+          </div>
+          <div className="flex flex-col gap-[6px]">
+            <Eyebrow tone="var(--world-business-money-office)">Never</Eyebrow>
+            <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>{D.ORIENTATION.donts.map((d) => <li key={d} className="flex items-start gap-[10px] py-[9px] text-[14px] leading-[20px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><X className="mt-[3px] h-4 w-4 flex-none" aria-hidden style={{ color: "var(--world-business-money-office)" }} /> {d}</li>)}</ul>
+          </div>
+          <QuietCta size="sm" className="w-fit" onClick={() => { setOpen(false); onToast("Sent to your email."); }}><Download className="h-4 w-4" aria-hidden /> Save a copy</QuietCta>
+        </Sheet>
+      )}
+    </>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Student
 
@@ -770,6 +838,8 @@ function StudentView({ onOpenProfile }: { onOpenProfile: () => void }) {
               ))}
             </div>
           </div>
+
+          <RematchPanel who="Avery" onToast={onToast} />
         </div>
       )}
       {tab === "messages" && <Thread me="mentee" onToast={onToast} onOpenProfile={onOpenProfile} />}
@@ -817,6 +887,8 @@ function MentorView({ onOpenProfile }: { onOpenProfile: () => void }) {
           </Panel>
 
           <ScheduleCard onToast={onToast} showMeter />
+          <OrientationRow onToast={onToast} />
+          <RematchPanel who="Maya" onToast={onToast} />
         </div>
       )}
       {tab === "messages" && <Thread me="mentor" onToast={onToast} onOpenProfile={onOpenProfile} />}
@@ -927,7 +999,7 @@ function EnterpriseView() {
 
             <Panel className="flex flex-col gap-[var(--space-4)]">
               <Title>Student impact</Title>
-              <div className="grid grid-cols-3 gap-[var(--space-3)]">
+              <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-4">
                 {D.IMPACT.map((m) => (
                   <div key={m.key} className="flex flex-col items-center gap-[8px] text-center">
                     <Ring pct={m.pct} size={84} stroke={7} accent={accent}>
@@ -947,6 +1019,43 @@ function EnterpriseView() {
               </div>
             </Panel>
           </div>
+
+          {/* activity without reading a word: what counts, who has gone quiet */}
+          <Panel className="flex flex-col gap-[var(--space-4)]">
+            <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+              <Title>Mentor activity</Title>
+              <Muted className="text-[12px] leading-[16px]">Messages and meetings become hours under the hour rules. Content is never read.</Muted>
+            </div>
+            <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1fr)_280px]">
+              <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+                <div className="hidden grid-cols-[minmax(0,1.6fr)_repeat(3,72px)_110px] gap-x-[var(--space-3)] pb-[6px] text-[11px] leading-[15px] font-extrabold tracking-[0.06em] uppercase sm:grid" style={{ color: "var(--muted-foreground)" }}>
+                  <span>Pair</span><span className="text-right">Messages</span><span className="text-right">Meetings</span><span className="text-right">Hours</span><span className="text-right">Last contact</span>
+                </div>
+                {D.PAIR_ACTIVITY.map((row) => (
+                  <div key={row.mentor} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[var(--space-3)] gap-y-[4px] py-[10px] sm:grid-cols-[minmax(0,1.6fr)_repeat(3,72px)_110px]" style={{ borderColor: RULE }}>
+                    <span className="flex min-w-0 items-center gap-[10px]">
+                      <span className="flex min-w-0 flex-col"><span className="truncate text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{row.mentor}</span><span className="truncate text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>with {row.mentee}</span></span>
+                    </span>
+                    <span className="text-right text-[12.5px] leading-[17px] font-semibold tabular-nums sm:order-last" style={{ color: row.quiet ? "var(--world-business-money-office)" : "var(--muted-foreground)" }}>{row.quiet && <AlertTriangle className="mr-[4px] inline h-3.5 w-3.5" aria-hidden />}{row.lastContact}</span>
+                    <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{row.messages}</span>
+                    <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{row.meetings}</span>
+                    <span className="hidden text-right text-[14px] font-extrabold tabular-nums sm:block" style={{ color: accent }}>{row.hours}h</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col gap-[var(--space-4)] border-t pt-[var(--space-4)] lg:border-t-0 lg:border-l lg:pt-0 lg:pl-[var(--space-4)]" style={{ borderColor: RULE }}>
+                <div className="flex flex-col gap-[8px]">
+                  <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Where mentors come from</span>
+                  <ShareBar parts={D.MENTOR_MIX} accent={accent} />
+                </div>
+                <div className="flex flex-col gap-[4px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+                  <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.MENTOR_PULSE.pct}%</span>
+                  <Muted>{D.MENTOR_PULSE.line}</Muted>
+                  <span className="text-[13px] leading-[19px] italic" style={{ color: "var(--foreground)" }}>&ldquo;{D.MENTOR_PULSE.quote}&rdquo;</span>
+                </div>
+              </div>
+            </div>
+          </Panel>
         </div>
       )}
 
