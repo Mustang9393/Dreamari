@@ -10370,3 +10370,12 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   the tab panel and could not be reached). The welcome fires only on
   `/resume-builder?view=templates`, every Create click. Profile's own
   splash behaves as before on arrival.
+
+## 2026-09-18 · My Plan: stage first, then the level
+
+- GradePlanCard shows only High School | College at rest. Pressing a stage
+  reveals 9 to 12 or Yr 1 to 4 (AnimatePresence); picking one folds the row
+  away and the subtitle names the level. Joshua Pierce, Slack, 18 Sept 2026:
+  "a lot of competing info... once you press either 9 10 11 and 12 comes up".
+- `DEMO_TOP3` moved to profile/data.ts so other surfaces can read the demo
+  student's default picks.

@@ -801,3 +801,7 @@ export function strongestCareerId(ids: string[]): string | null {
 export function primaryCareerId(picks: { ids: string[]; focus: string | null }): string | null {
   return picks.focus && picks.ids.includes(picks.focus) ? picks.focus : strongestCareerId(picks.ids);
 }
+
+/** The demo student's default picks when nothing is saved: what /profile
+ *  stands up with on its own, and what partner boards read for context. */
+export const DEMO_TOP3 = ["investment-banking", "airline-pilot"];

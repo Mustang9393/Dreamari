@@ -12,7 +12,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { BorderBeam } from "border-beam";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
 import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
@@ -24,7 +24,7 @@ import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, 
 import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
-import { ALL_PROFILE_CAREERS, careerReport, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
+import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type PlanStage } from "./gradePlanData";
@@ -91,7 +91,6 @@ const COVER_CAREER = "career";
 // navigates with (so the right career server-renders, no flash of someone
 // else's), then stored picks on a later visit, and finally the demo default so
 // /profile still stands up on its own with nothing saved.
-const DEMO_TOP3 = ["investment-banking", "airline-pilot"];
 
 const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "settings"];
 export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
@@ -1698,6 +1697,11 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
   // Winter / Spring windows and In app / Out of app split either way; the
   // college copy fills in the student's #1 career where it names one.
   const [stage, setStage] = useState<PlanStage>("hs");
+  // Progressive disclosure (Joshua Pierce, Slack, 18 Sept 2026: "have the
+  // HS and College toggle and then once you press either 9 10 11 and 12
+  // comes up"). The level row only appears after a stage is pressed and
+  // folds away once a level is chosen; the subtitle names the level.
+  const [pickingLevel, setPickingLevel] = useState(false);
   const [grade, setGrade] = useState<9 | 10 | 11 | 12>(defaultGrade);
   const [year, setYear] = useState<CollegeYear>(1);
   const [done, setDone] = useState<Set<string>>(new Set(["g9-fall-build"]));
@@ -1743,7 +1747,8 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                     type="button"
                     role="tab"
                     aria-selected={active}
-                    onClick={() => setStage(key)}
+                    onClick={() => { setStage(key); setPickingLevel(true); }}
+                    aria-expanded={pickingLevel && active}
                     className="dm-quiet relative flex h-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[12px] text-[13.5px] font-bold whitespace-nowrap"
                     style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}
                   >
@@ -1761,7 +1766,9 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                 );
               })}
             </div>
-            <div role="tablist" aria-label={stage === "hs" ? "Choose grade" : "Choose year"} className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+            <AnimatePresence initial={false}>
+              {pickingLevel && (
+            <motion.div key={stage} role="tablist" aria-label={stage === "hs" ? "Choose grade" : "Choose year"} initial={{ opacity: 0, x: -8, scale: 0.96 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, x: -8, scale: 0.96 }} transition={{ duration: 0.18, ease: "easeOut" }} className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               {(stage === "hs" ? ([9, 10, 11, 12] as const) : ([1, 2, 3, 4] as const)).map((level) => {
                 const active = stage === "hs" ? level === grade : level === year;
                 return (
@@ -1770,7 +1777,7 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                     type="button"
                     role="tab"
                     aria-selected={active}
-                    onClick={() => (stage === "hs" ? setGrade(level as 9 | 10 | 11 | 12) : setYear(level as CollegeYear))}
+                    onClick={() => { if (stage === "hs") setGrade(level as 9 | 10 | 11 | 12); else setYear(level as CollegeYear); setPickingLevel(false); }}
                     className="dm-quiet relative flex h-[34px] min-w-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[8px] text-[14px] font-bold whitespace-nowrap"
                     style={{ color: active ? "var(--primary-foreground)" : "var(--foreground)" }}
                   >
@@ -1787,7 +1794,9 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
                   </button>
                 );
               })}
-            </div>
+            </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
         <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
