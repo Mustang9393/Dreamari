@@ -1072,7 +1072,7 @@ function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
 // composite this card as its own layer, which clips the blur at the true
 // rounded edge instead of the corner square it renders to before clipping
 // (direct feedback, 19 Sept 2026: "bright borders on the rounded corners").
-const PREP_CARD = "dm-tap group relative isolate flex h-[240px] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left [transform:translateZ(0)]";
+const PREP_CARD = "dm-tap group relative isolate flex h-[240px] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left [transform:translateZ(0)] [clip-path:inset(0_round_var(--radius-lg))]";
 
 /** Measures a caption's actual rendered height (re-measuring whenever it
  *  reflows -- a wrapped title on a narrow phone, a font swap, a resize) so
@@ -1162,7 +1162,12 @@ function ResumePrepCard({ onClick }: { onClick: () => void }) {
       </span>
       <CardProgressiveBlur size={height ? `${height}px` : "58%"} maxBlur={34} />
       <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]" aria-hidden style={{ height: height ? `${height}px` : "58%", background: cardBottomScrim("heavy") }} />
-      <PrepFoot ref={ref} label={D.PREP_RESUME.label} title={name} why={D.PREP_RESUME.why} cta={D.PREP_RESUME.cta} />
+      {/* Same label color as its siblings -- it was defaulting to accent
+         (Coach's tan) while Explore/Play use WORLD_COLORS, two different
+         colors for what should read as one consistent eyebrow treatment
+         (direct feedback, 19 Sept 2026: "Resume label vs explore and play
+         labels is the color inconsistency"). */}
+      <PrepFoot ref={ref} label={D.PREP_RESUME.label} title={name} why={D.PREP_RESUME.why} cta={D.PREP_RESUME.cta} tone={WORLD_COLORS[D.PREP_CAREER.world]} />
     </button>
   );
 }

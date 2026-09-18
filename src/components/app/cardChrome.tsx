@@ -37,7 +37,15 @@ export function CardProgressiveBlur({ direction = "up", size = "52%", maxBlur }:
           <span
             key={blur}
             className="absolute inset-0"
-            style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }}
+            // borderRadius here too, not just on the wrapper above: Chromium
+            // can promote a backdrop-filter element to its own compositing
+            // layer and clip it against the ancestor's box *before* that
+            // ancestor's own radius is baked in, leaving a hairline sliver
+            // of the unblurred, unmasked edge visible right along the
+            // curve (direct feedback, repeated: "bright borders on the
+            // rounded corners"). The filtered element needs the radius on
+            // itself for that layer's own clip to be rounded.
+            style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask, borderRadius: "inherit" }}
           />
         );
       })}

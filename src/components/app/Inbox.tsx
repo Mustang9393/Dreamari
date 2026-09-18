@@ -116,6 +116,10 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
   const { list, isUnread } = useVisibleNotifications(filter);
   const filters: { key: Filter; label: string }[] = [{ key: "all", label: "All" }, { key: "connect", label: "Connect" }, ...(inbox.mentorship ? [{ key: "mentorship" as Filter, label: "Mentorship" }, { key: "messages" as Filter, label: "Messages" }] : [])];
   const openMessages = () => { onClose(); openDock(); };
+  // message-related notifications (a meeting proposed in chat, etc.) --
+  // anything the chat dock itself would surface, shown here the same way
+  // every other notification is, not just implied by the preview row above.
+  const messageNotifications = inbox.mentorship ? NOTIFICATIONS.filter((n) => n.chat) : [];
   const fresh = list.filter(isUnread);
   const earlier = list.filter((n) => !isUnread(n));
   const go = (n: Notification) => {
@@ -187,23 +191,37 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
           );
         })}
       </div>
-      {/* Messages: this app has exactly one conversation (the matched
-         mentor), so it's a single preview row, not a list -- opens the same
-         chat dock the standalone Messages icon used to (direct feedback,
-         19 Sept 2026: fold Messages into Notifications as a tab). */}
+      {/* Messages: an explicit, always-there "open the conversation" row
+         first -- direct feedback, 19 Sept 2026: "otherwise how do I launch
+         messages?" -- then any message-related notifications (accept a
+         meeting proposed in chat, etc.) below it, using the same Row every
+         other tab uses so Accept/Decline and read state all work the same
+         way (direct feedback: "I should see message notifications and the
+         conversation which I can click to open"). */}
       {filter === "messages" ? (
-        <button type="button" onClick={openMessages} className="dm-quiet flex w-full cursor-pointer items-start gap-[12px] rounded-[var(--radius-md)] px-[10px] py-[10px] text-left">
-          <Image src={MENTOR.photo} alt="" width={80} height={80} className="size-[40px] flex-none rounded-full object-cover" />
-          <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-            <span className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{MENTOR.name}</span>
-            <span className="truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{threadPreview()}</span>
-          </span>
-          {inbox.unread > 0 && (
-            <span aria-hidden className="mt-[3px] flex h-[18px] min-w-[18px] flex-none items-center justify-center rounded-full px-[5px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: "#FF3040", color: "#FFFFFF" }}>
-              {inbox.unread > 9 ? "9+" : inbox.unread}
+        <>
+          <button type="button" onClick={openMessages} className="dm-quiet flex w-full cursor-pointer items-start gap-[12px] rounded-[var(--radius-md)] px-[10px] py-[10px] text-left">
+            <Image src={MENTOR.photo} alt="" width={80} height={80} className="size-[40px] flex-none rounded-full object-cover" />
+            <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+              <span className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{MENTOR.name}</span>
+              <span className="truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{threadPreview()}</span>
             </span>
+            <span className="mt-[2px] flex flex-none items-center gap-[6px]">
+              {inbox.unread > 0 && (
+                <span aria-hidden className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: "#FF3040", color: "#FFFFFF" }}>
+                  {inbox.unread > 9 ? "9+" : inbox.unread}
+                </span>
+              )}
+              <span className="text-[12.5px] leading-[16px] font-bold" style={{ color: "var(--accent-subtle)" }}>Open</span>
+            </span>
+          </button>
+          {messageNotifications.length > 0 && (
+            <>
+              <span className="block px-[10px] pt-[8px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Waiting on you</span>
+              <ul className="flex flex-col">{messageNotifications.map((n) => <Row key={n.id} n={n} />)}</ul>
+            </>
           )}
-        </button>
+        </>
       ) : (
       <>
       {list.length === 0 && <p className="px-[10px] py-[14px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>Nothing here yet.</p>}
