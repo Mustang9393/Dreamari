@@ -38,6 +38,10 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-19 Prep row: blur zone and strength now exactly match the resume card
+
+- `CareerPrepCard`/`PlayPrepCard` moved from `size="46%" maxBlur={22}` to `size="50%" maxBlur={26}`, identical to the resume card, so the EXPLORE/PLAY eyebrow labels sit comfortably inside the frosted zone instead of near its edge (direct feedback: "it should fit the eyebrow comfortably, just like the resume card"). Checked headless at 1280.
+
 ### 2026-09-19 Prep row: stronger blur on Explore and Play too
 
 - `CareerPrepCard`/`PlayPrepCard`'s `CardProgressiveBlur` gets `maxBlur={22}` (was the 14px default), matching the resume card's own boosted legibility fix (direct feedback: "make sure the blur is high enough to ensure readability"). Checked headless at 1280: all three captions read cleanly, photos visibly frost toward the caption rather than just darken.

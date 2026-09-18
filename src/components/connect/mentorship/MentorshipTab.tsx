@@ -1087,8 +1087,8 @@ function CareerPrepCard({ onClick }: { onClick: () => void }) {
       {/* Same frosted-caption recipe as the resume card, not the flat
          --poster-scrim (direct feedback, 19 Sept 2026: "they should also
          use the blur effect"). */}
-      <CardProgressiveBlur size="46%" maxBlur={22} />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[46%]" aria-hidden style={{ background: cardBottomScrim() }} />
+      <CardProgressiveBlur size="50%" maxBlur={26} />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[50%]" aria-hidden style={{ background: cardBottomScrim() }} />
       <PrepFoot label={c.label} title={c.title} why={c.why} cta={c.cta} tone={WORLD_COLORS[c.world]} />
     </button>
   );
@@ -1099,8 +1099,8 @@ function PlayPrepCard({ onClick }: { onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} className={PREP_CARD} style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", textShadow: CARD_TEXT_SHADOW }}>
       <Image src={p.cover} alt="" fill sizes="(min-width: 640px) 33vw, 260px" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-      <CardProgressiveBlur size="46%" maxBlur={22} />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[46%]" aria-hidden style={{ background: cardBottomScrim() }} />
+      <CardProgressiveBlur size="50%" maxBlur={26} />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[50%]" aria-hidden style={{ background: cardBottomScrim() }} />
       <span className="absolute top-[14px] right-[14px] z-[2] flex size-[38px] items-center justify-center rounded-full" style={{ background: "var(--primary)", color: "#FFFFFF", boxShadow: "0 8px 20px -8px rgba(0,0,0,0.6)" }}>
         <Play className="ml-[2px] h-[16px] w-[16px]" fill="currentColor" aria-hidden />
       </span>
