@@ -10382,3 +10382,11 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
 - Follow-up: the stage and level controls sit behind a small Demo chip (same
   chip as Connect's role switch), since a real student's grade is known.
   At rest the card shows only the title and "Grade 11 · ..." subtitle.
+
+## 2026-09-18 · Mentorship Year Plan as a calendar
+
+- The numbered timeline is gone. One tile per program month (Oct to Jun),
+  the month large, the topic small, complete months ticked, the current
+  month tinted; tapping a tile shows its focus in one detail card. Joshua
+  Pierce, Slack, 18 Sept 2026: "all the user really needs to see is the
+  month and topic... the month should be larger than the topic".

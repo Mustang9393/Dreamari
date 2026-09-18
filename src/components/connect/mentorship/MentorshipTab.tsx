@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, MessageCircle, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Image as ImageIcon, Link2, Lock, MessageCircle, Paperclip, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
@@ -746,8 +746,14 @@ function MeetingRequestSheet({ onClose, onSend }: { onClose: () => void; onSend:
 }
 
 function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
-  const [open, setOpen] = useState<string | null>(D.YEAR_PLAN.find((m) => m.state === "current")?.key ?? null);
+  // A calendar, not a numbered list (Joshua Pierce, Slack, 18 Sept 2026:
+  // "all the user really needs to see is the month and topic... the month
+  // should be larger than the topic so you know where you are"). One tile
+  // per month, the month big, the topic small; tap a tile for the focus.
+  const [open, setOpen] = useState<string>(D.YEAR_PLAN.find((m) => m.state === "current")?.key ?? D.YEAR_PLAN[0].key);
   const done = D.YEAR_PLAN.filter((m) => m.state === "complete").length;
+  const sel = D.YEAR_PLAN.find((m) => m.key === open) ?? D.YEAR_PLAN[0];
+  const toneOf = (state: D.Month["state"]) => (state === "complete" ? GOOD : state === "current" ? accent : "var(--muted-foreground)");
   return (
     <Panel className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
@@ -757,42 +763,47 @@ function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
         </div>
         <Meter value={done} max={D.YEAR_PLAN.length} accent={GOOD} label="months" />
       </div>
-      <ol className="flex flex-col">
-        {D.YEAR_PLAN.map((m, i) => {
-          const isOpen = open === m.key;
-          const tone = m.state === "complete" ? GOOD : m.state === "current" ? accent : "var(--muted-foreground)";
+      <div role="tablist" aria-label="Program months" className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
+        {D.YEAR_PLAN.map((m) => {
+          const active = m.key === open;
+          const tone = toneOf(m.state);
+          const current = m.state === "current";
           return (
-            <li key={m.key} className="relative flex gap-[14px] border-t py-[10px] first:border-t-0" style={{ borderColor: RULE }}>
-              <span aria-hidden className="absolute top-[38px] bottom-[-10px] left-[13px] w-[2px]" style={{ background: i === D.YEAR_PLAN.length - 1 ? "transparent" : RULE }} />
-              <span className="relative z-[1] mt-[2px] flex size-[28px] flex-none items-center justify-center rounded-full text-[12px] font-extrabold tabular-nums" style={{ background: m.state === "upcoming" ? "var(--glass-surface-2)" : tone, color: m.state === "upcoming" ? "var(--muted-foreground)" : "#05070f", boxShadow: m.state === "upcoming" ? "inset 0 0 0 1px var(--glass-border)" : "none" }}>
-                {m.state === "complete" ? <Check className="h-3.5 w-3.5" aria-hidden /> : i + 1}
+            <button
+              key={m.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setOpen(m.key)}
+              className="dm-quiet relative flex min-h-[92px] cursor-pointer flex-col justify-between rounded-[var(--radius-md)] border p-[12px] text-left"
+              style={{
+                background: current ? `color-mix(in srgb, ${accent} 14%, var(--glass-surface-2))` : "var(--glass-surface-2)",
+                borderColor: active ? `color-mix(in srgb, ${tone} 70%, var(--glass-border))` : current ? `color-mix(in srgb, ${accent} 40%, var(--glass-border))` : "var(--glass-border)",
+                boxShadow: active ? `0 0 0 1px color-mix(in srgb, ${tone} 60%, transparent)` : "none",
+                opacity: m.state === "upcoming" && !active ? 0.8 : 1,
+              }}
+            >
+              <span className="flex items-start justify-between gap-[6px]">
+                <span className="text-[22px] leading-[24px] font-extrabold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-display)", color: m.state === "upcoming" ? "var(--foreground)" : tone }}>{m.month.slice(0, 3)}</span>
+                {m.state === "complete" && <Check className="h-4 w-4 flex-none" aria-hidden style={{ color: GOOD }} />}
+                {current && <span aria-hidden className="mt-[6px] size-[8px] flex-none rounded-full" style={{ background: accent }} />}
               </span>
-              <div className="flex min-w-0 flex-1 flex-col">
-                <button type="button" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : m.key)} className="dm-quiet -mx-[6px] flex cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[2px] text-left">
-                  <span className="flex min-w-0 flex-col">
-                    <span className="text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: tone }}>{m.month}</span>
-                    <span className="text-[15.5px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{m.title}</span>
-                  </span>
-                  <span className="flex flex-none items-center gap-[8px]">
-                    <Chip tone={tone}>{m.state === "complete" ? "Complete" : m.state === "current" ? "This month" : "Upcoming"}</Chip>
-                    <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} aria-hidden />
-                  </span>
-                </button>
-                {isOpen && (
-                  <Item className="mt-[8px] flex flex-col gap-[6px]">
-                    <Eyebrow tone="var(--muted-foreground)">Focus</Eyebrow>
-                    <span className="text-[15px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{m.focus}</span>
-                    {m.note && <Muted>{m.note}</Muted>}
-                    {m.state === "current" && (
-                      <Link href="/explore?tab=browse" className="dm-link mt-[2px] flex w-fit items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>View Careers <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>
-                    )}
-                  </Item>
-                )}
-              </div>
-            </li>
+              <span className="text-[12.5px] leading-[16px] font-semibold text-balance" style={{ color: "var(--muted-foreground)" }}>{m.title}</span>
+            </button>
           );
         })}
-      </ol>
+      </div>
+      <Item key={sel.key} className="flex flex-col gap-[6px]">
+        <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
+          <span className="text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{sel.month} · {sel.title}</span>
+          <Chip tone={toneOf(sel.state)}>{sel.state === "complete" ? "Complete" : sel.state === "current" ? "This month" : "Upcoming"}</Chip>
+        </div>
+        <span className="text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>{sel.focus}</span>
+        {sel.note && <Muted>{sel.note}</Muted>}
+        {sel.state === "current" && (
+          <Link href="/explore?tab=browse" className="dm-link mt-[2px] flex w-fit items-center gap-[4px] text-[13px] font-bold" style={{ color: accent }}>View Careers <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>
+        )}
+      </Item>
     </Panel>
   );
 }
