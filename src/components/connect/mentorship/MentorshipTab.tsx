@@ -1203,20 +1203,27 @@ function StudentView({ messages, setMessages, sub, setSub, openChat, onOpenProfi
              a full-width row each, side by side only from lg up where each
              card has real room. */}
           <div className="grid gap-[var(--space-5)] lg:grid-cols-2">
-          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`}>
-            <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
+          {/* Corporate ID badge (direct feedback, 19 Sept 2026): a Coach
+             tan header band, a Coach Foundation mark like a badge's
+             employer stamp, and a brand-colored photo ring, on the exact
+             same row shape and CTA placement as Next Meeting -- just a
+             different surface, not a different layout. */}
+          <ClickPanel onClick={onOpenProfile} label={`Open ${D.MENTOR.name}'s profile`} className="relative overflow-hidden">
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[3px]" style={{ background: accent }} />
+            <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `linear-gradient(180deg, color-mix(in srgb, ${accent} 14%, transparent) 0%, transparent 70%)` }} />
+            <Image src={D.PROGRAM.logoWhite} alt="" aria-hidden width={600} height={150} className="pointer-events-none absolute top-[var(--space-4)] right-[var(--space-4)] h-[13px] w-auto opacity-60" />
+            <div className="relative z-[1] flex flex-wrap items-center justify-between gap-[var(--space-4)] pr-[28px]">
               <div className="flex items-center gap-[14px]">
-                <Avatar name={D.MENTOR.name} size={52} photo={D.MENTOR.photo} ring={`color-mix(in srgb, ${accent} 45%, var(--glass-border))`} />
+                <Avatar name={D.MENTOR.name} size={52} photo={D.MENTOR.photo} ring={accent} />
                 <div className="flex min-w-0 flex-col gap-[2px]">
                   <Eyebrow>My mentor</Eyebrow>
                   <span className="flex items-center gap-[6px] text-[16px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{D.MENTOR.name} <VerifiedBadge size={15} /></span>
                   <Muted>{D.MENTOR.title}</Muted>
                 </div>
               </div>
-              <div className={`${ABOVE} flex flex-wrap items-center gap-[8px]`}>
-                <PrimaryCta size="sm" onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
-                <QuietCta size="sm" onClick={onOpenProfile}>View profile</QuietCta>
-              </div>
+              {/* No View profile button -- the whole card already opens
+                 it (direct feedback, 19 Sept 2026). */}
+              <PrimaryCta size="sm" className={ABOVE} onClick={openChat}><MessageCircle className="h-4 w-4" aria-hidden /> Message Mentor</PrimaryCta>
             </div>
           </ClickPanel>
 

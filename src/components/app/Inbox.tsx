@@ -9,12 +9,13 @@
 import Image from "next/image";
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, Briefcase, Calendar, FileText, Send, Sparkles, X, Zap } from "lucide-react";
+import { Bell, Briefcase, Calendar, FileText, Sparkles, X, Zap } from "lucide-react";
 import { DreamScoreChip } from "./DreamScoreChip";
 import { Portal } from "@/components/profile/CareerReport";
 import { decideMeeting, markNotificationRead, openDock, resolveNotification, useInbox } from "@/lib/inbox";
 import { NOTIFICATIONS, UNREAD_BY_DEFAULT, type Notification } from "./notificationsData";
 import { useStage } from "@/lib/stage";
+import { MENTOR, THREAD } from "@/components/connect/mentorship/mentorshipData";
 
 const ICONS = { xp: Zap, resume: FileText, opportunity: Briefcase, plan: Calendar, insight: Sparkles } as const;
 
@@ -32,10 +33,13 @@ function useIsPhone(): boolean {
   return phone;
 }
 
-type Filter = "all" | "connect" | "mentorship";
+type Filter = "all" | "connect" | "mentorship" | "messages";
 /** Mentorship items and the Mentorship filter exist only on the Mentorship
  *  tab in Connect (direct instruction, 18 Sept 2026); the stage decides the
- *  high-school or college set of everything else. */
+ *  high-school or college set of everything else. Messages folded in here
+ *  too (direct feedback, 19 Sept 2026: "combine notifications and messages,
+ *  just have messages as a tab inside notifications") -- one icon, one
+ *  panel, so the bell's badge covers both instead of two separate counts. */
 function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]; unread: number; isUnread: (n: Notification) => boolean } {
   const inbox = useInbox();
   const stage = useStage();
@@ -44,7 +48,8 @@ function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]
     .filter((n) => !n.stage || n.stage === stage)
     .filter((n) => filter === "all" || n.scope === filter);
   const isUnread = (n: Notification) => UNREAD_BY_DEFAULT.includes(n.id) && !inbox.read.includes(n.id);
-  return { list, unread: list.filter(isUnread).length, isUnread };
+  const messageUnread = inbox.mentorship ? inbox.unread : 0;
+  return { list, unread: list.filter(isUnread).length + (filter === "all" ? messageUnread : 0), isUnread };
 }
 
 /** The nav's round icon button, the same 40px as the hamburger. */
@@ -72,17 +77,6 @@ function NavIconButton({ label, open, onClick, badge, dot, children }: { label: 
   );
 }
 
-/** Messages: only inside a mentorship program. Opens the chat dock. */
-export function MessagesButton() {
-  const inbox = useInbox();
-  if (!inbox.mentorship) return null;
-  return (
-    <NavIconButton label="Messages" badge={inbox.unread} onClick={() => openDock()} open={inbox.dock === "open" || inbox.dock === "full"}>
-      <Send className="h-5 w-5" aria-hidden />
-    </NavIconButton>
-  );
-}
-
 export function NotificationsButton({ align = "right" }: { align?: "left" | "right" }) {
   const [open, setOpen] = useState(false);
   const { unread } = useVisibleNotifications();
@@ -102,13 +96,26 @@ export function NotificationsButton({ align = "right" }: { align?: "left" | "rig
   );
 }
 
+/** The last message worth previewing, in one line: a normal text message
+ *  as-is, a shared item or a meeting proposal described in words. */
+function threadPreview(): string {
+  for (let i = THREAD.length - 1; i >= 0; i--) {
+    const m = THREAD[i];
+    if (m.text) return m.text;
+    if (m.meeting) return `Proposed a meeting: ${m.meeting.when}`;
+    if (m.share) return `Shared ${m.share.title}`;
+  }
+  return "Say hello to start the conversation.";
+}
+
 function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClose: () => void }) {
   const router = useRouter();
   const inbox = useInbox();
   const phone = useIsPhone();
   const [filter, setFilter] = useState<Filter>("all");
   const { list, isUnread } = useVisibleNotifications(filter);
-  const filters: { key: Filter; label: string }[] = [{ key: "all", label: "All" }, { key: "connect", label: "Connect" }, ...(inbox.mentorship ? [{ key: "mentorship" as Filter, label: "Mentorship" }] : [])];
+  const filters: { key: Filter; label: string }[] = [{ key: "all", label: "All" }, { key: "connect", label: "Connect" }, ...(inbox.mentorship ? [{ key: "mentorship" as Filter, label: "Mentorship" }, { key: "messages" as Filter, label: "Messages" }] : [])];
+  const openMessages = () => { onClose(); openDock(); };
   const fresh = list.filter(isUnread);
   const earlier = list.filter((n) => !isUnread(n));
   const go = (n: Notification) => {
@@ -172,9 +179,33 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
       <div role="tablist" aria-label="Filter notifications" className="flex gap-[6px] px-[10px] pb-[10px]">
         {filters.map((f) => {
           const on = f.key === filter;
-          return <button key={f.key} type="button" role="tab" aria-selected={on} onClick={() => setFilter(f.key)} className="dm-quiet cursor-pointer rounded-full border px-[11px] py-[4px] text-[12px] leading-[16px] font-bold" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{f.label}</button>;
+          return (
+            <button key={f.key} type="button" role="tab" aria-selected={on} onClick={() => setFilter(f.key)} className="dm-quiet relative cursor-pointer rounded-full border px-[11px] py-[4px] text-[12px] leading-[16px] font-bold" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+              {f.label}
+              {f.key === "messages" && inbox.unread > 0 && <span aria-hidden className="absolute -top-[3px] -right-[3px] size-[8px] rounded-full" style={{ background: "#FF3040", boxShadow: "0 0 0 1.5px var(--background)" }} />}
+            </button>
+          );
         })}
       </div>
+      {/* Messages: this app has exactly one conversation (the matched
+         mentor), so it's a single preview row, not a list -- opens the same
+         chat dock the standalone Messages icon used to (direct feedback,
+         19 Sept 2026: fold Messages into Notifications as a tab). */}
+      {filter === "messages" ? (
+        <button type="button" onClick={openMessages} className="dm-quiet flex w-full cursor-pointer items-start gap-[12px] rounded-[var(--radius-md)] px-[10px] py-[10px] text-left">
+          <Image src={MENTOR.photo} alt="" width={80} height={80} className="size-[40px] flex-none rounded-full object-cover" />
+          <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+            <span className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{MENTOR.name}</span>
+            <span className="truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{threadPreview()}</span>
+          </span>
+          {inbox.unread > 0 && (
+            <span aria-hidden className="mt-[3px] flex h-[18px] min-w-[18px] flex-none items-center justify-center rounded-full px-[5px] text-[10.5px] leading-none font-extrabold tabular-nums" style={{ background: "#FF3040", color: "#FFFFFF" }}>
+              {inbox.unread > 9 ? "9+" : inbox.unread}
+            </span>
+          )}
+        </button>
+      ) : (
+      <>
       {list.length === 0 && <p className="px-[10px] py-[14px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>Nothing here yet.</p>}
       {fresh.length > 0 && (
         <>
@@ -187,6 +218,8 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
           <span className="block px-[10px] pt-[8px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Earlier</span>
           <ul className="flex flex-col">{earlier.map((n) => <Row key={n.id} n={n} />)}</ul>
         </>
+      )}
+      </>
       )}
     </>
   );
@@ -217,7 +250,6 @@ export function HeaderActions({ children }: { children?: ReactNode }) {
   return (
     <div className="flex items-center gap-[6px] sm:gap-[10px]">
       <DreamScoreChip />
-      <MessagesButton />
       <NotificationsButton />
       {children}
     </div>
