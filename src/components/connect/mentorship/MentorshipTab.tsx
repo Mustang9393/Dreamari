@@ -1011,6 +1011,15 @@ function EnterpriseView() {
                   </div>
                 ))}
               </div>
+              {/* the outcome the partner actually reports on */}
+              <div className="grid grid-cols-2 gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+                {D.OUTCOMES.map((o) => (
+                  <div key={o.value} className="flex flex-col gap-[2px]">
+                    <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{o.value}</span>
+                    <Muted className="text-[12.5px] leading-[17px]">{o.label}</Muted>
+                  </div>
+                ))}
+              </div>
               <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
                 <span className="flex items-baseline justify-between gap-[10px]">
                   <span className="text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Meetings completed per pair</span>
@@ -1071,6 +1080,7 @@ function EnterpriseView() {
                   <div className="flex min-w-0 flex-col gap-[2px]">
                     <span className="text-[15.5px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{p.name}</span>
                     <Muted className="text-[12px] leading-[16px]">{p.window} · {p.cadence}</Muted>
+                    <Muted className="text-[12px] leading-[16px]">Scholars via {p.via}</Muted>
                   </div>
                   <button type="button" onClick={() => { setProgram(p.id); setTab("overview"); }} className="dm-link flex cursor-pointer items-center gap-[4px] text-[13px] font-bold sm:order-last" style={{ color: accent }}>View report <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
                   {([[p.students, "Students"], [p.mentors, p.mentorLabel], [p.hours, "Hours"]] as [number, string][]).map(([n, l]) => (
@@ -1082,6 +1092,30 @@ function EnterpriseView() {
                   <span className="col-span-2 flex items-center sm:col-span-1">
                     <Sparkline values={p.monthly} accent={accent} width={110} height={28} />
                   </span>
+                </div>
+              ))}
+            </div>
+          </Panel>
+
+          {/* four years at once: the scholarship runs four years, so the
+             read has to hold across cohorts, not one year at a time */}
+          <Panel className="flex flex-col gap-[var(--space-3)]">
+            <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+              <Title>US cohorts</Title>
+              <Muted className="text-[12px] leading-[16px]">Four cohorts in the program at once. Still enrolled is the number the scholarship is for.</Muted>
+            </div>
+            <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+              <div className="hidden grid-cols-[minmax(0,1.2fr)_repeat(5,minmax(80px,0.7fr))] gap-x-[var(--space-3)] pb-[6px] text-[11px] leading-[15px] font-extrabold tracking-[0.06em] uppercase sm:grid" style={{ color: "var(--muted-foreground)" }}>
+                <span>Cohort</span><span className="text-right">Scholars</span><span className="text-right">Still enrolled</span><span className="text-right">Meetings / yr</span><span className="text-right">Explored 3+</span><span className="text-right">Resume</span>
+              </div>
+              {D.COHORTS.map((c) => (
+                <div key={c.start} className="grid grid-cols-2 items-center gap-x-[var(--space-3)] gap-y-[4px] py-[10px] sm:grid-cols-[minmax(0,1.2fr)_repeat(5,minmax(80px,0.7fr))]" style={{ borderColor: RULE }}>
+                  <span className="flex flex-col"><span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Class of {c.start + 4}</span><span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{c.year} · started {c.start}</span></span>
+                  <span className="text-right text-[14px] font-semibold tabular-nums" style={{ color: "var(--foreground)" }}>{c.scholars}</span>
+                  <span className="text-right text-[14px] font-extrabold tabular-nums" style={{ color: c.enrolled / c.scholars >= 0.95 ? GOOD : "var(--foreground)" }}>{Math.round((c.enrolled / c.scholars) * 100)}%</span>
+                  <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.meetingsAvg}</span>
+                  <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.explored}%</span>
+                  <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.resume}%</span>
                 </div>
               ))}
             </div>
@@ -1118,7 +1152,11 @@ function SettingsView({ onToast }: { onToast: (t: string) => void }) {
       <Panel className="flex flex-col divide-y !p-0">
         {D.SETTINGS.map((s) => (
           <div key={s.key} className="flex flex-wrap items-center justify-between gap-[var(--space-3)] px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
-            <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{s.title}</span>
+            <span className="flex min-w-0 flex-col gap-[2px]">
+              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{s.title}</span>
+              {/* where matching stands, on the row that sets how it works */}
+              {s.key === "matching" && <Muted className="text-[12.5px] leading-[17px]">{D.MATCHING_STATUS.recruitment} · {D.MATCHING_STATUS.signedUp} signed up · {D.MATCHING_STATUS.matched} matched · {D.MATCHING_STATUS.waitlist} waitlisted · {D.MATCHING_STATUS.rematchPending} year-two rematch answers pending</Muted>}
+            </span>
             <div role="radiogroup" aria-label={s.title} className="flex flex-wrap gap-[6px]">
               {s.options.map((o) => {
                 const on = values[s.key] === o;
@@ -1131,6 +1169,22 @@ function SettingsView({ onToast }: { onToast: (t: string) => void }) {
             </div>
           </div>
         ))}
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: RULE }}>
+          <span className="flex min-w-0 flex-col gap-[2px]">
+            <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{D.VERIFICATION.title}</span>
+            <Muted className="text-[12.5px] leading-[17px]">{D.VERIFICATION.line}</Muted>
+          </span>
+          <div role="radiogroup" aria-label={D.VERIFICATION.title} className="flex flex-wrap gap-[6px]">
+            {D.VERIFICATION.options.map((o) => {
+              const on = (values.verification ?? D.VERIFICATION.value) === o;
+              return (
+                <button key={o} type="button" role="radio" aria-checked={on} onClick={() => { setValues((v) => ({ ...v, verification: o })); onToast(`${D.VERIFICATION.title}: ${o}`); }} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[5px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap" style={on ? { borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
+                  {o}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </Panel>
       <Panel className="flex flex-col gap-[var(--space-3)]">
         <Title className="text-[16px] leading-[21px]">What counts toward volunteer hours</Title>

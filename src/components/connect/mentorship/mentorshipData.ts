@@ -43,8 +43,8 @@ export const PROGRAM = {
 export type ProgramTile = { id: string; company: string; title: string; kind: string; line: string; cover: string; focus?: string; lockup?: string; state: "yours" | "enrolling" | "soon"; meta: string };
 export const PROGRAM_TILES: ProgramTile[] = [
   { id: "coach", company: "Coach", title: "Dream It Real Mentorship", kind: "1:1 mentorship", line: "A Coach employee mentor for all four years of college.", cover: "/images/connect/covers/coach-dream-it-real.jpg", focus: "50% 30%", lockup: "/images/connect/partners/coach-foundation-white.png", state: "yours", meta: "" },
-  { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", kind: "1:1 mentorship", line: "Three years with a JPMorganChase mentor, sophomore year through college enrollment.", cover: "/images/connect/covers/jpmc-fellowship-initiative.jpg", focus: "50% 40%", state: "enrolling", meta: "January 2027" },
-  { id: "ey", company: "EY", title: "College MAP", kind: "Group mentorship", line: "EY mentors work with small groups through the college and financial aid process.", cover: "/images/connect/covers/ey-college-map.jpg", focus: "60% 40%", state: "soon", meta: "" },
+  { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", kind: "1:1 mentorship", line: "A JPMorganChase mentor, sophomore year through college.", cover: "/images/connect/covers/jpmc-fellowship-initiative.jpg", focus: "50% 40%", state: "enrolling", meta: "January 2027" },
+  { id: "ey", company: "EY", title: "College MAP", kind: "Group mentorship", line: "EY mentors, in small groups, through college and financial aid.", cover: "/images/connect/covers/ey-college-map.jpg", focus: "60% 40%", state: "soon", meta: "" },
 ];
 
 export type MentorshipView = "student" | "mentor" | "enterprise";
@@ -66,7 +66,7 @@ export const SHAREABLES: Share[] = [
   { kind: "careers", title: "Saved careers", line: "Top 3 from Explore", href: "/profile?tab=top3", meta: ["Fashion Buyer", "Marketing", "Product Management"] },
   { kind: "sim", title: "Fashion Buyer · Day in the Life", line: "Played once · 3 skills picked up", href: "/play", meta: ["Retail math", "Trend forecasting", "Vendor negotiation"] },
   { kind: "report", title: "Fashion Buyer career report", line: "Pay, education, career ladder, related careers", href: "/career/fashion-buyer", meta: ["$78K median", "Merchandising degree", "Assistant buyer first"] },
-  { kind: "schools", title: "School shortlist", line: "3 schools compared for Fashion Merchandising", href: "/colleges", meta: ["FIT (SUNY)", "Baruch College", "Cornell"] },
+  { kind: "schools", title: "School shortlist", line: "3 schools compared · estimated debt at graduation", href: "/colleges", meta: ["FIT (SUNY) · $9K", "Baruch College · $7K", "Cornell · $28K"] },
   { kind: "opportunity", title: "Coach Summer Internship", line: "Applications open · College sophomores", href: "/connect?tab=mentorship", meta: ["Merchandising track", "New York, NY", "Apply by Jan 31"] },
 ];
 
@@ -237,6 +237,8 @@ export type ProgramId = "all" | "us" | "uk" | "jp" | "cn";
 export type ProgramStat = {
   id: Exclude<ProgramId, "all">;
   name: string;
+  /** who sources the scholars (Tapestry: "How do you source your students? Through the nonprofit partners.") */
+  via: string;
   students: number;
   mentors: number;
   mentorLabel: string;
@@ -251,10 +253,10 @@ export type ProgramStat = {
 // October to April and dip after Dream Day in June, Japan runs April to
 // September, China's quarterly events land in March, June and September.
 export const PROGRAMS: ProgramStat[] = [
-  { id: "us", name: "United States", students: 450, mentors: 450, mentorLabel: "Mentors", hours: 8200, cadence: "3 to 4 meetings a year, most pairs monthly", window: "October to April, Dream Day in June", monthly: [1210, 1340, 1420, 1180, 620, 940, 310, 360, 820] },
-  { id: "uk", name: "United Kingdom", students: 35, mentors: 35, mentorLabel: "Mentors", hours: 1400, cadence: "Monthly", window: "October to April", monthly: [190, 210, 220, 200, 110, 90, 60, 80, 240] },
-  { id: "jp", name: "Japan", students: 33, mentors: 33, mentorLabel: "Mentors", hours: 1100, cadence: "Monthly", window: "April to September", monthly: [20, 20, 30, 170, 190, 200, 180, 160, 130] },
-  { id: "cn", name: "China", students: 1000, mentors: 18, mentorLabel: "Employee Contributors", hours: 7700, cadence: "Quarterly regional events", window: "1-year scholarship, no 1:1 matching", monthly: [420, 380, 1460, 510, 470, 1520, 440, 480, 2020] },
+  { id: "us", name: "United States", via: "The Opportunity Network · Bottom Line", students: 450, mentors: 450, mentorLabel: "Mentors", hours: 8200, cadence: "3 to 4 meetings a year, most pairs monthly", window: "October to April, Dream Day in June", monthly: [1210, 1340, 1420, 1180, 620, 940, 310, 360, 820] },
+  { id: "uk", name: "United Kingdom", via: "SEO London", students: 35, mentors: 35, mentorLabel: "Mentors", hours: 1400, cadence: "Monthly", window: "October to April", monthly: [190, 210, 220, 200, 110, 90, 60, 80, 240] },
+  { id: "jp", name: "Japan", via: "Katariba", students: 33, mentors: 33, mentorLabel: "Mentors", hours: 1100, cadence: "Monthly", window: "April to September", monthly: [20, 20, 30, 170, 190, 200, 180, 160, 130] },
+  { id: "cn", name: "China", via: "China Youth Development Foundation", students: 1000, mentors: 18, mentorLabel: "Employee Contributors", hours: 7700, cadence: "Quarterly regional events", window: "1-year scholarship, no 1:1 matching", monthly: [420, 380, 1460, 510, 470, 1520, 440, 480, 2020] },
 ];
 
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"] as const;
@@ -279,6 +281,34 @@ export const IMPACT = [
   // Coach's own headline outcome (coach.com/content/coachfoundation).
   { key: "graduate", pct: 97, label: "On track to graduate", delta: 2 },
 ] as const;
+
+/** The outcomes the partner reports on (Coach's published Dream It Real
+ *  figures; Tapestry: "the way that we see success is the least amount of
+ *  debt a student graduates with"). */
+export const OUTCOMES = [
+  { value: "88% less", label: "debt at graduation than the national average" },
+  { value: "94%", label: "first-generation college students" },
+] as const;
+
+/** The US cohorts side by side, since the scholarship runs four years and
+ *  impact has to read across them, not one year at a time (Tapestry: "we
+ *  support the cohort over the 4 years of their college"). */
+export type Cohort = { start: number; year: string; scholars: number; enrolled: number; meetingsAvg: number; explored: number; resume: number };
+export const COHORTS: Cohort[] = [
+  { start: 2026, year: "Year 1", scholars: 450, enrolled: 450, meetingsAvg: 0.8, explored: 71, resume: 44 },
+  { start: 2025, year: "Year 2", scholars: 250, enrolled: 243, meetingsAvg: 3.9, explored: 92, resume: 78 },
+  { start: 2024, year: "Year 3", scholars: 250, enrolled: 238, meetingsAvg: 4.2, explored: 96, resume: 88 },
+  { start: 2023, year: "Year 4", scholars: 250, enrolled: 236, meetingsAvg: 3.6, explored: 97, resume: 93 },
+];
+
+/** Where matching stands right now (Tapestry: a recruitment cycle "just
+ *  ended on Monday", then "the puzzle piece phase" of year-two rematching). */
+export const MATCHING_STATUS = { recruitment: "Mentor recruitment closed Sep 15", signedUp: 512, matched: 450, waitlist: 62, rematchPending: 38, rematchContinue: 187 } as const;
+
+/** How mentors are verified (Tapestry: "is there a verification process of
+ *  that?"). Coach's employee roster is the source of truth, so a mentor can
+ *  only be matched once the roster confirms them. */
+export const VERIFICATION = { title: "Mentor verification", options: ["Company roster", "Program lead approves", "Dreamari ID check"], value: "Company roster", line: "Only employees on the Coach roster can be matched. Verified mentors carry the badge students see." } as const;
 
 /** Where the mentors come from (Tapestry: about half corporate, half
  *  retail store teams) and how they feel about it. */

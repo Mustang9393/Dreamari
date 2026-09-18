@@ -10273,3 +10273,16 @@ video calls and message counting are backend.
   video call button in the thread header.
 - `ProProfileView` takes an optional `backLabel`; the profile is a layer over
   the program so Back returns to the same tab and thread.
+
+## 2026-09-18 · Mentorship, round four (remaining Tapestry items, no new screens)
+
+- Programs tab: each program names the nonprofit that sources its scholars
+  (`via`, from coach.com); a "US cohorts" table reads the four active cohorts
+  side by side (still enrolled, meetings a year, explored, resume).
+- Overview: Student impact carries Coach's published outcomes (88% less debt
+  at graduation, 94% first generation).
+- Settings: the Matching row shows where recruitment and year-two rematching
+  stand; a Mentor verification row (Company roster default).
+- Share from Dreamari: the school shortlist card carries estimated debt at
+  graduation per school.
+- Tiles: one status per card; JPMC and EY lines shortened.
