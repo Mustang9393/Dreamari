@@ -1702,6 +1702,10 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
   // comes up"). The level row only appears after a stage is pressed and
   // folds away once a level is chosen; the subtitle names the level.
   const [pickingLevel, setPickingLevel] = useState(false);
+  // The stage and level controls are demo tools: a real student's grade is
+  // known. They sit behind the same small Demo chip Connect uses, so they
+  // are never mistaken for part of the product (direct feedback, 18 Sept 2026).
+  const [demoOpen, setDemoOpen] = useState(false);
   const [grade, setGrade] = useState<9 | 10 | 11 | 12>(defaultGrade);
   const [year, setYear] = useState<CollegeYear>(1);
   const [done, setDone] = useState<Set<string>>(new Set(["g9-fall-build"]));
@@ -1737,6 +1741,18 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
           {/* Wraps onto two rows on a phone (both pills together are wider
              than 375px); from sm the pair sits right of the title. */}
           <div className="flex w-full min-w-0 flex-wrap items-center gap-[var(--space-2)] sm:w-auto sm:flex-none sm:justify-end">
+            <button
+              type="button"
+              aria-expanded={demoOpen}
+              aria-controls="grade-plan-demo"
+              onClick={() => { setDemoOpen((v) => !v); setPickingLevel(false); }}
+              className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+              style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+            >
+              Demo
+            </button>
+            {demoOpen && (
+            <div id="grade-plan-demo" className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
             {/* Stage first, then the level within it: 9 to 12, or Yr 1 to 4. */}
             <div role="tablist" aria-label="High school or college" className="dm-glass relative flex flex-none items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
               {([["hs", "High School"], ["college", "College"]] as const).map(([key, label]) => {
@@ -1797,6 +1813,8 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
             </motion.div>
               )}
             </AnimatePresence>
+            </div>
+            )}
           </div>
         </div>
         <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>

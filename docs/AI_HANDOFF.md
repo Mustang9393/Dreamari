@@ -10379,3 +10379,6 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   "a lot of competing info... once you press either 9 10 11 and 12 comes up".
 - `DEMO_TOP3` moved to profile/data.ts so other surfaces can read the demo
   student's default picks.
+- Follow-up: the stage and level controls sit behind a small Demo chip (same
+  chip as Connect's role switch), since a real student's grade is known.
+  At rest the card shows only the title and "Grade 11 · ..." subtitle.
