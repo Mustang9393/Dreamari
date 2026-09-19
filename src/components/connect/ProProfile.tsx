@@ -98,12 +98,18 @@ export function signals(views: number | undefined, likes: number, saves: number 
   return { views: v, likes, saves: s };
 }
 
-export function SignalRow({ views, likes, saves, accent }: { views: number; likes: number; saves: number; accent: string }) {
+export function SignalRow({ views, likes, saves, comments, accent }: { views: number; likes: number; saves: number; /** shown when passed -- e.g. a profile row that previews the count but opens the thread to actually comment */ comments?: number; accent: string }) {
   return (
     <span className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
       <span className="flex items-center gap-[4px]"><Eye className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(views, "compact")} Views</span>
       <span aria-hidden>·</span>
       <span className="flex items-center gap-[4px]"><ThumbsUp className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(likes)} Likes</span>
+      {comments !== undefined && (
+        <>
+          <span aria-hidden>·</span>
+          <span className="flex items-center gap-[4px]"><MessagesSquare className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(comments)} Comments</span>
+        </>
+      )}
       <span aria-hidden>·</span>
       <span className="flex items-center gap-[4px]"><Bookmark className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(saves)} Saves</span>
     </span>
@@ -789,13 +795,23 @@ export function ProProfileView({
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
         </button>
-        <div className="flex items-center gap-[var(--space-3)]">
-          {onOpenDashboard && (
-            <QuietCta size="sm" onClick={onOpenDashboard}>
-              My dashboard <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-            </QuietCta>
+        <div className="flex flex-col items-end gap-[6px]">
+          <div className="flex items-center gap-[var(--space-3)]">
+            {onOpenDashboard && (
+              <QuietCta size="sm" onClick={onOpenDashboard}>
+                My dashboard <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+              </QuietCta>
+            )}
+            <FollowButton following={following} onToggle={() => onFollow(pro.id)} />
+          </div>
+          {/* The follow-value pitch, not just a bare button (direct ask, 20
+             Sept 2026): says what following actually does. Gone once
+             followed -- the pitch has done its job. */}
+          {!onOpenDashboard && !following && (
+            <p className="max-w-[240px] text-right text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
+              Follow {pro.name.split(" ")[0]} to see new answers and posts in your Connect feed.
+            </p>
           )}
-          <FollowButton following={following} onToggle={() => onFollow(pro.id)} />
         </div>
       </div>
 
@@ -825,13 +841,17 @@ export function ProProfileView({
 
           {askSection === "answers" && (
             <div className="flex flex-col gap-[var(--space-4)]">
-              {/* Where to ask instead: the board this pro answers on. */}
+              {/* Answers are view-only here on purpose (direct feedback, 20
+                 Sept 2026): they come from public questions on Community
+                 Boards, so asking or commenting belongs there, not on a
+                 volunteer's own profile. No separate "open a discussion"
+                 link -- clicking a question below already opens it, so a
+                 second link to the same place is redundant (direct
+                 feedback, 20 Sept 2026). */}
               {homeBoard && (
                 <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
                   <MessagesSquare className="mr-[6px] inline-block h-3.5 w-3.5 align-[-2px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />
-                  Questions live on the boards. Ask in{" "}
-                  <button type="button" onClick={() => nav?.openBoard(homeBoard.id)} className="dm-link cursor-pointer font-bold" style={{ color: "var(--accent-subtle)" }}>{homeBoard.name}</button>
-                  {" "}and {pro.name.split(" ")[0]} may pick it up.
+                  {pro.name.split(" ")[0]}&apos;s answers from Community Boards. Click a question to open the full discussion.
                 </p>
               )}
               {answers.length === 0 && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>No answers yet.</p>}
@@ -840,11 +860,12 @@ export function ProProfileView({
                   {/* one question at rest, the rest behind View all: shorter section */}
                   {(allAnswers ? answers : answers.slice(0, 1)).map((thread) => {
                     const s = signals(thread.views, thread.helpful, undefined);
+                    const replyCount = thread.comments ?? thread.responses.length;
                     return (
                       <InsetRow key={thread.id} onClick={() => nav?.openThread(thread.id)} label={thread.title}>
                         <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{thread.title}</span>
                         <span className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-                          <SignalRow {...s} accent={PRO_ACCENT} />
+                          <SignalRow {...s} comments={replyCount} accent={PRO_ACCENT} />
                           <span className="flex items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[12px] leading-[16px] font-bold" style={{ background: "color-mix(in srgb, var(--color-feedback-success, #33c78c) 18%, transparent)", color: "var(--color-feedback-success, #33c78c)" }}><ShieldCheck className="h-3 w-3" aria-hidden /> Answered</span>
                         </span>
                       </InsetRow>
@@ -862,6 +883,12 @@ export function ProProfileView({
 
           {askSection === "posts" && (
             <div className="flex flex-col gap-[var(--space-3)]">
+              {homeBoard && (
+                <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+                  <MessagesSquare className="mr-[6px] inline-block h-3.5 w-3.5 align-[-2px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+                  {pro.name.split(" ")[0]}&apos;s posts from Community Boards. Click a post to open the full discussion.
+                </p>
+              )}
               {posts.length > 2 && (
                 <div className="flex justify-end">
                   <button type="button" onClick={() => setAllPosts((v) => !v)} aria-expanded={allPosts} className="dm-link flex min-h-[32px] cursor-pointer items-center gap-[5px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--accent-subtle)" }}>{allPosts ? "Show less" : "View all"} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>
@@ -874,7 +901,7 @@ export function ProProfileView({
                     return (
                       <InsetRow key={insight.id} onClick={() => nav?.openInsight(insight.id)} label={insight.title}>
                         <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>
-                        <SignalRow {...s} accent={PRO_ACCENT} />
+                        <SignalRow {...s} comments={insight.replies.length} accent={PRO_ACCENT} />
                       </InsetRow>
                     );
                   })}

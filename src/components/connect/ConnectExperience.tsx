@@ -136,7 +136,7 @@ function backLabelFor(prev: View | undefined): string {
     case "proDashboard": return "Back to my dashboard";
     case "event": return `Back to ${EVENTS.find((e) => e.id === prev.id)?.name ?? "the event"}`;
     case "thread": return "Back to the question";
-    case "insight": return "Back to the insight";
+    case "insight": return "Back to the post";
     case "saved": return "Back to Saved";
     case "followingFeed": return "Back to Following";
     case "activity": return "Back to your activity";
@@ -1388,7 +1388,7 @@ export function ConnectExperience() {
   );
 
 
-  const toggleSave = (id: string, what = "insight") => {
+  const toggleSave = (id: string, what = "post") => {
     dispatchAuroraPulse("select");
     setSaves((s) => {
       const next = { ...s, [id]: !s[id] };
@@ -1406,7 +1406,7 @@ export function ConnectExperience() {
   // defaults to "insight" (most callers save an insight), question rows
   // pass "question" explicitly so the toast doesn't lie about what you
   // just saved (direct feedback: flesh out what Save actually does).
-  const cardProps = (id: string, what = "insight") => ({
+  const cardProps = (id: string, what = "post") => ({
     saved: !!saves[id],
     onSave: () => toggleSave(id, what),
     helpful: !!helpfuls[id],
@@ -2546,8 +2546,25 @@ function BoardView({
       [...items].sort((a, b) => (sort === "best" ? b.helpful - a.helpful : agoMinutes(a.postedAgo) - agoMinutes(b.postedAgo))),
     [sort],
   );
-  const threads = sortFeed(THREADS.filter((t) => t.boardId === community.id));
-  const insights = sortFeed(INSIGHTS.filter((i) => i.boardId === community.id));
+  const nav = useContext(ConnectNav);
+  // Demo mockup (direct ask, 20 Sept 2026 -- "followed people's posts
+  // surface first in the boards in questions, posts etc"): a stable
+  // partition on top of the existing best/recent sort, not a replacement
+  // for it -- followed-first, then each group keeps its own order. A
+  // question counts as "followed" when a followed pro has answered it.
+  const followedFirst = <T,>(items: T[], isFollowed: (item: T) => boolean): T[] => {
+    const mine = items.filter(isFollowed);
+    const rest = items.filter((item) => !isFollowed(item));
+    return mine.length ? [...mine, ...rest] : items;
+  };
+  const threads = followedFirst(
+    sortFeed(THREADS.filter((t) => t.boardId === community.id)),
+    (t) => t.responses.some((r) => r.kind === "answer" && nav?.isFollowing(r.proId)),
+  );
+  const insights = followedFirst(
+    sortFeed(INSIGHTS.filter((i) => i.boardId === community.id)),
+    (i) => !!nav?.isFollowing(i.proId),
+  );
   const updates = OPPORTUNITIES.filter((o) => o.boardId === community.id);
   const firms = Array.from(new Set(updates.map((o) => o.org)));
   const [firm, setFirm] = useState<string>("All");
@@ -2567,7 +2584,6 @@ function BoardView({
   }, [community.id, community.world]);
   const bannerCover = PHOTO_COVER[community.id];
   const bannerInk = "#f6f5fb";
-  const nav = useContext(ConnectNav);
   const [postedQs, setPostedQs] = useState<{ id: string; title: string }[]>([]);
 
   return (
@@ -2632,7 +2648,7 @@ function BoardView({
          two-level hierarchy (section, then item) reads the same way it now
          does on Connect > People. */}
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
-      <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Insights" }, { key: "updates", label: "Updates" }, { key: "pros", label: "Pros" }, { key: "about", label: "About" }]} />
+      <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Updates" }, { key: "pros", label: "Pros" }, { key: "about", label: "About" }]} />
 
       {tab === "pros" && (
         <div className="flex flex-col gap-[var(--space-4)]">

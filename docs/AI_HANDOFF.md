@@ -38,6 +38,15 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-20 Volunteer-profile Answers/Posts UX (Josh's Slack ask), Explore catalog fix
+
+- **Explore Browse rail**: swapped Air Traffic Controller out of the "Typical Pay: $100K+" row for Veterinarian in `catalog.ts` -- it duplicated Skilled Trades on the same page (Slack, Chandu M P).
+- **Volunteer-profile Answers/Posts** (`ProProfile.tsx`): paused before building Josh's full ask to give a UX opinion first (asked, then agreed): kept Answers/Posts view-only with a clear "from Community Boards" framing line, but did **not** add a per-row "View discussion" CTA -- the rows already open the discussion on click (`AlignedRow`'s own pattern elsewhere in the app), so a repeated link is a redundant second target, confirmed and corrected twice today (first an inline "Open a discussion" link in the intro sentence, now plain text; then the same fix mirrored onto the Posts sub-tab, which didn't have an intro line at all before). Likes/comments counts stay visible on each row; opening the row is required to actually like/comment (confirmed this matches the existing pattern, not a UX regression).
+- **Insights -> Posts rename** (`ConnectExperience.tsx`): the Community Board segmented tab's label only (its `insights` key is unchanged), plus the Back label and the save-toast default noun. `EventView`'s own separate `Posts`/`Insights` tabs (a different meaning -- official event posts vs. an empty placeholder) were deliberately left alone.
+- **Followed-first demo sort** (`ConnectExperience.tsx`, `BoardView`): a board's Questions and Posts now surface followed-pro content first (stable partition on top of the existing best/recent sort), demo-only per direct instruction -- the real cross-board "followed content in your feed" algorithm is Usman's to build.
+- **Follow-value copy** (`ProProfile.tsx`): a one-line pitch under the Follow button ("Follow {name} to see new answers and posts in your Connect feed"), shown only pre-follow and only on the plain student-view header (not the pro's own dashboard preview).
+- Verified live in the Browser pane (not just headless): Amara Okafor's profile view-only Answers copy, the Posts tab intro, the Finance board's renamed Posts tab with Elena Martinez's (a seeded-followed pro) post sorted first, and the Follow-copy appearing/disappearing on toggle. tsc and eslint clean (eslint's 10 warnings are pre-existing unused-var/import warnings, none introduced by this batch).
+
 ### 2026-09-19 My mentor/mentee CTA: "Message" with the DM icon, same quiet style as Reschedule
 
 - Both the My mentor card and its mentor-side mirror (My mentee) had "Message Mentor"/"Message" as a filled `PrimaryCta` with a speech-bubble icon. Now `Send` (the paper-plane DM icon used everywhere else in the app for messaging) and `QuietCta`, matching Reschedule's outlined style exactly (direct feedback, 19 Sept 2026: "just say message and use the dm icon... same button style as reschedule").

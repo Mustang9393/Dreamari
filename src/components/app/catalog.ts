@@ -108,8 +108,11 @@ export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
   C("Jewelry Designer", "Factories & Making Things", "/images/app/poster-jewelry-designer.webp"),
 ];
 
+// Air Traffic Controller lived here too until 20 Sept 2026 (Slack, Chandu M
+// P): it already appears in Skilled Trades, and the two rows sit on the
+// same page, so it repeated. Veterinarian, already the row's own closer,
+// now stands in for it -- no career appears twice on this page.
 export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
-  C("Air Traffic Controller", "Driving, Flying & Shipping", "/images/app/poster-air-traffic-controller-v2.webp", "$137K"),
   C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.webp", "$559K"),
   C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.webp", "$227K"),
   C("Purchasing Manager", "Business & Finance", "/images/app/poster-purchasing-manager.webp", "$148K"),
