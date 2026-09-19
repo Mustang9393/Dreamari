@@ -795,23 +795,13 @@ export function ProProfileView({
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
         </button>
-        <div className="flex flex-col items-end gap-[6px]">
-          <div className="flex items-center gap-[var(--space-3)]">
-            {onOpenDashboard && (
-              <QuietCta size="sm" onClick={onOpenDashboard}>
-                My dashboard <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-              </QuietCta>
-            )}
-            <FollowButton following={following} onToggle={() => onFollow(pro.id)} />
-          </div>
-          {/* The follow-value pitch, not just a bare button (direct ask, 20
-             Sept 2026): says what following actually does. Gone once
-             followed -- the pitch has done its job. */}
-          {!onOpenDashboard && !following && (
-            <p className="max-w-[240px] text-right text-[12px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>
-              Follow {pro.name.split(" ")[0]} to see new answers and posts in your Connect feed.
-            </p>
+        <div className="flex items-center gap-[var(--space-3)]">
+          {onOpenDashboard && (
+            <QuietCta size="sm" onClick={onOpenDashboard}>
+              My dashboard <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+            </QuietCta>
           )}
+          <FollowButton following={following} onToggle={() => onFollow(pro.id)} />
         </div>
       </div>
 
