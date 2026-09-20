@@ -34,24 +34,28 @@ import { CertificationsStep, EducationStep, ExperienceStep, PersonalInfoStep, Re
 /** XP per finished wizard step (the reference's point values), banked into
  *  the Dream Score once per milestone. */
 const STEP_XP: Record<number, { xp: number; milestone: string }> = {
+  0: { xp: 20, milestone: "resume:personal" },
   1: { xp: 10, milestone: "resume:education" },
   2: { xp: 15, milestone: "resume:experience" },
   3: { xp: 10, milestone: "resume:skills" },
   4: { xp: 10, milestone: "resume:certifications" },
 };
-/** The toast text alongside each STEP_XP award -- "+{n} pts {label}!",
- *  the reference's own confirmed pattern (direct instruction, 20 Sept
- *  2026), reusing whatever XP number this codebase already awards rather
- *  than the reference's own numbers. Education/Experience/Skills were
- *  checked live against the reference; Certifications' wording is
- *  inferred (not independently confirmed live) -- the same "added"
- *  pattern the other required-entry steps use, since certifications are
- *  also a list of entries a student adds one at a time. Personal
- *  Information keeps its own existing "Personal information saved" toast
- *  with no XP number, since that's what was actually observed live --
- *  it has no entry in STEP_XP either, so it's untouched by this map.
+/** The toast text alongside each STEP_XP award -- "+{n} pts {label}", the
+ *  reference's own confirmed pattern (direct instruction, 20 Sept 2026),
+ *  reusing whatever XP number this codebase already awards rather than
+ *  the reference's own numbers. Personal Information/Education/Experience
+ *  were checked live against the reference; Skills/Certifications'
+ *  wording is inferred (not independently confirmed live) -- the same
+ *  "added"/"selected" pattern the other required-entry steps use. The
+ *  reference's own Personal Information toast read "Resume halfway
+ *  done!" on the one run this was checked, on a profile that already had
+ *  every other step filled in from earlier testing -- it may be a fixed
+ *  per-step message, or a completeness-based milestone that happened to
+ *  land there; there was no way to re-test from a genuinely empty account
+ *  to tell which. Placed here exactly where it was observed either way.
  */
 const STEP_XP_TOAST: Record<number, string> = {
+  0: "Resume halfway done!",
   1: "Education added!",
   2: "Experience added!",
   3: "Skills selected!",
@@ -773,7 +777,7 @@ function ResumeBuilderInner() {
                 ) : undefined
               }
             />
-            {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); goToStep(1); }} showToast={showToast} onFieldFocus={setActiveField} />}
+            {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); award(0, true); goToStep(1); }} onFieldFocus={setActiveField} />}
             {stepIndex === 1 && <EducationStep resume={resume} onNext={() => { react(); award(1, resume.education.length > 0); goToStep(2); }} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 2 && (
               // In-place, like Education/Certifications: the drawer swaps

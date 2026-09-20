@@ -75,7 +75,7 @@ function EntryRow({ title, subtitle, meta, onEdit, onRemove }: { title: string; 
 // ---------------------------------------------------------------------------
 // 1. Personal Information
 // ---------------------------------------------------------------------------
-export function PersonalInfoStep({ resume, onNext, showToast, onFieldFocus }: { resume: ResumeData; onNext: () => void; showToast: (m: string) => void; onFieldFocus?: (field: string | null) => void }) {
+export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: ResumeData; onNext: () => void; onFieldFocus?: (field: string | null) => void }) {
   const p = resume.profile;
   // Reads the freshest stored profile at write time, not the render-time `p`
   // closure -- successive keystrokes across fields can otherwise fire before
@@ -124,7 +124,6 @@ export function PersonalInfoStep({ resume, onNext, showToast, onFieldFocus }: { 
         nextDisabled={!canContinue}
         onNext={() => {
           onFieldFocus?.(null);
-          showToast("Personal information saved");
           onNext();
         }}
       />
