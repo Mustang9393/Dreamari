@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { BookOpen, Calendar, CalendarPlus, Check, ChevronDown, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, MapPin, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Timer, Users, Video, X } from "lucide-react";
+import { BookOpen, Calendar, CalendarPlus, Check, ChevronDown, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, MapPin, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Timer, TrendingDown, TrendingUp, Users, Video, X } from "lucide-react";
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
@@ -21,7 +21,7 @@ import { ProProfileView, SubTabs, type Follows } from "../ProProfile";
 import type { Pro } from "../data";
 import type { ResumeData } from "@/lib/resume";
 import { Meter, Ring, Segmented, ruledCell } from "../viz";
-import { compact } from "./charts";
+import { ShareBar, compact } from "./charts";
 import * as D from "./mentorshipData";
 
 // The Mentorship tab in Connect: a tiled list of partner mentorship programs
@@ -57,6 +57,18 @@ function Item({ children, className = "" }: { children: ReactNode; className?: s
  *  that fades in and nudges right, the same as the AT&T board's cards. */
 function HoverChevron({ className = "top-1/2 right-[14px] -translate-y-1/2" }: { className?: string }) {
   return <ChevronRight aria-hidden className={`pointer-events-none absolute z-20 h-[18px] w-[18px] opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100 ${className}`} style={{ color: "var(--muted-foreground)" }} />;
+}
+/** A stat's change, as a pill: an arrow that flips with the sign, never
+ *  spelled-out words like "vs last year" -- the arrow and color carry it. */
+function DeltaBadge({ value }: { value: number }) {
+  const up = value >= 0;
+  const tone = up ? GOOD : "var(--world-business-money-office)";
+  const Icon = up ? TrendingUp : TrendingDown;
+  return (
+    <span className="flex flex-none items-center gap-[3px] rounded-full py-[3px] pr-[8px] pl-[6px] text-[12px] leading-[15px] font-bold tabular-nums" style={{ color: tone, background: `color-mix(in srgb, ${tone} 15%, transparent)` }}>
+      <Icon className="h-3 w-3" aria-hidden /> {up ? "+" : ""}{value}%
+    </span>
+  );
 }
 /** A panel that opens something: the whole surface is the button, any
  *  control inside keeps working because it sits above the hit layer. */
@@ -1424,15 +1436,17 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
   const [program, setProgram] = useState<D.ProgramId>("all");
   const [ePeriod, setEPeriod] = useState<D.EngagementPeriod>("annual");
   const [exporting, setExporting] = useState(false);
+  const [sheet, setSheet] = useState<{ kind: "kpi"; key: D.Kpi["key"]; def: D.EngagementPeriod } | null>(null);
   const [toast, onToast] = useToast();
   const selected = D.PROGRAMS.find((p) => p.id === program) ?? null;
-  // a region's share of the global figure for a given KPI, reused by
-  // Program-at-a-glance and Engagement below
-  const regionValueOf = (k: D.Kpi) => (selected ? (k.key === "hours" ? selected.hours : k.key === "students" ? selected.students : k.key === "mentors" ? selected.mentors : Math.round(selected.hours * (k.key === "messages" ? 1.24 : 0.18))) : null);
-  const kpiValue = (k: D.Kpi, field: "year" | "quarter" | "month") => {
-    const regionValue = regionValueOf(k);
-    const ratio = regionValue !== null ? regionValue / k.year : 1;
-    return regionValue !== null ? (field === "year" ? regionValue : Math.round(k[field] * ratio)) : k[field];
+  // a region's (or, per-program, a program's) share of the global figure
+  // for a given KPI -- reused by Program-at-a-glance/Engagement and by the
+  // drill-down sheet's by-program breakdown
+  const shareOf = (k: D.Kpi, of: { hours: number; students: number; mentors: number } | null) => (of ? (k.key === "hours" ? of.hours : k.key === "students" ? of.students : k.key === "mentors" ? of.mentors : Math.round(of.hours * (k.key === "messages" ? 1.24 : 0.18))) : null);
+  const kpiValue = (k: D.Kpi, field: "year" | "quarter" | "month", of = selected) => {
+    const share = shareOf(k, of);
+    const ratio = share !== null ? share / k.year : 1;
+    return share !== null ? (field === "year" ? share : Math.round(k[field] * ratio)) : k[field];
   };
   const eDef = D.ENGAGEMENT_PERIODS.find((p) => p.key === ePeriod)!;
   const kpiOf = (key: D.Kpi["key"]) => D.KPIS.find((k) => k.key === key)!;
@@ -1471,19 +1485,22 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
           <div className="flex flex-col gap-[var(--space-3)]">
             <Title>Program at a glance</Title>
             <Panel className="relative grid grid-cols-2 !p-0">
-              <span aria-hidden className="absolute top-1/2 left-1/2 z-10 flex size-[30px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", background: "var(--background)", color: "var(--muted-foreground)" }}><Link2 className="h-[14px] w-[14px]" aria-hidden /></span>
-              <div className="flex flex-col items-center gap-[6px] p-[var(--space-5)] text-center">
-                <span className="flex size-[36px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><Users className="h-[18px] w-[18px]" aria-hidden /></span>
-                <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(mentorsNow)}</span>
-                <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Mentors</span>
-                <Muted className="text-[11.5px] leading-[15px]">Unique volunteers</Muted>
-              </div>
-              <div className="flex flex-col items-center gap-[6px] border-l p-[var(--space-5)] text-center" style={{ borderColor: RULE }}>
-                <span className="flex size-[36px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><GraduationCap className="h-[18px] w-[18px]" aria-hidden /></span>
-                <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(scholarsNow)}</span>
-                <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Scholars</span>
-                <Muted className="text-[11.5px] leading-[15px]">Unique students</Muted>
-              </div>
+              <span aria-hidden className="absolute top-1/2 left-1/2 z-10 flex size-[26px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", background: "var(--background)", color: "var(--muted-foreground)" }}><Link2 className="h-3 w-3" aria-hidden /></span>
+              {[
+                { key: "mentors" as const, value: mentorsNow, Icon: Users },
+                { key: "students" as const, value: scholarsNow, Icon: GraduationCap },
+              ].map(({ key, value, Icon }, i) => {
+                const k = kpiOf(key);
+                return (
+                  <button key={key} type="button" onClick={() => setSheet({ kind: "kpi", key, def: "annual" })} className={`dm-quiet group flex cursor-pointer flex-col gap-[10px] p-[var(--space-5)] text-left ${i === 1 ? "border-l" : ""}`} style={{ borderColor: RULE }}>
+                    <span className="flex items-center justify-between gap-[8px]">
+                      <span className="flex items-center gap-[6px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}><Icon className="h-4 w-4" aria-hidden style={{ color: accent }} /> {k.label}</span>
+                      <DeltaBadge value={k.deltaYear} />
+                    </span>
+                    <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
+                  </button>
+                );
+              })}
             </Panel>
           </div>
 
@@ -1498,12 +1515,14 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
                 const k = kpiOf(row.key);
                 const Icon = KPI_ICON[row.key];
                 return (
-                  <div key={row.key} className={`flex flex-col gap-[8px] ${ruledCell(i, 3)}`} style={{ borderColor: RULE }}>
-                    <span className="flex size-[32px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><Icon className="h-[16px] w-[16px]" aria-hidden /></span>
+                  <button key={row.key} type="button" onClick={() => setSheet({ kind: "kpi", key: row.key, def: ePeriod })} className={`dm-quiet group flex cursor-pointer flex-col gap-[10px] text-left ${ruledCell(i, 3)}`} style={{ borderColor: RULE }}>
+                    <span className="flex items-center justify-between gap-[8px]">
+                      <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-bold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}><Icon className="h-3.5 w-3.5" aria-hidden style={{ color: accent }} /> {k.label}</span>
+                      <DeltaBadge value={k[eDef.deltaField]} />
+                    </span>
                     <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(row.value)}</span>
-                    <span className="text-[12.5px] leading-[16px] font-bold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k.label}</span>
                     {row.sub && <Muted className="text-[12px] leading-[16px]">{row.sub}</Muted>}
-                  </div>
+                  </button>
                 );
               })}
             </Panel>
@@ -1528,6 +1547,24 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
       )}
 
       {tab === "settings" && <SettingsView onToast={onToast} />}
+
+      {sheet?.kind === "kpi" && (() => {
+        const k = kpiOf(sheet.key);
+        const def = D.ENGAGEMENT_PERIODS.find((p) => p.key === sheet.def)!;
+        const per = D.PROGRAMS.map((p) => ({ label: p.name, value: kpiValue(k, def.field, p) }));
+        return (
+          <Sheet title={k.label} label={`By program, ${def.sectionWord.toLowerCase()}`} onClose={() => setSheet(null)}>
+            <span className="flex items-center gap-[10px]">
+              <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(kpiValue(k, def.field, null))}</span>
+              <DeltaBadge value={k[def.deltaField]} />
+            </span>
+            <ShareBar parts={per} accent={accent} />
+            <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
+              {per.map((r) => <div key={r.label} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>{r.label}</span><span className="font-bold tabular-nums">{r.value.toLocaleString("en-US")}</span></div>)}
+            </div>
+          </Sheet>
+        );
+      })()}
 
       {exporting && (
         <Sheet title="Export report" label={selected ? selected.name : "All programs"} onClose={() => setExporting(false)}>

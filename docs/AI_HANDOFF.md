@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-20 Enterprise Overview: trend deltas + drill-down, cards redesigned
+
+- Asked for a genuine opinion on what the just-simplified Enterprise Overview was missing beyond the deleted content: agreed the real gap was no sense of trend -- every number was a bare total, no up/down context. Recommended adding a small delta rather than reviving the old sparklines/charts (that was the actual clutter Josh's pass was cutting).
+- First delta attempt was bad and got called out for it: spelled-out "vs last year" text wrapped ugly next to an already-uppercase label, and every tile still used the same generic gray icon-in-a-circle badge, repeated five times. Redesigned per direct feedback: icon + label top-left, a colored pill with a trend arrow (`DeltaBadge`, up/down via `TrendingUp`/`TrendingDown`) top-right -- no spelled-out comparison text anywhere, the arrow and color carry it, per "limit copy, use visual/graphical elements."
+- Cards are clickable again (`sheet` state and a single lean `Sheet` reintroduced, scoped to just this drill-down -- not the five sheet kinds and the Regions/Details tabs cut earlier today): tapping any Program-at-a-glance or Engagement tile opens "By program, {period}" with the total, its delta, a `ShareBar` split, and the per-program numbers. `kpiValue` now takes an optional `of` (region/program) so the same function powers the tile figures, the region filter, and the sheet's per-program breakdown without duplicating the math.
+- Verified live: both drill-down sheets open with ref-based clicks (screenshot-coordinate clicks were landing wrong after an earlier viewport resize -- the pane was 1210px wide while screenshots rendered at 800px, so real elements sat well off where they looked), Quarterly correctly reads "By program, this quarter" with quarter-scaled numbers in the sheet. tsc/eslint clean.
+
 ### 2026-09-20 Enterprise Overview rebuilt to Josh's simplified Replit pass, then trimmed to match it exactly
 
 - Josh sent a second Replit pass at the Mentorship Enterprise dashboard: a much simpler Overview (Geography dropdown + Annual/Quarterly/Monthly, "Program at a Glance" for Mentors/Scholars, "Engagement This [period]" for Volunteer Hours/Mentor Meetings/Messages Exchanged with avg-per-pair context, an annual-only volunteer-hours-goal ring, just Overview + Settings tabs).
