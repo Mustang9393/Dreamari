@@ -80,11 +80,17 @@ const INSET = { background: "var(--inset-surface)", borderColor: "var(--inset-bo
 const FROST = { background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.22)", color: "var(--foreground)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)" } as const;
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(24px) saturate(1.65)", WebkitBackdropFilter: "blur(24px) saturate(1.65)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
-// Covers a student can pick for their header: six rendered materials (fluted
-// glass, molten glass, rippled glass, a grain-lit horizon) in the app's dark,
-// warm-lit register (scratchpad/covers.js renders them), or their own upload.
-// No subject, nothing to crop. Persisted per browser.
-const COVERS = ["streaks", "fluted", "smoke", "molten", "frosted", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
+// Covers a student can pick for their header: twenty rendered materials
+// (glass, smoke, light, color) in the app's dark, warm-lit register
+// (scripts/qa/render-profile-covers.js renders them), toward the ~40 the
+// spec calls for -- six shipped first, fourteen more added 20 Sept once the
+// banner itself was trimmed to its real on-screen proportions. No subject,
+// nothing to crop, no uploads. Persisted per browser.
+const COVERS = [
+  "streaks", "fluted", "smoke", "molten", "frosted", "horizon",
+  "aurora", "grid", "confetti", "waves", "prism", "orbit", "terrain",
+  "bokeh", "shards", "ribbon", "static", "nebula", "mesh", "constellation",
+].map((n) => `/images/profile/covers/${n}.webp`);
 const COVER_KEY = "dreamari-cover";
 /** the sentinel that means "use my #1 career's poster as the cover" */
 const COVER_CAREER = "career";
@@ -271,8 +277,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // server render and the first paint match
     try {
       const saved = window.localStorage.getItem(COVER_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (saved && saved !== COVER_CAREER && !saved.startsWith("blob:")) { setCoverUrl(saved); setBgUrl(saved); }
+      if (saved && saved !== COVER_CAREER && !saved.startsWith("blob:")) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCoverUrl(saved); setBgUrl(saved);
+      } else if (!saved) {
+        // A brand-new profile (no cover chosen yet) gets a random one from
+        // the full set instead of everyone always landing on the same
+        // first option -- picked once and persisted, so it's varied
+        // student to student but stable for this one from here on.
+        const random = COVERS[Math.floor(Math.random() * COVERS.length)];
+        setCoverUrl(random); setBgUrl(random);
+        window.localStorage.setItem(COVER_KEY, random);
+      }
     } catch {}
   }, []);
   const pickCover = (url: string) => {

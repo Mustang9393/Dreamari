@@ -3,7 +3,7 @@
 // references, in the brand palette (navy, brand blue, indigo, teal, pink): light streaks with grain, reeded glass, flowing smoke, a molten
 // glass blob, a frosted glass band over an ember gradient, and a horizon glow.
 const sharp = require('sharp'); const fs = require('fs');
-const OUT = 'public/images/profile/covers'; const W = 2000, H = 1125;
+const OUT = 'public/images/profile/covers'; let W = 2000, H = 1125;
 
 // ---- noise ----
 function hash(n) { let x = Math.sin(n) * 43758.5453; return x - Math.floor(x); }
@@ -113,4 +113,175 @@ const INDIGO = hex('#6366f1'), PURPLE_DARK = hex('#2e2466'), TEAL = hex('#14b8a6
     const side = Math.exp(-Math.pow((u - 0.22) * 2.6, 2)) * Math.pow(Math.max(0, v - 0.4), 2) * 0.5;
     return lerpColor(DARK, lerpColor(PINK_DARK, lerpColor(PINK, hex('#ffd6e6'), Math.pow(g, 2.2) * 0.6), Math.min(1, g * 1.4 + side)), Math.min(1, (g + side) * 1.15));
   }), 'horizon', 18);
+
+  // ---- Batch 2 (20 Sept): fourteen more, rendered at the header's real
+  // on-screen proportions (~6:1) now that the cover banner itself was
+  // trimmed down to that shape, so nothing here needs to lean on
+  // object-cover to crop a taller source into a short strip. Same brand
+  // palette, same generative approach, toward the ~40 the spec calls for.
+  W = 2400; H = 400;
+
+  // 7. aurora: soft undulating teal/indigo/pink bands, lit from the bottom.
+  await save(render((u, v) => {
+    const wave = fbm(u * 2.2 + 4, v * 1.4, 4) * 0.55;
+    const band = Math.sin((v * 1.6 + wave) * Math.PI * 2) * 0.5 + 0.5;
+    const col = lerpColor(lerpColor(TEAL, INDIGO, band), PINK, Math.pow(Math.max(0, u - 0.62), 1.3));
+    const fade = Math.pow(1 - v, 0.75);
+    return lerpColor(DARK, col, fade * (0.42 + 0.58 * band));
+  }), 'aurora', 14);
+
+  // 8. grid: a faint dot lattice with one bright glow spot.
+  await save(render((u, v, x, y) => {
+    const cell = 40;
+    const gx = ((x % cell) + cell) % cell / cell - 0.5, gy = ((y % cell) + cell) % cell / cell - 0.5;
+    const dot = Math.max(0, 1 - Math.hypot(gx, gy) * 6.5);
+    const glow = Math.exp(-Math.pow(Math.hypot((u - 0.78) * 1.5, (v - 0.28) * 2.6), 2) * 3);
+    const line = lerpColor(DARK, hex('#161f45'), 0.55);
+    const lit = lerpColor(line, ICE, Math.min(1, dot * (0.32 + glow)));
+    return lerpColor(lit, SKY, glow * 0.65);
+  }), 'grid', 9);
+
+  // 9. confetti: scattered bright sparks over navy, each its own brand hue.
+  await save(render((u, v) => {
+    let spark = 0, tint = DARK;
+    for (let i = 0; i < 70; i++) {
+      const sx = hash(i * 12.9), sy = hash(i * 78.2 + 4);
+      const size = 2.2 + hash(i * 3.3) * 5;
+      const d = Math.hypot((u - sx) * W, (v - sy) * H);
+      const s = Math.max(0, 1 - d / size);
+      if (s > spark) { spark = s; tint = [BLUE, PINK, TEAL, ICE][i % 4]; }
+    }
+    return lerpColor(DARK, tint, Math.min(1, spark * 1.3));
+  }), 'confetti', 8);
+
+  // 10. waves: three offset sine ribbons, brightest where they overlap.
+  await save(render((u, v) => {
+    const w1 = Math.sin((u * 2.4 + 0.1) * Math.PI * 2) * 0.09 + 0.32;
+    const w2 = Math.sin((u * 2.4 + 0.55) * Math.PI * 2) * 0.09 + 0.55;
+    const w3 = Math.sin((u * 2.4 + 1.0) * Math.PI * 2) * 0.09 + 0.78;
+    const near = (w) => Math.exp(-Math.pow((v - w) * 9, 2));
+    const g = Math.min(1, near(w1) + near(w2) * 0.85 + near(w3) * 0.7);
+    const col = lerpColor(lerpColor(BLUE, INDIGO, near(w2)), TEAL, near(w1));
+    return lerpColor(DARK, col, g);
+  }), 'waves', 12);
+
+  // 11. prism: diagonal color-split bands, like light through glass.
+  await save(render((u, v) => {
+    const d = u * 0.72 - v * 0.4;
+    const t = ((d % 0.5) + 0.5) % 0.5 / 0.5;
+    const stops = [DARK, BLUE, INDIGO, TEAL, PINK, DARK];
+    const seg = t * (stops.length - 1), i = Math.floor(seg);
+    const col = lerpColor(stops[i], stops[Math.min(i + 1, stops.length - 1)], seg - i);
+    const edge = Math.pow(Math.sin(t * Math.PI), 0.6);
+    return lerpColor(DARK, col, 0.35 + 0.5 * edge);
+  }), 'prism', 11);
+
+  // 12. orbit: concentric glowing rings from an off-center point.
+  await save(render((u, v) => {
+    const d = Math.hypot((u - 0.72) * 1.5, (v - 0.4) * 2.4);
+    const ring = Math.pow(Math.abs(Math.sin(d * 13)), 6);
+    const fall = Math.exp(-d * 1.6);
+    const col = lerpColor(INDIGO, ICE, Math.min(1, ring * fall * 2));
+    return lerpColor(DARK, col, Math.min(1, (ring * 0.8 + 0.2) * fall * 1.6));
+  }), 'orbit', 10);
+
+  // 13. terrain: warm topographic contour lines.
+  await save(render((u, v) => {
+    const n = fbm(u * 3.2, v * 3.2 + 9, 5);
+    const line = Math.pow(1 - Math.abs(Math.sin(n * 22)), 9);
+    const base = lerpColor(hex('#1a0f30'), PINK_DARK, v);
+    return lerpColor(base, hex('#ffd6e6'), Math.min(0.85, line * 1.6));
+  }), 'terrain', 12);
+
+  // 14. bokeh: soft out-of-focus circles of light.
+  await save(render((u, v) => {
+    let g = 0, tint = SKY;
+    for (let i = 0; i < 16; i++) {
+      const cx = hash(i * 17.3), cy = hash(i * 51.1 + 8);
+      const r = 0.06 + hash(i * 9.7) * 0.16;
+      const d = Math.hypot((u - cx) * 1, (v - cy) * (W / H) * r * 0 + (v - cy));
+      const dd = Math.hypot((u - cx), (v - cy) * (H / W) * 3.2);
+      const s = Math.exp(-Math.pow(dd / r, 2) * 2.2) * 0.8;
+      if (s > 0.02) { g += s; if (s > 0.3) tint = [SKY, TEAL, PINK, INDIGO][i % 4]; }
+    }
+    return lerpColor(DARK, tint, Math.min(1, g));
+  }), 'bokeh', 10);
+
+  // 15. shards: small angular faceted fragments, each its own tint and shade.
+  await save(render((u, v, x, y) => {
+    const cell = 46;
+    const cx = Math.floor(x / cell), cy = Math.floor(y / cell);
+    const jx = hash(cx * 12.1 + cy * 7.7), jy = hash(cx * 33.3 + cy * 91.1);
+    const fx = x / cell - cx, fy = y / cell - cy;
+    const facet = (fx * (0.6 + jx * 0.8) + fy * (0.6 + jy * 0.8)) % 1;
+    const shade = 0.5 + 0.5 * Math.sin(facet * Math.PI * 2 + jy * 6);
+    const tint = [BLUE, INDIGO, TEAL][Math.floor((jx + jy) * 3) % 3];
+    const vgn = Math.pow(1 - Math.abs(v - 0.5) * 1.1, 0.6);
+    return lerpColor(DARK, tint, (0.16 + 0.4 * Math.max(0, shade)) * vgn);
+  }), 'shards', 10);
+
+  // 16. ribbon: one flowing satin ribbon crossing the frame.
+  await save(render((u, v) => {
+    const center = 0.5 + 0.18 * Math.sin(u * Math.PI * 1.6) + 0.08 * Math.sin(u * Math.PI * 5.2 + 2);
+    const d = Math.abs(v - center);
+    const body = Math.exp(-Math.pow(d * 7, 2));
+    const spec = Math.pow(Math.max(0, 1 - Math.abs(d * 7 - 0.35) * 3), 4) * 0.7;
+    const col = lerpColor(PINK_DARK, PINK, Math.min(1, body + spec));
+    return lerpColor(DARK, lerpColor(col, hex('#ffe6f0'), spec), Math.min(1, body * 0.9 + spec));
+  }), 'ribbon', 12);
+
+  // 17. static: fine horizontal scanlines over a cool gradient (a calmer,
+  // horizontal cousin of "streaks" -- rows, not columns).
+  await save(render((u, v, x, y) => {
+    const row = noise1(y * 0.9) * 0.6 + noise1(y * 3.1 + 40) * 0.4;
+    const field = Math.pow(Math.max(0, 1 - Math.abs(u - 0.68) * 1.3), 1.6);
+    const line = 0.3 + 0.7 * Math.pow(Math.max(0, row), 1.6);
+    const glow = field * line;
+    return lerpColor(DARK, lerpColor(INDIGO, ICE, Math.pow(glow, 1.5)), Math.min(1, glow * 1.2));
+  }), 'static', 15);
+
+  // 18. nebula: a soft multi-hue radial cloud, warm center, cool edges.
+  await save(render((u, v) => {
+    const n = fbm(u * 2.4 + 12, v * 2.4 + 3, 5);
+    const d = Math.hypot((u - 0.55) * 1.1, (v - 0.5) * 1.6);
+    const cloud = Math.max(0, (0.75 - d) + n * 0.35);
+    const col = lerpColor(lerpColor(PINK, INDIGO, Math.min(1, d * 1.3)), TEAL, Math.max(0, n - 0.5) * 1.2);
+    return lerpColor(DARK, col, Math.min(1, cloud * 1.3));
+  }), 'nebula', 13);
+
+  // 19. mesh: two soft gradient blobs blending across the frame.
+  await save(render((u, v) => {
+    const a = Math.exp(-Math.pow(Math.hypot((u - 0.25) * 1.3, (v - 0.3) * 2), 2) * 1.6);
+    const b = Math.exp(-Math.pow(Math.hypot((u - 0.8) * 1.3, (v - 0.75) * 2), 2) * 1.6);
+    const col = lerpColor(lerpColor(DARK, BLUE, a), lerpColor(DARK, PINK, b), 0.5);
+    return lerpColor(DARK, col, Math.min(1, a + b));
+  }), 'mesh', 12);
+
+  // 20. constellation: dense connected points, star-field style -- every
+  // point links to its nearest neighbor, not just its array-order sibling,
+  // so lines actually show up instead of scattering into isolated dots.
+  await save(render((u, v) => {
+    const n = 34;
+    const pts = [];
+    for (let i = 0; i < n; i++) pts.push([hash(i * 19.7 + 1), hash(i * 61.3 + 5)]);
+    let g = 0;
+    for (const [px, py] of pts) g = Math.max(g, Math.exp(-Math.pow(Math.hypot((u - px) * W, (v - py) * H) / 2.6, 2)));
+    for (let i = 0; i < n; i++) {
+      const [ax, ay] = pts[i];
+      let bestJ = -1, bestD = Infinity;
+      for (let j = 0; j < n; j++) {
+        if (j === i) continue;
+        const [bx, by] = pts[j];
+        const dd = Math.hypot((ax - bx) * (W / H), ay - by);
+        if (dd < bestD) { bestD = dd; bestJ = j; }
+      }
+      if (bestJ < 0 || bestD > 0.22) continue;
+      const [bx, by] = pts[bestJ];
+      const t = Math.max(0, Math.min(1, ((u - ax) * (bx - ax) + (v - ay) * (by - ay)) / (Math.pow(bx - ax, 2) + Math.pow(by - ay, 2) + 1e-6)));
+      const px2 = ax + (bx - ax) * t, py2 = ay + (by - ay) * t;
+      const d = Math.hypot((u - px2) * W, (v - py2) * H);
+      g = Math.max(g, Math.exp(-Math.pow(d / 1.3, 2)) * 0.55);
+    }
+    return lerpColor(DARK, ICE, Math.min(1, g));
+  }), 'constellation', 11);
 })();
