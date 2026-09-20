@@ -80,14 +80,20 @@ const INSET = { background: "var(--inset-surface)", borderColor: "var(--inset-bo
 const FROST = { background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.22)", color: "var(--foreground)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)" } as const;
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(24px) saturate(1.65)", WebkitBackdropFilter: "blur(24px) saturate(1.65)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
-// Covers a student can pick for their header: rendered materials in the
-// app's dark, warm-lit register (scripts/qa/render-profile-covers.js
-// renders them). No subject, nothing to crop, no uploads.
-// The 20 Sept batch of 14 procedural additions (plus "fluted" and "molten"
-// from the original six) was rejected on sight (direct feedback, 20 Sept)
-// -- pulled back to the four originals nobody's flagged, pending real
-// (Unsplash or similar) cover photography instead of more generated art.
-const COVERS = ["streaks", "smoke", "frosted", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
+// Covers a student can pick for their header: four of the original
+// procedurally-rendered materials (scripts/qa/render-profile-covers.js;
+// the other two, plus a batch of fourteen more in the same style, were
+// rejected on sight, direct feedback 20 Sept) plus real curated photography
+// from Unsplash -- abstract (light, glass, ink, paint) kept dominant per
+// direct instruction, landscape/nature as a smaller supplement, nothing
+// with a person in frame. No uploads.
+const COVERS = [
+  "streaks", "smoke", "frosted", "horizon",
+  // abstract photography
+  "gradient-glow", "color-flow", "bokeh-warm", "bokeh-blue", "glass-refract", "prism-light", "fluid-paint", "ink-swirl", "ink-marble",
+  // nature/landscape, no people
+  "aurora-sky", "ocean-aerial", "desert-dunes", "starry-sky",
+].map((n) => `/images/profile/covers/${n}.webp`);
 const COVER_KEY = "dreamari-cover";
 // Same nudge as "For you" on Explore (ExploreExperience.tsx's dm-text-nudge/
 // dm-nudge-spark): a light sweep across the button's own label until the
