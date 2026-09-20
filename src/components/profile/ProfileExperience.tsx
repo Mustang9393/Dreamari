@@ -80,32 +80,27 @@ const INSET = { background: "var(--inset-surface)", borderColor: "var(--inset-bo
 const FROST = { background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.22)", color: "var(--foreground)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)" } as const;
 const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(24px) saturate(1.65)", WebkitBackdropFilter: "blur(24px) saturate(1.65)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px -28px rgba(0,0,0,0.6)" } as const;
 
-// Covers a student can pick for their header: four of the original
-// procedurally-rendered materials (scripts/qa/render-profile-covers.js;
-// the other two, plus a batch of fourteen more in the same style, were
-// rejected on sight, direct feedback 20 Sept) plus real curated photography
-// from Unsplash -- abstract (light, glass, ink, paint) kept dominant per
-// direct instruction, landscape/nature as a smaller supplement, nothing
-// with a person in frame. No uploads.
+// Covers a student can pick for their header: one procedurally-rendered
+// material left (scripts/qa/render-profile-covers.js -- the rest of that
+// batch, plus streaks/frosted/horizon, were rejected on sight, direct
+// feedback 20 Sept) plus real curated photography from Unsplash -- abstract
+// (light, glass, ink, paint) kept dominant per direct instruction, landscape/
+// nature as a smaller supplement, nothing with a person in frame. No uploads.
+// First in the list is the literal default (what SSR/first paint shows,
+// picked to be the strongest single option -- direct instruction, 20 Sept:
+// "the default one needs to be the coolest, for the demo"); a genuinely new
+// profile then randomizes into a different one from the full list moments
+// after mount (see the effect below), so a real new student doesn't just
+// always see this same one either.
 const COVERS = [
-  "streaks", "smoke", "frosted", "horizon",
+  "ink-marble",
+  "smoke",
   // abstract photography
-  "gradient-glow", "color-flow", "bokeh-warm", "bokeh-blue", "glass-refract", "prism-light", "fluid-paint", "ink-swirl", "ink-marble",
+  "gradient-glow", "bokeh-warm", "bokeh-blue", "prism-light", "fluid-paint", "ink-swirl", "glass-refract",
   // nature/landscape, no people
   "aurora-sky", "ocean-aerial", "desert-dunes", "starry-sky",
 ].map((n) => `/images/profile/covers/${n}.webp`);
 const COVER_KEY = "dreamari-cover";
-// Same nudge as "For you" on Explore (ExploreExperience.tsx's dm-text-nudge/
-// dm-nudge-spark): a light sweep across the button's own label until the
-// student has opened the cover picker once, so it's obvious this is
-// changeable the moment they land here instead of sitting unnoticed.
-const COVER_NUDGE_SEEN_KEY = "dreamari:nudge:cover";
-function readCoverNudgeSeen(): boolean {
-  try { return window.localStorage.getItem(COVER_NUDGE_SEEN_KEY) === "1"; } catch { return false; }
-}
-function markCoverNudgeSeen(): void {
-  try { window.localStorage.setItem(COVER_NUDGE_SEEN_KEY, "1"); } catch {}
-}
 /** the sentinel that means "use my #1 career's poster as the cover" */
 const COVER_CAREER = "career";
 
@@ -279,13 +274,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // the A/B switch is a crossfade, never a half-decoded swap
   const [bgUrl, setBgUrl] = useState<string>(COVERS[0]);
   const [coverOpen, setCoverOpen] = useState(false);
-  // assume seen until the client checks, so SSR never flashes the sweep
-  const [coverNudgeSeen, setCoverNudgeSeen] = useState(true);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCoverNudgeSeen(readCoverNudgeSeen());
-  }, []);
-  const coverNudge = !coverOpen && !coverNudgeSeen;
+  // Plays every time the student lands on their profile, not just once
+  // (direct instruction, 20 Sept -- unlike Explore's "For you", which
+  // permanently stops after first use): the cover is a low-stakes, repeat-
+  // use customization, not a primary nav path someone only needs telling
+  // about once.
+  const coverNudge = !coverOpen;
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const avatarSeed = STUDENT.name.split(" ")[0] || STUDENT.name;
   const avatarSrc = useStudentAvatarSrc(avatarSeed);
@@ -457,12 +451,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   type="button"
                   aria-label="Change cover photo"
                   aria-expanded={coverOpen}
-                  onClick={() => { setCoverOpen((open) => !open); markCoverNudgeSeen(); setCoverNudgeSeen(true); }}
+                  onClick={() => setCoverOpen((open) => !open)}
                   className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
                   style={{ color: coverOpen ? "var(--accent-subtle)" : "rgba(255,255,255,0.86)" }}
                 >
                   <ImagePlus className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
-                  <span className={`relative hidden sm:inline ${coverNudge ? "dm-text-nudge" : ""}`}>
+                  {/* The sweep fills the text with currentColor + a white
+                     glint (dm-text-nudge, background-clip: text), so it
+                     needs a muted base to show against -- this label's
+                     normal resting color is already near-white, the same
+                     tone as the sweep itself, which is why it read as
+                     invisible (direct feedback, 20 Sept). */}
+                  <span className={`relative hidden sm:inline ${coverNudge ? "dm-text-nudge" : ""}`} style={coverNudge ? { color: "rgba(255,255,255,0.55)" } : undefined}>
                     Cover
                     {coverNudge && (
                       <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
