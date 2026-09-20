@@ -16,7 +16,6 @@ import { AtsIcon } from "./AtsIcon";
 import { Working } from "@/components/app/Working";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
 import { ATSCheckPanel } from "./ATSCheckPanel";
-import { AtsCheckStage } from "./AtsCheckStage";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
 import { EditSectionsPanel } from "./EditSectionsPanel";
 import { ExperienceModal } from "./ExperienceModal";
@@ -379,18 +378,21 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when the fingerprint changes
   }, [version?.id, stale]);
   const ats = version?.atsCheck ?? null;
-  // A just-created resume opens INTO the check: the stage runs first (paced
-  // reveal of the readability items, waiting on the real result), then the
-  // score card. Revisits with stale content only get the header chip.
-  const [staged, setStaged] = useState(false);
   // Same-route navigation (only the search params change) keeps the
   // previous scroll offset, so a resume created from the bottom of the
   // Tailor form opened already scrolled past its own header (17 Sept 2026).
   useEffect(() => {
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }, [version?.id]);
-  const showStage = celebrate && !staged && !!version;
-  const showResult = celebrate && staged && !resultSeen && !!ats && !stale;
+  // A just-created resume opens straight into the score card, the instant
+  // the check lands -- confirmed live against the reference (20 Sept
+  // 2026): its own score appears already computed, with no paced/animated
+  // "checking" sequence first, on both a fresh resume and a revisit. This
+  // used to run an AtsCheckStage (readability items revealing one at a
+  // time) before this card per direct feedback ("it has to read like an
+  // ATS check, not suddenly a score appearing", 17 Sept 2026) -- removed
+  // for literal parity; flagged as a real loss, not an oversight.
+  const showResult = celebrate && !resultSeen && !!ats && !stale;
   return (
     <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active="saved" router={router} onClose={() => router.push("/profile?tab=resume")} />}>
       <TopBar
@@ -504,7 +506,6 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
          two numbers and the single most useful tip, with the full report
          one tap away (the reference's own moment, minus the three tips it
          listed under "one small tip"). */}
-      {showStage && <AtsCheckStage result={ats && !stale ? ats : null} onDone={() => setStaged(true)} />}
       {/* The score card, once, as the same cinematic splash the rest of
          the app opens with: the headline by match strength, the two
          numbers, the single most useful tip; Continue banks the "first
