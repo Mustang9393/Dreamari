@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { AlertTriangle, BookOpen, Calendar, CalendarPlus, Check, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, MapPin, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Target, Timer, Users, Video, X } from "lucide-react";
+import { BookOpen, Calendar, CalendarPlus, Check, ChevronDown, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, MapPin, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Timer, Users, Video, X } from "lucide-react";
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
@@ -16,12 +16,12 @@ import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { studentAvatarSrc } from "@/lib/avatar";
 import { DEFAULT_RESUME_TEMPLATE } from "@/components/resume/data";
 import { resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
-import { Avatar, CompanyMark, InsightMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
-import { ProProfileView, type Follows } from "../ProProfile";
+import { Avatar, CompanyMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { ProProfileView, SubTabs, type Follows } from "../ProProfile";
 import type { Pro } from "../data";
 import type { ResumeData } from "@/lib/resume";
 import { Meter, Ring, Segmented, ruledCell } from "../viz";
-import { BarChart, GoalTrack, Histogram, ShareBar, Sparkline, compact } from "./charts";
+import { compact } from "./charts";
 import * as D from "./mentorshipData";
 
 // The Mentorship tab in Connect: a tiled list of partner mentorship programs
@@ -254,7 +254,6 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   // Tapping an avatar in the thread opens that person's profile; Back
   // returns to the same chat, so the program stays mounted underneath.
   const [profile, setProfile] = useState<"mentor" | "mentee" | null>(null);
-  const [mentorSheet, setMentorSheet] = useState<D.PairActivity | null>(null);
   // One thread shared by the student and mentor views, and by the schedule
   // card: accepting a request in the chat is what sets the next meeting.
   const [messages, setMessages] = useState<D.Message[]>(D.THREAD);
@@ -331,7 +330,7 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   // "Back to Messages", the Year Plan says "Back to Year Plan", the enterprise
   // activity table says "Back to Overview"; a Home tab names the program.
   const backTo =
-    view === "enterprise" ? (sub === "countries" ? "Regions" : sub === "settings" ? "Settings" : "Overview")
+    view === "enterprise" ? (sub === "countries" ? "Regions" : sub === "settings" ? "Settings" : sub === "details" ? "Details" : "Overview")
     : view === "student" && sub === "plan" ? "Year Plan"
     : view === "mentor" && sub === "journey" ? "Journey"
     : D.PROGRAM.initiative;
@@ -342,7 +341,6 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
          so Back lands on the same tab and the same thread */}
       {profile === "mentor" && <ProProfileView pro={D.MENTOR_PRO as unknown as Pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={() => setProfile(null)} backLabel={backLabel} />}
       {profile === "mentee" && <MenteeProfile onBack={() => setProfile(null)} backLabel={backLabel} />}
-      {mentorSheet && <MentorSheet row={mentorSheet} onClose={() => setMentorSheet(null)} />}
       <div className={profile === "mentor" ? "hidden" : "flex flex-col gap-[var(--space-5)]"}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
@@ -372,7 +370,7 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
         {view === "student" && <StudentView {...shared} onOpenProfile={() => openProfile("mentor")} />}
         {view === "mentor" && <MentorView {...shared} onOpenProfile={() => openProfile("mentee")} />}
-        {view === "enterprise" && <EnterpriseView sub={sub} setSub={setSub} onOpenMentor={(row) => (row.mentor === D.MENTOR.name ? setProfile("mentor") : setMentorSheet(row))} />}
+        {view === "enterprise" && <EnterpriseView sub={sub} setSub={setSub} />}
       </SectionSurface>
       </div>
       {dock !== "closed" && <ChatDock me={me} state={dock} unread={unread} messages={messages} setMessages={setMessages} onToast={onToast} onOpenProfile={() => openProfile(me === "mentee" ? "mentor" : "mentee")} />}
@@ -634,29 +632,6 @@ function ScheduleCard({ me, messages, onRequest, onToast, showMeter }: { me: "me
         </Sheet>
       )}
     </ClickPanel>
-  );
-}
-
-/** A mentor without a full Connect profile yet: the pair's activity and the
- *  ways to reach them, in a sheet so the dashboard stays put behind it. */
-function MentorSheet({ row, onClose }: { row: D.PairActivity; onClose: () => void }) {
-  return (
-    <Sheet title={row.mentor} label="Coach employee mentor" onClose={onClose}>
-      <Muted>Matched with {row.mentee} · Last contact {row.lastContact}</Muted>
-      <div className="grid grid-cols-3 gap-[var(--space-3)]">
-        {([[row.messages, "Messages"], [row.meetings, "Meetings"], [`${row.hours}h`, "Hours"]] as [number | string, string][]).map(([v, l]) => (
-          <div key={l} className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border p-[12px]" style={ITEM}>
-            <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: l === "Hours" ? accent : "var(--foreground)" }}>{v}</span>
-            <Muted className="text-[12px] leading-[16px]">{l}</Muted>
-          </div>
-        ))}
-      </div>
-      {row.quiet && <Item className="flex items-start gap-[10px]"><AlertTriangle className="mt-[2px] h-4 w-4 flex-none" aria-hidden style={{ color: "var(--world-business-money-office)" }} /><span className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>No contact in 30 days. The program lead is nudged automatically; you can also message the mentor.</span></Item>}
-      <div className="flex gap-[8px]">
-        <PrimaryCta size="sm" onClick={onClose}><MessageCircle className="h-4 w-4" aria-hidden /> Message mentor</PrimaryCta>
-        <QuietCta size="sm" onClick={onClose}>View full profile</QuietCta>
-      </div>
-    </Sheet>
   );
 }
 
@@ -1409,296 +1384,154 @@ function MentorView({ messages, setMessages, sub, setSub, openChat, onOpenProfil
 // ---------------------------------------------------------------------------
 // Enterprise
 
-const KPI_ICON = { hours: Timer, students: GraduationCap, mentors: Users, meetings: Handshake } as const;
+const KPI_ICON = { hours: Timer, students: GraduationCap, mentors: Users, meetings: Handshake, messages: MessageCircle } as const;
 
-function EnterpriseView({ sub, setSub, onOpenMentor }: { sub: string; setSub: (s: string) => void; onOpenMentor: (row: D.PairActivity) => void }) {
-  const tab = (["overview", "countries", "settings"].includes(sub) ? sub : "overview") as "overview" | "countries" | "settings";
-  const setTab = (t: "overview" | "countries" | "settings") => setSub(t);
-  const [sheet, setSheet] = useState<{ kind: "kpi"; key: D.Kpi["key"] } | { kind: "goals" } | { kind: "impact"; key: string } | { kind: "pairs" } | { kind: "cohort"; start: number } | null>(null);
-  const [period, setPeriod] = useState<"month" | "year">("year");
-  const [grain, setGrain] = useState<"monthly" | "weekly">("monthly");
+/** The Overview's region filter, a real dropdown (Josh's Replit pass, 20
+ *  Sept 2026) rather than the Regions tab's own segmented pills -- five
+ *  options read better as a list than a row that wraps on mobile. */
+function GeographyDropdown({ program, setProgram }: { program: D.ProgramId; setProgram: (p: D.ProgramId) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+  const options = [{ id: "all" as D.ProgramId, name: "Global" }, ...D.PROGRAMS];
+  const label = options.find((o) => o.id === program)?.name ?? "Global";
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={open} className="dm-quiet flex h-[42px] min-w-[180px] cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+        {label} <ChevronDown className={`h-4 w-4 flex-none transition-transform ${open ? "rotate-180" : ""}`} aria-hidden style={{ color: "var(--muted-foreground)" }} />
+      </button>
+      {open && (
+        <div role="listbox" aria-label="Geography" className="absolute top-[calc(100%+6px)] left-0 z-20 min-w-[220px] overflow-hidden rounded-[var(--radius-md)] border motion-safe:animate-[fade-slide-up_0.16s_ease-out_both]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 50px -20px rgba(0,0,0,0.8)" }}>
+          {options.map((o) => (
+            <button key={o.id} type="button" role="option" aria-selected={program === o.id} onClick={() => { setProgram(o.id); setOpen(false); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[10px] px-[14px] py-[10px] text-left text-[14px] font-semibold" style={{ color: program === o.id ? accent : "var(--foreground)" }}>
+              {o.name} {program === o.id && <Check className="h-4 w-4 flex-none" aria-hidden />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => void }) {
+  const tab = (["overview", "settings"].includes(sub) ? sub : "overview") as "overview" | "settings";
+  const setTab = (t: "overview" | "settings") => setSub(t);
   const [program, setProgram] = useState<D.ProgramId>("all");
+  const [ePeriod, setEPeriod] = useState<D.EngagementPeriod>("annual");
   const [exporting, setExporting] = useState(false);
   const [toast, onToast] = useToast();
   const selected = D.PROGRAMS.find((p) => p.id === program) ?? null;
-
-  const monthly = selected ? selected.monthly : D.MONTHS.map((_, i) => D.PROGRAMS.reduce((a, p) => a + p.monthly[i], 0));
-  const values = period === "month" ? D.THIS_MONTH_WEEKS : grain === "monthly" ? monthly : D.THIS_YEAR_WEEKS;
-  const labels = period === "month" ? ["Wk 1", "Wk 2", "Wk 3", "Wk 4"] : grain === "monthly" ? [...D.MONTHS] : D.THIS_YEAR_WEEKS.map((_, i) => `W${i + 1}`);
-  const lastYear = grain === "monthly" && period === "year" ? monthly.map((v) => Math.round(v * 0.86)) : undefined;
-  const hoursTotal = values.reduce((a, b) => a + b, 0);
-  const onTrackPairs = D.MEETINGS_PER_PAIR.slice(2).reduce((a, r) => a + r.pairs, 0);
-  const allPairs = D.MEETINGS_PER_PAIR.reduce((a, r) => a + r.pairs, 0);
+  // a region's share of the global figure for a given KPI, reused by
+  // Program-at-a-glance and Engagement below
+  const regionValueOf = (k: D.Kpi) => (selected ? (k.key === "hours" ? selected.hours : k.key === "students" ? selected.students : k.key === "mentors" ? selected.mentors : Math.round(selected.hours * (k.key === "messages" ? 1.24 : 0.18))) : null);
+  const kpiValue = (k: D.Kpi, field: "year" | "quarter" | "month") => {
+    const regionValue = regionValueOf(k);
+    const ratio = regionValue !== null ? regionValue / k.year : 1;
+    return regionValue !== null ? (field === "year" ? regionValue : Math.round(k[field] * ratio)) : k[field];
+  };
+  const eDef = D.ENGAGEMENT_PERIODS.find((p) => p.key === ePeriod)!;
+  const kpiOf = (key: D.Kpi["key"]) => D.KPIS.find((k) => k.key === key)!;
+  const mentorsNow = kpiValue(kpiOf("mentors"), "year");
+  const scholarsNow = kpiValue(kpiOf("students"), "year");
+  const hoursNow = kpiValue(kpiOf("hours"), eDef.field);
+  const meetingsNow = kpiValue(kpiOf("meetings"), eDef.field);
+  const messagesNow = kpiValue(kpiOf("messages"), eDef.field);
+  const goalPct = Math.min(100, Math.round((D.YEAR_HOURS_GOAL.logged / D.YEAR_HOURS_GOAL.target) * 100));
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Enterprise sections" value={tab} onChange={setTab} options={[{ key: "overview", label: "Overview" }, { key: "countries", label: "Regions" }, { key: "settings", label: "Settings" }]} /></div>
+      {/* Rebuilt to Josh's second Replit pass (20 Sept 2026): just this and
+         Settings, matching his structure exactly rather than tucking the
+         old Overview's deeper reporting (2030 goals, student impact, a
+         Regions tab, mentor activity, mentor mix) a tap away -- cut per
+         direct follow-up once that in-between version was live. */}
+      <div className="w-full sm:w-fit"><Segmented grow ariaLabel="Enterprise sections" value={tab} onChange={setTab} options={[{ key: "overview", label: "Overview" }, { key: "settings", label: "Settings" }]} /></div>
 
       {tab === "overview" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <SectionHead>{selected ? selected.name : "Global impact"}</SectionHead>
-            <div className="flex flex-wrap items-center gap-[8px]">
-              <Segmented ariaLabel="Period" value={period} onChange={setPeriod} options={[{ key: "month", label: "This Month" }, { key: "year", label: "This Year" }]} />
-              <QuietCta size="sm" onClick={() => setExporting(true)}><Download className="h-4 w-4" aria-hidden /> Export</QuietCta>
-            </div>
-          </div>
-          {/* the region, one tap: every number below follows it */}
-          <div className="w-full sm:w-fit">
-            <Segmented grow ariaLabel="Region" value={program} onChange={setProgram} options={[{ key: "all" as D.ProgramId, label: "All regions" }, ...D.PROGRAMS.map((p) => ({ key: p.id as D.ProgramId, label: p.name }))]} />
+        <div className="flex flex-col gap-[var(--space-5)]">
+          <div className="flex flex-wrap items-end justify-between gap-[var(--space-4)]">
+            <label className="flex flex-col gap-[6px]">
+              <span className="text-[11px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Geography</span>
+              <GeographyDropdown program={program} setProgram={setProgram} />
+            </label>
+            <QuietCta size="sm" onClick={() => setExporting(true)}><Download className="h-4 w-4" aria-hidden /> Export</QuietCta>
           </div>
 
-          <Panel className="grid grid-cols-2 !p-0 sm:grid-cols-4">
-            {D.KPIS.map((k, i) => {
-              const Icon = KPI_ICON[k.key];
-              // a region's share of the global figure, with its own hours curve
-              const regionValue = selected ? (k.key === "hours" ? selected.hours : k.key === "students" ? selected.students : k.key === "mentors" ? selected.mentors : Math.round(selected.hours * 0.18)) : null;
-              const ratio = regionValue !== null ? regionValue / k.year : 1;
-              const value = regionValue !== null ? (period === "year" ? regionValue : Math.round(k.month * ratio)) : period === "year" ? k.year : k.month;
-              const delta = period === "year" ? k.deltaYear : k.deltaMonth;
-              const spark = selected && k.key === "hours" ? selected.monthly : k.spark.map((v) => Math.round(v * ratio));
-              return (
-                <button key={k.key} type="button" onClick={() => setSheet({ kind: "kpi", key: k.key })} className={`dm-quiet group relative flex cursor-pointer flex-col gap-[10px] text-left ${ruledCell(i, 4)}`} style={{ borderColor: RULE }}>
-                  <HoverChevron className="top-[14px] right-[12px]" />
-                  <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><Icon className="h-3.5 w-3.5" aria-hidden style={{ color: accent }} /> {k.label}</span>
-                  <span className="flex items-baseline gap-[8px]">
-                    <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
-                    <span className="text-[12px] leading-[16px] font-bold tabular-nums" style={{ color: GOOD }}>+{delta}%</span>
-                  </span>
-                  <Sparkline values={spark} accent={accent} />
-                </button>
-              );
-            })}
-          </Panel>
+          {/* A different interaction than the Segmented tab bar above, on
+             purpose (direct feedback, 20 Sept 2026: stacked pill rows
+             clash) -- underlined sub-tabs, the same fix already used for
+             Answers | Posts on a volunteer's own profile. */}
+          <SubTabs ariaLabel="Time period" value={ePeriod} onChange={setEPeriod} options={D.ENGAGEMENT_PERIODS.map((p) => ({ key: p.key, label: p.label }))} />
 
-          <Panel className="flex flex-col gap-[var(--space-3)]">
-            <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-              <Title>Volunteer hours <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{compact(hoursTotal)} {period === "month" ? "this month" : "this year"}</span></Title>
-              {period === "year" && <Segmented ariaLabel="Chart grain" value={grain} onChange={setGrain} options={[{ key: "monthly", label: "Monthly" }, { key: "weekly", label: "Weekly" }]} />}
-            </div>
-            <BarChart values={values} labels={labels} accent={accent} highlight={values.length - 1} compare={lastYear} height={240} ariaLabel={`Volunteer hours by ${period === "month" ? "week" : grain === "monthly" ? "month" : "week"}`} />
-            <Muted className="flex flex-wrap items-center gap-x-[12px] gap-y-[4px] text-[12px] leading-[16px]">
-              {lastYear && <span className="flex items-center gap-[5px]"><span aria-hidden className="inline-block h-[10px] w-[14px] rounded-[3px] border border-dashed" style={{ borderColor: "rgba(255,255,255,0.4)" }} /> Last year</span>}
-              <span>{D.REPORTING_NOTE}</span>
-              <button type="button" onClick={() => setTab("settings")} className="dm-link cursor-pointer font-bold" style={{ color: accent }}>Hour rules</button>
-            </Muted>
-          </Panel>
-
-          <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-            <ClickPanel onClick={() => setSheet({ kind: "goals" })} label="2030 goals, details" className="flex flex-col gap-[var(--space-4)]">
-              <Title className="flex items-center gap-[8px]"><Target className="h-4 w-4" aria-hidden style={{ color: accent }} /> 2030 goals</Title>
-              {D.GOALS.map((g) => (
-                <div key={g.key} className="flex flex-col gap-[8px] border-t pt-[var(--space-3)] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
-                  <span className="flex flex-wrap items-baseline justify-between gap-[6px]">
-                    <span className="text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{g.title}</span>
-                    <Muted className="text-[12px] leading-[16px]">{g.scope}</Muted>
-                  </span>
-                  <GoalTrack logged={g.logged} target={g.target} pace={g.pace} accent={accent} unit={g.unit} />
-                </div>
-              ))}
-            </ClickPanel>
-
-            <Panel className="flex flex-col gap-[var(--space-4)]">
-              <Title>Student impact <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected && selected.id !== "us" ? "· United States scholars" : ""}</span></Title>
-              <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-4">
-                {D.IMPACT.map((m) => (
-                  <button key={m.key} type="button" onClick={() => setSheet({ kind: "impact", key: m.key })} className="dm-quiet group relative flex cursor-pointer flex-col items-center gap-[8px] rounded-[var(--radius-md)] p-[6px] text-center">
-                    <Ring pct={m.pct} size={84} stroke={7} accent={accent}>
-                      <span className="text-[18px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.pct}%</span>
-                    </Ring>
-                    <span className="text-[12.5px] leading-[16px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>{m.label}</span>
-                    <span className="text-[11.5px] leading-[14px] font-bold tabular-nums" style={{ color: GOOD }}>+{m.delta} pts</span>
-                  </button>
-                ))}
+          <div className="flex flex-col gap-[var(--space-3)]">
+            <Title>Program at a glance</Title>
+            <Panel className="relative grid grid-cols-2 !p-0">
+              <span aria-hidden className="absolute top-1/2 left-1/2 z-10 flex size-[30px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", background: "var(--background)", color: "var(--muted-foreground)" }}><Link2 className="h-[14px] w-[14px]" aria-hidden /></span>
+              <div className="flex flex-col items-center gap-[6px] p-[var(--space-5)] text-center">
+                <span className="flex size-[36px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><Users className="h-[18px] w-[18px]" aria-hidden /></span>
+                <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(mentorsNow)}</span>
+                <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Mentors</span>
+                <Muted className="text-[11.5px] leading-[15px]">Unique volunteers</Muted>
               </div>
-              {/* the outcome the partner actually reports on */}
-              <div className="grid grid-cols-2 gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
-                {D.OUTCOMES.map((o) => (
-                  <div key={o.value} className="flex flex-col gap-[2px]">
-                    <span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{o.value}</span>
-                    <Muted className="text-[12.5px] leading-[17px]">{o.label}</Muted>
-                  </div>
-                ))}
+              <div className="flex flex-col items-center gap-[6px] border-l p-[var(--space-5)] text-center" style={{ borderColor: RULE }}>
+                <span className="flex size-[36px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><GraduationCap className="h-[18px] w-[18px]" aria-hidden /></span>
+                <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(scholarsNow)}</span>
+                <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>Scholars</span>
+                <Muted className="text-[11.5px] leading-[15px]">Unique students</Muted>
               </div>
-              <button type="button" onClick={() => setSheet({ kind: "pairs" })} className="dm-quiet group relative flex cursor-pointer flex-col gap-[6px] border-t pt-[var(--space-3)] text-left" style={{ borderColor: RULE }}>
-                <HoverChevron className="top-[14px] right-0" />
-                <span className="flex items-baseline justify-between gap-[10px] pr-[24px]">
-                  <span className="text-[14.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Meetings completed per pair</span>
-                  <span className="text-[12.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><strong style={{ color: "var(--foreground)" }}>{Math.round((onTrackPairs / allPairs) * 100)}%</strong> met twice or more</span>
-                </span>
-                <Histogram values={D.MEETINGS_PER_PAIR.map((r) => r.pairs)} labels={D.MEETINGS_PER_PAIR.map((r) => r.label)} accent={accent} emphasisFrom={2} height={110} ariaLabel="Pairs by number of required meetings completed" />
-              </button>
             </Panel>
           </div>
 
-          {/* activity without reading a word: what counts, who has gone quiet */}
-          <Panel className="flex flex-col gap-[var(--space-4)]">
-            <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-              <Title>Mentor activity <span className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected && selected.id !== "us" ? "· United States pairs" : ""}</span></Title>
-              <Muted className="text-[12px] leading-[16px]">Messages and meetings become hours under the hour rules. Content is never read.</Muted>
-            </div>
-            <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1fr)_280px]">
-              <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-                <div className="hidden grid-cols-[minmax(0,1.6fr)_repeat(3,72px)_110px] gap-x-[var(--space-3)] pb-[6px] text-[11px] leading-[15px] font-extrabold tracking-[0.06em] uppercase sm:grid" style={{ color: "var(--muted-foreground)" }}>
-                  <span>Pair</span><span className="text-right">Messages</span><span className="text-right">Meetings</span><span className="text-right">Hours</span><span className="text-right">Last contact</span>
-                </div>
-                {D.PAIR_ACTIVITY.map((row) => (
-                  <button key={row.mentor} type="button" onClick={() => onOpenMentor(row)} className="dm-quiet group relative -mx-[8px] grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[var(--space-3)] gap-y-[4px] rounded-[var(--radius-sm)] px-[8px] py-[10px] text-left sm:grid-cols-[minmax(0,1.6fr)_repeat(3,72px)_110px]" style={{ borderColor: RULE }}>
-                    <span className="flex min-w-0 items-center gap-[10px]">
-                      <span className="flex min-w-0 flex-col"><span className="flex items-center gap-[4px] truncate text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{row.mentor} <ChevronRight className="h-3.5 w-3.5 flex-none opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100" aria-hidden style={{ color: "var(--muted-foreground)" }} /></span><span className="truncate text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>with {row.mentee}</span></span>
-                    </span>
-                    <span className="text-right text-[12.5px] leading-[17px] font-semibold tabular-nums sm:order-last" style={{ color: row.quiet ? "var(--world-business-money-office)" : "var(--muted-foreground)" }}>{row.quiet && <AlertTriangle className="mr-[4px] inline h-3.5 w-3.5" aria-hidden />}{row.lastContact}</span>
-                    <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{row.messages}</span>
-                    <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{row.meetings}</span>
-                    <span className="hidden text-right text-[14px] font-extrabold tabular-nums sm:block" style={{ color: accent }}>{row.hours}h</span>
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-col gap-[var(--space-4)] border-t pt-[var(--space-4)] lg:border-t-0 lg:border-l lg:pt-0 lg:pl-[var(--space-4)]" style={{ borderColor: RULE }}>
-                <div className="flex flex-col gap-[8px]">
-                  <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Where mentors come from</span>
-                  <ShareBar parts={D.MENTOR_MIX} accent={accent} />
-                </div>
-                {/* the mentors' own words, set like an insight card: the big
-                   mark, the quote as the headline, the number as the line under it */}
-                <div className="relative flex flex-1 flex-col justify-end gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)] pt-[var(--space-6)]" style={ITEM}>
-                  <InsightMark color={accent} size={64} />
-                  <blockquote className="text-[20px] leading-[26px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.MENTOR_PULSE.quote}</blockquote>
-                  <span className="flex items-baseline gap-[6px] border-t pt-[10px]" style={{ borderColor: RULE }}>
-                    <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }}>{D.MENTOR_PULSE.pct}%</span>
-                    <Muted className="text-[12.5px] leading-[17px]">{D.MENTOR_PULSE.line}</Muted>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Panel>
-        </div>
-      )}
-
-      {tab === "countries" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
-          <SectionHead>Regions</SectionHead>
-          <Panel className="flex flex-col gap-[var(--space-4)]">
-            <ShareBar parts={D.PROGRAMS.map((p) => ({ label: p.name, value: p.hours }))} accent={accent} />
-            <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-              {D.PROGRAMS.map((p) => (
-                <div key={p.id} role="button" tabIndex={0} onClick={() => { setProgram(p.id); setTab("overview"); }} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setProgram(p.id); setTab("overview"); } }} className="dm-quiet group -mx-[8px] grid cursor-pointer grid-cols-[1fr_auto] items-center gap-x-[var(--space-4)] gap-y-[8px] rounded-[var(--radius-sm)] px-[8px] py-[12px] sm:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(72px,0.6fr))_120px_auto]" style={{ borderColor: RULE }}>
-                  <div className="flex min-w-0 flex-col gap-[2px]">
-                    <span className="text-[15.5px] leading-[21px] font-bold" style={{ color: "var(--foreground)" }}>{p.name}</span>
-                    <Muted className="text-[12px] leading-[16px]">{p.window} · {p.cadence}</Muted>
-                    <Muted className="text-[12px] leading-[16px]">Scholars via {p.via}</Muted>
+          <div className="flex flex-col gap-[var(--space-3)]">
+            <Title>Engagement {eDef.sectionWord}</Title>
+            <Panel className="grid grid-cols-1 !p-0 sm:grid-cols-3">
+              {[
+                { key: "hours" as const, value: hoursNow, sub: null },
+                { key: "meetings" as const, value: meetingsNow, sub: `${(meetingsNow / mentorsNow).toFixed(1)} avg. per pair` },
+                { key: "messages" as const, value: messagesNow, sub: `${(messagesNow / mentorsNow).toFixed(1)} avg. per pair` },
+              ].map((row, i) => {
+                const k = kpiOf(row.key);
+                const Icon = KPI_ICON[row.key];
+                return (
+                  <div key={row.key} className={`flex flex-col gap-[8px] ${ruledCell(i, 3)}`} style={{ borderColor: RULE }}>
+                    <span className="flex size-[32px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}><Icon className="h-[16px] w-[16px]" aria-hidden /></span>
+                    <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(row.value)}</span>
+                    <span className="text-[12.5px] leading-[16px] font-bold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k.label}</span>
+                    {row.sub && <Muted className="text-[12px] leading-[16px]">{row.sub}</Muted>}
                   </div>
-                  <span className="flex items-center gap-[4px] text-[13px] font-bold sm:order-last" style={{ color: accent }}>View report <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
-                  {([[p.students, "Students"], [p.mentors, p.mentorLabel], [p.hours, "Hours"]] as [number, string][]).map(([n, l]) => (
-                    <span key={l} className="flex flex-col">
-                      <span className="text-[17px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: l === "Hours" ? accent : "var(--foreground)" }}>{l === "Hours" ? compact(n) : n.toLocaleString("en-US")}</span>
-                      <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</span>
-                    </span>
-                  ))}
-                  <span className="col-span-2 flex items-center sm:col-span-1">
-                    <Sparkline values={p.monthly} accent={accent} width={110} height={28} />
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Panel>
+                );
+              })}
+            </Panel>
+          </div>
 
-          {/* four years at once: the scholarship runs four years, so the
-             read has to hold across cohorts, not one year at a time */}
-          <Panel className="flex flex-col gap-[var(--space-3)]">
-            <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-              <Title>US cohorts</Title>
-              <Muted className="text-[12px] leading-[16px]">Four cohorts in the program at once. Still enrolled is the number the scholarship is for.</Muted>
-            </div>
-            <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-              <div className="hidden grid-cols-[minmax(0,1.2fr)_repeat(5,minmax(80px,0.7fr))] gap-x-[var(--space-3)] pb-[6px] text-[11px] leading-[15px] font-extrabold tracking-[0.06em] uppercase sm:grid" style={{ color: "var(--muted-foreground)" }}>
-                <span>Cohort</span><span className="text-right">Scholars</span><span className="text-right">Still enrolled</span><span className="text-right">Meetings / yr</span><span className="text-right">Explored 3+</span><span className="text-right">Resume</span>
+          {ePeriod === "annual" && (
+            <Panel className="flex flex-col items-center gap-[var(--space-5)] sm:flex-row">
+              <Ring pct={goalPct} size={140} stroke={12} accent={accent}>
+                <span className="flex flex-col items-center gap-[2px]">
+                  <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{goalPct}%</span>
+                  <span className="text-[11px] leading-[14px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Complete</span>
+                </span>
+              </Ring>
+              <div className="flex flex-col gap-[6px] text-center sm:text-left">
+                <Title>{new Date().getFullYear()} volunteer hours goal</Title>
+                <span className="text-[15px] leading-[20px] font-bold" style={{ color: accent }}>{compact(D.YEAR_HOURS_GOAL.logged)} <span style={{ color: "var(--muted-foreground)", fontWeight: 600 }}>of {compact(D.YEAR_HOURS_GOAL.target)} hours</span></span>
+                <Muted className="text-[13px] leading-[18px]">{compact(D.YEAR_HOURS_GOAL.target - D.YEAR_HOURS_GOAL.logged)} hours to go</Muted>
               </div>
-              {D.COHORTS.map((c) => (
-                <button key={c.start} type="button" onClick={() => setSheet({ kind: "cohort", start: c.start })} className="dm-quiet group -mx-[8px] grid cursor-pointer grid-cols-2 items-center gap-x-[var(--space-3)] gap-y-[4px] rounded-[var(--radius-sm)] px-[8px] py-[10px] text-left sm:grid-cols-[minmax(0,1.2fr)_repeat(5,minmax(80px,0.7fr))]" style={{ borderColor: RULE }}>
-                  <span className="flex flex-col"><span className="flex items-center gap-[4px] text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>Class of {c.start + 4} <ChevronRight className="h-3.5 w-3.5 opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100" aria-hidden style={{ color: "var(--muted-foreground)" }} /></span><span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{c.year} · started {c.start}</span></span>
-                  <span className="text-right text-[14px] font-semibold tabular-nums" style={{ color: "var(--foreground)" }}>{c.scholars}</span>
-                  <span className="text-right text-[14px] font-extrabold tabular-nums" style={{ color: c.enrolled / c.scholars >= 0.95 ? GOOD : "var(--foreground)" }}>{Math.round((c.enrolled / c.scholars) * 100)}%</span>
-                  <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.meetingsAvg}</span>
-                  <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.explored}%</span>
-                  <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: "var(--foreground)" }}>{c.resume}%</span>
-                </button>
-              ))}
-            </div>
-          </Panel>
+            </Panel>
+          )}
         </div>
       )}
 
       {tab === "settings" && <SettingsView onToast={onToast} />}
 
-      {sheet?.kind === "kpi" && (() => {
-        const k = D.KPIS.find((x) => x.key === sheet.key)!;
-        const per = D.PROGRAMS.map((p) => ({ label: p.name, value: sheet.key === "hours" ? p.hours : sheet.key === "students" ? p.students : sheet.key === "mentors" ? p.mentors : Math.round(p.hours * 0.18) }));
-        return (
-          <Sheet title={k.label} label="By program, this year" onClose={() => setSheet(null)}>
-            <span className="flex items-baseline gap-[8px]"><span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(k.year)}</span><span className="text-[13px] font-bold" style={{ color: GOOD }}>+{k.deltaYear}% vs last year</span><span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>· all regions</span></span>
-            <ShareBar parts={per} accent={accent} />
-            <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-              {per.map((r) => <div key={r.label} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>{r.label}</span><span className="font-bold tabular-nums">{r.value.toLocaleString("en-US")}</span></div>)}
-            </div>
-          </Sheet>
-        );
-      })()}
-      {sheet?.kind === "goals" && (
-        <Sheet title="2030 goals" label="How they are counted" onClose={() => setSheet(null)}>
-          {D.GOALS.map((g) => (
-            <div key={g.key} className="flex flex-col gap-[8px] border-t pt-[var(--space-3)] first:border-t-0 first:pt-0" style={{ borderColor: RULE }}>
-              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{g.title} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {g.scope}</span></span>
-              <GoalTrack logged={g.logged} target={g.target} pace={g.pace} accent={accent} unit={g.unit} />
-              <Muted className="text-[12.5px] leading-[17px]">{g.key === "hours" ? "Hours counted through Dreamari under the program's hour rules. Pace is a straight line from program start to December 2030." : "Scholarships funded across all seven Dream It Real programs. Pace is a straight line from 2018 to 2030."}</Muted>
-            </div>
-          ))}
-          <QuietCta size="sm" className="w-fit" onClick={() => { setSheet(null); setTab("settings"); }}>Hour rules <ChevronRight className="h-4 w-4" aria-hidden /></QuietCta>
-        </Sheet>
-      )}
-      {sheet?.kind === "impact" && (() => {
-        const m = D.IMPACT.find((x) => x.key === sheet.key)!;
-        const col = sheet.key === "resume" ? "resume" : "explored";
-        return (
-          <Sheet title={m.label} label="Student impact" onClose={() => setSheet(null)}>
-            <span className="flex items-baseline gap-[8px]"><span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.pct}%</span><span className="text-[13px] font-bold" style={{ color: GOOD }}>+{m.delta} pts vs last year</span></span>
-            <Muted>{sheet.key === "graduate" ? "Coach Foundation's published Dream It Real outcome, all US cohorts." : "Share of US scholars, by cohort."}</Muted>
-            {sheet.key !== "graduate" && sheet.key !== "simulation" && (
-              <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-                {D.COHORTS.map((c) => <div key={c.start} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>Class of {c.start + 4} · {c.year}</span><span className="font-bold tabular-nums">{c[col]}%</span></div>)}
-              </div>
-            )}
-          </Sheet>
-        );
-      })()}
-      {sheet?.kind === "pairs" && (
-        <Sheet title="Meetings completed per pair" label="450 US pairs" onClose={() => setSheet(null)}>
-          <Muted>Three to four meetings are required each year. Two by now counts as on track.</Muted>
-          <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-            {D.MEETINGS_PER_PAIR.map((r, i) => <div key={r.label} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>{r.label} {r.label === "1" ? "meeting" : "meetings"}{i < 2 ? " · needs a nudge" : ""}</span><span className="font-bold tabular-nums">{r.pairs} pairs</span></div>)}
-          </div>
-        </Sheet>
-      )}
-      {sheet?.kind === "cohort" && (() => {
-        const c = D.COHORTS.find((x) => x.start === sheet.start)!;
-        return (
-          <Sheet title={`Class of ${c.start + 4}`} label={`${c.year} · started ${c.start}`} onClose={() => setSheet(null)}>
-            <div className="grid grid-cols-3 gap-[var(--space-3)]">
-              {([[c.scholars, "Scholars"], [`${Math.round((c.enrolled / c.scholars) * 100)}%`, "Still enrolled"], [c.meetingsAvg, "Meetings a year"]] as [number | string, string][]).map(([v, l]) => (
-                <div key={l} className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border p-[12px]" style={ITEM}><span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{v}</span><Muted className="text-[12px] leading-[16px]">{l}</Muted></div>
-              ))}
-            </div>
-            <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-              <div className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>Explored 3+ careers</span><span className="font-bold tabular-nums">{c.explored}%</span></div>
-              <div className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>Built or updated a resume</span><span className="font-bold tabular-nums">{c.resume}%</span></div>
-              <div className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>Left the program</span><span className="font-bold tabular-nums">{c.scholars - c.enrolled}</span></div>
-            </div>
-          </Sheet>
-        );
-      })()}
       {exporting && (
         <Sheet title="Export report" label={selected ? selected.name : "All programs"} onClose={() => setExporting(false)}>
-          <Muted>Figures for {period === "month" ? "this month" : "this year"}. Message content is never included.</Muted>
+          <Muted>Figures for {eDef.sectionWord.toLowerCase()}. Message content is never included.</Muted>
           <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
             {D.EXPORT_ITEMS.map((e) => (
               <button key={e.title} type="button" onClick={() => { setExporting(false); onToast(`${e.title} is on its way to your email.`); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[10px] py-[12px] text-left" style={{ borderColor: RULE }}>

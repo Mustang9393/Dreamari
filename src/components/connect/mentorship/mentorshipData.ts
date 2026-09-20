@@ -283,51 +283,38 @@ export const PROGRAMS: ProgramStat[] = [
   { id: "cn", name: "China", via: "China Youth Development Foundation", students: 1000, mentors: 18, mentorLabel: "Employee Contributors", hours: 7700, cadence: "Quarterly regional events", window: "1-year scholarship, no 1:1 matching", monthly: [560, 640, 720, 790, 850, 920, 980, 1060, 1180] },
 ];
 
-export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"] as const;
-/** The enterprise view reports on the calendar year, the way Tapestry rolls
- *  hours up to its 2030 goal; the student's year plan runs on the program
- *  year (October to June). Both are right, so the chart says which it is. */
-export const REPORTING_NOTE = "Calendar year, the way Tapestry reports hours. The program year runs October to June.";
-
-export type Kpi = { key: "hours" | "students" | "mentors" | "meetings"; label: string; year: number; month: number; deltaYear: number; deltaMonth: number; spark: number[] };
+// `quarter`/`deltaQuarter` added 20 Sept 2026 (Josh's Replit pass, Annual /
+// Quarterly / Monthly on the Enterprise Overview) -- a hand-authored
+// midpoint between `month` and `year`, same curated-demo-data spirit as the
+// rest of this file, not a formula. "Students" relabeled "Scholars" to
+// match Coach's own language, already used everywhere else here
+// (PROGRAM.counts' "450 Scholars").
+export type Kpi = { key: "hours" | "students" | "mentors" | "meetings" | "messages"; label: string; year: number; quarter: number; month: number; deltaYear: number; deltaQuarter: number; deltaMonth: number; spark: number[] };
 export const KPIS: Kpi[] = [
-  { key: "hours", label: "Volunteer hours", year: 18400, month: 2200, deltaYear: 14, deltaMonth: 9, spark: [1350, 1535, 1735, 1905, 2025, 2230, 2280, 2510, 2830] },
-  { key: "students", label: "Students", year: 1518, month: 1180, deltaYear: 9, deltaMonth: 4, spark: [1290, 1310, 1350, 1380, 1400, 1420, 1440, 1470, 1518] },
-  { key: "mentors", label: "Mentors", year: 536, month: 418, deltaYear: 7, deltaMonth: 12, spark: [470, 476, 482, 488, 490, 494, 500, 512, 536] },
-  { key: "meetings", label: "Mentor meetings", year: 3240, month: 386, deltaYear: 18, deltaMonth: 21, spark: [280, 300, 330, 350, 360, 380, 390, 410, 440] },
+  { key: "hours", label: "Volunteer hours", year: 18400, quarter: 5200, month: 2200, deltaYear: 14, deltaQuarter: 11, deltaMonth: 9, spark: [1350, 1535, 1735, 1905, 2025, 2230, 2280, 2510, 2830] },
+  { key: "students", label: "Scholars", year: 1518, quarter: 1380, month: 1180, deltaYear: 9, deltaQuarter: 6, deltaMonth: 4, spark: [1290, 1310, 1350, 1380, 1400, 1420, 1440, 1470, 1518] },
+  { key: "mentors", label: "Mentors", year: 536, quarter: 505, month: 418, deltaYear: 7, deltaQuarter: 9, deltaMonth: 12, spark: [470, 476, 482, 488, 490, 494, 500, 512, 536] },
+  { key: "meetings", label: "Mentor meetings", year: 3240, quarter: 850, month: 386, deltaYear: 18, deltaQuarter: 19, deltaMonth: 21, spark: [280, 300, 330, 350, 360, 380, 390, 410, 440] },
+  { key: "messages", label: "Messages exchanged", year: 22800, quarter: 6100, month: 2850, deltaYear: 16, deltaQuarter: 14, deltaMonth: 13, spark: [1650, 1780, 1920, 2050, 2150, 2320, 2400, 2600, 2850] },
 ];
 
-/** This month by week, instead of the Replit's single "M1" bar. */
-export const THIS_MONTH_WEEKS = [640, 690, 720, 780];
-/** This year by week, 16 weeks. */
-export const THIS_YEAR_WEEKS = [920, 951, 981, 1012, 1043, 1073, 1104, 1135, 1165, 1196, 1227, 1257, 1288, 1319, 1349, 1380];
-
-export const IMPACT = [
-  { key: "explored", pct: 89, label: "Explored 3+ careers", delta: 6 },
-  { key: "simulation", pct: 76, label: "Completed a simulation", delta: 11 },
-  { key: "resume", pct: 68, label: "Built or updated a resume", delta: 9 },
-  // Coach's own headline outcome (coach.com/content/coachfoundation).
-  { key: "graduate", pct: 97, label: "On track to graduate", delta: 2 },
-] as const;
-
-/** The outcomes the partner reports on (Coach's published Dream It Real
- *  figures; Tapestry: "the way that we see success is the least amount of
- *  debt a student graduates with"). */
-export const OUTCOMES = [
-  { value: "88% less", label: "debt at graduation than the national average" },
-  { value: "94%", label: "first-generation college students" },
-] as const;
-
-/** The US cohorts side by side, since the scholarship runs four years and
- *  impact has to read across them, not one year at a time (Tapestry: "we
- *  support the cohort over the 4 years of their college"). */
-export type Cohort = { start: number; year: string; scholars: number; enrolled: number; meetingsAvg: number; explored: number; resume: number };
-export const COHORTS: Cohort[] = [
-  { start: 2026, year: "Year 1", scholars: 450, enrolled: 450, meetingsAvg: 0.8, explored: 71, resume: 44 },
-  { start: 2025, year: "Year 2", scholars: 250, enrolled: 243, meetingsAvg: 3.9, explored: 92, resume: 78 },
-  { start: 2024, year: "Year 3", scholars: 250, enrolled: 238, meetingsAvg: 4.2, explored: 96, resume: 88 },
-  { start: 2023, year: "Year 4", scholars: 250, enrolled: 236, meetingsAvg: 3.6, explored: 97, resume: 93 },
+/** The Enterprise Overview's Annual / Quarterly / Monthly toggle (Josh's
+ *  Replit pass, 20 Sept 2026): which KPIS field and section-title word each
+ *  period reads from. */
+export type EngagementPeriod = "annual" | "quarterly" | "monthly";
+export const ENGAGEMENT_PERIODS: { key: EngagementPeriod; label: string; field: "year" | "quarter" | "month"; deltaField: "deltaYear" | "deltaQuarter" | "deltaMonth"; sectionWord: string }[] = [
+  { key: "annual", label: "Annual", field: "year", deltaField: "deltaYear", sectionWord: "This Year" },
+  { key: "quarterly", label: "Quarterly", field: "quarter", deltaField: "deltaQuarter", sectionWord: "This Quarter" },
+  { key: "monthly", label: "Monthly", field: "month", deltaField: "deltaMonth", sectionWord: "This Month" },
 ];
+
+/** This fiscal year's own volunteer-hours target -- the number partners
+ *  watch quarter to quarter. Annual-view only on the Enterprise Overview
+ *  (Josh's Replit pass, 20 Sept 2026): hidden in Quarterly/Monthly to avoid
+ *  mixing timeframes. `logged` reads the real KPIS total rather than
+ *  repeating it, so the two can't drift. 50,000 is Josh's own figure,
+ *  paired with our real 18,400-hour total. */
+export const YEAR_HOURS_GOAL = { target: 50000, logged: KPIS.find((k) => k.key === "hours")!.year };
 
 /** Where matching stands right now (Tapestry: a recruitment cycle "just
  *  ended on Monday", then "the puzzle piece phase" of year-two rematching). */
@@ -337,41 +324,6 @@ export const MATCHING_STATUS = { recruitment: "Mentor recruitment closed Sep 15"
  *  that?"). Coach's employee roster is the source of truth, so a mentor can
  *  only be matched once the roster confirms them. */
 export const VERIFICATION = { title: "Mentor verification", options: ["Company roster", "Program lead approves", "Dreamari ID check"], value: "Company roster", line: "Only employees on the Coach roster can be matched. Verified mentors carry the badge students see." } as const;
-
-/** Where the mentors come from (Tapestry: about half corporate, half
- *  retail store teams) and how they feel about it. */
-export const MENTOR_MIX = [{ label: "Corporate", value: 228 }, { label: "Retail stores", value: 222 }];
-export const MENTOR_PULSE = { pct: 94, line: "of mentors would mentor again", quote: "This is the best part of working at Coach." };
-
-/** Activity without reading a word: messages and meetings per pair turn into
- *  hours under the program's rules, and pairs that have gone quiet surface
- *  (Tapestry: "Julie has been messaging this person 15 times this month...
- *  it equates to this many volunteer hours"). */
-export type PairActivity = { mentor: string; mentee: string; messages: number; meetings: number; hours: number; lastContact: string; quiet?: boolean };
-export const PAIR_ACTIVITY: PairActivity[] = [
-  { mentor: "Avery Thompson", mentee: "Jordan R.", messages: 15, meetings: 2, hours: 2.8, lastContact: "Today" },
-  { mentor: "Julie Park", mentee: "Devon A.", messages: 22, meetings: 3, hours: 4.1, lastContact: "Yesterday" },
-  { mentor: "Marcus Bell", mentee: "Priya S.", messages: 9, meetings: 2, hours: 2.5, lastContact: "4 days ago" },
-  { mentor: "Dana Whitfield", mentee: "Theo L.", messages: 2, meetings: 0, hours: 0.1, lastContact: "34 days ago", quiet: true },
-  { mentor: "Sam Okafor", mentee: "Zoe M.", messages: 0, meetings: 1, hours: 1, lastContact: "41 days ago", quiet: true },
-];
-
-/** Required meetings completed so far, across the 450 US pairs. */
-export const MEETINGS_PER_PAIR = [
-  { label: "0", pairs: 18 },
-  { label: "1", pairs: 64 },
-  { label: "2", pairs: 171 },
-  { label: "3", pairs: 132 },
-  { label: "4+", pairs: 65 },
-] as const;
-
-/** The two 2030 goals the partner reports on (Tapestry call). `logged` is
- *  what has been counted through Dreamari so far; `pace` is where a straight
- *  line from program start to 2030 would sit today. */
-export const GOALS = [
-  { key: "hours", title: "500,000 volunteer hours by 2030", scope: "Tapestry-wide", logged: 61200, target: 500000, pace: 58000, unit: "hours" },
-  { key: "scholarships", title: "10,000 scholarships by 2030", scope: "Coach Foundation", logged: 4860, target: 10000, pace: 5100, unit: "scholarships" },
-] as const;
 
 export const SETTINGS = [
   { key: "format", title: "Mentorship Format", options: ["1:1", "Group"], value: "1:1" },
