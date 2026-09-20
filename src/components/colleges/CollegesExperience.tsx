@@ -16,6 +16,7 @@ import { BrowseShelves } from "./BrowseShelves";
 import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
+import { useDiscoveryNudge } from "@/lib/nudge";
 
 // Find a school -- colleges and trade schools both live here, so the page
 // (and its nav chip) says "Schools," never "Colleges" (direct feedback,
@@ -89,6 +90,10 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
     return f;
   });
   const [trayOpen, setTrayOpen] = useState(false);
+  // Filters is easy to never open (For You loved candidate: "try to find
+  // candidates for it site wide", 20 Sept 2026) -- same text-sweep nudge
+  // as Explore's own For You, gone for good the first time it's opened.
+  const filtersNudge = useDiscoveryNudge("dreamari:nudge:college-filters", trayOpen);
   const [compare, setCompare] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [saved, toggleSaved] = useSaved();
@@ -212,7 +217,14 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         </HoverBeam>
         <button type="button" onClick={() => setTrayOpen(true)} aria-haspopup="dialog" aria-expanded={trayOpen} aria-label={`Filters${applied.length ? `, ${applied.length} on` : ""}`} className="dm-quiet flex min-h-[56px] flex-none cursor-pointer items-center gap-[8px] rounded-[var(--radius-lg)] border px-[var(--space-4)] text-[15px] leading-[20px] font-semibold" style={{ ...PANEL, borderColor: applied.length ? ACCENT : PANEL.borderColor, color: "var(--foreground)" }}>
           <SlidersHorizontal className="h-5 w-5" aria-hidden />
-          <span className="hidden sm:inline">Filters</span>
+          <span className={`relative hidden sm:inline ${filtersNudge ? "dm-text-nudge" : ""}`}>
+            Filters
+            {filtersNudge && (
+              <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+              </svg>
+            )}
+          </span>
           {applied.length > 0 && <span className="flex size-[22px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: ACCENT, color: "#fff" }}>{applied.length}</span>}
         </button>
         </div>

@@ -21,6 +21,7 @@ import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
 import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
+import { useDiscoveryNudge } from "@/lib/nudge";
 import { AttCommunityView } from "./att/AttCommunityView";
 import { AttCommunityView as AttCommunityViewV1 } from "./att/v1/AttCommunityView";
 import type { AttVersion } from "./att/VersionChip";
@@ -251,6 +252,12 @@ function InlineAsk({
 }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
+  // Asking a question is the core reason Connect exists, but this pill can
+  // read as passive prompt text until a student first opens it (For You
+  // loved candidate: "try to find candidates for it site wide", 20 Sept
+  // 2026) -- same text-sweep nudge as Explore's own For You, gone for good
+  // the first time this opens.
+  const askNudge = useDiscoveryNudge("dreamari:nudge:connect-ask", open);
   const submit = () => {
     if (!text.trim()) return;
     dispatchAuroraPulse("cta");
@@ -269,7 +276,15 @@ function InlineAsk({
         <Avatar name="Jordan Rivera" size={30} />
         <span className="min-w-0 flex-1 truncate text-[13.5px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{placeholder}</span>
         <span className="flex flex-none items-center gap-[5px] rounded-[var(--radius-sm)] px-[14px] py-[7px] text-[12px] leading-[16px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, color: "var(--foreground)" }}>
-          Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
+          <span className={`relative ${askNudge ? "dm-text-nudge" : ""}`}>
+            Ask
+            {askNudge && (
+              <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+              </svg>
+            )}
+          </span>
+          {" "}<ChevronRight className="h-[13px] w-[13px]" aria-hidden />
         </span>
       </button>
     );
