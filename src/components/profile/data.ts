@@ -86,7 +86,12 @@ const o = (id: string, label: string, action: PlanAction, href?: string): PlanTa
 const FINANCE_PLAN = (prefix: string): PlanHorizon[] => [
   h(`${prefix}-1`, "Next 3 Months", "Foundation", [
     { ...t(`${prefix}-1-0`, "Build Profile", "Build", "/flow"), doneByDefault: true },
-    t(`${prefix}-1-1`, "10 Finance Careers and save your Top 3", "Explore", "/explore?tab=browse"),
+    // This task's own copy says "...and save your Top 3" -- anyone with a
+    // Top 3 to view a plan for has already done exactly that by
+    // definition (Build then Match is the flow that gets a student here
+    // at all, direct instruction 20 Sept 2026), so it was never really an
+    // open task, just one nothing had marked done yet.
+    { ...t(`${prefix}-1-1`, "10 Finance Careers and save your Top 3", "Explore", "/explore?tab=browse"), doneByDefault: true },
     t(`${prefix}-1-2`, "3 Career Simulations from your Top 3", "Play", "/play"),
     t(`${prefix}-1-3`, "Ask 2 Finance Professionals one career question each", "Connect", "/connect"),
     o(`${prefix}-1-4`, "Meet your counselor to align next year's classes", "Plan", "/profile?tab=report"),
