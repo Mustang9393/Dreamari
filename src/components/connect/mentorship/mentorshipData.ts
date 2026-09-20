@@ -345,7 +345,7 @@ export const HOUR_RULES = [
 ] as const;
 
 export const EXPORT_ITEMS = [
-  { title: "Impact summary", line: "One page: hours, students, mentors, meetings, goals. PDF." },
+  { title: "Impact summary", line: "One page: hours, mentors, scholars, meetings. PDF." },
   { title: "Hours by program", line: "Monthly volunteer hours for every program. CSV." },
-  { title: "Mentor activity", line: "Meetings and messages per mentor, no message content. CSV." },
+  { title: "Engagement by program", line: "Meetings and messages exchanged, by program. CSV." },
 ] as const;
