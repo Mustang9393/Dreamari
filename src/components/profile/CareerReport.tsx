@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowLeftRight, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2, X } from "lucide-react";
 import { deleteReportVersion, formatVersionTime, recordReportVersion, reportHistorySnapshot, sameSnapshot, serverReportHistorySnapshot, subscribeReportHistory, type ReportSnapshot } from "@/lib/reportHistory";
 import type { ProfileCareer } from "./data";
 import { CareerExplorationBody } from "./CareerExploration";
@@ -223,6 +223,15 @@ export type ReportViewProps = {
   /** Version history (Slack, 10 Sept 2026): the host hands over what shapes
    *  the report right now and how to put an older version back. */
   history?: { snapshot: () => ReportSnapshot; restore: (snapshot: ReportSnapshot) => void };
+  /** The student's other Top Three careers (including this one) and the
+   *  same focus-setter Top Three's own "Make My Primary" already calls
+   *  (ProfileExperience.tsx) -- reused here, not a second concept of
+   *  "which career is showing," so switching from the Report tab and
+   *  switching from Top Three stay the exact same action (direct
+   *  instruction, 20 Sept 2026: no competing toggle). Omitted when there's
+   *  nothing to switch to. */
+  top3?: ProfileCareer[];
+  onSwitchCareer?: (careerId: string) => void;
 };
 
 
@@ -498,10 +507,12 @@ type ReportTabId = "report" | "share" | (typeof MORE_VIEWS)[number]["id"];
 const VIEW_LABEL: Record<ReportTabId, string> = { report: "Report", share: "Share", counselor: "Counselor Review", download: "Download", history: "History" };
 
 export function CareerReportView(props: ReportViewProps) {
-  const { student, career } = props;
+  const { student, career, top3, onSwitchCareer } = props;
   const report = reportV2(career.id);
   const [tab, setTab] = useState<ReportTabId>("report");
   const [moreOpen, setMoreOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
+  const otherCareers = (top3 ?? []).filter((c) => c.id !== career.id);
   // Every share / print keeps a version automatically; History lists them.
   const keep = (label: string) => {
     if (props.history) recordReportVersion(label, props.history.snapshot());
@@ -547,6 +558,14 @@ export function CareerReportView(props: ReportViewProps) {
                 <>
                   <button type="button" aria-label="Close menu" onClick={() => setMoreOpen(false)} className="fixed inset-0 z-40 cursor-default" />
                   <div role="menu" aria-label="More report actions" className="absolute left-0 z-50 mt-2 flex min-w-[200px] flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}>
+                    {otherCareers.length > 0 && onSwitchCareer && (
+                      <>
+                        <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); setSwitchOpen(true); }} className="dm-quiet flex cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[10px] text-left text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
+                          <ArrowLeftRight className="h-[15px] w-[15px] flex-none" aria-hidden /> Switch Career
+                        </button>
+                        <span aria-hidden className="my-[2px] block h-px" style={{ background: "var(--glass-border)" }} />
+                      </>
+                    )}
                     {MORE_VIEWS.map((item) => (
                       <button key={item.id} type="button" role="menuitem" onClick={() => { setMoreOpen(false); setTab(item.id); }} className="dm-quiet flex cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] py-[10px] text-left text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
                         {item.label}
@@ -605,6 +624,39 @@ export function CareerReportView(props: ReportViewProps) {
             }}
           />
         </section>
+      )}
+      {/* Same lightweight Portal-picker pattern as the Profile header's own
+         cover/avatar pickers -- an on-demand sheet, not a second
+         always-visible switcher sitting alongside Top Three's. */}
+      {switchOpen && (
+        <Portal>
+          <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Switch career" style={{ fontFamily: "var(--font-body)" }}>
+            <button type="button" aria-label="Close" onClick={() => setSwitchOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+            <div className="relative z-[1] flex w-full max-w-[420px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+              <div className="flex items-center justify-between gap-[var(--space-3)]">
+                <h3 className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Switch career</h3>
+                <button type="button" onClick={() => setSwitchOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+              <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Show the report for another one of your Top Three. This becomes your #1 on Top Three too.</p>
+              <div className="flex flex-col gap-[6px]">
+                {otherCareers.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => { onSwitchCareer?.(c.id); setSwitchOpen(false); }}
+                    className="dm-tap flex min-h-[52px] cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-left"
+                    style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+                  >
+                    <span className="text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.title}</span>
+                    <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Portal>
       )}
     </div>
   );

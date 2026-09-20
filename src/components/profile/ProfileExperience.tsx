@@ -765,6 +765,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               career={focus}
               savedMajors={savedMajors} onToggleMajor={toggleMajor}
               onOpenEvidence={() => setEvidenceOpen(true)} updatedLabel="today"
+              top3={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
+              onSwitchCareer={setFocusId}
               history={{
                 snapshot: () => ({ careerId: focus.id, careerTitle: focus.title, top3, focusId: focus.id, routeChoice, done, savedMajors: [...savedMajors] }),
                 // Putting a version back is the same as the student having
