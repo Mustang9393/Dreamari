@@ -20,7 +20,7 @@ import { AtsCheckStage } from "./AtsCheckStage";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
 import { EditSectionsPanel } from "./EditSectionsPanel";
 import { ExperienceModal } from "./ExperienceModal";
-import { downloadDocx } from "./resumeExport";
+import { ExportChecklistModal } from "./ExportChecklistModal";
 import { JobMatchPanel } from "./JobMatchPanel";
 import { ResumeExperience, useResumeWelcome } from "./ResumeExperience";
 import { ResumeDocument, ZoomResumeButton, ZoomResumeModal } from "./ResumeDocument";
@@ -325,36 +325,15 @@ function MobileActionBar({ primary, more }: { primary: BarAction[]; more: BarAct
 }
 
 function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, templateId, version, celebrate = false }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter>; templateId: string; version?: ResumeVersion; /** just created: show Dreamy's score card once the check lands */ celebrate?: boolean }) {
-  // "export" dropped from this union: Export is now an immediate download,
-  // not a panel (see the Export button below).
-  const [panel, setPanel] = useState<"none" | "tailor" | "ats" | "text" | "sections">("none");
+  // Confirmed live against the reference (20 Sept 2026): its Export button
+  // opens the same six-item "Review Before Exporting" checklist ours does
+  // -- this was matched correctly from the start and should never have
+  // been removed. "export" stays in this union.
+  const [panel, setPanel] = useState<"none" | "tailor" | "ats" | "text" | "export" | "sections">("none");
   // The full-screen reader, shared by the toolbar button (sm+), the phone
   // bar and a tap on the phone's thumbnail sheet.
   const [zoomOpen, setZoomOpen] = useState(false);
   const { toast, showToast } = useResumeToast();
-  const [exporting, setExporting] = useState(false);
-  // Direct one-click download, matching the reference's instant-export
-  // behavior exactly (direct instruction, 20 Sept 2026) -- the same
-  // downloadDocx() the Saved Resumes list's own Download icon already
-  // calls, with no intermediate modal. This is a deliberate ROLLBACK of a
-  // real safety feature: the previous ExportChecklistModal gated Export
-  // behind six required confirmations (contact info correct, education
-  // correct, skills accurate, experience truthful, bullets reviewed, ATS
-  // disclaimer acknowledged) before either "Export PDF" or "Download
-  // .docx" unlocked. A resume going out to a real employer is exactly the
-  // kind of irreversible action a confirmation step exists to protect --
-  // this is a known, accepted regression for this build (for literal 1:1
-  // parity with the reference), not an oversight, and is worth
-  // revisiting with the product owner.
-  const handleExport = async () => {
-    if (exporting) return;
-    setExporting(true);
-    try {
-      await downloadDocx(resume);
-    } finally {
-      setExporting(false);
-    }
-  };
   // The Approve workflow -- see the ResumeVersion.approved comment in
   // lib/resume.ts for what's confirmed vs. inferred about it.
   const [approveOpen, setApproveOpen] = useState(false);
@@ -456,7 +435,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
                 <ListOrdered className="h-4 w-4" aria-hidden />
               </ToolbarButton>
             )}
-            <ToolbarButton iconOnly label={exporting ? "Exporting…" : "Export"} onClick={handleExport}>
+            <ToolbarButton iconOnly label="Export" onClick={() => setPanel("export")}>
               <Download className="h-4 w-4" aria-hidden />
             </ToolbarButton>
             {version && (
@@ -484,6 +463,8 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         <ATSCheckPanel resume={resume} version={version} onClose={() => setPanel("none")} />
       ) : panel === "text" ? (
         <TextPreviewModal resume={resume} onClose={() => setPanel("none")} />
+      ) : panel === "export" ? (
+        <ExportChecklistModal resume={resume} onClose={() => setPanel("none")} />
       ) : panel === "sections" && version ? (
         <EditSectionsPanel resume={resume} version={version} onClose={() => setPanel("none")} />
       ) : (
@@ -505,7 +486,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
           primary={[
             ...(version ? [{ key: "tailor", label: "Tailor", Icon: Wand2, onClick: () => setPanel("tailor") }, { key: "ats", label: "ATS Check", Icon: AtsIcon, onClick: () => setPanel("ats") }] : []),
             { key: "zoom", label: "Read", Icon: Maximize2, onClick: () => setZoomOpen(true) },
-            { key: "export", label: exporting ? "Exporting…" : "Export", Icon: Download, onClick: handleExport },
+            { key: "export", label: "Export", Icon: Download, onClick: () => setPanel("export") },
           ]}
           more={[
             { key: "text", label: "Text Preview", Icon: FileText, onClick: () => setPanel("text") },
