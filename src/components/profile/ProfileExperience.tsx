@@ -37,6 +37,7 @@ import { collegeBySlug, collegeImage } from "@/components/colleges/data";
 import { tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
 import { useSavedVideos } from "@/lib/savedVideos";
+import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -658,17 +659,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             card there to make it the career every other tab shows. */}
         {(tab === "locker" || tab === "settings") ? null : (
           <>
-          {/* Demo-only Overview v2 toggle, deliberately outside the shared
-             tabs+panel surface below (direct instruction, 20 Sept 2026:
-             "subtle, out of the way... outside that whole card surface
-             thing") -- same placement logic as the AT&T board's own
-             VersionChip, next to the page's own controls rather than
-             inside the card it's switching. */}
-          {tab === "overview" && (
-            <div className="flex justify-end">
-              <OverviewVersionChip version={overviewVersion} onChange={setOverviewVersion} />
-            </div>
-          )}
           {/* One surface for every tab: the tab bar and the active panel share
              this card. Inside it nothing is a card again (direct feedback,
              4 Sept): groups are drawn with borders on the shared surface,
@@ -746,9 +736,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
               {overviewVersion === "v2" ? (
                 <OverviewTabV2
-                  focus={focus} planProgress={planProgress}
+                  focus={focus} planProgress={planProgress} nextTask={nextTask}
                   top3Careers={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
                   onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
+                  onGoResume={() => setTab("resume")}
                 />
               ) : (
                 <OverviewTab
@@ -822,6 +813,17 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           </div>
         )}
           </div>
+          {/* Demo-only Overview v2 toggle -- below the whole card, bottom
+             center, so it never adds space between the header and the
+             card itself (direct instruction, 20 Sept 2026: moved out of
+             the row above; "subtle, out of the way" still the goal, same
+             placement spirit as the AT&T board's own VersionChip, just
+             tucked under rather than beside). */}
+          {tab === "overview" && (
+            <div className="flex justify-center">
+              <OverviewVersionChip version={overviewVersion} onChange={setOverviewVersion} />
+            </div>
+          )}
           </>
         )}
         {/* Reachable only via PlanTab's "Change route" link now, not a main
@@ -1432,7 +1434,11 @@ function MeterRing({ pct, label, value, size = 92, stroke = 8 }: { pct: number; 
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, pct));
   return (
-    <span className="relative flex flex-none items-center justify-center" role="img" aria-label={`${label}: ${value}`}>
+    // Needs a `group` ancestor (every caller's button has one): a small
+    // scale-up on hover, the same "this is the thing that's interactive"
+    // cue the chevron gives, just on the stat itself (direct instruction,
+    // 20 Sept -- hover should highlight the stat, not just reveal a chevron).
+    <span className="relative flex flex-none items-center justify-center transition-transform duration-200 group-hover:scale-[1.05]" role="img" aria-label={`${label}: ${value}`}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="flex-none" aria-hidden>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--accent-subtle) 16%, transparent)" strokeWidth={stroke} />
         <circle
@@ -1447,85 +1453,156 @@ function MeterRing({ pct, label, value, size = 92, stroke = 8 }: { pct: number; 
   );
 }
 
+/** Report's own ceiling (Top Three caps at 3) drawn as three small marks --
+ *  same accent, flat fill, no glow -- rather than forcing it into a ring
+ *  that would need a fake percentage. */
+function DotTrio({ filled }: { filled: number }) {
+  return (
+    <span className="flex flex-none flex-col gap-[4px]" role="img" aria-label={`${filled} of 3 reports ready`}>
+      {[0, 1, 2].map((i) => (
+        <span key={i} className="h-[7px] w-[20px] rounded-full transition-transform duration-200 group-hover:scale-x-[1.08]" style={{ background: i < filled ? "var(--accent-subtle)" : "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" }} />
+      ))}
+    </span>
+  );
+}
+
+/** The one hover cue every clickable tile on this dashboard shares: a
+ *  chevron that fades in and nudges right on hover/focus, nothing visible
+ *  at rest -- the same interaction the mentorship dashboard's cards use
+ *  (MentorshipTab.tsx's own HoverChevron), reused here rather than a
+ *  second implementation of the identical idea (direct instruction, 20
+ *  Sept: match it, app-wide). Needs `group` on the clickable ancestor. */
+function DashHoverChevron() {
+  return <ChevronRight aria-hidden className="pointer-events-none absolute top-[var(--space-4)] right-[var(--space-4)] z-20 h-[16px] w-[16px] opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100 sm:top-[var(--space-5)] sm:right-[var(--space-5)]" style={{ color: "var(--muted-foreground)" }} />;
+}
+
 function OverviewTabV2({
-  focus, top3Careers, planProgress, onGoTop3, onGoPlan, onGoReport,
+  focus, top3Careers, planProgress, nextTask, onGoTop3, onGoPlan, onGoReport, onGoResume,
 }: {
   focus: ProfileCareer | null;
   top3Careers: ProfileCareer[];
   planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
+  nextTask: (career: ProfileCareer) => PlanTask | null;
   onGoTop3: () => void;
   onGoPlan: () => void;
   onGoReport: () => void;
+  onGoResume: () => void;
 }) {
+  const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   if (!focus) return null;
   const progress = planProgress(focus);
+  const next = nextTask(focus);
+  const resumeSaved = resume.versions.length;
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <section aria-labelledby="dash-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
-        <h3 id="dash-title" className="sr-only">Your Top Three, plan progress and report at a glance</h3>
+      {/* Two real ratios (chosen/3, steps done/total) lead, side by side --
+         the two "in progress, keep going" facts, each with its own ring
+         and its own next action. Stacks to one column below sm rather than
+         fighting for room at four-across (direct feedback, 20 Sept: the
+         four-tile row didn't hold up on tablet/mobile, and this is the
+         first screen a student sees with the whole app unlocked -- worth
+         more composition than a uniform stat grid). */}
+      <section aria-labelledby="dash-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
+        <h3 id="dash-title" className="sr-only">Your Top Three, plan, report and resume at a glance</h3>
 
         {/* Top Three: chosen/3 is a real ratio against a limit -- v1's own
-           metric, just drawn as the ring it actually is. Which one is
-           primary is real information this tile never showed at all
-           (direct instruction, 20 Sept) -- Top Three's own star badge
-           marks it there, this is the same fact surfaced here. */}
+           metric, drawn as the ring it actually is. Leads with WHO is
+           primary (the one fact worth reading first), not a sentence
+           about the count -- the ring already carries "3/3." */}
         <HoverBeam strength={0.6} className="min-w-0">
-          <button type="button" onClick={onGoTop3} className="dm-tap flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+          <button type="button" onClick={onGoTop3} className="dm-tap group relative flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+            <DashHoverChevron />
             <MeterRing pct={(top3Careers.length / 3) * 100} label="My Top Three" value={`${top3Careers.length}/3`} />
             <span className="flex min-w-0 flex-col gap-[2px]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</span>
-              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{top3Careers.length} of 3 chosen</span>
-              {focus && (
-                <span className="flex items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
-                  <Star className="h-[11px] w-[11px] flex-none" aria-hidden fill="currentColor" /> {focus.title} is #1
+              <span className="flex items-center gap-[5px] text-[16px] leading-[20px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                <Star className="h-[13px] w-[13px] flex-none" aria-hidden fill="var(--accent-subtle)" style={{ color: "var(--accent-subtle)" }} /> {focus.title}
+              </span>
+              <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>#1 of {top3Careers.length} chosen</span>
+            </span>
+          </button>
+        </HoverBeam>
+
+        {/* Plan: the ring is still the right form for done/total (a real
+           ratio), but a percentage alone doesn't say what to actually do
+           -- nextTask() already computes exactly that (it's what
+           ReportOverlay uses for "Immediate next step"), just never shown
+           here before. Absorbs "Do this next" entirely rather than
+           repeating a second, disconnected CTA elsewhere on the page
+           (direct instruction, 20 Sept: "do this next... is actually
+           part of [the plan]... combine it"). */}
+        <HoverBeam strength={0.6} className="min-w-0">
+          <button type="button" onClick={onGoPlan} className="dm-tap group relative flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+            <DashHoverChevron />
+            <MeterRing pct={progress.pct} label="Plan Progress" value={`${progress.pct}%`} />
+            <span className="flex min-w-0 flex-col gap-[2px]">
+              <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</span>
+              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{progress.complete} of {progress.total} steps</span>
+              {next && (
+                <span className="truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }} title={`${next.action}: ${next.label}`}>
+                  Next: {next.action} · {next.label}
                 </span>
               )}
             </span>
           </button>
         </HoverBeam>
-
-        {/* Plan progress: the one number v1 buried in a thin SparkBar, now
-           the hero figure it actually is. */}
-        <HoverBeam strength={0.6} className="min-w-0">
-          <button type="button" onClick={onGoPlan} className="dm-tap flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
-            <MeterRing pct={progress.pct} label="Plan Progress" value={`${progress.pct}%`} />
-            <span className="flex min-w-0 flex-col gap-[2px]">
-              <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Plan Progress</span>
-              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{progress.complete} of {progress.total} steps</span>
-            </span>
-          </button>
-        </HoverBeam>
-
-        {/* Report is not actually a ratio against a limit -- it's complete
-           the moment it exists, auto-generated from Match, identical for
-           every student (direct feedback, 20 Sept: a ring at a fixed 100%
-           isn't a real Meter, it's a Meter-shaped decoration, and "6
-           sections" never carried any signal since it never varies
-           either). Forcing this tile to match the other two rings just
-           because they're rings would be exactly the kind of cargo-cult
-           the dataviz approach warns against. What's actually true and
-           worth a glance here: which career the report is for -- the one
-           real variable -- with readiness as a plain status line, not a
-           fake metric. */}
-        <HoverBeam strength={0.6} className="min-w-0">
-          <button type="button" onClick={onGoReport} className="dm-tap flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
-            <span className="flex items-start justify-between gap-[var(--space-2)]">
-              <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Report</span>
-              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-            </span>
-            <span className="flex flex-col gap-[6px]">
-              <span className="text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.title}</span>
-              <span className="flex items-center gap-[6px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--world-food-farming-nature, #1fc76e)" }}>
-                <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: "currentColor" }} />
-                Ready to share
-              </span>
-            </span>
-          </button>
-        </HoverBeam>
       </section>
 
-      <DoThisNextCard />
+      {/* Report + Resume: neither is a ratio (both are complete-or-not,
+         no fixed target to measure against), and neither changes as often
+         as the two above -- one quieter strip for both instead of two more
+         equal-weight boxes repeating the same ring shape those two facts
+         don't actually have. Splits into its own two halves so each still
+         opens its own tab. */}
+      <div className="flex flex-col divide-y overflow-hidden rounded-[var(--radius-lg)] border sm:flex-row sm:divide-x sm:divide-y-0" style={{ borderColor: "var(--glass-border)", background: INSET.background }}>
+        {/* Report: not a ratio against a limit -- complete the instant it
+           exists, auto-generated from Match, identical for every student,
+           so a ring here would be decoration wearing a Meter's shape
+           (direct feedback, 20 Sept). What's real: how many of the
+           student's picks have a report, and whether there's still room
+           for a third -- both genuinely vary student to student, unlike a
+           section count that never does. */}
+        <button type="button" onClick={onGoReport} className="dm-tap group relative flex flex-1 min-w-0 cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="flex min-w-0 items-center gap-[var(--space-3)]">
+            {/* Real ceiling here (Top Three caps at 3), so three dots read
+               honestly -- filled = has a report, same accent as the rings
+               above for one visual family across the whole page. */}
+            <DotTrio filled={top3Careers.length} />
+            <span className="flex min-w-0 flex-col gap-[2px]">
+              <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Report</span>
+              <span className="flex items-baseline gap-[6px]">
+                <span className="text-[22px] leading-[26px] font-extrabold tabular-nums transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{top3Careers.length}</span>
+                <span className="text-[13.5px] font-bold" style={{ color: top3Careers.length < 3 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
+                  {top3Careers.length < 3 ? "ready · add a 3rd for one more" : "ready · all three"}
+                </span>
+              </span>
+            </span>
+          </span>
+          <DashHoverChevron />
+        </button>
+
+        {/* Resume: not a ratio either -- there's no fixed ceiling to a dot
+           row the way Report has, so a plain icon badge carries the same
+           "at a glance, is there something here" job instead. */}
+        <button type="button" onClick={onGoResume} className="dm-tap group relative flex flex-1 min-w-0 cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left sm:p-[var(--space-5)]">
+          <span className="flex min-w-0 items-center gap-[var(--space-3)]">
+            <span className="flex size-[36px] flex-none items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-[1.08]" style={{ background: resumeSaved ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : "color-mix(in srgb, var(--accent-subtle) 8%, transparent)" }}>
+              <BookOpen className="h-4 w-4" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+            </span>
+            <span className="flex min-w-0 flex-col gap-[2px]">
+              <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Resume</span>
+              <span className="flex items-baseline gap-[6px]">
+                <span className="text-[22px] leading-[26px] font-extrabold tabular-nums transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{resumeSaved || "—"}</span>
+                <span className="text-[13.5px] font-bold" style={{ color: resumeSaved ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>
+                  {resumeSaved ? "saved · ready to tailor or export" : "not started yet"}
+                </span>
+              </span>
+            </span>
+          </span>
+          <DashHoverChevron />
+        </button>
+      </div>
     </div>
   );
 }
