@@ -169,7 +169,7 @@ function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete }:
     // content runs (a tailored + scored card vs. a bare one).
     <div
       className="relative flex h-full flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] backdrop-blur-md"
-      style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, var(--inset-surface) 85%, ${accent} 15%)` }}
+      style={{ borderColor: "var(--glass-border)", background: version.color ? `color-mix(in srgb, var(--inset-surface) 85%, ${version.color} 15%)` : "var(--inset-surface)" }}
     >
       <StatusTags version={version} />
       <div

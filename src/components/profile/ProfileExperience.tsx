@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Calendar, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Snowflake, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -165,6 +165,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Demo-only, session-only -- same pattern as the AT&T board's own
   // VersionChip (direct instruction, 20 Sept 2026).
   const [overviewVersion, setOverviewVersion] = useState<"v1" | "v2">("v1");
+  // QA-only: overrides currentPlanWindowId()'s real-date result so the
+  // season art can be checked without waiting for the calendar (direct
+  // instruction, 20 Sept 2026: "a toggle... where i can cycle through
+  // season so i can QA each seasons graphics"). null = use the real date.
+  const [seasonOverride, setSeasonOverride] = useState<"fall" | "winter" | "spring" | null>(null);
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
@@ -736,10 +741,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
               {overviewVersion === "v2" ? (
                 <OverviewTabV2
-                  focus={focus} planProgress={planProgress} nextTask={nextTask}
+                  focus={focus}
                   top3Careers={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
                   onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
                   onGoResume={() => setTab("resume")}
+                  seasonOverride={seasonOverride}
                 />
               ) : (
                 <OverviewTab
@@ -769,7 +775,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         )}
         {tab === "plan" && (
           <div role="tabpanel" id="profile-panel-plan" aria-labelledby="profile-tab-plan">
-            <MyPlanTab focus={focus} onGoRoutes={() => setTab("routes")} />
+            <MyPlanTab focus={focus} onGoRoutes={() => setTab("routes")} variant={overviewVersion} />
           </div>
         )}
         {tab === "report" && focus && (
@@ -813,17 +819,21 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           </div>
         )}
           </div>
-          {/* Demo-only Overview v2 toggle -- below the whole card, bottom
+          {/* Demo-only v1/v2 toggle -- below the whole card, bottom
              center, so it never adds space between the header and the
-             card itself (direct instruction, 20 Sept 2026: moved out of
-             the row above; "subtle, out of the way" still the goal, same
-             placement spirit as the AT&T board's own VersionChip, just
-             tucked under rather than beside). */}
-          {tab === "overview" && (
-            <div className="flex justify-center">
-              <OverviewVersionChip version={overviewVersion} onChange={setOverviewVersion} />
-            </div>
-          )}
+             card itself. Toggles the whole Profile section, not just
+             Overview, so it stays put across every tab rather than
+             vanishing the moment a student leaves Overview (direct
+             feedback, 20 Sept 2026: "should be toggling the entire my
+             profile section not just overview"). */}
+          <div className="flex justify-center gap-[6px]">
+            <OverviewVersionChip version={overviewVersion} onChange={setOverviewVersion} />
+            {/* QA-only: cycles the season art without waiting on the real
+               calendar (direct instruction, 20 Sept 2026: "a toggle...
+               where i can cycle through season so i can QA each seasons
+               graphics"). Only meaningful once v2 is on. */}
+            {overviewVersion === "v2" && <SeasonQAToggle value={seasonOverride} onChange={setSeasonOverride} />}
+          </div>
           </>
         )}
         {/* Reachable only via PlanTab's "Change route" link now, not a main
@@ -1418,53 +1428,27 @@ function DoThisNextCard() {
 // of printed as a sentence. Never changes v1 -- purely additive, reached
 // through OverviewVersionChip.
 
-// A Meter (dataviz: "a single ratio against a limit" -> Meter, not a bar
-// chart or a pie). All three tiles below are exactly that job once framed
-// right -- careers chosen /3, plan steps done/total, report complete/not
-// -- so one ring component, reused three times, same accent throughout
-// (this app's single brand blue; the "world" category colors are reserved
-// for career industries elsewhere and would misapply here). The unfilled
-// track is a lighter step of that same accent, not a generic gray, so
-// each ring still reads as "this metric's own color" at a glance even
-// empty -- same principle Apple's own Activity rings use. No gradient
-// sheen, no drop-shadow glow -- flat fill, flat track (direct feedback, 20
-// Sept: the glossy version read as dated/3D).
-function MeterRing({ pct, label, value, size = 92, stroke = 8 }: { pct: number; label: string; value: string; size?: number; stroke?: number }) {
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const clamped = Math.max(0, Math.min(100, pct));
-  return (
-    // Needs a `group` ancestor (every caller's button has one): a small
-    // scale-up on hover, the same "this is the thing that's interactive"
-    // cue the chevron gives, just on the stat itself (direct instruction,
-    // 20 Sept -- hover should highlight the stat, not just reveal a chevron).
-    <span className="relative flex flex-none items-center justify-center transition-transform duration-200 group-hover:scale-[1.05]" role="img" aria-label={`${label}: ${value}`}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="flex-none" aria-hidden>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--accent-subtle) 16%, transparent)" strokeWidth={stroke} />
-        <circle
-          cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--accent-subtle)" strokeWidth={stroke} strokeLinecap="round"
-          strokeDasharray={c} strokeDashoffset={c * (1 - clamped / 100)}
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.22,1,0.36,1)" }}
-        />
-      </svg>
-      <span className="absolute text-[19px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
-    </span>
-  );
-}
+// Rings kept getting rebuilt back to life here across several rounds of
+// feedback before landing on bars (SparkBar, this app's own established
+// meter) instead -- removed for good rather than left as dead code
+// (direct feedback, 20 Sept: "why are we still doing rings?").
 
-/** Report's own ceiling (Top Three caps at 3) drawn as three small marks --
- *  same accent, flat fill, no glow -- rather than forcing it into a ring
- *  that would need a fake percentage. */
-function DotTrio({ filled }: { filled: number }) {
-  return (
-    <span className="flex flex-none flex-col gap-[4px]" role="img" aria-label={`${filled} of 3 reports ready`}>
-      {[0, 1, 2].map((i) => (
-        <span key={i} className="h-[7px] w-[20px] rounded-full transition-transform duration-200 group-hover:scale-x-[1.08]" style={{ background: i < filled ? "var(--accent-subtle)" : "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" }} />
-      ))}
-    </span>
-  );
-}
+// Both DotTrio (Report) and WindowTrio (Plan) -- three small pill marks in
+// a row -- got removed here. Sitting next to a number that already said
+// the same count, they read as carousel/pagination dots, not data (direct
+// feedback, 20 Sept: "the three bar graphs in my plan read like
+// pagination. redesign all cards"). Every tile in this dashboard now
+// carries exactly one visual for its one real number: a SparkBar for a
+// ratio (Top Three, Plan), a plain icon-in-circle for a count with no
+// fixed ceiling (Report, Resume) -- one family, not five treatments.
+
+// The ring (Top Three, then Report) got rebuilt with real gradient +
+// transparency per direct feedback, then dropped for good: its number sat
+// inside the graphic with nothing tying it to the caption beside it, so
+// the two never read as one fact (direct feedback, 20 Sept: "2 is inside
+// the ring so it feels disconnected"). Both tiles now use the same
+// icon-circle + inline "N + label" line Resume already had, where the
+// number IS the sentence rather than a separate graphic next to one.
 
 /** The one hover cue every clickable tile on this dashboard shares: a
  *  chevron that fades in and nudges right on hover/focus, nothing visible
@@ -1472,80 +1456,194 @@ function DotTrio({ filled }: { filled: number }) {
  *  (MentorshipTab.tsx's own HoverChevron), reused here rather than a
  *  second implementation of the identical idea (direct instruction, 20
  *  Sept: match it, app-wide). Needs `group` on the clickable ancestor. */
-function DashHoverChevron() {
-  return <ChevronRight aria-hidden className="pointer-events-none absolute top-[var(--space-4)] right-[var(--space-4)] z-20 h-[16px] w-[16px] opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100 sm:top-[var(--space-5)] sm:right-[var(--space-5)]" style={{ color: "var(--muted-foreground)" }} />;
+function DashHoverChevron({ light = false }: { light?: boolean }) {
+  return <ChevronRight aria-hidden className="pointer-events-none absolute top-[var(--space-4)] right-[var(--space-4)] z-20 h-[16px] w-[16px] opacity-0 transition-all duration-150 group-hover:translate-x-[2px] group-hover:opacity-100 sm:top-[var(--space-5)] sm:right-[var(--space-5)]" style={{ color: light ? "rgba(255,255,255,0.85)" : "var(--muted-foreground)" }} />;
+}
+
+// Aug-Dec reads as Fall, Jan-Mar as Winter, Apr-Jul as Spring -- the same
+// three windows gradePlanData.ts's own plans are organized into. A plain
+// month check, not tied to any account data, since nothing else in this
+// prototype tracks an actual school calendar.
+// Matches GRADE_WINDOW_MONTHS below exactly (Sept-Nov/Dec-Feb/Mar-May) --
+// June-August has no window of its own, bucketed into "fall" as the
+// upcoming term rather than inventing a fourth season nothing else here has.
+function currentPlanWindowId(): "fall" | "winter" | "spring" {
+  const m = new Date().getMonth();
+  if (m === 11 || m <= 1) return "winter";
+  if (m >= 2 && m <= 4) return "spring";
+  return "fall";
 }
 
 function OverviewTabV2({
-  focus, top3Careers, planProgress, nextTask, onGoTop3, onGoPlan, onGoReport, onGoResume,
+  focus, top3Careers, onGoTop3, onGoPlan, onGoReport, onGoResume, seasonOverride,
 }: {
   focus: ProfileCareer | null;
   top3Careers: ProfileCareer[];
-  planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
-  nextTask: (career: ProfileCareer) => PlanTask | null;
   onGoTop3: () => void;
   onGoPlan: () => void;
   onGoReport: () => void;
   onGoResume: () => void;
+  seasonOverride: "fall" | "winter" | "spring" | null;
 }) {
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
+  const stage = useStage();
   if (!focus) return null;
-  const progress = planProgress(focus);
-  const next = nextTask(focus);
-  const resumeSaved = resume.versions.length;
+  // The actual "My Plan" tab (MyPlanTab -> GradePlanCard) is the grade-by-
+  // grade Fall/Winter/Spring plan, NOT career.plan -- a completely separate
+  // model that was never what this tile was reading before (verified by
+  // reading MyPlanTab's own render, 20 Sept 2026: "is it really 13 steps?
+  // check the logic" -- it wasn't; that number came from career.plan,
+  // which nothing in My Plan actually shows). This reads the same
+  // gradePlan()/collegePlan() the real tab does, so the window and step
+  // named here are the ones a click-through actually lands on.
+  const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
+  const plan = stage === "hs" ? gradePlan(defaultGrade) : collegePlan(1, { id: focus.id, title: focus.title });
+  const windowId = seasonOverride ?? currentPlanWindowId();
+  const currentWindow = plan.windows.find((w) => w.id === windowId) ?? plan.windows[0];
+  const windowIndex = plan.windows.findIndex((w) => w.id === currentWindow.id);
+  const requiredSteps = currentWindow.steps.filter((s) => !s.optional);
+  const firstStep = requiredSteps[0] ?? currentWindow.steps[0];
+  // Position in the plan's own term sequence IS a real ratio (term N of
+  // however many the plan has) -- unlike a fake done/total, this doesn't
+  // need GradePlanCard's own local completion state to be honest (direct
+  // feedback, 20 Sept: "isnt showing any progress metric").
+  const termPercent = ((windowIndex + 1) / plan.windows.length) * 100;
+  // A single "best" score assumes one resume; Choose & Tailor produces as
+  // many named versions as a student wants, so the only metric that's
+  // still true at any count is how many exist (direct feedback, 20 Sept:
+  // "what happens when there are multiple. bad metrics to show here").
+  const resumeCount = resume.versions.length;
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* Two real ratios (chosen/3, steps done/total) lead, side by side --
-         the two "in progress, keep going" facts, each with its own ring
-         and its own next action. Stacks to one column below sm rather than
-         fighting for room at four-across (direct feedback, 20 Sept: the
-         four-tile row didn't hold up on tablet/mobile, and this is the
+      {/* Two real ratios (chosen/3, steps done/total) lead, side by side.
+         Bars, not rings (direct feedback, 20 Sept) -- SparkBar is this
+         app's own established meter (Plan's v1 tile already used it), so
+         this reuses it rather than a bespoke ring nobody asked for twice.
+         Stacks to one column below sm (direct feedback, 20 Sept: four
+         tiles across didn't hold up on tablet/mobile, and this is the
          first screen a student sees with the whole app unlocked -- worth
-         more composition than a uniform stat grid). */}
+         real composition). */}
       <section aria-labelledby="dash-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
         <h3 id="dash-title" className="sr-only">Your Top Three, plan, report and resume at a glance</h3>
 
-        {/* Top Three: chosen/3 is a real ratio against a limit -- v1's own
-           metric, drawn as the ring it actually is. Leads with WHO is
-           primary (the one fact worth reading first), not a sentence
-           about the count -- the ring already carries "3/3." */}
+        {/* Top Three: chosen/3 is a real ratio -- v1's own metric, now a
+           bar. Leads with WHO is primary and HOW strong that match is
+           (the match score was sitting unused; pairing identity with
+           strength is a real insight "2 of 3" alone never gave). */}
         <HoverBeam strength={0.6} className="min-w-0">
-          <button type="button" onClick={onGoTop3} className="dm-tap group relative flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+          {/* A real div, not a button, now that "Choose N more" is its own
+             link -- a <button> can't legally contain another interactive
+             element (direct feedback, 20 Sept: make it clickable straight
+             to Explore). role="button" + the same keyboard handling keeps
+             the rest of the card exactly as clickable as it always was. */}
+          <div
+            role="button" tabIndex={0} onClick={onGoTop3}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onGoTop3(); } }}
+            className="dm-tap group relative flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}
+          >
             <DashHoverChevron />
-            <MeterRing pct={(top3Careers.length / 3) * 100} label="My Top Three" value={`${top3Careers.length}/3`} />
-            <span className="flex min-w-0 flex-col gap-[2px]">
-              <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</span>
-              <span className="flex items-center gap-[5px] text-[16px] leading-[20px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                <Star className="h-[13px] w-[13px] flex-none" aria-hidden fill="var(--accent-subtle)" style={{ color: "var(--accent-subtle)" }} /> {focus.title}
+            {/* Caption sits exactly where Plan's own caption
+               ("PROFESSIONAL READINESS") sits, directly on top of the
+               bar, same all-caps styling -- only the number itself is
+               brighter than the rest of the line. The #1 badge + name
+               moved underneath the bar instead, in the stat-line spot
+               Plan uses for "Term 1 of 3..." (direct feedback, 20 Sept). */}
+            <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</span>
+            <span className="flex flex-col gap-[8px]">
+              <span className="min-w-0 truncate text-[11.5px] leading-[14px] font-bold tracking-[0.05em] uppercase">
+                <span style={{ color: "var(--foreground)" }}>{top3Careers.length}</span>{" "}
+                <span style={{ color: "var(--muted-foreground)" }}>of 3 chosen</span>
               </span>
-              <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>#1 of {top3Careers.length} chosen</span>
+              <SparkBar percent={(top3Careers.length / 3) * 100} min={8} height={6} track="color-mix(in srgb, var(--foreground) 10%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+              <span className="flex items-center gap-[7px]">
+                {/* Measured against the shield's own rendered bounding box
+                   (not just its 24x24 viewBox) before landing here -- an
+                   earlier manual nudge assumed the taper pulled the visual
+                   center up and moved the "1" the wrong direction (direct
+                   feedback, 20 Sept: "still not centred"). Plain flex
+                   centering already lines up within a fraction of a
+                   pixel once the stroke width is accounted for. */}
+                <span className="relative flex-none" style={{ width: 18, height: 18 }}>
+                  <Shield className="absolute inset-0 h-full w-full" aria-hidden fill="var(--accent-subtle)" style={{ color: "var(--accent-subtle)" }} />
+                  <span className="absolute inset-0 flex items-center justify-center text-[9px] leading-none font-extrabold" style={{ color: "var(--primary-foreground)" }}>1</span>
+                </span>
+                <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{focus.title}</span>
+              </span>
             </span>
-          </button>
-        </HoverBeam>
-
-        {/* Plan: the ring is still the right form for done/total (a real
-           ratio), but a percentage alone doesn't say what to actually do
-           -- nextTask() already computes exactly that (it's what
-           ReportOverlay uses for "Immediate next step"), just never shown
-           here before. Absorbs "Do this next" entirely rather than
-           repeating a second, disconnected CTA elsewhere on the page
-           (direct instruction, 20 Sept: "do this next... is actually
-           part of [the plan]... combine it"). */}
-        <HoverBeam strength={0.6} className="min-w-0">
-          <button type="button" onClick={onGoPlan} className="dm-tap group relative flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
-            <DashHoverChevron />
-            <MeterRing pct={progress.pct} label="Plan Progress" value={`${progress.pct}%`} />
-            <span className="flex min-w-0 flex-col gap-[2px]">
-              <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</span>
-              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{progress.complete} of {progress.total} steps</span>
-              {next && (
-                <span className="truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }} title={`${next.action}: ${next.label}`}>
-                  Next: {next.action} · {next.label}
+            <span className="flex flex-col gap-[8px]">
+              {top3Careers.length < 3 ? (
+                <Link
+                  href="/explore"
+                  onClick={(e) => e.stopPropagation()}
+                  className="dm-link dm-chip-hover flex w-fit items-center gap-[6px]"
+                >
+                  <Plus className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                  <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    Choose {3 - top3Careers.length} more
+                  </span>
+                </Link>
+              ) : (
+                <span className="flex items-center gap-[6px]">
+                  <Plus className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                  <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }}>All three chosen</span>
                 </span>
               )}
             </span>
-          </button>
+          </div>
+        </HoverBeam>
+
+        {/* Plan: reads the same gradePlan()/collegePlan() windows the real
+           My Plan tab shows (see the note above -- this used to read
+           career.plan, a different model the tab doesn't even render).
+           Same dark card + subtle season wash as the real accordions
+           (SeasonScene) -- v2-only, so it never leaks into v1. Term
+           position is a real ratio (SparkBar), same family as Top Three's
+           ring above it. */}
+        <HoverBeam strength={0.6} className="min-w-0">
+          {/* A real div, not a button, now that "Next: ..." is its own
+             link straight to that step (direct feedback, 20 Sept) -- a
+             <button> can't legally contain another interactive element. */}
+          <div
+            role="button" tabIndex={0} onClick={onGoPlan}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onGoPlan(); } }}
+            className="dm-tap group relative flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}
+          >
+            <SeasonScene seasonId={currentWindow.id} />
+            <DashHoverChevron />
+            <span className="relative z-[1] text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</span>
+            <span className="relative z-[1] flex flex-col gap-[8px]">
+              {/* Plan name as a small caption, not the headline -- the
+                 season scene itself already says which term this is, so
+                 the words don't need to repeat it (direct feedback, 20
+                 Sept: "the colored season styling should do that for
+                 us... professional readiness can be a smaller caption"). */}
+              <span className="min-w-0 truncate text-[11.5px] leading-[14px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--muted-foreground)" }}>{plan.title}</span>
+              <SparkBar percent={termPercent} min={8} height={6} track="color-mix(in srgb, var(--foreground) 10%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+              <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Term {windowIndex + 1} of {plan.windows.length}</span>
+            </span>
+            <span className="relative z-[1] flex flex-col gap-[8px]">
+              {firstStep ? (
+                firstStep.href ? (
+                  <Link
+                    href={firstStep.href}
+                    onClick={(e) => e.stopPropagation()}
+                    className="dm-link dm-chip-hover flex w-fit min-w-0 items-center gap-[6px]"
+                  >
+                    <Calendar className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                    <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }} title={firstStep.title}>Next: {firstStep.title}</span>
+                  </Link>
+                ) : (
+                  <span className="flex items-center gap-[6px]">
+                    <Calendar className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                    <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }} title={firstStep.title}>Next: {firstStep.title}</span>
+                  </span>
+                )
+              ) : (
+                <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing due this window</span>
+              )}
+            </span>
+          </div>
         </HoverBeam>
       </section>
 
@@ -1556,46 +1654,48 @@ function OverviewTabV2({
          don't actually have. Splits into its own two halves so each still
          opens its own tab. */}
       <div className="flex flex-col divide-y overflow-hidden rounded-[var(--radius-lg)] border sm:flex-row sm:divide-x sm:divide-y-0" style={{ borderColor: "var(--glass-border)", background: INSET.background }}>
-        {/* Report: not a ratio against a limit -- complete the instant it
-           exists, auto-generated from Match, identical for every student,
-           so a ring here would be decoration wearing a Meter's shape
-           (direct feedback, 20 Sept). What's real: how many of the
-           student's picks have a report, and whether there's still room
-           for a third -- both genuinely vary student to student, unlike a
-           section count that never does. */}
+        {/* Report: same icon-circle + inline "N + label" line as Resume
+           beside it, not a ring -- a ring's number sat inside the graphic
+           with nothing connecting it to the caption beside it (direct
+           feedback, 20 Sept: "2 is inside the ring so it feels
+           disconnected"). Still the identical real ratio (reports ready /
+           3 picks), just written as one sentence instead. */}
         <button type="button" onClick={onGoReport} className="dm-tap group relative flex flex-1 min-w-0 cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex min-w-0 items-center gap-[var(--space-3)]">
-            {/* Real ceiling here (Top Three caps at 3), so three dots read
-               honestly -- filled = has a report, same accent as the rings
-               above for one visual family across the whole page. */}
-            <DotTrio filled={top3Careers.length} />
+            <span className="flex size-[36px] flex-none items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-[1.08]" style={{ background: "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" }}>
+              <BadgeCheck className="h-4 w-4" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+            </span>
             <span className="flex min-w-0 flex-col gap-[2px]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Report</span>
               <span className="flex items-baseline gap-[6px]">
                 <span className="text-[22px] leading-[26px] font-extrabold tabular-nums transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{top3Careers.length}</span>
-                <span className="text-[13.5px] font-bold" style={{ color: top3Careers.length < 3 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>
-                  {top3Careers.length < 3 ? "ready · add a 3rd for one more" : "ready · all three"}
-                </span>
+                <span className="text-[13.5px] font-bold" style={{ color: top3Careers.length < 3 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>of 3 ready</span>
               </span>
             </span>
           </span>
           <DashHoverChevron />
         </button>
 
-        {/* Resume: not a ratio either -- there's no fixed ceiling to a dot
-           row the way Report has, so a plain icon badge carries the same
-           "at a glance, is there something here" job instead. */}
+        {/* Resume: a single "best" score assumes there's one resume to
+           score. Choose & Tailor produces as many named versions as a
+           student wants, so the only number that's still true regardless
+           of count is how many exist -- same honest-count pattern as
+           Report's dot total, not a score that goes stale/misleading the
+           moment a 2nd or 3rd version exists (direct feedback, 20 Sept:
+           "what happens when there are multiple. bad metrics to show here"). */}
         <button type="button" onClick={onGoResume} className="dm-tap group relative flex flex-1 min-w-0 cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left sm:p-[var(--space-5)]">
           <span className="flex min-w-0 items-center gap-[var(--space-3)]">
-            <span className="flex size-[36px] flex-none items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-[1.08]" style={{ background: resumeSaved ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : "color-mix(in srgb, var(--accent-subtle) 8%, transparent)" }}>
+            <span className="flex size-[36px] flex-none items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-[1.08]" style={{ background: resumeCount > 0 ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : "color-mix(in srgb, var(--accent-subtle) 8%, transparent)" }}>
               <BookOpen className="h-4 w-4" aria-hidden style={{ color: "var(--accent-subtle)" }} />
             </span>
             <span className="flex min-w-0 flex-col gap-[2px]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Resume</span>
               <span className="flex items-baseline gap-[6px]">
-                <span className="text-[22px] leading-[26px] font-extrabold tabular-nums transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{resumeSaved || "—"}</span>
-                <span className="text-[13.5px] font-bold" style={{ color: resumeSaved ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>
-                  {resumeSaved ? "saved · ready to tailor or export" : "not started yet"}
+                <span className="text-[22px] leading-[26px] font-extrabold tabular-nums transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                  {resumeCount || "—"}
+                </span>
+                <span className="text-[13.5px] font-bold" style={{ color: resumeCount > 0 ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>
+                  {resumeCount > 0 ? "generated" : "not started yet"}
                 </span>
               </span>
             </span>
@@ -1632,6 +1732,25 @@ function OverviewVersionChip({ version, onChange }: { version: "v1" | "v2"; onCh
         );
       })}
     </div>
+  );
+}
+
+/** QA-only: cycles Auto (real date) -> Fall -> Winter -> Spring -> Auto,
+ *  one click at a time -- lets the season art on the Plan tile be checked
+ *  without waiting for the calendar to actually reach each window. */
+function SeasonQAToggle({ value, onChange }: { value: "fall" | "winter" | "spring" | null; onChange: (v: "fall" | "winter" | "spring" | null) => void }) {
+  const order: Array<"fall" | "winter" | "spring" | null> = [null, "fall", "winter", "spring"];
+  const label = value ? value[0].toUpperCase() + value.slice(1) : "Auto";
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(order[(order.indexOf(value) + 1) % order.length])}
+      title="QA: cycle the Plan tile's season art"
+      className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[3px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+      style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
+    >
+      Season: {label}
+    </button>
   );
 }
 
@@ -1800,10 +1919,10 @@ function RoutesTab({
 
 // ---- My Plan: what to do about it, plus what is coming up ----
 
-function MyPlanTab({ focus, onGoRoutes }: { focus: ProfileCareer | null; onGoRoutes: () => void }) {
+function MyPlanTab({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2" }) {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <GradePlanCard focus={focus} onGoRoutes={onGoRoutes} />
+      <GradePlanCard focus={focus} onGoRoutes={onGoRoutes} variant={variant} />
     </div>
   );
 }
@@ -1995,6 +2114,172 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
 }
 
 const GRADE_WINDOW_MONTHS: Record<string, string> = { fall: "Sept – Nov", winter: "Dec – Feb", spring: "Mar – May" };
+
+// Purpose-drawn marks, not lucide's generic Leaf/Flower2 -- a simple single
+// leaf silhouette (two variants, so a cluster never repeats one shape) and
+// an actual five-petal sakura blossom, since "get better SVGs of actual
+// autumn leaves... spring can use better sakura style flows" asked for the
+// real thing, not an icon-font stand-in (direct feedback, 20 Sept). Winter
+// keeps lucide's own Snowflake -- "the snowflakes are okay." All three take
+// className/style just like a lucide icon so SeasonScene can treat every
+// season's marks identically.
+function LeafMarkA({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden>
+      <path d="M12 2C16 6 18 10.5 17 15.5C16.2 19.6 13.4 22 12 22C10.6 22 7.8 19.6 7 15.5C6 10.5 8 6 12 2Z" fill="currentColor" />
+      <path d="M12 4.5V20.5" stroke="rgba(0,0,0,0.3)" strokeWidth="0.8" strokeLinecap="round" />
+      <path d="M12 8.5L8.8 11M12 8.5L15.2 11M12 13L9.2 15.3M12 13L14.8 15.3" stroke="rgba(0,0,0,0.24)" strokeWidth="0.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+function LeafMarkB({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden>
+      <path d="M12 3C14.6 4.7 17.6 5.9 18.6 9C19.6 12 18 14 16 14.2C17 16.3 16.6 18.7 14.4 19.6C13.4 20 12.5 19.6 12 19C11.5 19.6 10.6 20 9.6 19.6C7.4 18.7 7 16.3 8 14.2C6 14 4.4 12 5.4 9C6.4 5.9 9.4 4.7 12 3Z" fill="currentColor" />
+      <path d="M12 5.5V19" stroke="rgba(0,0,0,0.26)" strokeWidth="0.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+function SakuraMark({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden>
+      {[0, 72, 144, 216, 288].map((deg) => (
+        <ellipse key={deg} cx="12" cy="6.6" rx="2.5" ry="3.9" fill="currentColor" transform={`rotate(${deg} 12 12)`} />
+      ))}
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" opacity="0.75" />
+    </svg>
+  );
+}
+
+// Each season's own two-tone tint + which marks fall through it -- the one
+// place in the app where "which season" is the whole point of the
+// surface, so it gets real color rather than the app's single accent.
+// Kept as a wash on the card's right half, not a full saturated fill: the
+// card's own dark surface still leads on the left (direct feedback, 20
+// Sept: "restrict it to only be there after the 50% width... slightly
+// more brighter color gradient... with 2 or more colors"). Used on both
+// the real My Plan tab's window accordions and Overview's own Plan tile,
+// so the same three moods read consistently everywhere.
+type SeasonParticle = { size: number; top: number; topStart: number; left: string; dy: number; dx: number; r0: number; r1: number; delay: string; dur: string; op: number; markIndex?: number };
+
+// Each season keeps its own hand-placed cluster, not one layout reused with
+// a different color -- three cards sitting one under another with the
+// identical composition read as one asset stamped three times (direct
+// feedback, 20 Sept: "dont compose all the cards the same so the elements
+// look like theyre repeating"). Every cluster sits tight and right-aligned
+// -- some marks crop against the card's own right edge on purpose, rather
+// than floating at an unanchored middle distance ("not aligned right nor
+// left... compose them a tad bit tighter together").
+const SEASON_STYLE: Record<"fall" | "winter" | "spring", { Marks: Array<React.ElementType>; tint: string; tint2: string; particles: SeasonParticle[] }> = {
+  fall: {
+    Marks: [LeafMarkA, LeafMarkB], tint: "#e2842a", tint2: "#c2410c",
+    particles: [
+      { size: 22, top: 60, topStart: 6, left: "78%", markIndex: 0, dy: 62, dx: 8, r0: -10, r1: 48, delay: "0s", dur: "5.4s", op: 0.6 },
+      { size: 15, top: 78, topStart: 10, left: "92%", markIndex: 1, dy: 56, dx: -8, r0: 8, r1: -34, delay: "1.1s", dur: "6.1s", op: 0.48 },
+      { size: 25, top: 58, topStart: 4, left: "99%", markIndex: 0, dy: 60, dx: 6, r0: -6, r1: 40, delay: "2.1s", dur: "5.8s", op: 0.52 },
+    ],
+  },
+  winter: {
+    Marks: [Snowflake], tint: "#3b82f6", tint2: "#6366f1",
+    particles: [
+      { size: 12, top: 58, topStart: 8, left: "76%", dy: 64, dx: 6, r0: 0, r1: 30, delay: "0s", dur: "6.8s", op: 0.46 },
+      { size: 17, top: 74, topStart: 6, left: "88%", dy: 58, dx: -6, r0: 10, r1: -20, delay: "1.6s", dur: "6.2s", op: 0.56 },
+      { size: 10, top: 90, topStart: 12, left: "97%", dy: 52, dx: 5, r0: -8, r1: 24, delay: "0.8s", dur: "7.4s", op: 0.38 },
+      { size: 15, top: 62, topStart: 4, left: "100%", dy: 60, dx: -4, r0: 6, r1: -28, delay: "2.6s", dur: "6.6s", op: 0.46 },
+    ],
+  },
+  spring: {
+    Marks: [SakuraMark], tint: "#f472b6", tint2: "#db2777",
+    particles: [
+      { size: 18, top: 62, topStart: 6, left: "80%", dy: 58, dx: 8, r0: -10, r1: 45, delay: "0s", dur: "5.6s", op: 0.56 },
+      { size: 13, top: 80, topStart: 10, left: "93%", dy: 54, dx: -8, r0: 8, r1: -32, delay: "1.4s", dur: "6.3s", op: 0.44 },
+      { size: 20, top: 58, topStart: 4, left: "100%", dy: 58, dx: 6, r0: -6, r1: 38, delay: "2.4s", dur: "5.9s", op: 0.48 },
+    ],
+  },
+};
+
+/** A live weather-widget scene, not a flat badge: a season-tinted glow
+ *  radiating from the card's own top-right corner, not a strict left/right
+ *  split -- a straight vertical seam down the middle read as a hard line
+ *  and the second color never blended in naturally (direct feedback, 20
+ *  Sept: "reads too left and right with the sharp line... second color
+ *  doesnt flow as organically... more top right corner... but still not
+ *  linear more organic... as long as it starts out 0% for a little bit
+ *  and organically grows im fine"). Sits over the card's own dark base,
+ *  and the season's marks sit visibly still at rest lower in that same
+ *  corner -- kept clear of the header's own number+chevron column, which
+ *  lives in the corner's top few rows (direct feedback: "dont clash with
+ *  the number and chevron... in default state"). REST is not invisible --
+ *  the marks drift down on a loop only while hovered (dm-season-fall,
+ *  app.css), starting from the exact resting opacity so hover never pops.
+ *  A fixed-height mask keeps the glow reading as part of the HEADER
+ *  specifically on an accordion: it fades to nothing well before the
+ *  card's own bottom edge, tapering into the opened body organically
+ *  rather than being sliced off by a straight edge. */
+function SeasonScene({ seasonId, className = "", fadeToHeader = false }: { seasonId: "fall" | "winter" | "spring"; className?: string; fadeToHeader?: boolean }) {
+  const { Marks, tint, tint2, particles } = SEASON_STYLE[seasonId];
+  // Only the accordion (fadeToHeader) needs the color kept local to its
+  // own header, tapering out before the opened body below it -- a plain,
+  // non-expanding card (Overview's own Plan tile) has nothing below to
+  // stay clear of, so its color runs the card's own full height instead
+  // of stopping short of the bottom edge (direct feedback, 20 Sept: "can
+  // also touch the bottom edge, dont stop where it is right now"). */
+  const fade = fadeToHeader ? "linear-gradient(to bottom, black 0px, black 64px, transparent 132px)" : undefined;
+  return (
+    <div
+      className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${className}`}
+      style={{
+        background: `radial-gradient(130% 180% at 100% 0%, color-mix(in srgb, ${tint2} 46%, transparent) 0%, color-mix(in srgb, ${tint} 34%, transparent) 34%, transparent 68%)`,
+        ...(fade ? { maskImage: fade, WebkitMaskImage: fade } : {}),
+      }}
+      aria-hidden
+    >
+      {particles.map((p, i) => {
+        const Mark = Marks[p.markIndex ?? i % Marks.length];
+        return (
+          <Mark
+            key={i}
+            className="dm-season-particle absolute"
+            style={{
+              top: p.top, left: p.left, height: p.size, width: p.size, color: tint, opacity: p.op,
+              transform: `rotate(${p.r0}deg)`,
+              // The fall itself starts from near the card's own top edge
+              // (--fy0), not from wherever the mark happens to rest --
+              // the resting position (top: p.top) stays put either way
+              // (direct feedback, 20 Sept: "should start from the top...
+              // but in default mode dont make the default position the
+              // top").
+              ["--dur" as string]: p.dur, ["--pdelay" as string]: p.delay, ["--dy" as string]: `${p.dy}px`,
+              ["--dx" as string]: `${p.dx}px`, ["--r0" as string]: `${p.r0}deg`, ["--r1" as string]: `${p.r1}deg`, ["--po" as string]: p.op,
+              ["--fy0" as string]: `${p.topStart - p.top}px`,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+/** One calendar frame: a thin colored strip on its own (the "header," not
+ *  shared with either month) sits above both months stacked underneath it
+ *  in identical styling, so neither reads more important than the other
+ *  (direct feedback, 20 Sept: "dont put one in colored header and not the
+ *  other... have both months below stacked so one doesnt read too
+ *  important than the other"). Sized to sit inline with the window title
+ *  rather than stacked above it. v2 accordions only; v1 keeps its plain
+ *  uppercase label untouched. */
+function CalendarMonthChip({ label, tint }: { label: string; tint: string }) {
+  const [start, end] = label.split("–").map((s) => s.trim());
+  return (
+    <span className="flex h-[34px] w-[30px] flex-none flex-col overflow-hidden rounded-[6px] border" style={{ borderColor: "rgba(255,255,255,0.22)" }} role="img" aria-label={label}>
+      <span className="h-[5px] w-full flex-none" style={{ background: tint }} />
+      <span className="flex flex-1 flex-col items-center justify-center gap-[1px]" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <span className="text-[7.5px] leading-none font-extrabold tracking-[0.02em]" style={{ color: "var(--foreground)" }}>{start}</span>
+        <span className="text-[7.5px] leading-none font-extrabold tracking-[0.02em]" style={{ color: "var(--foreground)" }}>{end}</span>
+      </span>
+    </span>
+  );
+}
+
 const GRADE_WINDOW_DUE: Record<string, string> = { fall: "Due by Nov", winter: "Due by Feb", spring: "Due by May" };
 
 // The grade-by-grade academic plan (course planning, applications, financial
@@ -2018,7 +2303,7 @@ const GRADE_WINDOW_DUE: Record<string, string> = { fall: "Due by Nov", winter: "
 // optional step (the avatar/cover add-on) doesn't count toward the total;
 // "Build your Profile" starts checked off for this demo student; a
 // deadline-bound step names the term's closing month.
-function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onGoRoutes: () => void }) {
+function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2" }) {
   const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
   // High School | College (Joshua Pierce, Slack, 18 Sept 2026: "expand it
   // so students can continue using it through college"). Same Fall /
@@ -2087,7 +2372,12 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
           Demo
         </button>
       </div>
-      <section className="dm-glass-2 flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] backdrop-blur-[24px] backdrop-saturate-[1.65] sm:p-[var(--space-6)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)" }}>
+      {/* Reads as the page's own header/title now, not a card competing
+         with the season cards below it -- no border, no surface fill
+         (direct feedback, 20 Sept: "that card... should read more like a
+         header or title to the rest of the cards rather than be its own
+         card"). */}
+      <div className="flex flex-col gap-[var(--space-3)] px-[2px]">
         <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
           <div className="flex min-w-0 flex-col gap-[2px]">
             <span className="flex flex-wrap items-baseline gap-[10px]">
@@ -2099,24 +2389,41 @@ function GradePlanCard({ focus, onGoRoutes }: { focus: ProfileCareer | null; onG
             <span key={`${stage}-${grade}-${year}`} className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{levelLabel} · {plan.title}</span>
           </div>
         </div>
-        <div className="mt-[var(--space-4)] flex items-baseline justify-between gap-[var(--space-4)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+        <div className="flex items-baseline justify-between gap-[var(--space-4)]">
           <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
           <span className="text-[15px] leading-[22px] font-bold tabular-nums">{doneCount} of {allSteps.length}</span>
         </div>
-        <SparkBar className="mt-[var(--space-2)] w-full" percent={Math.round((doneCount / Math.max(allSteps.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
-      </section>
+        <SparkBar className="w-full" percent={Math.round((doneCount / Math.max(allSteps.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+      </div>
 
       {plan.windows.map((w) => {
         const countedSteps = w.steps.filter((s) => !s.optional);
         const wDone = countedSteps.filter((s) => done.has(s.id)).length;
         const isOpen = openWindow === w.id;
+        const v2 = variant === "v2";
         return (
-          <section key={w.id} className="dm-glass flex w-full flex-col rounded-[var(--radius-lg)] border backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-            <button type="button" aria-expanded={isOpen} onClick={() => setOpenWindow(isOpen ? null : w.id)} className="dm-quiet flex w-full cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:p-[var(--space-6)]">
-              <span className="flex min-w-0 flex-col gap-[2px]">
-                <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--accent-subtle)" }}>{GRADE_WINDOW_MONTHS[w.id]}</span>
-                <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)" }}>{w.title}</span>
-              </span>
+          <section key={w.id} className="group relative flex w-full flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={INSET}>
+            {/* v1 stays exactly the plain dark card it always was; v2 gets
+               the season scene, a subtle wash + hover-only falling marks
+               over the SAME dark base, not a special lighter card (direct
+               feedback, 20 Sept: v1/v2 "will not have shared tabs... 2
+               different versions of the entire my profile screen", and
+               separately "cards... should be the same color as the cards
+               in overview... but the season cards/accordions should get
+               the graphical season treatment"). */}
+            {v2 && <SeasonScene seasonId={w.id} fadeToHeader />}
+            <button type="button" aria-expanded={isOpen} onClick={() => setOpenWindow(isOpen ? null : w.id)} className="dm-quiet relative z-[1] flex w-full cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:p-[var(--space-6)]">
+              {v2 ? (
+                <span className="flex min-w-0 items-center gap-[10px]">
+                  <CalendarMonthChip label={GRADE_WINDOW_MONTHS[w.id]} tint={SEASON_STYLE[w.id].tint} />
+                  <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.title}</span>
+                </span>
+              ) : (
+                <span className="flex min-w-0 flex-col gap-[2px]">
+                  <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{GRADE_WINDOW_MONTHS[w.id]}</span>
+                  <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.title}</span>
+                </span>
+              )}
               <span className="flex flex-none flex-col items-end gap-[6px] pt-[4px]">
                 <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: wDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{wDone} of {countedSteps.length}</span>
                 <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} aria-hidden />
