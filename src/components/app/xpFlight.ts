@@ -64,19 +64,26 @@ export function flyXp({ from, amount, milestone, tone }: { from: Element | Point
   } as Partial<CSSStyleDeclaration>);
   document.body.appendChild(el);
 
-  const land = () => {
+  // Banks the score and bumps the chip the instant the pill visually lands
+  // (still on-screen, mid-fade), not after its full flight -- including the
+  // final fade-out tail -- has finished. Waiting for the whole animation
+  // left a beat where the pill had already reached the chip and the number
+  // hadn't moved yet, so the two felt disconnected instead of like one
+  // impact.
+  const arrive = () => {
     awardDreamScore(milestone, amount);
     const chip = ([...document.querySelectorAll<HTMLElement>(`[${DREAM_SCORE_TARGET_ATTR}]`)].find((el) => el.getClientRects().length > 0) ?? document.querySelector<HTMLElement>(`[${DREAM_SCORE_TARGET_ATTR}]`));
     if (chip && !reduce) {
       chip.animate([{ transform: "scale(1)" }, { transform: "scale(1.3)", offset: 0.35 }, { transform: "scale(1)" }], { duration: 560, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
     }
-    el.remove();
   };
+  const cleanup = () => el.remove();
 
   if (reduce) {
     el.style.transform = `translate(${start.x}px, ${start.y}px) translate(-50%, -50%) scale(1)`;
     el.style.opacity = "1";
-    window.setTimeout(land, 1600);
+    window.setTimeout(arrive, 1600);
+    window.setTimeout(cleanup, 1600);
     return true;
   }
   playXpRise(420);
@@ -98,7 +105,12 @@ export function flyXp({ from, amount, milestone, tone }: { from: Element | Point
     ],
     { duration: 3600, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" },
   );
-  anim.onfinish = land;
-  anim.oncancel = land;
+  // The pill is already at the chip, still visible, by offset 0.98 -- bank
+  // the score and bump the chip right there instead of waiting out the
+  // last 2% (just the fade-to-nothing), so the number moves the instant
+  // the eye reads the pill as "arrived."
+  window.setTimeout(arrive, 3600 * 0.98);
+  anim.onfinish = cleanup;
+  anim.oncancel = cleanup;
   return true;
 }
