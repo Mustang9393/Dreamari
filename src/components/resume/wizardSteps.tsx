@@ -19,7 +19,7 @@ import {
   upsertEducation,
   writeResume,
 } from "@/lib/resume";
-import { COUNTRIES, EDUCATION_PROGRAMS, EXPERIENCE_TYPES, SKILL_CATEGORIES } from "./data";
+import { COUNTRIES, EDUCATION_PROGRAMS, EXPERIENCE_TYPES, RESUME_WIZARD_DREAMY, SKILL_CATEGORIES } from "./data";
 import { CARD_CLASS, Field, INSET, ResumeModal, SelectInput, TextInput, WizardFooter } from "./ui";
 
 // ---------------------------------------------------------------------------
@@ -161,7 +161,7 @@ function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: 
     onClose();
   };
   return (
-    <ResumeModal title="Add Your High School" onClose={closeAndClear}>
+    <ResumeModal title="Add Your High School" onClose={closeAndClear} dreamy={RESUME_WIZARD_DREAMY[1]}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="High School Name" htmlFor="edu-name" required>
           <TextInput id="edu-name" value={draft.schoolName} onChange={(v) => setDraft({ ...draft, schoolName: v })} onFocus={track("schoolName")} placeholder="Lincoln High School" />
@@ -339,7 +339,7 @@ function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSa
   const [custom, setCustom] = useState("");
   const toggle = (s: string) => setPicked((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : cur.length >= MAX_SKILLS_PER_CATEGORY ? cur : [...cur, s]));
   return (
-    <ResumeModal title={label} onClose={onClose}>
+    <ResumeModal title={label} onClose={onClose} dreamy={SKILL_DREAMY[categoryKey]}>
       <p className="mb-[var(--space-4)] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select up to 3.</p>
       <div className="mb-[var(--space-4)] flex gap-[var(--space-2)]">
         <TextInput id={`skill-${categoryKey}-custom`} value={custom} onChange={setCustom} placeholder="Type your own…" />
@@ -489,7 +489,7 @@ function CertificationModal({ initial, onClose, onSaved, onFieldFocus }: { initi
     onClose();
   };
   return (
-    <ResumeModal title="Add Certification" onClose={closeAndClear}>
+    <ResumeModal title="Add Certification" onClose={closeAndClear} dreamy={RESUME_WIZARD_DREAMY[4]}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="Certification Name" htmlFor="cert-name" required>
           <TextInput id="cert-name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} onFocus={track("name")} placeholder="e.g. AWS Certified Cloud Practitioner" />

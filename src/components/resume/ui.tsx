@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Portal } from "@/components/profile/CareerReport";
 
@@ -278,7 +279,7 @@ function ResumeModalHeader({ title, onClose }: { title: string; onClose: () => v
   );
 }
 
-export function ResumeModal({ title, onClose, children, presentation = "overlay" }: { title: string; onClose: () => void; children: ReactNode; /** see the block comment above -- "overlay" (default) is a real popup with a backdrop; "inline" keeps the original in-place swap for the document toolbar's own panels. */ presentation?: "overlay" | "inline" }) {
+export function ResumeModal({ title, onClose, children, presentation = "overlay", dreamy }: { title: string; onClose: () => void; children: ReactNode; /** see the block comment above -- "overlay" (default) is a real popup with a backdrop; "inline" keeps the original in-place swap for the document toolbar's own panels. */ presentation?: "overlay" | "inline"; /** Dreamy, inside the popup itself, matching the reference's own modal (confirmed live, 20 Sept 2026: a small Dreamy + a contextual line at the top of every Add flow's popup) -- the wizard's own step-level Dreamy sits behind this popup's backdrop while it's open, so callers with a real sub-step line (ExperienceModal, SkillsPicker) pass it here instead of relying on that one alone. */ dreamy?: { sprite: string; line: string } }) {
   // Escape closes either presentation the same way every other dialog in
   // this app does; harmless (and unused) while nothing has focus trapped.
   useEffect(() => {
@@ -312,6 +313,11 @@ export function ResumeModal({ title, onClose, children, presentation = "overlay"
           style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}
         >
           <ResumeModalHeader title={title} onClose={onClose} />
+          {dreamy && (
+            <div className="flex-none">
+              <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} size="sm" />
+            </div>
+          )}
           <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
         </div>
       </div>

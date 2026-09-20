@@ -135,7 +135,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
   }, [sub]);
 
   return (
-    <ResumeModal title={modalHeaderByStep[sub]} onClose={closeAndClear}>
+    <ResumeModal title={modalHeaderByStep[sub]} onClose={closeAndClear} dreamy={{ sprite: spriteByStep[sub], line: titleByStep[sub] }}>
       {sub === "type" && (
         <div className="flex flex-col gap-[var(--space-3)]">
           {EXPERIENCE_TYPES.map(({ type, label, hint, Icon }) => (
