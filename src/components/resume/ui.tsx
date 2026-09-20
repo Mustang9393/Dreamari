@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Portal } from "@/components/profile/CareerReport";
+import { IconTip, Tip } from "@/components/app/IconTip";
 
 // Shared field/card styling for every resume step -- copied verbatim from
 // ProfileExperience.tsx's own Settings form fields (SETTINGS_FIELD/_STYLE/
@@ -228,46 +229,6 @@ export function ToolbarButton({ label, onClick, children, iconOnly = false, tone
   );
 }
 
-/** The tooltip bubble itself, portalled to the body and positioned from the
- *  trigger's rect. Rendering it inline under the trigger looked right in
- *  the DOM but painted BEHIND whatever came next (the resume sheet, the
- *  next saved-resume row): those neighbours carry their own stacking
- *  contexts (entrance animations that keep a transform after they fill),
- *  so no z-index inside the header could win (17 Sept 2026). */
-function Tip({ label, children, hideFromLg = false, className = "" }: { label: string; children: ReactNode; hideFromLg?: boolean; className?: string }) {
-  const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
-  const ref = useRef<HTMLSpanElement>(null);
-  const id = useId();
-  const show = () => {
-    const r = ref.current?.getBoundingClientRect();
-    if (r) setTip({ x: r.left + r.width / 2, y: r.bottom + 8 });
-  };
-  const hide = () => setTip(null);
-  // Scrolling under an open tooltip would leave it stranded; dismiss instead.
-  useEffect(() => {
-    if (!tip) return;
-    window.addEventListener("scroll", hide, { passive: true, capture: true });
-    return () => window.removeEventListener("scroll", hide, { capture: true } as EventListenerOptions);
-  }, [tip]);
-  return (
-    <span ref={ref} className={`relative flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide} aria-describedby={tip ? id : undefined}>
-      {children}
-      {tip && (
-        <Portal>
-          <span
-            id={id}
-            role="tooltip"
-            className={`pointer-events-none fixed z-[9999] -translate-x-1/2 rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12px] leading-[16px] font-semibold whitespace-nowrap motion-safe:animate-[fade-slide-up_0.18s_ease-out_both] ${hideFromLg ? "lg:hidden" : ""}`}
-            style={{ left: tip.x, top: tip.y, background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 14px 30px -16px rgba(0,0,0,0.7)", fontFamily: "var(--font-body)" }}
-          >
-            {label}
-          </span>
-        </Portal>
-      )}
-    </span>
-  );
-}
-
 function ResumeModalHeader({ title, onClose }: { title: string; onClose: () => void }) {
   return (
     <div className="flex flex-none items-center gap-[var(--space-2)] border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -325,8 +286,8 @@ export function ResumeModal({ title, onClose, children, presentation = "overlay"
   );
 }
 
-/** Universal rule (direct feedback, 17 Sept 2026): anything icon-only shows
- *  its label as a tooltip on hover and keyboard focus. Wrap the control. */
-export function IconTip({ label, children, className = "" }: { label: string; children: ReactNode; className?: string }) {
-  return <Tip label={label} className={className}>{children}</Tip>;
-}
+// IconTip/Tip moved to src/components/app/IconTip.tsx once Career and
+// College detail pages needed the identical "icon-only shows its label on
+// hover/focus" rule -- re-exported here so this module's own existing
+// `import { IconTip } from "./ui"` call sites keep working unchanged.
+export { IconTip, Tip };

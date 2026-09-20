@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, FileText, ShieldAlert, Trophy } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, ShieldAlert, Trophy } from "lucide-react";
 import Link from "next/link";
 
-import { Keycap } from "./interactions";
 import { type PerformancePlan, type PipState } from "./performance-plan";
 import { playCorrect, playSweep, playWrong } from "./sound";
 
@@ -311,7 +310,7 @@ function StepCard({
               style={{ background: "#e5484d", color: "#1a0508" }}
             >
               Continue
-              <Keycap tint="#1a0508">⏎</Keycap>
+              <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "#1a0508" }} />
             </button>
           </>
         )}

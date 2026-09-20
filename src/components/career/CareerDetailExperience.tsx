@@ -12,6 +12,7 @@ import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, H
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
+import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "./ConnectWithProfessionalsModal";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
@@ -79,16 +80,18 @@ const HERO_FOCUS: Record<string, string> = {
 
 function IconButton({ label, active = false, onClick, children }: { label: string; active?: boolean; onClick?: () => void; children: React.ReactNode }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      aria-pressed={active}
-      onClick={onClick}
-      className="dm-quiet flex size-11 flex-none cursor-pointer items-center justify-center rounded-full border"
-      style={{ background: "rgba(12,16,35,0.45)", borderColor: active ? "var(--accent-subtle)" : "rgba(255,255,255,0.3)", color: active ? "var(--accent-subtle)" : "#fff" }}
-    >
-      {children}
-    </button>
+    <IconTip label={label}>
+      <button
+        type="button"
+        aria-label={label}
+        aria-pressed={active}
+        onClick={onClick}
+        className="dm-quiet flex size-11 flex-none cursor-pointer items-center justify-center rounded-full border"
+        style={{ background: "rgba(12,16,35,0.45)", borderColor: active ? "var(--accent-subtle)" : "rgba(255,255,255,0.3)", color: active ? "var(--accent-subtle)" : "#fff" }}
+      >
+        {children}
+      </button>
+    </IconTip>
   );
 }
 
@@ -550,19 +553,21 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 <span className="flex items-start justify-between gap-[6px]">
                   <span className={`${LABEL} min-w-0`}>{fact.label}</span>
                   {factKey(fact.label) && vm.details?.[factKey(fact.label)!] && (
-                    <button
-                      type="button"
-                      aria-label={`About ${fact.label.toLowerCase()}`}
-                      aria-expanded={openFact === factKey(fact.label)}
-                      onClick={(e) => {
-                        setFactAnchor(e.currentTarget);
-                        setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)));
-                      }}
-                      className="dm-quiet -mr-[4px] -mt-[1px] flex size-6 flex-none cursor-pointer items-center justify-center rounded-full"
-                      style={{ color: "var(--muted-foreground)" }}
-                    >
-                      <Info className="h-[15px] w-[15px]" aria-hidden />
-                    </button>
+                    <IconTip label={`About ${fact.label.toLowerCase()}`}>
+                      <button
+                        type="button"
+                        aria-label={`About ${fact.label.toLowerCase()}`}
+                        aria-expanded={openFact === factKey(fact.label)}
+                        onClick={(e) => {
+                          setFactAnchor(e.currentTarget);
+                          setOpenFact((v) => (v === factKey(fact.label) ? null : factKey(fact.label)));
+                        }}
+                        className="dm-quiet -mr-[4px] -mt-[1px] flex size-6 flex-none cursor-pointer items-center justify-center rounded-full"
+                        style={{ color: "var(--muted-foreground)" }}
+                      >
+                        <Info className="h-[15px] w-[15px]" aria-hidden />
+                      </button>
+                    </IconTip>
                   )}
                 </span>
                 <span className="mt-auto"><Figure accent={accent}>{fact.value}</Figure></span>

@@ -7,6 +7,7 @@ import { ArrowLeftRight, Bookmark, Check, ChevronDown, ChevronRight, GraduationC
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { OpenCue } from "@/components/app/PosterCard";
 import { announce } from "@/components/app/LiveRegion";
+import { IconTip } from "@/components/app/IconTip";
 import { SMALL } from "@/components/career/CareerDetailExperience";
 import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, type College } from "./data";
 
@@ -86,17 +87,20 @@ export function CollegePicture({ c, sizes, priority = false, className = "", pos
 
 /** Bookmark toggle, same everywhere. */
 export function SaveButton({ on, onToggle, size = 40 }: { on: boolean; onToggle: () => void; size?: number }) {
+  const label = on ? "Saved. Tap to remove" : "Save this college";
   return (
-    <button
-      type="button"
-      aria-pressed={on}
-      aria-label={on ? "Saved. Tap to remove" : "Save this college"}
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggle(); }}
-      className="dm-quiet flex flex-none cursor-pointer items-center justify-center rounded-full border"
-      style={{ width: size, height: size, borderColor: on ? ACCENT : "rgba(255,255,255,0.22)", background: on ? "color-mix(in srgb, var(--primary) 22%, rgba(12,16,35,0.6))" : "rgba(12,16,35,0.55)", color: on ? SOFT : "#fff", backdropFilter: "blur(8px)" }}
-    >
-      <Bookmark className="h-[18px] w-[18px]" fill={on ? "currentColor" : "none"} aria-hidden />
-    </button>
+    <IconTip label={label}>
+      <button
+        type="button"
+        aria-pressed={on}
+        aria-label={label}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggle(); }}
+        className="dm-quiet flex flex-none cursor-pointer items-center justify-center rounded-full border"
+        style={{ width: size, height: size, borderColor: on ? ACCENT : "rgba(255,255,255,0.22)", background: on ? "color-mix(in srgb, var(--primary) 22%, rgba(12,16,35,0.6))" : "rgba(12,16,35,0.55)", color: on ? SOFT : "#fff", backdropFilter: "blur(8px)" }}
+      >
+        <Bookmark className="h-[18px] w-[18px]" fill={on ? "currentColor" : "none"} aria-hidden />
+      </button>
+    </IconTip>
   );
 }
 

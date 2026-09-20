@@ -27,6 +27,10 @@ export type LocationId =
   // supplied for this exact scene, so there is no reason to substitute a
   // generic room for it.
   | "l1-reception"
+  // The exterior establishing shot supplied 20 Sept for the level's opening
+  // beat (L1-01) -- the one time the player sees the building from the
+  // street before every other scene is interior.
+  | "cobalt-exterior-sunset"
   // Riverbend Medical Center -- the Registered Nurse simulation's six-room
   // library. The lobby/station/staff-room plates are the asset pack's
   // people-free daytime masters, so the chroma-keyed cast sprites stand in
@@ -131,6 +135,15 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
     // (L1-15, Christina alone): her own slot, fully in frame.
     characterAnchor: { x: 0.5, baselineY: 0.99, heightFrac: 0.88 },
   },
+  "cobalt-exterior-sunset": {
+    src: `${L}/exterior-sunset.webp`,
+    alt: "Cobalt Capital's tower entrance at sunset, the lobby glowing behind its glass facade.",
+    focal: { x: 0.62, y: 0.55 },
+    mobileFocal: { x: 0.6, y: 0.5 },
+    // No cast member ever appears on L1-01 (Narrator, no castMember) -- kept
+    // for consistency with every other location, never exercised.
+    characterAnchor: { x: 0.32, baselineY: 0.99, heightFrac: 0.85 },
+  },
   // The Riverbend anchors run FAR past full height (1.75) on purpose. The IB
   // cast's cutouts are WAIST-UP crops (Christina head-to-hips fills her whole
   // canvas), while the RN pack's are full head-to-toe figures -- so at equal
@@ -204,43 +217,56 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
 // internal boardroom, formal client pitch/deal decision -> client boardroom,
 // public working-floor moment -> trading floor, private transition -> hallway.
 export const BEAT_LOCATION: Record<string, LocationId> = {
-  // Level 1 -- Intern (ids from the Aug 31 handoff's restructured sheet).
-  // L1-01..04 are the arrival story/teach/check screens -- no castMember/
-  // speaker resolves to a character on any of them, so the reception shows
-  // as an empty room, not a starfield. Neither character has entered the
-  // story yet; the room itself already has.
-  "L1-01": "l1-reception",
+  // Level 1 -- Intern (20 Sept rebuild, "Level 1 Intern" tab -- three-act
+  // structure, ids L1-01..L1-36). Only "card" and "review" beats ever reach
+  // this table (see the note above), so every choice/rapid/rank/focus/
+  // reveal id in the level is correctly absent below, not an oversight.
+
+  // ---- Act 1: Learn the Game ----
+  // L1-01 alone gets the new exterior establishing shot (20 Sept handoff) --
+  // the one street-level view of Cobalt Capital, before the level cuts
+  // inside for every following scene.
+  "L1-01": "cobalt-exterior-sunset",
+  // L1-02..05, 07, 08, 10 are the arrival/teach/meet-Christina run -- no
+  // location change reads as "the story hasn't left reception yet" (L1-10's
+  // own line: "Christina meets you at reception").
   "L1-02": "l1-reception",
   "L1-03": "l1-reception",
-  "L1-03b": "l1-reception",
   "L1-04": "l1-reception",
-  // VISUAL CONGRUENCE (direct feedback): the whole Day-1-morning run stays
-  // in the daylight reception -- the sunset floor sandwiched between two
-  // daylight screens read as day -> evening -> day in five slides. Time of
-  // day only ever moves FORWARD through the level from here.
   "L1-05": "l1-reception",
-  "L1-06": "l1-reception",
   "L1-07": "l1-reception",
-  // Day 1 at reception, with both characters in the supplied two-slot plate.
   "L1-08": "l1-reception",
-  "L1-09": "l1-reception",
   "L1-10": "l1-reception",
-  // Christina's teaching stretch keeps the cafe, same room the old teach/
-  // match/rapid run used.
-  "L1-11": "cobalt-cafe-lounge-sunset",
-  "L1-12": "cobalt-cafe-lounge-sunset",
+  // Christina's language lesson moves to the cafe, same room the teaching
+  // stretch has always used.
   "L1-13": "cobalt-cafe-lounge-sunset",
-  "L1-13b": "cobalt-trading-floor-sunset",
-  // L1-14 has its own hero art (the laptop POV shot).
-  "L1-15": "cobalt-trading-floor-sunset",
-  "L1-16": "cobalt-trading-floor-sunset",
+  // L1-ACT1 is a full-bleed auto-advancing celebration card (Interaction
+  // Rules: "not a real stopping point") -- deliberately no room, same as
+  // L1-CHECK below.
+
+  // ---- Act 2: Prove You're Client-Ready ----
   "L1-17": "cobalt-trading-floor-sunset",
-  "L1-18": "cobalt-trading-floor-sunset",
   "L1-19": "cobalt-trading-floor-sunset",
-  "L1-20": "cobalt-cafe-lounge-sunset",
-  // L1-21 and L1-22 carry their own hero art.
-  "L1-23": "cobalt-trading-floor-night",
-  "L1-24": "l1-reception",
+  // Meeting Marcus (VP) and reviewing the deal summary with him and
+  // Christina both read as the internal boardroom, not the open floor.
+  "L1-21": "cobalt-internal-boardroom-sunset",
+  "L1-22": "cobalt-internal-boardroom-sunset",
+  "L1-23": "cobalt-internal-boardroom-sunset",
+  // L1-CHECK: the Act 2 checkpoint card, same full-bleed treatment as
+  // L1-ACT1 -- no room.
+
+  // ---- Act 3: Survive the Internship ----
+  "L1-26": "cobalt-trading-floor-sunset",
+  // L1-27 and L1-29 carry their own hero art (l1-12/l1-13.webp).
+  // 6 PM onward is explicitly night (mood: "night" on the beats
+  // themselves) -- the floor at night carries the rest of Act 3.
+  "L1-31": "cobalt-trading-floor-night",
+  "L1-32": "cobalt-trading-floor-night",
+  "L1-34": "cobalt-trading-floor-night",
+  // L1-35 closes the level back at reception, full circle with L1-02.
+  "L1-35": "l1-reception",
+  // L1-36 is the Final Review -- deliberately absent, same as every other
+  // level's review beat (see the note above).
 
   // Level 2 -- Analyst
   "L2-01": "cobalt-elevator-hallway-sunset",

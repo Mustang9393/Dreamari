@@ -23,7 +23,7 @@ import {
   ChoiceBody,
   FlagsBody,
   FlipsBody,
-  Keycap,
+  FocusBody,
   MatchBody,
   PickBody,
   RankBody,
@@ -1294,6 +1294,7 @@ function BeatBody({
     if (beat.kind === "check") return <CheckBody beat={beat} onNext={onNext} />;
     if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
     if (beat.kind === "flips") return <FlipsBody beat={beat} accent={accent} onNext={onNext} />;
+    if (beat.kind === "focus") return <FocusBody beat={beat} onNext={onNext} />;
     if (beat.kind === "choice") return <ChoiceBody beat={beat} onResolve={onResolve} locked={locked} />;
     if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} />;
@@ -1337,7 +1338,7 @@ function ReviewBody({ title, body, onNext }: { title: string; body: string; onNe
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           See the decision
-          <Keycap tint="var(--primary-foreground)">⏎</Keycap>
+          <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
         </button>
       ) : (
         <p className="flex items-center gap-[8px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
@@ -1387,7 +1388,7 @@ function useCountUp(value: number) {
  *  count-up/down between values, a pop when it changes, and the floating
  *  +5/-3 delta. The same ring language as the countdown clock, so the
  *  HUD's two dials read as one family. */
-function ScoreGauge({ reputation, band, delta, accent, demo = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean }) {
+function ScoreGauge({ reputation, band, delta, accent, demo = false, hideBand = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean; hideBand?: boolean }) {
   // Spotlight demo (direct feedback): while a beat is EXPLAINING the score,
   // the gauge acts out a worked example -- nudging up 5, back, down 3,
   // back -- with an arrow calling the eye to it, so "that number in the
@@ -1515,12 +1516,19 @@ function ScoreGauge({ reputation, band, delta, accent, demo = false }: { reputat
           {shown}
         </span>
       </span>
-      <span className="hidden flex-col sm:flex" aria-hidden>
-        <Star className="h-[11px] w-[11px]" fill="currentColor" style={{ color }} />
-        <span className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-          {band}
+      {/* The band word (At Risk / Cautious / Respected / Trusted) is
+         RETIRED on any rebuilt level (Scoring Model, 20 Sept): the corner
+         shows the reputation NUMBER only, and the three outcomes at the
+         level's end carry the meaning the band used to. Untouched levels
+         keep it until they get the same pass. */}
+      {!hideBand && (
+        <span className="hidden flex-col sm:flex" aria-hidden>
+          <Star className="h-[11px] w-[11px]" fill="currentColor" style={{ color }} />
+          <span className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+            {band}
+          </span>
         </span>
-      </span>
+      )}
       {demo && demoDelta !== 0 && (
         <span
           key={`demo-${demoStep}`}
@@ -1848,7 +1856,6 @@ function DialogueBox({
           >
             Continue
             <ChevronRight className="h-[16px] w-[16px] motion-safe:animate-[play-nudge_1.1s_ease-in-out_infinite]" aria-hidden />
-            <Keycap tint={accent}>⏎</Keycap>
             <span className="sr-only">or press enter</span>
           </button>
         )}
@@ -1905,27 +1912,35 @@ function DialogueBox({
 /** Express: the score gauge as a button. Tapping it opens the three outcomes
  *  -- the exact teaching the cut spotlight screen pushed, now pulled on
  *  demand. The row the player is currently in is lit. */
-function TappableScore({ reputation, band, delta, accent }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string }) {
+function TappableScore({ reputation, band, delta, accent, hideBand = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; hideBand?: boolean }) {
   const [open, setOpen] = useState(false);
-  const OUTCOMES = [
-    { label: "Promoted", range: "85+", active: reputation >= 85 },
-    { label: "No return offer, start over", range: "40-84", active: reputation >= 40 && reputation < 85 },
-    { label: "The run ends", range: "Under 40", active: reputation < 40 },
-  ];
+  // Outcome-first wording (Scoring Model, 20 Sept): the word itself is
+  // what happens to the player, not a feeling about it.
+  const OUTCOMES = hideBand
+    ? [
+        { label: "Bag secured", range: "85+", active: reputation >= 85 },
+        { label: "Retry level", range: "40-84", active: reputation >= 40 && reputation < 85 },
+        { label: "Terminated", range: "Under 40", active: reputation < 40 },
+      ]
+    : [
+        { label: "Promoted", range: "85+", active: reputation >= 85 },
+        { label: "No return offer, start over", range: "40-84", active: reputation >= 40 && reputation < 85 },
+        { label: "The run ends", range: "Under 40", active: reputation < 40 },
+      ];
   return (
     <>
       <button
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={`Reputation ${Math.round(reputation)}, ${band}. What this number decides`}
+        aria-label={hideBand ? `Reputation ${Math.round(reputation)}. What this number decides` : `Reputation ${Math.round(reputation)}, ${band}. What this number decides`}
         onClick={() => {
           playSelect();
           setOpen(true);
         }}
         className="dm-quiet cursor-pointer rounded-[var(--radius-md)]"
       >
-        <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} />
+        <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} hideBand={hideBand} />
       </button>
       {open && (
         <div
@@ -2053,12 +2068,18 @@ function Hud({
            which was truncating down to one or two characters. The gauge
            alone still says the same thing at a glance; aria-label keeps the
            full "47, Cautious" available to assistive tech either way. */}
-        {/* EXPRESS: reputation shows from screen one but is never explained
-           by a teaching screen -- the number itself is the explainer. Tapping
-           it opens the three outcomes (the cut "That number in the corner
-           just moved" screen, pull instead of push). Full mode keeps the
-           gauge inert; its spotlight beat does this job. */}
-        {level.express ? <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} /> : <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} demo={spotlightScore} />}
+        {/* EXPRESS, and every rebuilt level (hideBand): reputation shows from
+           screen one but is never explained by a teaching screen -- the
+           number itself is the explainer. Tapping it opens the three
+           outcomes (the old mandatory "That number in the corner just
+           moved" screen, pull instead of push -- Interaction Rules, 20
+           Sept). Untouched full-mode levels keep the gauge inert; their
+           spotlight beat still does this job until they get the same pass. */}
+        {level.express || level.hideBand ? (
+          <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} hideBand={level.hideBand} />
+        ) : (
+          <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} demo={spotlightScore} />
+        )}
       </div>
       <div className="flex items-center gap-[7px]">
         {/* Same spark/flicker language as the Build flow's bar (SparkBar): the
@@ -2274,7 +2295,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           {cta}
-          <Keycap tint="var(--primary-foreground)">⏎</Keycap>
+          <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
         </button>
       </div>
     </div>

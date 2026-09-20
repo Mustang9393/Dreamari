@@ -8,10 +8,16 @@
  *  and carry no score of their own. */
 export type Tier = "best" | "acceptable" | "wrong" | "risky" | "none";
 
+// Wrong moved from -3 to -5 (Scoring Model, REBUILT 20 Sept to binary
+// scoring): symmetrical with Best, so ten scored beats at +-5 from a start
+// of 50 give a clean 0-100 range with no rounding, and a level's final
+// reputation always equals correct answers x 10. Acceptable/Risky stay
+// defined (existing Level 2/3 content still authors them) but the new
+// binary levels simply never assign either tier to a choice.
 export const TIER_SCORE: Record<Tier, number> = {
   best: 5,
   acceptable: 2,
-  wrong: -3,
+  wrong: -5,
   risky: -6,
   none: 0,
 };
@@ -105,7 +111,9 @@ export type Mood = "day" | "night" | "crunch";
  *  is a numbered card in an onboarding or character carousel. */
 export type CardBeat = BeatBase & {
   kind: "card";
-  variant: "intro" | "character" | "chapter" | "offer" | "step";
+  /** "act": a completion moment (with `auto`) or a checkpoint (with
+   *  `secondaryCta`) -- full-bleed, celebratory, never a scored beat. */
+  variant: "intro" | "character" | "chapter" | "offer" | "step" | "act";
   title: string;
   body?: string;
   /** Grey EXAMPLE box under the body. */
@@ -118,6 +126,20 @@ export type CardBeat = BeatBase & {
   step?: { at: number; of: number };
   /** A warning or aside under the body, in the level's accent. */
   note?: string;
+    /** "act" variant only: auto-advances after a short pause instead of
+   *  waiting on `cta` -- a quick celebratory beat, not a real stopping
+   *  point (Act Moment, Interaction Rules). On this variant `title` is the
+   *  small eyebrow ("FOUNDATION COMPLETE") and `body` is the one line
+   *  underneath ("You know the basics."), swapped from every other
+   *  variant's use of `title` as the headline. */
+  auto?: boolean;
+  /** "act" variant only: a second, quieter action under the primary
+   *  button that leaves the level instead of continuing it -- the one
+   *  place a student is offered a mid-level exit (the Act Moment
+   *  checkpoint). Progress is already saved by the time this renders, so
+   *  it only needs somewhere to send them. */
+  secondaryCta?: string;
+  secondaryHref?: string;
   /** character variant, card two of two (the POWER card): the ladder graphic,
    *  bottom-to-top, each rung "Name - Role" (a rung always carries its job
    *  title, never a bare name). `lit` rungs are the player and the character
@@ -197,6 +219,13 @@ export type ChoiceBeat = BeatBase & {
   /** Header for the `document` layout's window chrome. The label was hardcoded
    *  to Level 1's Nike summary, which is wrong on every other beat. */
   doc?: string;
+  /** `options` layout only: a draggable token, same rail-and-drop mechanic
+   *  CheckBeat's own drag method already uses, in front of a SCORED beat
+   *  instead of a free comprehension check ("Drag to Answer" / "Drag Cards
+   *  to Zone" / "Drag Message to Chat" on the Interaction Rules tab -- one
+   *  mechanic, three names for what the card around it is dressed as). A
+   *  card is always still tappable, so a missed drag never strands anyone. */
+  dragEnabled?: boolean;
 };
 
 /** Tap a term, then its definition. Nothing scores until Check Matches. All
@@ -329,6 +358,18 @@ export type BucketBeat = BeatBase & {
   skills: string[];
 };
 
+/** Teach Card - Focus One (Interaction Rules): two term cards on screen at
+ *  once, only one in focus (sharp; the other blurred). GOT IT on the
+ *  focused card swaps which one is sharp; Back returns focus to the
+ *  first. Not scored -- it replaces the one-word-at-a-time flip carousel
+ *  with a pair that shows both terms belong together while still forcing
+ *  attention onto one at a time. */
+export type FocusBeat = BeatBase & {
+  kind: "focus";
+  title: string;
+  terms: [{ term: string; def: string }, { term: string; def: string }];
+};
+
 export type Beat =
   | CardBeat
   | CheckBeat
@@ -343,12 +384,16 @@ export type Beat =
   | FlagsBeat
   | RankBeat
   | PickBeat
-  | BucketBeat;
+  | BucketBeat
+  | FocusBeat;
 
 export type Ending = {
   /** Inclusive floor. Matched highest-first. */
   min: number;
-  band: BandName;
+  /** Omitted on a level whose own `hideBand` retires the four-band system
+   *  in favor of stating the outcome itself as the headline (Scoring
+   *  Model: "the band word is RETIRED" for Level 1). */
+  band?: BandName;
   headline: string;
   message: string;
   subline: string;
@@ -376,6 +421,12 @@ export type Level = {
   cast?: Record<string, string>;
   beats: Beat[];
   endings: Ending[];
+  /** Retires the At Risk / Cautious / Respected / Trusted band word from
+   *  the reputation gauge's own corner label -- the outcome (BAG SECURED,
+   *  RETRY LEVEL, TERMINATED) carries the meaning instead (Scoring Model,
+   *  Interaction Rules: "the band word is RETIRED", 20 Sept). Per-level so
+   *  Levels 2 and 3 keep their own band word until they get the same pass. */
+  hideBand?: boolean;
   /** Express mode: beat ids the trimmed demo run drops. All are teaching
    *  screens -- every scored beat must survive, and scoring, thresholds and
    *  endings stay untouched (Express handoff doc). Presence of this list is
