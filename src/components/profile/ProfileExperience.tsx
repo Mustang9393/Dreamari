@@ -405,7 +405,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <CardProgressiveBlur size="66%" />
             <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.62) 34%, rgba(12,16,35,0.12) 64%, transparent 100%), linear-gradient(90deg, color-mix(in srgb, ${heroAccent} 14%, transparent), transparent 60%)` }} />
           </div>
-          <div className="relative flex min-h-[280px] flex-col justify-end gap-[var(--space-5)] p-[var(--space-5)] pt-[96px] sm:min-h-[312px] sm:p-[var(--space-6)]">
+          {/* Was a flat 280/312px floor with no upper bound -- roughly 2x
+             taller than a real LinkedIn cover renders at the same viewport
+             (measured live, 20 Sept 2026: ~148px at 1440x900, vs this
+             hero's ~330px), eating most of the first screen before any
+             profile content showed. Trimmed to what the overlaid avatar +
+             name/school + stat-tile rows actually need, not a number
+             carried over from an earlier, content-only version of this
+             card. */}
+          <div className="relative flex min-h-[192px] flex-col justify-end gap-[var(--space-4)] p-[var(--space-4)] pt-[56px] sm:min-h-[208px] sm:gap-[var(--space-5)] sm:p-[var(--space-5)] sm:pt-[60px]">
             <div className="absolute top-[var(--space-4)] right-[var(--space-4)] flex max-w-[calc(100%-32px)] flex-wrap items-center justify-end gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
               <span className="relative">
                 <button
