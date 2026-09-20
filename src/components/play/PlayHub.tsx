@@ -691,11 +691,22 @@ function GlossaryGamesRow({ games }: { games: { careerSlug: string; title: strin
          full-bleed rail as FeaturedRow above (negative margins run it to
          the viewport edge so the next card visibly peeks instead of
          clipping at the content column, direct feedback, 9 Sept 2026)
-         rather than stopping dead at main's own padding. overflow-x-auto
-         only -- overflow-y stays visible so a card scaling up on hover
-         isn't clipped top/bottom. */}
+         rather than stopping dead at main's own padding.
+         pt-10/pb-8 is real headroom, not decoration: a focused card grows
+         to scale 1.16 from its own CENTER (not the top/bottom edge), so
+         roughly half that growth pushes up and half pushes down. On the
+         tallest breakpoint (195px) that's ~16px each way -- pt-10 (40px)
+         and pb-8 (32px) comfortably clear both the row title above and
+         the next section below with margin to spare (direct feedback, 21
+         Sept 2026: the card was overlapping the row title at the old
+         pt-6/origin-bottom combination, where ALL of the ~31px scale
+         growth pushed upward with only 24px to absorb it). overflow-x-auto
+         with overflow-y left alone reads as "visible" in the browser here
+         only because nothing inside ever actually exceeds this padded
+         box -- if the growth math above ever changes, the padding has to
+         grow with it, not the other way around. */}
       <ul
-        className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto overflow-y-visible p-0 px-5 pt-6 pb-6 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]"
+        className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto overflow-y-visible p-0 px-5 pt-10 pb-8 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]"
         onMouseLeave={() => setHovered(null)}
       >
         {games.map((game) => (
@@ -734,14 +745,19 @@ function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: 
   // weight: a slight overshoot as it scales up, a softer float back down,
   // instead of every card moving through the exact same eased curve at
   // the exact same speed regardless of how far it's travelling. Scale
-  // from the bottom edge, not the center -- the card grows UP into the
-  // row's own top padding (GlossaryGamesRow reserves it) instead of
-  // pushing down into the row header below it.
+  // from the CENTER (default transform-origin, no origin-* override) --
+  // an earlier bottom-anchored version pushed the entire ~31px of scale
+  // growth upward with nowhere near enough padding to absorb it, and the
+  // card overlapped the row title (direct feedback). Centered growth
+  // splits that ~16px up / ~16px down, and the lift itself is small (y:
+  // -3, down from -6) -- GlossaryGamesRow's pt-10/pb-8 padding is sized
+  // for exactly this math; if either number here changes, that padding
+  // needs rechecking too.
   const FOCUS_SPRING = { type: "spring" as const, stiffness: 300, damping: 22, mass: 0.7 };
   const DIM_SPRING = { type: "spring" as const, stiffness: 260, damping: 28, mass: 0.7 };
   const focusAnimate =
     focusState === "focused"
-      ? { scale: 1.16, opacity: 1, y: -6, boxShadow: "0 26px 48px -16px rgba(0,0,0,0.6)", transition: FOCUS_SPRING }
+      ? { scale: 1.16, opacity: 1, y: -3, boxShadow: "0 26px 48px -16px rgba(0,0,0,0.6)", transition: FOCUS_SPRING }
       : focusState === "dimmed"
         ? { scale: 0.96, opacity: 0.6, y: 0, boxShadow: "0 0px 0px 0px rgba(0,0,0,0)", transition: DIM_SPRING }
         : { scale: 1, opacity: 1, y: 0, boxShadow: "0 0px 0px 0px rgba(0,0,0,0)", transition: DIM_SPRING };
@@ -791,7 +807,7 @@ function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: 
     return (
       <motion.span
         aria-label={`${game.title} — coming soon`}
-        className={`group relative block flex-none origin-bottom overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_W} ${SHELF_HEIGHT}`}
+        className={`group relative block flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_W} ${SHELF_HEIGHT}`}
         style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)", zIndex: focusZ }}
         animate={focusAnimate}
       >
@@ -807,7 +823,7 @@ function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: 
     // here too, on the outer box, so the whole card (HoverBeam's glow
     // included) scales as one unit instead of the glow staying pinned to
     // an unscaled box while the art inside it grows.
-    <motion.div className={`flex-none origin-bottom ${SHELF_W} ${SHELF_HEIGHT}`} style={{ zIndex: focusZ }} animate={focusAnimate}>
+    <motion.div className={`flex-none ${SHELF_W} ${SHELF_HEIGHT}`} style={{ zIndex: focusZ }} animate={focusAnimate}>
     <HoverBeam strength={0.8}>
     <Link
       href={`/play/glossary/${game.careerSlug}`}
