@@ -1466,13 +1466,21 @@ function OverviewTabV2({
         <h3 id="dash-title" className="sr-only">Your Top Three, plan progress and report at a glance</h3>
 
         {/* Top Three: chosen/3 is a real ratio against a limit -- v1's own
-           metric, just drawn as the ring it actually is. */}
+           metric, just drawn as the ring it actually is. Which one is
+           primary is real information this tile never showed at all
+           (direct instruction, 20 Sept) -- Top Three's own star badge
+           marks it there, this is the same fact surfaced here. */}
         <HoverBeam strength={0.6} className="min-w-0">
           <button type="button" onClick={onGoTop3} className="dm-tap flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
             <MeterRing pct={(top3Careers.length / 3) * 100} label="My Top Three" value={`${top3Careers.length}/3`} />
             <span className="flex min-w-0 flex-col gap-[2px]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</span>
               <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{top3Careers.length} of 3 chosen</span>
+              {focus && (
+                <span className="flex items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
+                  <Star className="h-[11px] w-[11px] flex-none" aria-hidden fill="currentColor" /> {focus.title} is #1
+                </span>
+              )}
             </span>
           </button>
         </HoverBeam>
@@ -1489,19 +1497,29 @@ function OverviewTabV2({
           </button>
         </HoverBeam>
 
-        {/* Report: complete the moment it exists -- auto-generated from
-           Match for every student, never partial (direct feedback, 20
-           Sept: "6 sections" never actually changed, so it wasn't really
-           measuring anything). The ring is honestly 100% once there's a
-           focus career, same as an Apple Activity ring reads 100% at
-           goal; the section count still shows, just as the supporting
-           fact it always was rather than the headline. */}
+        {/* Report is not actually a ratio against a limit -- it's complete
+           the moment it exists, auto-generated from Match, identical for
+           every student (direct feedback, 20 Sept: a ring at a fixed 100%
+           isn't a real Meter, it's a Meter-shaped decoration, and "6
+           sections" never carried any signal since it never varies
+           either). Forcing this tile to match the other two rings just
+           because they're rings would be exactly the kind of cargo-cult
+           the dataviz approach warns against. What's actually true and
+           worth a glance here: which career the report is for -- the one
+           real variable -- with readiness as a plain status line, not a
+           fake metric. */}
         <HoverBeam strength={0.6} className="min-w-0">
-          <button type="button" onClick={onGoReport} className="dm-tap flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
-            <MeterRing pct={100} label="Career Report" value="✓" />
-            <span className="flex min-w-0 flex-col gap-[2px]">
+          <button type="button" onClick={onGoReport} className="dm-tap flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+            <span className="flex items-start justify-between gap-[var(--space-2)]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Report</span>
-              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Ready · {REPORT_SECTIONS.length} sections</span>
+              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+            </span>
+            <span className="flex flex-col gap-[6px]">
+              <span className="text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.title}</span>
+              <span className="flex items-center gap-[6px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--world-food-farming-nature, #1fc76e)" }}>
+                <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: "currentColor" }} />
+                Ready to share
+              </span>
             </span>
           </button>
         </HoverBeam>
