@@ -97,8 +97,9 @@ const COVERS = [
   "smoke",
   // abstract photography
   "gradient-glow", "bokeh-warm", "bokeh-blue", "prism-light", "fluid-paint", "ink-swirl", "glass-refract",
-  // nature/landscape, no people
-  "aurora-sky", "ocean-aerial", "desert-dunes", "starry-sky",
+  "crystal-glass", "crystal-macro", "neon-streak", "neon-tunnel", "smoke-color", "smoke-purple",
+  // nature/landscape/space, no people
+  "aurora-sky", "ocean-aerial", "desert-dunes", "starry-sky", "galaxy-space", "nebula-color",
 ].map((n) => `/images/profile/covers/${n}.webp`);
 const COVER_KEY = "dreamari-cover";
 /** the sentinel that means "use my #1 career's poster as the cover" */
