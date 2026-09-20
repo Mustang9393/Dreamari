@@ -93,10 +93,11 @@ const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(24px
 // after mount (see the effect below), so a real new student doesn't just
 // always see this same one either.
 const COVERS = [
+  "glass-refract",
   "ink-marble",
   "smoke",
   // abstract photography
-  "gradient-glow", "bokeh-warm", "bokeh-blue", "prism-light", "fluid-paint", "ink-swirl", "glass-refract",
+  "gradient-glow", "bokeh-warm", "bokeh-blue", "prism-light", "fluid-paint", "ink-swirl",
   "crystal-glass", "crystal-macro", "neon-streak", "neon-tunnel", "smoke-color", "smoke-purple",
   // nature/landscape/space, no people
   "aurora-sky", "ocean-aerial", "desert-dunes", "starry-sky", "galaxy-space", "nebula-color",
@@ -486,7 +487,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                           <X className="h-4 w-4" aria-hidden />
                         </button>
                       </div>
-                      <div className="grid grid-cols-3 gap-[8px]">
+                      {/* Same max-h + overflow-y-auto pattern as the avatar
+                         picker's own grid just below -- with 21 covers now
+                         (was 6 when this had no scroll constraint at all),
+                         the grid ran taller than the viewport on shorter
+                         screens and just got cropped (direct feedback, 20
+                         Sept). The header above stays put; only the grid
+                         scrolls. */}
+                      <div className="dm-scroll grid max-h-[60vh] grid-cols-3 gap-[8px] overflow-y-auto pr-[2px]">
                         {COVERS.map((url) => (
                           <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
                             <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />

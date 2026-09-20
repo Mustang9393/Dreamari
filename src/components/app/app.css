@@ -26,6 +26,29 @@
   display: none;
 }
 
+/* A thin, quiet scrollbar for panels where scrolling itself needs to read
+   as available (a grid of swatches, a long picker) -- unlike foryou-snap
+   above, which hides its scrollbar because the snap points already make
+   scrolling obvious. Track stays transparent; the thumb is a soft step off
+   the surface, just enough to notice without competing with the content. */
+.dm-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--glass-border) transparent;
+}
+.dm-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.dm-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dm-scroll::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 999px;
+}
+.dm-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .env-zoom-active img {
     animation: none;
