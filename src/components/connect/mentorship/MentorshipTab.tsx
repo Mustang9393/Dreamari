@@ -21,7 +21,7 @@ import { ProProfileView, SubTabs, type Follows } from "../ProProfile";
 import type { Pro } from "../data";
 import type { ResumeData } from "@/lib/resume";
 import { Meter, Ring, Segmented, ruledCell } from "../viz";
-import { ShareBar, compact } from "./charts";
+import { ShareBar, Sparkline, compact } from "./charts";
 import * as D from "./mentorshipData";
 
 // The Mentorship tab in Connect: a tiled list of partner mentorship programs
@@ -1448,6 +1448,13 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
   };
   const eDef = D.ENGAGEMENT_PERIODS.find((p) => p.key === ePeriod)!;
   const kpiOf = (key: D.Kpi["key"]) => D.KPIS.find((k) => k.key === key)!;
+  // the stat tile's optional third part (dataviz skill: "trend -- 12-point
+  // sparkline"), scaled to the current region the same way the number is
+  const sparkOf = (k: D.Kpi) => {
+    const share = shareOf(k, selected);
+    const ratio = share !== null ? share / k.year : 1;
+    return k.spark.map((v) => Math.round(v * ratio));
+  };
   const mentorsNow = kpiValue(kpiOf("mentors"), "year");
   const scholarsNow = kpiValue(kpiOf("students"), "year");
   const hoursNow = kpiValue(kpiOf("hours"), eDef.field);
@@ -1495,7 +1502,10 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
                       <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{k.label}</span>
                       <DeltaBadge value={k.deltaYear} />
                     </span>
-                    <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
+                    <span className="flex items-end justify-between gap-[10px]">
+                      <span className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
+                      <Sparkline values={sparkOf(k)} accent={accent} width={64} height={22} />
+                    </span>
                   </button>
                 );
               })}
@@ -1517,7 +1527,10 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
                       <span className="text-[12px] leading-[16px] font-bold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k.label}</span>
                       <DeltaBadge value={k[eDef.deltaField]} />
                     </span>
-                    <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(row.value)}</span>
+                    <span className="flex items-end justify-between gap-[8px]">
+                      <span className="text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(row.value)}</span>
+                      <Sparkline values={sparkOf(k)} accent={accent} width={52} height={20} />
+                    </span>
                     {row.sub && <Muted className="text-[12px] leading-[16px]">{row.sub}</Muted>}
                   </button>
                 );
@@ -1529,7 +1542,7 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
             <Panel className="flex flex-col items-center gap-[var(--space-5)] sm:flex-row">
               <Ring pct={goalPct} size={140} stroke={12} accent={accent}>
                 <span className="flex flex-col items-center gap-[2px]">
-                  <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{goalPct}%</span>
+                  <span className="text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{goalPct}%</span>
                   <span className="text-[11px] leading-[14px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Complete</span>
                 </span>
               </Ring>
@@ -1552,7 +1565,7 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
         return (
           <Sheet title={k.label} label={`By program, ${def.sectionWord.toLowerCase()}`} onClose={() => setSheet(null)}>
             <span className="flex items-center gap-[10px]">
-              <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(kpiValue(k, def.field, null))}</span>
+              <span className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(kpiValue(k, def.field, null))}</span>
               <DeltaBadge value={k[def.deltaField]} />
             </span>
             <ShareBar parts={per} accent={accent} />
