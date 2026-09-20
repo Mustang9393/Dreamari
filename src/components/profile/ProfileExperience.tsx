@@ -89,6 +89,17 @@ const GLASS = { background: "var(--glass-surface-2)", backdropFilter: "blur(24px
 // (Unsplash or similar) cover photography instead of more generated art.
 const COVERS = ["streaks", "smoke", "frosted", "horizon"].map((n) => `/images/profile/covers/${n}.webp`);
 const COVER_KEY = "dreamari-cover";
+// Same nudge as "For you" on Explore (ExploreExperience.tsx's dm-text-nudge/
+// dm-nudge-spark): a light sweep across the button's own label until the
+// student has opened the cover picker once, so it's obvious this is
+// changeable the moment they land here instead of sitting unnoticed.
+const COVER_NUDGE_SEEN_KEY = "dreamari:nudge:cover";
+function readCoverNudgeSeen(): boolean {
+  try { return window.localStorage.getItem(COVER_NUDGE_SEEN_KEY) === "1"; } catch { return false; }
+}
+function markCoverNudgeSeen(): void {
+  try { window.localStorage.setItem(COVER_NUDGE_SEEN_KEY, "1"); } catch {}
+}
 /** the sentinel that means "use my #1 career's poster as the cover" */
 const COVER_CAREER = "career";
 
@@ -262,6 +273,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // the A/B switch is a crossfade, never a half-decoded swap
   const [bgUrl, setBgUrl] = useState<string>(COVERS[0]);
   const [coverOpen, setCoverOpen] = useState(false);
+  // assume seen until the client checks, so SSR never flashes the sweep
+  const [coverNudgeSeen, setCoverNudgeSeen] = useState(true);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCoverNudgeSeen(readCoverNudgeSeen());
+  }, []);
+  const coverNudge = !coverOpen && !coverNudgeSeen;
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const avatarSeed = STUDENT.name.split(" ")[0] || STUDENT.name;
   const avatarSrc = useStudentAvatarSrc(avatarSeed);
@@ -433,11 +451,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   type="button"
                   aria-label="Change cover photo"
                   aria-expanded={coverOpen}
-                  onClick={() => setCoverOpen((open) => !open)}
+                  onClick={() => { setCoverOpen((open) => !open); markCoverNudgeSeen(); setCoverNudgeSeen(true); }}
                   className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
                   style={{ color: coverOpen ? "var(--accent-subtle)" : "rgba(255,255,255,0.86)" }}
                 >
-                  <ImagePlus className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Cover</span>
+                  <ImagePlus className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
+                  <span className={`relative hidden sm:inline ${coverNudge ? "dm-text-nudge" : ""}`}>
+                    Cover
+                    {coverNudge && (
+                      <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                        <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+                      </svg>
+                    )}
+                  </span>
                 </button>
                 {coverOpen && (
                   /* a sheet through the portal: the header clips and the blurred
