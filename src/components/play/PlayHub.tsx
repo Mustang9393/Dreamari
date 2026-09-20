@@ -89,27 +89,7 @@ export function PlayHub() {
            feedback, 9 Sept 2026: "they dont have to work or lead anywhere,
            theyre just dummy cards to fill the row"), same idiom as the
            career-simulation placeholders below. */}
-        {GLOSSARY_GAMES.length > 0 && (
-          <section className="flex flex-col gap-[var(--space-3)]">
-            <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
-              Glossary Games
-            </h2>
-            {/* A small horizontal shelf (SHELF_HEIGHT), deliberately smaller
-               than the hero row above -- the billboard dominates, the
-               shelves below it stay uniform and quiet, Netflix-style. Same
-               full-bleed rail as FeaturedRow above (negative margins run it
-               to the viewport edge so the next card visibly peeks instead of
-               clipping at the content column, direct feedback, 9 Sept 2026)
-               rather than stopping dead at main's own padding. */}
-            <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
-              {GLOSSARY_GAMES.map((game) => (
-                <li key={game.careerSlug} className="flex-none">
-                  <GlossaryGameCard game={game} playable={hasGlossary(game.careerSlug)} />
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        {GLOSSARY_GAMES.length > 0 && <GlossaryGamesRow games={GLOSSARY_GAMES} />}
         {/* The bridge from Play to Explore (Joshua Pierce, Slack, 5 Sept 2026):
            Play is for experiencing careers, Explore for discovering them.
            Sits after the Glossary Games so it closes the page instead of
@@ -684,6 +664,58 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
   );
 }
 
+/** The Glossary Games shelf, Netflix-row hover behaviour (direct feedback,
+ *  21 Sept 2026): "glossary games shouldn't feel secondary just because
+ *  the cards are smaller by default... only less dominant until hovered."
+ *  Hover state lives HERE, one level above the cards, because the dim
+ *  treatment on a card depends on whether a DIFFERENT card in the row is
+ *  hovered -- not something a single card can know about itself. The row
+ *  header brightens the moment the pointer enters ANY card (the row
+ *  "wakes up" as a whole); the specific hovered card additionally scales
+ *  up and lifts above its neighbours, which dim slightly to hand it focus. */
+function GlossaryGamesRow({ games }: { games: { careerSlug: string; title: string; sub: string; cover?: string }[] }) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  const rowActive = hovered !== null;
+  return (
+    <section className="flex flex-col gap-[var(--space-3)]">
+      <h2
+        className={`${ROW_HEADER} transition-colors duration-300`}
+        style={{ color: rowActive ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
+      >
+        Glossary Games
+      </h2>
+      {/* A small horizontal shelf (SHELF_HEIGHT), deliberately smaller
+         than the hero row above -- the billboard dominates, the shelves
+         below it stay uniform and quiet at rest, Netflix-style, and now
+         come alive on hover the same way Netflix's own rows do. Same
+         full-bleed rail as FeaturedRow above (negative margins run it to
+         the viewport edge so the next card visibly peeks instead of
+         clipping at the content column, direct feedback, 9 Sept 2026)
+         rather than stopping dead at main's own padding. overflow-x-auto
+         only -- overflow-y stays visible so a card scaling up on hover
+         isn't clipped top/bottom. */}
+      <ul
+        className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto overflow-y-visible p-0 px-5 pt-6 pb-6 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]"
+        onMouseLeave={() => setHovered(null)}
+      >
+        {games.map((game) => (
+          <li
+            key={game.careerSlug}
+            className="flex-none"
+            onMouseEnter={() => setHovered(game.careerSlug)}
+          >
+            <GlossaryGameCard
+              game={game}
+              playable={hasGlossary(game.careerSlug)}
+              focusState={!rowActive ? "idle" : hovered === game.careerSlug ? "focused" : "dimmed"}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /** A Glossary Game shelf card: title and sub live INSIDE the artwork's own
  *  bottom scrim, same as every other Play card (a Netflix thumbnail, not
  *  an image-plus-caption block that ends up taller than the hero row), with
@@ -691,8 +723,20 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
  *  already says "Glossary Games", so the card itself carries no type chip
  *  (direct feedback, 9 Sept 2026). A career with no authored content yet
  *  (!playable) renders as a dim, non-linking "Coming soon" dummy -- same
- *  idiom as SoonCard below -- rather than a real link into an empty game. */
-function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; title: string; sub: string; cover?: string }; playable: boolean }) {
+ *  idiom as SoonCard below -- rather than a real link into an empty game.
+ *  `focusState` drives the Netflix-row hover behaviour (see
+ *  GlossaryGamesRow): "idle" is at-rest, "dimmed" is a sibling ceding
+ *  focus, "focused" is the one under the pointer. */
+function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: string; title: string; sub: string; cover?: string }; playable: boolean; focusState: "idle" | "focused" | "dimmed" }) {
+  // Scale from the bottom edge, not the center -- the card grows UP into
+  // the row's own top padding (GlossaryGamesRow reserves it) instead of
+  // pushing down into the row header below it.
+  const focusClass =
+    focusState === "focused"
+      ? "z-30 scale-[1.16] opacity-100 shadow-[0_22px_44px_-14px_rgba(0,0,0,0.55)]"
+      : focusState === "dimmed"
+        ? "z-0 scale-[0.96] opacity-60"
+        : "z-0 scale-100 opacity-100";
   const art = (
     <>
       {game.cover ? (
@@ -738,7 +782,7 @@ function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; titl
     return (
       <span
         aria-label={`${game.title} — coming soon`}
-        className={`group relative block flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_W} ${SHELF_HEIGHT}`}
+        className={`group relative block flex-none origin-bottom overflow-hidden rounded-[var(--radius-lg)] border transition-[transform,opacity,box-shadow] duration-300 ease-out ${SHELF_W} ${SHELF_HEIGHT} ${focusClass}`}
         style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
       >
         {art}
@@ -749,8 +793,11 @@ function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; titl
   return (
     // Size on this plain box, HoverBeam fills it: with the size classes on
     // HoverBeam its own h-full won and the card collapsed to a line on
-    // phones (direct feedback, 11 Sept 2026).
-    <div className={`flex-none ${SHELF_W} ${SHELF_HEIGHT}`}>
+    // phones (direct feedback, 11 Sept 2026). The focus transform lives
+    // here too, on the outer box, so the whole card (HoverBeam's glow
+    // included) scales as one unit instead of the glow staying pinned to
+    // an unscaled box while the art inside it grows.
+    <div className={`flex-none origin-bottom transition-[transform,opacity,box-shadow] duration-300 ease-out ${SHELF_W} ${SHELF_HEIGHT} ${focusClass}`}>
     <HoverBeam strength={0.8}>
     <Link
       href={`/play/glossary/${game.careerSlug}`}
