@@ -679,7 +679,7 @@ function GlossaryGamesRow({ games }: { games: { careerSlug: string; title: strin
   return (
     <section className="flex flex-col gap-[var(--space-3)]">
       <h2
-        className={`${ROW_HEADER} transition-colors duration-300`}
+        className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
         style={{ color: rowActive ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
       >
         Glossary Games
@@ -728,15 +728,24 @@ function GlossaryGamesRow({ games }: { games: { careerSlug: string; title: strin
  *  GlossaryGamesRow): "idle" is at-rest, "dimmed" is a sibling ceding
  *  focus, "focused" is the one under the pointer. */
 function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: string; title: string; sub: string; cover?: string }; playable: boolean; focusState: "idle" | "focused" | "dimmed" }) {
-  // Scale from the bottom edge, not the center -- the card grows UP into
-  // the row's own top padding (GlossaryGamesRow reserves it) instead of
+  // Spring physics, not a fixed-duration CSS transition (direct feedback,
+  // 21 Sept 2026: the Tailwind-transition version read as "rigid" --
+  // three fixed keyframes with no organic settle). A real spring gives it
+  // weight: a slight overshoot as it scales up, a softer float back down,
+  // instead of every card moving through the exact same eased curve at
+  // the exact same speed regardless of how far it's travelling. Scale
+  // from the bottom edge, not the center -- the card grows UP into the
+  // row's own top padding (GlossaryGamesRow reserves it) instead of
   // pushing down into the row header below it.
-  const focusClass =
+  const FOCUS_SPRING = { type: "spring" as const, stiffness: 300, damping: 22, mass: 0.7 };
+  const DIM_SPRING = { type: "spring" as const, stiffness: 260, damping: 28, mass: 0.7 };
+  const focusAnimate =
     focusState === "focused"
-      ? "z-30 scale-[1.16] opacity-100 shadow-[0_22px_44px_-14px_rgba(0,0,0,0.55)]"
+      ? { scale: 1.16, opacity: 1, y: -6, boxShadow: "0 26px 48px -16px rgba(0,0,0,0.6)", transition: FOCUS_SPRING }
       : focusState === "dimmed"
-        ? "z-0 scale-[0.96] opacity-60"
-        : "z-0 scale-100 opacity-100";
+        ? { scale: 0.96, opacity: 0.6, y: 0, boxShadow: "0 0px 0px 0px rgba(0,0,0,0)", transition: DIM_SPRING }
+        : { scale: 1, opacity: 1, y: 0, boxShadow: "0 0px 0px 0px rgba(0,0,0,0)", transition: DIM_SPRING };
+  const focusZ = focusState === "focused" ? 30 : 0;
   const art = (
     <>
       {game.cover ? (
@@ -780,13 +789,14 @@ function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: 
 
   if (!playable) {
     return (
-      <span
+      <motion.span
         aria-label={`${game.title} — coming soon`}
-        className={`group relative block flex-none origin-bottom overflow-hidden rounded-[var(--radius-lg)] border transition-[transform,opacity,box-shadow] duration-300 ease-out ${SHELF_W} ${SHELF_HEIGHT} ${focusClass}`}
-        style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
+        className={`group relative block flex-none origin-bottom overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_W} ${SHELF_HEIGHT}`}
+        style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)", zIndex: focusZ }}
+        animate={focusAnimate}
       >
         {art}
-      </span>
+      </motion.span>
     );
   }
 
@@ -797,7 +807,7 @@ function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: 
     // here too, on the outer box, so the whole card (HoverBeam's glow
     // included) scales as one unit instead of the glow staying pinned to
     // an unscaled box while the art inside it grows.
-    <div className={`flex-none origin-bottom transition-[transform,opacity,box-shadow] duration-300 ease-out ${SHELF_W} ${SHELF_HEIGHT} ${focusClass}`}>
+    <motion.div className={`flex-none origin-bottom ${SHELF_W} ${SHELF_HEIGHT}`} style={{ zIndex: focusZ }} animate={focusAnimate}>
     <HoverBeam strength={0.8}>
     <Link
       href={`/play/glossary/${game.careerSlug}`}
@@ -807,7 +817,7 @@ function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: 
       {art}
     </Link>
     </HoverBeam>
-    </div>
+    </motion.div>
   );
 }
 
