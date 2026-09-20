@@ -45,8 +45,10 @@ function resumeToPlainText(resume: ResumeData): string {
 }
 
 export function TextPreviewModal({ resume, onClose }: { resume: ResumeData; onClose: () => void }) {
+  // Replaces the document view's whole content column, not a small popup
+  // -- kept "inline" like it always was (see ResumeModal, ui.tsx).
   return (
-    <ResumeModal title="ATS Text Preview" onClose={onClose}>
+    <ResumeModal title="ATS Text Preview" onClose={onClose} presentation="inline">
       <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>How your resume looks as plain text. {NOT_A_GUARANTEE_NOTE}</p>
       <pre className={`${CARD_CLASS} overflow-x-auto text-[12.5px] leading-[1.6] whitespace-pre-wrap`} style={{ ...INSET, fontFamily: "var(--font-mono, monospace)", color: "var(--foreground)" }}>
         {resumeToPlainText(resume)}

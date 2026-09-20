@@ -70,8 +70,10 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
     setRunning(false);
   }
 
+  // Replaces the document view's whole content column, not a small popup
+  // -- kept "inline" like it always was (see ResumeModal, ui.tsx).
   return (
-    <ResumeModal title="ATS Check" onClose={onClose}>
+    <ResumeModal title="ATS Check" onClose={onClose} presentation="inline">
       {!result ? (
         <div className={CARD_CLASS} style={INSET}>
           <span className="text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>

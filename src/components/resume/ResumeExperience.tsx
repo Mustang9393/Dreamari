@@ -8,7 +8,7 @@ import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { readStudentProfile } from "@/lib/studentProfile";
 import { STUDENT } from "@/components/profile/data";
-import { downloadDocx } from "./ExportChecklistModal";
+import { downloadDocx } from "./resumeExport";
 import { CARD_CLASS, INSET, useResumeToast, IconTip } from "./ui";
 
 // Resume Quality and Job Match scores, right on the card, same tone rule
@@ -115,7 +115,39 @@ function TagDot({ color, onPick }: { color: string; onPick: (color: string) => v
   );
 }
 
-function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void }) {
+// A status tag: "Standard" by default, "Tailored" once a job description
+// is set, "Approved" once the student has confirmed it (see the
+// ResumeVersion.approved comment, lib/resume.ts). A version can be both
+// tailored and approved at once, so this is a row of chips, not a single
+// label -- Approved leads (it's the more final state), then Tailored,
+// falling back to "Standard" only when neither applies.
+function StatusTags({ version }: { version: ResumeVersion }) {
+  const tags: { label: string; tone: string }[] = [];
+  if (version.approved) tags.push({ label: "Approved", tone: "var(--world-food-farming-nature, #3aa66b)" });
+  if (version.jobDescription) tags.push({ label: "Tailored", tone: "var(--accent-subtle)" });
+  if (tags.length === 0) tags.push({ label: "Standard", tone: "var(--muted-foreground)" });
+  return (
+    <div className="flex flex-wrap items-center gap-[6px]">
+      {tags.map((t) => (
+        <span
+          key={t.label}
+          className="inline-flex items-center rounded-full border px-[9px] py-[2px] text-[10.5px] font-bold tracking-[0.04em] uppercase"
+          style={{ borderColor: `color-mix(in srgb, ${t.tone} 45%, var(--glass-border))`, color: t.tone, background: `color-mix(in srgb, ${t.tone} 12%, transparent)` }}
+        >
+          {t.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// A card grid, not a horizontal row list (direct instruction, 20 Sept
+// 2026, matching the reference exactly) -- see the grid wrapper below.
+// Kept every piece of VersionRow's own content (the tag dot, the score
+// badges exactly as they rendered, the four icon actions, Open), just
+// reflowed for a card: status tags up top, identity, scores, then a
+// footer row for actions instead of one continuous horizontal line.
+function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void }) {
   const [downloading, setDownloading] = useState(false);
   const ats = version.atsCheck;
   // Stored as "NW — Needs Work"; only the plain-English half is ever shown.
@@ -131,79 +163,71 @@ function VersionRow({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: 
   // student actually picked.
   const accent = version.color ?? "var(--muted-foreground)";
   return (
-    // Darker glass surface than a flat tint, backdrop-blur keeps it
-    // reading as glass rather than a solid tinted panel (direct feedback,
-    // "a better surface color, maybe darker without losing that glass
-    // effect"). Kept to two rows plus an optional scores row -- a
-    // separate footer band for Edit/Open made the card taller, not
-    // sleeker (direct feedback: "much sleeker, much shorter"). A left
-    // accent stripe in the template color was here too, dropped on
-    // sight (direct feedback: "i dont like the dark colored line on the
-    // left of the card either") -- the small dot beside the name is a
-    // quieter nod to the same thing instead.
-    // One dense row from sm up (direct feedback, 17 Sept 2026: the stacked
-    // card "wastes so much space"): identity left, the score chips beside
-    // it, then date, actions and Open pushed to the right. Phones stack
-    // title, chips, actions in three short rows.
+    // Same darker glass surface + accent tint VersionRow used, just a
+    // full-height flex column instead of a row, so the footer (actions +
+    // Open) can sit flush at the bottom regardless of how tall the middle
+    // content runs (a tailored + scored card vs. a bare one).
     <div
-      className="relative flex flex-col gap-[10px] overflow-hidden rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[12px] backdrop-blur-md sm:flex-row sm:items-center sm:gap-[var(--space-4)]"
+      className="relative flex h-full flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] backdrop-blur-md"
       style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, var(--inset-surface) 85%, ${accent} 15%)` }}
     >
+      <StatusTags version={version} />
       <div
         role="button"
         tabIndex={0}
         onClick={onOpen}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
-        className="dm-link flex min-w-0 cursor-pointer flex-col gap-[2px] text-left sm:w-[220px] xl:w-[260px] sm:flex-none"
+        className="dm-link flex min-w-0 cursor-pointer flex-col gap-[2px] text-left"
       >
         <div className="flex items-center gap-[6px]">
           <TagDot color={accent} onPick={(color) => upsertVersion({ ...version, color, updatedAt: Date.now() })} />
           <span className="truncate text-[15.5px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
         </div>
         {version.targetPosition ? (
-          <span className="truncate pl-[16px] text-[12px] font-semibold" style={{ color: accent }}>Tailored for {version.targetPosition}</span>
+          <span className="truncate pl-[16px] text-[12px] font-semibold" style={{ color: accent }}>Target: {[version.targetPosition, version.targetCompany].filter(Boolean).join(" at ")}</span>
         ) : (
-          <span className="truncate pl-[16px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{formatDate(version.updatedAt)}</span>
+          <span className="truncate pl-[16px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Updated {formatDate(version.updatedAt)}</span>
         )}
       </div>
       {ats && (
-        <div className="flex flex-wrap items-center gap-[8px] sm:min-w-0 sm:flex-1 sm:flex-nowrap">
+        <div className="flex flex-wrap items-center gap-[8px]">
           <ScoreBadge category="Resume Rating" label={gradeLabel} value={ats.qualityScore} />
           {ats.jobMatchScore !== null && <ScoreBadge category="Job Match" label={ats.jobMatchLabel || "Possible Match"} value={ats.jobMatchScore} />}
         </div>
       )}
-      <div className="flex flex-none items-center gap-[4px] sm:ml-auto">
-        {version.targetPosition && <span className="mr-[6px] hidden text-[11px] font-semibold whitespace-nowrap lg:inline" style={{ color: "var(--muted-foreground)" }}>{formatDate(version.updatedAt)}</span>}
-        <IconTip label="Edit"><button type="button" aria-label={`Edit ${version.name}`} onClick={onEdit} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-          <Pencil className="h-4 w-4" aria-hidden />
-        </button></IconTip>
-        <IconTip label="Download"><button
-          type="button"
-          aria-label={`Download ${version.name}`}
-          disabled={downloading}
-          onClick={async () => {
-            setDownloading(true);
-            try {
-              await downloadDocx(resumeForVersion(resume, version));
-            } finally {
-              setDownloading(false);
-            }
-          }}
-          className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ color: "var(--muted-foreground)" }}
-        >
-          <Download className="h-4 w-4" aria-hidden />
-        </button></IconTip>
-        <IconTip label="Duplicate"><button type="button" aria-label={`Duplicate ${version.name}`} onClick={onDuplicate} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-          <Copy className="h-4 w-4" aria-hidden />
-        </button></IconTip>
-        <IconTip label="Delete"><button type="button" aria-label={`Delete ${version.name}`} onClick={onDelete} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-          <Trash2 className="h-4 w-4" aria-hidden />
-        </button></IconTip>
+      <div className="mt-auto flex items-center justify-between gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+        <div className="flex flex-none items-center gap-[2px]">
+          <IconTip label="Edit"><button type="button" aria-label={`Edit ${version.name}`} onClick={onEdit} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <Pencil className="h-4 w-4" aria-hidden />
+          </button></IconTip>
+          <IconTip label="Download"><button
+            type="button"
+            aria-label={`Download ${version.name}`}
+            disabled={downloading}
+            onClick={async () => {
+              setDownloading(true);
+              try {
+                await downloadDocx(resumeForVersion(resume, version));
+              } finally {
+                setDownloading(false);
+              }
+            }}
+            className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            <Download className="h-4 w-4" aria-hidden />
+          </button></IconTip>
+          <IconTip label="Duplicate"><button type="button" aria-label={`Duplicate ${version.name}`} onClick={onDuplicate} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <Copy className="h-4 w-4" aria-hidden />
+          </button></IconTip>
+          <IconTip label="Delete"><button type="button" aria-label={`Delete ${version.name}`} onClick={onDelete} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <Trash2 className="h-4 w-4" aria-hidden />
+          </button></IconTip>
+        </div>
         <button
           type="button"
           onClick={onOpen}
-          className="dm-tap ml-[4px] flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
+          className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px] text-[12.5px] font-bold"
           style={{ borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, background: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent }}
         >
           Open <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -319,24 +343,26 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
           <Plus className="h-4 w-4" aria-hidden /> Create New
         </button>
       </div>
-      <div className="flex flex-col gap-[var(--space-3)]">
-
-        <div className="flex flex-col gap-[var(--space-3)]">
-          {versions.map((v) => (
-            <VersionRow
-              key={v.id}
-              resume={resume}
-              version={v}
-              onOpen={() => router.push(`/resume-builder?view=version&version=${v.id}`)}
-              onEdit={() => router.push(`/resume-builder?view=tailor&version=${v.id}&edit=1`)}
-              onDuplicate={() => {
-                const now = Date.now();
-                upsertVersion({ ...v, id: makeId(), name: `${v.name} (Copy)`, createdAt: now, updatedAt: now, atsCheck: null });
-              }}
-              onDelete={() => setConfirmDelete(v)}
-            />
-          ))}
-        </div>
+      {/* A card grid, not a horizontal row list (direct instruction, 20
+         Sept 2026, matching the reference exactly) -- same breakpoint
+         shape as the neighboring 3-up rows elsewhere in Profile
+         (ProfileExperience.tsx's own Top Three/My Plan/Career Report
+         row), reusing this app's own spacing token rather than a new one. */}
+      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
+        {versions.map((v) => (
+          <VersionCard
+            key={v.id}
+            resume={resume}
+            version={v}
+            onOpen={() => router.push(`/resume-builder?view=version&version=${v.id}`)}
+            onEdit={() => router.push(`/resume-builder?view=tailor&version=${v.id}&edit=1`)}
+            onDuplicate={() => {
+              const now = Date.now();
+              upsertVersion({ ...v, id: makeId(), name: `${v.name} (Copy)`, createdAt: now, updatedAt: now, atsCheck: null });
+            }}
+            onDelete={() => setConfirmDelete(v)}
+          />
+        ))}
       </div>
 
       {confirmDelete && (

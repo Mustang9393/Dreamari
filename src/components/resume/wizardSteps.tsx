@@ -612,14 +612,18 @@ function ChecklistRow({
   );
 }
 
-export function ReviewStep({ resume, onEditStep, onFinish }: { resume: ResumeData; onEditStep: (step: number) => void; onFinish: () => void }) {
+export function ReviewStep({ resume, onEditStep, onSaveExport, onCustomizeFirst }: { resume: ResumeData; onEditStep: (step: number) => void; /** skips tailoring entirely, straight to the finished document */ onSaveExport: () => void; /** opens Choose & Tailor first */ onCustomizeFirst: () => void }) {
   // The "good start" tip: real in the reference, a real centered popup
   // shown at export time, not the inline checklist-summary card this step
   // used to show instead (direct instruction, 16 Sept 2026: "take no
   // liberties... each modal... needs to be there"). Checked live: it
   // showed on every Save & Export click in the reference, not just once,
   // so that's what this matches too, rather than guessing at some other
-  // trigger condition never actually observed.
+  // trigger condition never actually observed. Gates "Save & Export"
+  // specifically (direct instruction, 20 Sept 2026) -- that's the button
+  // that skips further curation, so it's the one the nudge actually
+  // benefits; "Customize First" goes straight to Tailor, where the
+  // curating happens anyway.
   const [showTip, setShowTip] = useState(false);
   const fullName = `${resume.profile.firstName} ${resume.profile.lastName}`.trim();
   const totalSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length;
@@ -638,16 +642,44 @@ export function ReviewStep({ resume, onEditStep, onFinish }: { resume: ResumeDat
           <ChecklistRow key={i.label} Icon={i.Icon} label={i.label} optional={i.optional} subtitle={i.subtitle} done={i.done} onEdit={() => onEditStep(i.step)} last={idx === items.length - 1} />
         ))}
       </div>
-      <WizardFooter onNext={() => (resume.experience.length < 2 ? setShowTip(true) : onFinish())} nextLabel="Save & Export" nextDisabled={!complete} />
+      {/* Two buttons, not one auto-routing button (direct instruction, 20
+         Sept 2026, matching the reference exactly): "Customize First"
+         (secondary, Sparkles icon like the reference) always opens Choose
+         & Tailor next; "Save & Export" (primary) skips tailoring entirely.
+         Same sticky footer styling as WizardFooter elsewhere in this
+         wizard, built locally here since it needs two actions instead of
+         one Back/Next pair -- Back itself still lives one level up, as the
+         chevron beside the progress bar (ResumeBuilderExperience.tsx). */}
+      <div className="sticky bottom-0 z-10 flex items-center justify-end gap-[var(--space-3)] border-t px-[var(--space-1)] pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+        <button
+          type="button"
+          onClick={onCustomizeFirst}
+          disabled={!complete}
+          className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+          style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        >
+          <Sparkles className="h-4 w-4" aria-hidden /> Customize First
+        </button>
+        <button
+          type="button"
+          onClick={() => (resume.experience.length < 2 ? setShowTip(true) : onSaveExport())}
+          disabled={!complete}
+          className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+          style={{ background: "var(--primary)" }}
+        >
+          Save &amp; Export
+        </button>
+      </div>
       {/* The "good start" nudge as the same cinematic splash every other
          Dreamy moment uses (direct feedback, 17 Sept 2026). Continue saves
          and moves on; Add Experiences goes back to step 3. Shown only while
          there is genuinely room to add (fewer than two experiences); with
-         more, Save & Export just proceeds. */}
+         more, Save & Export just proceeds. Gates "Save & Export" only --
+         see the comment on `showTip` above. */}
       <WelcomeSplash
         surface="resume"
         open={showTip}
-        onDone={() => { setShowTip(false); onFinish(); }}
+        onDone={() => { setShowTip(false); onSaveExport(); }}
         onSecondary={() => { setShowTip(false); onEditStep(2); }}
         scene={{
           sprite: "/images/dreamy/v2/splash/dreamy-curious.webp",

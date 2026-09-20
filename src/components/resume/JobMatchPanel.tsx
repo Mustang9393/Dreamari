@@ -98,8 +98,10 @@ export function JobMatchPanel({ resume, version, onClose }: { resume: ResumeData
     }
   }
 
+  // Replaces the document view's whole content column, not a small popup
+  // -- kept "inline" like it always was (see ResumeModal, ui.tsx).
   return (
-    <ResumeModal title="Tailor Resume" onClose={onClose}>
+    <ResumeModal title="Tailor Resume" onClose={onClose} presentation="inline">
       <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         Paste a job description to see how this resume fits, and which skills are worth adding. Come back and tailor it to a different job anytime.
       </p>

@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, Download, Expand, FileText, ListOrdered, Maximize2, MoreHorizontal, Pencil, Wand2, X, type LucideIcon } from "lucide-react";
+import { BadgeCheck, Check, ChevronLeft, Download, Expand, FileText, ListOrdered, Maximize2, MoreHorizontal, Pencil, Wand2, X, type LucideIcon } from "lucide-react";
 import { atsIsStale, runAtsCheck } from "@/lib/resumeAts";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { useScrolled } from "@/components/app/chrome";
@@ -20,7 +20,7 @@ import { AtsCheckStage } from "./AtsCheckStage";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
 import { EditSectionsPanel } from "./EditSectionsPanel";
 import { ExperienceModal } from "./ExperienceModal";
-import { ExportChecklistModal } from "./ExportChecklistModal";
+import { downloadDocx } from "./resumeExport";
 import { JobMatchPanel } from "./JobMatchPanel";
 import { ResumeExperience, useResumeWelcome } from "./ResumeExperience";
 import { ResumeDocument, ZoomResumeButton, ZoomResumeModal } from "./ResumeDocument";
@@ -38,6 +38,24 @@ const STEP_XP: Record<number, { xp: number; milestone: string }> = {
   2: { xp: 15, milestone: "resume:experience" },
   3: { xp: 10, milestone: "resume:skills" },
   4: { xp: 10, milestone: "resume:certifications" },
+};
+/** The toast text alongside each STEP_XP award -- "+{n} pts {label}!",
+ *  the reference's own confirmed pattern (direct instruction, 20 Sept
+ *  2026), reusing whatever XP number this codebase already awards rather
+ *  than the reference's own numbers. Education/Experience/Skills were
+ *  checked live against the reference; Certifications' wording is
+ *  inferred (not independently confirmed live) -- the same "added"
+ *  pattern the other required-entry steps use, since certifications are
+ *  also a list of entries a student adds one at a time. Personal
+ *  Information keeps its own existing "Personal information saved" toast
+ *  with no XP number, since that's what was actually observed live --
+ *  it has no entry in STEP_XP either, so it's untouched by this map.
+ */
+const STEP_XP_TOAST: Record<number, string> = {
+  1: "Education added!",
+  2: "Experience added!",
+  3: "Skills selected!",
+  4: "Certification added!", // inferred, see comment above
 };
 const CREATED_XP = 25;
 
@@ -307,10 +325,39 @@ function MobileActionBar({ primary, more }: { primary: BarAction[]; more: BarAct
 }
 
 function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, templateId, version, celebrate = false }: { resume: ResumeData; title: string; onBack: () => void; backLabel: string; editHref?: string; router: ReturnType<typeof useRouter>; templateId: string; version?: ResumeVersion; /** just created: show Dreamy's score card once the check lands */ celebrate?: boolean }) {
-  const [panel, setPanel] = useState<"none" | "tailor" | "ats" | "text" | "export" | "sections">("none");
+  // "export" dropped from this union: Export is now an immediate download,
+  // not a panel (see the Export button below).
+  const [panel, setPanel] = useState<"none" | "tailor" | "ats" | "text" | "sections">("none");
   // The full-screen reader, shared by the toolbar button (sm+), the phone
   // bar and a tap on the phone's thumbnail sheet.
   const [zoomOpen, setZoomOpen] = useState(false);
+  const { toast, showToast } = useResumeToast();
+  const [exporting, setExporting] = useState(false);
+  // Direct one-click download, matching the reference's instant-export
+  // behavior exactly (direct instruction, 20 Sept 2026) -- the same
+  // downloadDocx() the Saved Resumes list's own Download icon already
+  // calls, with no intermediate modal. This is a deliberate ROLLBACK of a
+  // real safety feature: the previous ExportChecklistModal gated Export
+  // behind six required confirmations (contact info correct, education
+  // correct, skills accurate, experience truthful, bullets reviewed, ATS
+  // disclaimer acknowledged) before either "Export PDF" or "Download
+  // .docx" unlocked. A resume going out to a real employer is exactly the
+  // kind of irreversible action a confirmation step exists to protect --
+  // this is a known, accepted regression for this build (for literal 1:1
+  // parity with the reference), not an oversight, and is worth
+  // revisiting with the product owner.
+  const handleExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await downloadDocx(resume);
+    } finally {
+      setExporting(false);
+    }
+  };
+  // The Approve workflow -- see the ResumeVersion.approved comment in
+  // lib/resume.ts for what's confirmed vs. inferred about it.
+  const [approveOpen, setApproveOpen] = useState(false);
   // Every saved resume is scored without being asked: the check runs the
   // moment the document opens with no result, or with a result computed
   // from older content, and stores it on the version (direct feedback, 17
@@ -409,9 +456,19 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
                 <ListOrdered className="h-4 w-4" aria-hidden />
               </ToolbarButton>
             )}
-            <ToolbarButton iconOnly label="Export" onClick={() => setPanel("export")}>
+            <ToolbarButton iconOnly label={exporting ? "Exporting…" : "Export"} onClick={handleExport}>
               <Download className="h-4 w-4" aria-hidden />
             </ToolbarButton>
+            {version && (
+              <ToolbarButton
+                iconOnly
+                tone="success"
+                label={version.approved ? "Approved" : "Approve"}
+                onClick={() => { if (!version.approved) setApproveOpen(true); }}
+              >
+                {version.approved ? <BadgeCheck className="h-4 w-4" aria-hidden /> : <Check className="h-4 w-4" aria-hidden />}
+              </ToolbarButton>
+            )}
             {editHref && (
               <ToolbarButton iconOnly label="Edit Selection" onClick={() => router.push(editHref)}>
                 <Pencil className="h-4 w-4" aria-hidden />
@@ -427,8 +484,6 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
         <ATSCheckPanel resume={resume} version={version} onClose={() => setPanel("none")} />
       ) : panel === "text" ? (
         <TextPreviewModal resume={resume} onClose={() => setPanel("none")} />
-      ) : panel === "export" ? (
-        <ExportChecklistModal resume={resume} onClose={() => setPanel("none")} />
       ) : panel === "sections" && version ? (
         <EditSectionsPanel resume={resume} version={version} onClose={() => setPanel("none")} />
       ) : (
@@ -450,11 +505,12 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
           primary={[
             ...(version ? [{ key: "tailor", label: "Tailor", Icon: Wand2, onClick: () => setPanel("tailor") }, { key: "ats", label: "ATS Check", Icon: AtsIcon, onClick: () => setPanel("ats") }] : []),
             { key: "zoom", label: "Read", Icon: Maximize2, onClick: () => setZoomOpen(true) },
-            { key: "export", label: "Export", Icon: Download, onClick: () => setPanel("export") },
+            { key: "export", label: exporting ? "Exporting…" : "Export", Icon: Download, onClick: handleExport },
           ]}
           more={[
             { key: "text", label: "Text Preview", Icon: FileText, onClick: () => setPanel("text") },
             ...(version ? [{ key: "sections", label: "Edit Sections", Icon: ListOrdered, onClick: () => setPanel("sections") }] : []),
+            ...(version ? [{ key: "approve", label: version.approved ? "Approved" : "Approve", Icon: version.approved ? BadgeCheck : Check, onClick: () => { if (!version.approved) setApproveOpen(true); } }] : []),
             ...(editHref ? [{ key: "edit", label: "Edit Selection", Icon: Pencil, onClick: () => router.push(editHref) }] : []),
           ]}
         />
@@ -495,6 +551,33 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
       >
         {backLabel}
       </button>
+      {/* Same inline dialog pattern as ResumeExperience.tsx's own delete
+         confirm -- this app has no shared Modal component, every local
+         dialog rolls its own role="dialog" markup this way. */}
+      {approveOpen && version && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[120] flex items-end justify-center p-4 backdrop-blur-[14px] sm:items-center" style={{ background: "rgba(5,7,15,0.55)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setApproveOpen(false); }}>
+          <div className="flex w-full max-w-[400px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+            <p className="text-[18px] leading-[24px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Approve this resume?</p>
+            <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>This marks it as final. You can still make changes after.</p>
+            <div className="flex items-center justify-end gap-[var(--space-3)]">
+              <button type="button" onClick={() => setApproveOpen(false)} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
+              <button
+                type="button"
+                onClick={() => {
+                  upsertVersion({ ...version, approved: true, updatedAt: Date.now() });
+                  setApproveOpen(false);
+                  showToast("Marked as approved");
+                }}
+                className="dm-solid flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold text-white"
+                style={{ background: "var(--world-food-farming-nature, #3aa66b)" }}
+              >
+                Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {toast}
     </Shell>
   );
 }
@@ -550,6 +633,9 @@ function ResumeBuilderInner() {
     const prize = STEP_XP[step];
     if (!prize || !has) return;
     flyXp({ from: card.current, amount: prize.xp, milestone: prize.milestone });
+    // The toast itself, alongside the flying XP -- was silent before
+    // (direct instruction, 20 Sept 2026): STEP_XP_TOAST above.
+    showToast(`+${prize.xp} pts ${STEP_XP_TOAST[step]}`);
   };
 
   const backToProfile = () => router.push("/profile?tab=resume");
@@ -739,59 +825,69 @@ function ResumeBuilderInner() {
               <ReviewStep
                 resume={resume}
                 onEditStep={(step) => goToStep(step)}
-                onFinish={() => {
+                // Two buttons now, not one auto-routing button (direct
+                // instruction, 20 Sept 2026, matching the reference
+                // exactly): "Save & Export" always creates a version with
+                // sensible defaults and skips straight to the finished
+                // document; "Customize First" always creates a version too,
+                // then opens Choose & Tailor (naming, which
+                // education/experience to include, template, matching to a
+                // job) before landing on the document. Both build the same
+                // shape of default version -- only the name and the
+                // destination differ -- so that part is shared here.
+                onSaveExport={() => {
                   react();
-                  // First finish with nothing saved yet: create a real,
-                  // named resume right away instead of only a preview, so
-                  // "Your Resumes" isn't confusingly empty right after
-                  // finishing (direct feedback, 14 Sept 2026 -- "there is an
-                  // alex chen resume right there" pointing at exactly this
-                  // gap). Uses whatever template was picked on the way in
-                  // (the gallery, if this came from there); falls back to
-                  // the default when the wizard was entered directly (e.g.
-                  // "Edit My Info" on an existing resume). Routes into
-                  // Tailor next, not straight to the finished document --
-                  // Choose & Tailor (which education/experience to include,
-                  // and matching to a job description) is a real step in
-                  // the reference flow, not a thing you stumble into later
-                  // via "Edit Selection" on the finished resume (direct
-                  // feedback, 15 Sept 2026: "matching the job is hidden in
-                  // the last screen inside edit selection... tailor resume
-                  // is a big part of the flow in the replit"). Later
-                  // finishes (editing shared info via "Edit My Info") just
-                  // go to the full preview -- there's no new version being
-                  // created there to tailor.
                   const current = readResume();
-                  if (current.versions.length === 0) {
-                    // A resume title, not the student's own name -- every
-                    // saved resume belongs to this one student already, so
-                    // their name on the card said nothing about which
-                    // resume it was (direct feedback, 16 Sept 2026: "show
-                    // the name it was saved in rather than the users name
-                    // on the resume").
-                    const name = "My Resume";
-                    const version: ResumeVersion = {
-                      id: makeId(),
-                      name,
-                      createdAt: Date.now(),
-                      updatedAt: Date.now(),
-                      educationIds: current.education.map((e) => e.id),
-                      experienceIds: current.experience.map((e) => e.id),
-                      jobDescription: "",
-                      targetPosition: "",
-                      targetCompany: "",
-                      template: pickedTemplate ?? DEFAULT_RESUME_TEMPLATE,
-                      atsCheck: null,
-                    };
-                    upsertVersion(version);
-                    router.push(`/resume-builder?view=tailor&version=${version.id}`);
-                  } else {
-                    // Straight to the scored resume: the document runs the
-                    // ATS check on arrival and shows the score card, so the
-                    // check is the wizard's real last step, not a tool kept
-                    // for saved resumes (direct feedback, 17 Sept 2026).
-                    router.push("/resume-builder?view=document&from=create");
-                  }
+                  // A real name, not the student's own name repeated --
+                  // every saved resume already belongs to this one student,
+                  // so their name on the card said nothing about which
+                  // resume it was (direct feedback, 16 Sept 2026). Skipping
+                  // tailoring entirely means there's no Tailor screen left
+                  // to name it in, so this path needs its own sensible
+                  // default: the student's name + "Resume".
+                  const fullName = `${current.profile.firstName} ${current.profile.lastName}`.trim();
+                  const version: ResumeVersion = {
+                    id: makeId(),
+                    name: fullName ? `${fullName} Resume` : "My Resume",
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                    educationIds: current.education.map((e) => e.id),
+                    experienceIds: current.experience.map((e) => e.id),
+                    jobDescription: "",
+                    targetPosition: "",
+                    targetCompany: "",
+                    template: pickedTemplate ?? DEFAULT_RESUME_TEMPLATE,
+                    atsCheck: null,
+                  };
+                  upsertVersion(version);
+                  // Same routing the single button's old "subsequent
+                  // resume" branch used: the document view opens the most
+                  // recently updated saved version, which is the one just
+                  // created above. The check runs on arrival and shows the
+                  // score card, so it's still the wizard's real last step.
+                  router.push("/resume-builder?view=document&from=create");
+                }}
+                onCustomizeFirst={() => {
+                  react();
+                  const current = readResume();
+                  // Same defaults as the old single button's "first resume"
+                  // branch: a placeholder name, real naming happens on the
+                  // Tailor screen this routes into next.
+                  const version: ResumeVersion = {
+                    id: makeId(),
+                    name: "My Resume",
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                    educationIds: current.education.map((e) => e.id),
+                    experienceIds: current.experience.map((e) => e.id),
+                    jobDescription: "",
+                    targetPosition: "",
+                    targetCompany: "",
+                    template: pickedTemplate ?? DEFAULT_RESUME_TEMPLATE,
+                    atsCheck: null,
+                  };
+                  upsertVersion(version);
+                  router.push(`/resume-builder?view=tailor&version=${version.id}`);
                 }}
               />
             )}

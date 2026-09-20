@@ -71,8 +71,10 @@ export function EditSectionsPanel({ resume, version, onClose }: { resume: Resume
     onClose();
   }
 
+  // Replaces the document view's whole content column, not a small popup
+  // -- kept "inline" like it always was (see ResumeModal, ui.tsx).
   return (
-    <ResumeModal title="Edit Sections" onClose={onClose}>
+    <ResumeModal title="Edit Sections" onClose={onClose} presentation="inline">
       <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Reorder, hide, or hand-edit what shows up on this resume.</p>
       <div className="flex flex-col gap-[var(--space-3)]">
         {order.map((id, index) => {

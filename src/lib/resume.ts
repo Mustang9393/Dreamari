@@ -141,6 +141,13 @@ export type ResumeVersion = {
    *  string here so this data-layer file doesn't import from components/. */
   template: string;
   atsCheck: ATSCheckResult | null;
+  /** "Approved" exists in the reference as a real status but its exact
+   *  trigger semantics weren't confirmed live -- built as a simple
+   *  self-confirm for now, revisit if Joshua/Maisha clarify who actually
+   *  approves (a student marking their own resume "done", vs. a real
+   *  counselor sign-off). Undefined/false on anything saved before this
+   *  existed. */
+  approved?: boolean;
   /** A student-chosen tag color (a CSS color value), independent of the
    *  template's own accent -- lets versions be told apart at a glance the
    *  way Finder tags work (direct feedback, 16 Sept 2026: "let the user
@@ -307,6 +314,7 @@ function normalizeVersions(value: unknown): ResumeVersion[] {
         targetCompany: str(v.targetCompany),
         template: str(v.template) || "classic",
         atsCheck: normalizeATSCheck(v.atsCheck),
+        approved: v.approved === true ? true : undefined,
         color: typeof v.color === "string" && v.color ? v.color : undefined,
       };
     });

@@ -10676,3 +10676,108 @@ the other Connect surfaces (memory: feedback-clickable-cards-profiles).
   repo; Art Director, Film Director and Journalist are new to the catalog.
 - Verified headless: "finanace", "codng", "hospital", "planes", "arts",
   "drawing", "netflix", and "xyzq" (no match).
+
+## 2026-09-20 · Resume Builder: 1:1 parity pass against the Replit reference
+
+User-approved build against the live reference (resume-builder-maishak.replit.app),
+already thoroughly audited in a prior turn this session; this turn implemented
+the 7 confirmed gaps (6 from the spec, plus one the user caught personally
+after the turn started and added as change #0). Template picker on Tailor
+stays a deliberate non-1:1 exception, by direct instruction.
+
+- **#0 -- Add-flow popups are real modals now.** `ResumeModal` (`ui.tsx`) was
+  an in-place swap of the wizard card's own body (no backdrop, no
+  `fixed inset-0`, no `role="dialog"`, no Portal -- there was even a code
+  comment admitting it). The reference shows every "Add" flow (Education,
+  Experience, Skills, Certifications) as a true floating popup. Fixed once,
+  at the shared component, not per call site: `ResumeModal` now takes a
+  `presentation` prop, `"overlay"` (new default, `fixed inset-0` + Portal +
+  backdrop + `role="dialog"` + `aria-modal` + Escape-to-close, same sheet
+  chrome as `MentorshipTab.tsx`'s own `Sheet`) or `"inline"` (the original
+  behavior, explicitly kept for the document toolbar's own panels --
+  ATSCheckPanel, EditSectionsPanel, JobMatchPanel, TextPreviewModal --
+  which replace the document view's whole content column and were never
+  checked against the reference for popup-vs-inline). **Known, accepted
+  tradeoff, by direct instruction**: the full-screen popup covers the live
+  resume preview (and its field-highlight "camera pan" feature) while open,
+  which the reference doesn't have to worry about since it has no live
+  preview at all. This is deliberate 1:1 parity, not an oversight -- flagged
+  to product/design as worth a second look if a future pass wants both the
+  live preview AND a true popup at once (e.g. scoping the overlay to the
+  wizard's own column). Verified live: Add Education now opens as a centered
+  popup with a blurred/dimmed backdrop over the entire page.
+- **#1 -- Review step, two buttons.** "Save & Export" (skips tailoring,
+  creates a version with sensible defaults -- all current
+  education/experience, name = student's name + "Resume", default template,
+  no job description -- and routes straight to the document) and "Customize
+  First" (Sparkles icon, creates a version with a placeholder name and opens
+  Choose & Tailor). Both replace the old single auto-routing "Save & Export"
+  button. The "GOOD START" splash (fewer than 2 experiences) now gates
+  "Save & Export" specifically, not both buttons.
+- **#2 -- Saved Resumes is a card grid**, not a row list (`grid-cols-1
+  sm:grid-cols-2 lg:grid-cols-3`, same shape as ProfileExperience.tsx's own
+  Top Three/My Plan/Career Report row). Each card: status tags (Standard /
+  Tailored / Approved, can combine), the same score badges as before, a
+  Target line when tailored, the same four icon actions + Open, just
+  reflowed for a card footer.
+- **#3 -- Approve workflow (new).** `ResumeVersion.approved?: boolean` in
+  `lib/resume.ts`. A green-toned toolbar button (`ToolbarButton` gained a
+  `tone="success"` option) opens a confirm dialog (this app's usual inline
+  `role="dialog"` pattern, no shared Modal component exists); on confirm it
+  sets `approved: true` and toasts "Marked as approved". **Open question**:
+  the reference has "Approved" as a real status but its trigger semantics
+  (self-marked vs. a counselor sign-off) were never confirmed live -- built
+  as a simple self-confirm, flagged in a code comment on the `approved`
+  field for Joshua/Maisha to clarify.
+- **#4 -- Export is immediate now, no checklist gate.** Deleted
+  `ExportChecklistModal.tsx` (its 6-item confirmation checklist gating
+  Export PDF/.docx) after confirming no other imports; moved `downloadDocx`
+  into a new `resumeExport.ts` so it isn't homeless. The toolbar's Export
+  button now calls `downloadDocx()` directly, same as the Saved Resumes
+  list's own Download icon always did. **Known, accepted regression, by
+  direct instruction**: the removed checklist (contact info correct,
+  education correct, skills accurate, experience truthful, bullets
+  reviewed, ATS disclaimer acknowledged) was a real safety feature for
+  something going to a real employer. Worth revisiting with the product
+  owner -- this was a deliberate rollback for literal reference parity, not
+  an oversight, flagged in a code comment at the call site too.
+- **#5 -- XP toasts on wizard steps.** The wizard already awarded XP
+  silently per step; now each award also shows a toast, "+{n} pts {label}!"
+  in the reference's confirmed wording, reusing this codebase's own
+  STEP_XP numbers (10/15/10/10), not the reference's own numbers.
+  Certifications' copy ("+10 pts Certification added!") is inferred, not
+  independently confirmed live -- flagged in a code comment. Personal
+  Information keeps its existing "Personal information saved" toast with no
+  XP number (that's what was actually observed live).
+- **#6 -- Review step row icons.** Turned out to already be implemented
+  (User/GraduationCap/Briefcase/Sparkles/Award per row) -- no change needed,
+  just verified live against the reference's icon set.
+
+Files: `src/lib/resume.ts`, `src/components/resume/ui.tsx`,
+`src/components/resume/ResumeBuilderExperience.tsx`,
+`src/components/resume/wizardSteps.tsx`,
+`src/components/resume/ResumeExperience.tsx`,
+`src/components/resume/resumeExport.ts` (new),
+`src/components/resume/ExportChecklistModal.tsx` (deleted),
+`src/components/resume/ATSCheckPanel.tsx`,
+`src/components/resume/EditSectionsPanel.tsx`,
+`src/components/resume/JobMatchPanel.tsx`,
+`src/components/resume/TextPreviewModal.tsx` (all four: added
+`presentation="inline"` to their `ResumeModal` call).
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+Verified live (existing dev server on :3000, desktop width): Add Education
+opens as a real popup; Review's two buttons route correctly (Save & Export
+-> "Jordan Rivera Resume" straight to the scored document; Customize First
+-> Tailor with a placeholder name, no GOOD START splash); Saved Resumes
+renders a 3-up card grid with correct status tags across 4 saved versions;
+Approve opens its confirm dialog, sets the badge/tag, toasts; Export
+downloads immediately with no checklist on both a Standard and a Tailored
+resume; all four step XP toasts fire with the right copy; Review's row
+icons render. Not independently re-verified: the actual file that lands in
+Downloads (docx generation itself is unchanged from before, just no longer
+gated).
+
+Next step: none outstanding for this pass. Open items for the product
+owner: the Export-checklist rollback (#4) and the Approve-workflow trigger
+semantics (#3), both flagged above and in code comments at their source.

@@ -166,17 +166,31 @@ export function useResumeToast() {
 
 // ---------------------------------------------------------------------------
 // Modal -- the shared "Add Education" / "Add Certification" / Experience
-// wrapper. IN-PLACE, not a floating overlay (direct feedback, 15 Sept
-// 2026, after a first attempt as a fixed left-anchored drawer: "the side
-// bar doesn't cover the modal underneath, so it looks cluttered sitting
-// above each other" -- a fixed-position drawer can't line up with a
-// responsive grid column without measuring it, and even then it's a
-// second layer floating over the first). This version isn't positioned at
-// all: each step (EducationStep, CertificationsStep, the wizard's own
-// Experience branch) swaps its OWN body for this form and swaps back on
-// close, so there is only ever one thing in that card at a time -- no
-// overlap is possible by construction. The live preview lives in the
-// grid's other column entirely, so it was never at risk either way.
+// wrapper, plus the document toolbar's own panels (ATS Check, Edit
+// Sections, Tailor, Text Preview).
+//
+// Two presentations now, not one:
+// - "overlay" (the default): a true floating popup with a backdrop and
+//   Portal. The reference shows every "Add" flow (Education, Experience,
+//   Skills, Certifications) this way -- caught live against the reference,
+//   20 Sept 2026, after the wizard's own version shipped IN-PLACE instead
+//   (see the second bullet below). All four routes through this one
+//   component, so the fix lives here once rather than at each call site.
+//   Same sheet chrome this app already uses elsewhere (MentorshipTab.tsx's
+//   own `Sheet`, the AT&T board's opportunity sheet): a Portal, a backdrop
+//   button that closes on click, role="dialog", aria-modal, Escape-to-close.
+// - "inline": the ORIGINAL in-place swap this whole component used to be
+//   unconditionally (direct feedback, 15 Sept 2026, after a first attempt
+//   as a fixed left-anchored drawer: "the side bar doesn't cover the modal
+//   underneath, so it looks cluttered sitting above each other" -- a
+//   fixed-position drawer couldn't line up with a responsive grid column
+//   without measuring it, and even then it was a second layer floating
+//   over the first). Kept, explicitly opted into, for the document
+//   toolbar's own panels: those REPLACE the document view's whole content
+//   column (they're not small forms, see ATSCheckPanel's category
+//   breakdown or EditSectionsPanel's per-section controls) and their own
+//   popup-vs-inline presentation was never checked against the reference,
+//   so it's left exactly as it was rather than guessed at.
 // ---------------------------------------------------------------------------
 
 // The document toolbar's own button: icon-only (a plain square, no pill)
@@ -187,12 +201,15 @@ export function useResumeToast() {
 // height (direct feedback, 17 Sept 2026: "too many controls on top of the
 // preview on tablet mode... can we do icons only"). `title` carries the
 // label as a native tooltip once the visible text is gone.
-export function ToolbarButton({ label, onClick, children, iconOnly = false }: { label: string; onClick: () => void; children: ReactNode; /** icon at every width, label only in the tooltip (the document header, direct feedback 17 Sept 2026: "one line is enough") */ iconOnly?: boolean }) {
+export function ToolbarButton({ label, onClick, children, iconOnly = false, tone }: { label: string; onClick: () => void; children: ReactNode; /** icon at every width, label only in the tooltip (the document header, direct feedback 17 Sept 2026: "one line is enough") */ iconOnly?: boolean; /** "success": a green-tinted variant for Approve -- the one toolbar action that isn't neutral like the rest (Tailor/ATS/Text Preview/Export/Edit Sections). */ tone?: "success" }) {
   // Below lg the button is icon-only, so the label comes back as a real
   // tooltip on hover and keyboard focus, in the same bubble the Dream
   // Score chip uses (direct feedback, 17 Sept 2026: "anywhere we use only
   // icons... a tooltip should show on hover with the label"). Hidden from
   // lg up, where the label is already printed.
+  const toneStyle: CSSProperties = tone === "success"
+    ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature, #3aa66b) 45%, var(--glass-border))", color: "var(--world-food-farming-nature, #3aa66b)", background: "color-mix(in srgb, var(--world-food-farming-nature, #3aa66b) 12%, transparent)" }
+    : { borderColor: "var(--glass-border)", color: "var(--foreground)" };
   return (
     <Tip label={label} hideFromLg={!iconOnly}>
       <button
@@ -201,7 +218,7 @@ export function ToolbarButton({ label, onClick, children, iconOnly = false }: { 
         aria-label={label}
         onClick={onClick}
         className={`dm-tap flex size-9 flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold whitespace-nowrap ${iconOnly ? "" : "lg:h-auto lg:w-auto lg:px-[var(--space-4)] lg:py-[10px]"}`}
-        style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        style={toneStyle}
       >
         {children}
         {!iconOnly && <span className="hidden lg:inline">{label}</span>}
@@ -250,17 +267,55 @@ function Tip({ label, children, hideFromLg = false, className = "" }: { label: s
   );
 }
 
-export function ResumeModal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+function ResumeModalHeader({ title, onClose }: { title: string; onClose: () => void }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-[var(--space-4)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both]">
-      <div className="flex flex-none items-center gap-[var(--space-2)] border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-        <button type="button" aria-label="Back" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-          <ChevronLeft className="h-4 w-4" aria-hidden />
-        </button>
-        <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
-      </div>
-      <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
+    <div className="flex flex-none items-center gap-[var(--space-2)] border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+      <button type="button" aria-label="Back" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+        <ChevronLeft className="h-4 w-4" aria-hidden />
+      </button>
+      <h3 className="text-[16px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
     </div>
+  );
+}
+
+export function ResumeModal({ title, onClose, children, presentation = "overlay" }: { title: string; onClose: () => void; children: ReactNode; /** see the block comment above -- "overlay" (default) is a real popup with a backdrop; "inline" keeps the original in-place swap for the document toolbar's own panels. */ presentation?: "overlay" | "inline" }) {
+  // Escape closes either presentation the same way every other dialog in
+  // this app does; harmless (and unused) while nothing has focus trapped.
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [onClose]);
+
+  if (presentation === "inline") {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col gap-[var(--space-4)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both]">
+        <ResumeModalHeader title={title} onClose={onClose} />
+        <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
+      </div>
+    );
+  }
+
+  // Matches the reference's full-screen modal exactly, per direct
+  // instruction. Known tradeoff: this covers the live resume preview
+  // while open, including the field-highlight/"camera pan" feature (see
+  // onFieldFocus in wizardSteps.tsx/ExperienceModal.tsx and the
+  // data-field/data-section markers on ResumeDocument.tsx), which the
+  // reference doesn't have to begin with. Flagged to product/design as a
+  // deliberate parity choice, not an oversight.
+  return (
+    <Portal>
+      <div className="fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={title}>
+        <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+        <div
+          className="relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
+          style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}
+        >
+          <ResumeModalHeader title={title} onClose={onClose} />
+          <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
+        </div>
+      </div>
+    </Portal>
   );
 }
 
