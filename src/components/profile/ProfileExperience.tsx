@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Calendar, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Snowflake, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Snowflake, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -1535,14 +1535,6 @@ function OverviewTabV2({
   const plan = stage === "hs" ? gradePlan(defaultGrade) : collegePlan(1, { id: focus.id, title: focus.title });
   const windowId = seasonOverride ?? currentPlanWindowId();
   const currentWindow = plan.windows.find((w) => w.id === windowId) ?? plan.windows[0];
-  const windowIndex = plan.windows.findIndex((w) => w.id === currentWindow.id);
-  const requiredSteps = currentWindow.steps.filter((s) => !s.optional);
-  const firstStep = requiredSteps[0] ?? currentWindow.steps[0];
-  // Position in the plan's own term sequence IS a real ratio (term N of
-  // however many the plan has) -- unlike a fake done/total, this doesn't
-  // need GradePlanCard's own local completion state to be honest (direct
-  // feedback, 20 Sept: "isnt showing any progress metric").
-  const termPercent = ((windowIndex + 1) / plan.windows.length) * 100;
   // A single "best" score assumes one resume; Choose & Tailor produces as
   // many named versions as a student wants, so the only metric that's
   // still true at any count is how many exist (direct feedback, 20 Sept:
@@ -1585,26 +1577,17 @@ function OverviewTabV2({
                moved underneath the bar instead, in the stat-line spot
                Plan uses for "Term 1 of 3..." (direct feedback, 20 Sept). */}
             <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</span>
+            {/* The #1 pick's own name dropped (direct feedback, 21 Sept
+               2026: "a quick status snapshot, not a detailed page" -- the
+               ratio below is the one fact this tile exists to show, so it's
+               now the headline text instead of a small caption over a
+               separate name row). */}
             <span className="flex flex-col gap-[8px]">
-              <span className="min-w-0 truncate text-[11.5px] leading-[14px] font-bold tracking-[0.05em] uppercase">
-                <span style={{ color: "var(--foreground)" }}>{top3Careers.length}</span>{" "}
-                <span style={{ color: "var(--muted-foreground)" }}>of 3 chosen</span>
+              <span className="flex items-baseline gap-[6px]">
+                <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{top3Careers.length}</span>
+                <span className="text-[13.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>of 3 chosen</span>
               </span>
               <SparkBar percent={(top3Careers.length / 3) * 100} min={8} height={6} track="color-mix(in srgb, var(--foreground) 10%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
-              <span className="flex items-center gap-[7px]">
-                {/* Measured against the shield's own rendered bounding box
-                   (not just its 24x24 viewBox) before landing here -- an
-                   earlier manual nudge assumed the taper pulled the visual
-                   center up and moved the "1" the wrong direction (direct
-                   feedback, 20 Sept: "still not centred"). Plain flex
-                   centering already lines up within a fraction of a
-                   pixel once the stroke width is accounted for. */}
-                <span className="relative flex-none" style={{ width: 18, height: 18 }}>
-                  <Shield className="absolute inset-0 h-full w-full" aria-hidden fill="var(--accent-subtle)" style={{ color: "var(--accent-subtle)" }} />
-                  <span className="absolute inset-0 flex items-center justify-center text-[9px] leading-none font-extrabold" style={{ color: "var(--primary-foreground)" }}>1</span>
-                </span>
-                <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{focus.title}</span>
-              </span>
             </span>
             <span className="flex flex-col gap-[8px]">
               {top3Careers.length < 3 ? (
@@ -1647,36 +1630,19 @@ function OverviewTabV2({
             <SeasonScene seasonId={currentWindow.id} />
             <DashHoverChevron />
             <span className="relative z-[1] text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</span>
-            <span className="relative z-[1] flex flex-col gap-[8px]">
-              {/* Plan name as a small caption, not the headline -- the
-                 season scene itself already says which term this is, so
-                 the words don't need to repeat it (direct feedback, 20
-                 Sept: "the colored season styling should do that for
-                 us... professional readiness can be a smaller caption"). */}
-              <span className="min-w-0 truncate text-[11.5px] leading-[14px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--muted-foreground)" }}>{plan.title}</span>
-              <SparkBar percent={termPercent} min={8} height={6} track="color-mix(in srgb, var(--foreground) 10%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
-              <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Term {windowIndex + 1} of {plan.windows.length}</span>
+            {/* Plan name, term ratio, and the "Next" step all dropped
+               (direct feedback, 21 Sept 2026: "a quick status snapshot, not
+               a detailed page" -- three separate facts read as too much
+               here). What's left: which semester (the one thing the season
+               art alone doesn't say in words) as the headline, and how many
+               actions are in it. No fake "N complete" count -- nothing in
+               this app tracks per-step completion yet, so a done/total
+               ratio here would be invented, not real. */}
+            <span className="relative z-[1] flex items-baseline gap-[6px]">
+              <span className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{currentWindow.title} Semester</span>
             </span>
-            <span className="relative z-[1] flex flex-col gap-[8px]">
-              {firstStep ? (
-                firstStep.href ? (
-                  <Link
-                    href={firstStep.href}
-                    onClick={(e) => e.stopPropagation()}
-                    className="dm-link dm-chip-hover flex w-fit min-w-0 items-center gap-[6px]"
-                  >
-                    <Calendar className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-                    <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }} title={firstStep.title}>Next: {firstStep.title}</span>
-                  </Link>
-                ) : (
-                  <span className="flex items-center gap-[6px]">
-                    <Calendar className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-                    <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }} title={firstStep.title}>Next: {firstStep.title}</span>
-                  </span>
-                )
-              ) : (
-                <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing due this window</span>
-              )}
+            <span className="relative z-[1] text-[13.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+              {currentWindow.steps.length} action{currentWindow.steps.length === 1 ? "" : "s"} this term
             </span>
           </div>
         </HoverBeam>
@@ -1704,20 +1670,18 @@ function OverviewTabV2({
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Report</span>
               <span className="flex items-baseline gap-[6px]">
                 <span className="text-[22px] leading-[26px] font-extrabold tabular-nums transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{top3Careers.length}</span>
-                <span className="text-[13.5px] font-bold" style={{ color: top3Careers.length < 3 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>of 3 ready</span>
+                <span className="text-[13.5px] font-bold" style={{ color: top3Careers.length < 3 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>of 3 reports ready</span>
               </span>
             </span>
           </span>
           <DashHoverChevron />
         </button>
 
-        {/* Resume: a single "best" score assumes there's one resume to
-           score. Choose & Tailor produces as many named versions as a
-           student wants, so the only number that's still true regardless
-           of count is how many exist -- same honest-count pattern as
-           Report's dot total, not a score that goes stale/misleading the
-           moment a 2nd or 3rd version exists (direct feedback, 20 Sept:
-           "what happens when there are multiple. bad metrics to show here"). */}
+        {/* Resume: dropped the version count entirely (direct feedback, 21
+           Sept 2026: "simplify to Not started or Start your resume") --
+           complete-or-not is the only fact this tile needs to give in a
+           snapshot; how many versions exist is real detail for the Resume
+           tab itself, not the Overview. */}
         <button type="button" onClick={onGoResume} className="dm-tap group relative flex flex-1 min-w-0 cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left sm:p-[var(--space-5)]">
           <span className="flex min-w-0 items-center gap-[var(--space-3)]">
             <span className="flex size-[36px] flex-none items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-[1.08]" style={{ background: resumeCount > 0 ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : "color-mix(in srgb, var(--accent-subtle) 8%, transparent)" }}>
@@ -1725,13 +1689,8 @@ function OverviewTabV2({
             </span>
             <span className="flex min-w-0 flex-col gap-[2px]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Resume</span>
-              <span className="flex items-baseline gap-[6px]">
-                <span className="text-[22px] leading-[26px] font-extrabold tabular-nums transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                  {resumeCount || "—"}
-                </span>
-                <span className="text-[13.5px] font-bold" style={{ color: resumeCount > 0 ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>
-                  {resumeCount > 0 ? "generated" : "not started yet"}
-                </span>
+              <span className="text-[19px] leading-[24px] font-extrabold transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: resumeCount > 0 ? "var(--foreground)" : "var(--accent-subtle)" }}>
+                {resumeCount > 0 ? "Resume ready" : "Start your resume"}
               </span>
             </span>
           </span>
