@@ -200,16 +200,20 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
   },
 };
 
-// Per-beat routing. Every beat is listed, including ones with their own hero
-// illustration, and ones the player actively answers (choice, rank, pick, and
-// the rest) -- assigning them a location is inert for both today (hero art
-// always wins; SimulationPlayer routes every non-card, non-review beat
-// straight past this table to the plain ambient backdrop, on purpose, so a
-// scored question is never competing with a room and a standing character for
-// attention) but keeps the map complete if either rule ever loosens. Review
-// beats (L1-16, L2-25, L3-28) are deliberately absent for a different reason:
-// the final-review wait reads better as the abstract, liminal AmbientBackdrop
-// than as any one room.
+// Per-beat routing. EVERY beat gets an entry here, including a beat the
+// player is actively answering (choice, rank, pick, and the rest) and one
+// that also owns its own hero illustration (`beat.art` always wins while it's
+// fresh -- see sceneFor in SimulationPlayer.tsx -- so the location entry is
+// the fallback once that picture goes stale, not dead weight). A room behind
+// an interactive beat renders dimmed (blur + darken, SimulationPlayer's
+// `dimmed`), never full brightness, so it reads as a real place without
+// competing with the question on top of it. Confirmed by omission, not
+// assertion: a beat id missing from this table is a beat that has genuinely
+// never been assigned a room, not a kind the engine skips -- audit against
+// the level file's own beat list if one looks thin. The one deliberate
+// exception is the terminal review beat of each level (see each level's own
+// list below): the final-review wait reads better as the abstract, liminal
+// AmbientBackdrop than as any one room.
 //
 // Routed from the handoff's background-library.json where a beat is listed
 // there; filled in by narrative judgment elsewhere, using its own tie-break
@@ -218,55 +222,72 @@ export const LOCATION_ART: Record<LocationId, LocationArt> = {
 // public working-floor moment -> trading floor, private transition -> hallway.
 export const BEAT_LOCATION: Record<string, LocationId> = {
   // Level 1 -- Intern (20 Sept rebuild, "Level 1 Intern" tab -- three-act
-  // structure, ids L1-01..L1-36). Only "card" and "review" beats ever reach
-  // this table (see the note above), so every choice/rapid/rank/focus/
-  // reveal id in the level is correctly absent below, not an oversight.
+  // structure, ids L1-01..L1-36). EVERY beat gets a room, scored questions
+  // included -- they render dimmed behind their own controls (see the note
+  // above), never the bare AmbientBackdrop. Only L1-36 (the Final Review) is
+  // deliberately absent, same as every other level's terminal review beat.
 
   // ---- Act 1: Learn the Game ----
   // L1-01 alone gets the new exterior establishing shot (20 Sept handoff) --
   // the one street-level view of Cobalt Capital, before the level cuts
   // inside for every following scene.
   "L1-01": "cobalt-exterior-sunset",
-  // L1-02..05, 07, 08, 10 are the arrival/teach/meet-Christina run -- no
+  // L1-02..11 are the arrival/teach/meet-Christina-and-Jordan run -- no
   // location change reads as "the story hasn't left reception yet" (L1-10's
   // own line: "Christina meets you at reception").
   "L1-02": "l1-reception",
   "L1-03": "l1-reception",
   "L1-04": "l1-reception",
   "L1-05": "l1-reception",
+  "L1-06": "l1-reception",
   "L1-07": "l1-reception",
   "L1-08": "l1-reception",
+  "L1-09": "l1-reception",
   "L1-10": "l1-reception",
+  "L1-11": "l1-reception",
   // Christina's language lesson moves to the cafe, same room the teaching
   // stretch has always used.
   "L1-13": "cobalt-cafe-lounge-sunset",
-  // L1-ACT1 is a full-bleed auto-advancing celebration card (Interaction
-  // Rules: "not a real stopping point") -- deliberately no room, same as
-  // L1-CHECK below.
+  "L1-14": "cobalt-cafe-lounge-sunset",
+  "L1-15": "cobalt-cafe-lounge-sunset",
+  "L1-16": "cobalt-cafe-lounge-sunset",
+  // Act 1 completion moment -- closes out in the same room its own beats did.
+  "L1-ACT1": "cobalt-cafe-lounge-sunset",
 
   // ---- Act 2: Prove You're Client-Ready ----
   "L1-17": "cobalt-trading-floor-sunset",
+  "L1-18": "cobalt-trading-floor-sunset",
   "L1-19": "cobalt-trading-floor-sunset",
+  "L1-20": "cobalt-trading-floor-sunset",
   // Meeting Marcus (VP) and reviewing the deal summary with him and
   // Christina both read as the internal boardroom, not the open floor.
   "L1-21": "cobalt-internal-boardroom-sunset",
   "L1-22": "cobalt-internal-boardroom-sunset",
   "L1-23": "cobalt-internal-boardroom-sunset",
-  // L1-CHECK: the Act 2 checkpoint card, same full-bleed treatment as
-  // L1-ACT1 -- no room.
+  "L1-24": "cobalt-internal-boardroom-sunset",
+  // The Boss Moment (Marcus's deal email) plays out back on the open floor,
+  // in front of the whole team -- the checkpoint that follows closes there.
+  "L1-25": "cobalt-trading-floor-sunset",
+  "L1-CHECK": "cobalt-trading-floor-sunset",
 
   // ---- Act 3: Survive the Internship ----
   "L1-26": "cobalt-trading-floor-sunset",
-  // L1-27 and L1-29 carry their own hero art (l1-12/l1-13.webp).
+  // L1-27 and L1-29 carry their own hero art (l1-12/l1-13.webp) -- these
+  // entries are the fallback once that picture goes stale, same pattern as
+  // every art-owning beat in Level 2/3 below.
+  "L1-27": "cobalt-trading-floor-sunset",
+  "L1-28": "cobalt-trading-floor-sunset",
+  "L1-29": "cobalt-trading-floor-sunset",
+  "L1-30": "cobalt-trading-floor-sunset",
   // 6 PM onward is explicitly night (mood: "night" on the beats
   // themselves) -- the floor at night carries the rest of Act 3.
   "L1-31": "cobalt-trading-floor-night",
   "L1-32": "cobalt-trading-floor-night",
+  "L1-33": "cobalt-trading-floor-night",
   "L1-34": "cobalt-trading-floor-night",
   // L1-35 closes the level back at reception, full circle with L1-02.
   "L1-35": "l1-reception",
-  // L1-36 is the Final Review -- deliberately absent, same as every other
-  // level's review beat (see the note above).
+  // L1-36 is the Final Review -- deliberately absent (see the note above).
 
   // Level 2 -- Analyst
   "L2-01": "cobalt-elevator-hallway-sunset",
