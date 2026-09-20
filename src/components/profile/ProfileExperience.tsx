@@ -284,6 +284,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // the last background picked, kept so both cover layers stay mounted and
   // the A/B switch is a crossfade, never a half-decoded swap
   const [bgUrl, setBgUrl] = useState<string>(COVERS[0]);
+  // Self-heals a broken cover image instead of leaving the browser's own
+  // broken-image glyph on screen forever (reported live on Vercel, 21 Sept
+  // 2026: a stale localStorage value -- a blob: URL from the removed upload
+  // feature, or any other now-invalid path -- survives the mount-time guard
+  // below in some cases and the <img> simply fails to decode with no
+  // fallback). Once either layer 404s, fall back to the known-good default
+  // and stop persisting the bad value so it can't recur on the next visit.
+  const [careerPhotoFailed, setCareerPhotoFailed] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
   // Plays every time the student lands on their profile, not just once
   // (direct instruction, 20 Sept -- unlike Explore's "For you", which
@@ -303,10 +311,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // server render and the first paint match
     try {
       const saved = window.localStorage.getItem(COVER_KEY);
-      if (saved && saved !== COVER_CAREER && !saved.startsWith("blob:")) {
+      // Allowlist, not a blocklist: only a value that is EXACTLY one of our
+      // own known-good cover paths (or the career sentinel) is trusted.
+      // The old check only rejected a "blob:" prefix, so any other stale or
+      // unrecognized value -- a renamed/removed file, a leftover from a
+      // dropped feature -- still made it through with nothing to fall back
+      // on, which is exactly the bug reported live (broken cover, no self-
+      // heal). Anything that fails this allowlist is treated the same as
+      // "nothing saved yet".
+      const trusted = saved === COVER_CAREER || COVERS.includes(saved ?? "");
+      if (saved && trusted) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setCoverUrl(saved); setBgUrl(saved);
-      } else if (!saved) {
+        setCoverUrl(saved); if (saved !== COVER_CAREER) setBgUrl(saved);
+      } else {
+        if (saved && !trusted) window.localStorage.removeItem(COVER_KEY);
         // A brand-new profile (no cover chosen yet) gets a random one from
         // the full set instead of everyone always landing on the same
         // first option -- picked once and persisted, so it's varied
@@ -338,8 +356,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // your Top 3 changes) or one of the abstract light fields / an upload.
   const coverIsCareer = coverUrl === COVER_CAREER;
   const heroAccent = (focus && WORLD_COLORS[focus.world]) || "var(--accent-subtle)";
-  const careerSrc = focus?.photo ?? COVERS[0];
-  const careerPosition = focus?.photoFocus ?? "50% 30%";
+  const careerSrc = careerPhotoFailed ? COVERS[0] : (focus?.photo ?? COVERS[0]);
+  const careerPosition = careerPhotoFailed ? "50% 40%" : (focus?.photoFocus ?? "50% 30%");
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
 
   const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes.find((route) => route.recommended) ?? career.routes[0];
@@ -442,8 +460,25 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         <section className={`relative overflow-hidden rounded-[var(--radius-lg)] border ${buildIn(1).className}`} style={{ ...buildIn(1).style, borderColor: `color-mix(in srgb, ${heroAccent} 40%, rgba(255,255,255,0.16))`, background: "#0e0c20", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
           <div className="absolute inset-0" aria-hidden>
             {/* both layers stay mounted; A/B crossfades between them */}
-            <img src={careerSrc} alt="" className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500" style={{ objectPosition: careerPosition, opacity: coverIsCareer ? 1 : 0 }} />
-            <img src={bgUrl} alt="" className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%", opacity: coverIsCareer ? 0 : 1 }} />
+            <img
+              src={careerSrc}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+              style={{ objectPosition: careerPosition, opacity: coverIsCareer ? 1 : 0 }}
+              onError={() => setCareerPhotoFailed(true)}
+            />
+            <img
+              src={bgUrl}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+              style={{ objectPosition: "50% 40%", opacity: coverIsCareer ? 0 : 1 }}
+              onError={() => {
+                if (bgUrl === COVERS[0]) return; // the default itself can't be the problem -- avoid a retry loop
+                setBgUrl(COVERS[0]);
+                if (coverUrl === bgUrl) setCoverUrl(COVERS[0]);
+                try { window.localStorage.setItem(COVER_KEY, COVERS[0]); } catch {}
+              }}
+            />
             <CardProgressiveBlur size="66%" />
             <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.62) 34%, rgba(12,16,35,0.12) 64%, transparent 100%), linear-gradient(90deg, color-mix(in srgb, ${heroAccent} 14%, transparent), transparent 60%)` }} />
           </div>

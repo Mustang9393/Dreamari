@@ -33,6 +33,7 @@ import {
 import { WORLD_LABELS } from "./worlds";
 import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "./careerSearch";
 import { careerSlug } from "@/components/career/slug";
+import { simulationFor } from "@/components/play/games";
 import "./app.css";
 
 // Explore, both faces of the Figma design:
@@ -399,6 +400,12 @@ const LEGIBLE_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.85), 0 1px 8px rgba(0,0,0,0.
 function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   const [face, setFace] = useState<"Summary" | "Details">("Summary");
   const router = useRouter();
+  const slug = careerSlug(career.title);
+  // Confirmed live bug (engineer feedback, 20 Sept 2026): this button had no
+  // onClick and no check, so it showed "Play Game" on every card even for
+  // careers with no simulation built -- only the career detail page's own
+  // Play button was gated on this. Same hasSimulation check as that page.
+  const hasSimulation = !!simulationFor(slug);
   return (
     <article
       className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-lg)]"
@@ -519,21 +526,24 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
             </button>
 
             <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
+              {hasSimulation && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/play/${slug}`)}
+                  className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
+                  /* solid dark glass in BOTH themes: the faint white-alpha surface
+                     disappeared against the photos (founder feedback) */
+                  style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
+                >
+                  <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
+                    Play Game
+                  </span>
+                  <Play aria-hidden className="h-4 w-4" style={{ color: "#F4F7FF" }} />
+                </button>
+              )}
               <button
                 type="button"
-                className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)]"
-                /* solid dark glass in BOTH themes: the faint white-alpha surface
-                   disappeared against the photos (founder feedback) */
-                style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
-              >
-                <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
-                  Play Game
-                </span>
-                <Play aria-hidden className="h-4 w-4" style={{ color: "#F4F7FF" }} />
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push(`/career/${careerSlug(career.title)}`)}
+                onClick={() => router.push(`/career/${slug}`)}
                 className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
                 style={{ background: "var(--foreground)" }}
               >
