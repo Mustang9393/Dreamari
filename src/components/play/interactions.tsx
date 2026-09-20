@@ -1835,16 +1835,23 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
   }
 
   function onPointerUp() {
-    setDrag((current) => {
-      if (current) {
-        const to = Math.max(0, Math.min(rows.length - 1, current.index + Math.round(current.dy / current.height)));
-        if (to !== current.index) {
-          playSelect();
-          setRows((list) => reorder(list, current.index, to));
-        }
+    // Committing the reorder must NOT happen inside setDrag's own updater --
+    // React 18 Strict Mode double-invokes state updaters to catch impure
+    // ones, and setRows was a side effect of that updater, so the reorder
+    // silently applied twice: two passes of the same (from, to) splice
+    // through the already-shifted list, which is not idempotent (it can
+    // net out to the original order, reading as "it snapped back", or to a
+    // scrambled one). Read `drag` directly (already current, set by
+    // onPointerMove's own pure updates) and keep setDrag(null) separate and
+    // side-effect-free.
+    if (drag) {
+      const to = Math.max(0, Math.min(rows.length - 1, drag.index + Math.round(drag.dy / drag.height)));
+      if (to !== drag.index) {
+        playSelect();
+        setRows((list) => reorder(list, drag.index, to));
       }
-      return null;
-    });
+    }
+    setDrag(null);
   }
 
   return (
