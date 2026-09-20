@@ -37,6 +37,7 @@ import { collegeBySlug, collegeImage } from "@/components/colleges/data";
 import { tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
 import { useSavedVideos } from "@/lib/savedVideos";
+import { BarChart } from "@/components/connect/mentorship/charts";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -161,6 +162,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
+  // Demo-only, session-only -- same pattern as the AT&T board's own
+  // VersionChip (direct instruction, 20 Sept 2026).
+  const [overviewVersion, setOverviewVersion] = useState<"v1" | "v2">("v1");
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
@@ -654,10 +658,22 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
         {(tab === "locker" || tab === "settings") ? null : (
-          /* One surface for every tab: the tab bar and the active panel share
+          <>
+          {/* Demo-only Overview v2 toggle, deliberately outside the shared
+             tabs+panel surface below (direct instruction, 20 Sept 2026:
+             "subtle, out of the way... outside that whole card surface
+             thing") -- same placement logic as the AT&T board's own
+             VersionChip, next to the page's own controls rather than
+             inside the card it's switching. */}
+          {tab === "overview" && (
+            <div className="flex justify-end">
+              <OverviewVersionChip version={overviewVersion} onChange={setOverviewVersion} />
+            </div>
+          )}
+          {/* One surface for every tab: the tab bar and the active panel share
              this card. Inside it nothing is a card again (direct feedback,
              4 Sept): groups are drawn with borders on the shared surface,
-             the way the career report keeps one sheet of paper. */
+             the way the career report keeps one sheet of paper. */}
           <div className={`flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)] ${buildIn(2).className}`} style={{ ...GLASS, ...buildIn(2).style }}>
         {/* ---- Tabs: real tablist semantics, 44px targets ----
            "Paths" is gone from here -- phenomenal on its own, per direct
@@ -729,11 +745,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
             {tab === "overview" && (
             <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
-              <OverviewTab
-                focus={focus} planProgress={planProgress} top3Count={top3.length}
-                onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
-                onGoLocker={() => setTab("locker")}
-              />
+              {overviewVersion === "v2" ? (
+                <OverviewTabV2
+                  focus={focus} planProgress={planProgress}
+                  top3Careers={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
+                  onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
+                />
+              ) : (
+                <OverviewTab
+                  focus={focus} planProgress={planProgress} top3Count={top3.length}
+                  onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
+                  onGoLocker={() => setTab("locker")}
+                />
+              )}
             </div>
             )}
         {tab === "top3" && (
@@ -799,6 +823,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           </div>
         )}
           </div>
+          </>
         )}
         {/* Reachable only via PlanTab's "Change route" link now, not a main
            tab -- hidden from the tablist per direct feedback (see the
@@ -1317,20 +1342,28 @@ export function OverviewTab({
         </HoverBeam>
       </section>
 
-      {/* Do this next (official copy, 5 Sept 2026): Explore leads (it is
-         where a new student starts); Play is the alternative for someone
-         with a #1 already. One shared card (not two standalone ones --
-         splitting it read as disintegrated, direct feedback, 9 Sept 2026),
-         holding two full-width list rows instead of a pill button sitting
-         mid-sentence: each row is the whole tap target, with an icon, the
-         verb plain in the sentence, and a solid CTA at the end matching
-         NextStepBanner. Hover fills only the row's own rect (dm-quiet, no radius of
-         its own) -- the section's overflow-hidden clips it to the card's
-         rounded corners, so the boundary still reads as one piece. The
-         border itself is BorderBeam (border-beam npm package), the same
-         one used on NextStepBanner -- no literal `border` class here, the
-         beam supplies the whole outline. */}
-      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
+      <DoThisNextCard />
+    </div>
+  );
+}
+
+// Shared by both Overview versions (v1's original bento, v2's dashboard
+// below) so the one actual next-step CTA never has two copies to drift out
+// of sync. Do this next (official copy, 5 Sept 2026): Explore leads (it is
+// where a new student starts); Play is the alternative for someone with a
+// #1 already. One shared card (not two standalone ones -- splitting it
+// read as disintegrated, direct feedback, 9 Sept 2026), holding two
+// full-width list rows instead of a pill button sitting mid-sentence: each
+// row is the whole tap target, with an icon, the verb plain in the
+// sentence, and a solid CTA at the end matching NextStepBanner. Hover
+// fills only the row's own rect (dm-quiet, no radius of its own) -- the
+// section's overflow-hidden clips it to the card's rounded corners, so the
+// boundary still reads as one piece. The border itself is BorderBeam
+// (border-beam npm package), the same one used on NextStepBanner -- no
+// literal `border` class here, the beam supplies the whole outline.
+function DoThisNextCard() {
+  return (
+    <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
       <section aria-labelledby="next-title" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)]" style={{ background: INSET.background }}>
         <h3 id="next-title" className="px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-2)] text-[12px] font-bold tracking-[1.4px] uppercase sm:px-[var(--space-5)] sm:pt-[var(--space-5)]" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
         {[
@@ -1368,7 +1401,141 @@ export function OverviewTab({
           </Fragment>
         ))}
       </section>
-      </BorderBeam>
+    </BorderBeam>
+  );
+}
+
+// ---- Overview v2: a real dashboard, not three doorways ----
+// v1's bento is navigation dressed as data (a caption + one number, each
+// tile just a link to a tab that's already in the tab strip right below
+// it, direct feedback 20 Sept). This is the alternative: the same three
+// destinations, but showing what's actually true about the student's
+// picks -- a real chart comparing their Top 3, not just a count of them --
+// built from the reusable chart primitives the mentorship dashboard
+// already established (BarChart, charts.tsx), so it follows the same
+// mark-and-axis rules instead of inventing a second visual language.
+// Never changes v1 -- purely additive, reached through OverviewVersionChip.
+
+function RingStat({ pct, accent, size = 96, stroke = 9 }: { pct: number; accent: string; size?: number; stroke?: number }) {
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(100, pct));
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="flex-none" aria-hidden>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
+      <circle
+        cx={size / 2} cy={size / 2} r={r} fill="none" stroke={accent} strokeWidth={stroke} strokeLinecap="round"
+        strokeDasharray={c} strokeDashoffset={c * (1 - clamped / 100)}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.22,1,0.36,1)" }}
+      />
+    </svg>
+  );
+}
+
+function OverviewTabV2({
+  focus, top3Careers, planProgress, onGoTop3, onGoPlan, onGoReport,
+}: {
+  focus: ProfileCareer | null;
+  top3Careers: ProfileCareer[];
+  planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
+  onGoTop3: () => void;
+  onGoPlan: () => void;
+  onGoReport: () => void;
+}) {
+  if (!focus) return null;
+  const progress = planProgress(focus);
+  const sorted = [...top3Careers].sort((a, b) => b.match - a.match);
+  const focusIndex = sorted.findIndex((c) => c.id === focus.id);
+  const accent = "var(--accent-subtle)";
+
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      <section aria-labelledby="dash-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[1.1fr_1fr]">
+        <h3 id="dash-title" className="sr-only">Your career match, plan progress and report at a glance</h3>
+
+        {/* Career match: the chart v1 never had -- how the Top 3 actually
+           compare, not just that there are three of them. */}
+        <HoverBeam strength={0.6} className="min-w-0">
+          <button type="button" onClick={onGoTop3} className="dm-tap flex h-full min-w-0 w-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+            <span className="flex items-start justify-between gap-[var(--space-2)]">
+              <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Match</span>
+              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+            </span>
+            <BarChart
+              values={sorted.map((c) => c.match)}
+              labels={sorted.map((c) => (c.title.length > 16 ? `${c.title.slice(0, 15)}…` : c.title))}
+              accent={accent}
+              highlight={focusIndex}
+              height={168}
+              unit="match score"
+              ariaLabel="Career Interest Score for each of your Top Three careers"
+            />
+          </button>
+        </HoverBeam>
+
+        <div className="flex flex-col gap-[var(--space-3)]">
+          {/* Plan progress: the one number v1 buried in a thin SparkBar,
+             now the hero figure it actually is. */}
+          <HoverBeam strength={0.6} className="min-w-0">
+            <button type="button" onClick={onGoPlan} className="dm-tap flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+              <span className="relative flex flex-none items-center justify-center">
+                <RingStat pct={progress.pct} accent={accent} />
+                <span className="absolute text-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{progress.pct}%</span>
+              </span>
+              <span className="flex min-w-0 flex-col gap-[2px]">
+                <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Plan Progress</span>
+                <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{progress.complete} of {progress.total} steps</span>
+              </span>
+            </button>
+          </HoverBeam>
+
+          {/* Report: same doorway as v1's third tile, just proportioned to
+             match the two figures beside it rather than a bare caption. */}
+          <HoverBeam strength={0.6} className="min-w-0">
+            <button type="button" onClick={onGoReport} className="dm-tap flex h-full w-full cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+              <span className="flex min-w-0 flex-col gap-[2px]">
+                <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Report</span>
+                <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</span>
+              </span>
+              <span className="flex flex-none items-baseline gap-[4px]">
+                <span className="text-[28px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{REPORT_SECTIONS.length}</span>
+                <span className="text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}>sections</span>
+              </span>
+            </button>
+          </HoverBeam>
+        </div>
+      </section>
+
+      <DoThisNextCard />
+    </div>
+  );
+}
+
+// Same demo-only pattern as the AT&T board's own VersionChip (a small,
+// muted toggle beside the main content, never mistaken for product UI):
+// v1 is the shipped bento, v2 is this dashboard -- both real, neither
+// hidden, switching is session-only (direct instruction, 20 Sept: "subtle,
+// out of the way... outside that whole card surface thing").
+function OverviewVersionChip({ version, onChange }: { version: "v1" | "v2"; onChange: (v: "v1" | "v2") => void }) {
+  return (
+    <div role="tablist" aria-label="Overview version" className="flex flex-none items-center gap-[2px] rounded-[var(--radius-sm)] border p-[2px]" style={{ borderColor: "var(--glass-border)" }}>
+      {(["v1", "v2"] as const).map((key) => {
+        const on = key === version;
+        return (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={on}
+            onClick={() => onChange(key)}
+            className="dm-quiet cursor-pointer rounded-[4px] px-[7px] py-[1px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+            style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", background: on ? "var(--glass-surface-2)" : "transparent" }}
+          >
+            {key}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowLeftRight, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2, X } from "lucide-react";
+import { AlertCircle, ArrowLeftRight, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2 } from "lucide-react";
 import { deleteReportVersion, formatVersionTime, recordReportVersion, reportHistorySnapshot, sameSnapshot, serverReportHistorySnapshot, subscribeReportHistory, type ReportSnapshot } from "@/lib/reportHistory";
 import type { ProfileCareer } from "./data";
 import { CareerExplorationBody } from "./CareerExploration";
@@ -547,33 +547,59 @@ export function CareerReportView(props: ReportViewProps) {
       <div data-print-hide className="no-print flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)]">
         {tab === "report" ? (
           <>
-            <button type="button" onClick={() => setTab("share")} className={`${chip} border-transparent`} style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-              <Send className="h-[15px] w-[15px]" aria-hidden /> Share
-            </button>
-            <div className="relative">
-              <button type="button" aria-haspopup="menu" aria-expanded={moreOpen} aria-label="More report actions" onClick={() => setMoreOpen((o) => !o)} className={chip} style={chipStyle}>
-                <span aria-hidden className="text-[16px] leading-none tracking-[0.1em]">•••</span> More
-              </button>
-              {moreOpen && (
-                <>
-                  <button type="button" aria-label="Close menu" onClick={() => setMoreOpen(false)} className="fixed inset-0 z-40 cursor-default" />
-                  <div role="menu" aria-label="More report actions" className="absolute left-0 z-50 mt-2 flex min-w-[200px] flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}>
-                    {otherCareers.length > 0 && onSwitchCareer && (
-                      <>
-                        <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); setSwitchOpen(true); }} className="dm-quiet flex cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[10px] text-left text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
-                          <ArrowLeftRight className="h-[15px] w-[15px] flex-none" aria-hidden /> Switch Career
+            {/* Its own subtle dropdown, not a line buried in More -- quiet
+               until someone actually wants it (direct instruction, 20
+               Sept). Same shared setFocusId as Top Three's "Make My
+               Primary" (see ReportViewProps.onSwitchCareer above). */}
+            {otherCareers.length > 0 && onSwitchCareer && (
+              <div className="relative">
+                <button type="button" aria-haspopup="menu" aria-expanded={switchOpen} onClick={() => setSwitchOpen((o) => !o)} className={chip} style={chipStyle}>
+                  <ArrowLeftRight className="h-[15px] w-[15px] flex-none" aria-hidden />
+                  <span className="max-w-[140px] truncate">{career.title}</span>
+                  <ChevronDown className="h-3.5 w-3.5 flex-none" aria-hidden style={{ transform: switchOpen ? "rotate(180deg)" : undefined, transition: "transform 0.15s ease" }} />
+                </button>
+                {switchOpen && (
+                  <>
+                    <button type="button" aria-label="Close menu" onClick={() => setSwitchOpen(false)} className="fixed inset-0 z-40 cursor-default" />
+                    <div role="menu" aria-label="Switch career" className="absolute left-0 z-50 mt-2 flex min-w-[200px] flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}>
+                      {otherCareers.map((c) => (
+                        <button key={c.id} type="button" role="menuitem" onClick={() => { onSwitchCareer?.(c.id); setSwitchOpen(false); }} className="dm-quiet flex cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] py-[10px] text-left text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
+                          {c.title}
                         </button>
-                        <span aria-hidden className="my-[2px] block h-px" style={{ background: "var(--glass-border)" }} />
-                      </>
-                    )}
-                    {MORE_VIEWS.map((item) => (
-                      <button key={item.id} type="button" role="menuitem" onClick={() => { setMoreOpen(false); setTab(item.id); }} className="dm-quiet flex cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] py-[10px] text-left text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+            <span className="text-[11.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>Updated {props.updatedLabel}</span>
+            {/* Share stays the one solid CTA on the bar; More is now an
+               icon-only circle with its label only as a hover/focus
+               tooltip, not printed text (direct instruction, 20 Sept). */}
+            <div className="flex items-center gap-[var(--space-2)] sm:ml-auto">
+              <button type="button" onClick={() => setTab("share")} className={`${chip} border-transparent`} style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+                <Send className="h-[15px] w-[15px]" aria-hidden /> Share
+              </button>
+              <div className="group relative">
+                <button type="button" aria-haspopup="menu" aria-expanded={moreOpen} aria-label="More report actions" onClick={() => setMoreOpen((o) => !o)} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border text-[16px] leading-none tracking-[0.1em]" style={chipStyle}>
+                  •••
+                </button>
+                <span role="tooltip" className="pointer-events-none absolute -top-[32px] left-1/2 z-10 -translate-x-1/2 rounded-[6px] border px-[8px] py-[4px] text-[11px] leading-[14px] font-bold whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100" style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  More
+                </span>
+                {moreOpen && (
+                  <>
+                    <button type="button" aria-label="Close menu" onClick={() => setMoreOpen(false)} className="fixed inset-0 z-40 cursor-default" />
+                    <div role="menu" aria-label="More report actions" className="absolute right-0 z-50 mt-2 flex min-w-[200px] flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}>
+                      {MORE_VIEWS.map((item) => (
+                        <button key={item.id} type="button" role="menuitem" onClick={() => { setMoreOpen(false); setTab(item.id); }} className="dm-quiet flex cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] py-[10px] text-left text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </>
         ) : (
@@ -582,9 +608,9 @@ export function CareerReportView(props: ReportViewProps) {
               <ChevronRight className="h-[15px] w-[15px] rotate-180" aria-hidden /> Report
             </button>
             <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{VIEW_LABEL[tab]}</span>
+            <span className="text-[11.5px] font-bold sm:ml-auto" style={{ color: "var(--muted-foreground)" }}>Updated {props.updatedLabel}</span>
           </>
         )}
-        <span className="text-[11.5px] font-bold sm:ml-auto" style={{ color: "var(--muted-foreground)" }}>Updated {props.updatedLabel}</span>
       </div>
 
       {tab === "report" && (
@@ -624,39 +650,6 @@ export function CareerReportView(props: ReportViewProps) {
             }}
           />
         </section>
-      )}
-      {/* Same lightweight Portal-picker pattern as the Profile header's own
-         cover/avatar pickers -- an on-demand sheet, not a second
-         always-visible switcher sitting alongside Top Three's. */}
-      {switchOpen && (
-        <Portal>
-          <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Switch career" style={{ fontFamily: "var(--font-body)" }}>
-            <button type="button" aria-label="Close" onClick={() => setSwitchOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
-            <div className="relative z-[1] flex w-full max-w-[420px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-              <div className="flex items-center justify-between gap-[var(--space-3)]">
-                <h3 className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Switch career</h3>
-                <button type="button" onClick={() => setSwitchOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                  <X className="h-4 w-4" aria-hidden />
-                </button>
-              </div>
-              <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Show the report for another one of your Top Three. This becomes your #1 on Top Three too.</p>
-              <div className="flex flex-col gap-[6px]">
-                {otherCareers.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => { onSwitchCareer?.(c.id); setSwitchOpen(false); }}
-                    className="dm-tap flex min-h-[52px] cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-left"
-                    style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
-                  >
-                    <span className="text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.title}</span>
-                    <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Portal>
       )}
     </div>
   );
