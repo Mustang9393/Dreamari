@@ -7,7 +7,7 @@ import { AVATAR_POOL, useStudentAvatarSrc, writeAvatarOverride } from "@/lib/ava
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { UndoToast } from "@/components/app/UndoToast";
 import Link from "next/link";
-import { Fragment, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -1416,50 +1416,34 @@ function DoThisNextCard() {
 // of printed as a sentence. Never changes v1 -- purely additive, reached
 // through OverviewVersionChip.
 
-function RingStat({ pct, accent, size = 96, stroke = 9 }: { pct: number; accent: string; size?: number; stroke?: number }) {
-  const id = useId().replace(/:/g, "");
+// A Meter (dataviz: "a single ratio against a limit" -> Meter, not a bar
+// chart or a pie). All three tiles below are exactly that job once framed
+// right -- careers chosen /3, plan steps done/total, report complete/not
+// -- so one ring component, reused three times, same accent throughout
+// (this app's single brand blue; the "world" category colors are reserved
+// for career industries elsewhere and would misapply here). The unfilled
+// track is a lighter step of that same accent, not a generic gray, so
+// each ring still reads as "this metric's own color" at a glance even
+// empty -- same principle Apple's own Activity rings use. No gradient
+// sheen, no drop-shadow glow -- flat fill, flat track (direct feedback, 20
+// Sept: the glossy version read as dated/3D).
+function MeterRing({ pct, label, value, size = 92, stroke = 8 }: { pct: number; label: string; value: string; size?: number; stroke?: number }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, pct));
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="flex-none" aria-hidden>
-      <defs>
-        <linearGradient id={`ring-${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={accent} stopOpacity="1" />
-          <stop offset="100%" stopColor={accent} stopOpacity="0.55" />
-        </linearGradient>
-      </defs>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
-      <circle
-        cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`url(#ring-${id})`} strokeWidth={stroke} strokeLinecap="round"
-        strokeDasharray={c} strokeDashoffset={c * (1 - clamped / 100)}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.22,1,0.36,1)" }}
-      />
-    </svg>
-  );
-}
-
-/** A row of gradient-filled marks for a "N of M" metric that's really a
- *  binary/discrete state (slots chosen, sections in a finished document) --
- *  not a percentage, so a bar chart or ring would overstate precision that
- *  isn't there. Filled marks carry the same two-stop gradient + glow
- *  RingStat's arc does, so every graphic on this dashboard reads as one
- *  family. */
-function GradientPips({ count, filled, accent, height = 12 }: { count: number; filled: number; accent: string; height?: number }) {
-  return (
-    <div className="flex w-full gap-[4px]" role="img" aria-label={`${filled} of ${count} complete`}>
-      {Array.from({ length: count }, (_, i) => i < filled).map((on, i) => (
-        <span
-          key={i}
-          className="flex-1 rounded-full"
-          style={{
-            height,
-            background: on ? `linear-gradient(180deg, ${accent} 0%, color-mix(in srgb, ${accent} 50%, transparent) 100%)` : "rgba(255,255,255,0.08)",
-          }}
+    <span className="relative flex flex-none items-center justify-center" role="img" aria-label={`${label}: ${value}`}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="flex-none" aria-hidden>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--accent-subtle) 16%, transparent)" strokeWidth={stroke} />
+        <circle
+          cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--accent-subtle)" strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={c * (1 - clamped / 100)}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.22,1,0.36,1)" }}
         />
-      ))}
-    </div>
+      </svg>
+      <span className="absolute text-[19px] leading-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+    </span>
   );
 }
 
@@ -1475,38 +1459,29 @@ function OverviewTabV2({
 }) {
   if (!focus) return null;
   const progress = planProgress(focus);
-  const accent = "var(--accent-subtle)";
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <section aria-labelledby="dash-title" className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
         <h3 id="dash-title" className="sr-only">Your Top Three, plan progress and report at a glance</h3>
 
-        {/* Top Three: v1's own metric ("N of 3 chosen"), drawn as three
-           gradient marks instead of printed as a sentence. */}
+        {/* Top Three: chosen/3 is a real ratio against a limit -- v1's own
+           metric, just drawn as the ring it actually is. */}
         <HoverBeam strength={0.6} className="min-w-0">
-          <button type="button" onClick={onGoTop3} className="dm-tap flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
-            <span className="flex items-start justify-between gap-[var(--space-2)]">
+          <button type="button" onClick={onGoTop3} className="dm-tap flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+            <MeterRing pct={(top3Careers.length / 3) * 100} label="My Top Three" value={`${top3Careers.length}/3`} />
+            <span className="flex min-w-0 flex-col gap-[2px]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Top Three</span>
-              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-            </span>
-            <span className="flex flex-col gap-[10px]">
-              <span className="text-[28px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                {top3Careers.length} <span className="text-[15px] font-bold" style={{ color: "var(--muted-foreground)" }}>of 3 chosen</span>
-              </span>
-              <GradientPips count={3} filled={top3Careers.length} accent={accent} />
+              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{top3Careers.length} of 3 chosen</span>
             </span>
           </button>
         </HoverBeam>
 
         {/* Plan progress: the one number v1 buried in a thin SparkBar, now
-           the hero figure it actually is, in a gradient ring. */}
+           the hero figure it actually is. */}
         <HoverBeam strength={0.6} className="min-w-0">
           <button type="button" onClick={onGoPlan} className="dm-tap flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
-            <span className="relative flex flex-none items-center justify-center">
-              <RingStat pct={progress.pct} accent={accent} />
-              <span className="absolute text-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{progress.pct}%</span>
-            </span>
+            <MeterRing pct={progress.pct} label="Plan Progress" value={`${progress.pct}%`} />
             <span className="flex min-w-0 flex-col gap-[2px]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Plan Progress</span>
               <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{progress.complete} of {progress.total} steps</span>
@@ -1514,24 +1489,19 @@ function OverviewTabV2({
           </button>
         </HoverBeam>
 
-        {/* Report: a career report is complete the moment it exists (its
-           6 sections are pre-authored, never partial), so "6 sections" was
-           counting something that never actually changed -- the true
-           state worth showing is that it's finished and ready to hand
-           over (direct feedback, 20 Sept), with the same gradient marks
-           as Top Three for one consistent visual language. */}
+        {/* Report: complete the moment it exists -- auto-generated from
+           Match for every student, never partial (direct feedback, 20
+           Sept: "6 sections" never actually changed, so it wasn't really
+           measuring anything). The ring is honestly 100% once there's a
+           focus career, same as an Apple Activity ring reads 100% at
+           goal; the section count still shows, just as the supporting
+           fact it always was rather than the headline. */}
         <HoverBeam strength={0.6} className="min-w-0">
-          <button type="button" onClick={onGoReport} className="dm-tap flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
-            <span className="flex items-start justify-between gap-[var(--space-2)]">
+          <button type="button" onClick={onGoReport} className="dm-tap flex h-full w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}>
+            <MeterRing pct={100} label="Career Report" value="✓" />
+            <span className="flex min-w-0 flex-col gap-[2px]">
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Report</span>
-              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-            </span>
-            <span className="flex flex-col gap-[10px]">
-              <span className="flex items-center gap-[8px]">
-                <BadgeCheck className="h-5 w-5 flex-none" aria-hidden style={{ color: accent }} />
-                <span className="text-[17px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Ready to share</span>
-              </span>
-              <GradientPips count={REPORT_SECTIONS.length} filled={REPORT_SECTIONS.length} accent={accent} />
+              <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Ready · {REPORT_SECTIONS.length} sections</span>
             </span>
           </button>
         </HoverBeam>
