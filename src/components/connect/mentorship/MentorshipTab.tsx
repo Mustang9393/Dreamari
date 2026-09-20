@@ -21,7 +21,7 @@ import { ProProfileView, SubTabs, type Follows } from "../ProProfile";
 import type { Pro } from "../data";
 import type { ResumeData } from "@/lib/resume";
 import { Meter, Ring, Segmented, ruledCell } from "../viz";
-import { ShareBar, Sparkline, compact } from "./charts";
+import { BarChart, ShareBar, compact } from "./charts";
 import * as D from "./mentorshipData";
 
 // The Mentorship tab in Connect: a tiled list of partner mentorship programs
@@ -1396,6 +1396,12 @@ function MentorView({ messages, setMessages, sub, setSub, openChat, onOpenProfil
 // ---------------------------------------------------------------------------
 // Enterprise
 
+/** Each KPI's spark series is 9 months, Jan through Sep -- the same
+ *  calendar-year cadence the Enterprise Overview reports on (see
+ *  mentorshipData.ts's Kpi.spark comment history). Local to this file since
+ *  nothing else needs month labels once the Details tab was cut. */
+const SPARK_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"];
+
 /** The Overview's region filter, a real dropdown (Josh's Replit pass, 20
  *  Sept 2026) rather than the Regions tab's own segmented pills -- five
  *  options read better as a list than a row that wraps on mobile. */
@@ -1448,8 +1454,10 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
   };
   const eDef = D.ENGAGEMENT_PERIODS.find((p) => p.key === ePeriod)!;
   const kpiOf = (key: D.Kpi["key"]) => D.KPIS.find((k) => k.key === key)!;
-  // the stat tile's optional third part (dataviz skill: "trend -- 12-point
-  // sparkline"), scaled to the current region the same way the number is
+  // the drill-down sheet's own trend chart, region-scaled the same way the
+  // number is -- real axis and gridlines belong here, not on the compact
+  // card (dataviz research, 20 Sept 2026: a bare mini-line at card size
+  // reads as noise; a grounded chart needs the room a sheet has)
   const sparkOf = (k: D.Kpi) => {
     const share = shareOf(k, selected);
     const ratio = share !== null ? share / k.year : 1;
@@ -1502,10 +1510,7 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
                       <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{k.label}</span>
                       <DeltaBadge value={k.deltaYear} />
                     </span>
-                    <span className="flex items-end justify-between gap-[10px]">
-                      <span className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
-                      <Sparkline values={sparkOf(k)} accent={accent} width={64} height={22} />
-                    </span>
+                    <span className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
                   </button>
                 );
               })}
@@ -1527,10 +1532,7 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
                       <span className="text-[12px] leading-[16px] font-bold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k.label}</span>
                       <DeltaBadge value={k[eDef.deltaField]} />
                     </span>
-                    <span className="flex items-end justify-between gap-[8px]">
-                      <span className="text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(row.value)}</span>
-                      <Sparkline values={sparkOf(k)} accent={accent} width={52} height={20} />
-                    </span>
+                    <span className="text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(row.value)}</span>
                     {row.sub && <Muted className="text-[12px] leading-[16px]">{row.sub}</Muted>}
                   </button>
                 );
@@ -1568,6 +1570,7 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
               <span className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(kpiValue(k, def.field, null))}</span>
               <DeltaBadge value={k[def.deltaField]} />
             </span>
+            <BarChart values={sparkOf(k)} labels={SPARK_MONTHS} accent={accent} highlight={SPARK_MONTHS.length - 1} height={150} ariaLabel={`${k.label} by month`} />
             <ShareBar parts={per} accent={accent} />
             <div className="flex flex-col divide-y" style={{ borderColor: RULE }}>
               {per.map((r) => <div key={r.label} className="flex items-center justify-between py-[9px] text-[14px]" style={{ borderColor: RULE, color: "var(--foreground)" }}><span>{r.label}</span><span className="font-bold tabular-nums">{r.value.toLocaleString("en-US")}</span></div>)}
