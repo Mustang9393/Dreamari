@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
-import { BookOpen, Calendar, CalendarPlus, Check, ChevronDown, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, GraduationCap, Handshake, Link2, Lock, MapPin, Maximize2, MessageCircle, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, Timer, TrendingDown, TrendingUp, Users, Video, X } from "lucide-react";
+import { BookOpen, Calendar, CalendarPlus, Check, ChevronDown, ClipboardList, Compass, ChevronLeft, ChevronRight, Clock, Download, FileText, Flag, Handshake, Link2, Lock, MapPin, Maximize2, Minimize2, Minus, Play, Plus, School, Send, ShieldCheck, Smile, Sparkles, TrendingDown, TrendingUp, Video, X } from "lucide-react";
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
@@ -1396,8 +1396,6 @@ function MentorView({ messages, setMessages, sub, setSub, openChat, onOpenProfil
 // ---------------------------------------------------------------------------
 // Enterprise
 
-const KPI_ICON = { hours: Timer, students: GraduationCap, mentors: Users, meetings: Handshake, messages: MessageCircle } as const;
-
 /** The Overview's region filter, a real dropdown (Josh's Replit pass, 20
  *  Sept 2026) rather than the Regions tab's own segmented pills -- five
  *  options read better as a list than a row that wraps on mobile. */
@@ -1487,14 +1485,14 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
             <Panel className="relative grid grid-cols-2 !p-0">
               <span aria-hidden className="absolute top-1/2 left-1/2 z-10 flex size-[26px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", background: "var(--background)", color: "var(--muted-foreground)" }}><Link2 className="h-3 w-3" aria-hidden /></span>
               {[
-                { key: "mentors" as const, value: mentorsNow, Icon: Users },
-                { key: "students" as const, value: scholarsNow, Icon: GraduationCap },
-              ].map(({ key, value, Icon }, i) => {
+                { key: "mentors" as const, value: mentorsNow },
+                { key: "students" as const, value: scholarsNow },
+              ].map(({ key, value }, i) => {
                 const k = kpiOf(key);
                 return (
                   <button key={key} type="button" onClick={() => setSheet({ kind: "kpi", key, def: "annual" })} className={`dm-quiet group flex cursor-pointer flex-col gap-[10px] p-[var(--space-5)] text-left ${i === 1 ? "border-l" : ""}`} style={{ borderColor: RULE }}>
                     <span className="flex items-center justify-between gap-[8px]">
-                      <span className="flex items-center gap-[6px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}><Icon className="h-4 w-4" aria-hidden style={{ color: accent }} /> {k.label}</span>
+                      <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{k.label}</span>
                       <DeltaBadge value={k.deltaYear} />
                     </span>
                     <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
@@ -1509,15 +1507,14 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
             <Panel className="grid grid-cols-1 !p-0 sm:grid-cols-3">
               {[
                 { key: "hours" as const, value: hoursNow, sub: null },
-                { key: "meetings" as const, value: meetingsNow, sub: `${(meetingsNow / mentorsNow).toFixed(1)} avg. per pair` },
-                { key: "messages" as const, value: messagesNow, sub: `${(messagesNow / mentorsNow).toFixed(1)} avg. per pair` },
+                { key: "meetings" as const, value: meetingsNow, sub: `${(meetingsNow / mentorsNow).toFixed(1)} / pair` },
+                { key: "messages" as const, value: messagesNow, sub: `${(messagesNow / mentorsNow).toFixed(1)} / pair` },
               ].map((row, i) => {
                 const k = kpiOf(row.key);
-                const Icon = KPI_ICON[row.key];
                 return (
                   <button key={row.key} type="button" onClick={() => setSheet({ kind: "kpi", key: row.key, def: ePeriod })} className={`dm-quiet group flex cursor-pointer flex-col gap-[10px] text-left ${ruledCell(i, 3)}`} style={{ borderColor: RULE }}>
                     <span className="flex items-center justify-between gap-[8px]">
-                      <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-bold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}><Icon className="h-3.5 w-3.5" aria-hidden style={{ color: accent }} /> {k.label}</span>
+                      <span className="text-[12px] leading-[16px] font-bold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k.label}</span>
                       <DeltaBadge value={k[eDef.deltaField]} />
                     </span>
                     <span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(row.value)}</span>
