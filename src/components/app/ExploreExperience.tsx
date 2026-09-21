@@ -19,6 +19,7 @@ import {
   BROWSE_ARTS,
   BROWSE_BECAUSE_LIKED,
   BROWSE_MIGHT_NOT_KNOW,
+  BROWSE_PUBLIC_SERVICE,
   BROWSE_TRADES,
   BROWSE_TRENDING,
   BROWSE_TYPICAL_PAY,
@@ -263,6 +264,7 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
   const worldRail = view(BROWSE_WORLD_RAIL);
   const mightNotKnow = view(BROWSE_MIGHT_NOT_KNOW);
   const typicalPay = view(BROWSE_TYPICAL_PAY);
+  const publicService = view(BROWSE_PUBLIC_SERVICE);
   // Arts, Media & Sport: one row, at the bottom of the page only (direct
   // feedback, 19 Sept 2026: no second appearance near the top, no "New in").
   // The full world, not just the poster-library additions.
@@ -304,7 +306,8 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
       <>
       {/* Rail order + content per Joshua (2026-08-21): merged recommended
          rail, then Tech, Top 5, Might Not Know, Skilled Trades (added 11
-         Sept 2026), Videos, Typical Pay. `contents` keeps
+         Sept 2026), Videos, Public Service (added 21 Sept 2026), Typical
+         Pay. `contents` keeps
          this div out of main's flex layout (the rails still lay out as if
          they were main's own direct children) while giving seq-reveal
          something to stagger the rails' entrance from off of. */}
@@ -346,6 +349,15 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
         <Rail title="Videos Inside Leading Companies">
           <CompanyVideoCards />
         </Rail>
+
+        {/* Public Service (Slack, 21 Sept 2026): its own row, directly above
+           Typical Pay, not folded into it -- these are civic/public-sector
+           careers, not a pay tier. */}
+        {publicService.length > 0 && (
+          <Rail title="Public Service Careers">
+            <PosterRail careers={publicService} />
+          </Rail>
+        )}
 
         {typicalPay.length > 0 && (
           <Rail title="Typical Pay: $100K +">

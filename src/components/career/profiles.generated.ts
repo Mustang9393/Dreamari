@@ -8428,5 +8428,992 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
         "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +700 by 2034. It is growing about as fast as most jobs."
       }
     }
-  }
+  },
+  // The 7 Public Service row careers (21 Sept 2026): same BLS-approximate
+  // convention as the rest of this file, no factDetails authored (the (i)
+  // icon on a fact just doesn't render without one -- see viewModel() in
+  // CareerDetailExperience.tsx). Judicial Law Clerk's pay note calls out
+  // that a clerkship's own salary is modest; the well-known six-figure
+  // "clerkship bonus" is a separate, later law-firm signing bonus.
+  "mental-health-social-worker": {
+    "slug": "mental-health-social-worker",
+    "title": "Mental Health Social Worker",
+    "world": "Counseling & Social Work",
+    "photo": "/images/app/browse/mental-health-social-worker.webp",
+    "summary": "Helps people work through mental health and substance use challenges.",
+    "scenario": "Imagine a client walks in mid-crisis, an hour before your day was supposed to end. You stay, because their plan can't wait until tomorrow.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "Bachelor's degree"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$58,550/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "124,000"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "15,600"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$47K"
+        }
+      ],
+      "best": [
+        {
+          "state": "California",
+          "pay": "$75K"
+        },
+        {
+          "state": "New Jersey",
+          "pay": "$71K"
+        },
+        {
+          "state": "Connecticut",
+          "pay": "$68K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Mental health and substance use",
+      "Human behavior",
+      "Community resources",
+      "Crisis intervention",
+      "Confidentiality and ethics"
+    ],
+    "goodAt": [
+      "Active listening",
+      "Staying calm in a crisis",
+      "Empathy without burning out",
+      "Case documentation",
+      "Building trust quickly"
+    ],
+    "software": [
+      "Electronic health records (EHR)",
+      "Microsoft Office software",
+      "Case management systems",
+      "Telehealth platforms",
+      "Scheduling software"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Case Manager / BSW Social Worker",
+        "pay": "$45K",
+        "description": "You carry a caseload under a licensed supervisor, connecting clients to housing, benefits and treatment.",
+        "whatYouDo": [
+          "Intake interviews",
+          "Connect clients to resources",
+          "Document every visit",
+          "Coordinate with other agencies"
+        ],
+        "toGetHere": [
+          "Bachelor's in social work",
+          "State registration"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Licensed Clinical Social Worker (LCSW)",
+        "pay": "$62K",
+        "description": "You provide therapy directly, with your own caseload and a license to practice independently.",
+        "whatYouDo": [
+          "One-on-one therapy sessions",
+          "Treatment planning",
+          "Crisis intervention",
+          "Supervise case managers"
+        ],
+        "toGetHere": [
+          "Master's in social work",
+          "2-3K supervised hours",
+          "Clinical license exam"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Clinical Supervisor / Program Director",
+        "pay": "$88K",
+        "description": "You run the clinical team, set treatment standards, and answer to the agency's leadership.",
+        "whatYouDo": [
+          "Supervise clinicians",
+          "Set program policy",
+          "Manage the budget",
+          "Handle the hardest cases"
+        ],
+        "toGetHere": [
+          "5+ years licensed practice",
+          "Supervisory certification"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Social Work"
+        },
+        {
+          "name": "Psychology"
+        }
+      ],
+      "where": [
+        {
+          "count": "480",
+          "credential": "Bachelor's degree"
+        },
+        {
+          "count": "290",
+          "credential": "Master's degree"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "urban-planner": {
+    "slug": "urban-planner",
+    "title": "Urban Planner",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/urban-planner.webp",
+    "summary": "Decides how cities grow, from new parks to where housing gets built.",
+    "scenario": "Imagine a neighborhood meeting where half the room wants a new apartment building and half wants it stopped. You have to find the plan that actually works.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "Master's degree"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$79,540/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "40,000"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "4,600"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$58K"
+        }
+      ],
+      "best": [
+        {
+          "state": "California",
+          "pay": "$104K"
+        },
+        {
+          "state": "New York",
+          "pay": "$97K"
+        },
+        {
+          "state": "New Jersey",
+          "pay": "$92K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Zoning and land use law",
+      "Public policy",
+      "Geography and mapping",
+      "Traffic and transit",
+      "Community engagement"
+    ],
+    "goodAt": [
+      "Reading maps and site plans",
+      "Public speaking",
+      "Balancing competing interests",
+      "Data analysis",
+      "Writing clear reports"
+    ],
+    "software": [
+      "GIS (ArcGIS/QGIS)",
+      "Microsoft Excel",
+      "AutoCAD",
+      "Adobe Illustrator",
+      "Public records databases"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Planning Technician",
+        "pay": "$48K",
+        "description": "You pull permits, update maps and support the planners running public meetings.",
+        "whatYouDo": [
+          "Research zoning rules",
+          "Update GIS maps",
+          "Prepare meeting packets",
+          "Answer public records requests"
+        ],
+        "toGetHere": [
+          "Bachelor's degree",
+          "Entry-level planning role"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Urban Planner",
+        "pay": "$75K",
+        "description": "You write the zoning recommendations and present them at public hearings yourself.",
+        "whatYouDo": [
+          "Draft zoning changes",
+          "Review development proposals",
+          "Present to planning boards",
+          "Run community meetings"
+        ],
+        "toGetHere": [
+          "Master's in urban planning",
+          "AICP certification eligible"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Planning Director",
+        "pay": "$112K",
+        "description": "You run the department, set the city's long-range plan, and report straight to the mayor or council.",
+        "whatYouDo": [
+          "Set department priorities",
+          "Manage planning staff",
+          "Advise elected officials",
+          "Oversee the master plan"
+        ],
+        "toGetHere": [
+          "10+ years in planning",
+          "AICP certification"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Urban Planning"
+        },
+        {
+          "name": "Geography"
+        }
+      ],
+      "where": [
+        {
+          "count": "75",
+          "credential": "Master's degree"
+        },
+        {
+          "count": "40",
+          "credential": "Bachelor's degree"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "judicial-law-clerk": {
+    "slug": "judicial-law-clerk",
+    "title": "Judicial Law Clerk",
+    "world": "Law, Safety & Justice",
+    "photo": "/images/app/browse/judicial-law-clerk.webp",
+    "summary": "Researches the law and drafts opinions for a judge.",
+    "scenario": "Imagine a judge hands you a case the night before oral argument. By morning, your memo is the reason they know which question to ask.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "Law degree (J.D.)"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$67,000/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "15,000"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "2,200"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$52K"
+        }
+      ],
+      "best": [
+        {
+          "state": "District of Columbia",
+          "pay": "$88K"
+        },
+        {
+          "state": "California",
+          "pay": "$84K"
+        },
+        {
+          "state": "New York",
+          "pay": "$81K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Legal research and writing",
+      "Civil and criminal procedure",
+      "Case law",
+      "Court rules",
+      "Judicial ethics"
+    ],
+    "goodAt": [
+      "Fast, precise legal research",
+      "Writing clearly under deadline",
+      "Reading dense case law",
+      "Discretion and confidentiality",
+      "Working one-on-one with a judge"
+    ],
+    "software": [
+      "Westlaw",
+      "LexisNexis",
+      "Microsoft Word",
+      "Court case management systems",
+      "PACER"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Judicial Intern",
+        "pay": "Unpaid / stipend",
+        "description": "You research narrow legal questions for a judge during law school, usually a summer or semester.",
+        "whatYouDo": [
+          "Cite-check opinions",
+          "Summarize case law",
+          "Sit in on hearings",
+          "Draft short memos"
+        ],
+        "toGetHere": [
+          "Law student",
+          "Top of class or law review"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Judicial Law Clerk",
+        "pay": "$67K",
+        "description": "You're the judge's right hand for one to two years, drafting opinions and prepping every case that hits the docket.",
+        "whatYouDo": [
+          "Draft opinions",
+          "Research every motion",
+          "Prep bench memos",
+          "Attend chambers conferences"
+        ],
+        "toGetHere": [
+          "J.D.",
+          "Bar admission or in progress",
+          "Judge's appointment"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Senior / Career Law Clerk",
+        "pay": "$95K",
+        "description": "Some clerkships become multi-year or permanent roles, running chambers for a judge with a heavy docket.",
+        "whatYouDo": [
+          "Train incoming clerks",
+          "Manage the docket",
+          "Draft the hardest opinions",
+          "Liaise with court staff"
+        ],
+        "toGetHere": [
+          "Multiple clerkships or years of practice",
+          "Judge's trust"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Law (J.D.)"
+        },
+        {
+          "name": "Political Science"
+        }
+      ],
+      "where": [
+        {
+          "count": "200",
+          "credential": "Juris Doctor"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics. Clerkship pay is a national approximation -- federal and state courts vary widely, and law-firm signing bonuses after a clerkship (often six figures) are separate from the clerkship salary itself."
+  },
+  "environment-scientist": {
+    "slug": "environment-scientist",
+    "title": "Environment Scientist",
+    "world": "Science & Research",
+    "photo": "/images/app/browse/environment-scientist.webp",
+    "summary": "Studies air, water and soil to protect the environment and public health.",
+    "scenario": "Imagine a town's well water tests strange. You're the one testing every sample and telling them if it's safe to drink.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "Bachelor's degree"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$78,980/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "89,000"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "8,400"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$56K"
+        }
+      ],
+      "best": [
+        {
+          "state": "California",
+          "pay": "$99K"
+        },
+        {
+          "state": "New Jersey",
+          "pay": "$92K"
+        },
+        {
+          "state": "Massachusetts",
+          "pay": "$89K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Chemistry and biology",
+      "Environmental regulation",
+      "Data collection and analysis",
+      "Pollution and contamination",
+      "Climate and ecosystems"
+    ],
+    "goodAt": [
+      "Careful lab and field work",
+      "Statistical analysis",
+      "Writing technical reports",
+      "Following safety protocols",
+      "Explaining findings to non-scientists"
+    ],
+    "software": [
+      "Microsoft Excel",
+      "GIS mapping software",
+      "Lab information management systems (LIMS)",
+      "Statistical software (R/SPSS)",
+      "EPA reporting databases"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Environmental Technician",
+        "pay": "$44K",
+        "description": "You collect the samples and run the tests the scientists design.",
+        "whatYouDo": [
+          "Collect field samples",
+          "Run lab tests",
+          "Log data",
+          "Maintain equipment"
+        ],
+        "toGetHere": [
+          "Associate's or Bachelor's degree"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Environmental Scientist",
+        "pay": "$72K",
+        "description": "You design the studies, interpret the data, and write the reports regulators and companies rely on.",
+        "whatYouDo": [
+          "Design sampling plans",
+          "Analyze results",
+          "Write compliance reports",
+          "Advise on cleanup plans"
+        ],
+        "toGetHere": [
+          "Bachelor's in environmental science",
+          "2-3 years experience"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Senior Environmental Scientist / Program Manager",
+        "pay": "$101K",
+        "description": "You lead the biggest projects and manage the scientists doing the fieldwork.",
+        "whatYouDo": [
+          "Lead major studies",
+          "Manage a team of scientists",
+          "Liaise with regulators",
+          "Set project budgets"
+        ],
+        "toGetHere": [
+          "Master's degree often preferred",
+          "8+ years experience"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Environmental Science"
+        },
+        {
+          "name": "Biology"
+        }
+      ],
+      "where": [
+        {
+          "count": "310",
+          "credential": "Bachelor's degree"
+        },
+        {
+          "count": "95",
+          "credential": "Master's degree"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "principal": {
+    "slug": "principal",
+    "title": "Principal",
+    "world": "Teaching & Education",
+    "photo": "/images/app/browse/principal.webp",
+    "summary": "Runs a school, from the teachers' classrooms to the budget that pays for them.",
+    "scenario": "Imagine a fight breaks out in the hallway during a fire drill, a parent is waiting in your office, and a teacher needs you to observe her class by noon. All three are still your job.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "Master's degree"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$103,460/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "271,000"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "20,000"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$84K"
+        }
+      ],
+      "best": [
+        {
+          "state": "New York",
+          "pay": "$138K"
+        },
+        {
+          "state": "California",
+          "pay": "$132K"
+        },
+        {
+          "state": "Connecticut",
+          "pay": "$124K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "School law and policy",
+      "Curriculum and instruction",
+      "Budgeting",
+      "Staff management",
+      "Student discipline"
+    ],
+    "goodAt": [
+      "Leading a large staff",
+      "Staying calm under pressure",
+      "Difficult conversations with parents",
+      "Reading a budget",
+      "Building a school culture"
+    ],
+    "software": [
+      "Student information systems (PowerSchool/Infinite Campus)",
+      "Microsoft Office software",
+      "Scheduling software",
+      "Email and communication platforms",
+      "Budget management software"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Teacher",
+        "pay": "$58K",
+        "description": "You run your own classroom, and start taking on leadership roles like department head.",
+        "whatYouDo": [
+          "Teach classes",
+          "Mentor other teachers",
+          "Serve on school committees",
+          "Build toward a leadership credential"
+        ],
+        "toGetHere": [
+          "Bachelor's degree",
+          "Teaching license"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Assistant Principal",
+        "pay": "$86K",
+        "description": "You handle discipline, scheduling and the day-to-day the principal can't get to alone.",
+        "whatYouDo": [
+          "Handle student discipline",
+          "Manage schedules",
+          "Observe classrooms",
+          "Support the principal"
+        ],
+        "toGetHere": [
+          "Master's in education leadership",
+          "Administrator license"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Principal",
+        "pay": "$103K",
+        "description": "You run the whole building: staff, students, budget and every decision that lands on your desk.",
+        "whatYouDo": [
+          "Hire and evaluate staff",
+          "Manage the school budget",
+          "Set school policy",
+          "Represent the school to the district and parents"
+        ],
+        "toGetHere": [
+          "Several years as assistant principal",
+          "Administrator license"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Education Leadership"
+        },
+        {
+          "name": "Educational Administration"
+        }
+      ],
+      "where": [
+        {
+          "count": "160",
+          "credential": "Master's degree"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "community-program-manager": {
+    "slug": "community-program-manager",
+    "title": "Community Program Manager",
+    "world": "Counseling & Social Work",
+    "photo": "/images/app/browse/community-program-manager.webp",
+    "summary": "Runs programs that connect a community to resources, from food banks to job training.",
+    "scenario": "Imagine your program's biggest grant runs out in three months. You spend the morning writing the renewal and the afternoon at the food pantry it funds.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "Bachelor's degree"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$74,240/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "174,000"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "18,900"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$54K"
+        }
+      ],
+      "best": [
+        {
+          "state": "District of Columbia",
+          "pay": "$99K"
+        },
+        {
+          "state": "California",
+          "pay": "$92K"
+        },
+        {
+          "state": "New York",
+          "pay": "$88K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Grant writing and funding",
+      "Community needs assessment",
+      "Nonprofit or government operations",
+      "Volunteer management",
+      "Public speaking"
+    ],
+    "goodAt": [
+      "Managing a budget",
+      "Building partnerships",
+      "Writing grant proposals",
+      "Organizing events",
+      "Leading volunteers"
+    ],
+    "software": [
+      "Microsoft Office software",
+      "Grant management software",
+      "Donor/volunteer databases (Salesforce Nonprofit)",
+      "Social media platforms",
+      "Scheduling software"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Program Coordinator",
+        "pay": "$42K",
+        "description": "You run the day-to-day of one program, from scheduling to tracking who it's helping.",
+        "whatYouDo": [
+          "Schedule program activities",
+          "Track participants",
+          "Support volunteers",
+          "Order supplies"
+        ],
+        "toGetHere": [
+          "Bachelor's degree"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Community Program Manager",
+        "pay": "$65K",
+        "description": "You own the whole program: the budget, the staff, and whether it hits its goals.",
+        "whatYouDo": [
+          "Manage program budget",
+          "Supervise coordinators",
+          "Write grant reports",
+          "Build community partnerships"
+        ],
+        "toGetHere": [
+          "3-5 years program experience"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Program Director",
+        "pay": "$91K",
+        "description": "You oversee multiple programs across the organization and answer to the executive director or board.",
+        "whatYouDo": [
+          "Oversee multiple programs",
+          "Set organizational strategy",
+          "Manage senior staff",
+          "Report to the board"
+        ],
+        "toGetHere": [
+          "8+ years experience",
+          "Master's often preferred"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Social Work"
+        },
+        {
+          "name": "Nonprofit Management"
+        },
+        {
+          "name": "Public Administration"
+        }
+      ],
+      "where": [
+        {
+          "count": "260",
+          "credential": "Bachelor's degree"
+        },
+        {
+          "count": "70",
+          "credential": "Master's degree"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "detective": {
+    "slug": "detective",
+    "title": "Detective",
+    "world": "Law, Safety & Justice",
+    "photo": "/images/app/browse/detective.webp",
+    "summary": "Investigates crimes, from the crime scene to the arrest.",
+    "scenario": "Imagine a case gone cold for two years. A single new lead comes in, and you have forty-eight hours before the trail goes cold again.",
+    "facts": [
+      {
+        "label": "Typical degree",
+        "value": "High school diploma (police academy required)"
+      },
+      {
+        "label": "Typical pay",
+        "value": "$91,050/year"
+      },
+      {
+        "label": "People doing it",
+        "value": "96,000"
+      },
+      {
+        "label": "Jobs open each year",
+        "value": "8,600"
+      }
+    ],
+    "payByState": {
+      "title": "Pay by state",
+      "yourStates": [
+        {
+          "state": "South Dakota",
+          "pay": "$61K"
+        }
+      ],
+      "best": [
+        {
+          "state": "California",
+          "pay": "$123K"
+        },
+        {
+          "state": "New Jersey",
+          "pay": "$118K"
+        },
+        {
+          "state": "New York",
+          "pay": "$109K"
+        }
+      ]
+    },
+    "knowAbout": [
+      "Criminal law and procedure",
+      "Interview and interrogation",
+      "Evidence handling",
+      "Forensics basics",
+      "Report writing"
+    ],
+    "goodAt": [
+      "Reading people",
+      "Patience on a long case",
+      "Staying composed under pressure",
+      "Physical fitness",
+      "Working within the law"
+    ],
+    "software": [
+      "Case management systems (RMS)",
+      "Report writing software",
+      "Fingerprint/DNA databases",
+      "Body camera systems",
+      "Microsoft Office software"
+    ],
+    "ladder": [
+      {
+        "number": "1",
+        "jobTitle": "Police Officer",
+        "pay": "$58K",
+        "description": "You patrol, respond to calls, and build the track record that gets you considered for detective.",
+        "whatYouDo": [
+          "Patrol an assigned area",
+          "Respond to 911 calls",
+          "Write incident reports",
+          "Make arrests"
+        ],
+        "toGetHere": [
+          "High school diploma",
+          "Police academy"
+        ]
+      },
+      {
+        "number": "2",
+        "jobTitle": "Detective",
+        "pay": "$84K",
+        "description": "You're assigned cases, not calls: you interview witnesses, gather evidence and build the file for prosecutors.",
+        "whatYouDo": [
+          "Interview witnesses and suspects",
+          "Gather and log evidence",
+          "Coordinate with forensics",
+          "Testify in court"
+        ],
+        "toGetHere": [
+          "Several years as an officer",
+          "Detective exam/promotion"
+        ]
+      },
+      {
+        "number": "3",
+        "jobTitle": "Detective Sergeant / Lieutenant",
+        "pay": "$110K",
+        "description": "You supervise a squad of detectives and decide which cases get priority.",
+        "whatYouDo": [
+          "Assign and review cases",
+          "Supervise detectives",
+          "Report to command staff",
+          "Manage major investigations"
+        ],
+        "toGetHere": [
+          "Years as detective",
+          "Supervisory exam"
+        ]
+      }
+    ],
+    "education": {
+      "studies": [
+        {
+          "name": "Criminal Justice"
+        },
+        {
+          "name": "Criminology"
+        }
+      ],
+      "where": [
+        {
+          "count": "180",
+          "credential": "Bachelor's degree"
+        },
+        {
+          "count": "310",
+          "credential": "Police academy / certificate"
+        }
+      ]
+    },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
 };

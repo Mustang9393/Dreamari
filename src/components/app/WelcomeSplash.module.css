@@ -7,9 +7,16 @@
   align-items: center;
   justify-content: center;
   padding: 16px 16px calc(76px + env(safe-area-inset-bottom));
-  /* Opaque (direct feedback, 11 Sept 2026): the page underneath ("Find your
-     Top 3", the deck) showed through and read as clutter behind the dialog. */
-  background: radial-gradient(120% 80% at 50% 0%, rgba(var(--t1), .16), transparent 60%), var(--color-night-background);
+  /* Opaque until 21 Sept 2026: the 11 Sept feedback that made this solid was
+     about the page underneath being legibly readable through it ("Find your
+     Top 3", the deck) and reading as clutter -- not about wanting zero color
+     from behind. A real blur (not just transparency) removes that same
+     legibility while still showing depth/color through, matching the blur
+     treatment every other modal in the app uses (direct feedback, 21 Sept
+     2026: "no blue showing the screen behind... these solid backgrounds"). */
+  background: radial-gradient(120% 80% at 50% 0%, rgba(var(--t1), .16), transparent 60%), color-mix(in srgb, var(--color-night-background) 62%, transparent);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
   color: var(--foreground);
 }
 .dialog {

@@ -108,26 +108,39 @@ export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
   C("Jewelry Designer", "Factories & Making Things", "/images/app/poster-jewelry-designer.webp"),
 ];
 
-// Replaced wholesale (Slack, Chandu M P, 21 Sept 2026): the seven below, in
-// this order, with fresh photos for the three (Mental Health Social Worker,
-// Community Program Manager, Detective already existed elsewhere in the
-// catalog; the new photos for the first two now travel with them everywhere
-// via ALL_CATALOG_CAREERS' first-occurrence merge, since this rail is merged
-// before BROWSE_LIBRARY). Urban Planner, Judicial Law Clerk, Environment
-// Scientist and Principal are new to the app. PROTOTYPE PAY: senior/upper-
-// range figures for each title (general industry knowledge, not a verified
-// source, same caveat as career/data.ts's ladder pay) -- flagged since two
-// of these (Mental Health Social Worker, Judicial Law Clerk) sit well above
-// their national medians at typical experience levels; worth a real source
-// before this ships past prototype.
+// Air Traffic Controller lived here too until 20 Sept 2026 (Slack, Chandu M
+// P): it already appears in Skilled Trades, and the two rows sit on the
+// same page, so it repeated. Veterinarian, already the row's own closer,
+// now stands in for it -- no career appears twice on this page.
 export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
-  C("Mental Health Social Worker", "Counseling & Social Work", "/images/app/browse/mental-health-social-worker.webp", "$101K"),
-  C("Urban Planner", "Building & Construction", "/images/app/browse/urban-planner.webp", "$104K"),
-  C("Judicial Law Clerk", "Law, Safety & Justice", "/images/app/browse/judicial-law-clerk.webp", "$105K"),
-  C("Environment Scientist", "Science & Research", "/images/app/browse/environment-scientist.webp", "$102K"),
-  C("Principal", "Teaching & Education", "/images/app/browse/principal.webp", "$118K"),
-  C("Community Program Manager", "Counseling & Social Work", "/images/app/browse/community-program-manager.webp", "$103K"),
-  C("Detective", "Law, Safety & Justice", "/images/app/browse/detective.webp", "$109K"),
+  C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.webp", "$559K"),
+  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.webp", "$227K"),
+  C("Purchasing Manager", "Business & Finance", "/images/app/poster-purchasing-manager.webp", "$148K"),
+  C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.webp", "$496K"),
+  C("Public Relations Manager", "Business & Finance", "/images/app/poster-public-relations-manager.webp", "$146K"),
+  C("Veterinarian", "Farming, Animals & Nature", "/images/app/poster-veterinarian.webp", "$130K"),
+];
+
+// "Public Service Careers" (Slack, Chandu M P, 21 Sept 2026): its own row,
+// directly above Typical Pay, not a replacement for it -- these are civic /
+// public-sector roles (social work, city planning, the courts, environmental
+// regulation, public schools, community programs, law enforcement), not a
+// pay tier, so it gets its own theme rather than reusing "$100K +". Fresh
+// photos for Mental Health Social Worker and Community Program Manager (both
+// already existed elsewhere in the catalog) now travel with them everywhere
+// via ALL_CATALOG_CAREERS' first-occurrence merge, since this rail is merged
+// before BROWSE_LIBRARY. Urban Planner, Judicial Law Clerk, Environment
+// Scientist and Principal are new to the app; Detective reuses its existing
+// photo. Pay figures are BLS-approximate national medians (same caveat as
+// GENERATED_PROFILES) -- not inflated to hit any threshold.
+export const BROWSE_PUBLIC_SERVICE: CatalogCareer[] = [
+  C("Mental Health Social Worker", "Counseling & Social Work", "/images/app/browse/mental-health-social-worker.webp", "$59K"),
+  C("Urban Planner", "Building & Construction", "/images/app/browse/urban-planner.webp", "$80K"),
+  C("Judicial Law Clerk", "Law, Safety & Justice", "/images/app/browse/judicial-law-clerk.webp", "$67K"),
+  C("Environment Scientist", "Science & Research", "/images/app/browse/environment-scientist.webp", "$79K"),
+  C("Principal", "Teaching & Education", "/images/app/browse/principal.webp", "$103K"),
+  C("Community Program Manager", "Counseling & Social Work", "/images/app/browse/community-program-manager.webp", "$74K"),
+  C("Detective", "Law, Safety & Justice", "/images/app/browse/detective.webp", "$91K"),
 ];
 
 // Every catalogued career, deduped by title, for lookups that need to search
@@ -149,7 +162,7 @@ const ARTS_FIGMA: CatalogCareer[] = [
 // 2026). Search and the world filter read from this.
 export const ALL_CATALOG_CAREERS: CatalogCareer[] = (() => {
   const seen = new Map<string, CatalogCareer>();
-  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...ARTS_FIGMA, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TYPICAL_PAY, ...BROWSE_LIBRARY]) {
+  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...ARTS_FIGMA, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_PUBLIC_SERVICE, ...BROWSE_TYPICAL_PAY, ...BROWSE_LIBRARY]) {
     if (!seen.has(career.title)) seen.set(career.title, career);
   }
   return [...seen.values()];
