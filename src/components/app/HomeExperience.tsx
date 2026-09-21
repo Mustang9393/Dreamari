@@ -11,6 +11,7 @@ import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, 
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
+import { IconTip } from "@/components/app/IconTip";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
 import { careerSlug } from "@/components/career/slug";
@@ -339,16 +340,17 @@ function HeroBanner() {
          title's way (they used to sit mid-height and cut across the type) */}
       <div className="absolute right-[22px] bottom-[26px] z-[3] hidden items-center gap-[6px] sm:flex">
         {([["Previous highlight", -1, ChevronLeft], ["Next highlight", 1, ChevronRight]] as const).map(([label, delta, Icon]) => (
-          <button
-            key={label}
-            type="button"
-            aria-label={label}
-            onClick={() => step(delta)}
-            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
-            style={{ background: "rgba(12,16,35,0.5)", borderColor: "rgba(255,255,255,0.22)", color: "#fff" }}
-          >
-            <Icon className="h-[18px] w-[18px]" />
-          </button>
+          <IconTip key={label} label={label}>
+            <button
+              type="button"
+              aria-label={label}
+              onClick={() => step(delta)}
+              className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
+              style={{ background: "rgba(12,16,35,0.5)", borderColor: "rgba(255,255,255,0.22)", color: "#fff" }}
+            >
+              <Icon className="h-[18px] w-[18px]" />
+            </button>
+          </IconTip>
         ))}
       </div>
 
@@ -359,39 +361,42 @@ function HeroBanner() {
            holds, so the timing is visible instead of a guess */}
         <div className="flex items-center gap-[5px]">
           {Array.from({ length: PANEL_COUNT }, (_, index) => index).map((index) => (
-            <button
-              key={index}
-              type="button"
-              aria-label={`Panel ${index + 1}`}
-              aria-current={panel === index}
-              onClick={() => setPanel(index)}
-              className="dm-quiet relative -my-[8px] h-[30px] w-[26px] cursor-pointer"
-            >
-              <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.28)" }}>
-                {panel === index && (
-                  <span key={`${panel}-${paused}`} className={`absolute inset-y-0 left-0 rounded-full ${paused ? "" : "motion-safe:animate-[home-hero-seg_7s_linear_forwards]"}`} style={{ background: "#fff", width: paused ? "100%" : undefined }} />
-                )}
-                {panel > index && <span className="absolute inset-0 rounded-full" style={{ background: "#fff" }} />}
-              </span>
-            </button>
+            <IconTip key={index} label={`Panel ${index + 1}`}>
+              <button
+                type="button"
+                aria-label={`Panel ${index + 1}`}
+                aria-current={panel === index}
+                onClick={() => setPanel(index)}
+                className="dm-quiet relative -my-[8px] h-[30px] w-[26px] cursor-pointer"
+              >
+                <span className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.28)" }}>
+                  {panel === index && (
+                    <span key={`${panel}-${paused}`} className={`absolute inset-y-0 left-0 rounded-full ${paused ? "" : "motion-safe:animate-[home-hero-seg_7s_linear_forwards]"}`} style={{ background: "#fff", width: paused ? "100%" : undefined }} />
+                  )}
+                  {panel > index && <span className="absolute inset-0 rounded-full" style={{ background: "#fff" }} />}
+                </span>
+              </button>
+            </IconTip>
           ))}
         </div>
-        <button
-          type="button"
-          aria-label={paused ? "Resume carousel" : "Pause carousel"}
-          aria-pressed={paused}
-          onClick={() => setPaused((value) => !value)}
-          className="dm-link -mx-[8px] -my-[4px] flex h-8 min-w-[32px] cursor-pointer items-center justify-center gap-[4px] px-[8px]"
-        >
-          {paused ? (
-            <span aria-hidden className="ml-[2px] block border-y-[5px] border-l-[8px] border-y-transparent" style={{ borderLeftColor: "var(--foreground)" }} />
-          ) : (
-            <>
-              <span className="h-[10px] w-[2.5px] rounded-[1px]" style={{ background: "var(--foreground)" }} />
-              <span className="h-[10px] w-[2.5px] rounded-[1px]" style={{ background: "var(--foreground)" }} />
-            </>
-          )}
-        </button>
+        <IconTip label={paused ? "Resume carousel" : "Pause carousel"}>
+          <button
+            type="button"
+            aria-label={paused ? "Resume carousel" : "Pause carousel"}
+            aria-pressed={paused}
+            onClick={() => setPaused((value) => !value)}
+            className="dm-link -mx-[8px] -my-[4px] flex h-8 min-w-[32px] cursor-pointer items-center justify-center gap-[4px] px-[8px]"
+          >
+            {paused ? (
+              <span aria-hidden className="ml-[2px] block border-y-[5px] border-l-[8px] border-y-transparent" style={{ borderLeftColor: "var(--foreground)" }} />
+            ) : (
+              <>
+                <span className="h-[10px] w-[2.5px] rounded-[1px]" style={{ background: "var(--foreground)" }} />
+                <span className="h-[10px] w-[2.5px] rounded-[1px]" style={{ background: "var(--foreground)" }} />
+              </>
+            )}
+          </button>
+        </IconTip>
       </div>
       {SHOW_DAILY_DROP && <DailyDropTakeover open={dropOpen} onClose={() => setDropOpen(false)} />}
     </section>

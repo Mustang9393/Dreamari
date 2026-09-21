@@ -5,6 +5,7 @@ import { Check, ChevronLeft, ChevronRight, GripVertical, Loader2, Plus, Sparkles
 import { makeId, removeExperience, upsertExperience, type ExperienceType, type ResumeExperience } from "@/lib/resume";
 import { EXPERIENCE_QUESTIONS, EXPERIENCE_TYPES } from "./data";
 import { Field, ResumeModal, TextInput } from "./ui";
+import { IconTip } from "@/components/app/IconTip";
 
 // Six sub-steps, not four -- the reference's own progress bar shows four
 // stages (Type / Info / Questions / Lines) but Info and Questions are each
@@ -307,9 +308,11 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
                   />
                   <span className="self-end text-[11px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{line.length} / {BULLET_MAX}</span>
                 </div>
+                <IconTip label="Remove line">
                 <button type="button" aria-label="Remove line" onClick={() => setDraft((d) => ({ ...d, bullets: d.bullets.filter((_, j) => j !== i) }))} className="dm-quiet mt-[2px] flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
                   <Trash2 className="h-4 w-4" aria-hidden />
                 </button>
+                </IconTip>
               </div>
             ))}
           </div>

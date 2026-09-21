@@ -8,6 +8,7 @@ import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Info, Plus, 
 import { BorderBeam } from "border-beam";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
+import { IconTip } from "@/components/app/IconTip";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { announce } from "@/components/app/LiveRegion";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
@@ -368,22 +369,24 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
         {career.salary}
       </span>
       {/* select control */}
-      <button
-        type="button"
-        aria-pressed={isSelected}
-        aria-label={isSelected ? `Remove ${career.title} from your Top 3` : `Add ${career.title} to your Top 3`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggle({ clientX: e.clientX, clientY: e.clientY });
-        }}
-        className="absolute top-2 right-2 z-[2] flex size-8 cursor-pointer items-center justify-center rounded-full border-2 backdrop-blur-md transition-transform active:scale-90"
-        style={{
-          background: isSelected ? career.color : "color-mix(in srgb, var(--color-night-background) 55%, transparent)",
-          borderColor: isSelected ? career.color : "rgba(255,255,255,0.5)",
-        }}
-      >
-        {isSelected ? <span className="text-[13px] font-extrabold text-white">{rank}</span> : <Plus className="h-4 w-4 text-white" strokeWidth={2.75} aria-hidden />}
-      </button>
+      <IconTip label={isSelected ? "Remove from Top 3" : "Add to Top 3"} className="absolute top-2 right-2 z-[2]">
+        <button
+          type="button"
+          aria-pressed={isSelected}
+          aria-label={isSelected ? `Remove ${career.title} from your Top 3` : `Add ${career.title} to your Top 3`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle({ clientX: e.clientX, clientY: e.clientY });
+          }}
+          className="flex size-8 cursor-pointer items-center justify-center rounded-full border-2 backdrop-blur-md transition-transform active:scale-90"
+          style={{
+            background: isSelected ? career.color : "color-mix(in srgb, var(--color-night-background) 55%, transparent)",
+            borderColor: isSelected ? career.color : "rgba(255,255,255,0.5)",
+          }}
+        >
+          {isSelected ? <span className="text-[13px] font-extrabold text-white">{rank}</span> : <Plus className="h-4 w-4 text-white" strokeWidth={2.75} aria-hidden />}
+        </button>
+      </IconTip>
     </motion.div>
   );
 }
@@ -440,15 +443,17 @@ function DetailModal({
         style={{ background: "var(--color-night-card)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {/* close */}
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={onClose}
-          className="absolute top-3 right-3 z-[3] flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md"
-          style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" }}
-        >
-          <X className="h-4.5 w-4.5 text-white" aria-hidden />
-        </button>
+        <IconTip label="Close" className="absolute top-3 right-3 z-[3]">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md"
+            style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" }}
+          >
+            <X className="h-4.5 w-4.5 text-white" aria-hidden />
+          </button>
+        </IconTip>
 
         <div className="flow-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {/* hero: 4/3 -> 3/2 (direct feedback, 14 Sept 2026: shorten this
@@ -469,14 +474,18 @@ function DetailModal({
                scrollable card (it used to drift onto "Career Breakdown"
                once the panel's total height exceeded the hero alone). */}
             {onPrev && (
-              <button type="button" aria-label="Previous career" onClick={onPrev} className="absolute top-1/2 left-3 z-[2] flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md" style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" }}>
-                <ChevronLeft className="h-5 w-5 text-white" aria-hidden />
-              </button>
+              <IconTip label="Previous career" className="absolute top-1/2 left-3 z-[2] -translate-y-1/2">
+                <button type="button" aria-label="Previous career" onClick={onPrev} className="flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md" style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" }}>
+                  <ChevronLeft className="h-5 w-5 text-white" aria-hidden />
+                </button>
+              </IconTip>
             )}
             {onNext && (
-              <button type="button" aria-label="Next career" onClick={onNext} className="absolute top-1/2 right-3 z-[2] flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md" style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" }}>
-                <ChevronRight className="h-5 w-5 text-white" aria-hidden />
-              </button>
+              <IconTip label="Next career" className="absolute top-1/2 right-3 z-[2] -translate-y-1/2">
+                <button type="button" aria-label="Next career" onClick={onNext} className="flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md" style={{ background: "color-mix(in srgb, var(--color-night-background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" }}>
+                  <ChevronRight className="h-5 w-5 text-white" aria-hidden />
+                </button>
+              </IconTip>
             )}
             {/* pr-14 keeps the salary chip clear of the close button, which
                floats above this row at the same corner. */}

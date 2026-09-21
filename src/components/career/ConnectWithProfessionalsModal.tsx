@@ -129,8 +129,12 @@ function Row<T>({ items, renderCard, ariaLabel, cardClassName }: { items: T[]; r
       </div>
       {items.length > 1 && (
         <div className={styles.stackNav}>
-          <button type="button" aria-label="Scroll left" onClick={() => scroll(-1)}><ChevronLeft size={17} /></button>
-          <button type="button" aria-label="Scroll right" onClick={() => scroll(1)}><ChevronRight size={17} /></button>
+          <IconTip label="Scroll left">
+            <button type="button" aria-label="Scroll left" onClick={() => scroll(-1)}><ChevronLeft size={17} /></button>
+          </IconTip>
+          <IconTip label="Scroll right">
+            <button type="button" aria-label="Scroll right" onClick={() => scroll(1)}><ChevronRight size={17} /></button>
+          </IconTip>
         </div>
       )}
     </div>
@@ -299,16 +303,20 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
 
   return createPortal(
     <div className={`marketing-v2 themeable ${styles.overlay}`} style={{ "--connect-accent": accent, background: "transparent" } as CSSProperties}>
-      <button type="button" aria-label="Close" onClick={onClose} className={`${styles.backdrop} backdrop-blur-[14px]`} />
+      <button type="button" aria-label="Close" onClick={onClose} className={`${styles.backdrop} backdrop-blur-[28px]`} />
       <motion.div
         ref={dialog} role="dialog" aria-modal="true" aria-labelledby="connect-pros-title" tabIndex={-1}
         className={`${styles.dialog} backdrop-blur-[22px]`} initial={{ opacity: 0, y: reduceMotion ? 0 : 18 }} animate={{ opacity: 1, y: 0 }}
       >
         <header className={styles.toolbar}>
           {view === "profile" ? (
-            <button className={styles.iconButton} aria-label="Back" onClick={() => setView("posts")}><ArrowLeftIcon /></button>
+            <IconTip label="Back">
+              <button className={styles.iconButton} aria-label="Back" onClick={() => setView("posts")}><ArrowLeftIcon /></button>
+            </IconTip>
           ) : view === "posts" ? (
-            <button className={styles.iconButton} aria-label="Back to menu" onClick={() => setView("intro")}><ArrowLeftIcon /></button>
+            <IconTip label="Back to menu">
+              <button className={styles.iconButton} aria-label="Back to menu" onClick={() => setView("intro")}><ArrowLeftIcon /></button>
+            </IconTip>
           ) : (
             <IconTip label="Replay">
               <button className={styles.iconButton} aria-label="Replay" onClick={replay}><RotateCcw className="h-4 w-4" aria-hidden /></button>
@@ -333,7 +341,9 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
           {/* Was a "Close" text button AND this X icon, both doing the
              identical thing (direct feedback, 21 Sept 2026: "there is
              close and x... this was a mistake, only x will remain"). */}
-          <button className={styles.iconButton} aria-label="Close" onClick={onClose}><X size={18} /></button>
+          <IconTip label="Close">
+            <button className={styles.iconButton} aria-label="Close" onClick={onClose}><X size={18} /></button>
+          </IconTip>
         </header>
 
         <div ref={content} className={styles.content}>

@@ -11,6 +11,7 @@ import { useGlobalTheme } from "./theme";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
 import { useStudentAvatarSrc } from "@/lib/avatar";
 import { STUDENT } from "@/components/profile/data";
+import { IconTip } from "@/components/app/IconTip";
 
 // The student's generated avatar doubles as the Profile entry point in both
 // navs (direct feedback, 8 Sept 2026: "the avatar in the top navbar is still
@@ -185,18 +186,20 @@ const DEMO_LINKS = [
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
   const router = useRouter();
   return (
-    <button
-      type="button"
-      aria-label="Go back"
-      onClick={() => {
-        if (window.history.length > 1) router.back();
-        else router.push(fallback);
-      }}
-      className={`dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] ${className}`}
-      style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-    >
-      <ChevronLeft className="h-5 w-5" />
-    </button>
+    <IconTip label="Go back">
+      <button
+        type="button"
+        aria-label="Go back"
+        onClick={() => {
+          if (window.history.length > 1) router.back();
+          else router.push(fallback);
+        }}
+        className={`dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] ${className}`}
+        style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+    </IconTip>
   );
 }
 
@@ -271,16 +274,18 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
   }, [open]);
   return (
     <div className={className ?? "relative"}>
-      <button
-        type="button"
-        aria-label={open ? "Close quick links" : "Quick links"}
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-        className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full"
-        style={{ color: open ? "var(--primary)" : "var(--foreground)" }}
-      >
-        {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
+      <IconTip label={open ? "Close quick links" : "Quick links"}>
+        <button
+          type="button"
+          aria-label={open ? "Close quick links" : "Quick links"}
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+          className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full"
+          style={{ color: open ? "var(--primary)" : "var(--foreground)" }}
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </IconTip>
       {open && (
         <>
           <button type="button" aria-label="Close quick links" onClick={() => setOpen(false)} className="fixed inset-0 z-40 cursor-default" />
@@ -395,9 +400,11 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
                lands there after Build (Joshua Pierce, Slack, 6 Sept 2026). */}
             <DreamScoreChip />
             <NotificationsButton />
-            <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
-              <Image src={avatarSrc} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
-            </Link>
+            <IconTip label="My Profile">
+              <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
+                <Image src={avatarSrc} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
+              </Link>
+            </IconTip>
             <QuickLinksMenu />
           </div>
         </header>
@@ -460,35 +467,38 @@ export function MobileNav({ active }: { active: string }) {
       {MOBILE_ITEMS.map(({ label, href, Icon }) => {
         const isActive = label === active;
         return (
-          <Link
-            key={label}
-            href={href}
-            prefetch={false}
-            aria-label={label}
-            aria-current={isActive ? "page" : undefined}
-            className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
-            style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)" }}
-          >
-            <Icon className="h-6 w-6" strokeWidth={isActive ? 2.4 : 2} />
-          </Link>
+          <IconTip key={label} label={label}>
+            <Link
+              href={href}
+              prefetch={false}
+              aria-label={label}
+              aria-current={isActive ? "page" : undefined}
+              className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
+              style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)" }}
+            >
+              <Icon className="h-6 w-6" strokeWidth={isActive ? 2.4 : 2} />
+            </Link>
+          </IconTip>
         );
       })}
-      <Link
-        href="/profile"
-        prefetch={false}
-        aria-label="My Profile"
-        aria-current={active === "Profile" ? "page" : undefined}
-        className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
-      >
-        <Image
-          src={avatarSrc}
-          alt=""
-          width={56}
-          height={56}
-          className="block size-7 rounded-full border-[1.5px] object-cover"
-          style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
-        />
-      </Link>
+      <IconTip label="My Profile">
+        <Link
+          href="/profile"
+          prefetch={false}
+          aria-label="My Profile"
+          aria-current={active === "Profile" ? "page" : undefined}
+          className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
+        >
+          <Image
+            src={avatarSrc}
+            alt=""
+            width={56}
+            height={56}
+            className="block size-7 rounded-full border-[1.5px] object-cover"
+            style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
+          />
+        </Link>
+      </IconTip>
     </nav>
   );
 }

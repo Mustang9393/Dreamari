@@ -6,6 +6,7 @@ import { BorderBeam } from "border-beam";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { ChapterShell } from "../ChapterShell";
 import { usePlayingOnScroll, advanceTo } from "../scrollHooks";
+import { IconTip } from "@/components/app/IconTip";
 
 // All three cards are real Business/Money/Office-world careers with real copy pulled
 // from the vetted 322-career taxonomy spreadsheet — no invented blurbs. Salaries are the
@@ -299,27 +300,29 @@ function MatchDemo() {
                       {card.key === "iba" && (
                         <div className="absolute mkt-scale-pulse" style={{ top: "calc(var(--mu) * 10px)", left: "calc(var(--mu) * 10px)" }}>
                           <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                selectTop();
-                              }}
-                              aria-label={`Match with ${card.title}`}
-                              className="flex items-center justify-center rounded-full border-2"
-                              style={{
-                                width: "calc(var(--mu) * 34px)",
-                                height: "calc(var(--mu) * 34px)",
-                                color: "#fff",
-                                background: "rgba(5,7,15,0.55)",
-                                borderColor: "rgba(255,255,255,0.7)",
-                                backdropFilter: "blur(6px)",
-                                WebkitBackdropFilter: "blur(6px)",
-                                boxShadow: "0 4px 14px -4px rgba(0,0,0,0.5)",
-                              }}
-                            >
-                              <Plus style={{ width: "calc(var(--mu) * 18px)", height: "calc(var(--mu) * 18px)" }} strokeWidth={2.8} aria-hidden />
-                            </button>
+                            <IconTip label={`Match with ${card.title}`}>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  selectTop();
+                                }}
+                                aria-label={`Match with ${card.title}`}
+                                className="flex items-center justify-center rounded-full border-2"
+                                style={{
+                                  width: "calc(var(--mu) * 34px)",
+                                  height: "calc(var(--mu) * 34px)",
+                                  color: "#fff",
+                                  background: "rgba(5,7,15,0.55)",
+                                  borderColor: "rgba(255,255,255,0.7)",
+                                  backdropFilter: "blur(6px)",
+                                  WebkitBackdropFilter: "blur(6px)",
+                                  boxShadow: "0 4px 14px -4px rgba(0,0,0,0.5)",
+                                }}
+                              >
+                                <Plus style={{ width: "calc(var(--mu) * 18px)", height: "calc(var(--mu) * 18px)" }} strokeWidth={2.8} aria-hidden />
+                              </button>
+                            </IconTip>
                           </BorderBeam>
                         </div>
                       )}
@@ -418,15 +421,17 @@ function MatchDemo() {
         )}
         {!matched && (
           <div className="flex" style={{ gap: "calc(var(--mu) * 18px)" }}>
-            <button
-              type="button"
-              aria-label="Previous career"
-              onClick={back}
-              className="flex items-center justify-center rounded-full border"
-              style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
-            >
-              <ChevronLeft style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }} strokeWidth={2.5} aria-hidden />
-            </button>
+            <IconTip label="Previous career">
+              <button
+                type="button"
+                aria-label="Previous career"
+                onClick={back}
+                className="flex items-center justify-center rounded-full border"
+                style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
+              >
+                <ChevronLeft style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }} strokeWidth={2.5} aria-hidden />
+              </button>
+            </IconTip>
             {/* Nudges paging forward through the deck -- the next logical action
                once swipe-to-like was sunsetted (direct feedback, 13 Sept 2026) --
                except on Investment Banking, where the nudge hands off to the "+"
@@ -440,15 +445,17 @@ function MatchDemo() {
                later in the DOM) silently wins over a plain class doing the same. */}
             <div className={top?.key !== "iba" ? "mkt-scale-pulse" : undefined}>
               <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={top?.key !== "iba"}>
-                <button
-                  type="button"
-                  aria-label="Next career"
-                  onClick={advance}
-                  className="flex items-center justify-center rounded-full border"
-                  style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
-                >
-                  <ChevronRight style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }} strokeWidth={2.5} aria-hidden />
-                </button>
+                <IconTip label="Next career">
+                  <button
+                    type="button"
+                    aria-label="Next career"
+                    onClick={advance}
+                    className="flex items-center justify-center rounded-full border"
+                    style={{ width: "calc(var(--mu) * 52px)", height: "calc(var(--mu) * 52px)", background: "var(--glass-surface-2)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}
+                  >
+                    <ChevronRight style={{ width: "calc(var(--mu) * 22px)", height: "calc(var(--mu) * 22px)" }} strokeWidth={2.5} aria-hidden />
+                  </button>
+                </IconTip>
               </BorderBeam>
             </div>
           </div>

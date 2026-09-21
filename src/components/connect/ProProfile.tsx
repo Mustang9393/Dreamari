@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X, MessagesSquare } from "lucide-react";
 import { Meter, Ring, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { IconTip } from "@/components/app/IconTip";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
@@ -688,9 +689,11 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
           <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
             <div className="flex items-center justify-between gap-[var(--space-3)]">
               <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Cover photo</h3>
-              <button type="button" onClick={() => setCoverOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                <X className="h-4 w-4" aria-hidden />
-              </button>
+              <IconTip label="Close">
+                <button type="button" onClick={() => setCoverOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </IconTip>
             </div>
             <div className="grid grid-cols-3 gap-[8px]">
               {PRO_COVERS.map((url) => (

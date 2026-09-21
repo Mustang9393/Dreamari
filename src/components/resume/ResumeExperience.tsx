@@ -366,7 +366,7 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
       </div>
 
       {confirmDelete && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[120] flex items-end justify-center p-4 backdrop-blur-[14px] sm:items-center" style={{ background: "rgba(5,7,15,0.55)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setConfirmDelete(null); }}>
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[120] flex items-end justify-center p-4 backdrop-blur-[28px] sm:items-center" style={{ background: "rgba(5,7,15,0.55)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setConfirmDelete(null); }}>
           <div className="flex w-full max-w-[400px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
             <p className="text-[18px] leading-[24px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Delete &ldquo;{confirmDelete.name}&rdquo;?</p>
             <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>This only removes this saved resume. Your education, experience, and skills stay in your profile.</p>

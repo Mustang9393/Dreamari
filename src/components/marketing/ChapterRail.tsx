@@ -1,6 +1,7 @@
 "use client";
 
 import { advanceTo } from "./scrollHooks";
+import { IconTip } from "@/components/app/IconTip";
 
 import { type RefObject, useEffect, useRef, useState } from "react";
 
@@ -82,24 +83,25 @@ export function ChapterRail({ wrapRef }: ChapterRailProps) {
         const isActive = chapter.id === activeId;
         const isPassed = i < activeIndex;
         return (
-          <button
-            key={chapter.id}
-            type="button"
-            aria-label={chapter.label}
-            onClick={() => advanceTo(chapter.id)}
-            className="group relative z-[2] flex h-3.5 w-3.5 items-center justify-center p-1"
-          >
-            <span
-              className="rounded-full transition-all duration-250"
-              style={{
-                width: isActive ? "8px" : "6px",
-                height: isActive ? "8px" : "6px",
-                background: isActive || isPassed ? chapter.color : "var(--card)",
-                border: `1.5px solid ${chapter.color}`,
-                opacity: isPassed && !isActive ? 0.5 : 1,
-              }}
-            />
-          </button>
+          <IconTip key={chapter.id} label={chapter.label} className="relative z-[2]">
+            <button
+              type="button"
+              aria-label={chapter.label}
+              onClick={() => advanceTo(chapter.id)}
+              className="group flex h-3.5 w-3.5 items-center justify-center p-1"
+            >
+              <span
+                className="rounded-full transition-all duration-250"
+                style={{
+                  width: isActive ? "8px" : "6px",
+                  height: isActive ? "8px" : "6px",
+                  background: isActive || isPassed ? chapter.color : "var(--card)",
+                  border: `1.5px solid ${chapter.color}`,
+                  opacity: isPassed && !isActive ? 0.5 : 1,
+                }}
+              />
+            </button>
+          </IconTip>
         );
       })}
     </nav>

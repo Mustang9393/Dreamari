@@ -133,14 +133,18 @@ export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
 // Scientist and Principal are new to the app; Detective reuses its existing
 // photo. Pay figures are BLS-approximate national medians (same caveat as
 // GENERATED_PROFILES) -- not inflated to hit any threshold.
+// No salary badge on these cards (direct feedback, 21 Sept 2026): the row
+// is a civic theme, not a pay tier, so a dollar figure on every card would
+// misread it as one again. The pay data still lives on each career's own
+// detail page via its GENERATED_PROFILES entry (profiles.generated.ts).
 export const BROWSE_PUBLIC_SERVICE: CatalogCareer[] = [
-  C("Mental Health Social Worker", "Counseling & Social Work", "/images/app/browse/mental-health-social-worker.webp", "$59K"),
-  C("Urban Planner", "Building & Construction", "/images/app/browse/urban-planner.webp", "$80K"),
-  C("Judicial Law Clerk", "Law, Safety & Justice", "/images/app/browse/judicial-law-clerk.webp", "$67K"),
-  C("Environment Scientist", "Science & Research", "/images/app/browse/environment-scientist.webp", "$79K"),
-  C("Principal", "Teaching & Education", "/images/app/browse/principal.webp", "$103K"),
-  C("Community Program Manager", "Counseling & Social Work", "/images/app/browse/community-program-manager.webp", "$74K"),
-  C("Detective", "Law, Safety & Justice", "/images/app/browse/detective.webp", "$91K"),
+  C("Mental Health Social Worker", "Counseling & Social Work", "/images/app/browse/mental-health-social-worker.webp"),
+  C("Urban Planner", "Building & Construction", "/images/app/browse/urban-planner.webp"),
+  C("Judicial Law Clerk", "Law, Safety & Justice", "/images/app/browse/judicial-law-clerk.webp"),
+  C("Environment Scientist", "Science & Research", "/images/app/browse/environment-scientist.webp"),
+  C("Principal", "Teaching & Education", "/images/app/browse/principal.webp"),
+  C("Community Program Manager", "Counseling & Social Work", "/images/app/browse/community-program-manager.webp"),
+  C("Detective", "Law, Safety & Justice", "/images/app/browse/detective.webp"),
 ];
 
 // Every catalogued career, deduped by title, for lookups that need to search

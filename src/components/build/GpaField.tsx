@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { ChevronDown, Check, X } from "lucide-react";
 import { GPA_BELOW, GPA_HIGHER, GPA_NOT_USED, GPA_SCALE } from "./types";
+import { IconTip } from "@/components/app/IconTip";
 import styles from "./GpaField.module.css";
 
 const choices = [GPA_HIGHER, ...GPA_SCALE.slice(1, -1).reverse(), GPA_BELOW];
@@ -76,7 +77,9 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
         <div className={styles.panel}>
           <div className={styles.heading}>
             <div><h2 id="gpa-picker-title">Select your GPA</h2><p>Choose the closest value.</p></div>
-            <button type="button" className={styles.close} aria-label="Close GPA picker" onClick={closePicker}><X size={19} aria-hidden /></button>
+            <IconTip label="Close">
+              <button type="button" className={styles.close} aria-label="Close GPA picker" onClick={closePicker}><X size={19} aria-hidden /></button>
+            </IconTip>
           </div>
           <div className={styles.grid} role="group" aria-label="GPA values">
             {choices.map((choice, index) => (

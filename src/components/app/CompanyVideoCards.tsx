@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Bookmark, Play, Volume2, VolumeX, X } from "lucide-react";
 import { LetterMark } from "@/components/connect/primitives";
+import { IconTip } from "@/components/app/IconTip";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 import { setVideoSoundMuted, useVideoSoundMuted } from "./videoSound";
@@ -155,29 +156,33 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
       />
       {/* Top-left: save for later (Profile > Saved > Videos), same corner
          convention as the college/career bookmark toggles elsewhere. */}
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); toggleSaved(item.video); }}
-        aria-label={saved ? `Remove ${item.title} from Saved` : `Save ${item.title}`}
-        aria-pressed={saved}
-        className="dm-tap absolute top-[10px] left-[10px] z-[1] flex size-[34px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 hover:scale-110"
-        style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
-      >
-        <Bookmark className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} fill={saved ? "#FFFFFF" : "none"} />
-      </button>
+      <IconTip label={saved ? "Remove from Saved" : "Save video"} className="absolute top-[10px] left-[10px] z-[1]">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); toggleSaved(item.video); }}
+          aria-label={saved ? `Remove ${item.title} from Saved` : `Save ${item.title}`}
+          aria-pressed={saved}
+          className="dm-tap flex size-[34px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 hover:scale-110"
+          style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+        >
+          <Bookmark className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} fill={saved ? "#FFFFFF" : "none"} />
+        </button>
+      </IconTip>
       {/* Top-right badge: a play glyph before anything has played, then a
          real mute/unmute toggle once the clip is playing. */}
       {playing ? (
-        <button
-          type="button"
-          onClick={toggleSound}
-          aria-label={elMuted ? "Unmute" : "Mute"}
-          aria-pressed={!elMuted}
-          className="absolute top-[10px] right-[10px] z-[1] flex size-[34px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 hover:scale-110"
-          style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
-        >
-          {elMuted ? <VolumeX className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} /> : <Volume2 className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} />}
-        </button>
+        <IconTip label={elMuted ? "Unmute" : "Mute"} className="absolute top-[10px] right-[10px] z-[1]">
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-label={elMuted ? "Unmute" : "Mute"}
+            aria-pressed={!elMuted}
+            className="flex size-[34px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 hover:scale-110"
+            style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
+          >
+            {elMuted ? <VolumeX className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} /> : <Volume2 className="h-[15px] w-[15px]" style={{ color: "#FFFFFF" }} />}
+          </button>
+        </IconTip>
       ) : (
         <span
           aria-hidden
@@ -218,7 +223,7 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
       role="dialog"
       aria-modal="true"
       aria-label={`${item.company}: ${item.title}`}
-      className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-4)] backdrop-blur-[16px]"
+      className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-4)] backdrop-blur-[28px]"
       style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }}
       onClick={onClose}
     >
@@ -234,15 +239,17 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
              the eye already is (direct feedback, 5 Sept 2026: "easily
              closeable... on the top right of the card"). Backdrop click
              and Escape still close it too. */}
-          <button
-            type="button"
-            aria-label="Close video"
-            onClick={onClose}
-            className="dm-quiet absolute top-[10px] right-[10px] z-[1] flex size-10 cursor-pointer items-center justify-center rounded-full border"
-            style={{ background: "rgba(0,0,0,0.5)", borderColor: "rgba(255,255,255,0.3)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <IconTip label="Close video" className="absolute top-[10px] right-[10px] z-[1]">
+            <button
+              type="button"
+              aria-label="Close video"
+              onClick={onClose}
+              className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border"
+              style={{ background: "rgba(0,0,0,0.5)", borderColor: "rgba(255,255,255,0.3)", color: "#FFFFFF", backdropFilter: "blur(6px)" }}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </IconTip>
           <video
             src={item.video}
             poster={item.poster}

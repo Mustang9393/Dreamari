@@ -316,7 +316,7 @@ function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonN
   if (typeof document === "undefined") return null;
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)", background: "transparent" }}>
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
       <div
         className="dm-scroll relative z-[1] flex max-h-[92dvh] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
         style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", color: "var(--foreground)" }}
@@ -326,9 +326,11 @@ function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonN
             <h2 id="degree-sheet-title" className={BIG} style={DISPLAY}>What you need to get in</h2>
             <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>{career}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
-            <X className="h-4 w-4" aria-hidden />
-          </button>
+          <IconTip label="Close">
+            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </IconTip>
         </div>
 
         <dl className="flex flex-col gap-[8px]">

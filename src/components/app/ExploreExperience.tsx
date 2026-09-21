@@ -12,6 +12,7 @@ import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Sear
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
+import { IconTip } from "@/components/app/IconTip";
 
 import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
@@ -653,16 +654,18 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
       style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
     >
       <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" loop playsInline preload={active ? "auto" : "none"} />
-      <button
-        type="button"
-        aria-label={soundOn ? "Mute video" : "Unmute video"}
-        aria-pressed={soundOn}
-        onClick={() => onSoundChange(!soundOn)}
-        className="dm-quiet absolute top-[var(--space-4)] right-[var(--space-4)] z-[1] flex size-9 cursor-pointer items-center justify-center rounded-full border"
-        style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
-      >
-        {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-      </button>
+      <IconTip label={soundOn ? "Mute video" : "Unmute video"} className="absolute top-[var(--space-4)] right-[var(--space-4)] z-[1]">
+        <button
+          type="button"
+          aria-label={soundOn ? "Mute video" : "Unmute video"}
+          aria-pressed={soundOn}
+          onClick={() => onSoundChange(!soundOn)}
+          className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border"
+          style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", color: "#ffffff" }}
+        >
+          {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+        </button>
+      </IconTip>
       <div className="relative z-[1] p-[var(--space-4)] pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-[var(--space-4)]">
         {/* Same rounded panel language as the Env Card v2 details panel, but
            a SOLID scrim rather than the frosted-glass blur -- blurring part
@@ -687,18 +690,20 @@ function ForYouCard({ item, active, soundOn, onSoundChange }: { item: ReelItem; 
 
 function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: typeof Heart; bare?: boolean }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border transition-transform duration-150 hover:-translate-y-px active:scale-95"
-      style={{
-        background: bare ? "transparent" : "var(--glass-surface-1)",
-        borderColor: bare ? "transparent" : "var(--glass-border)",
-        color: "var(--foreground)",
-      }}
-    >
-      <Icon className="h-6 w-6" />
-    </button>
+    <IconTip label={label}>
+      <button
+        type="button"
+        aria-label={label}
+        className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border transition-transform duration-150 hover:-translate-y-px active:scale-95"
+        style={{
+          background: bare ? "transparent" : "var(--glass-surface-1)",
+          borderColor: bare ? "transparent" : "var(--glass-border)",
+          color: "var(--foreground)",
+        }}
+      >
+        <Icon className="h-6 w-6" />
+      </button>
+    </IconTip>
   );
 }
 
@@ -829,26 +834,30 @@ function ForYouFace() {
 
       {/* Previous / Next paging */}
       <div className="absolute right-0 hidden flex-col gap-[10px] md:flex">
-        <button
-          type="button"
-          aria-label="Previous career"
-          disabled={active === 0}
-          onClick={() => step(-1)}
-          className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
-          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-        >
-          <ChevronUp className="h-5 w-5" />
-        </button>
-        <button
-          type="button"
-          aria-label="Next career"
-          disabled={active >= total - 1}
-          onClick={() => step(1)}
-          className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
-          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-        >
-          <ChevronDown className="h-5 w-5" />
-        </button>
+        <IconTip label="Previous career">
+          <button
+            type="button"
+            aria-label="Previous career"
+            disabled={active === 0}
+            onClick={() => step(-1)}
+            className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
+            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          >
+            <ChevronUp className="h-5 w-5" />
+          </button>
+        </IconTip>
+        <IconTip label="Next career">
+          <button
+            type="button"
+            aria-label="Next career"
+            disabled={active >= total - 1}
+            onClick={() => step(1)}
+            className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border disabled:cursor-default disabled:opacity-40"
+            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          >
+            <ChevronDown className="h-5 w-5" />
+          </button>
+        </IconTip>
       </div>
     </div>
   );
@@ -922,27 +931,30 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
           <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou} />
           <div className="flex items-center gap-[10px]">
             {tab === "browse" && (
+              <IconTip label="Search">
+                <button
+                  type="button"
+                  aria-label="Search"
+                  aria-pressed={searchOpen}
+                  onClick={() => setSearchOpen((value) => !value)}
+                  className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+                  style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: searchOpen ? "var(--primary)" : "var(--foreground)" }}
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </IconTip>
+            )}
+            <IconTip label="Schools">
               <button
                 type="button"
-                aria-label="Search"
-                aria-pressed={searchOpen}
-                onClick={() => setSearchOpen((value) => !value)}
+                aria-label="Find a college"
+                onClick={() => router.push("/colleges")}
                 className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-                style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: searchOpen ? "var(--primary)" : "var(--foreground)" }}
+                style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
               >
-                <Search className="h-4 w-4" />
+                <GraduationCap className="h-4 w-4" />
               </button>
-            )}
-            <button
-              type="button"
-              aria-label="Find a college"
-              title="Schools"
-              onClick={() => router.push("/colleges")}
-              className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-              style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-            >
-              <GraduationCap className="h-4 w-4" />
-            </button>
+            </IconTip>
           </div>
         </div>
         {/* Explore Header (desktop) */}
@@ -975,9 +987,11 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                   borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",
                 }}
               >
-                <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="dm-link flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
-                  <Search className="h-4 w-4" />
-                </button>
+                <IconTip label="Search">
+                  <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="dm-link flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
+                    <Search className="h-4 w-4" />
+                  </button>
+                </IconTip>
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
@@ -989,15 +1003,17 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                   style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", opacity: searchOpen ? 1 : 0, pointerEvents: searchOpen ? "auto" : "none" }}
                 />
                 {searchOpen && (
-                  <button
-                    type="button"
-                    aria-label="Close search"
-                    onClick={() => (query ? setQuery("") : setSearchOpen(false))}
-                    className="dm-quiet flex h-7 flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
-                    style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+                  <IconTip label="Close search">
+                    <button
+                      type="button"
+                      aria-label="Close search"
+                      onClick={() => (query ? setQuery("") : setSearchOpen(false))}
+                      className="dm-quiet flex h-7 flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
+                      style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </IconTip>
                 )}
               </div>
               </BorderBeam>
@@ -1027,15 +1043,17 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
               className="dm-beam-input min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none placeholder:text-[color:var(--muted-foreground)]"
               style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
             />
-            <button
-              type="button"
-              aria-label="Clear search"
-              onClick={() => (query ? setQuery("") : setSearchOpen(false))}
-              className="dm-quiet flex h-8 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
-              style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
-            >
-              <X className="h-3 w-3" />
-            </button>
+            <IconTip label="Clear search">
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => (query ? setQuery("") : setSearchOpen(false))}
+                className="dm-quiet flex h-8 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
+                style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </IconTip>
           </div>
           </BorderBeam>
         )}

@@ -7,6 +7,7 @@ import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { RESUME_TEMPLATES, RESUME_TEMPLATE_GALLERY_DREAMY, SAMPLE_RESUME_DATA, type ResumeTemplateId } from "./data";
 import { ResumeDocument } from "./ResumeDocument";
 import { selectedRowStyle } from "./ui";
+import { IconTip } from "@/components/app/IconTip";
 
 function UseTemplateButton({ onClick }: { onClick: () => void }) {
   return (
@@ -115,12 +116,14 @@ export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId)
 
       {previewTemplate && (
         <Portal>
-          <div className="fixed inset-0 z-[150] flex flex-col backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--color-night-background) 62%, transparent)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setPreviewing(null); }}>
+          <div className="fixed inset-0 z-[150] flex flex-col backdrop-blur-[28px]" style={{ background: "color-mix(in srgb, var(--color-night-background) 62%, transparent)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setPreviewing(null); }}>
             <div className="flex flex-none items-center justify-between px-5 py-4">
               <span className="text-[13px] font-bold tracking-[0.06em] text-white uppercase">{previewTemplate.label}</span>
+              <IconTip label="Close">
               <button type="button" aria-label="Close" onClick={() => setPreviewing(null)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border border-white/20 text-white">
                 <X className="h-4 w-4" aria-hidden />
               </button>
+              </IconTip>
             </div>
             <div className="dm-scroll flex-1 overflow-auto px-5 pb-5">
               <div className="mx-auto w-full max-w-[460px]">

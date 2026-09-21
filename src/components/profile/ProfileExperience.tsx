@@ -6,6 +6,7 @@ import Image from "next/image";
 import { AVATAR_POOL, useStudentAvatarSrc, writeAvatarOverride } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { UndoToast } from "@/components/app/UndoToast";
+import { IconTip } from "@/components/app/IconTip";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -532,13 +533,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   <Portal>
                   <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose a cover photo" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
                     {/* the page stays visible behind a frosted overlay, never a black screen */}
-                    <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+                    <button type="button" aria-label="Close" onClick={() => setCoverOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
                     <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
                       <div className="flex items-center justify-between gap-[var(--space-3)]">
                         <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Cover photo</h3>
+                        <IconTip label="Close">
                         <button type="button" onClick={() => setCoverOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
                           <X className="h-4 w-4" aria-hidden />
                         </button>
+                        </IconTip>
                       </div>
                       {/* Same max-h + overflow-y-auto pattern as the avatar
                          picker's own grid just below -- with 21 covers now
@@ -640,6 +643,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   className="size-[72px] flex-none rounded-full border-2 object-cover"
                   style={{ borderColor: "rgba(255,255,255,0.9)" }}
                 />
+                <IconTip label="Change picture">
                 <button
                   type="button"
                   aria-label="Change your picture"
@@ -650,16 +654,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 >
                   <Pencil className="h-3 w-3" strokeWidth={2.75} aria-hidden />
                 </button>
+                </IconTip>
                 {avatarPickerOpen && (
                   <Portal>
                     <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label="Choose your picture" style={{ textShadow: "none", fontFamily: "var(--font-body)" }}>
-                      <button type="button" aria-label="Close" onClick={() => setAvatarPickerOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+                      <button type="button" aria-label="Close" onClick={() => setAvatarPickerOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
                       <div className="relative z-[1] flex w-full max-w-[480px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
                         <div className="flex items-center justify-between gap-[var(--space-3)]">
                           <h3 className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Choose your picture</h3>
+                          <IconTip label="Close">
                           <button type="button" onClick={() => setAvatarPickerOpen(false)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
                             <X className="h-4 w-4" aria-hidden />
                           </button>
+                          </IconTip>
                         </div>
                         {/* dm-scroll: same thin, quiet scrollbar treatment
                            as the Cover photo picker just above (direct
@@ -981,9 +988,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Add to your Top 3</p>
                 <p className="mt-[2px] text-[14px]" style={{ color: "var(--muted-foreground)" }}>{3 - top3.length} open {top3.length === 2 ? "slot" : "slots"} · from Saved</p>
               </div>
+              <IconTip label="Close">
               <button type="button" aria-label="Close" onClick={() => setAddOpen(false)} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
                 <X className="h-4 w-4" />
               </button>
+              </IconTip>
             </div>
             <div className="dm-scroll mt-[var(--space-4)] flex max-h-[50vh] flex-col gap-[var(--space-2)] overflow-y-auto">
               {locker.length === 0 && (
@@ -1178,6 +1187,7 @@ function Top3Tab({
                 </span>
               )}
               <div className="absolute top-[6px] right-[6px] z-[3]">
+                <IconTip label="More options">
                 <button
                   type="button"
                   aria-label={`More options for ${career.title}`}
@@ -1188,6 +1198,7 @@ function Top3Tab({
                 >
                   <MoreVertical className="h-4 w-4" />
                 </button>
+                </IconTip>
                 {menuFor === id && (
                   <>
                     <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setMenuFor(null)} />
@@ -1319,16 +1330,18 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
     .filter((entry): entry is { career: ProfileCareer; report: NonNullable<ReturnType<typeof reportV2>> } => Boolean(entry.report));
   return (
     <div className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(8px)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="relative mx-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex flex-col gap-[2px]">
             <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Side by side</span>
             <h3 id="compare-sheet-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My top {entries.length}</h3>
           </span>
+          <IconTip label="Close">
           <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison">
             <X className="h-5 w-5" aria-hidden />
           </button>
+          </IconTip>
         </div>
         <div className="dm-report dm-scroll min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
           {entries.length > 1 ? (
@@ -1803,7 +1816,7 @@ function EvidenceSheet({
 
   return (
     <div className="no-print fixed inset-0 z-[120] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="evidence-intro">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(8px)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="dm-scroll relative flex w-full max-w-[560px] flex-col gap-[var(--space-4)] overflow-y-auto border-l p-5 pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] pt-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
         <span className="flex flex-col gap-[3px]">
@@ -1813,9 +1826,11 @@ function EvidenceSheet({
             Only things you chose, did or wrote. If something here is wrong, fix it and the report changes with it.
           </span>
         </span>
+        <IconTip label="Close">
         <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close evidence">
           <X className="h-5 w-5" aria-hidden />
         </button>
+        </IconTip>
       </div>
       <div role="group" aria-label="Filter evidence" className="flex w-fit gap-[3px] rounded-[var(--radius-md)] border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
         {([["all", "Everything"], ["career", focus ? `Just ${focus.title}` : "This career"]] as const).map(([value, label]) => (
@@ -2051,11 +2066,13 @@ function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose
   return (
     <Portal>
     <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(8px)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />
       <div className="relative flex max-h-[92dvh] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-        <button type="button" onClick={onClose} className="dm-quiet absolute top-[10px] right-[10px] z-10 flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close details">
+        <IconTip label="Close" className="absolute top-[10px] right-[10px] z-10">
+        <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close details">
           <X className="h-5 w-5" aria-hidden />
         </button>
+        </IconTip>
         <div className="dm-scroll min-h-0 flex-1 overflow-y-auto p-[var(--space-4)] pb-[calc(env(safe-area-inset-bottom)+var(--space-5))] sm:p-[var(--space-5)]">
           <RouteColumn route={route} majors={majors} selected={selected} onSelect={onSelect} onGoPlan={onGoPlan} inModal />
         </div>
@@ -2331,13 +2348,17 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
                         return (
                           <div key={s.id} className="flex items-center gap-[12px] border-t py-[11px]" style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
                             {s.counselorVerified ? (
+                              <IconTip label="What to do">
                               <button type="button" aria-label={`${s.title}: what to do`} onClick={() => setNoteStep(s)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border border-dashed md:size-[22px]" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
                                 <Lock className="h-3 w-3" style={{ color: "var(--muted-foreground)" }} aria-hidden />
                               </button>
+                              </IconTip>
                             ) : (
+                              <IconTip label={complete ? "Mark not done" : "Mark done"}>
                               <button type="button" aria-label={complete ? `Mark "${s.title}" not done` : `Mark "${s.title}" done`} onClick={() => toggle(s.id)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border md:size-[22px]" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
                                 {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
                               </button>
+                              </IconTip>
                             )}
                             {s.href && !complete ? (
                               <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px]">
@@ -2367,7 +2388,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
       {noteStep && (
         <Portal>
           <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label={noteStep.title}>
-            <button type="button" aria-label="Close" onClick={() => setNoteStep(null)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }} />
+            <button type="button" aria-label="Close" onClick={() => setNoteStep(null)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
             <div className="relative z-[1] flex w-full max-w-[380px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
               <div className="flex items-start justify-between gap-[var(--space-3)]">
                 <div className="flex items-center gap-[10px]">
@@ -2376,9 +2397,11 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
                   </span>
                   <h3 className="text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{noteStep.title}</h3>
                 </div>
+                <IconTip label="Close">
                 <button type="button" onClick={() => setNoteStep(null)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
                   <X className="h-4 w-4" aria-hidden />
                 </button>
+                </IconTip>
               </div>
               <p className="text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>{noteStep.counselorNote}</p>
               <p className="text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>Your counselor confirms this one on their own dashboard, so it can&apos;t be checked off here.</p>
@@ -2751,15 +2774,17 @@ function VideosShelf() {
             <Image src={v.poster} alt="" fill sizes="220px" className="object-cover" />
           </span>
           {/* Same unsave gap as SchoolsShelf (direct feedback, 21 Sept 2026). */}
+          <IconTip label="Remove" className="absolute top-[8px] right-[8px] z-10">
           <button
             type="button"
             aria-label="Remove from saved"
             onClick={() => toggleSaved(v.video)}
-            className="dm-quiet absolute top-[8px] right-[8px] z-10 flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
+            className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
             style={{ borderColor: "rgba(255,255,255,0.22)", background: "rgba(12,16,35,0.55)", color: "#fff", backdropFilter: "blur(8px)" }}
           >
             <X className="h-[16px] w-[16px]" aria-hidden />
           </button>
+          </IconTip>
           <span className="dm-glass flex flex-col gap-[2px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="truncate text-[14px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{v.title}</span>
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{v.company}</span>
@@ -2788,9 +2813,11 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Saved</h2>
         <span className="flex items-center gap-[var(--space-3)]">
           <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{SHELF_COUNT[shelf]} {shelf === "events" ? "kept" : "saved"}</span>
+          <IconTip label="Close">
           <button type="button" aria-label="Close Saved" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
+          </IconTip>
         </span>
       </div>
       <div role="tablist" aria-label="Locker shelves" className="dm-glass flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
@@ -2927,9 +2954,11 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
+        <IconTip label="Close">
         <button type="button" aria-label="Close settings" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)" }}>
           <X className="h-4 w-4" />
         </button>
+        </IconTip>
       </div>
 
       {show === "answers" && (
@@ -2977,7 +3006,9 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
                   ) : (
                     <span className="flex items-center gap-[var(--space-1)]">
                       <button type="button" onClick={() => setConfirming(`restore:${entry.id}`)} className={ghost} style={ghostStyle}>Restore</button>
+                      <IconTip label="Delete">
                       <button type="button" onClick={() => deleteArchivedProfile(entry.id)} aria-label="Delete this build" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+                      </IconTip>
                     </span>
                   )}
                 </li>
@@ -3150,9 +3181,11 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
           <button type="button" onClick={() => window.print()} className="flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
             <Printer className="h-4 w-4" /> Print / Save PDF
           </button>
+          <IconTip label="Close">
           <button type="button" onClick={onClose} aria-label="Close report" className="flex cursor-pointer items-center justify-center rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
+          </IconTip>
         </span>
       </div>
 

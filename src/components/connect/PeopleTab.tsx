@@ -4,6 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Eye, Gem, MessagesSquare, Medal, Sparkles, Trophy, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { IconTip } from "@/components/app/IconTip";
 import { demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
@@ -112,17 +113,21 @@ function FollowCarousel({ pros, follows, onFollow }: { pros: Pro[]; follows: Fol
           {/* 40px, not the original 30px -- a real repeatedly-tapped control
              well under the ~40-44px comfortable touch-target size (mobile
              audit, 9 Sept 2026). */}
-          <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={clamped === 0} aria-label="Previous professionals" className="dm-quiet flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
-            <ChevronLeft className="h-4 w-4" aria-hidden />
-          </button>
+          <IconTip label="Previous">
+            <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={clamped === 0} aria-label="Previous professionals" className="dm-quiet flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+              <ChevronLeft className="h-4 w-4" aria-hidden />
+            </button>
+          </IconTip>
           <span className="flex items-center gap-[6px]" role="tablist" aria-label="Page">
             {Array.from({ length: pageCount }).map((_, i) => (
               <button key={i} type="button" role="tab" aria-selected={i === clamped} aria-label={`Page ${i + 1}`} onClick={() => setPage(i)} className="dm-quiet size-[6px] cursor-pointer rounded-full" style={{ background: i === clamped ? "var(--primary)" : "var(--glass-border)" }} />
             ))}
           </span>
-          <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={clamped === pageCount - 1} aria-label="More professionals" className="dm-quiet flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
-            <ChevronRight className="h-4 w-4" aria-hidden />
-          </button>
+          <IconTip label="Next">
+            <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={clamped === pageCount - 1} aria-label="More professionals" className="dm-quiet flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </button>
+          </IconTip>
         </div>
       )}
     </div>

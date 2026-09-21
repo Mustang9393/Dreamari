@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { AlertCircle, ArrowLeftRight, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2 } from "lucide-react";
 import { deleteReportVersion, formatVersionTime, recordReportVersion, reportHistorySnapshot, sameSnapshot, serverReportHistorySnapshot, subscribeReportHistory, type ReportSnapshot } from "@/lib/reportHistory";
+import { IconTip } from "@/components/app/IconTip";
 import type { ProfileCareer } from "./data";
 import { CareerExplorationBody } from "./CareerExploration";
 import {
@@ -724,9 +725,11 @@ function HistoryTab({ history, onPrint, onShare }: { history?: ReportViewProps["
                   <button type="button" onClick={() => onShare(version.snapshot)} className={action} style={actionStyle}>
                     <Send className="h-4 w-4" aria-hidden /> Share
                   </button>
-                  <button type="button" onClick={() => deleteReportVersion(version.id)} aria-label="Delete this version" className="dm-quiet ml-auto flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                    <Trash2 className="h-4 w-4" aria-hidden />
-                  </button>
+                  <IconTip label="Delete version" className="ml-auto">
+                    <button type="button" onClick={() => deleteReportVersion(version.id)} aria-label="Delete this version" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                      <Trash2 className="h-4 w-4" aria-hidden />
+                    </button>
+                  </IconTip>
                 </div>
               </li>
             );

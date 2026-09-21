@@ -6,14 +6,15 @@ import { resolveCareer } from "./data";
 /** Top 3 is full -- pick one to swap out. Same structure and copy as
  *  ProfileExperience's own swap-picker (extracted so Career Detail's "+"
  *  button can reuse it, direct feedback 21 Sept 2026), with the backdrop
- *  blur this session's modal audit standardized on. */
+ *  blur raised to the app-wide 28px floor (21 Sept 2026 app-wide blur
+ *  pass -- see the other modal backdrops touched the same day). */
 export function Top3SwapModal({ incomingId, currentIds, onConfirm, onCancel }: { incomingId: string; currentIds: string[]; onConfirm: (outgoingId: string) => void; onCancel: () => void }) {
   if (typeof document === "undefined") return null;
   const incoming = resolveCareer(incomingId);
   return createPortal(
     <div
       className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0"
-      style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}
+      style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}
       onPointerUp={(event) => { if (event.target === event.currentTarget) onCancel(); }}
     >
       <div

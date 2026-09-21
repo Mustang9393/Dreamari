@@ -269,6 +269,7 @@ function TopBar({ label, badges, onClose, extra, toolsFromSm = false }: { label:
       <div className={`-my-[6px] max-w-full items-center gap-[6px] overflow-x-auto px-[2px] py-[6px] [scrollbar-width:none] lg:gap-[8px] ${toolsFromSm ? "hidden sm:flex" : "flex"}`}>
         {extra}
         {onClose && (
+          <IconTip label="Close">
           <button
             type="button"
             aria-label="Close and return to Profile"
@@ -278,6 +279,7 @@ function TopBar({ label, badges, onClose, extra, toolsFromSm = false }: { label:
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
+          </IconTip>
         )}
       </div>
     </div>
@@ -309,7 +311,7 @@ function MobileActionBar({ primary, more }: { primary: BarAction[]; more: BarAct
       {open && (
         <Portal>
           <div className="fixed inset-0 z-[120] flex items-end sm:hidden" onClick={() => setOpen(false)}>
-            <div aria-hidden className="absolute inset-0 backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)" }} />
+            <div aria-hidden className="absolute inset-0 backdrop-blur-[28px]" style={{ background: "rgba(0,0,0,0.45)" }} />
             <div role="dialog" aria-label="More actions" onClick={(e) => e.stopPropagation()} className="relative z-10 mx-3 mb-[max(10px,env(safe-area-inset-bottom))] w-full overflow-hidden rounded-[22px] border motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
               {more.map((a) => (
                 <button key={a.key} type="button" onClick={() => { setOpen(false); a.onClick(); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] border-b px-[18px] py-[14px] text-left text-[14.5px] font-semibold last:border-b-0" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
@@ -541,7 +543,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
          confirm -- this app has no shared Modal component, every local
          dialog rolls its own role="dialog" markup this way. */}
       {approveOpen && version && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[120] flex items-end justify-center p-4 backdrop-blur-[14px] sm:items-center" style={{ background: "rgba(5,7,15,0.55)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setApproveOpen(false); }}>
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[120] flex items-end justify-center p-4 backdrop-blur-[28px] sm:items-center" style={{ background: "rgba(5,7,15,0.55)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setApproveOpen(false); }}>
           <div className="flex w-full max-w-[400px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
             <p className="text-[18px] leading-[24px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Approve this resume?</p>
             <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>This marks it as final. You can still make changes after.</p>
@@ -766,6 +768,7 @@ function ResumeBuilderInner() {
               stepIndex={stepIndex}
               leading={
                 showBackButton ? (
+                  <IconTip label="Back">
                   <button
                     type="button"
                     aria-label="Back"
@@ -775,6 +778,7 @@ function ResumeBuilderInner() {
                   >
                     <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
                   </button>
+                  </IconTip>
                 ) : undefined
               }
             />

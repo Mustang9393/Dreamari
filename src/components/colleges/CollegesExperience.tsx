@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { ArrowLeftRight, Briefcase, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { IconTip } from "@/components/app/IconTip";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
@@ -162,15 +163,16 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-4 pb-[140px] sm:px-[var(--space-14)] lg:pt-[var(--space-10)]">
         <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
           <ForYouBrowseToggle tab={view} onTab={setView} />
-          <Link
-            href="/explore"
-            aria-label="Explore careers"
-            title="Careers"
-            className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-            style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-          >
-            <Briefcase className="h-4 w-4" />
-          </Link>
+          <IconTip label="Careers">
+            <Link
+              href="/explore"
+              aria-label="Explore careers"
+              className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+              style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+            >
+              <Briefcase className="h-4 w-4" />
+            </Link>
+          </IconTip>
         </div>
         {/* Desktop header, laid out exactly like Explore Careers': title and
            the Careers/Schools strip on the left, the For you / Browse All
@@ -209,9 +211,11 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
             style={{ color: "var(--foreground)" }}
           />
           {q && (
-            <button type="button" onClick={() => { setQuery(""); inputRef.current?.focus(); }} aria-label="Clear search" className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-              <X className="h-4 w-4" aria-hidden />
-            </button>
+            <IconTip label="Clear search">
+              <button type="button" onClick={() => { setQuery(""); inputRef.current?.focus(); }} aria-label="Clear search" className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            </IconTip>
           )}
         </label>
         </HoverBeam>
@@ -342,14 +346,24 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
     // nav bar sits (same bug as the other sheets on this pass, direct
     // feedback 9 Sept 2026).
     <div className="marketing-v2 themeable fixed inset-0 z-[110] flex items-end justify-end pb-[calc(76px+env(safe-area-inset-bottom))] md:items-stretch md:pb-0" role="dialog" aria-modal="true" aria-label="Filters" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
-      {/* the results stay visible behind: dimmed and softened, never black */}
-      <button type="button" aria-label="Close filters" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.35)", backdropFilter: "blur(3px)", WebkitBackdropFilter: "blur(3px)" }} />
+      {/* Was deliberately kept to blur(3px) so "the results stay visible
+         behind: dimmed and softened, never black" (11 Sept 2026, a narrow
+         exception for this one drawer). Superseded 21 Sept 2026 by an
+         explicit app-wide instruction ("blur the background more don't
+         just dim the background for the modals... consistently applied to
+         all cases") -- raised to the same 28px floor every other modal
+         backdrop in the app now uses. The results still show through: a
+         real blur reads as visible-but-abstracted, not blocked, at any
+         strength. */}
+      <button type="button" aria-label="Close filters" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.35)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
       <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full flex-col rounded-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: RULE }}>
           <h2 className="text-[18px] leading-[24px] font-extrabold" style={DISPLAY}>Filters</h2>
           <span className="flex items-center gap-[var(--space-2)]">
             <button type="button" onClick={onClear} className="dm-link cursor-pointer text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>Clear</button>
-            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}><X className="h-5 w-5" aria-hidden /></button>
+            <IconTip label="Close">
+              <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}><X className="h-5 w-5" aria-hidden /></button>
+            </IconTip>
           </span>
         </div>
         <div className="dm-scroll min-h-0 flex-1 overflow-y-auto px-[var(--space-3)] [scrollbar-gutter:stable]">
@@ -416,14 +430,16 @@ function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () 
   const head = { background: "color-mix(in srgb, var(--primary) 12%, var(--background))" } as const;
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="college-compare-title" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.45)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
       <div className="relative mx-auto mt-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: RULE }}>
           <span className="flex flex-col gap-[2px]">
             <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: SOFT }}>Side by side</span>
             <h3 id="college-compare-title" className="text-[20px] leading-[25px] font-extrabold" style={DISPLAY}>{colleges.length} colleges</h3>
           </span>
-          <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison"><X className="h-5 w-5" aria-hidden /></button>
+          <IconTip label="Close">
+            <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison"><X className="h-5 w-5" aria-hidden /></button>
+          </IconTip>
         </div>
         <div className="dm-scroll min-h-0 flex-1 overflow-auto px-5 py-[var(--space-4)]" style={{ touchAction: "pan-x pan-y" }}>
           <table className="w-full border-collapse text-left text-[13px]" style={{ minWidth: 120 + colleges.length * 190 }}>

@@ -12,6 +12,7 @@ import { BIG, PANEL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SchoolCard, SOFT } from "./shared";
 import { COLLEGES } from "./data";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { IconTip } from "@/components/app/IconTip";
 import { UndoToast } from "@/components/app/UndoToast";
 import { Listbox } from "@/components/app/Listbox";
 import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, targetGpaFor, type Route, type SchoolMatch } from "./pathway";
@@ -381,12 +382,14 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-5 pb-[calc(20px+env(safe-area-inset-bottom))]" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", backdropFilter: "blur(10px)" }}>
+    <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-5 pb-[calc(20px+env(safe-area-inset-bottom))]" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", backdropFilter: "blur(28px)" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" />
       <section role="dialog" aria-modal="true" aria-labelledby="schools-sheet" className="dm-scroll relative flex max-h-[calc(100dvh-40px)] w-full max-w-[400px] flex-col gap-[var(--space-6)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="schools-sheet" className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
-          <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet -mr-[8px] flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+          <IconTip label="Close">
+            <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet -mr-[8px] flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+          </IconTip>
         </div>
         {children}
       </section>

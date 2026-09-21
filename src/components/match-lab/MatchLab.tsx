@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, BookOpen, GraduationCap, Laptop, RotateCcw, Sparkles, ThumbsUp, Wrench, X } from "lucide-react";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
+import { IconTip } from "@/components/app/IconTip";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { announce } from "@/components/app/LiveRegion";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
@@ -970,43 +971,47 @@ function Stamp({ side, color, opacity, children }: { side: "left" | "right"; col
 
 function ActionButton({ label, color, size, onClick, disabled, children }: { label: string; color: string; size: number; onClick: (e: React.MouseEvent) => void; disabled?: boolean; children: React.ReactNode }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      disabled={disabled}
-      className="dm-tap flex items-center justify-center rounded-full border backdrop-blur disabled:opacity-35 disabled:hover:scale-100"
-      style={{
-        width: size,
-        height: size,
-        color,
-        background: "var(--color-glass-surface-raised)",
-        borderColor: `color-mix(in srgb, ${color} 35%, transparent)`,
-      }}
-    >
-      {children}
-    </button>
+    <IconTip label={label}>
+      <button
+        type="button"
+        aria-label={label}
+        onClick={onClick}
+        disabled={disabled}
+        className="dm-tap flex items-center justify-center rounded-full border backdrop-blur disabled:opacity-35 disabled:hover:scale-100"
+        style={{
+          width: size,
+          height: size,
+          color,
+          background: "var(--color-glass-surface-raised)",
+          borderColor: `color-mix(in srgb, ${color} 35%, transparent)`,
+        }}
+      >
+        {children}
+      </button>
+    </IconTip>
   );
 }
 
 function IconGhostButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: React.ReactNode }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      disabled={disabled}
-      className="flex h-8 w-8 flex-none items-center justify-center rounded-full border transition-colors disabled:opacity-30"
-      // --color-glass-surface-2 flips polarity per theme (white-alpha dark,
-      // black-alpha light), and its one caller here sits inside a row
-      // already using --color-glass-surface-raised (white-alpha in both
-      // themes) -- in light mode this button read as a dark, sunken circle
-      // inside a lighter row instead of the elevated icon control it's
-      // meant to be. Same fix as VibeButtonRow's idle chips (16 Sept 2026).
-      style={{ background: GLASS_CHIP_IDLE_BG, borderColor: "var(--color-glass-border)", color: "var(--color-night-foreground)" }}
-    >
-      {children}
-    </button>
+    <IconTip label={label}>
+      <button
+        type="button"
+        aria-label={label}
+        onClick={onClick}
+        disabled={disabled}
+        className="flex h-8 w-8 flex-none items-center justify-center rounded-full border transition-colors disabled:opacity-30"
+        // --color-glass-surface-2 flips polarity per theme (white-alpha dark,
+        // black-alpha light), and its one caller here sits inside a row
+        // already using --color-glass-surface-raised (white-alpha in both
+        // themes) -- in light mode this button read as a dark, sunken circle
+        // inside a lighter row instead of the elevated icon control it's
+        // meant to be. Same fix as VibeButtonRow's idle chips (16 Sept 2026).
+        style={{ background: GLASS_CHIP_IDLE_BG, borderColor: "var(--color-glass-border)", color: "var(--color-night-foreground)" }}
+      >
+        {children}
+      </button>
+    </IconTip>
   );
 }
 

@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { Bell, Briefcase, Calendar, FileText, Sparkles, X, Zap } from "lucide-react";
 import { DreamScoreChip } from "./DreamScoreChip";
 import { Portal } from "@/components/profile/CareerReport";
+import { IconTip } from "@/components/app/IconTip";
 import { decideMeeting, markNotificationRead, openDock, resolveNotification, useInbox } from "@/lib/inbox";
 import { NOTIFICATIONS, UNREAD_BY_DEFAULT, type Notification } from "./notificationsData";
 import { useStage } from "@/lib/stage";
@@ -55,25 +56,26 @@ function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]
 /** The nav's round icon button, the same 40px as the hamburger. */
 function NavIconButton({ label, open, onClick, badge, dot, children }: { label: string; open?: boolean; onClick: () => void; badge?: number; dot?: boolean; children: ReactNode }) {
   return (
-    <button
-      type="button"
-      aria-label={badge ? `${label}, ${badge} new` : label}
-      aria-expanded={open}
-      title={label}
-      onClick={onClick}
-      // plain icon, no bordered surface (direct feedback, 19 Sept 2026:
-      // "remove the surfaces... make them have breathing room")
-      className="dm-quiet relative flex size-10 cursor-pointer items-center justify-center rounded-full"
-      style={{ color: open ? "var(--primary)" : "var(--foreground)" }}
-    >
-      {children}
-      {!!badge && (
-        <span aria-hidden className="absolute top-[5px] right-[5px] flex h-[15px] min-w-[15px] items-center justify-center rounded-full px-[4px] text-[9.5px] leading-none font-extrabold tabular-nums" style={{ background: "#FF3040", color: "#FFFFFF", boxShadow: "0 0 0 1.5px var(--background)" }}>
-          {badge > 9 ? "9+" : badge}
-        </span>
-      )}
-      {dot && !badge && <span aria-hidden className="absolute top-[7px] right-[7px] size-[8px] rounded-full" style={{ background: "var(--world-food-farming-nature)", boxShadow: "0 0 0 2px var(--background)" }} />}
-    </button>
+    <IconTip label={label}>
+      <button
+        type="button"
+        aria-label={badge ? `${label}, ${badge} new` : label}
+        aria-expanded={open}
+        onClick={onClick}
+        // plain icon, no bordered surface (direct feedback, 19 Sept 2026:
+        // "remove the surfaces... make them have breathing room")
+        className="dm-quiet relative flex size-10 cursor-pointer items-center justify-center rounded-full"
+        style={{ color: open ? "var(--primary)" : "var(--foreground)" }}
+      >
+        {children}
+        {!!badge && (
+          <span aria-hidden className="absolute top-[5px] right-[5px] flex h-[15px] min-w-[15px] items-center justify-center rounded-full px-[4px] text-[9.5px] leading-none font-extrabold tabular-nums" style={{ background: "#FF3040", color: "#FFFFFF", boxShadow: "0 0 0 1.5px var(--background)" }}>
+            {badge > 9 ? "9+" : badge}
+          </span>
+        )}
+        {dot && !badge && <span aria-hidden className="absolute top-[7px] right-[7px] size-[8px] rounded-full" style={{ background: "var(--world-food-farming-nature)", boxShadow: "0 0 0 2px var(--background)" }} />}
+      </button>
+    </IconTip>
   );
 }
 
@@ -178,7 +180,9 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
     <>
       <div className="flex items-center justify-between px-[10px] pt-[4px] pb-[8px]">
         <span className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Notifications</span>
-        <button type="button" aria-label="Close" onClick={onClose} className={`dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full ${phone ? "" : "hidden"}`} style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+        <IconTip label="Close" className={phone ? "" : "hidden"}>
+          <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+        </IconTip>
       </div>
       <div role="tablist" aria-label="Filter notifications" className="flex gap-[6px] px-[10px] pb-[10px]">
         {filters.map((f) => {
@@ -246,7 +250,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
     return (
       <Portal>
         <div className="fixed inset-0 z-[90] flex items-end" role="dialog" aria-modal="true" aria-label="Notifications">
-          <button type="button" aria-label="Close notifications" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }} />
+          <button type="button" aria-label="Close notifications" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
           <div className="dm-scroll relative z-[1] max-h-[80dvh] w-full overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-3)] pb-[calc(var(--space-4)+env(safe-area-inset-bottom))]" style={surface}>{body}</div>
         </div>
       </Portal>

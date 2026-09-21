@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
 import { DEFAULT_SECTION_ORDER, upsertVersion, type ResumeData, type ResumeSectionId, type ResumeVersion } from "@/lib/resume";
 import { dateRange, resumeSkillLines } from "./ResumeDocument";
 import { CARD_CLASS, INSET, ResumeModal } from "./ui";
+import { IconTip } from "@/components/app/IconTip";
 
 const SECTION_LABEL: Record<ResumeSectionId, string> = {
   education: "Education",
@@ -84,12 +85,16 @@ export function EditSectionsPanel({ resume, version, onClose }: { resume: Resume
             <div key={id} className={CARD_CLASS} style={INSET}>
               <div className="flex items-center gap-[var(--space-3)]">
                 <div className="flex flex-none flex-col">
+                  <IconTip label="Move up">
                   <button type="button" aria-label={`Move ${SECTION_LABEL[id]} up`} disabled={index === 0} onClick={() => move(id, -1)} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] disabled:cursor-not-allowed disabled:opacity-30" style={{ color: "var(--muted-foreground)" }}>
                     <ChevronUp className="h-3.5 w-3.5" aria-hidden />
                   </button>
+                  </IconTip>
+                  <IconTip label="Move down">
                   <button type="button" aria-label={`Move ${SECTION_LABEL[id]} down`} disabled={index === order.length - 1} onClick={() => move(id, 1)} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] disabled:cursor-not-allowed disabled:opacity-30" style={{ color: "var(--muted-foreground)" }}>
                     <ChevronDown className="h-3.5 w-3.5" aria-hidden />
                   </button>
+                  </IconTip>
                 </div>
                 <button type="button" onClick={() => setExpanded(isOpen ? null : id)} className="dm-quiet flex min-w-0 flex-1 cursor-pointer flex-col items-start gap-[1px] text-left" style={{ opacity: isHidden ? 0.5 : 1 }}>
                   <span className="text-[14.5px] font-extrabold" style={{ color: "var(--foreground)" }}>{SECTION_LABEL[id]}</span>

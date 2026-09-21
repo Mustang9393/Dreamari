@@ -325,7 +325,7 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
         type="button"
         aria-label="Close and continue to next level"
         onClick={onContinue}
-        className={`${styles.backdrop} backdrop-blur-[14px]`}
+        className={`${styles.backdrop} backdrop-blur-[28px]`}
       />
       <motion.div
         ref={dialog} role="dialog" aria-modal="true" aria-labelledby="connect-title" tabIndex={-1}
@@ -333,7 +333,9 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
       >
         <header className={styles.toolbar}>
           {view === "posts" ? (
-            <button className={styles.iconButton} aria-label="Back to menu" onClick={() => setView("intro")}><ChevronLeft size={18} /></button>
+            <IconTip label="Back to menu">
+              <button className={styles.iconButton} aria-label="Back to menu" onClick={() => setView("intro")}><ChevronLeft size={18} /></button>
+            </IconTip>
           ) : (
             <IconTip label="Replay">
               <button className={styles.iconButton} aria-label="Replay" onClick={replay}><RotateCcw size={16} /></button>
@@ -357,7 +359,9 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
           </div>
           {/* No Skip button (direct feedback, 19 Sept 2026). Close stays as
              the one quiet way out; the loop is what the screen offers. */}
-          <button className={`${styles.iconButton} ${styles.close}`} aria-label="Close" onClick={onContinue}><X size={18} /></button>
+          <IconTip label="Close">
+            <button className={`${styles.iconButton} ${styles.close}`} aria-label="Close" onClick={onContinue}><X size={18} /></button>
+          </IconTip>
         </header>
 
         <div ref={content} className={styles.content}>

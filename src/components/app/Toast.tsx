@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { announce } from "./LiveRegion";
+import { IconTip } from "@/components/app/IconTip";
 
 /** A short, self-dismissing confirmation -- same visual language as
  *  UndoToast, for actions that need acknowledgement but nothing to undo
@@ -22,7 +23,9 @@ export function Toast({ message, onClose, duration = 3200 }: { message: string; 
         style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
       >
         <span className="min-w-0 flex-1">{message}</span>
-        <button type="button" aria-label="Dismiss" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>×</button>
+        <IconTip label="Dismiss">
+          <button type="button" aria-label="Dismiss" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>×</button>
+        </IconTip>
       </div>
     </div>,
     document.body,

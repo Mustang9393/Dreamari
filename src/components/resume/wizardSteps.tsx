@@ -21,6 +21,7 @@ import {
 } from "@/lib/resume";
 import { COUNTRIES, EDUCATION_PROGRAMS, EXPERIENCE_TYPES, RESUME_WIZARD_DREAMY, SKILL_CATEGORIES } from "./data";
 import { CARD_CLASS, Field, INSET, ResumeModal, SelectInput, TextInput, WizardFooter } from "./ui";
+import { IconTip } from "@/components/app/IconTip";
 
 // ---------------------------------------------------------------------------
 // Empty-state CTA -- the "Add X" action itself fills the empty-state slot
@@ -60,12 +61,16 @@ function EntryRow({ title, subtitle, meta, onEdit, onRemove }: { title: string; 
           {meta && <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{meta}</span>}
         </div>
         <div className="flex flex-none items-center gap-[6px]">
+          <IconTip label="Edit">
           <button type="button" aria-label="Edit" onClick={onEdit} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
             <Pencil className="h-4 w-4" aria-hidden />
           </button>
+          </IconTip>
+          <IconTip label="Remove">
           <button type="button" aria-label="Remove" onClick={onRemove} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
             <Trash2 className="h-4 w-4" aria-hidden />
           </button>
+          </IconTip>
         </div>
       </div>
     </div>
@@ -205,7 +210,9 @@ function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: 
               {draft.honors.map((h, i) => (
                 <span key={`${h}-${i}`} className="inline-flex items-center gap-[6px] rounded-full border px-[10px] py-[4px] text-[12.5px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
                   {h}
+                  <IconTip label="Remove">
                   <button type="button" aria-label={`Remove ${h}`} onClick={() => setDraft({ ...draft, honors: draft.honors.filter((_, j) => j !== i) })} className="cursor-pointer" style={{ color: "var(--muted-foreground)" }}>×</button>
+                  </IconTip>
                 </span>
               ))}
             </div>
@@ -305,12 +312,16 @@ export function ExperienceStep({ resume, onNext, onAdd, onEdit }: { resume: Resu
                     {exp.bullets.length > 2 && <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>+{exp.bullets.length - 2} more…</span>}
                   </div>
                   <div className="flex flex-none items-center gap-[6px]">
+                    <IconTip label="Edit">
                     <button type="button" aria-label="Edit" onClick={() => onEdit(exp)} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
                       <Pencil className="h-4 w-4" aria-hidden />
                     </button>
+                    </IconTip>
+                    <IconTip label="Remove">
                     <button type="button" aria-label="Remove" onClick={() => removeExperience(exp.id)} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
                       <Trash2 className="h-4 w-4" aria-hidden />
                     </button>
+                    </IconTip>
                   </div>
                 </div>
               </div>

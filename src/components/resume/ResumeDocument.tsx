@@ -7,6 +7,7 @@ import { DEFAULT_SECTION_ORDER, type ResumeData, type ResumeSectionId } from "@/
 import { Portal } from "@/components/profile/CareerReport";
 import { RESUME_TEMPLATES, type ResumeTemplateId } from "./data";
 import { ToolbarButton } from "./ui";
+import { IconTip } from "@/components/app/IconTip";
 
 // The actual resume, rendered as a real document -- not a form summary.
 // Reuses the app's existing printable-document system (`.dm-report`, the
@@ -834,22 +835,28 @@ export function ZoomResumeModal({ open, onClose, resume, templateId, title, sect
   if (!open) return null;
   return (
     <Portal>
-      <div className="fixed inset-0 z-[150] flex flex-col backdrop-blur-[18px]" style={{ background: "color-mix(in srgb, var(--color-night-background) 62%, transparent)" }}>
+      <div className="fixed inset-0 z-[150] flex flex-col backdrop-blur-[28px]" style={{ background: "color-mix(in srgb, var(--color-night-background) 62%, transparent)" }}>
         <div className="flex flex-none items-center justify-between gap-[var(--space-3)] px-4 py-3 sm:px-5 sm:py-4">
           <span className="min-w-0 truncate text-[13px] font-bold tracking-[0.06em] text-white uppercase">{title}</span>
           <div className="flex flex-none items-center gap-[var(--space-3)]">
             <div className="flex items-center gap-[2px] rounded-full border border-white/20 p-[2px]">
+              <IconTip label="Zoom out">
               <button type="button" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full text-white">
                 <Minus className="h-4 w-4" aria-hidden />
               </button>
+              </IconTip>
               <span className="w-[44px] text-center text-[12.5px] font-bold text-white tabular-nums">{zoom}%</span>
+              <IconTip label="Zoom in">
               <button type="button" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full text-white">
                 <Plus className="h-4 w-4" aria-hidden />
               </button>
+              </IconTip>
             </div>
+            <IconTip label="Close">
             <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border border-white/20 text-white">
               <X className="h-4 w-4" aria-hidden />
             </button>
+            </IconTip>
           </div>
         </div>
         {/* Pans in both directions: on a phone 100% is wider than the screen,

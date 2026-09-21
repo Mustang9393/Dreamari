@@ -15,6 +15,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
+import { IconTip } from "@/components/app/IconTip";
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -221,13 +222,17 @@ export function DatePicker({
             }}
           >
             <div className="flex items-center justify-between gap-[8px]">
-              <button type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]">
-                <ChevronLeft className="h-4 w-4" aria-hidden />
-              </button>
+              <IconTip label="Previous month">
+                <button type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]">
+                  <ChevronLeft className="h-4 w-4" aria-hidden />
+                </button>
+              </IconTip>
               <span className="text-[14px] font-bold">{MONTH_NAMES[viewM]} {viewY}</span>
-              <button type="button" aria-label="Next month" onClick={() => shiftMonth(1)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]">
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </button>
+              <IconTip label="Next month">
+                <button type="button" aria-label="Next month" onClick={() => shiftMonth(1)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]">
+                  <ChevronRight className="h-4 w-4" aria-hidden />
+                </button>
+              </IconTip>
             </div>
             <div id={gridId} role="grid" className="grid grid-cols-7 gap-[2px]">
               {WEEKDAY_LABELS.map((w, i) => (

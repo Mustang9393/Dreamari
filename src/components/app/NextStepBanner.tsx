@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { X, type LucideIcon } from "lucide-react";
 import { BorderBeam } from "border-beam";
+import { IconTip } from "@/components/app/IconTip";
 
 // The compact "what now" banner (Joshua Pierce, Slack, 5 Sept 2026): a slow
 // glow so the eye lands on it without it shouting, one sentence, one button,
@@ -94,9 +95,11 @@ export function NextStepBanner({
               {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
             </Link>
           </div>
-          <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow || text}`} className="dm-quiet absolute top-[8px] right-[8px] flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-            <X className="h-4 w-4" aria-hidden />
-          </button>
+          <IconTip label="Dismiss" className="absolute top-[8px] right-[8px]">
+            <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow || text}`} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </IconTip>
         </aside>
       </BorderBeam>
       </div>
@@ -127,9 +130,11 @@ export function NextStepBanner({
             {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
           </Link>
         </div>
-        <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow || text}`} className="dm-quiet absolute top-[8px] right-[8px] flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-          <X className="h-4 w-4" aria-hidden />
-        </button>
+        <IconTip label="Dismiss" className="absolute top-[8px] right-[8px]">
+          <button type="button" onClick={dismiss} aria-label={`Dismiss: ${eyebrow || text}`} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </IconTip>
       </aside>
     </BorderBeam>
     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Check, ChevronDown, PenLine, Trash2 } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
+import { IconTip } from "@/components/app/IconTip";
 import { Portal } from "@/components/profile/CareerReport";
 import { DatePicker } from "@/components/app/DatePicker";
 import {
@@ -232,8 +233,12 @@ function ExperienceRow({ e, editing, onEdit, onDone }: { e: Experience; editing:
           <span className="pl-[15px] text-[12px] leading-[16px]" style={{ color: "var(--ink-soft)" }}>{summary}</span>
           {e.notes && <span className="pl-[15px] text-[12px] leading-[16px]" style={{ color: "var(--ink-faint)" }}>{e.notes}</span>}
         </button>
-        <button type="button" data-print-hide aria-label={`Edit ${experienceLabel(e.type)}`} onClick={onEdit} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--ink-faint)" }}><PenLine className="h-[14px] w-[14px]" aria-hidden /></button>
-        <button type="button" data-print-hide aria-label={`Delete ${experienceLabel(e.type)}`} onClick={() => removeExperience(e.id)} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--ink-faint)" }}><Trash2 className="h-[14px] w-[14px]" aria-hidden /></button>
+        <IconTip label="Edit">
+          <button type="button" data-print-hide aria-label={`Edit ${experienceLabel(e.type)}`} onClick={onEdit} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--ink-faint)" }}><PenLine className="h-[14px] w-[14px]" aria-hidden /></button>
+        </IconTip>
+        <IconTip label="Delete">
+          <button type="button" data-print-hide aria-label={`Delete ${experienceLabel(e.type)}`} onClick={() => removeExperience(e.id)} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--ink-faint)" }}><Trash2 className="h-[14px] w-[14px]" aria-hidden /></button>
+        </IconTip>
       </div>
       {editing && (
         <div data-print-hide className="flex flex-col gap-[10px] border-t px-[12px] py-[12px]" style={{ borderColor: "var(--rule)" }}>

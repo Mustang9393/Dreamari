@@ -6,6 +6,7 @@ import { ArrowUpRight, Star, X } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { IconTip } from "@/components/app/IconTip";
 import { CompanyChip } from "./primitives";
 import type { Community } from "./data";
 
@@ -89,9 +90,11 @@ function MoreMarks({ className, missing, names, open, onToggle, onClose }: { cla
       >
         {names.map((name) => <CompanyChip key={name} name={name} tone="frost" />)}
         {open && (
-          <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet absolute top-[6px] right-[6px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.12)", color: "#fff" }}>
-            <X className="h-3.5 w-3.5" aria-hidden />
-          </button>
+          <IconTip label="Close" className="absolute top-[6px] right-[6px]">
+            <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.12)", color: "#fff" }}>
+              <X className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          </IconTip>
         )}
       </span>
     </span>

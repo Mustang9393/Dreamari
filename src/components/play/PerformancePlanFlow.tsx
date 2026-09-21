@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, FileText, ShieldAlert, Trophy } from "lucide-react";
 import Link from "next/link";
+import { IconTip } from "@/components/app/IconTip";
 
 import { type PerformancePlan, type PipState } from "./performance-plan";
 import { playCorrect, playSweep, playWrong } from "./sound";
@@ -124,15 +125,17 @@ export function PerformancePlanFlow({
         }}
       />
       {canStepBack && (
-        <button
-          type="button"
-          onClick={stepBack}
-          aria-label="Back to the previous screen"
-          className="dm-quiet fixed top-3 left-3 z-[2] flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px] sm:top-4 sm:left-5"
-          style={{ background: "rgba(10,3,6,0.55)", borderColor: "rgba(255,255,255,0.25)", color: "#F4F7FF" }}
-        >
-          <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
-        </button>
+        <IconTip label="Back" className="fixed top-3 left-3 z-[2] sm:top-4 sm:left-5">
+          <button
+            type="button"
+            onClick={stepBack}
+            aria-label="Back to the previous screen"
+            className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+            style={{ background: "rgba(10,3,6,0.55)", borderColor: "rgba(255,255,255,0.25)", color: "#F4F7FF" }}
+          >
+            <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
+          </button>
+        </IconTip>
       )}
       <div className="relative z-[1] flex w-full max-w-[480px] flex-col items-center gap-[var(--space-4)]">
         {phase === "warning" && (

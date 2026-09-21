@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, ChevronDown, ChevronRight, ChevronUp, Eye, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
 
+import { IconTip } from "@/components/app/IconTip";
 import { GestureSpotlight, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
 import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
@@ -1892,12 +1893,16 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
               <span className="flex flex-none gap-[4px]" onPointerDown={(event) => event.stopPropagation()}>
                 {/* 36px, not the original 30px -- a real repeatedly-tapped
                    control mid-simulation (mobile audit, 9 Sept 2026). */}
-                <button type="button" onClick={() => move(index, -1)} disabled={locked || index === 0} aria-label={`Move ${row} up`} className="dm-quiet flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
-                  <ChevronUp className="h-[16px] w-[16px]" aria-hidden />
-                </button>
-                <button type="button" onClick={() => move(index, 1)} disabled={locked || index === rows.length - 1} aria-label={`Move ${row} down`} className="dm-quiet flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
-                  <ChevronDown className="h-[16px] w-[16px]" aria-hidden />
-                </button>
+                <IconTip label="Move up">
+                  <button type="button" onClick={() => move(index, -1)} disabled={locked || index === 0} aria-label={`Move ${row} up`} className="dm-quiet flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                    <ChevronUp className="h-[16px] w-[16px]" aria-hidden />
+                  </button>
+                </IconTip>
+                <IconTip label="Move down">
+                  <button type="button" onClick={() => move(index, 1)} disabled={locked || index === rows.length - 1} aria-label={`Move ${row} down`} className="dm-quiet flex h-[36px] w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border disabled:opacity-30 md:h-[30px] md:w-[30px]" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
+                    <ChevronDown className="h-[16px] w-[16px]" aria-hidden />
+                  </button>
+                </IconTip>
               </span>
             </li>
           );

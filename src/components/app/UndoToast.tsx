@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { announce } from "./LiveRegion";
+import { IconTip } from "@/components/app/IconTip";
 
 // A six-second toast with one Undo (UX audit, 11 Sept 2026: "Not for me" and
 // "Remove from Top 3" had no way back). Mounted by the screen that owns the
@@ -25,7 +26,9 @@ export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { messa
         <button type="button" onClick={() => { onUndo(); onClose(); }} className="dm-link flex-none cursor-pointer rounded-[8px] px-[10px] py-[6px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
           Undo
         </button>
-        <button type="button" aria-label="Dismiss" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>×</button>
+        <IconTip label="Dismiss">
+          <button type="button" aria-label="Dismiss" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>×</button>
+        </IconTip>
       </div>
     </div>,
     document.body,

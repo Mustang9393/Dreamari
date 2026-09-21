@@ -19,6 +19,7 @@ import {
   ExternalLink, Flag, Laptop, LifeBuoy, MessageCircleQuestion, MessagesSquare, Sparkles, ThumbsUp, Timer, UserRound, Users, X, FileText, ListChecks,
 } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
+import { IconTip } from "@/components/app/IconTip";
 import { Listbox } from "@/components/app/Listbox";
 import { flyXp } from "@/components/app/xpFlight";
 import { studentAvatarSrc } from "@/lib/avatar";
@@ -83,9 +84,11 @@ const ReportCtx = createContext<(what: string) => void>(() => {});
 function ReportButton({ what }: { what: string }) {
   const report = useContext(ReportCtx);
   return (
-    <button type="button" onClick={() => report(what)} aria-label={D.REPORT.label} title={D.REPORT.label} className="dm-quiet flex size-[30px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-      <Flag className="h-3.5 w-3.5" aria-hidden />
-    </button>
+    <IconTip label={D.REPORT.label}>
+      <button type="button" onClick={() => report(what)} aria-label={D.REPORT.label} className="dm-quiet flex size-[30px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+        <Flag className="h-3.5 w-3.5" aria-hidden />
+      </button>
+    </IconTip>
   );
 }
 /** The student's saved picks (or the demo default), so the board speaks to
@@ -226,17 +229,21 @@ function InsightRail({ onAsk }: { onAsk: () => void }) {
         ))}
       </div>
       <div className="flex items-center justify-center gap-[var(--space-4)] lg:hidden">
-        <button type="button" aria-label="Previous insight" onClick={() => go(Math.max(0, index - 1))} disabled={index === 0} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
-          <ChevronLeft className="h-4 w-4" aria-hidden />
-        </button>
+        <IconTip label="Previous">
+          <button type="button" aria-label="Previous insight" onClick={() => go(Math.max(0, index - 1))} disabled={index === 0} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+          </button>
+        </IconTip>
         <div className="flex items-center gap-[6px]" role="tablist" aria-label="Insights">
           {D.STUDENT_INSIGHTS.map((item, i) => (
             <button key={item.id} type="button" role="tab" aria-selected={i === index} aria-label={`Insight ${i + 1} of ${count}`} onClick={() => go(i)} className="dm-quiet cursor-pointer rounded-full transition-all duration-200" style={{ width: i === index ? 18 : 7, height: 7, background: i === index ? accent : "var(--glass-border)" }} />
           ))}
         </div>
-        <button type="button" aria-label="Next insight" onClick={() => go(Math.min(count - 1, index + 1))} disabled={index === count - 1} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
-          <ChevronRight className="h-4 w-4" aria-hidden />
-        </button>
+        <IconTip label="Next">
+          <button type="button" aria-label="Next insight" onClick={() => go(Math.min(count - 1, index + 1))} disabled={index === count - 1} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+            <ChevronRight className="h-4 w-4" aria-hidden />
+          </button>
+        </IconTip>
       </div>
     </div>
   );
@@ -372,9 +379,11 @@ function OpportunitySheet({ item, saved, onSave, inPlan, onPlan, onClose }: { it
   const resumeLabel = /internship|scholarship|job shadow/i.test(item.kind) ? "Tailor your résumé" : "Build your résumé";
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="att-opp-title">
-      <button type="button" aria-label={U.close} onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <button type="button" aria-label={U.close} onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-        <button type="button" onClick={onClose} aria-label={U.close} className="dm-quiet absolute top-[14px] right-[14px] z-10 flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+        <IconTip label={U.close} className="absolute top-[14px] right-[14px] z-10">
+          <button type="button" onClick={onClose} aria-label={U.close} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+        </IconTip>
 
         {/* header: status, title, the numbers. No eyebrow (the title names
            the kind) and no subtitle (the facts below say who and when). */}
@@ -405,9 +414,11 @@ function OpportunitySheet({ item, saved, onSave, inPlan, onPlan, onClose }: { it
         <div className="flex items-center gap-[10px] px-[var(--space-6)] pt-[var(--space-5)] pb-[var(--space-6)]">
           {inPlan ? <QuietCta size="sm" done onClick={onPlan}><ListChecks className="h-4 w-4" aria-hidden /> {U.inPlan}</QuietCta> : <PrimaryCta size="sm" onClick={onPlan}><ListChecks className="h-4 w-4" aria-hidden /> {U.addPlan}</PrimaryCta>}
           <QuietCta size="sm" onClick={() => router.push("/profile?tab=resume")}><FileText className="h-4 w-4" aria-hidden /> {resumeLabel}</QuietCta>
-          <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? D.SAVE.saved : D.SAVE.save} className="dm-quiet ml-auto flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-            <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
-          </button>
+          <IconTip label={saved ? D.SAVE.saved : D.SAVE.save} className="ml-auto">
+            <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? D.SAVE.saved : D.SAVE.save} className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+              <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
+            </button>
+          </IconTip>
         </div>
       </div>
     </div>
@@ -427,9 +438,11 @@ function Sheet({ title, label, onClose, children, titleId }: { title: string; la
   return (
     <Portal>
       <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby={titleId}>
-        <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+        <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
         <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet absolute top-[14px] right-[14px] z-10 flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+          <IconTip label="Close" className="absolute top-[14px] right-[14px] z-10">
+            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+          </IconTip>
           <div className="flex flex-col gap-[6px] pr-[40px]">
             {label && <Eyebrow>{label}</Eyebrow>}
             <h2 id={titleId} className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h2>

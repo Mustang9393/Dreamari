@@ -108,9 +108,11 @@ function Sheet({ title, onClose, children, label }: { title: string; onClose: ()
   return (
     <Portal>
       <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={title}>
-        <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+        <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
         <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet absolute top-[14px] right-[14px] z-10 flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+          <IconTip label="Close" className="absolute top-[14px] right-[14px] z-10">
+            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+          </IconTip>
           <div className="flex flex-col gap-[6px] pr-[40px]">
             {label && <Eyebrow>{label}</Eyebrow>}
             <h2 className="text-[22px] leading-[27px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
@@ -489,7 +491,9 @@ function IncomingNudge({ me, text, raised, onOpen, onClose }: { me: "mentee" | "
               <span className="line-clamp-2 text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{text}</span>
             </span>
           </button>
-          <button type="button" aria-label="Dismiss" onClick={onClose} className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+          <IconTip label="Dismiss">
+            <button type="button" aria-label="Dismiss" onClick={onClose} className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+          </IconTip>
         </div>
       </motion.div>
     </Portal>
@@ -810,7 +814,9 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
         </button>
         <div className="flex items-center gap-[10px]">
           <Chip tone={GOOD}><span aria-hidden className="size-[6px] rounded-full" style={{ background: GOOD }} />Matched</Chip>
-          <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" aria-label="Start a video call" className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Video className="h-4 w-4" aria-hidden /></a>
+          <IconTip label="Video call">
+            <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" aria-label="Start a video call" className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Video className="h-4 w-4" aria-hidden /></a>
+          </IconTip>
         </div>
       </div>}
 
@@ -857,14 +863,18 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
             <button type="button" onClick={() => setDraft(nudge)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-left text-[12.5px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "transparent", color: "var(--muted-foreground)" }}>
               <Sparkles className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} /> <span className="truncate">{nudge}</span>
             </button>
-            <button type="button" aria-label="Dismiss suggestion" onClick={() => setNudgeGone(true)} className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+            <IconTip label="Dismiss suggestion">
+              <button type="button" aria-label="Dismiss suggestion" onClick={() => setNudgeGone(true)} className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+            </IconTip>
           </div>
         )}
         <form className="relative flex items-center gap-[8px]" onSubmit={(e) => { e.preventDefault(); send(draft); }}>
           <div className="relative flex-none">
-            <button type="button" aria-label="Add" aria-expanded={menu === "plus"} onClick={() => setMenu(menu === "plus" ? "none" : "plus")} className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: menu === "plus" ? "var(--glass-surface-2)" : "transparent" }}>
-              <Plus className="h-[18px] w-[18px] transition-transform" style={{ transform: menu === "plus" ? "rotate(45deg)" : "none" }} aria-hidden />
-            </button>
+            <IconTip label="Add">
+              <button type="button" aria-label="Add" aria-expanded={menu === "plus"} onClick={() => setMenu(menu === "plus" ? "none" : "plus")} className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: menu === "plus" ? "var(--glass-surface-2)" : "transparent" }}>
+                <Plus className="h-[18px] w-[18px] transition-transform" style={{ transform: menu === "plus" ? "rotate(45deg)" : "none" }} aria-hidden />
+              </button>
+            </IconTip>
             {menu === "plus" && (
               <div role="menu" className={`${menuClass} flex min-w-[240px] flex-col`} style={menuStyle}>
                 {[...actions, { key: "gif", label: "GIF", who: "both" as const }].map((a) => (
@@ -877,9 +887,11 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
           </div>
           <div className="relative flex min-w-0 flex-1 items-center">
             <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={me === "mentee" ? "Message Avery" : `Message ${D.MENTEE.name}`} aria-label="Message" className="min-w-0 flex-1 rounded-full border py-[10px] pr-[44px] pl-[16px] text-[15px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]" style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-            <button type="button" aria-label="Emoji" aria-expanded={menu === "emoji"} onClick={() => setMenu(menu === "emoji" ? "none" : "emoji")} className="dm-quiet absolute right-[6px] flex size-[30px] cursor-pointer items-center justify-center rounded-full" style={{ color: menu === "emoji" ? accent : "var(--muted-foreground)" }}>
-              <Smile className="h-[18px] w-[18px]" aria-hidden />
-            </button>
+            <IconTip label="Emoji" className="absolute right-[6px]">
+              <button type="button" aria-label="Emoji" aria-expanded={menu === "emoji"} onClick={() => setMenu(menu === "emoji" ? "none" : "emoji")} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full" style={{ color: menu === "emoji" ? accent : "var(--muted-foreground)" }}>
+                <Smile className="h-[18px] w-[18px]" aria-hidden />
+              </button>
+            </IconTip>
             {menu === "emoji" && (
               <div role="menu" className={`${menuClass} right-0 left-auto grid grid-cols-8 gap-[2px] p-[8px]`} style={menuStyle}>
                 {D.EMOJI.map((e) => (
@@ -888,9 +900,11 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
               </div>
             )}
           </div>
-          <button type="submit" aria-label="Send" disabled={!draft.trim()} className="dm-solid flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-40" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-            <Send className="h-[16px] w-[16px]" aria-hidden />
-          </button>
+          <IconTip label="Send">
+            <button type="submit" aria-label="Send" disabled={!draft.trim()} className="dm-solid flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-40" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
+              <Send className="h-[16px] w-[16px]" aria-hidden />
+            </button>
+          </IconTip>
         </form>
         {!embedded && (
         <div className="flex flex-wrap items-center justify-between gap-[8px]">

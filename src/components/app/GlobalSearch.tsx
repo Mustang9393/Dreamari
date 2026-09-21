@@ -10,6 +10,7 @@ import { careerSlug } from "@/components/career/slug";
 import { COLLEGES, money } from "@/components/colleges/data";
 import { COMMUNITIES, EVENTS, PROS } from "@/components/connect/data";
 import { Avatar, CompanyChip } from "@/components/connect/primitives";
+import { IconTip } from "@/components/app/IconTip";
 
 // PARKED (2026-09-03): first cut of sitewide search, pulled from the chrome
 // after review ("heavy, busy, misaligned"). Not rendered anywhere. Kept so
@@ -78,17 +79,19 @@ export function SearchTrigger() {
   }, []);
   return (
     <>
-      <button
-        type="button"
-        aria-label="Search Dreamari"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={() => setOpen(true)}
-        className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-[var(--radius-lg)] border backdrop-blur-[10px]"
-        style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-      >
-        <Search className="h-5 w-5" aria-hidden />
-      </button>
+      <IconTip label="Search">
+        <button
+          type="button"
+          aria-label="Search Dreamari"
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          onClick={() => setOpen(true)}
+          className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-[var(--radius-lg)] border backdrop-blur-[10px]"
+          style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        >
+          <Search className="h-5 w-5" aria-hidden />
+        </button>
+      </IconTip>
       {open && <GlobalSearch onClose={() => setOpen(false)} />}
     </>
   );
@@ -115,14 +118,16 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[130] flex flex-col" role="dialog" aria-modal="true" aria-label="Search Dreamari" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       {/* the page stays visible behind, dimmed and softened */}
-      <button type="button" aria-label="Close search" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }} />
+      <button type="button" aria-label="Close search" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.55)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
       <div className="relative z-[1] mx-auto flex h-full w-full max-w-[720px] flex-col px-5 pt-[var(--space-4)] pb-[var(--space-6)] md:pt-[72px]">
         <div className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", maxHeight: "calc(100dvh - 40px)" }}>
           <label className="flex min-h-[60px] items-center gap-[var(--space-3)] border-b px-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
             <Search className="h-5 w-5 flex-none" aria-hidden style={{ color: q ? "var(--accent-subtle)" : "var(--muted-foreground)" }} />
             <span className="sr-only">Search careers, colleges, people, companies and communities</span>
             <input ref={inputRef} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search Dreamari" autoComplete="off" enterKeyHint="search" className="min-w-0 flex-1 bg-transparent text-[16px] leading-[22px] font-semibold outline-none" style={{ color: "var(--foreground)" }} />
-            <button type="button" onClick={q ? () => { setQ(""); inputRef.current?.focus(); } : onClose} aria-label={q ? "Clear" : "Close"} className="dm-quiet flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-5 w-5" aria-hidden /></button>
+            <IconTip label={q ? "Clear" : "Close"}>
+              <button type="button" onClick={q ? () => { setQ(""); inputRef.current?.focus(); } : onClose} aria-label={q ? "Clear" : "Close"} className="dm-quiet flex size-[40px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-5 w-5" aria-hidden /></button>
+            </IconTip>
           </label>
 
           <div className="flex items-center gap-[8px] overflow-x-auto border-b px-[var(--space-4)] py-[10px] [scrollbar-width:none]" role="tablist" aria-label="Search in" style={{ borderColor: "var(--glass-border)" }}>

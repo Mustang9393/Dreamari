@@ -3,6 +3,7 @@
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { IconTip } from "@/components/app/IconTip";
 import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 
@@ -534,15 +535,17 @@ function TicketStub({ lead, partner, accent, onQr }: { lead: string; partner?: s
  *  (direct feedback: tasteful, never distracting). Opens the branded sheet. */
 export function QrBadge({ onClick, className = "", label = "Show event QR code" }: { onClick: () => void; className?: string; label?: string }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
-      className={`dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[8px] border opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 ${className}`}
-      style={{ background: "rgba(8,10,22,0.55)", borderColor: "rgba(255,255,255,0.16)", color: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none" }}
-    >
-      <QrCode className="h-[15px] w-[15px]" aria-hidden />
-    </button>
+    <IconTip label={label} className={className}>
+      <button
+        type="button"
+        aria-label={label}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
+        className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[8px] border opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100"
+        style={{ background: "rgba(8,10,22,0.55)", borderColor: "rgba(255,255,255,0.16)", color: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none" }}
+      >
+        <QrCode className="h-[15px] w-[15px]" aria-hidden />
+      </button>
+    </IconTip>
   );
 }
 
@@ -558,10 +561,12 @@ export function QrSheet({ name, seed, accent, lead, partner, onClose }: { name: 
   }, [onClose]);
   const lit = `color-mix(in srgb, ${accent} 62%, #ffffff)`;
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label={`${name} QR code`} className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-5)] backdrop-blur-[16px]" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }} onClick={onClose}>
-      <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet absolute top-[var(--space-4)] right-[var(--space-4)] flex size-10 cursor-pointer items-center justify-center rounded-full border" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.24)", color: "#fff" }}>
-        <X className="h-5 w-5" />
-      </button>
+    <div role="dialog" aria-modal="true" aria-label={`${name} QR code`} className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-5)] backdrop-blur-[28px]" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }} onClick={onClose}>
+      <IconTip label="Close" className="absolute top-[var(--space-4)] right-[var(--space-4)]">
+        <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.24)", color: "#fff" }}>
+          <X className="h-5 w-5" />
+        </button>
+      </IconTip>
       <div className="relative w-full max-w-[320px] overflow-hidden rounded-[var(--radius-lg)] motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "#0e0c20", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }} onClick={(e) => e.stopPropagation()}>
         <EventSurface accent={accent} />
         <div className="relative z-10 flex flex-col items-center gap-[var(--space-4)] p-[var(--space-6)]">
@@ -848,9 +853,11 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
         {/* Icon-only, pushed to the far edge: Save is a secondary action and
            doesn't need to compete in text with the status/helpful/comments
            cluster that actually explains the post (direct feedback). */}
-        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-          <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
-        </button>
+        <IconTip label={saved ? "Saved" : "Save"} className="ml-auto">
+          <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+            <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
+          </button>
+        </IconTip>
       </div>
     </div>
   );
@@ -890,9 +897,11 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { i
             {/* Icon-only, same reasoning as QuestionCard's Save (direct
                feedback): a secondary action, not something to compete in
                text with the counts that actually explain the post. */}
-            <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet ml-auto flex min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-              <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
-            </button>
+            <IconTip label={saved ? "Saved" : "Save"} className="ml-auto">
+              <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+                <Bookmark className="h-4 w-4" aria-hidden fill={saved ? "currentColor" : "none"} />
+              </button>
+            </IconTip>
           </div>
         </div>
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{insight.postedAgo}</span>
@@ -1061,9 +1070,11 @@ function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful 
       <HelpfulPill onClick={onHelpful} pressed={helpful} count={thread.helpful + (helpful ? 1 : 0)} />
       {/* 36px, not the original 28px -- a real per-row action (saves to
          Locker) too small to tap reliably (mobile audit, 9 Sept 2026). */}
-      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] md:size-[28px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
-      </button>
+      <IconTip label={saved ? "Saved" : "Save"}>
+        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] md:size-[28px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+          <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+        </button>
+      </IconTip>
     </AlignedRow>
   );
 }
@@ -1086,9 +1097,11 @@ function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful 
       <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
       {/* 36px, not the original 28px -- a real per-row action (saves to
          Locker) too small to tap reliably (mobile audit, 9 Sept 2026). */}
-      <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] md:size-[28px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-        <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
-      </button>
+      <IconTip label={saved ? "Saved" : "Save"}>
+        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] md:size-[28px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+          <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+        </button>
+      </IconTip>
     </AlignedRow>
   );
 }
@@ -1939,13 +1952,15 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
     // welcome popup on connect... gets cropped and i cant hit the cta" --
     // every other bottom sheet on this page had the identical bug).
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="ask-title">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="ask-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Ask a question</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-            <X className="h-4 w-4" aria-hidden />
-          </button>
+          <IconTip label="Close">
+            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </IconTip>
         </div>
         <label className="block">
           <span className="sr-only">Your question</span>
@@ -2048,9 +2063,11 @@ function SavedView({ saves, onUnsave, onBack, backLabel = "Back", onOpenThread, 
                   <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{row.kicker}</span>
                   <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{row.title}</span>
                 </button>
-                <button type="button" onClick={() => onUnsave(row.key)} aria-label="Remove from Saved" className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--accent-subtle)" }}>
-                  <Bookmark className="h-4 w-4" aria-hidden fill="currentColor" />
-                </button>
+                <IconTip label="Remove from Saved">
+                  <button type="button" onClick={() => onUnsave(row.key)} aria-label="Remove from Saved" className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--accent-subtle)" }}>
+                    <Bookmark className="h-4 w-4" aria-hidden fill="currentColor" />
+                  </button>
+                </IconTip>
               </li>
             ))}
           </ul>
@@ -2116,13 +2133,15 @@ function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (re
   const [reason, setReason] = useState<string | null>(null);
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="report-title">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[440px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="report-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Report this</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-            <X className="h-4 w-4" aria-hidden />
-          </button>
+          <IconTip label="Close">
+            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </IconTip>
         </div>
         <div className="flex flex-col" role="radiogroup" aria-label="Reason">
           {REPORT_REASONS.map((r) => {
@@ -2264,9 +2283,11 @@ function HomeView({
             style={{ color: "var(--foreground)", fontFamily: "var(--font-body)" }}
           />
           {query && (
-            <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="dm-quiet flex h-[28px] w-[28px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-              <X className="h-4 w-4" aria-hidden />
-            </button>
+            <IconTip label="Clear search">
+              <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="dm-quiet flex h-[28px] w-[28px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            </IconTip>
           )}
         </label>
         </HoverBeam>
@@ -3088,23 +3109,29 @@ function EventView({
 
           {/* the viewer: one photo large, the count, previous and next; Escape or the X closes */}
           {photoOpen !== null && event.photos && typeof document !== "undefined" && createPortal(
-            <div role="dialog" aria-modal="true" aria-label={`Photo ${photoOpen + 1} of ${event.photos.count}`} className="marketing-v2 themeable fixed inset-0 z-[95] flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "rgba(6,7,16,0.9)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
-              <button type="button" aria-label="Close" onClick={() => setPhotoOpen(null)} className="absolute inset-0 cursor-default backdrop-blur-[14px]" />
+            <div role="dialog" aria-modal="true" aria-label={`Photo ${photoOpen + 1} of ${event.photos.count}`} className="marketing-v2 themeable fixed inset-0 z-[95] flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "rgba(6,7,16,0.6)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}>
+              <button type="button" aria-label="Close" onClick={() => setPhotoOpen(null)} className="absolute inset-0 cursor-default backdrop-blur-[28px]" />
               <div className="relative z-[1] flex w-full max-w-[1100px] flex-col gap-[var(--space-3)]">
                 <div className="flex items-center justify-between text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>
                   <span>{event.name} · Photo {photoOpen + 1} of {event.photos.count}</span>
-                  <button type="button" onClick={() => setPhotoOpen(null)} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF" }}>
-                    <X className="h-4 w-4" aria-hidden />
-                  </button>
+                  <IconTip label="Close">
+                    <button type="button" onClick={() => setPhotoOpen(null)} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF" }}>
+                      <X className="h-4 w-4" aria-hidden />
+                    </button>
+                  </IconTip>
                 </div>
                 <div className="relative w-full overflow-hidden rounded-[var(--radius-lg)]" style={{ aspectRatio: "16 / 9", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
                   <Image key={photoOpen} src={event.photos.images[photoOpen % event.photos.images.length]} alt="" fill sizes="1100px" className="object-cover motion-safe:animate-[fade-slide-up_0.35s_ease-out_both]" priority />
-                  <button type="button" aria-label="Previous photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i - 1 + event.photos!.images.length) % event.photos!.images.length))} className="dm-quiet absolute top-1/2 left-3 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
-                    <ChevronLeft className="h-5 w-5" aria-hidden />
-                  </button>
-                  <button type="button" aria-label="Next photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i + 1) % event.photos!.images.length))} className="dm-quiet absolute top-1/2 right-3 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
-                    <ChevronRight className="h-5 w-5" aria-hidden />
-                  </button>
+                  <IconTip label="Previous" className="absolute top-1/2 left-3 -translate-y-1/2">
+                    <button type="button" aria-label="Previous photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i - 1 + event.photos!.images.length) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
+                      <ChevronLeft className="h-5 w-5" aria-hidden />
+                    </button>
+                  </IconTip>
+                  <IconTip label="Next" className="absolute top-1/2 right-3 -translate-y-1/2">
+                    <button type="button" aria-label="Next photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i + 1) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
+                      <ChevronRight className="h-5 w-5" aria-hidden />
+                    </button>
+                  </IconTip>
                 </div>
                 <ul className="flex justify-center gap-[6px]">
                   {event.photos.images.map((src, i) => (
@@ -3843,15 +3870,17 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
   ];
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "#0e0c20", fontFamily: "var(--font-display)" }}>
           <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
           <span aria-hidden className="absolute inset-0" style={{ background: "rgba(14,12,32,0.55)" }} />
           <h2 className="relative z-10 min-w-0 flex-1 text-[16px] leading-[21px] font-extrabold" style={{ color: "#f6f5fb", textShadow: CARD_TEXT_SHADOW }}>{community.name}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet relative z-10 flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(246,245,251,0.18)", color: "#f6f5fb" }}>
-            <X className="h-4 w-4" aria-hidden />
-          </button>
+          <IconTip label="Close" className="z-10">
+            <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(246,245,251,0.18)", color: "#f6f5fb" }}>
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </IconTip>
         </div>
         <div className="flex flex-col gap-[var(--space-3)] p-[var(--space-5)]">
           {/* No unlock ladder, no points gate (direct feedback): joining is
@@ -3914,7 +3943,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
 
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label="Enter event code">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.55)" }} />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.55)" }} />
       <div className="dm-scroll relative z-[1] max-h-[calc(100dvh-96px)] w-full max-w-[480px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         {confirming ? (
           <div aria-live="polite">
@@ -3933,9 +3962,11 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
           <>
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Enter event code</h2>
-              <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--border)" }}>
-                <X className="h-4 w-4" aria-hidden />
-              </button>
+              <IconTip label="Close">
+                <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--border)" }}>
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </IconTip>
             </div>
             <p className="mt-[6px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
               Event codes come from a Dreamari event: on your badge, the closing slide, or the follow-up email. They unlock a private board for attendees.

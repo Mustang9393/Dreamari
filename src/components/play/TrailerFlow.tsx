@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
+import { IconTip } from "@/components/app/IconTip";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { musicMutedSnapshot, playMusic, serverMusicMutedSnapshot, setMusicMuted, stopMusic, subscribeMusicMuted } from "./music";
 import type { Simulation, TrailerCard } from "./types";
@@ -258,16 +259,18 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
       {/* Always skippable, never hidden -- quiet corner chrome, the way a
          real trailer keeps its skip out of the frame's way. The sound
          toggle shares the corner language, top-right. */}
-      <button
-        type="button"
-        onClick={() => setMusicMuted(!musicMuted)}
-        aria-pressed={musicMuted}
-        aria-label={musicMuted ? "Turn trailer sound on" : "Turn trailer sound off"}
-        className="dm-quiet absolute top-[calc(9dvh+14px)] right-[18px] z-30 flex size-[40px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[8px]"
-        style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.3)", color: musicMuted ? "rgba(255,255,255,0.55)" : "#FFFFFF" }}
-      >
-        {musicMuted ? <VolumeX className="h-[17px] w-[17px]" aria-hidden /> : <Volume2 className="h-[17px] w-[17px]" aria-hidden />}
-      </button>
+      <IconTip label={musicMuted ? "Turn trailer sound on" : "Turn trailer sound off"} className="absolute top-[calc(9dvh+14px)] right-[18px] z-30">
+        <button
+          type="button"
+          onClick={() => setMusicMuted(!musicMuted)}
+          aria-pressed={musicMuted}
+          aria-label={musicMuted ? "Turn trailer sound on" : "Turn trailer sound off"}
+          className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[8px]"
+          style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.3)", color: musicMuted ? "rgba(255,255,255,0.55)" : "#FFFFFF" }}
+        >
+          {musicMuted ? <VolumeX className="h-[17px] w-[17px]" aria-hidden /> : <Volume2 className="h-[17px] w-[17px]" aria-hidden />}
+        </button>
+      </IconTip>
       <button
         type="button"
         onClick={onDone}

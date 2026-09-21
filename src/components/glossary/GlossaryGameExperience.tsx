@@ -8,6 +8,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -157,20 +158,22 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
 function MuteToggle() {
   const muted = useSyncExternalStore(subscribeMuted, mutedSnapshot, serverMutedSnapshot);
   return (
-    <button
-      type="button"
-      onClick={() => {
-        const next = !muted;
-        setMuted(next);
-        if (!next) playSelect();
-      }}
-      aria-pressed={muted}
-      aria-label={muted ? "Turn sound on" : "Turn sound off"}
-      className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-    >
-      {muted ? <VolumeX className="h-[17px] w-[17px]" aria-hidden /> : <Volume2 className="h-[17px] w-[17px]" aria-hidden />}
-    </button>
+    <IconTip label={muted ? "Turn sound on" : "Turn sound off"}>
+      <button
+        type="button"
+        onClick={() => {
+          const next = !muted;
+          setMuted(next);
+          if (!next) playSelect();
+        }}
+        aria-pressed={muted}
+        aria-label={muted ? "Turn sound on" : "Turn sound off"}
+        className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+        style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+      >
+        {muted ? <VolumeX className="h-[17px] w-[17px]" aria-hidden /> : <Volume2 className="h-[17px] w-[17px]" aria-hidden />}
+      </button>
+    </IconTip>
   );
 }
 
@@ -1025,7 +1028,7 @@ function QuestionScreen({
 // the only way through.
 function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; text: string; onNext: () => void; isLast: boolean }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}>
       <div
         className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]"
         style={{ background: correct ? "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}
@@ -1065,7 +1068,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
     playCorrect();
   }, []);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }} onClick={onDismiss}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} onClick={onDismiss}>
       <div
         className="relative flex w-full max-w-[320px] flex-col items-center gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] p-[var(--space-8)] text-center motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{ background: "linear-gradient(160deg, var(--hero-accent-teal), var(--background))" }}

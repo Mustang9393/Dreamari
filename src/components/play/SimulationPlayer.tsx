@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { motion } from "framer-motion";
 import { ChevronRight, Briefcase, ChevronLeft, FastForward, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
+import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
 
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO } from "./expressions";
@@ -1881,7 +1882,7 @@ function DialogueBox({
             setLex(null);
           }}
         >
-          <div aria-hidden className="absolute inset-0" style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(4px)" }} />
+          <div aria-hidden className="absolute inset-0" style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(28px)" }} />
           <div
             role="dialog"
             aria-label={lex.title}
@@ -1951,7 +1952,7 @@ function TappableScore({ reputation, band, delta, accent, hideBand = false }: { 
             setOpen(false);
           }}
         >
-          <div aria-hidden className="absolute inset-0" style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(4px)" }} />
+          <div aria-hidden className="absolute inset-0" style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(28px)" }} />
           <div
             role="dialog"
             aria-label="What your reputation decides"
@@ -2019,24 +2020,28 @@ function Hud({
           {/* Always available, mid-level or not -- the per-beat back chevron
              only ever stepped back one beat within the run; there was no way
              to jump straight out to the Play hub once past the first beat. */}
-          <Link
-            href="/play"
-            aria-label="Back to Play"
-            className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
-            style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
-          >
-            <Home className="h-[17px] w-[17px]" aria-hidden />
-          </Link>
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              aria-label="Back to the previous screen"
+          <IconTip label="Back to Play">
+            <Link
+              href="/play"
+              aria-label="Back to Play"
               className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
               style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
             >
-              <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
-            </button>
+              <Home className="h-[17px] w-[17px]" aria-hidden />
+            </Link>
+          </IconTip>
+          {onBack && (
+            <IconTip label="Back">
+              <button
+                type="button"
+                onClick={onBack}
+                aria-label="Back to the previous screen"
+                className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+              >
+                <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
+              </button>
+            </IconTip>
           )}
         </span>
         <span className="min-w-0 flex-1">
@@ -2050,16 +2055,17 @@ function Hud({
         </span>
         <span className="flex flex-none items-center gap-[6px]">
           {onOpenConnect && (
-            <button
-              type="button"
-              onClick={onOpenConnect}
-              aria-label="Demo: jump to Connect interstitial"
-              title="Demo: jump to Connect"
-              className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
-              style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--accent-subtle)" }}
-            >
-              <FastForward className="h-[15px] w-[15px]" aria-hidden />
-            </button>
+            <IconTip label="Demo: jump to Connect">
+              <button
+                type="button"
+                onClick={onOpenConnect}
+                aria-label="Demo: jump to Connect interstitial"
+                className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--accent-subtle)" }}
+              >
+                <FastForward className="h-[15px] w-[15px]" aria-hidden />
+              </button>
+            </IconTip>
           )}
           <MusicToggle />
           <MuteToggle />
@@ -2119,16 +2125,18 @@ function Hud({
 function MusicToggle() {
   const musicMuted = useSyncExternalStore(subscribeMusicMuted, musicMutedSnapshot, serverMusicMutedSnapshot);
   return (
-    <button
-      type="button"
-      onClick={() => setMusicMuted(!musicMuted)}
-      aria-pressed={musicMuted}
-      aria-label={musicMuted ? "Turn music on" : "Turn music off"}
-      className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
-      style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: musicMuted ? "var(--muted-foreground)" : "var(--foreground)" }}
-    >
-      <Music className="h-[16px] w-[16px]" aria-hidden />
-    </button>
+    <IconTip label={musicMuted ? "Turn music on" : "Turn music off"}>
+      <button
+        type="button"
+        onClick={() => setMusicMuted(!musicMuted)}
+        aria-pressed={musicMuted}
+        aria-label={musicMuted ? "Turn music on" : "Turn music off"}
+        className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+        style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: musicMuted ? "var(--muted-foreground)" : "var(--foreground)" }}
+      >
+        <Music className="h-[16px] w-[16px]" aria-hidden />
+      </button>
+    </IconTip>
   );
 }
 
@@ -2137,20 +2145,22 @@ function MusicToggle() {
 function MuteToggle() {
   const muted = useSyncExternalStore(subscribeMuted, mutedSnapshot, serverMutedSnapshot);
   return (
-    <button
-      type="button"
-      onClick={() => {
-        const next = !muted;
-        setMuted(next);
-        if (!next) playSelect();
-      }}
-      aria-pressed={muted}
-      aria-label={muted ? "Turn sound on" : "Turn sound off"}
-      className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
-      style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: muted ? "var(--muted-foreground)" : "var(--foreground)" }}
-    >
-      {muted ? <VolumeX className="h-[17px] w-[17px]" aria-hidden /> : <Volume2 className="h-[17px] w-[17px]" aria-hidden />}
-    </button>
+    <IconTip label={muted ? "Turn sound on" : "Turn sound off"}>
+      <button
+        type="button"
+        onClick={() => {
+          const next = !muted;
+          setMuted(next);
+          if (!next) playSelect();
+        }}
+        aria-pressed={muted}
+        aria-label={muted ? "Turn sound on" : "Turn sound off"}
+        className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+        style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: muted ? "var(--muted-foreground)" : "var(--foreground)" }}
+      >
+        {muted ? <VolumeX className="h-[17px] w-[17px]" aria-hidden /> : <Volume2 className="h-[17px] w-[17px]" aria-hidden />}
+      </button>
+    </IconTip>
   );
 }
 
@@ -2223,7 +2233,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
   }, [onNext]);
 
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center px-3 py-3 sm:px-5 sm:py-5" style={{ background: "color-mix(in srgb, var(--background) 58%, transparent)" }}>
+    <div className="absolute inset-0 z-30 flex items-center justify-center px-3 py-3 sm:px-5 sm:py-5" style={{ background: "color-mix(in srgb, var(--background) 58%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}>
       <div
         className="flex w-full max-w-[620px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[18px] py-[18px] backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.44s_cubic-bezier(0.16,1,0.3,1)_both]"
         style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: color }}
