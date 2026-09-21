@@ -11519,3 +11519,28 @@ Files touched: `src/components/app/DatePicker.tsx` (new), `src/components/career
 `npx tsc --noEmit -p .` and `npx eslint src/components` clean (0 errors). Live-verified every fix in the browser, including the Build-flow panel contrast fix specifically (computed `background-color` checked before and after).
 
 Next step: none pending. Not yet committed/pushed -- pending explicit go-ahead per the project's standing rule.
+
+## 2026-09-21 · V2 seasonal card artwork and motion
+
+Isolated branch `codex/season-card-motion`, based on remote main 5b9fddd.
+Shared SeasonScene extracted from ProfileExperience; preserves the existing Fall, Winter, Spring palette and plan data. New maple/tapered leaf silhouettes, fine snow crystals, notched sakura and loose petals. Each season has its own resting composition. A separate moving layer crossfades on hover or direct keyboard focus; phased, paused CSS timelines combine descent, lateral sway and rotation without moving the resting marks abruptly to the top. Only the directly interacted card animates. Reduced motion retains the static composition. No runtime dependencies or animation state updates.
+
+Overview uses the full card fade; accordion wash fades within 145px and particles within 182px, leaving task content clear. Content is layered above decoration. Existing V1 behavior remains.
+
+Validation: TypeScript passed; ESLint has no errors (one existing unused AnimatePresence warning in ProfileExperience); token check passed; browser renders Overview and all three Plan cards, Winter expansion, isolated hover activation, and reduced-motion static state. Desktop 1280px and mobile 390px inspected; mobile overflow 0; no browser errors. Screenshots in workspace outputs/seasons-*.png.
+
+Preview: http://localhost:3107/profile, dismiss welcome screen, choose V2 at page foot, then Overview or My Plan. Not pushed or deployed at handoff time -- see follow-up entry below.
+
+## 2026-09-21 · Season card watercolor art: asset gap found and closed, with a graceful fallback
+
+Picked up the branch above to integrate and push. Rebased onto current `origin/main` cleanly (`ProfileExperience.tsx` auto-merged, only this file needed manual resolution).
+
+**Found a real blocker before pushing:** the new `SeasonScene.tsx` renders `<img src="/images/seasons/watercolor/{kind}.png">` for six marks (maple, leaf, snow, crystal, blossom, petal), but none of those files existed anywhere on the machine -- not in this worktree, not in any of the other local Dreamari checkouts, not in system temp/cache. Codex's own handoff notes and its screenshots (`outputs/seasons-*.png`) show the art rendering correctly, so the files were real inside Codex's own session; they just never made it to disk here. Codex's own notes flagged this as unreviewed and unshipped, so this wasn't a silent gap -- it was going to be caught in review regardless. Confirmed via exhaustive filesystem search before assuming anything, not by inspection of the code alone.
+
+**Resolved with 2 changes:**
+1. The user supplied 3 of the 6 watercolor PNGs Codex generated (from Codex's own chat, saved via Downloads): `maple.png`, `leaf.png` (a ginkgo leaf), `snow.png`. Placed at `public/images/seasons/watercolor/`.
+2. Rebuilt `SeasonMark` (inside `SeasonScene.tsx`) with a per-mark fallback: the `<img>` still points at the watercolor PNG, but an `onError` handler swaps to the equivalent V1 SVG mark (`LeafMarkA`/`LeafMarkB`/lucide `Snowflake`/`SakuraMark`, ported back in from the pre-Codex version of this component in `ProfileExperience.tsx`, tinted via the season's own color) instead of leaving the browser's broken-image glyph. This means: the 3 delivered marks (maple, leaf, snow) render as real watercolor art now; the 3 not yet delivered (crystal, blossom, petal) render as the exact already-shipped SVG art instead of breaking; and when the remaining 3 PNGs arrive, they'll start rendering automatically with no further code change, file by file.
+
+Files touched: `src/components/profile/SeasonScene.tsx` (fallback logic + restored SVG marks), `public/images/seasons/watercolor/{maple,leaf,snow}.png` (new).
+
+`npx tsc --noEmit -p .` and `npx eslint` clean. [Live verification and push status: see the push itself / next session log entry.]
