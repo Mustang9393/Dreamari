@@ -9902,4 +9902,604 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       "pay": { "starting": "$42,000", "typical": "$62,580", "top": "$92,000" }
     }
   },
+  "bank-teller": {
+    "slug": "bank-teller",
+    "title": "Bank Teller",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/bank-teller.webp",
+    "summary": "Handles deposits, withdrawals and everyday customer transactions at a bank.",
+    "scenario": "Imagine a line forming at your window during the lunch rush. Every transaction has to be fast, friendly and exactly right.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$37,020/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$45K" }, { "state": "California", "pay": "$42K" }, { "state": "New York", "pay": "$41K" }] },
+    "knowAbout": ["Cash handling and balancing a drawer", "Bank products and services", "Fraud and security awareness", "Customer service basics"],
+    "goodAt": ["Accuracy with numbers", "Staying friendly under pressure", "Trustworthy with money", "Clear communication"],
+    "software": ["Bank teller/transaction systems", "Point of sale terminals"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Bank Teller", "pay": "$37K", "description": "You handle everyday transactions and answer basic account questions.", "whatYouDo": ["Process deposits and withdrawals", "Balance a cash drawer", "Answer account questions"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Senior Teller / Personal Banker", "pay": "$45K", "description": "You handle complex transactions and start opening accounts.", "whatYouDo": ["Open new accounts", "Handle escalations", "Cross-sell bank products"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Branch Supervisor", "pay": "$58K", "description": "You run the teller line and train new hires.", "whatYouDo": ["Supervise tellers", "Manage branch operations", "Train new hires"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "90", "credential": "High school diploma" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "Banks train tellers on their own systems; no specific major is expected.", "noBachelorPct": "88%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 42.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 10.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$28,000", "typical": "$37,020", "top": "$48,000" }
+    }
+  },
+  "claims-adjuster": {
+    "slug": "claims-adjuster",
+    "title": "Claims Adjuster",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/claims-adjuster.webp",
+    "summary": "Investigates insurance claims to decide what a company owes.",
+    "scenario": "Imagine a family's house just flooded and they're waiting to hear what's covered. You're the one who inspects the damage and makes the call.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$72,540/year" }],
+    "payByState": { "best": [{ "state": "New Jersey", "pay": "$91K" }, { "state": "California", "pay": "$85K" }, { "state": "New York", "pay": "$83K" }] },
+    "knowAbout": ["Insurance policies and coverage", "Property and liability damage assessment", "Negotiation and documentation", "State licensing requirements"],
+    "goodAt": ["Careful investigation", "Fair, clear judgment calls", "Talking to people during stressful moments", "Writing detailed reports"],
+    "software": ["Claims management systems", "Estimating software (Xactimate)"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Claims Trainee", "pay": "$48K", "description": "You shadow adjusters and learn to evaluate straightforward claims.", "whatYouDo": ["Shadow inspections", "Basic claim review", "Learn policy language"], "toGetHere": ["Bachelor's degree", "State adjuster license"] },
+      { "number": "2", "jobTitle": "Claims Adjuster", "pay": "$73K", "description": "You investigate and settle claims on your own.", "whatYouDo": ["Inspect damage", "Interview claimants", "Determine payouts"], "toGetHere": ["State license", "1-2 years experience"] },
+      { "number": "3", "jobTitle": "Senior Claims Adjuster", "pay": "$95K", "description": "You handle complex or high-value claims and mentor newer adjusters.", "whatYouDo": ["Handle complex claims", "Mentor adjusters", "Litigation support"], "toGetHere": ["5+ years experience", "Advanced certifications"] }
+    ],
+    "education": { "studies": [{ "name": "Business" }, { "name": "Finance" }], "where": [{ "count": "160", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Usually not, but a state license is required", "trainingAfterHiring": "Insurer-provided training + state licensing exam", "note": "The state adjuster license is the real gate, alongside a bachelor's degree most insurers expect.", "noBachelorPct": "35%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 8.0 }, { "label": "Some college, no degree", "pct": 14.0 }, { "label": "Associate's degree", "pct": 12.0 }, { "label": "Bachelor's degree", "pct": 55.0 }, { "label": "Master's degree", "pct": 9.0 }, { "label": "Doctorate or professional degree", "pct": 1.5 }] },
+      "pay": { "starting": "$48,000", "typical": "$72,540", "top": "$105,000" }
+    }
+  },
+  "customer-service-representative": {
+    "slug": "customer-service-representative",
+    "title": "Customer Service Representative",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/customer-service-representative.webp",
+    "summary": "Helps customers with questions, problems and orders over phone, chat or email.",
+    "scenario": "Imagine a customer calls furious about a billing mistake. Your job is to fix it and have them hang up feeling actually taken care of.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$39,680/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$48K" }, { "state": "California", "pay": "$45K" }, { "state": "Massachusetts", "pay": "$44K" }] },
+    "knowAbout": ["Company products and policies", "De-escalation techniques", "Order and account systems", "Written and verbal communication"],
+    "goodAt": ["Staying calm and patient", "Clear communication", "Problem-solving on the spot", "Handling repetitive tasks well"],
+    "software": ["CRM/ticketing systems (Zendesk, Salesforce)", "Live chat tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Customer Service Rep", "pay": "$36K", "description": "You handle everyday questions and issues for customers.", "whatYouDo": ["Answer calls/chats", "Resolve basic issues", "Log interactions"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Senior Rep / Escalations", "pay": "$45K", "description": "You handle the harder, escalated cases other reps can't resolve.", "whatYouDo": ["Handle escalations", "Mentor new reps", "Resolve complex issues"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Customer Service Supervisor", "pay": "$56K", "description": "You lead a team of reps and manage service quality.", "whatYouDo": ["Supervise team", "Monitor quality", "Handle team scheduling"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "70", "credential": "High school diploma" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job / company product training", "note": "Companies train you on their own products and systems; no specific major matters.", "noBachelorPct": "85%", "distribution": [{ "label": "Did not finish high school", "pct": 4.0 }, { "label": "Finished high school", "pct": 38.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 13.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$30,000", "typical": "$39,680", "top": "$52,000" }
+    }
+  },
+  "entrepreneur": {
+    "slug": "entrepreneur",
+    "title": "Entrepreneur",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/entrepreneur.webp",
+    "summary": "Starts and runs their own business, from idea to first customer and beyond.",
+    "scenario": "Imagine you have an idea nobody else believes in yet. You have to build it, sell it, and keep the lights on before anyone else gets convinced.",
+    "facts": [{ "label": "Typical degree", "value": "No specific requirement" }, { "label": "Typical pay", "value": "Varies widely" }],
+    "payByState": { "best": [{ "state": "California", "pay": "Varies" }, { "state": "New York", "pay": "Varies" }, { "state": "Texas", "pay": "Varies" }] },
+    "knowAbout": ["Business planning and budgeting", "Sales and marketing basics", "Managing risk", "The specific industry you're building in"],
+    "goodAt": ["Comfort with uncertainty", "Persistence through setbacks", "Wearing many hats at once", "Selling an idea"],
+    "software": ["Accounting software (QuickBooks)", "Basic marketing/website tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Founder (Idea Stage)", "pay": "Varies", "description": "You're validating the idea, often while working another job.", "whatYouDo": ["Test the idea", "Talk to potential customers", "Build a first version"], "toGetHere": ["No formal requirement"] },
+      { "number": "2", "jobTitle": "Founder (Early Business)", "pay": "Varies", "description": "You have real customers and are figuring out how to grow.", "whatYouDo": ["Manage cash flow", "Hire first employees", "Refine the product"], "toGetHere": ["A working business with real revenue"] },
+      { "number": "3", "jobTitle": "Founder / CEO (Established)", "pay": "Varies", "description": "You run a real company and lead a team.", "whatYouDo": ["Set company strategy", "Lead a team", "Raise capital or reinvest profit"], "toGetHere": ["Years of running the business"] }
+    ],
+    "education": { "studies": [{ "name": "Business (helpful, not required)" }], "where": [{ "count": "0", "credential": "No specific requirement" }] },
+    "sources": "There is no single BLS occupation code for 'entrepreneur' -- pay and path vary enormously by industry and outcome; figures here describe typical ranges, not a sourced median.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "No specific requirement", "experienceFirst": "No. Many start with no prior business experience", "trainingAfterHiring": "Learned by doing, mentorship, or business programs", "note": "There's no single path in -- some entrepreneurs have advanced degrees, many don't.", "noBachelorPct": "Varies", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 20.0 }, { "label": "Some college, no degree", "pct": 20.0 }, { "label": "Associate's degree", "pct": 10.0 }, { "label": "Bachelor's degree", "pct": 35.0 }, { "label": "Master's degree", "pct": 8.0 }, { "label": "Doctorate or professional degree", "pct": 2.0 }] },
+      "pay": { "starting": "Often $0", "typical": "Varies widely", "top": "Unbounded", "note": "Most new businesses take years to turn a reliable profit, and many never do -- pay here genuinely cannot be reduced to one number." }
+    }
+  },
+  "event-director": {
+    "slug": "event-director",
+    "title": "Event Director",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/event-director.webp",
+    "summary": "Leads the planning and execution of large events from start to finish.",
+    "scenario": "Imagine a 2,000-person conference opens in six hours and the keynote speaker's flight just got delayed. You're the one making the calls.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$75,000/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$94K" }, { "state": "California", "pay": "$89K" }, { "state": "Nevada", "pay": "$81K" }] },
+    "knowAbout": ["Event logistics and vendor management", "Budgeting large events", "Venue contracts", "Crisis management"],
+    "goodAt": ["Staying calm under pressure", "Juggling many moving pieces", "Leading a team on a deadline", "Negotiating with vendors"],
+    "software": ["Event management platforms (Cvent)", "Project management tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Event Coordinator", "pay": "$47K", "description": "You handle logistics for smaller events under a director.", "whatYouDo": ["Coordinate vendors", "Manage event timelines", "Handle registration"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Event Manager", "pay": "$62K", "description": "You run mid-size events from planning through execution.", "whatYouDo": ["Manage full events", "Own vendor relationships", "Lead on-site teams"], "toGetHere": ["2-4 years experience"] },
+      { "number": "3", "jobTitle": "Event Director", "pay": "$95K", "description": "You lead the biggest events and manage a team of planners.", "whatYouDo": ["Lead flagship events", "Manage event team", "Own event P&L"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Event Management" }, { "name": "Business" }, { "name": "Communications" }], "where": [{ "count": "120", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Usually, a few years as a coordinator first", "trainingAfterHiring": "On-the-job, learning by running smaller events first", "note": "Most Event Directors worked their way up from coordinator roles rather than starting there.", "noBachelorPct": "38%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 8.0 }, { "label": "Some college, no degree", "pct": 16.0 }, { "label": "Associate's degree", "pct": 13.0 }, { "label": "Bachelor's degree", "pct": 52.0 }, { "label": "Master's degree", "pct": 9.0 }, { "label": "Doctorate or professional degree", "pct": 1.5 }] },
+      "pay": { "starting": "$47,000", "typical": "$75,000", "top": "$110,000" }
+    }
+  },
+  "event-marketing-manager": {
+    "slug": "event-marketing-manager",
+    "title": "Event Marketing Manager",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/event-marketing-manager.webp",
+    "summary": "Plans the marketing that gets people to show up to an event.",
+    "scenario": "Imagine a product launch event with tickets not selling. You have two weeks to turn attention into a packed room.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$68,000/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$85K" }, { "state": "California", "pay": "$81K" }, { "state": "Massachusetts", "pay": "$76K" }] },
+    "knowAbout": ["Marketing campaigns and channels", "Audience targeting", "Event promotion timelines", "Analytics and ticket sales tracking"],
+    "goodAt": ["Creative campaign thinking", "Working backward from a deadline", "Reading data to adjust a plan", "Cross-team coordination"],
+    "software": ["Email/marketing platforms (Mailchimp, HubSpot)", "Social media ad managers", "Analytics dashboards"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Marketing Coordinator", "pay": "$45K", "description": "You execute campaigns designed by others.", "whatYouDo": ["Run email campaigns", "Post on social channels", "Track basic metrics"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Event Marketing Manager", "pay": "$68K", "description": "You plan and run the marketing strategy for events.", "whatYouDo": ["Plan campaigns", "Manage ad spend", "Report on attendance results"], "toGetHere": ["2-4 years experience"] },
+      { "number": "3", "jobTitle": "Senior Marketing Manager", "pay": "$95K", "description": "You own marketing strategy across multiple events or a whole calendar.", "whatYouDo": ["Set marketing strategy", "Manage a team", "Own the marketing budget"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Marketing" }, { "name": "Communications" }], "where": [{ "count": "140", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Usually a few years in marketing first", "trainingAfterHiring": "On-the-job, campaign by campaign", "note": "A marketing or communications degree is the common path, but a strong portfolio can substitute.", "noBachelorPct": "34%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 7.0 }, { "label": "Some college, no degree", "pct": 15.0 }, { "label": "Associate's degree", "pct": 11.5 }, { "label": "Bachelor's degree", "pct": 55.0 }, { "label": "Master's degree", "pct": 10.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
+      "pay": { "starting": "$45,000", "typical": "$68,000", "top": "$98,000" }
+    }
+  },
+  "event-operations-manager": {
+    "slug": "event-operations-manager",
+    "title": "Event Operations Manager",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/event-operations-manager.webp",
+    "summary": "Manages the physical and logistical side of running an event.",
+    "scenario": "Imagine the catering truck is late, the AV isn't working, and doors open in 40 minutes. You're the one who has to fix all three at once.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$58,000/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$72K" }, { "state": "California", "pay": "$69K" }, { "state": "Nevada", "pay": "$64K" }] },
+    "knowAbout": ["Venue and vendor logistics", "Staffing and scheduling", "Safety and permit requirements", "On-site problem solving"],
+    "goodAt": ["Staying calm when things go wrong", "Managing many vendors at once", "Physical stamina for long event days", "Clear, fast communication"],
+    "software": ["Event management platforms (Cvent)", "Scheduling and staffing tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Operations Coordinator", "pay": "$42K", "description": "You assist with event setup, vendor check-ins and day-of logistics.", "whatYouDo": ["Coordinate setup", "Check in vendors", "Assist on-site"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Event Operations Manager", "pay": "$58K", "description": "You run the full logistics of an event from setup to teardown.", "whatYouDo": ["Manage vendors", "Oversee staffing", "Run day-of operations"], "toGetHere": ["2-4 years experience"] },
+      { "number": "3", "jobTitle": "Senior Operations Manager", "pay": "$80K", "description": "You oversee operations for the largest, most complex events.", "whatYouDo": ["Lead operations team", "Manage venue contracts", "Own event safety plans"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Event Management" }, { "name": "Hospitality" }], "where": [{ "count": "100", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Usually a couple years coordinating events first", "trainingAfterHiring": "On-the-job, event by event", "note": "Hands-on event experience matters as much as the degree itself.", "noBachelorPct": "40%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 10.0 }, { "label": "Some college, no degree", "pct": 16.0 }, { "label": "Associate's degree", "pct": 13.0 }, { "label": "Bachelor's degree", "pct": 51.0 }, { "label": "Master's degree", "pct": 8.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
+      "pay": { "starting": "$42,000", "typical": "$58,000", "top": "$85,000" }
+    }
+  },
+  "exhibition-sales-manager": {
+    "slug": "exhibition-sales-manager",
+    "title": "Exhibition Sales Manager",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/exhibition-sales-manager.webp",
+    "summary": "Sells booth space and sponsorships for trade shows and expos.",
+    "scenario": "Imagine a trade show is six months out and half the floor is still unsold. You're the one making calls to fill it before the deadline.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$67,000/year" }],
+    "payByState": { "best": [{ "state": "Nevada", "pay": "$82K" }, { "state": "New York", "pay": "$80K" }, { "state": "California", "pay": "$78K" }] },
+    "knowAbout": ["Sales pipelines and quotas", "Exhibitor and sponsor relationships", "Trade show floor planning", "Contract negotiation"],
+    "goodAt": ["Cold outreach and follow-up", "Building long-term client relationships", "Handling rejection and staying persistent", "Negotiating pricing"],
+    "software": ["CRM software (Salesforce)", "Floor plan / booth management tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Sales Coordinator", "pay": "$42K", "description": "You support the sales team with outreach and account admin.", "whatYouDo": ["Cold outreach", "Track leads", "Support account managers"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Exhibition Sales Manager", "pay": "$67K", "description": "You own accounts and sell booth space directly.", "whatYouDo": ["Manage client accounts", "Sell booth/sponsorship packages", "Hit sales targets"], "toGetHere": ["2-4 years sales experience"] },
+      { "number": "3", "jobTitle": "Senior Sales Manager", "pay": "$95K", "description": "You lead a sales team and own the biggest accounts.", "whatYouDo": ["Lead sales team", "Manage key accounts", "Set sales strategy"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Business" }, { "name": "Marketing" }], "where": [{ "count": "90", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Usually some sales experience first", "trainingAfterHiring": "On-the-job, account by account", "note": "Sales results matter more than the specific degree once you're in the door.", "noBachelorPct": "36%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 9.0 }, { "label": "Some college, no degree", "pct": 15.0 }, { "label": "Associate's degree", "pct": 11.5 }, { "label": "Bachelor's degree", "pct": 54.0 }, { "label": "Master's degree", "pct": 9.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
+      "pay": { "starting": "$42,000", "typical": "$67,000", "top": "$100,000", "note": "Commission on top of base pay is common and can meaningfully raise this." }
+    }
+  },
+  "fashion-e-commerce-manager": {
+    "slug": "fashion-e-commerce-manager",
+    "title": "Fashion E-Commerce Manager",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/fashion-e-commerce-manager.webp",
+    "summary": "Runs the online store for a fashion brand, from product pages to checkout.",
+    "scenario": "Imagine a big holiday sale launches at midnight and the site starts lagging under traffic. You're the one watching the dashboards, ready to act.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$72,000/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$90K" }, { "state": "California", "pay": "$86K" }, { "state": "New Jersey", "pay": "$79K" }] },
+    "knowAbout": ["E-commerce platforms and site merchandising", "Digital marketing and conversion data", "Inventory and fulfillment coordination", "Fashion trends and product cycles"],
+    "goodAt": ["Reading data to improve sales", "Visual merchandising sense", "Project managing site launches", "Working cross-functionally with design and ops"],
+    "software": ["Shopify / e-commerce platforms", "Google Analytics", "Email marketing tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "E-Commerce Coordinator", "pay": "$46K", "description": "You maintain product listings and support site updates.", "whatYouDo": ["Update product pages", "Support site content", "Track basic metrics"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Fashion E-Commerce Manager", "pay": "$72K", "description": "You own the site's performance and merchandising strategy.", "whatYouDo": ["Manage site merchandising", "Run promotions", "Analyze sales data"], "toGetHere": ["2-4 years experience"] },
+      { "number": "3", "jobTitle": "Head of E-Commerce", "pay": "$105K", "description": "You set digital strategy across the whole brand's online presence.", "whatYouDo": ["Set digital strategy", "Manage e-commerce team", "Own online revenue targets"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Marketing" }, { "name": "Fashion Merchandising" }], "where": [{ "count": "110", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Usually a couple years in e-commerce or retail first", "trainingAfterHiring": "On-the-job, platform by platform", "note": "Real e-commerce platform experience (Shopify, etc.) matters as much as the major.", "noBachelorPct": "37%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 8.0 }, { "label": "Some college, no degree", "pct": 16.0 }, { "label": "Associate's degree", "pct": 12.5 }, { "label": "Bachelor's degree", "pct": 53.0 }, { "label": "Master's degree", "pct": 9.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
+      "pay": { "starting": "$46,000", "typical": "$72,000", "top": "$105,000" }
+    }
+  },
+  "fashion-merchandiser": {
+    "slug": "fashion-merchandiser",
+    "title": "Fashion Merchandiser",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/fashion-merchandiser.webp",
+    "summary": "Decides what clothes a store buys and how they're displayed to sell.",
+    "scenario": "Imagine a fall line isn't selling and you have three weeks to fix the display, the pricing, or both before it gets marked down.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$52,000/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$66K" }, { "state": "California", "pay": "$62K" }, { "state": "New Jersey", "pay": "$57K" }] },
+    "knowAbout": ["Fashion trends and buying cycles", "Visual merchandising", "Sales data and inventory turnover", "Vendor relationships"],
+    "goodAt": ["An eye for what will sell", "Reading sales data", "Visual and spatial sense for displays", "Negotiating with vendors"],
+    "software": ["Retail merchandising/inventory systems", "Point of sale reporting tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Merchandising Assistant", "pay": "$38K", "description": "You support buyers with inventory tracking and store visits.", "whatYouDo": ["Track inventory", "Assist with displays", "Support buyers"], "toGetHere": ["Bachelor's degree helpful"] },
+      { "number": "2", "jobTitle": "Fashion Merchandiser", "pay": "$52K", "description": "You choose what a store buys and how it's presented.", "whatYouDo": ["Select product lines", "Plan floor displays", "Analyze sell-through data"], "toGetHere": ["2-3 years experience"] },
+      { "number": "3", "jobTitle": "Senior Merchandiser / Buyer", "pay": "$78K", "description": "You own buying decisions for a whole category or region.", "whatYouDo": ["Lead buying strategy", "Manage vendor relationships", "Own category budget"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Fashion Merchandising" }, { "name": "Business" }], "where": [{ "count": "100", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "No, entry roles exist for new grads", "trainingAfterHiring": "On-the-job, season by season", "note": "A fashion merchandising degree helps, but a strong eye and retail experience can substitute.", "noBachelorPct": "42%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 10.0 }, { "label": "Some college, no degree", "pct": 18.0 }, { "label": "Associate's degree", "pct": 13.0 }, { "label": "Bachelor's degree", "pct": 49.0 }, { "label": "Master's degree", "pct": 8.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
+      "pay": { "starting": "$38,000", "typical": "$52,000", "top": "$78,000" }
+    }
+  },
+  "financial-advisor": {
+    "slug": "financial-advisor",
+    "title": "Financial Advisor",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/financial-advisor.webp",
+    "summary": "Helps people plan and manage their money and investments.",
+    "scenario": "Imagine a client walks in scared about retirement, thirty years out and no plan. You have to turn that fear into a real, workable strategy.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$99,580/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$135K" }, { "state": "Connecticut", "pay": "$120K" }, { "state": "New Jersey", "pay": "$115K" }] },
+    "knowAbout": ["Investments, taxes and retirement planning", "Financial regulations and licensing", "Insurance and estate basics", "Client relationship management"],
+    "goodAt": ["Building trust with clients", "Explaining complex things simply", "Long-term thinking", "Series 65/CFP licensing helps"],
+    "software": ["Financial planning software", "Portfolio management platforms"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Financial Advisor Associate", "pay": "$55K", "description": "You support senior advisors and build your own client base.", "whatYouDo": ["Support client meetings", "Research investment options", "Build a client book"], "toGetHere": ["Bachelor's degree", "Series 65 license"] },
+      { "number": "2", "jobTitle": "Financial Advisor", "pay": "$100K", "description": "You manage your own clients' financial plans and investments.", "whatYouDo": ["Build financial plans", "Manage investment portfolios", "Meet with clients regularly"], "toGetHere": ["3-5 years experience", "CFP certification helps"] },
+      { "number": "3", "jobTitle": "Senior Financial Advisor", "pay": "$160K", "description": "You manage a large book of clients and mentor newer advisors.", "whatYouDo": ["Manage high-net-worth clients", "Mentor advisors", "Lead firm strategy"], "toGetHere": ["10+ years experience", "CFP charter"] }
+    ],
+    "education": { "studies": [{ "name": "Finance" }, { "name": "Economics" }, { "name": "Business" }], "where": [{ "count": "280", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Usually starts as an associate under a senior advisor", "trainingAfterHiring": "Series 65/66 licensing, CFP certification", "note": "The licenses matter as much as the degree -- you can't practice without them.", "noBachelorPct": "25%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 6.0 }, { "label": "Some college, no degree", "pct": 10.0 }, { "label": "Associate's degree", "pct": 8.0 }, { "label": "Bachelor's degree", "pct": 56.0 }, { "label": "Master's degree", "pct": 16.0 }, { "label": "Doctorate or professional degree", "pct": 3.5 }] },
+      "pay": { "starting": "$55,000", "typical": "$99,580", "top": "$180,000", "note": "Many advisors earn part of their pay from commissions or fees on assets managed." }
+    }
+  },
+  "insurance-agent": {
+    "slug": "insurance-agent",
+    "title": "Insurance Agent",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/insurance-agent.webp",
+    "summary": "Sells insurance policies and helps people pick the right coverage.",
+    "scenario": "Imagine a new homeowner has no idea what coverage they actually need. You have to explain it clearly, without over-selling them.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$59,080/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$78K" }, { "state": "Connecticut", "pay": "$73K" }, { "state": "Texas", "pay": "$68K" }] },
+    "knowAbout": ["Insurance products and coverage types", "State licensing requirements", "Sales and client relationships", "Risk assessment basics"],
+    "goodAt": ["Building trust quickly", "Explaining policies in plain language", "Comfortable with commission-based pay", "Persistent, organized follow-up"],
+    "software": ["Insurance quoting/CRM systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Licensed Agent", "pay": "$42K", "description": "You sell policies and build your first client base.", "whatYouDo": ["Sell policies", "Answer coverage questions", "Follow up on leads"], "toGetHere": ["High school diploma", "State insurance license"] },
+      { "number": "2", "jobTitle": "Insurance Agent", "pay": "$59K", "description": "You manage a growing book of clients and renewals.", "whatYouDo": ["Manage client book", "Handle renewals", "Cross-sell coverage"], "toGetHere": ["2-3 years experience"] },
+      { "number": "3", "jobTitle": "Senior Agent / Agency Owner", "pay": "$95K", "description": "You run a large book of business or your own agency.", "whatYouDo": ["Manage large accounts", "Mentor new agents", "Run agency operations"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "60", "credential": "State insurance license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. The state license is the real requirement", "trainingAfterHiring": "State licensing exam + company training", "note": "A degree helps for some firms, but the state license is what actually lets you sell.", "noBachelorPct": "70%", "distribution": [{ "label": "Did not finish high school", "pct": 2.0 }, { "label": "Finished high school", "pct": 28.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 25.0 }, { "label": "Master's degree", "pct": 4.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$38,000", "typical": "$59,080", "top": "$100,000", "note": "Commission is a big part of pay here, so income varies a lot by how many policies you sell." }
+    }
+  },
+  "management-consultant": {
+    "slug": "management-consultant",
+    "title": "Management Consultant",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/management-consultant.webp",
+    "summary": "Helps companies solve big problems, brought in from the outside.",
+    "scenario": "Imagine a company is losing money and no one inside can agree on why. You have six weeks to figure it out and tell the CEO the truth.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$95,000/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$128K" }, { "state": "California", "pay": "$120K" }, { "state": "Massachusetts", "pay": "$112K" }] },
+    "knowAbout": ["Business strategy and operations", "Data analysis and presentation", "Interviewing and research techniques", "The specific industry of each client"],
+    "goodAt": ["Structured problem-solving", "Presenting findings clearly to executives", "Working long hours on tight deadlines", "Traveling frequently"],
+    "software": ["Excel/PowerPoint (heavily)", "Data analysis tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Business Analyst", "pay": "$78K", "description": "You research and build the analysis senior consultants present.", "whatYouDo": ["Research industries", "Build data models", "Support client interviews"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Management Consultant", "pay": "$95K", "description": "You lead workstreams and present findings directly to clients.", "whatYouDo": ["Lead project workstreams", "Present to clients", "Manage junior analysts"], "toGetHere": ["3-4 years experience", "MBA common"] },
+      { "number": "3", "jobTitle": "Senior Consultant / Manager", "pay": "$150K", "description": "You lead whole engagements and manage client relationships.", "whatYouDo": ["Own client relationships", "Lead full engagements", "Sell new projects"], "toGetHere": ["7+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Business" }, { "name": "Economics" }], "where": [{ "count": "210", "credential": "Bachelor's degree" }, { "count": "90", "credential": "MBA" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Sometimes, though top firms also hire straight from undergrad", "trainingAfterHiring": "Structured on-the-job training + eventual MBA", "note": "An MBA is common for advancement here, though not required to start.", "noBachelorPct": "12%", "distribution": [{ "label": "Did not finish high school", "pct": 0.2 }, { "label": "Finished high school", "pct": 2.0 }, { "label": "Some college, no degree", "pct": 4.0 }, { "label": "Associate's degree", "pct": 5.8 }, { "label": "Bachelor's degree", "pct": 62.0 }, { "label": "Master's degree", "pct": 23.0 }, { "label": "Doctorate or professional degree", "pct": 3.0 }] },
+      "pay": { "starting": "$78,000", "typical": "$95,000", "top": "$170,000" }
+    }
+  },
+  "market-research-analyst": {
+    "slug": "market-research-analyst",
+    "title": "Market Research Analyst",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/market-research-analyst.webp",
+    "summary": "Studies what customers want and whether a product will sell.",
+    "scenario": "Imagine a company wants to launch a new product but has no idea if anyone will actually buy it. Your research is what tells them yes or no.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$68,230/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$88K" }, { "state": "California", "pay": "$84K" }, { "state": "Massachusetts", "pay": "$78K" }] },
+    "knowAbout": ["Surveys and focus groups", "Statistics and data analysis", "Consumer behavior trends", "Presenting data visually"],
+    "goodAt": ["Analytical, detail-oriented thinking", "Spotting patterns in data", "Writing clear reports", "Curiosity about why people buy things"],
+    "software": ["Excel and statistical software (SPSS, R)", "Survey platforms (Qualtrics)"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Research Assistant", "pay": "$48K", "description": "You help run surveys and clean data for senior analysts.", "whatYouDo": ["Run surveys", "Clean and organize data", "Support report writing"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Market Research Analyst", "pay": "$68K", "description": "You design studies and turn data into recommendations.", "whatYouDo": ["Design research studies", "Analyze data", "Present findings"], "toGetHere": ["2-3 years experience"] },
+      { "number": "3", "jobTitle": "Senior Research Analyst", "pay": "$98K", "description": "You lead major research projects and guide strategy.", "whatYouDo": ["Lead research strategy", "Present to executives", "Mentor analysts"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Marketing" }, { "name": "Statistics" }, { "name": "Business" }], "where": [{ "count": "160", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "No, entry roles exist for new grads", "trainingAfterHiring": "On-the-job, tool by tool", "note": "Comfort with statistics matters more than the exact major.", "noBachelorPct": "22%", "distribution": [{ "label": "Did not finish high school", "pct": 0.3 }, { "label": "Finished high school", "pct": 3.5 }, { "label": "Some college, no degree", "pct": 8.0 }, { "label": "Associate's degree", "pct": 10.2 }, { "label": "Bachelor's degree", "pct": 58.0 }, { "label": "Master's degree", "pct": 17.0 }, { "label": "Doctorate or professional degree", "pct": 3.0 }] },
+      "pay": { "starting": "$48,000", "typical": "$68,230", "top": "$98,000" }
+    }
+  },
+  "marketing-manager": {
+    "slug": "marketing-manager",
+    "title": "Marketing Manager",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/marketing-manager.webp",
+    "summary": "Plans and leads a company's marketing strategy and campaigns.",
+    "scenario": "Imagine a new product launches in eight weeks and every channel, ad and message has to be ready on the same day.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$140,040/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$175K" }, { "state": "California", "pay": "$168K" }, { "state": "New Jersey", "pay": "$155K" }] },
+    "knowAbout": ["Brand strategy and positioning", "Digital and traditional marketing channels", "Budgeting and ROI analysis", "Leading a creative/marketing team"],
+    "goodAt": ["Big-picture strategic thinking", "Leading and inspiring a team", "Balancing creative ideas with data", "Managing a large budget"],
+    "software": ["Marketing analytics platforms", "Project management tools", "CRM/marketing automation"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Marketing Specialist", "pay": "$58K", "description": "You execute specific campaigns and channels.", "whatYouDo": ["Run individual campaigns", "Manage a single channel", "Report on results"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Marketing Manager", "pay": "$140K", "description": "You own the overall marketing strategy and a team.", "whatYouDo": ["Set marketing strategy", "Manage a marketing team", "Own the marketing budget"], "toGetHere": ["5-7 years experience"] },
+      { "number": "3", "jobTitle": "Director of Marketing", "pay": "$185K", "description": "You lead marketing across the whole company.", "whatYouDo": ["Set company-wide strategy", "Manage multiple teams", "Report to executive leadership"], "toGetHere": ["10+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Marketing" }, { "name": "Business" }, { "name": "Communications" }], "where": [{ "count": "240", "credential": "Bachelor's degree" }, { "count": "80", "credential": "MBA" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Yes, usually 5+ years of marketing experience first", "trainingAfterHiring": "On-the-job, often with an eventual MBA", "note": "This is a leadership role, not an entry point -- most marketing managers spent years as specialists first.", "noBachelorPct": "16%", "distribution": [{ "label": "Did not finish high school", "pct": 0.2 }, { "label": "Finished high school", "pct": 2.5 }, { "label": "Some college, no degree", "pct": 6.0 }, { "label": "Associate's degree", "pct": 7.3 }, { "label": "Bachelor's degree", "pct": 60.0 }, { "label": "Master's degree", "pct": 21.0 }, { "label": "Doctorate or professional degree", "pct": 3.0 }] },
+      "pay": { "starting": "$58,000", "typical": "$140,040", "top": "$225,000" }
+    }
+  },
+  "medical-office-assistant": {
+    "slug": "medical-office-assistant",
+    "title": "Medical Office Assistant",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/medical-office-assistant.webp",
+    "summary": "Handles scheduling, records and front-desk work at a medical office.",
+    "scenario": "Imagine a fully booked morning and the phone won't stop ringing. You're the one keeping the whole schedule from falling apart.",
+    "facts": [{ "label": "Typical degree", "value": "Postsecondary certificate" }, { "label": "Typical pay", "value": "$44,200/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$56K" }, { "state": "Washington", "pay": "$51K" }, { "state": "New York", "pay": "$49K" }] },
+    "knowAbout": ["Medical scheduling and records systems", "Insurance and billing basics", "Patient privacy rules (HIPAA)", "Front-desk customer service"],
+    "goodAt": ["Staying organized under pressure", "Clear communication with patients", "Attention to detail with records", "Multitasking"],
+    "software": ["Electronic health records (EHR) systems", "Medical scheduling software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Front Desk Assistant", "pay": "$36K", "description": "You handle check-ins and basic scheduling.", "whatYouDo": ["Check in patients", "Schedule appointments", "Answer phones"], "toGetHere": ["High school diploma or certificate"] },
+      { "number": "2", "jobTitle": "Medical Office Assistant", "pay": "$44K", "description": "You manage records, billing basics and office coordination.", "whatYouDo": ["Manage patient records", "Handle insurance verification", "Coordinate office workflow"], "toGetHere": ["Postsecondary certificate", "1-2 years experience"] },
+      { "number": "3", "jobTitle": "Office Manager", "pay": "$58K", "description": "You run the front office and supervise other staff.", "whatYouDo": ["Supervise office staff", "Manage billing operations", "Handle vendor relationships"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Medical Office Administration" }], "where": [{ "count": "80", "credential": "Postsecondary certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job, system by system", "note": "A short certificate program is common, but many offices train HS grads directly.", "noBachelorPct": "86%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 35.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 21.0 }, { "label": "Bachelor's degree", "pct": 12.5 }, { "label": "Master's degree", "pct": 1.0 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$34,000", "typical": "$44,200", "top": "$58,000" }
+    }
+  },
+  "office-clerk": {
+    "slug": "office-clerk",
+    "title": "Office Clerk",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/office-clerk.webp",
+    "summary": "Handles the everyday paperwork and tasks that keep an office running.",
+    "scenario": "Imagine a stack of filing, a jammed printer, and three people asking for the same report at once. You're the one who keeps it all moving.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$40,170/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$48K" }, { "state": "Washington", "pay": "$46K" }, { "state": "New York", "pay": "$45K" }] },
+    "knowAbout": ["Filing and records systems", "Basic office software", "Scheduling and correspondence", "Office equipment"],
+    "goodAt": ["Organization and attention to detail", "Handling repetitive tasks reliably", "Multitasking", "Clear written communication"],
+    "software": ["Microsoft Office / Google Workspace", "Filing and records systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Office Clerk", "pay": "$36K", "description": "You handle filing, data entry and general office support.", "whatYouDo": ["File and organize records", "Data entry", "Answer phones"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Senior Office Clerk", "pay": "$42K", "description": "You take on more responsibility and train newer clerks.", "whatYouDo": ["Manage office systems", "Train new clerks", "Handle vendor orders"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Office Administrator", "pay": "$52K", "description": "You run the day-to-day operations of the office.", "whatYouDo": ["Manage office operations", "Supervise clerical staff", "Handle budgets for supplies"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "50", "credential": "High school diploma" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "This is one of the most accessible office roles -- no specific major or certificate is expected.", "noBachelorPct": "88%", "distribution": [{ "label": "Did not finish high school", "pct": 4.0 }, { "label": "Finished high school", "pct": 40.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 10.5 }, { "label": "Master's degree", "pct": 1.0 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$31,000", "typical": "$40,170", "top": "$52,000" }
+    }
+  },
+  "operations-manager": {
+    "slug": "operations-manager",
+    "title": "Operations Manager",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/operations-manager.webp",
+    "summary": "Keeps a company's day-to-day operations running smoothly and efficiently.",
+    "scenario": "Imagine a supplier just missed a shipment and three departments are asking you what happens now. You're the one who has to have an answer.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$103,650/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$130K" }, { "state": "California", "pay": "$124K" }, { "state": "Massachusetts", "pay": "$115K" }] },
+    "knowAbout": ["Business processes and efficiency", "Budgeting and resource planning", "Team leadership", "Supply chain and vendor basics"],
+    "goodAt": ["Systems thinking", "Problem-solving under pressure", "Leading and coordinating teams", "Balancing competing priorities"],
+    "software": ["ERP systems (SAP, NetSuite)", "Project management tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Operations Coordinator", "pay": "$52K", "description": "You support daily operations and track key processes.", "whatYouDo": ["Track processes", "Support scheduling", "Coordinate between teams"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Operations Manager", "pay": "$104K", "description": "You own operations for a department or location.", "whatYouDo": ["Manage daily operations", "Lead a team", "Improve efficiency"], "toGetHere": ["5+ years experience"] },
+      { "number": "3", "jobTitle": "Director of Operations", "pay": "$150K", "description": "You oversee operations across the whole company.", "whatYouDo": ["Set operational strategy", "Manage multiple managers", "Report to executives"], "toGetHere": ["10+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Business Administration" }, { "name": "Operations Management" }], "where": [{ "count": "200", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Yes, usually several years in a related role first", "trainingAfterHiring": "On-the-job, often with an eventual MBA", "note": "This is a leadership role most people grow into rather than start in.", "noBachelorPct": "20%", "distribution": [{ "label": "Did not finish high school", "pct": 0.3 }, { "label": "Finished high school", "pct": 3.0 }, { "label": "Some college, no degree", "pct": 7.0 }, { "label": "Associate's degree", "pct": 9.7 }, { "label": "Bachelor's degree", "pct": 58.0 }, { "label": "Master's degree", "pct": 19.0 }, { "label": "Doctorate or professional degree", "pct": 3.0 }] },
+      "pay": { "starting": "$52,000", "typical": "$103,650", "top": "$165,000" }
+    }
+  },
+  "project-manager": {
+    "slug": "project-manager",
+    "title": "Project Manager",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/project-manager.webp",
+    "summary": "Plans and tracks a project from start to finish, keeping it on time and budget.",
+    "scenario": "Imagine a launch date is fixed and three teams are all slightly behind. You're the one keeping everyone honest about what's actually on track.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$98,580/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$122K" }, { "state": "California", "pay": "$118K" }, { "state": "Washington", "pay": "$112K" }] },
+    "knowAbout": ["Project planning and scheduling", "Budget tracking", "Risk management", "Cross-team communication"],
+    "goodAt": ["Staying organized across many moving parts", "Clear, frequent communication", "Managing conflict between teams", "Realistic time estimation"],
+    "software": ["Project management tools (Jira, Asana, MS Project)", "Spreadsheets and reporting dashboards"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Project Coordinator", "pay": "$54K", "description": "You track tasks and timelines for a senior project manager.", "whatYouDo": ["Track project tasks", "Schedule meetings", "Update project trackers"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Project Manager", "pay": "$99K", "description": "You own a project's timeline, budget and team coordination.", "whatYouDo": ["Plan project timelines", "Manage budgets", "Coordinate across teams"], "toGetHere": ["3-5 years experience", "PMP certification helps"] },
+      { "number": "3", "jobTitle": "Senior Project Manager", "pay": "$135K", "description": "You manage the largest, highest-stakes projects.", "whatYouDo": ["Lead major initiatives", "Manage multiple projects", "Report to executives"], "toGetHere": ["8+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Business" }, { "name": "Project Management" }], "where": [{ "count": "190", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Usually a couple years coordinating projects first", "trainingAfterHiring": "On-the-job, often with a PMP certification later", "note": "The PMP certification matters a lot for advancement, more than the specific undergrad major.", "noBachelorPct": "24%", "distribution": [{ "label": "Did not finish high school", "pct": 0.3 }, { "label": "Finished high school", "pct": 3.5 }, { "label": "Some college, no degree", "pct": 8.0 }, { "label": "Associate's degree", "pct": 12.2 }, { "label": "Bachelor's degree", "pct": 56.0 }, { "label": "Master's degree", "pct": 17.0 }, { "label": "Doctorate or professional degree", "pct": 3.0 }] },
+      "pay": { "starting": "$54,000", "typical": "$98,580", "top": "$150,000" }
+    }
+  },
+  "real-estate-agent": {
+    "slug": "real-estate-agent",
+    "title": "Real Estate Agent",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/real-estate-agent.webp",
+    "summary": "Helps people buy, sell and rent homes and properties.",
+    "scenario": "Imagine a family found their dream house, but three other offers just came in. You have an hour to help them decide how to compete.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + real estate license" }, { "label": "Typical pay", "value": "$54,300/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$92K" }, { "state": "California", "pay": "$85K" }, { "state": "Massachusetts", "pay": "$74K" }] },
+    "knowAbout": ["Local housing markets", "Contracts and negotiation", "State licensing requirements", "Marketing a listing"],
+    "goodAt": ["Building trust quickly", "Negotiating on a client's behalf", "Flexible hours, including evenings/weekends", "Comfortable with commission-based pay"],
+    "software": ["MLS listing systems", "CRM tools for client management"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Licensed Agent (New)", "pay": "$38K", "description": "You're building your first client base, often under a broker.", "whatYouDo": ["Show properties", "Support senior agents", "Build a client list"], "toGetHere": ["High school diploma", "State real estate license"] },
+      { "number": "2", "jobTitle": "Real Estate Agent", "pay": "$54K", "description": "You manage your own listings and buyer clients.", "whatYouDo": ["List and sell properties", "Negotiate offers", "Manage client relationships"], "toGetHere": ["2-3 years experience"] },
+      { "number": "3", "jobTitle": "Broker / Top Producer", "pay": "$110K", "description": "You run a large book of business or your own brokerage.", "whatYouDo": ["Manage top clients", "Mentor newer agents", "Run brokerage operations"], "toGetHere": ["Broker's license", "5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "50", "credential": "State real estate license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + real estate license", "experienceFirst": "No, but the state license exam is required", "trainingAfterHiring": "Pre-licensing course + state exam", "note": "The real estate license is the real requirement, not a college degree.", "noBachelorPct": "72%", "distribution": [{ "label": "Did not finish high school", "pct": 1.5 }, { "label": "Finished high school", "pct": 26.0 }, { "label": "Some college, no degree", "pct": 26.0 }, { "label": "Associate's degree", "pct": 18.0 }, { "label": "Bachelor's degree", "pct": 24.0 }, { "label": "Master's degree", "pct": 4.0 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$32,000", "typical": "$54,300", "top": "$120,000", "note": "Almost all pay here is commission, so income varies a lot year to year." }
+    }
+  },
+  "receptionist": {
+    "slug": "receptionist",
+    "title": "Receptionist",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/receptionist.webp",
+    "summary": "Greets visitors and manages the front desk of a business.",
+    "scenario": "Imagine three visitors arrive at once, the phone rings, and a delivery needs a signature. You're the calm center of it all.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$35,570/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$43K" }, { "state": "New York", "pay": "$41K" }, { "state": "Washington", "pay": "$40K" }] },
+    "knowAbout": ["Phone and scheduling systems", "Office visitor procedures", "Basic office software", "Company organization"],
+    "goodAt": ["Friendly, welcoming first impressions", "Multitasking under interruptions", "Staying organized", "Clear communication"],
+    "software": ["Phone/scheduling systems", "Microsoft Office / Google Workspace"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Receptionist", "pay": "$34K", "description": "You greet visitors and manage the front desk.", "whatYouDo": ["Greet visitors", "Answer and route calls", "Manage deliveries and mail"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Senior Receptionist / Office Assistant", "pay": "$40K", "description": "You take on more admin support alongside front desk duties.", "whatYouDo": ["Support scheduling for staff", "Handle vendor coordination", "Train new receptionists"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Office Manager", "pay": "$52K", "description": "You run the front office and office operations.", "whatYouDo": ["Manage office operations", "Supervise front desk staff", "Handle office budgets"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "40", "credential": "High school diploma" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "This is one of the most accessible entry points into office work.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 4.0 }, { "label": "Finished high school", "pct": 44.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$28,000", "typical": "$35,570", "top": "$46,000" }
+    }
+  },
+  "recruiter": {
+    "slug": "recruiter",
+    "title": "Recruiter",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/recruiter.webp",
+    "summary": "Finds and hires the right people for a company's open jobs.",
+    "scenario": "Imagine a critical role has been open for three months and the hiring manager is losing patience. You have to find the right person, fast.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$67,190/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$85K" }, { "state": "New York", "pay": "$82K" }, { "state": "Washington", "pay": "$78K" }] },
+    "knowAbout": ["Sourcing and interviewing techniques", "Employment law basics", "Applicant tracking systems", "The industries you recruit for"],
+    "goodAt": ["Reading people quickly", "Building relationships with candidates", "Juggling many open roles at once", "Selling a company and a role"],
+    "software": ["Applicant tracking systems (Greenhouse, Lever)", "LinkedIn Recruiter"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Recruiting Coordinator", "pay": "$48K", "description": "You schedule interviews and support recruiters.", "whatYouDo": ["Schedule interviews", "Post job listings", "Support candidate communication"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Recruiter", "pay": "$67K", "description": "You own the full hiring process for open roles.", "whatYouDo": ["Source candidates", "Run interviews", "Manage offers"], "toGetHere": ["2-3 years experience"] },
+      { "number": "3", "jobTitle": "Senior Recruiter / Talent Lead", "pay": "$100K", "description": "You lead hiring strategy for a whole team or company.", "whatYouDo": ["Lead hiring strategy", "Manage recruiting team", "Own hiring metrics"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Human Resources" }, { "name": "Business" }, { "name": "Psychology" }], "where": [{ "count": "150", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "No, entry roles exist for new grads", "trainingAfterHiring": "On-the-job, tool by tool", "note": "People skills matter as much as the specific major here.", "noBachelorPct": "35%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 7.0 }, { "label": "Some college, no degree", "pct": 15.0 }, { "label": "Associate's degree", "pct": 12.5 }, { "label": "Bachelor's degree", "pct": 55.0 }, { "label": "Master's degree", "pct": 8.5 }, { "label": "Doctorate or professional degree", "pct": 1.5 }] },
+      "pay": { "starting": "$48,000", "typical": "$67,190", "top": "$100,000" }
+    }
+  },
+  "retail-sales-associate": {
+    "slug": "retail-sales-associate",
+    "title": "Retail Sales Associate",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/retail-sales-associate.webp",
+    "summary": "Helps customers find what they need and checks them out in a store.",
+    "scenario": "Imagine a store packed on a holiday weekend and a customer needs help finding one specific item. You're the one who has to know the floor.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$33,000/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$40K" }, { "state": "California", "pay": "$38K" }, { "state": "New York", "pay": "$37K" }] },
+    "knowAbout": ["Store products and layout", "Point of sale systems", "Customer service basics", "Store promotions and policies"],
+    "goodAt": ["Friendly, approachable communication", "Staying on your feet for long shifts", "Handling a busy sales floor", "Basic math for transactions"],
+    "software": ["Point of sale (POS) systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Sales Associate", "pay": "$31K", "description": "You help customers and run the register.", "whatYouDo": ["Help customers find products", "Run the register", "Restock shelves"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Senior Sales Associate", "pay": "$36K", "description": "You take on more responsibility and train new hires.", "whatYouDo": ["Train new associates", "Handle returns/exceptions", "Support store displays"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Retail Store Supervisor", "pay": "$44K", "description": "You help run the store's daily operations.", "whatYouDo": ["Supervise associates", "Manage store scheduling", "Handle escalations"], "toGetHere": ["2-3 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "30", "credential": "High school diploma" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "This is one of the most common first jobs -- almost no barrier to entry.", "noBachelorPct": "92%", "distribution": [{ "label": "Did not finish high school", "pct": 6.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 13.0 }, { "label": "Bachelor's degree", "pct": 7.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$27,000", "typical": "$33,000", "top": "$42,000" }
+    }
+  },
+  "retail-store-supervisor": {
+    "slug": "retail-store-supervisor",
+    "title": "Retail Store Supervisor",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/retail-store-supervisor.webp",
+    "summary": "Runs the daily operations of a retail store and its sales team.",
+    "scenario": "Imagine two employees call out sick on the store's busiest day. You have to rearrange the whole floor and keep customers happy anyway.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$44,600/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$54K" }, { "state": "Washington", "pay": "$51K" }, { "state": "New York", "pay": "$50K" }] },
+    "knowAbout": ["Store operations and scheduling", "Inventory management", "Team leadership", "Customer service escalations"],
+    "goodAt": ["Leading a team under pressure", "Quick decision-making", "Balancing customer needs with staffing", "Staying organized across many tasks"],
+    "software": ["Point of sale (POS) systems", "Scheduling software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Sales Associate", "pay": "$31K", "description": "You start on the sales floor learning store operations.", "whatYouDo": ["Help customers", "Run the register", "Learn store procedures"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Retail Store Supervisor", "pay": "$45K", "description": "You lead a shift or department's daily operations.", "whatYouDo": ["Supervise associates", "Manage scheduling", "Handle customer escalations"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Store Manager", "pay": "$62K", "description": "You run the whole store, staff and budget.", "whatYouDo": ["Manage full store operations", "Own store budget", "Hire and train staff"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "40", "credential": "High school diploma" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "Yes, usually promoted from a sales associate role", "trainingAfterHiring": "On-the-job, often promoted from within", "note": "Most supervisors are promoted from the sales floor rather than hired directly.", "noBachelorPct": "84%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 38.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 14.5 }, { "label": "Master's degree", "pct": 1.2 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$34,000", "typical": "$44,600", "top": "$58,000" }
+    }
+  },
+  "stockbroker": {
+    "slug": "stockbroker",
+    "title": "Stockbroker",
+    "world": "Business & Finance",
+    "photo": "/images/app/browse/stockbroker.webp",
+    "summary": "Buys and sells stocks and securities on behalf of clients.",
+    "scenario": "Imagine the market drops fast and your phone won't stop ringing with clients wanting to sell. You have minutes to give them a clear, calm answer.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$76,900/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$115K" }, { "state": "Connecticut", "pay": "$98K" }, { "state": "New Jersey", "pay": "$90K" }] },
+    "knowAbout": ["Stocks, bonds and securities markets", "Financial regulations (FINRA)", "Client risk profiles", "Market analysis"],
+    "goodAt": ["Staying calm during market swings", "Building client trust", "Fast, clear decision-making", "Series 7/63 licensing required"],
+    "software": ["Trading platforms", "Market data terminals (Bloomberg)"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Registered Rep Trainee", "pay": "$50K", "description": "You study for licensing exams while supporting senior brokers.", "whatYouDo": ["Study for Series 7/63", "Support client research", "Learn compliance rules"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Stockbroker", "pay": "$77K", "description": "You manage client accounts and execute trades.", "whatYouDo": ["Manage client portfolios", "Execute trades", "Advise on market moves"], "toGetHere": ["Series 7 and 63 licenses"] },
+      { "number": "3", "jobTitle": "Senior Broker / Portfolio Manager", "pay": "$140K", "description": "You manage large client books and complex portfolios.", "whatYouDo": ["Manage high-value accounts", "Develop investment strategy", "Mentor junior brokers"], "toGetHere": ["7+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Finance" }, { "name": "Economics" }, { "name": "Business" }], "where": [{ "count": "170", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "No, but Series 7/63 licenses are required to trade", "trainingAfterHiring": "Firm-sponsored licensing exam prep", "note": "You can't legally trade for clients without the licenses, regardless of degree.", "noBachelorPct": "24%", "distribution": [{ "label": "Did not finish high school", "pct": 0.3 }, { "label": "Finished high school", "pct": 4.0 }, { "label": "Some college, no degree", "pct": 8.0 }, { "label": "Associate's degree", "pct": 11.7 }, { "label": "Bachelor's degree", "pct": 58.0 }, { "label": "Master's degree", "pct": 15.0 }, { "label": "Doctorate or professional degree", "pct": 3.0 }] },
+      "pay": { "starting": "$50,000", "typical": "$76,900", "top": "$150,000", "note": "Commission on assets managed can meaningfully change total pay." }
+    }
+  },
 };

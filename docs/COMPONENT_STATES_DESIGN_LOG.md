@@ -298,7 +298,7 @@ significant thin counts:
 | World | Thin / Total |
 |---|---|
 | Fixing Machines & Engines | ~~18/18~~ **0/18 -- closed 22 Sept** |
-| Business & Finance | 25/36 |
+| Business & Finance | ~~25/36~~ **0/36 -- closed 22 Sept** |
 | Building & Construction | 18/23 |
 | Driving, Flying & Shipping | 18/23 |
 | Factories & Making Things | 11/12 |
@@ -369,11 +369,40 @@ progression played twice for v4) rather than the same notes repeating.
 `tsc`/`eslint` clean; verified live on v4 with no console/server errors
 over a full loop cycle.
 
+### Business & Finance -- Done, 22 Sept 2026 (25 careers)
+
+The largest single gap by career count, and the world most likely to be
+clicked in a demo of a career-guidance product -- now 0% thin. Bank
+Teller, Claims Adjuster, Customer Service Representative, Entrepreneur,
+Event Director, Event Marketing Manager, Event Operations Manager,
+Exhibition Sales Manager, Fashion E-Commerce Manager, Fashion
+Merchandiser, Financial Advisor, Insurance Agent, Management Consultant,
+Market Research Analyst, Marketing Manager, Medical Office Assistant,
+Office Clerk, Operations Manager, Project Manager, Real Estate Agent,
+Receptionist, Recruiter, Retail Sales Associate, Retail Store Supervisor,
+Stockbroker.
+
+`factDetails` included from the start this time (learned from the
+Fixing Machines follow-up). One entry needed a real judgment call:
+"Entrepreneur" has no BLS occupation code, so pay is honestly "Varies
+widely" / "Unbounded" rather than a fabricated false-precision number --
+matching the project's own standing rule against inflating figures to
+fit a format. Verified live (screenshotted) that this renders as an
+honest, readable state, not a broken one.
+
+Verified: all 25 confirmed populated via batch fetch check. Caught and
+fixed two rounding errors (claims-adjuster, event-director distributions
+summing to 99.5% instead of 100%) via a programmatic sum check across all
+25 -- now exact. `tsc`/`eslint` clean.
+
 ### Remaining worlds -- not started
 
-Business & Finance (25 careers) is the next highest-value target -- the
-largest single gap by career count, and the world most likely to be
-clicked in a demo of a career-guidance product.
+Next highest-value by career count: Building & Construction (18) and
+Driving, Flying & Shipping (18), tied; then Factories & Making Things
+(11), Health & Medicine (11), Law Safety & Justice (9), Counseling &
+Social Work (8), Personal Care & Community Services (6), Tech &
+Engineering (7), Farming Animals & Nature (2), Science & Research (1),
+Food & Cooking (1).
 
 ---
 
