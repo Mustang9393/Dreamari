@@ -352,7 +352,7 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
             <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}><X className="h-5 w-5" aria-hidden /></button>
           </span>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-[var(--space-3)] [scrollbar-gutter:stable]">
+        <div className="dm-scroll min-h-0 flex-1 overflow-y-auto px-[var(--space-3)] [scrollbar-gutter:stable]">
           <Group title="Where">
             {STATES.slice(0, statesOpen ? undefined : 6).map((s) => <Option key={s.code} on={filters.states.has(s.code)} onToggle={() => set({ states: toggleIn(filters.states, s.code) })} count={s.n}>{s.name}</Option>)}
             {STATES.length > 6 && <li><button type="button" onClick={() => setStatesOpen((v) => !v)} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[4px] px-[var(--space-2)] text-[13px] font-bold" style={{ color: SOFT }}>{statesOpen ? "Fewer states" : `All ${STATES.length} states`} <ChevronDown className="h-4 w-4" style={{ transform: statesOpen ? "rotate(180deg)" : undefined }} aria-hidden /></button></li>}
@@ -425,7 +425,7 @@ function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () 
           </span>
           <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison"><X className="h-5 w-5" aria-hidden /></button>
         </div>
-        <div className="min-h-0 flex-1 overflow-auto px-5 py-[var(--space-4)]" style={{ touchAction: "pan-x pan-y" }}>
+        <div className="dm-scroll min-h-0 flex-1 overflow-auto px-5 py-[var(--space-4)]" style={{ touchAction: "pan-x pan-y" }}>
           <table className="w-full border-collapse text-left text-[13px]" style={{ minWidth: 120 + colleges.length * 190 }}>
             <thead>
               <tr>

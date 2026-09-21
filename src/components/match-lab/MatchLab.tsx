@@ -38,11 +38,12 @@ import { DECK, MAX_SLOTS, type Career } from "./data";
 
 const SWIPE_COMMIT_PX = 100;
 
-// Gesture guide replays on EVERY open of the Match Lab while this is true
-// (direct request, 11 Sept 2026: Joshua was not seeing it; the per-session
-// memory below had hidden it after the first tab). Progress within one
-// mount still ends it (a real gesture stops the walk). Flip back to false
-// for the per-session rule when the demo period ends.
+// DEMO-ONLY: gesture guide replays on EVERY open of the Match Lab while this
+// is true (direct request, 11 Sept 2026: Joshua was not seeing it; the
+// per-session memory below had hidden it after the first tab). Progress
+// within one mount still ends it (a real gesture stops the walk). Flip back
+// to false for the per-session rule when the demo period ends. See
+// docs/HANDOFF_INDEX.md's Demo vs Production section.
 const DEMO_ALWAYS_SHOW_GUIDE = true;
 
 const GUIDE_ORDER = ["up", "right", "left"] as const;
@@ -813,7 +814,7 @@ export function CardBody({ career, isTop, dragX, previewScrollUp = false }: { ca
       {/* the dating-app profile scroll: full-height poster first, sections below */}
       <div
         data-card-scroller
-        className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none]"
+        className="flow-scroll h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain"
         style={{ touchAction: "pan-y", background: "var(--color-night-card)" }}
       >
         {/* The animation lives on THIS wrapper (all of the scroller's own
@@ -1080,7 +1081,7 @@ function Sheet({ children, onClose, maxWidth = "440px", bare = false }: { childr
       aria-modal="true"
     >
       <div
-        className={`w-full max-h-[90dvh] overflow-y-auto overscroll-contain [scrollbar-width:none] ${bare ? "p-2 motion-safe:animate-[fade-slide-up_0.45s_ease-out_both]" : "rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"}`}
+        className={`flow-scroll w-full max-h-[90dvh] overflow-y-auto overscroll-contain ${bare ? "p-2 motion-safe:animate-[fade-slide-up_0.45s_ease-out_both]" : "rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"}`}
         style={bare ? { maxWidth } : { maxWidth, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {children}

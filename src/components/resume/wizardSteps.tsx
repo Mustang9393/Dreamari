@@ -105,10 +105,12 @@ export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: Res
       </Field>
       <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
         <Field label="Country" htmlFor="rb-country">
-          <SelectInput id="rb-country" value={p.country} onChange={(v) => set({ country: v })}>
-            <option value="">Select country…</option>
-            {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </SelectInput>
+          <SelectInput
+            id="rb-country"
+            value={p.country}
+            onChange={(v) => set({ country: v })}
+            options={[{ value: "", label: "Select country…" }, ...COUNTRIES.map((c) => ({ value: c, label: c }))]}
+          />
         </Field>
         <Field label="State / Province / Region" htmlFor="rb-state">
           <TextInput id="rb-state" value={p.state} onChange={(v) => set({ state: v })} onFocus={track("profile:contact")} placeholder="California" />
@@ -172,10 +174,12 @@ function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: 
           <TextInput id="edu-grad" value={draft.gradYear} onChange={(v) => setDraft({ ...draft, gradYear: v })} onFocus={track("gradYear")} placeholder="e.g. June 2027" />
         </Field>
         <Field label="High School Program (optional)" htmlFor="edu-program">
-          <SelectInput id="edu-program" value={draft.program} onChange={(v) => setDraft({ ...draft, program: v })}>
-            <option value="">Select program…</option>
-            {EDUCATION_PROGRAMS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </SelectInput>
+          <SelectInput
+            id="edu-program"
+            value={draft.program}
+            onChange={(v) => setDraft({ ...draft, program: v })}
+            options={[{ value: "", label: "Select program…" }, ...EDUCATION_PROGRAMS.map((p) => ({ value: p, label: p }))]}
+          />
         </Field>
         <Field label="GPA (optional)" htmlFor="edu-gpa">
           <TextInput id="edu-gpa" value={draft.gpa} onChange={(v) => setDraft({ ...draft, gpa: v })} onFocus={track("cityState")} placeholder="e.g. 3.8" />

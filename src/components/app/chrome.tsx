@@ -171,8 +171,9 @@ const QUICK_LINKS = [
   { label: "Sign Up", href: "/signup" },
 ] as const;
 
-// Demo perspectives (Connect 2.0): each role's own Connect, one tap from any
-// screen. Demo scaffolding; remove before production.
+// DEMO-ONLY: perspectives (Connect 2.0) -- each role's own Connect, one tap
+// from any screen. Demo scaffolding; remove before production. See
+// docs/HANDOFF_INDEX.md's Demo vs Production section.
 const DEMO_LINKS = [
   { label: "Student", href: "/connect" },
   { label: "Event attendee", href: "/connect?tab=events&as=attendee" },

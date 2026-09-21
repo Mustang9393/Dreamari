@@ -183,7 +183,11 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
   const accent = WORLD_COLORS[world] ?? "var(--primary)";
   const router = useRouter();
 
-  const community = COMMUNITIES.find((item) => item.world === world) ?? COMMUNITIES.find((item) => item.id === "teaching-education");
+  // No fallback to a different world's board -- that silently showed a
+  // mismatched community (e.g. Teaching & Education) under another world's
+  // header. When a world has no community of its own, `community` stays
+  // undefined and the board card simply doesn't render (guarded below).
+  const community = COMMUNITIES.find((item) => item.world === world);
   const { thread, answerInsights, peoplePros } = useMemo(() => {
     const insights = INSIGHTS.filter((item) => item.boardId === community?.id).slice().sort((a, b) => b.helpful - a.helpful);
     const threadsHere = THREADS.filter((item) => item.boardId === community?.id && item.type === "question");

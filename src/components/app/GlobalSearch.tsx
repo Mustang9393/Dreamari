@@ -149,7 +149,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             })}
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-[var(--space-4)] py-[var(--space-4)]">
+          <div className="dm-scroll min-h-0 flex-1 overflow-y-auto px-[var(--space-4)] py-[var(--space-4)]">
             {!results ? (
               <div className="flex flex-col gap-[var(--space-5)]">
                 <div className="flex flex-col gap-[8px]">

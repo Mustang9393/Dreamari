@@ -14,4 +14,8 @@ The W3C DTCG collections and generated artifacts under `design-tokens/` and `src
 
 ## Engineering handoff
 
-Read `docs/HANDOFF_INDEX.md` first: it lists the locked feature specs in `docs/handoff/specs/`, the source-of-truth data files, the demo-only scaffolding not to build, and the current demo tag. `docs/AI_HANDOFF.md` is a session log; specs win over it.
+Read `docs/HANDOFF_INDEX.md` first: it lists the locked feature specs in `docs/handoff/specs/`, the source-of-truth data files, the full demo-vs-production breakdown (every demo-only flag is tagged `DEMO-ONLY:` in its own code comment -- `grep -rn "DEMO-ONLY" src` is the authoritative list), and the current demo tag. `docs/AI_HANDOFF.md` is a session log; specs win over it.
+
+## Cross-browser guardrails (read before UI work)
+
+Most students are on Windows laptops or Chromebooks, not Mac -- our dev machines are Mac, and that mismatch has already shipped real, hard-to-reproduce bugs (unpaired scrollbar CSS, unclamped tooltip positioning). Before any layout, scrolling, positioning or icon-only-control work, read `docs/CROSS_BROWSER_GUARDRAILS.md` and run its self-check before calling the work done -- don't rely on your own screen looking right.

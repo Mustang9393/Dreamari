@@ -21,6 +21,7 @@ import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
+import { Listbox } from "@/components/app/Listbox";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, serverProfileArchiveSnapshot, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeProfileArchive, subscribeStudentProfile, writeStudentProfile, type StudentProfile } from "@/lib/studentProfile";
 import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
@@ -162,8 +163,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
-  // Demo-only, session-only -- same pattern as the AT&T board's own
-  // VersionChip (direct instruction, 20 Sept 2026).
+  // DEMO-ONLY, session-only -- same pattern as the AT&T board's own
+  // VersionChip (direct instruction, 20 Sept 2026). See
+  // docs/HANDOFF_INDEX.md's Demo vs Production section.
   const [overviewVersion, setOverviewVersion] = useState<"v1" | "v2">("v1");
   // QA-only: overrides currentPlanWindowId()'s real-date result so the
   // season art can be checked without waiting for the calendar (direct
@@ -933,7 +935,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       {/* ---- Swap sheet ---- */}
       {swapCandidate && (
         <div className="no-print fixed inset-0 z-[60] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setSwapCandidate(null); }}>
-          <div className="filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <div className="dm-scroll filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>
             <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to Saved.</p>
             <div className="mt-4 flex flex-col gap-[var(--space-2)]">
@@ -957,7 +959,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       {/* ---- Remove confirm: destructive actions always confirm ---- */}
       {confirmRemove && (
         <div className="no-print fixed inset-0 z-[66] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
-          <div className="filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[400px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <div className="dm-scroll filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[400px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
             <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>It goes back to Saved. Nothing is lost.</p>
             <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
@@ -981,7 +983,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="mt-[var(--space-4)] flex max-h-[50vh] flex-col gap-[var(--space-2)] overflow-y-auto">
+            <div className="dm-scroll mt-[var(--space-4)] flex max-h-[50vh] flex-col gap-[var(--space-2)] overflow-y-auto">
               {locker.length === 0 && (
                 <Link href="/match-grid" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-center text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Nothing saved yet · browse careers</Link>
               )}
@@ -1326,7 +1328,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
             <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
-        <div className="dm-report min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
+        <div className="dm-report dm-scroll min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
           {entries.length > 1 ? (
             <ComparisonTable entries={entries} focusId={focusId} />
           ) : (
@@ -1800,7 +1802,7 @@ function EvidenceSheet({
   return (
     <div className="no-print fixed inset-0 z-[120] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="evidence-intro">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(8px)" }} />
-      <div className="relative flex w-full max-w-[560px] flex-col gap-[var(--space-4)] overflow-y-auto border-l p-5 pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] pt-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="dm-scroll relative flex w-full max-w-[560px] flex-col gap-[var(--space-4)] overflow-y-auto border-l p-5 pb-[calc(env(safe-area-inset-bottom)+var(--space-6))] pt-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       <div className="flex items-start justify-between gap-[var(--space-3)]">
         <span className="flex flex-col gap-[3px]">
           <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Evidence</span>
@@ -2052,7 +2054,7 @@ function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose
         <button type="button" onClick={onClose} className="dm-quiet absolute top-[10px] right-[10px] z-10 flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close details">
           <X className="h-5 w-5" aria-hidden />
         </button>
-        <div className="min-h-0 flex-1 overflow-y-auto p-[var(--space-4)] pb-[calc(env(safe-area-inset-bottom)+var(--space-5))] sm:p-[var(--space-5)]">
+        <div className="dm-scroll min-h-0 flex-1 overflow-y-auto p-[var(--space-4)] pb-[calc(env(safe-area-inset-bottom)+var(--space-5))] sm:p-[var(--space-5)]">
           <RouteColumn route={route} majors={majors} selected={selected} onSelect={onSelect} onGoPlan={onGoPlan} inModal />
         </div>
       </div>
@@ -3129,18 +3131,31 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           </div>
           <div className="flex flex-col gap-[6px]">
             <label className={SETTINGS_LABEL} htmlFor="settings-gpa" style={{ color: "var(--muted-foreground)" }}>GPA</label>
-            <select id="settings-gpa" value={draft.gpa} onChange={(e) => patch({ gpa: e.target.value })} className={`${SETTINGS_FIELD} cursor-pointer`} style={SETTINGS_FIELD_STYLE}>
-              <option value="">Select</option>
-              {GPA_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-            </select>
+            <Listbox
+              id="settings-gpa"
+              value={draft.gpa}
+              onChange={(v) => patch({ gpa: v })}
+              placeholder="Select"
+              options={GPA_OPTIONS.map((option) => ({ value: option, label: option }))}
+              className={SETTINGS_FIELD}
+              style={SETTINGS_FIELD_STYLE}
+            />
           </div>
           <div className="flex flex-col gap-[6px]">
             <label className={SETTINGS_LABEL} htmlFor="settings-gpa-type" style={{ color: "var(--muted-foreground)" }}>GPA type</label>
-            <select id="settings-gpa-type" value={draft.gpaType} onChange={(e) => patch({ gpaType: e.target.value })} className={`${SETTINGS_FIELD} cursor-pointer`} style={SETTINGS_FIELD_STYLE}>
-              <option value="">Not sure</option>
-              <option value="weighted">Weighted</option>
-              <option value="unweighted">Unweighted</option>
-            </select>
+            <Listbox
+              id="settings-gpa-type"
+              value={draft.gpaType}
+              onChange={(v) => patch({ gpaType: v })}
+              placeholder="Not sure"
+              options={[
+                { value: "", label: "Not sure" },
+                { value: "weighted", label: "Weighted" },
+                { value: "unweighted", label: "Unweighted" },
+              ]}
+              className={SETTINGS_FIELD}
+              style={SETTINGS_FIELD_STYLE}
+            />
           </div>
           <div className="flex flex-col gap-[6px]">
             <label className={SETTINGS_LABEL} htmlFor="settings-zip" style={{ color: "var(--muted-foreground)" }}>Zip code</label>
@@ -3148,10 +3163,15 @@ function SettingsView({ section, onClose }: { section: SettingsSection | null; o
           </div>
           <div className="flex flex-col gap-[6px] sm:col-span-2">
             <label className={SETTINGS_LABEL} htmlFor="settings-distance" style={{ color: "var(--muted-foreground)" }}>How far would you go for school?</label>
-            <select id="settings-distance" value={draft.travelDistance} onChange={(e) => patch({ travelDistance: e.target.value })} className={`${SETTINGS_FIELD} cursor-pointer`} style={SETTINGS_FIELD_STYLE}>
-              <option value="">Select</option>
-              {TRAVEL_DISTANCE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-            </select>
+            <Listbox
+              id="settings-distance"
+              value={draft.travelDistance}
+              onChange={(v) => patch({ travelDistance: v })}
+              placeholder="Select"
+              options={TRAVEL_DISTANCE_OPTIONS.map((option) => ({ value: option, label: option }))}
+              className={SETTINGS_FIELD}
+              style={SETTINGS_FIELD_STYLE}
+            />
           </div>
         </div>
         <div className="flex items-center gap-[var(--space-3)]">
@@ -3235,7 +3255,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
   const [sections, setSections] = useState({ receipts: true, route: true, plan: true });
   const toggle = (key: keyof typeof sections) => setSections((current) => ({ ...current, [key]: !current[key] }));
   return (
-    <div className="print-overlay fixed inset-0 z-[70] overflow-y-auto" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)" }}>
+    <div className="dm-scroll print-overlay fixed inset-0 z-[70] overflow-y-auto" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)" }}>
       <div className="dm-glass-3 no-print sticky top-0 z-10 flex flex-wrap items-center justify-between gap-[var(--space-2)] px-5 py-3 backdrop-blur-[30px] backdrop-saturate-[1.8]" style={{ background: "var(--glass-surface-3)" }}>
         <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Career Report · {career.title}</span>
         <span className="flex flex-wrap items-center gap-[var(--space-2)]">

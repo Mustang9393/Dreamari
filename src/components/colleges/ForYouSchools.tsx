@@ -13,6 +13,7 @@ import { ACCENT, SchoolCard, SOFT } from "./shared";
 import { COLLEGES } from "./data";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { UndoToast } from "@/components/app/UndoToast";
+import { Listbox } from "@/components/app/Listbox";
 import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, schoolsForRoute, shortProgram, targetGpaFor, type Route, type SchoolMatch } from "./pathway";
 
 // Explore Schools, "For you". The Replit's architecture, delivered leaner
@@ -382,7 +383,7 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-5 pb-[calc(20px+env(safe-area-inset-bottom))]" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", backdropFilter: "blur(10px)" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" />
-      <section role="dialog" aria-modal="true" aria-labelledby="schools-sheet" className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[400px] flex-col gap-[var(--space-6)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="schools-sheet" className="dm-scroll relative flex max-h-[calc(100dvh-40px)] w-full max-w-[400px] flex-col gap-[var(--space-6)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="schools-sheet" className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
           <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet -mr-[8px] flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
@@ -424,12 +425,14 @@ function Segmented({ value, options, onChange, ariaLabel }: { value: string; opt
 
 function Select({ value, options, onChange, ariaLabel }: { value: string; options: string[]; onChange: (v: string) => void; ariaLabel: string }) {
   return (
-    <span className="relative flex items-center">
-      <select value={value} onChange={(e) => onChange(e.target.value)} aria-label={ariaLabel} className="dm-quiet min-h-[46px] w-full cursor-pointer appearance-none rounded-[var(--radius-md)] border px-[14px] pr-[40px] text-[15px] font-bold outline-none" style={FIELD}>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
-      <ChevronDown className="pointer-events-none absolute right-[14px] h-4 w-4" aria-hidden style={{ color: SOFT }} />
-    </span>
+    <Listbox
+      value={value}
+      onChange={onChange}
+      ariaLabel={ariaLabel}
+      options={options.map((o) => ({ value: o, label: o }))}
+      className="dm-quiet min-h-[46px] w-full rounded-[var(--radius-md)] border px-[14px] text-[15px] font-bold outline-none"
+      style={FIELD}
+    />
   );
 }
 

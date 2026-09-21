@@ -203,9 +203,10 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
   );
 }
 
-// Daily Drop is hidden for the school focus group (Joshua Pierce, Slack,
-// 6 Sept 2026): the essential features get understood first, the Drop comes
-// back halfway through. Flip to true to restore panel 1 and its takeover.
+// DEMO-ONLY: Daily Drop is hidden for the school focus group (Joshua Pierce,
+// Slack, 6 Sept 2026): the essential features get understood first, the Drop
+// comes back halfway through. Flip to true to restore panel 1 and its
+// takeover. See docs/HANDOFF_INDEX.md's Demo vs Production section.
 const SHOW_DAILY_DROP = false;
 const PANEL_COUNT = SHOW_DAILY_DROP ? 3 : 2;
 

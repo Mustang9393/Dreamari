@@ -1,10 +1,11 @@
 "use client";
 
-// Demo only: which build of the AT&T board is showing. The live board is
+// DEMO-ONLY: which build of the AT&T board is showing. The live board is
 // v1 (Joshua's Replit, faithfully); v2.0 is the reach-first rebuild. A
 // small muted chip beside the Demo chip, never part of the product UI
 // (direct instruction, 18 Sept 2026: "a small toggle for demo's sake...
-// not huge and distracting").
+// not huge and distracting"). See docs/HANDOFF_INDEX.md's Demo vs
+// Production section.
 export type AttVersion = "v1" | "v2";
 
 export function VersionChip({ version, onChange }: { version: AttVersion; onChange: (v: AttVersion) => void }) {

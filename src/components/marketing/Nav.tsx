@@ -185,7 +185,7 @@ export function Nav({ view, onSchoolsClick, onStudentClick }: NavProps) {
         {/* Mobile menu panel */}
         {menuOpen && (
           <div
-            className="absolute top-[calc(100%+8px)] right-0 flex max-h-[min(78vh,720px)] w-64 flex-col gap-1 overflow-y-auto rounded-2xl border p-2"
+            className="dm-scroll absolute top-[calc(100%+8px)] right-0 flex max-h-[min(78vh,720px)] w-64 flex-col gap-1 overflow-y-auto rounded-2xl border p-2"
             style={{
               background: "color-mix(in srgb, var(--background) 97%, var(--foreground))",
               backdropFilter: "blur(18px) saturate(1.6)",

@@ -247,7 +247,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
       <Portal>
         <div className="fixed inset-0 z-[90] flex items-end" role="dialog" aria-modal="true" aria-label="Notifications">
           <button type="button" aria-label="Close notifications" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
-          <div className="relative z-[1] max-h-[80dvh] w-full overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-3)] pb-[calc(var(--space-4)+env(safe-area-inset-bottom))]" style={surface}>{body}</div>
+          <div className="dm-scroll relative z-[1] max-h-[80dvh] w-full overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-3)] pb-[calc(var(--space-4)+env(safe-area-inset-bottom))]" style={surface}>{body}</div>
         </div>
       </Portal>
     );
@@ -256,7 +256,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
     <>
       <button type="button" aria-label="Close notifications" onClick={onClose} className="fixed inset-0 z-40 cursor-default" />
       <div role="dialog" aria-label="Notifications" className={`filters-reveal absolute z-50 mt-2 w-[380px] max-w-[calc(100vw-24px)] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px] ${align === "left" ? "left-0" : "right-0"}`} style={surface}>
-        <div className="max-h-[min(70vh,560px)] overflow-y-auto">{body}</div>
+        <div className="dm-scroll max-h-[min(70vh,560px)] overflow-y-auto">{body}</div>
       </div>
     </>
   );

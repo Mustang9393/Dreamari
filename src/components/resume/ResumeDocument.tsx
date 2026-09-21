@@ -854,7 +854,7 @@ export function ZoomResumeModal({ open, onClose, resume, templateId, title, sect
         </div>
         {/* Pans in both directions: on a phone 100% is wider than the screen,
            which is the point (real text size, the way a PDF viewer reads). */}
-        <div className="flex-1 overflow-auto px-4 pb-[max(24px,env(safe-area-inset-bottom))] sm:px-8 sm:pb-8">
+        <div className="dm-scroll flex-1 overflow-auto px-4 pb-[max(24px,env(safe-area-inset-bottom))] sm:px-8 sm:pb-8">
           <div className="mx-auto" style={{ width: Math.round(PAGE_WIDTH * (zoom / 100)) }}>
             <ResumeDocument resume={resume} templateId={templateId} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
           </div>

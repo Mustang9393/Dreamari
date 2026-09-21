@@ -1259,8 +1259,9 @@ export function ConnectExperience() {
   // a board's insights tab, another thread). This stack is that missing
   // history: pushed once per setView call, popped by goBack below.
   const [viewStack, setViewStack] = useState<View[]>([]);
-  // Demo only: which build of the AT&T board shows. v1 is the live default;
-  // `?v=2` opens the reach-first rebuild, so a demo link can land on it.
+  // DEMO-ONLY: which build of the AT&T board shows. v1 is the live default;
+  // `?v=2` opens the reach-first rebuild, so a demo link can land on it. See
+  // docs/HANDOFF_INDEX.md's Demo vs Production section.
   const [attVersion, setAttVersion] = useState<AttVersion>("v1");
   const pickAttVersion = (v: AttVersion) => {
     setAttVersion(v);
@@ -1294,11 +1295,13 @@ export function ConnectExperience() {
   const [asked, setAsked] = useState<AskedQuestion[]>([]);
   const [askOpen, setAskOpen] = useState(false);
   const [reportFor, setReportFor] = useState<string | null>(null);
-  // Demo only: which of the four roles Connect is being shown as. A
+  // DEMO-ONLY: which of the four roles Connect is being shown as. A
   // segmented switch at the top (like the earlier ?cards= lane switcher), so
-  // the demo can flip between journeys in one tap.
+  // the demo can flip between journeys in one tap. Production has one role
+  // per signed-in user -- see docs/HANDOFF_INDEX.md's Demo vs Production
+  // section.
   const [role, setRole] = useState<DemoRole>("student");
-  // Demo only: which volunteer the Volunteer and Partner roles are shown for.
+  // DEMO-ONLY: which volunteer the Volunteer and Partner roles are shown for.
   const volunteer = view.kind === "proDashboard" || view.kind === "pro" ? view.id : view.kind === "partner" ? (PROS.find((p) => p.org === view.org)?.id ?? "pro-okafor") : "pro-okafor";
 
   // restore view from URL on mount; keep URL in sync so filters survive
@@ -1727,8 +1730,9 @@ export function ConnectExperience() {
   );
 }
 
-// ——— DEMO ONLY: role switcher and volunteer picker. Not a product feature;
-// production has one role per signed-in user. See docs/HANDOFF_INDEX.md. ———
+// ——— DEMO-ONLY: role switcher and volunteer picker. Not a product feature;
+// production has one role per signed-in user. See docs/HANDOFF_INDEX.md's
+// Demo vs Production section. ———
 
 type DemoRole = "student" | "attendee" | "pro" | "partner" | "admin";
 
@@ -1936,7 +1940,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
     // every other bottom sheet on this page had the identical bug).
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="ask-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="ask-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Ask a question</h2>
           <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
@@ -2113,7 +2117,7 @@ function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (re
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="report-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[440px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[440px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="report-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Report this</h2>
           <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
@@ -3840,7 +3844,7 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "#0e0c20", fontFamily: "var(--font-display)" }}>
           <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
           <span aria-hidden className="absolute inset-0" style={{ background: "rgba(14,12,32,0.55)" }} />
@@ -3911,7 +3915,7 @@ function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onC
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label="Enter event code">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.55)" }} />
-      <div className="relative z-[1] max-h-[calc(100dvh-96px)] w-full max-w-[480px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] max-h-[calc(100dvh-96px)] w-full max-w-[480px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         {confirming ? (
           <div aria-live="polite">
             <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>

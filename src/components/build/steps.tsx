@@ -8,6 +8,7 @@ import { ChevronRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConic
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { playMilestoneChime, playXpRise } from "./sound";
+import { Listbox } from "@/components/app/Listbox";
 import { awardDreamScore, peekDreamScoreAfter } from "@/lib/dreamScore";
 import {
   EDUCATION_OPTIONS,
@@ -293,48 +294,29 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
 }
 
 // Grade and travel as dropdowns (per feedback: pill walls read as information
-// overload on the profile step). Native <select> = keyboard/screen-reader
-// support for free; glass styling matches the flow's inputs.
+// overload on the profile step). Listbox, not native <select> -- same
+// keyboard/screen-reader support, but the popup is the app's own design on
+// every platform instead of the OS's (see docs/CROSS_BROWSER_GUARDRAILS.md).
+// Glass styling matches the flow's inputs.
 function SelectField({ label, options, value, placeholder, onChange }: { label: string; options: string[]; value: string; placeholder: string; onChange: (next: string) => void }) {
   return (
     <div>
       {/* Bigger -- a field title, not a tiny caption (direct feedback,
          11 Sept 2026: "'Grade' and 'GPA' should be larger titles"). */}
       <p className="mb-2 text-[15px] font-extrabold" style={{ color: "var(--color-night-foreground)" }}>{label}</p>
-      <div className="relative">
-        <select
-          value={value}
-          aria-label={label}
-          onChange={(e) => onChange(e.target.value)}
-          className={`w-full cursor-pointer appearance-none rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
-          style={{
-            background: GLASS_PANEL_BG,
-            borderColor: value ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
-            color: value ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)",
-          }}
-        >
-          <option value="" disabled style={{ color: "#4a4f6d", background: "#0b0e1f" }}>
-            {placeholder}
-          </option>
-          {options.map((option) => (
-            <option key={option} value={option} style={{ color: "#f4f7ff", background: "#0b0e1f" }}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[var(--color-night-muted-foreground)]"
-          aria-hidden
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </div>
+      <Listbox
+        value={value}
+        ariaLabel={label}
+        placeholder={placeholder}
+        onChange={onChange}
+        options={options.map((option) => ({ value: option, label: option }))}
+        className={`w-full rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
+        style={{
+          background: GLASS_PANEL_BG,
+          borderColor: value ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
+          color: value ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)",
+        }}
+      />
     </div>
   );
 }

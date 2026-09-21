@@ -122,7 +122,7 @@ export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId)
                 <X className="h-4 w-4" aria-hidden />
               </button>
             </div>
-            <div className="flex-1 overflow-auto px-5 pb-5">
+            <div className="dm-scroll flex-1 overflow-auto px-5 pb-5">
               <div className="mx-auto w-full max-w-[460px]">
                 <ResumeDocument resume={SAMPLE_RESUME_DATA} templateId={previewTemplate.id} />
               </div>

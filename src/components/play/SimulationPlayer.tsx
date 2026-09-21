@@ -57,11 +57,12 @@ import { ConnectInterstitial } from "./ConnectInterstitial";
 // only thing you can do. Everything about WHAT happens lives in the level data;
 // this file only knows how a beat is staged and how reputation moves.
 
-// Demo switch: a HUD button that jumps straight to the Connect interstitial
+// DEMO-ONLY: a HUD button that jumps straight to the Connect interstitial
 // without replaying a level (direct instruction, 17 Sept 2026: "add a back
 // button or replay thing so we can QA without going back so many steps to
 // launch this"). Same pattern as WelcomeSplash's DEMO_ALWAYS_SHOW_SPLASH.
-// Flip back to false before this ships to students.
+// Flip back to false before this ships to students. See
+// docs/HANDOFF_INDEX.md's Demo vs Production section.
 export const DEMO_CONNECT_SHORTCUT = true;
 
 type Phase = "beat" | "feedback" | "ending";
@@ -1783,7 +1784,7 @@ function DialogueBox({
       )}
       <div
         onClick={step}
-        className={`flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[clamp(20px,1.4vw,32px)] sm:pt-[clamp(22px,1.53vw,34px)] [scrollbar-width:thin] ${shape}`}
+        className={`dm-scroll flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[clamp(20px,1.4vw,32px)] sm:pt-[clamp(22px,1.53vw,34px)] ${shape}`}
         style={{
           background: voice === "system" ? "color-mix(in srgb, var(--background) 93%, transparent)" : "color-mix(in srgb, var(--background) 86%, transparent)",
           borderColor: edge,

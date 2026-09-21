@@ -14,6 +14,7 @@ import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "./ConnectWithProfessionalsModal";
+import { PROS } from "@/components/connect/data";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "./PayMap";
@@ -290,7 +291,7 @@ function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonN
     <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)", background: "transparent" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }} />
       <div
-        className="relative z-[1] flex max-h-[92dvh] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
+        className="dm-scroll relative z-[1] flex max-h-[92dvh] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
         style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", color: "var(--foreground)" }}
       >
         <div className="flex items-start justify-between gap-[var(--space-4)]">
@@ -404,6 +405,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const similar = similarCareers(career);
   const hasSimulation = !!simulationFor(career.slug);
   const hasGlossaryGame = hasGlossary(career.slug);
+  const hasWorldProfessionals = PROS.some((pro) => pro.world === career.world);
   const vm = viewModel(career);
 
   return (
@@ -505,15 +507,20 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               )}
               {/* Ported from the Replit reference (dceeai.replit.app/explore-careers):
                  view a career -> tap Connect -> "Connect with [World]
-                 Professionals" -- Ask / Answers / People. */}
-              <button
-                type="button"
-                onClick={() => setConnectOpen(true)}
-                className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
-              >
-                <Users className="h-4 w-4" aria-hidden /> Connect
-              </button>
+                 Professionals" -- Ask / Answers / People. Hidden when the
+                 world has no real professionals (PROS has no entry for it):
+                 direct feedback, 21 Sept 2026, confirmed the button should
+                 not appear rather than open to an empty modal. */}
+              {hasWorldProfessionals && (
+                <button
+                  type="button"
+                  onClick={() => setConnectOpen(true)}
+                  className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
+                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
+                >
+                  <Users className="h-4 w-4" aria-hidden /> Connect
+                </button>
+              )}
               <div className="flex items-center gap-[var(--space-2)]">
                 <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
                 <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>

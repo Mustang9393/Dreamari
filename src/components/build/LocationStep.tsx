@@ -5,6 +5,7 @@ import usaMapModule from "@svg-maps/usa";
 import { CardHud, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, QuestionHeading, StepFooter } from "./ui";
 import type { StepProps } from "./steps";
 import { useTheme } from "@/components/flow/theme/ThemeProvider";
+import { Listbox } from "@/components/app/Listbox";
 
 // Location — a REAL USA map (actual state shapes via @svg-maps/usa path data, not
 // the reference's grid of abbreviation chips, per direct instruction) plus a
@@ -253,23 +254,18 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
           <p className="mt-2 hidden px-1 text-[12px] font-medium text-[var(--color-night-muted-foreground)] opacity-70 sm:block">Tap a state to select it.</p>
         </div>
       ) : (
-        <select
-          aria-label="Choose a state"
+        <Listbox
+          ariaLabel="Choose a state"
           value={selected}
-          onChange={(e) => pickState(e.target.value)}
-          className={`w-full rounded-[var(--radius-md)] border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
+          onChange={pickState}
+          placeholder="Choose a state"
+          options={STATE_NAMES.map((name) => ({ value: name, label: name }))}
+          className={`w-full min-h-[46px] rounded-[var(--radius-md)] border px-4 py-3 text-[15px] font-semibold text-[var(--color-night-foreground)] outline-none transition-colors focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
           style={{
             background: GLASS_PANEL_BG,
             borderColor: GLASS_PANEL_BORDER,
           }}
-        >
-          <option value="">Choose a state</option>
-          {STATE_NAMES.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
+        />
       )}
 
       <Citation>MIT CAPD Job Search + BLS OEWS</Citation>

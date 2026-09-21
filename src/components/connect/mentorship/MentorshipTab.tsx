@@ -108,7 +108,7 @@ function Sheet({ title, onClose, children, label }: { title: string; onClose: ()
     <Portal>
       <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={title}>
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-        <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+        <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
           <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet absolute top-[14px] right-[14px] z-10 flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
           <div className="flex flex-col gap-[6px] pr-[40px]">
             {label && <Eyebrow>{label}</Eyebrow>}
@@ -805,7 +805,7 @@ function Thread({ me, messages, setMessages, onToast, onOpenProfile, embedded = 
         </div>
       </div>}
 
-      <div ref={listRef} className={embedded ? "flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-[var(--space-4)] py-[var(--space-4)]" : "flex min-h-[320px] flex-col justify-end gap-[22px] px-[var(--space-5)] py-[var(--space-5)] sm:min-h-[380px]"}>
+      <div ref={listRef} className={embedded ? "dm-scroll flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-[var(--space-4)] py-[var(--space-4)]" : "flex min-h-[320px] flex-col justify-end gap-[22px] px-[var(--space-5)] py-[var(--space-5)] sm:min-h-[380px]"}>
         {/* the safety line sits at the start of the conversation and scrolls
            away with it, the way messaging apps note encryption (direct
            feedback, 18 Sept 2026) */}

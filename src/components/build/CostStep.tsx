@@ -106,10 +106,23 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
           />
         </div>
 
-        {/* Stop labels double as jump targets, positioned at the SAME
-           percentages as the tick dots so the thumb sits right over the
-           selected words (edges clamp inward to stay inside the card). */}
-        <div className="relative h-[38px]">
+        {/* Stop labels double as jump targets. Used to be individually
+           positioned at the SAME percentages as the tick dots above, via
+           absolute + left:N% + a centering transform, so the thumb sits
+           right over the selected word -- but that meant every pair of
+           neighbors was one font-metrics difference away from colliding,
+           and at a real narrow render two labels' text visibly interleaved
+           (direct feedback, 21 Sept 2026, after an earlier narrowing pass
+           on 21 Sept still wasn't enough margin). Percent-positioned boxes
+           can only ever get *closer* to overlapping as content or viewport
+           shrinks; nothing forces them apart. A flex row with
+           justify-between can't overlap by construction -- the browser
+           lays out six shrink-to-fit boxes left-to-right and only ever
+           adds space between them, never lets them share pixels -- at the
+           cost of the thumb no longer sitting exactly over a middle
+           label's text (still true for the first and last, which flex
+           already flushes to the row's own edges). */}
+        <div className="flex items-start justify-between gap-1">
           {(
             // two-line breaks of COST_STOPS, in the same order (one entry per stop)
             [
@@ -122,7 +135,6 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
             ] as const
           ).map(([top, bottom], i) => {
             const isActive = touched && i === index;
-            const stopPercent = (i / (COST_STOPS.length - 1)) * 100;
             const isFirst = i === 0;
             const isLast = i === COST_STOPS.length - 1;
             return (
@@ -134,17 +146,10 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
                 // etc are too small") -- wider max-width to match, so the
                 // longer labels ("Cost isn't a major factor") still wrap
                 // to two lines instead of overflowing.
-                // Narrower on phones (direct feedback, 21 Sept 2026: "no
-                // overlapping content") -- at 92px wide, the centered
-                // "Cost isn't a / major factor" label and the right-
-                // aligned "I'm not / sure" label sit close enough at
-                // narrow widths to overlap each other.
-                className={`absolute top-0 max-w-[74px] text-[11.5px] leading-tight font-bold transition-colors sm:max-w-[112px] sm:text-[13.5px] ${
-                  isFirst ? "text-left" : isLast ? "text-right" : "-translate-x-1/2 text-center"
+                className={`min-w-0 shrink-0 text-[11.5px] leading-tight font-bold transition-colors sm:max-w-[112px] sm:text-[13.5px] ${
+                  isFirst ? "max-w-[38px] text-left sm:max-w-[80px]" : isLast ? "max-w-[42px] text-right sm:max-w-[80px]" : "max-w-[54px] text-center sm:max-w-[112px]"
                 }`}
                 style={{
-                  left: isLast ? undefined : `${stopPercent}%`,
-                  right: isLast ? 0 : undefined,
                   color: isActive ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 90%, transparent)",
                   opacity: isActive ? 1 : 0.9,
                 }}

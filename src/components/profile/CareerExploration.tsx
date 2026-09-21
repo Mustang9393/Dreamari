@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { Check, ChevronDown, PenLine, Trash2 } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
+import { Portal } from "@/components/profile/CareerReport";
 import {
   EXPERIENCE_TYPES, FEELINGS, addExperience, experienceLabel, experiencesSnapshot, loggedActivity, removeExperience,
   serverExperiencesSnapshot, shortDate, subscribeExperiences, updateExperience, type Experience, type ExperienceTypeId, type Feeling,
@@ -93,17 +94,33 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
 }
 
 /** "Add something you did": a button that opens a checklist; Add commits the
- *  checked types as rows. Checkboxes, not a single select (Joshua). */
+ *  checked types as rows. Checkboxes, not a single select (Joshua).
+ *
+ *  The checklist used to open inline, growing this section's own height --
+ *  which no longer stretched its sibling (the `items-start` fix above) but
+ *  still pushed the report content below it down the page while open
+ *  (direct feedback, 21 Sept 2026: it should overlay, not shove content
+ *  around). Portalled and positioned from the trigger's own measured rect,
+ *  same pattern as ProfileExperience's Settings menu: it floats above
+ *  whatever is below in the document instead of displacing it, and closes
+ *  on an outside click via the full-screen backdrop button. */
 function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle: () => void; onAdd: (types: ExperienceTypeId[]) => void; idPrefix: string }) {
   const [checked, setChecked] = useState<Set<ExperienceTypeId>>(new Set());
+  const [menuRect, setMenuRect] = useState({ top: 0, left: 0, width: 0 });
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const toggle = (id: ExperienceTypeId) => setChecked((cur) => { const next = new Set(cur); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   return (
     <div data-print-hide className="flex flex-col gap-[8px]">
       <button
+        ref={triggerRef}
         type="button"
         aria-expanded={open}
         aria-controls={`${idPrefix}add-menu`}
-        onClick={onToggle}
+        onClick={() => {
+          const rect = triggerRef.current?.getBoundingClientRect();
+          if (rect) setMenuRect({ top: rect.bottom + 6, left: rect.left, width: rect.width });
+          onToggle();
+        }}
         className={`dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-between gap-[8px] text-left font-bold ${FIELD}`}
         style={fieldStyle}
       >
@@ -111,23 +128,30 @@ function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle:
         <ChevronDown className="h-4 w-4 flex-none transition-transform" style={{ color: "var(--ink-faint)", transform: open ? "rotate(180deg)" : "none" }} aria-hidden />
       </button>
       {open && (
-        <div id={`${idPrefix}add-menu`} className="flex flex-col gap-[4px] rounded-[var(--radius-sm)] border p-[6px]" style={fieldStyle}>
-          {EXPERIENCE_TYPES.map((t) => (
-            <label key={t.id} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[10px] rounded-[6px] px-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--ink)" }}>
-              <input type="checkbox" checked={checked.has(t.id)} onChange={() => toggle(t.id)} className="size-[16px] accent-[var(--primary)]" />
-              {t.label}
-            </label>
-          ))}
-          <button
-            type="button"
-            disabled={checked.size === 0}
-            onClick={() => { onAdd([...checked]); setChecked(new Set()); }}
-            className="dm-solid mt-[4px] flex min-h-[38px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ background: "var(--primary)", color: "#fff" }}
+        <Portal>
+          <button type="button" aria-label="Close menu" className="fixed inset-0 z-[58] cursor-default" onClick={onToggle} />
+          <div
+            id={`${idPrefix}add-menu`}
+            className="fixed z-[59] flex flex-col gap-[4px] rounded-[var(--radius-sm)] border p-[6px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
+            style={{ ...fieldStyle, top: menuRect.top, left: menuRect.left, width: menuRect.width }}
           >
-            {checked.size > 1 ? `Add ${checked.size}` : "Add"}
-          </button>
-        </div>
+            {EXPERIENCE_TYPES.map((t) => (
+              <label key={t.id} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[10px] rounded-[6px] px-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--ink)" }}>
+                <input type="checkbox" checked={checked.has(t.id)} onChange={() => toggle(t.id)} className="size-[16px] accent-[var(--primary)]" />
+                {t.label}
+              </label>
+            ))}
+            <button
+              type="button"
+              disabled={checked.size === 0}
+              onClick={() => { onAdd([...checked]); setChecked(new Set()); }}
+              className="dm-solid mt-[4px] flex min-h-[38px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ background: "var(--primary)", color: "#fff" }}
+            >
+              {checked.size > 1 ? `Add ${checked.size}` : "Add"}
+            </button>
+          </div>
+        </Portal>
       )}
     </div>
   );

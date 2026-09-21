@@ -17,6 +17,7 @@ import {
   MessageCircleQuestion, MessagesSquare, ThumbsUp, UserRound, Users, X, FileText, ListChecks,
 } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
+import { Listbox } from "@/components/app/Listbox";
 import { Avatar, Composer, InlineAsk, InsightMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../../primitives";
 import { AreaChart, MetricTile, Segmented, ruledCell } from "../../viz";
 import { FollowButton, Panel, ProProfileView, RULE } from "../../ProProfile";
@@ -328,7 +329,7 @@ function OpportunitySheet({ item, saved, onSave, inPlan, onPlan, onClose }: { it
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="att-opp-title">
       <button type="button" aria-label={U.close} onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <button type="button" onClick={onClose} aria-label={U.close} className="dm-quiet absolute top-[14px] right-[14px] z-10 flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
 
         {/* header: status, title, the numbers. No eyebrow (the title names
@@ -632,9 +633,7 @@ function VolunteerShare() {
           ) : (
             <label className="flex flex-col gap-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               {S.opportunity.chooseType}
-              <select value={type} onChange={(e) => setType(e.target.value)} className={FIELD_CLASS} style={FIELD_STYLE}>
-                {S.opportunity.types.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <Listbox value={type} onChange={setType} options={S.opportunity.types.map((t) => ({ value: t, label: t }))} className={FIELD_CLASS} style={FIELD_STYLE} />
             </label>
           )}
         />

@@ -8,6 +8,7 @@ import { ChevronLeft, BookOpen, Check, Eye, EyeOff, GraduationCap, Heart, PartyP
 import { playMilestoneChime } from "@/components/build/sound";
 import { Wordmark } from "@/components/app/chrome";
 import { InkText } from "@/components/build/ui";
+import { Listbox } from "@/components/app/Listbox";
 
 // Signup — a from-scratch build (Figma 3645:5759 was a useful skeleton: role
 // picker -> birthdate -> account, but plain dark cards with a stock
@@ -421,28 +422,10 @@ export function SignupExperience() {
                 </h2>
                 <div className="flex gap-[12px]">
                   <Field label="Month">
-                    <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} className={`${INPUT_CLASS} cursor-pointer appearance-none`} style={inputStyle()}>
-                      <option value="" disabled>
-                        Month
-                      </option>
-                      {MONTHS.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </select>
+                    <Listbox value={birthMonth} onChange={setBirthMonth} placeholder="Month" ariaLabel="Month" options={MONTHS.map((m) => ({ value: m, label: m }))} className={INPUT_CLASS} style={inputStyle()} />
                   </Field>
                   <Field label="Year">
-                    <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} className={`${INPUT_CLASS} cursor-pointer appearance-none`} style={inputStyle()}>
-                      <option value="" disabled>
-                        Year
-                      </option>
-                      {YEARS.map((y) => (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      ))}
-                    </select>
+                    <Listbox value={birthYear} onChange={setBirthYear} placeholder="Year" ariaLabel="Year" options={YEARS.map((y) => ({ value: String(y), label: String(y) }))} className={INPUT_CLASS} style={inputStyle()} />
                   </Field>
                 </div>
                 {birthdateError && (

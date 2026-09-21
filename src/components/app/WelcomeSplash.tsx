@@ -207,10 +207,11 @@ export function WelcomeSplash({ surface, open, onDone, onSecondary, scene }: { s
   return open ? <SplashDialog key={surface} surface={surface} onDone={onDone} onSecondary={onSecondary} override={scene} /> : null;
 }
 
-// Demo switch: show the splash on EVERY visit, ignoring the stored "seen"
-// flag (direct request, 10 Sept 2026: "make it appear every time for now,
-// for demo"). Same pattern as MatchLab's DEMO_ALWAYS_SHOW_GUIDE. Flip back
-// to false before this ships to students.
+// DEMO-ONLY: show the splash on EVERY visit, ignoring the stored "seen" flag
+// (direct request, 10 Sept 2026: "make it appear every time for now, for
+// demo"). Same pattern as MatchLab's DEMO_ALWAYS_SHOW_GUIDE. Flip back to
+// false before this ships to students. See docs/HANDOFF_INDEX.md's Demo vs
+// Production section.
 export const DEMO_ALWAYS_SHOW_SPLASH = true;
 
 /* Demo mode shows a welcome once per browser SESSION, not once per mount:

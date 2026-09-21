@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip, Tip } from "@/components/app/IconTip";
+import { Listbox, type ListboxOption } from "@/components/app/Listbox";
 
 // Shared field/card styling for every resume step -- copied verbatim from
 // ProfileExperience.tsx's own Settings form fields (SETTINGS_FIELD/_STYLE/
@@ -57,18 +58,13 @@ export function TextInput({ id, value, onChange, placeholder, type = "text", inv
   );
 }
 
-export function SelectInput({ id, value, onChange, children }: { id: string; value: string; onChange: (v: string) => void; children: ReactNode }) {
+export function SelectInput({ id, value, onChange, options }: { id: string; value: string; onChange: (v: string) => void; options: ListboxOption[] }) {
   // The native select ignored the shared min-height and painted a thin
   // control next to 44px text fields (direct feedback, 18 Sept 2026), so
-  // the height is explicit, the native arrow is off and the chevron is ours.
-  return (
-    <span className="relative block">
-      <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={`${FIELD_CLASS} h-[44px] cursor-pointer appearance-none pr-[40px]`} style={FIELD_STYLE}>
-        {children}
-      </select>
-      <ChevronDown aria-hidden className="pointer-events-none absolute top-1/2 right-[12px] h-4 w-4 -translate-y-1/2" style={{ color: "var(--muted-foreground)" }} />
-    </span>
-  );
+  // the height is explicit -- and it's Listbox, not <select>, so the popup
+  // is the app's own design everywhere, not the OS's (see
+  // docs/CROSS_BROWSER_GUARDRAILS.md).
+  return <Listbox id={id} value={value} onChange={onChange} options={options} className={`${FIELD_CLASS} h-[44px]`} style={FIELD_STYLE} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -270,7 +266,7 @@ export function ResumeModal({ title, onClose, children, presentation = "overlay"
       <div className="fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={title}>
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[14px]" style={{ background: "rgba(5,7,15,0.6)" }} />
         <div
-          className="relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
+          className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
           style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}
         >
           <ResumeModalHeader title={title} onClose={onClose} />

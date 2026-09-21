@@ -450,7 +450,7 @@ function DetailModal({
           <X className="h-4.5 w-4.5 text-white" aria-hidden />
         </button>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none]">
+        <div className="flow-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {/* hero: 4/3 -> 3/2 (direct feedback, 14 Sept 2026: shorten this
              without cropping the photo too much) -- a modest step, not
              16/9, since these are waist-up portraits and a much shorter
