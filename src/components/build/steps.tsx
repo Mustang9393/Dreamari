@@ -316,6 +316,10 @@ function SelectField({ label, options, value, placeholder, onChange }: { label: 
           borderColor: value ? "var(--color-brand-400)" : GLASS_PANEL_BORDER,
           color: value ? "var(--color-night-foreground)" : "var(--color-night-muted-foreground)",
         }}
+        // Solid, flow-specific panel surface, not the trigger's translucent
+        // glass -- see the matching comment in LocationStep.tsx's own
+        // Listbox for why (direct feedback, 21 Sept 2026).
+        panelStyle={{ background: "var(--color-night-card)", borderColor: "var(--color-glass-border-raised)", color: "var(--color-night-foreground)" }}
       />
     </div>
   );

@@ -10,6 +10,7 @@ import { BookOpen, Calendar, CalendarPlus, Check, ChevronDown, ClipboardList, Co
 import { clearMeetingDecision, openDock, setDock, setMentorshipContext, setProgramContext, setUnreadMessages, useInbox } from "@/lib/inbox";
 import { playMessageTone } from "./sound";
 import { Portal } from "@/components/profile/CareerReport";
+import { IconTip } from "@/components/app/IconTip";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardBottomScrim, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
@@ -450,10 +451,18 @@ function ChatDock({ me, state, unread, messages, setMessages, onToast, onOpenPro
               </span>
             </button>
             <span className="flex flex-none items-center gap-[2px]" style={{ color: "var(--muted-foreground)" }}>
-              <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" aria-label="Start a video call" title="Video call" className={iconBtn}><Video className="h-4 w-4" aria-hidden /></a>
-              <button type="button" aria-label="Minimise" title="Minimise" onClick={() => setDock("min")} className={`${iconBtn} hidden sm:flex`}><Minus className="h-4 w-4" aria-hidden /></button>
-              <button type="button" aria-label={full ? "Exit full screen" : "Full screen"} title={full ? "Exit full screen" : "Full screen"} onClick={() => setDock(full ? "open" : "full")} className={`${iconBtn} hidden sm:flex`}>{full ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}</button>
-              <button type="button" aria-label="Close" title="Close" onClick={() => setDock("closed")} className={iconBtn}><X className="h-4 w-4" aria-hidden /></button>
+              <IconTip label="Video call">
+                <a href="https://teams.microsoft.com" target="_blank" rel="noreferrer" aria-label="Start a video call" className={iconBtn}><Video className="h-4 w-4" aria-hidden /></a>
+              </IconTip>
+              <IconTip label="Minimise">
+                <button type="button" aria-label="Minimise" onClick={() => setDock("min")} className={`${iconBtn} hidden sm:flex`}><Minus className="h-4 w-4" aria-hidden /></button>
+              </IconTip>
+              <IconTip label={full ? "Exit full screen" : "Full screen"}>
+                <button type="button" aria-label={full ? "Exit full screen" : "Full screen"} onClick={() => setDock(full ? "open" : "full")} className={`${iconBtn} hidden sm:flex`}>{full ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}</button>
+              </IconTip>
+              <IconTip label="Close">
+                <button type="button" aria-label="Close" onClick={() => setDock("closed")} className={iconBtn}><X className="h-4 w-4" aria-hidden /></button>
+              </IconTip>
             </span>
           </div>
           <div className="min-h-0 flex-1">

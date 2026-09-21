@@ -265,6 +265,17 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
             background: GLASS_PANEL_BG,
             borderColor: GLASS_PANEL_BORDER,
           }}
+          // The trigger's own translucent glass surface (GLASS_PANEL_BG) is
+          // meant to sit ON this flow's background and read through it a
+          // little -- right for an inline field, wrong for a floating panel
+          // that has to stay legible over WHATEVER happens to be behind it.
+          // Listbox's own default (--card) is solid but tuned to contrast
+          // against the standard app --background, not this flow's own
+          // custom gradient, where it read as barely-there (direct
+          // feedback, 21 Sept 2026: "no surface color... clashing with
+          // everything"). A fully solid, flow-specific surface instead,
+          // same one GpaField's dialog already uses for the same reason.
+          panelStyle={{ background: "var(--color-night-card)", borderColor: "var(--color-glass-border-raised)", color: "var(--color-night-foreground)" }}
         />
       )}
 

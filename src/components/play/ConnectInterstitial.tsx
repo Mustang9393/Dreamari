@@ -44,6 +44,7 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardBottomScrim } from "@/compon
 import { awardDreamScore } from "@/lib/dreamScore";
 import { playMilestoneChime, playXpRise } from "@/components/build/sound";
 import { LocalBurst } from "@/components/build/ui";
+import { IconTip } from "@/components/app/IconTip";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Avatar, CompanyChip, formatCount, InlineAsk, InsightMark } from "@/components/connect/primitives";
 import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
@@ -334,7 +335,9 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
           {view === "posts" ? (
             <button className={styles.iconButton} aria-label="Back to menu" onClick={() => setView("intro")}><ChevronLeft size={18} /></button>
           ) : (
-            <button className={styles.iconButton} aria-label="Replay" title="Replay" onClick={replay}><RotateCcw size={16} /></button>
+            <IconTip label="Replay">
+              <button className={styles.iconButton} aria-label="Replay" onClick={replay}><RotateCcw size={16} /></button>
+            </IconTip>
           )}
           <div ref={xpTarget} className={styles.xp} aria-live="polite" aria-atomic="true">
             <LocalBurst nonce={burstNonce} />

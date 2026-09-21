@@ -1553,3 +1553,20 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
   30% { opacity: 1; transform: translateY(-2px); }
 }
+
+/* Every <summary> in this app pairs with its own chevron icon as the
+   open/closed indicator, so the browser's own native disclosure triangle
+   would be a second, redundant marker -- and it's rendered differently
+   per engine (old WebKit's ::-webkit-details-marker pseudo-element vs the
+   modern standard ::marker), so it's suppressed both ways rather than
+   trusting one engine's current spec compliance. See
+   docs/CROSS_BROWSER_GUARDRAILS.md. */
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+summary::marker {
+  display: none;
+}

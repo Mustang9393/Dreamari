@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Check, ChevronDown, PenLine, Trash2 } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { Portal } from "@/components/profile/CareerReport";
+import { DatePicker } from "@/components/app/DatePicker";
 import {
   EXPERIENCE_TYPES, FEELINGS, addExperience, experienceLabel, experiencesSnapshot, loggedActivity, removeExperience,
   serverExperiencesSnapshot, shortDate, subscribeExperiences, updateExperience, type Experience, type ExperienceTypeId, type Feeling,
@@ -106,9 +107,57 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
  *  on an outside click via the full-screen backdrop button. */
 function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle: () => void; onAdd: (types: ExperienceTypeId[]) => void; idPrefix: string }) {
   const [checked, setChecked] = useState<Set<ExperienceTypeId>>(new Set());
-  const [menuRect, setMenuRect] = useState({ top: 0, left: 0, width: 0 });
+  const [menuRect, setMenuRect] = useState({ top: 0, left: 0, width: 0, maxHeight: 320, openUp: false });
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const toggle = (id: ExperienceTypeId) => setChecked((cur) => { const next = new Set(cur); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+
+  const MARGIN = 8;
+  const MIN_HEIGHT = 160;
+  const MAX_HEIGHT = 320;
+
+  function computeRect() {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+    const vh = window.innerHeight;
+    const spaceBelow = vh - rect.bottom - MARGIN;
+    const spaceAbove = rect.top - MARGIN;
+    const openUp = spaceBelow < 200 && spaceAbove > spaceBelow;
+    const maxHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, openUp ? spaceAbove : spaceBelow));
+    return { top: openUp ? rect.top - 6 : rect.bottom + 6, left: rect.left, width: rect.width, maxHeight, openUp };
+  }
+
+  // Same bounded-panel pattern as Listbox/DatePicker: capped and scrollable
+  // rather than left to grow past the viewport on a shorter screen (this
+  // panel overflowed the page on a real render, 21 Sept 2026 -- the fixed
+  // "Add" button at the end was pushed off-screen entirely below a tall
+  // enough checklist). The checklist scrolls; "Add" stays pinned in view.
+  useLayoutEffect(() => {
+    if (!open || !panelRef.current) return;
+    const rect = panelRef.current.getBoundingClientRect();
+    let top = menuRect.top;
+    let left = menuRect.left;
+    if (menuRect.openUp) {
+      if (rect.top < MARGIN) top += MARGIN - rect.top;
+    } else if (rect.bottom > window.innerHeight - MARGIN) {
+      top = Math.max(MARGIN, top - (rect.bottom - (window.innerHeight - MARGIN)));
+    }
+    if (rect.right > window.innerWidth - MARGIN) left -= rect.right - (window.innerWidth - MARGIN);
+    if (left < MARGIN) left = MARGIN;
+    if (top !== menuRect.top || left !== menuRect.left) setMenuRect((p) => ({ ...p, top, left }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onResize() {
+      const next = computeRect();
+      if (next) setMenuRect(next);
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [open]);
+
   return (
     <div data-print-hide className="flex flex-col gap-[8px]">
       <button
@@ -117,8 +166,8 @@ function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle:
         aria-expanded={open}
         aria-controls={`${idPrefix}add-menu`}
         onClick={() => {
-          const rect = triggerRef.current?.getBoundingClientRect();
-          if (rect) setMenuRect({ top: rect.bottom + 6, left: rect.left, width: rect.width });
+          const next = computeRect();
+          if (next) setMenuRect(next);
           onToggle();
         }}
         className={`dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-between gap-[8px] text-left font-bold ${FIELD}`}
@@ -131,21 +180,31 @@ function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle:
         <Portal>
           <button type="button" aria-label="Close menu" className="fixed inset-0 z-[58] cursor-default" onClick={onToggle} />
           <div
+            ref={panelRef}
             id={`${idPrefix}add-menu`}
-            className="fixed z-[59] flex flex-col gap-[4px] rounded-[var(--radius-sm)] border p-[6px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
-            style={{ ...fieldStyle, top: menuRect.top, left: menuRect.left, width: menuRect.width }}
+            className="fixed z-[59] flex flex-col gap-[6px] rounded-[var(--radius-sm)] border p-[6px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
+            style={{
+              ...fieldStyle,
+              top: menuRect.top,
+              left: menuRect.left,
+              width: menuRect.width,
+              maxHeight: menuRect.maxHeight,
+              transform: menuRect.openUp ? "translateY(-100%)" : undefined,
+            }}
           >
-            {EXPERIENCE_TYPES.map((t) => (
-              <label key={t.id} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[10px] rounded-[6px] px-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--ink)" }}>
-                <input type="checkbox" checked={checked.has(t.id)} onChange={() => toggle(t.id)} className="size-[16px] accent-[var(--primary)]" />
-                {t.label}
-              </label>
-            ))}
+            <div className="dm-scroll flex min-h-0 flex-1 flex-col gap-[4px] overflow-y-auto">
+              {EXPERIENCE_TYPES.map((t) => (
+                <label key={t.id} className="dm-quiet flex min-h-[36px] cursor-pointer items-center gap-[10px] rounded-[6px] px-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--ink)" }}>
+                  <input type="checkbox" checked={checked.has(t.id)} onChange={() => toggle(t.id)} className="size-[16px] accent-[var(--primary)]" />
+                  {t.label}
+                </label>
+              ))}
+            </div>
             <button
               type="button"
               disabled={checked.size === 0}
               onClick={() => { onAdd([...checked]); setChecked(new Set()); }}
-              className="dm-solid mt-[4px] flex min-h-[38px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
+              className="dm-solid flex min-h-[38px] flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
               style={{ background: "var(--primary)", color: "#fff" }}
             >
               {checked.size > 1 ? `Add ${checked.size}` : "Add"}
@@ -180,7 +239,7 @@ function ExperienceRow({ e, editing, onEdit, onDone }: { e: Experience; editing:
         <div data-print-hide className="flex flex-col gap-[10px] border-t px-[12px] py-[12px]" style={{ borderColor: "var(--rule)" }}>
           <label className="flex flex-col gap-[4px] text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>
             <span>Date<span aria-hidden style={{ color: "var(--primary)" }}>*</span><span className="sr-only"> (required)</span></span>
-            <input type="date" required value={e.date} onChange={(ev) => updateExperience(e.id, { date: ev.target.value })} className={FIELD} style={fieldStyle} />
+            <DatePicker value={e.date} onChange={(v) => updateExperience(e.id, { date: v })} ariaLabel="Date" className={FIELD} style={fieldStyle} />
           </label>
           <label className="flex flex-col gap-[4px] text-[12px] font-bold" style={{ color: "var(--ink-soft)" }}>
             Where or with whom?
