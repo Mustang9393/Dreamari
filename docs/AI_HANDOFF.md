@@ -11633,3 +11633,19 @@ Files touched: `src/components/colleges/shared.tsx` (`SchoolCard`).
 `npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified via DOM measurement across every shelf on both Browse and For You (`Schools with Finance`, `Near you`, `Lower-cost options`, `High acceptance`, `More schools for your path`, `Target`, `Safety`, `Reach`, `Lower-cost ways to start`) -- all 380px, no exceptions. Also verified "Why this school?" expands cleanly within the fixed box without pushing the card taller than its neighbors.
 
 Next step: none pending on this thread.
+
+## 2026-09-21 · SchoolCard: chip position, pinned CTA, and a cleaner fixed-height approach
+
+Three more corrections on the same card, all direct feedback with screenshots.
+
+**"DIRECT PATH chip wraps for longer course names, bad composition."** The programme name and its route chip used to share one `flex-wrap` line, so a long programme name pushed the chip to wherever it happened to wrap to -- inconsistent position card to card. Split into two lines: the programme name (truncated, never wraps) on its own row, the chips (route/fit/target) on a separate row directly under it. The chip row's position is now identical on every card that has one.
+
+**"When I expand why this school, the CTA moves downward, clipping it and I can't interact with it."** First attempt at a fix (a separate absolutely-scrolled zone for stats+why) actually made it worse -- the expanded text rendered overlapping the actions row rather than clipping cleanly, a flexbox `overflow: auto` + `justify-content: flex-end` interaction that didn't behave as expected. Corrected instruction: "don't reserve space for missing details... keep the cards the same height and have the content pinned to the bottom" -- simplified back to one plain `mt-auto` group (chips-if-any, stats, why-if-any, actions-if-any) in normal flow, with the card's fixed height raised from 380px to 420px so the group has real headroom for the worst case (2-line chip wrap + why expanded) without needing scroll tricks. The expanded "why" paragraph keeps a `max-h-[52px] overflow-y-auto` safety net for the rare unusually-long reason.
+
+**"For cards with no other CTA like Not for me, make Compare go full width."** Then, on seeing it: "if full width is too much, left-align instead -- those cards have all the other content left-aligned, it looks awkward." Landed on left-aligned: a lone Compare button now sits at the card's left edge, flush with the name/chips/stats above it, instead of floating alone on the right.
+
+Files touched: `src/components/colleges/shared.tsx` (`SchoolCard`).
+
+`npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified: every shelf on Browse and For You at a uniform 420px, the "Economics / DIRECT PATH / TARGET AT 3.9" 2-line-chip card with "Why this school?" expanded (text fully legible, Not for me/Compare fully visible below it, no overlap or clipping), and a lone-Compare card (Near you, Lower-cost options) left-aligned with no dead gap above it.
+
+Next step: none pending on this thread.
