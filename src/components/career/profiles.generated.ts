@@ -9416,4 +9416,418 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     },
     "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
   },
+  "auto-body-technician": {
+    "slug": "auto-body-technician",
+    "title": "Auto Body Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/auto-body-technician.webp",
+    "summary": "Repairs and repaints cars after crashes and damage.",
+    "scenario": "Imagine a car comes in with the whole front end crumpled. You have to make the frame straight again before any of the rest matters.",
+    "facts": [
+      { "label": "Typical degree", "value": "High school diploma or equivalent" },
+      { "label": "Typical pay", "value": "$47,770/year" }
+    ],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$62K" }, { "state": "Massachusetts", "pay": "$58K" }, { "state": "New Jersey", "pay": "$56K" }] },
+    "knowAbout": ["How car frames and panels are built", "Paint and color matching", "Welding and metalwork", "Insurance estimates"],
+    "goodAt": ["Working with your hands", "Noticing small imperfections", "Patience on detail work", "Reading a repair estimate"],
+    "software": ["Estimating software (CCC ONE)", "Paint-mixing systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Apprentice Technician", "pay": "$36K", "description": "You learn the shop's process, prepping and sanding under a lead tech.", "whatYouDo": ["Sand and prep panels", "Mask for paint", "Assist on repairs"], "toGetHere": ["High school diploma", "Trade school helpful"] },
+      { "number": "2", "jobTitle": "Auto Body Technician", "pay": "$48K", "description": "You handle full repairs on your own, from frame to paint.", "whatYouDo": ["Straighten frames", "Replace panels", "Paint and blend"], "toGetHere": ["2-4 years experience", "ASE certification"] },
+      { "number": "3", "jobTitle": "Shop Foreman", "pay": "$65K", "description": "You oversee the shop's jobs and train newer techs.", "whatYouDo": ["Assign jobs", "Quality-check repairs", "Train apprentices"], "toGetHere": ["Years of ASE-certified work", "Shop management experience"] }
+    ],
+    "education": { "studies": [{ "name": "Collision Repair Technology" }, { "name": "Automotive Technology" }], "where": [{ "count": "310", "credential": "Trade school certificate" }, { "count": "120", "credential": "Associate's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "auto-mechanic": {
+    "slug": "auto-mechanic",
+    "title": "Auto Mechanic",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/auto-mechanic.webp",
+    "summary": "Diagnoses and fixes what's wrong with cars and trucks.",
+    "scenario": "Imagine a car that won't start and the owner needs it by 5pm. You have twenty minutes to find the real problem, not just a guess.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$47,770/year" }
+    ],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$61K" }, { "state": "California", "pay": "$56K" }, { "state": "Washington", "pay": "$55K" }] },
+    "knowAbout": ["How engines and electrical systems work", "Diagnostic computers", "Brakes, suspension and transmissions", "Manufacturer service manuals"],
+    "goodAt": ["Troubleshooting", "Working with your hands", "Staying current as cars change", "ASE certification helps"],
+    "software": ["OBD-II diagnostic scanners", "Manufacturer repair databases"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Lube/Service Technician", "pay": "$32K", "description": "You handle oil changes, tire rotations and basic inspections.", "whatYouDo": ["Oil changes", "Tire rotations", "Basic inspections"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Auto Mechanic", "pay": "$48K", "description": "You diagnose and repair most problems that come through the shop.", "whatYouDo": ["Diagnose issues", "Replace parts", "Test-drive repairs"], "toGetHere": ["Trade school or 2-3 years experience", "ASE certification"] },
+      { "number": "3", "jobTitle": "Master Technician", "pay": "$70K", "description": "You handle the hardest jobs and mentor the rest of the shop.", "whatYouDo": ["Complex diagnostics", "Mentor technicians", "Handle warranty work"], "toGetHere": ["Multiple ASE certifications", "5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Automotive Technology" }], "where": [{ "count": "420", "credential": "Trade school certificate" }, { "count": "140", "credential": "Associate's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "aviation-maintenance-technician": {
+    "slug": "aviation-maintenance-technician",
+    "title": "Aviation Maintenance Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/aviation-maintenance-technician.webp",
+    "summary": "Inspects and repairs aircraft so they're safe to fly.",
+    "scenario": "Imagine a plane is due to take off in two hours and your inspection finds a crack in a part. Nobody flies until you sign off that it's fixed.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate (A&P license)" },
+      { "label": "Typical pay", "value": "$75,660/year" }
+    ],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$97K" }, { "state": "Alaska", "pay": "$88K" }, { "state": "California", "pay": "$85K" }] },
+    "knowAbout": ["Aircraft systems and engines", "FAA regulations", "Precision inspection standards", "Reading technical manuals"],
+    "goodAt": ["Extreme attention to detail", "Following exact procedures", "Working under time pressure", "An A&P license is required"],
+    "software": ["Maintenance tracking systems", "Digital technical manuals"],
+    "ladder": [
+      { "number": "1", "jobTitle": "A&P Apprentice", "pay": "$45K", "description": "You work under licensed mechanics while finishing your certification hours.", "whatYouDo": ["Assist inspections", "Basic maintenance", "Log hours toward license"], "toGetHere": ["FAA-approved A&P school", "In progress toward license"] },
+      { "number": "2", "jobTitle": "A&P Mechanic", "pay": "$76K", "description": "You inspect, maintain and sign off repairs as a licensed technician.", "whatYouDo": ["Inspect aircraft", "Repair systems", "Sign maintenance logs"], "toGetHere": ["FAA A&P license", "1-2 years experience"] },
+      { "number": "3", "jobTitle": "Lead Inspector", "pay": "$100K", "description": "You oversee inspections and sign off on the hardest calls.", "whatYouDo": ["Lead inspections", "Train mechanics", "Final sign-off authority"], "toGetHere": ["Years as licensed A&P", "Inspection Authorization (IA)"] }
+    ],
+    "education": { "studies": [{ "name": "Aviation Maintenance Technology" }], "where": [{ "count": "260", "credential": "FAA-approved A&P certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "avionics-technician": {
+    "slug": "avionics-technician",
+    "title": "Avionics Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/avionics-technician.webp",
+    "summary": "Fixes the electronics that fly and navigate the plane.",
+    "scenario": "Imagine a plane's autopilot is reading the wrong altitude. You have to trace the fault through miles of wiring before it flies again.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$74,650/year" }
+    ],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$92K" }, { "state": "Texas", "pay": "$78K" }, { "state": "Connecticut", "pay": "$76K" }] },
+    "knowAbout": ["Aircraft electrical and navigation systems", "Radar and communications equipment", "FAA regulations", "Circuit diagrams"],
+    "goodAt": ["Electronics troubleshooting", "Precision work", "Reading wiring schematics", "An avionics certification helps"],
+    "software": ["Digital diagnostic test equipment", "Technical wiring databases"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Avionics Apprentice", "pay": "$44K", "description": "You assist licensed technicians while learning aircraft electrical systems.", "whatYouDo": ["Assist repairs", "Learn wiring systems", "Basic testing"], "toGetHere": ["Avionics or electronics certificate program"] },
+      { "number": "2", "jobTitle": "Avionics Technician", "pay": "$75K", "description": "You diagnose and repair aircraft electronics on your own.", "whatYouDo": ["Diagnose faults", "Repair systems", "Test and certify work"], "toGetHere": ["FCC/FAA certifications", "2-3 years experience"] },
+      { "number": "3", "jobTitle": "Lead Avionics Technician", "pay": "$98K", "description": "You handle the hardest electrical faults and train the team.", "whatYouDo": ["Complex diagnostics", "Train technicians", "Oversee upgrades"], "toGetHere": ["Years of certified experience", "Specialized system certifications"] }
+    ],
+    "education": { "studies": [{ "name": "Avionics Technology" }, { "name": "Electronics Technology" }], "where": [{ "count": "180", "credential": "FAA-approved certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "biomedical-equipment-technician": {
+    "slug": "biomedical-equipment-technician",
+    "title": "Biomedical Equipment Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/biomedical-equipment-technician.webp",
+    "summary": "Keeps hospital medical equipment working and safe.",
+    "scenario": "Imagine an MRI machine goes down in the middle of a busy hospital day. Every scan waiting on it is a patient waiting on you.",
+    "facts": [
+      { "label": "Typical degree", "value": "Associate's degree" },
+      { "label": "Typical pay", "value": "$59,720/year" }
+    ],
+    "payByState": { "best": [{ "state": "California", "pay": "$78K" }, { "state": "Massachusetts", "pay": "$70K" }, { "state": "New York", "pay": "$67K" }] },
+    "knowAbout": ["Medical equipment and electronics", "Hospital safety regulations", "Calibration and testing", "Manufacturer service manuals"],
+    "goodAt": ["Careful, methodical troubleshooting", "Electronics and mechanics", "Working around patients calmly", "Certification (CBET) helps"],
+    "software": ["Computerized maintenance management systems", "Manufacturer diagnostic software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Biomed Technician I", "pay": "$48K", "description": "You handle routine maintenance and inspections under supervision.", "whatYouDo": ["Routine inspections", "Basic repairs", "Equipment logs"], "toGetHere": ["Associate's degree in biomedical equipment technology"] },
+      { "number": "2", "jobTitle": "Biomedical Equipment Technician", "pay": "$60K", "description": "You maintain and repair a hospital's full range of equipment.", "whatYouDo": ["Diagnose equipment faults", "Calibrate devices", "Coordinate with vendors"], "toGetHere": ["2-3 years experience", "CBET certification"] },
+      { "number": "3", "jobTitle": "Senior Biomed Technician", "pay": "$80K", "description": "You handle the hospital's most complex, critical equipment.", "whatYouDo": ["Lead complex repairs", "Train junior techs", "Manage equipment programs"], "toGetHere": ["Years of certified experience", "Specialty equipment training"] }
+    ],
+    "education": { "studies": [{ "name": "Biomedical Equipment Technology" }, { "name": "Electronics Technology" }], "where": [{ "count": "140", "credential": "Associate's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "diesel-mechanic": {
+    "slug": "diesel-mechanic",
+    "title": "Diesel Mechanic",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/diesel-mechanic.webp",
+    "summary": "Repairs the engines that power trucks, buses and heavy equipment.",
+    "scenario": "Imagine a delivery fleet has three trucks down the same morning. Every hour they sit is an hour of deliveries not happening.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$56,140/year" }
+    ],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$72K" }, { "state": "Nevada", "pay": "$63K" }, { "state": "Washington", "pay": "$62K" }] },
+    "knowAbout": ["Diesel engines and drivetrains", "Hydraulic and electrical systems", "Emissions regulations", "Fleet maintenance schedules"],
+    "goodAt": ["Diagnosing mechanical problems", "Working with heavy tools", "Physical stamina", "ASE certification helps"],
+    "software": ["Diagnostic scan tools", "Fleet maintenance software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Lube Technician", "pay": "$36K", "description": "You handle routine service on trucks coming through the shop.", "whatYouDo": ["Oil and filter changes", "Basic inspections", "Tire checks"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Diesel Mechanic", "pay": "$56K", "description": "You diagnose and repair engines and drivetrains on your own.", "whatYouDo": ["Diagnose engine issues", "Repair drivetrains", "Test-drive repairs"], "toGetHere": ["Trade school or 2-3 years experience", "ASE certification"] },
+      { "number": "3", "jobTitle": "Shop Lead / Fleet Mechanic", "pay": "$75K", "description": "You handle the fleet's hardest jobs and train the shop.", "whatYouDo": ["Complex diagnostics", "Mentor mechanics", "Manage fleet schedules"], "toGetHere": ["Multiple ASE certifications", "5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Diesel Technology" }], "where": [{ "count": "290", "credential": "Trade school certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "heavy-equipment-mechanic": {
+    "slug": "heavy-equipment-mechanic",
+    "title": "Heavy Equipment Mechanic",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/heavy-equipment-mechanic.webp",
+    "summary": "Keeps bulldozers, cranes and other construction machines running.",
+    "scenario": "Imagine a crane breaks down mid-job on a construction site. The whole crew is waiting, and the fix has to happen outdoors, today.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$60,300/year" }
+    ],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$78K" }, { "state": "Hawaii", "pay": "$68K" }, { "state": "Washington", "pay": "$66K" }] },
+    "knowAbout": ["Hydraulic and diesel systems", "Heavy machinery components", "On-site repair techniques", "Manufacturer manuals"],
+    "goodAt": ["Diagnosing mechanical problems in the field", "Physical stamina", "Working outdoors in all conditions", "Welding helps"],
+    "software": ["Diagnostic scan tools", "Fleet maintenance tracking"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Mechanic Helper", "pay": "$38K", "description": "You assist mechanics with basic maintenance and parts runs.", "whatYouDo": ["Assist repairs", "Basic maintenance", "Parts and tools"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Heavy Equipment Mechanic", "pay": "$60K", "description": "You diagnose and repair heavy machinery on-site and in the shop.", "whatYouDo": ["Diagnose faults", "Repair hydraulics and engines", "On-site service calls"], "toGetHere": ["Trade school or 2-3 years experience"] },
+      { "number": "3", "jobTitle": "Lead Mechanic", "pay": "$78K", "description": "You handle the hardest jobs and manage the shop's schedule.", "whatYouDo": ["Complex diagnostics", "Train mechanics", "Manage repair schedules"], "toGetHere": ["5+ years experience", "Certifications in hydraulics/diesel"] }
+    ],
+    "education": { "studies": [{ "name": "Heavy Equipment Technology" }, { "name": "Diesel Technology" }], "where": [{ "count": "220", "credential": "Trade school certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "hvac-technician": {
+    "slug": "hvac-technician",
+    "title": "HVAC Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/hvac-technician.webp",
+    "summary": "Installs and repairs heating, cooling and ventilation systems.",
+    "scenario": "Imagine it's 95 degrees and a family's AC just died. You're the one who shows up and gets the house cool again by dinner.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$57,300/year" }
+    ],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$74K" }, { "state": "Massachusetts", "pay": "$67K" }, { "state": "New Jersey", "pay": "$64K" }] },
+    "knowAbout": ["Heating and cooling systems", "Refrigerants and EPA regulations", "Electrical wiring basics", "Ductwork and airflow"],
+    "goodAt": ["Diagnosing mechanical and electrical issues", "Working in tight spaces", "Talking customers through a fix", "EPA 608 certification required"],
+    "software": ["Digital diagnostic gauges", "Scheduling and dispatch apps"],
+    "ladder": [
+      { "number": "1", "jobTitle": "HVAC Apprentice", "pay": "$38K", "description": "You assist on installs and service calls while learning the trade.", "whatYouDo": ["Assist installs", "Basic maintenance", "Learn refrigerant handling"], "toGetHere": ["High school diploma", "Trade school or apprenticeship"] },
+      { "number": "2", "jobTitle": "HVAC Technician", "pay": "$57K", "description": "You install and repair systems on your own, from diagnosis to fix.", "whatYouDo": ["Diagnose system issues", "Install units", "Service refrigerant lines"], "toGetHere": ["EPA 608 certification", "2-3 years experience"] },
+      { "number": "3", "jobTitle": "Lead Technician / Estimator", "pay": "$78K", "description": "You handle the hardest jobs and quote new installations.", "whatYouDo": ["Complex diagnostics", "Estimate new jobs", "Train apprentices"], "toGetHere": ["5+ years experience", "NATE certification"] }
+    ],
+    "education": { "studies": [{ "name": "HVACR Technology" }], "where": [{ "count": "340", "credential": "Trade school certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "industrial-maintenance-technician": {
+    "slug": "industrial-maintenance-technician",
+    "title": "Industrial Maintenance Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/industrial-maintenance-technician.webp",
+    "summary": "Keeps factory machines running so production never stops.",
+    "scenario": "Imagine a production line stops at 2am and every minute down costs the plant money. You're the one on call to get it moving again.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$61,170/year" }
+    ],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$78K" }, { "state": "Louisiana", "pay": "$68K" }, { "state": "Washington", "pay": "$67K" }] },
+    "knowAbout": ["Industrial machines and controls", "Hydraulics, pneumatics and electrical systems", "Preventive maintenance schedules", "Safety lockout procedures"],
+    "goodAt": ["Troubleshooting under pressure", "Reading equipment manuals and schematics", "Working with a variety of tools", "Comfortable with electrical and mechanical work"],
+    "software": ["Computerized maintenance management systems (CMMS)", "PLC diagnostic software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Maintenance Technician I", "pay": "$42K", "description": "You handle routine maintenance and basic repairs on the floor.", "whatYouDo": ["Routine maintenance", "Basic repairs", "Equipment inspections"], "toGetHere": ["High school diploma", "Trade school helpful"] },
+      { "number": "2", "jobTitle": "Industrial Maintenance Technician", "pay": "$61K", "description": "You diagnose and fix mechanical, electrical and hydraulic issues.", "whatYouDo": ["Diagnose equipment faults", "Repair machinery", "Preventive maintenance"], "toGetHere": ["Trade certificate or 2-3 years experience"] },
+      { "number": "3", "jobTitle": "Maintenance Lead / Millwright", "pay": "$80K", "description": "You handle the plant's most complex breakdowns and lead the team.", "whatYouDo": ["Complex diagnostics", "Train technicians", "Plan preventive maintenance"], "toGetHere": ["5+ years experience", "Specialized certifications"] }
+    ],
+    "education": { "studies": [{ "name": "Industrial Maintenance Technology" }, { "name": "Mechatronics" }], "where": [{ "count": "260", "credential": "Trade school certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "locksmith": {
+    "slug": "locksmith",
+    "title": "Locksmith",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/locksmith.webp",
+    "summary": "Installs, repairs and opens locks and security systems.",
+    "scenario": "Imagine someone's locked out of their house at midnight with kids waiting in the car. You show up and have them inside in minutes.",
+    "facts": [
+      { "label": "Typical degree", "value": "High school diploma or equivalent" },
+      { "label": "Typical pay", "value": "$48,210/year" }
+    ],
+    "payByState": { "best": [{ "state": "California", "pay": "$62K" }, { "state": "New York", "pay": "$58K" }, { "state": "Massachusetts", "pay": "$55K" }] },
+    "knowAbout": ["Lock mechanisms and key systems", "Electronic and smart locks", "Basic security systems", "State licensing requirements"],
+    "goodAt": ["Fine detail work", "Working under time pressure", "Trustworthy with people's security", "A clean background check is required"],
+    "software": ["Key-cutting machines", "Access control software (commercial jobs)"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Locksmith Apprentice", "pay": "$34K", "description": "You learn the trade under a licensed locksmith, starting with key cutting.", "whatYouDo": ["Key cutting", "Basic lock installs", "Shadow service calls"], "toGetHere": ["High school diploma", "Apprenticeship"] },
+      { "number": "2", "jobTitle": "Locksmith", "pay": "$48K", "description": "You handle lockouts, installs and repairs on your own.", "whatYouDo": ["Lockout service", "Install and repair locks", "Rekey properties"], "toGetHere": ["State license", "1-2 years experience"] },
+      { "number": "3", "jobTitle": "Master Locksmith / Shop Owner", "pay": "$68K", "description": "You handle commercial security systems or run your own shop.", "whatYouDo": ["Commercial security installs", "Train apprentices", "Run the business"], "toGetHere": ["Years of licensed experience", "Certified Master Locksmith (CML)"] }
+    ],
+    "education": { "studies": [{ "name": "Locksmithing certificate programs" }], "where": [{ "count": "60", "credential": "Trade certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "low-voltage-technician": {
+    "slug": "low-voltage-technician",
+    "title": "Low Voltage Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/low-voltage-technician.webp",
+    "summary": "Installs and wires security, network and AV systems.",
+    "scenario": "Imagine a new office needs every camera, network jack and speaker wired before opening day. You're the one running and testing every cable.",
+    "facts": [
+      { "label": "Typical degree", "value": "High school diploma or equivalent" },
+      { "label": "Typical pay", "value": "$61,150/year" }
+    ],
+    "payByState": { "best": [{ "state": "New Jersey", "pay": "$76K" }, { "state": "California", "pay": "$72K" }, { "state": "New York", "pay": "$70K" }] },
+    "knowAbout": ["Cabling standards", "Security and camera systems", "Network wiring basics", "Blueprints and wiring diagrams"],
+    "goodAt": ["Detail-oriented wiring work", "Reading blueprints", "Working in tight spaces (attics, crawl spaces)", "Basic electrical safety"],
+    "software": ["Cable testers and certifiers", "Network configuration tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Cabling Installer", "pay": "$40K", "description": "You run and terminate cable under a lead technician.", "whatYouDo": ["Run cable", "Terminate connections", "Label and test runs"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Low Voltage Technician", "pay": "$61K", "description": "You install and configure full systems on your own.", "whatYouDo": ["Install security/network systems", "Configure equipment", "Troubleshoot issues"], "toGetHere": ["2-3 years experience", "Manufacturer certifications"] },
+      { "number": "3", "jobTitle": "Lead Technician / Project Lead", "pay": "$82K", "description": "You run full installation projects and train the crew.", "whatYouDo": ["Lead installation projects", "Design system layouts", "Train technicians"], "toGetHere": ["5+ years experience", "Advanced certifications"] }
+    ],
+    "education": { "studies": [{ "name": "Low voltage / electronics certificate programs" }], "where": [{ "count": "150", "credential": "Trade certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "millwright": {
+    "slug": "millwright",
+    "title": "Millwright",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/millwright.webp",
+    "summary": "Installs and aligns heavy industrial machinery.",
+    "scenario": "Imagine a factory just bought a machine the size of a truck. You're the one who levels, aligns and bolts it into place, down to the millimeter.",
+    "facts": [
+      { "label": "Typical degree", "value": "High school diploma + apprenticeship" },
+      { "label": "Typical pay", "value": "$63,300/year" }
+    ],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$82K" }, { "state": "Washington", "pay": "$74K" }, { "state": "Louisiana", "pay": "$70K" }] },
+    "knowAbout": ["Precision alignment and rigging", "Hydraulics and pneumatics", "Blueprint reading", "Industrial safety standards"],
+    "goodAt": ["Precision, patient work", "Physical strength for rigging", "Reading technical drawings", "Problem-solving on the floor"],
+    "software": ["Laser alignment tools", "CMMS maintenance tracking"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Millwright Apprentice", "pay": "$44K", "description": "You learn rigging and alignment on the job through an apprenticeship.", "whatYouDo": ["Assist installs", "Learn rigging", "Basic alignment work"], "toGetHere": ["High school diploma", "Apprenticeship program"] },
+      { "number": "2", "jobTitle": "Millwright", "pay": "$63K", "description": "You install and align heavy machinery on your own.", "whatYouDo": ["Install machinery", "Precision alignment", "Rigging and lifting"], "toGetHere": ["Completed apprenticeship", "3-4 years experience"] },
+      { "number": "3", "jobTitle": "Lead Millwright", "pay": "$85K", "description": "You lead major installation projects and train apprentices.", "whatYouDo": ["Lead installations", "Train apprentices", "Plan rigging jobs"], "toGetHere": ["Journeyman status", "5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Millwright apprenticeship programs" }], "where": [{ "count": "90", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "motorcycle-mechanic": {
+    "slug": "motorcycle-mechanic",
+    "title": "Motorcycle Mechanic",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/motorcycle-mechanic.webp",
+    "summary": "Repairs and tunes motorcycles and small engines.",
+    "scenario": "Imagine a rider brings in a bike making a noise no one else could diagnose. You have to find it by sound and feel before you ever open it up.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$41,200/year" }
+    ],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$52K" }, { "state": "California", "pay": "$49K" }, { "state": "Nevada", "pay": "$47K" }] },
+    "knowAbout": ["Motorcycle engines and drivetrains", "Electrical systems", "Manufacturer specs and tuning", "Basic bodywork"],
+    "goodAt": ["Hands-on mechanical troubleshooting", "Working with small, precise parts", "Passion for motorcycles helps", "Manufacturer certifications help"],
+    "software": ["Diagnostic scan tools", "Manufacturer service databases"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Shop Apprentice", "pay": "$32K", "description": "You assist mechanics with basic service while learning the trade.", "whatYouDo": ["Basic service", "Assist repairs", "Parts and inventory"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Motorcycle Mechanic", "pay": "$41K", "description": "You diagnose and repair bikes on your own.", "whatYouDo": ["Diagnose issues", "Engine and drivetrain repair", "Tune-ups"], "toGetHere": ["Trade school or 2-3 years experience"] },
+      { "number": "3", "jobTitle": "Master Technician / Shop Lead", "pay": "$58K", "description": "You handle the hardest jobs and run the service department.", "whatYouDo": ["Complex diagnostics", "Manufacturer-certified repairs", "Train technicians"], "toGetHere": ["Manufacturer certification", "5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Motorcycle Repair Technology" }], "where": [{ "count": "70", "credential": "Trade school certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "office-equipment-technician": {
+    "slug": "office-equipment-technician",
+    "title": "Office Equipment Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/office-equipment-technician.webp",
+    "summary": "Repairs printers, copiers and other office machines.",
+    "scenario": "Imagine a law firm's copier jams the morning of a big filing deadline. You're the call that gets it running again before anyone panics.",
+    "facts": [
+      { "label": "Typical degree", "value": "High school diploma or equivalent" },
+      { "label": "Typical pay", "value": "$46,020/year" }
+    ],
+    "payByState": { "best": [{ "state": "California", "pay": "$58K" }, { "state": "New York", "pay": "$55K" }, { "state": "New Jersey", "pay": "$53K" }] },
+    "knowAbout": ["Printers, copiers and multifunction devices", "Basic networking", "Manufacturer service procedures", "Parts inventory"],
+    "goodAt": ["Mechanical troubleshooting", "Customer-facing service calls", "Working independently on the road", "Comfortable with basic IT"],
+    "software": ["Manufacturer diagnostic tools", "Service ticketing systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Field Service Trainee", "pay": "$34K", "description": "You shadow technicians and learn common repairs.", "whatYouDo": ["Shadow service calls", "Basic maintenance", "Stock parts"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Office Equipment Technician", "pay": "$46K", "description": "You handle your own service route, repairing machines on-site.", "whatYouDo": ["Diagnose and repair machines", "Manage a service route", "Install new equipment"], "toGetHere": ["1-2 years experience", "Manufacturer certification"] },
+      { "number": "3", "jobTitle": "Senior Field Technician", "pay": "$60K", "description": "You handle the toughest tickets and mentor new techs.", "whatYouDo": ["Complex repairs", "Train technicians", "Manage key accounts"], "toGetHere": ["5+ years experience", "Multiple manufacturer certifications"] }
+    ],
+    "education": { "studies": [{ "name": "Electronics Technology" }], "where": [{ "count": "40", "credential": "On-the-job / manufacturer training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "power-line-technician": {
+    "slug": "power-line-technician",
+    "title": "Power-Line Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/power-line-technician.webp",
+    "summary": "Builds and repairs the power lines that bring electricity to homes.",
+    "scenario": "Imagine a storm knocks out power to a whole town overnight. You're up a 40-foot pole at 3am, in the wind, getting the lights back on.",
+    "facts": [
+      { "label": "Typical degree", "value": "High school diploma + apprenticeship" },
+      { "label": "Typical pay", "value": "$85,420/year" }
+    ],
+    "payByState": { "best": [{ "state": "California", "pay": "$118K" }, { "state": "Oregon", "pay": "$98K" }, { "state": "Illinois", "pay": "$95K" }] },
+    "knowAbout": ["High-voltage electrical systems", "Utility pole and line equipment", "OSHA safety standards", "Storm and outage response"],
+    "goodAt": ["Comfortable working at heights", "Calm under real physical risk", "Physical strength and stamina", "Following exact safety procedures"],
+    "software": ["Outage management systems", "Grid mapping tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Groundman", "pay": "$42K", "description": "You support the line crew from the ground while learning the trade.", "whatYouDo": ["Support crew from ground", "Handle equipment", "Learn line basics"], "toGetHere": ["High school diploma", "Apprenticeship program"] },
+      { "number": "2", "jobTitle": "Journeyman Lineworker", "pay": "$85K", "description": "You build and repair power lines, including emergency outage work.", "whatYouDo": ["Install and repair lines", "Respond to outages", "Work energized/de-energized lines"], "toGetHere": ["Completed apprenticeship (3-4 years)", "Commercial driver's license"] },
+      { "number": "3", "jobTitle": "Line Crew Foreman", "pay": "$110K", "description": "You lead a crew and make the safety calls on every job.", "whatYouDo": ["Lead crew on jobs", "Coordinate outage response", "Enforce safety protocol"], "toGetHere": ["Years as journeyman", "Leadership training"] }
+    ],
+    "education": { "studies": [{ "name": "Lineworker apprenticeship / trade programs" }], "where": [{ "count": "110", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "semiconductor-equipment-technician": {
+    "slug": "semiconductor-equipment-technician",
+    "title": "Semiconductor Equipment Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/semiconductor-equipment-technician.webp",
+    "summary": "Keeps the precision machines that make computer chips running.",
+    "scenario": "Imagine a machine that etches lines a thousand times thinner than a hair goes out of calibration. Nothing on the line runs until you fix it.",
+    "facts": [
+      { "label": "Typical degree", "value": "Associate's degree" },
+      { "label": "Typical pay", "value": "$105,420/year" }
+    ],
+    "payByState": { "best": [{ "state": "California", "pay": "$128K" }, { "state": "Arizona", "pay": "$112K" }, { "state": "Texas", "pay": "$108K" }] },
+    "knowAbout": ["Cleanroom protocols", "Precision manufacturing equipment", "Vacuum and gas delivery systems", "Statistical process control"],
+    "goodAt": ["Extreme precision and cleanliness", "Following strict procedures exactly", "Electronics and mechanical troubleshooting", "Comfortable in cleanroom suits"],
+    "software": ["Equipment monitoring dashboards", "Statistical process control software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Equipment Technician I", "pay": "$68K", "description": "You monitor equipment and assist senior techs on routine maintenance.", "whatYouDo": ["Monitor equipment", "Routine maintenance", "Cleanroom procedures"], "toGetHere": ["Associate's degree in electronics/semiconductor tech"] },
+      { "number": "2", "jobTitle": "Semiconductor Equipment Technician", "pay": "$105K", "description": "You maintain and calibrate fabrication equipment on your own.", "whatYouDo": ["Calibrate equipment", "Diagnose faults", "Preventive maintenance"], "toGetHere": ["2-4 years experience", "Equipment-specific certifications"] },
+      { "number": "3", "jobTitle": "Senior Equipment Engineer Tech", "pay": "$135K", "description": "You handle the fab's most critical equipment and lead upgrades.", "whatYouDo": ["Lead equipment upgrades", "Train technicians", "Solve chronic issues"], "toGetHere": ["5+ years experience", "Advanced technical training"] }
+    ],
+    "education": { "studies": [{ "name": "Semiconductor Manufacturing Technology" }, { "name": "Electronics Technology" }], "where": [{ "count": "80", "credential": "Associate's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "telecom-technician": {
+    "slug": "telecom-technician",
+    "title": "Telecom Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/telecom-technician.webp",
+    "summary": "Installs and repairs phone, internet and cable lines.",
+    "scenario": "Imagine a whole neighborhood loses internet during a storm. You're out tracing the line, pole by pole, until you find the break.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$62,960/year" }
+    ],
+    "payByState": { "best": [{ "state": "New Jersey", "pay": "$78K" }, { "state": "California", "pay": "$74K" }, { "state": "New York", "pay": "$72K" }] },
+    "knowAbout": ["Fiber, copper and coax lines", "Network and signal testing", "Splicing and cabling standards", "Customer installation service"],
+    "goodAt": ["Working at heights and in tight spaces", "Diagnosing signal problems", "Customer-facing service", "Comfortable driving to job sites"],
+    "software": ["Signal testers and OTDR meters", "Service dispatch apps"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Installation Technician", "pay": "$42K", "description": "You install service at homes and businesses under supervision.", "whatYouDo": ["Install service lines", "Basic troubleshooting", "Customer setup"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Telecom Technician", "pay": "$63K", "description": "You diagnose and repair network issues across the service area.", "whatYouDo": ["Diagnose line faults", "Splice and repair cable", "Network testing"], "toGetHere": ["2-3 years experience", "Fiber splicing certification"] },
+      { "number": "3", "jobTitle": "Lead Technician / Splicer", "pay": "$85K", "description": "You handle the hardest network faults and train new techs.", "whatYouDo": ["Complex fiber repairs", "Train technicians", "Plan network builds"], "toGetHere": ["5+ years experience", "Advanced fiber certification"] }
+    ],
+    "education": { "studies": [{ "name": "Telecommunications Technology" }], "where": [{ "count": "160", "credential": "Trade school certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
+  "wind-turbine-technician": {
+    "slug": "wind-turbine-technician",
+    "title": "Wind Turbine Technician",
+    "world": "Fixing Machines & Engines",
+    "photo": "/images/app/browse/wind-turbine-technician.webp",
+    "summary": "Maintains and repairs wind turbines, one of the fastest-growing trades.",
+    "scenario": "Imagine climbing 250 feet inside a turbine tower to fix a gearbox, with the blades locked and the wind picking up below you.",
+    "facts": [
+      { "label": "Typical degree", "value": "Postsecondary certificate" },
+      { "label": "Typical pay", "value": "$62,580/year" }
+    ],
+    "payByState": { "best": [{ "state": "Texas", "pay": "$68K" }, { "state": "Iowa", "pay": "$64K" }, { "state": "Oklahoma", "pay": "$63K" }] },
+    "knowAbout": ["Turbine mechanical and electrical systems", "Hydraulics and gearboxes", "Working at extreme heights", "OSHA safety standards"],
+    "goodAt": ["Comfortable with heights and confined spaces", "Mechanical and electrical troubleshooting", "Physical fitness for climbing", "Calm decision-making at altitude"],
+    "software": ["Turbine monitoring/SCADA systems", "Diagnostic handheld tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Turbine Technician Trainee", "pay": "$44K", "description": "You learn tower climbing, safety and basic maintenance.", "whatYouDo": ["Climb-certification training", "Assist maintenance", "Basic inspections"], "toGetHere": ["Wind energy technology certificate", "Physical fitness for climbing"] },
+      { "number": "2", "jobTitle": "Wind Turbine Technician", "pay": "$62K", "description": "You perform maintenance and repairs on turbines in the field.", "whatYouDo": ["Scheduled maintenance", "Diagnose and repair faults", "Safety inspections"], "toGetHere": ["Certificate program", "2-3 years experience"] },
+      { "number": "3", "jobTitle": "Lead Turbine Technician", "pay": "$82K", "description": "You lead a maintenance crew across a wind farm.", "whatYouDo": ["Lead maintenance crew", "Handle major repairs", "Train technicians"], "toGetHere": ["5+ years experience", "Advanced safety certifications"] }
+    ],
+    "education": { "studies": [{ "name": "Wind Energy Technology" }], "where": [{ "count": "70", "credential": "Trade school certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+  },
 };

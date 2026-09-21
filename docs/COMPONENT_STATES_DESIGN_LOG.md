@@ -39,6 +39,18 @@ section or 1 point inside a section will be missing (1 field)." Both are
 now being checked for on every component touched, not just whole-section
 absence.
 
+**Two separate tracks, clarified 22 Sept 2026**: the state/edge-case
+*handling code* (TabComingSoon, DotList filtering, Match's placeholder
+cards, etc.) is permanent, documented reference behavior for Usman's own
+build -- keep designing and pushing all of it regardless of the demo.
+Separately, and only for the demo actually pushed to Vercel: real content
+coverage matters, not fallback text, specifically for whatever's reachable
+from the Explore tab (a demo viewer clicking a world filter is one click
+from real careers, and several worlds were 100% thin -- see "Mock content
+for Explore-reachable careers" below). The fallback code stays in place
+either way; it just shouldn't be what a demo viewer actually sees, since
+the demo is deliberately curated, not a random sample of real data.
+
 Screenshots referenced below live in
 `docs/reference/component-states-2026-09-22/`.
 
@@ -263,6 +275,75 @@ control the exact scenario, THEN cross-checked against a real, common,
 live career ("Financial Advisor") to confirm it wasn't a synthetic-only
 fix. All 5 tabs screenshotted in both the broken (before) and fixed
 (after) states.
+
+---
+
+## Mock content for Explore-reachable careers (demo-only concern)
+
+Status: **in progress** -- 1 of ~9 affected worlds fully closed.
+
+Not a UI/state-handling task -- this is content authoring, tracked
+separately from the design log above. Scope, per direct instruction: "I
+want there to be data for everything visible in the explore tab. Others
+can wait" -- not all 137 thin careers, just the ones a demo viewer can
+actually reach from Explore.
+
+**Method**: Explore's default Browse view (no filter clicked) renders 7
+curated rails + the Arts world -- 67 unique titles, checked against the
+137-thin list: **zero overlap**. The default view was already clean.
+The real risk is one click away: clicking ANY world filter pill renders
+`ALL_CATALOG_CAREERS` filtered to that world, and most worlds have
+significant thin counts:
+
+| World | Thin / Total |
+|---|---|
+| Fixing Machines & Engines | ~~18/18~~ **0/18 -- closed 22 Sept** |
+| Business & Finance | 25/36 |
+| Building & Construction | 18/23 |
+| Driving, Flying & Shipping | 18/23 |
+| Factories & Making Things | 11/12 |
+| Health & Medicine | 11/17 |
+| Law, Safety & Justice | 9/12 |
+| Counseling & Social Work | 8/12 |
+| Personal Care & Community Services | 6/7 |
+| Tech & Engineering | 7/14 |
+| Farming, Animals & Nature | 2/7 |
+| Science & Research | 1/2 |
+| Food & Cooking | 1/1 |
+| Arts, Media & Sport | 0/27 (already clean) |
+| Teaching & Education | 0/1 (already clean) |
+
+**Format**: every entry follows `profiles.generated.ts`'s own established
+convention exactly (its own header comment, unchanged): "GENERATED
+PROTOTYPE DATA... figures are approximate, drawn from the BLS Occupational
+Outlook Handbook and O*NET... rounded... do not treat as sourced." Skips
+the optional `factDetails` block (the memory on this file already notes
+that's safe to omit -- the (i) icon just doesn't render). Every entry has:
+summary, scenario, 2 facts (degree + pay), `payByState` (3 states),
+knowAbout, goodAt, software (where relevant), a 3-rung career ladder, and
+education -- matching the Carpenter/Asset Manager blueprint shape exactly
+(confirmed via `tsc` -- every entry satisfies `CareerProfile` with no type
+errors).
+
+### Fixing Machines & Engines -- Done, 22 Sept 2026 (18 careers)
+
+100% thin before (the worst of any world) -- now 0% thin. Auto Body
+Technician, Auto Mechanic, Aviation Maintenance Technician, Avionics
+Technician, Biomedical Equipment Technician, Diesel Mechanic, Heavy
+Equipment Mechanic, HVAC Technician, Industrial Maintenance Technician,
+Locksmith, Low Voltage Technician, Millwright, Motorcycle Mechanic, Office
+Equipment Technician, Power-Line Technician, Semiconductor Equipment
+Technician, Telecom Technician, Wind Turbine Technician.
+
+Verified live: HVAC Technician screenshotted in full (header, facts,
+Overview, Career Ladder), all 18 confirmed populated via a batch fetch
+check (`data-fact-cell` count 0 -> 2 for every one). `tsc`/`eslint` clean.
+
+### Remaining worlds -- not started
+
+Business & Finance (25 careers) is the next highest-value target -- the
+largest single gap by career count, and the world most likely to be
+clicked in a demo of a career-guidance product.
 
 ---
 
