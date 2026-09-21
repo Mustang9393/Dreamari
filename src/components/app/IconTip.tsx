@@ -50,8 +50,21 @@ export function Tip({ label, children, hideFromLg = false, className = "" }: { l
     if (!above && rect.bottom > window.innerHeight - margin) above = true;
     if (x !== tip.x || above !== tip.above) setTip({ ...tip, x, above });
   }, [tip]);
+  // The wrapper needs SOME position other than static so the portalled
+  // tooltip bubble can measure it, but a caller that already passes its own
+  // `absolute`/`fixed`/`sticky` (to place the whole trigger -- a corner
+  // button, a close control) doesn't need `relative` too: Tailwind gives
+  // both utilities the same specificity, so whichever one the generated
+  // stylesheet happens to list last silently wins the cascade -- in this
+  // project that was `relative`, so every icon-only control positioned via
+  // IconTip's own className (Match's "+"/rank badge among many others)
+  // rendered at its static in-flow position instead of the corner it asked
+  // for. Found 22 Sept 2026 via a direct report that Match's card content
+  // was "cropped and overlapping" -- the real bug was this select button
+  // landing on top of the salary chip instead of the card's other corner.
+  const positioned = /\b(?:absolute|fixed|sticky|static)\b/.test(className);
   return (
-    <span ref={ref} className={`relative flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide} aria-describedby={tip ? id : undefined}>
+    <span ref={ref} className={`${positioned ? "" : "relative "}flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide} aria-describedby={tip ? id : undefined}>
       {children}
       {tip && (
         <Portal>
