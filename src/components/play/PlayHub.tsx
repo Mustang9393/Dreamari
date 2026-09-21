@@ -5,7 +5,6 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
-import { HoverBeam } from "@/components/app/HoverBeam";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
@@ -170,11 +169,19 @@ export function PlayHub() {
            cards that fill out the row rather than link anywhere (direct
            feedback, 9 Sept 2026: "they dont have to work or lead anywhere,
            theyre just dummy cards to fill the row"), same idiom as the
-           career-simulation placeholders below. */}
+           career-simulation placeholders below. Same hero+side shape as
+           Career Simulations now too (direct feedback, 21 Sept 2026), via
+           the shared HeroShelfRow. */}
         {GLOSSARY_GAMES.length > 0 && (
-          <RowFocusWrapper id="glossary" active={activeRow === "glossary"}>
-            <GlossaryGamesRow games={GLOSSARY_GAMES} />
-          </RowFocusWrapper>
+          <HeroShelfRow
+            rowId="glossary"
+            active={activeRow === "glossary"}
+            label="Glossary Games"
+            items={GLOSSARY_GAMES.map((game) => {
+              const playable = hasGlossary(game.careerSlug);
+              return { id: game.careerSlug, title: game.title, cover: game.cover, sub: game.sub, href: playable ? `/play/glossary/${game.careerSlug}` : undefined, locked: !playable };
+            })}
+          />
         )}
         {/* The bridge from Play to Explore (Joshua Pierce, Slack, 5 Sept 2026):
            Play is for experiencing careers, Explore for discovering them.
@@ -191,13 +198,12 @@ export function PlayHub() {
           storageKey="dreamari:play-explore-bridge-dismissed"
         />
 
-        <RowFocusWrapper id="soon" active={activeRow === "soon"}>
-          <SoonSection label="In the works">
-            {soon.map((game) => (
-              <SoonCard key={game.careerId} title={game.title} cover={game.cover} />
-            ))}
-          </SoonSection>
-        </RowFocusWrapper>
+        <HeroShelfRow
+          rowId="soon"
+          active={activeRow === "soon"}
+          label="In the works"
+          items={soon.map((game) => ({ id: game.careerId, title: game.title, cover: game.cover, world: game.world, locked: true }))}
+        />
       </main>
 
       <MobileNav active="Play" />
@@ -224,18 +230,10 @@ const ROW_HEIGHT = "sm:h-[300px] md:h-[380px] lg:h-[430px]";
 // animation scaled the contents and read as stretchy (direct feedback).
 const FEATURED_W = "sm:w-[533px] md:w-[676px] lg:w-[764px]";
 const SIDE_W = "sm:w-[212px] md:w-[269px] lg:w-[304px]";
-// Rows BELOW the hero: uniform smaller shelves, Netflix-style.
-const SHELF_HEIGHT = "h-[150px] sm:h-[170px] md:h-[195px]";
-// Explicit 16:9 widths for the glossary shelf (of SHELF_HEIGHT) instead of
-// an aspect-ratio class: inside a flex-none <li>, HoverBeam's wrapper divs
-// gave the playable card no intrinsic width, so it collapsed to 2px and
-// its neighbour rendered on top of it on mobile (direct feedback, 10 Sept
-// 2026: "overlapping cards").
-const SHELF_W = "w-[267px] sm:w-[302px] md:w-[347px]";
-// "In the works" cards read too small at SHELF_HEIGHT (direct feedback, 9
-// Sept 2026) -- closer to PosterCard's own real 210x297 poster size, scaled
-// down slightly to still sit in a shelf row rather than the full browse grid.
-const SOON_HEIGHT = "h-[210px] sm:h-[230px] md:h-[260px]";
+// Every row below the hero now shares these same three constants too
+// (HeroShelfRow) -- there is no separate smaller "shelf" size left to
+// carry (direct feedback, 21 Sept 2026: "same sized cards" as Career
+// Simulations, not a smaller lookalike).
 // Netflix's row headers are bold, bright and readable -- not micro-labels.
 const ROW_HEADER = "text-[15px] font-extrabold tracking-[0.06em] uppercase sm:text-[17px]";
 
@@ -693,183 +691,153 @@ function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulatio
   );
 }
 
-/** A titled shelf of locked "Soon" cards -- career sims not yet built. A
- *  horizontal scroll row of small uniform posters (Netflix's own below-
- *  the-billboard shelves), deliberately smaller than the hero row above so
- *  the page reads billboard-first. */
-function SoonSection({ label, children }: { label: string; children: React.ReactNode }) {
+// A row candidate, generalized past FeaturedCandidate/Simulation so ANY
+// row can use the exact hero+side mechanism Career Simulations pioneered
+// (direct feedback, 21 Sept 2026: "when i get to glossary games it has to
+// have the same design as the simulation row, same sized cards, one card
+// large and hero style, the other on the row narrower, opening up to be
+// like the selected card when tapped... then the in the works does that
+// too"). world/sub are alternate second lines under the title (a
+// simulation and In the works show world; Glossary Games shows its own
+// one-line "sub" instead) -- never both at once.
+type HeroItem = { id: string; title: string; cover?: string; world?: string; sub?: string; href?: string; locked?: boolean };
+
+// The resting size for a row that ISN'T in focus -- a real TV's own
+// remote-navigation pattern (direct description, 21 Sept 2026: "on a tv,
+// the other rows show normal narrow cards but when i hit the down arrow
+// on my remote they come into view with large tile hero + narrow cards to
+// the right"): every row starts here, uniform and small, and only the one
+// row currently in focus morphs into the FEATURED_W/SIDE_W hero shape.
+// Scroll is this app's own "down arrow" (useCenteredRow, PlayHub).
+const COMPACT_HEIGHT = "h-[150px] sm:h-[170px] md:h-[195px]";
+const COMPACT_W = "w-[267px] sm:w-[302px] md:w-[347px]";
+
+/** One row, Netflix/Apple-TV shaped: AT REST every card is the same small
+ *  COMPACT size; once `active` (this row is the one in focus -- see
+ *  useCenteredRow), it morphs into a single FEATURED_W hero card plus a
+ *  shelf of narrower SIDE_W cards, all sharing ROW_HEIGHT -- the same
+ *  three constants FeaturedRow's own RowCard uses, so "same sized cards"
+ *  is true by construction once focused, not just similar-looking.
+ *  Tapping a side card (active rows only) doesn't navigate: it becomes
+ *  the new hero, expanding in place -- exactly RowCard's own selection
+ *  model, reused rather than reinvented. */
+function HeroShelfRow({ rowId, label, items, active }: { rowId: string; label: string; items: HeroItem[]; active: boolean }) {
+  const [featuredId, setFeaturedId] = useState<string | undefined>(items[0]?.id);
+  const featured = items.find((item) => item.id === featuredId) ?? items[0];
+  if (!featured) return null;
   return (
-    <section className="flex flex-col gap-[var(--space-3)]">
-      <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
+    <section data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]">
+      <h2
+        className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
+        style={{ color: active ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
+      >
         {label}
       </h2>
-      {/* Full-bleed rail, same idiom as FeaturedRow/Glossary Games above
-         (direct feedback, 9 Sept 2026: "dont have them cut off like this,
-         let them overflow till the edge of the screen ... so its obvious
-         its scrollable but the cards still peak"). */}
-      <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">{children}</ul>
-    </section>
-  );
-}
-
-/** One locked card: either a full-color photo cover (kept colorful, not
- *  dimmed/grayscale -- direct feedback, 9 Sept 2026: "dont greyscale the
- *  coming soon thumbnails, let them be colorful") or a flat icon tile when
- *  there's no cover art yet (the
- *  Glossary Game type has no image asset at all, same as Home's own
- *  "TODAY'S GLOSSARY CHALLENGE" banner uses an icon rather than a photo). */
-function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?: React.ReactNode }) {
-  return (
-    <li className="flex-none">
-      <span
-        className={`relative flex aspect-[210/297] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border p-[10px] ${SOON_HEIGHT}`}
-        style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}
-      >
-        {cover ? (
-          <>
-            {/* Colour kept (direct feedback, 9 Sept 2026), but eased to 80%
-               so a locked card reads as not-yet rather than tappable (UX
-               audit, 11 Sept 2026). */}
-            <Image src={cover} alt="" fill sizes="(max-width: 640px) 45vw, 200px" className="object-cover opacity-80" />
-            <span
-              aria-hidden
-              className="absolute inset-0"
-              style={{ background: "linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--background) 92%, transparent) 100%)" }}
-            />
-          </>
-        ) : (
-          <span aria-hidden className="absolute top-[14px] left-[10px] flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)]" style={{ background: "var(--world-business-money-office)", color: "var(--background)" }}>
-            {icon}
-          </span>
-        )}
-        <span className="relative flex w-fit items-center gap-[5px] rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ color: "var(--foreground)", background: "rgba(5,8,20,0.6)" }}>
-          <Lock className="h-[12px] w-[12px]" aria-hidden />
-          Soon
-        </span>
-        <span className="relative text-[14px] leading-tight font-extrabold" style={{ color: "var(--foreground)" }}>
-          {title}
-        </span>
-      </span>
-    </li>
-  );
-}
-
-/** The Glossary Games shelf, Netflix-row hover behaviour (direct feedback,
- *  21 Sept 2026): "glossary games shouldn't feel secondary just because
- *  the cards are smaller by default... only less dominant until hovered."
- *  Hover state lives HERE, one level above the cards, because the dim
- *  treatment on a card depends on whether a DIFFERENT card in the row is
- *  hovered -- not something a single card can know about itself. Row-level
- *  dominance (the whole row brightening/receding as scroll moves on or off
- *  it) now lives ONE level up still, in the shared RowFocusWrapper every
- *  row uses (PlayHub) -- this row no longer runs its own separate hover-
- *  driven version of that (direct feedback, 21 Sept 2026: "we dont need
- *  the elevated hover for this version... it should be like the first
- *  row... scale should also borrow from the first row"). No per-card
- *  expand-on-hover either, for the same reason: the first row's own cards
- *  don't have one (just dm-tap's ordinary 1px lift), so this row doesn't
- *  invent a bigger one either. */
-function GlossaryGamesRow({ games }: { games: { careerSlug: string; title: string; sub: string; cover?: string }[] }) {
-  return (
-    <section className="flex flex-col gap-[var(--space-3)]">
-      <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
-        Glossary Games
-      </h2>
-      {/* A small horizontal shelf (SHELF_HEIGHT), deliberately smaller
-         than the hero row above -- the billboard dominates, the shelves
-         below it stay uniform and quiet, Netflix-style. Same full-bleed
-         rail as FeaturedRow above (negative margins run it to the
-         viewport edge so the next card visibly peeks instead of clipping
-         at the content column, direct feedback, 9 Sept 2026) rather than
-         stopping dead at main's own padding. */}
-      <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
-        {games.map((game) => (
-          <li key={game.careerSlug} className="flex-none">
-            <GlossaryGameCard game={game} playable={hasGlossary(game.careerSlug)} />
-          </li>
+      <div className="dreamari-card-rail flex items-start gap-[var(--space-3)] overflow-x-auto -mx-5 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
+        {items.map((item) => (
+          <HeroShelfCard
+            key={item.id}
+            item={item}
+            active={active}
+            large={active && item.id === featured.id}
+            onSelect={item.id === featured.id ? undefined : () => setFeaturedId(item.id)}
+          />
         ))}
-      </ul>
+      </div>
     </section>
   );
 }
 
-/** A Glossary Game shelf card: title and sub live INSIDE the artwork's own
- *  bottom scrim, same as every other Play card (a Netflix thumbnail, not
- *  an image-plus-caption block that ends up taller than the hero row), with
- *  a small centered play badge echoing the featured card's. The row header
- *  already says "Glossary Games", so the card itself carries no type chip
- *  (direct feedback, 9 Sept 2026). A career with no authored content yet
- *  (!playable) renders as a dim, non-linking "Coming soon" dummy -- same
- *  idiom as SoonCard below -- rather than a real link into an empty game. */
-function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; title: string; sub: string; cover?: string }; playable: boolean }) {
-  const art = (
-    <>
-      {game.cover ? (
-        <Image src={game.cover} alt="" fill sizes="(min-width: 768px) 347px, 60vw" className="object-cover" />
+/** One card inside a HeroShelfRow -- content-wise a trimmed RowCard (no
+ *  trailer chip, no saved-progress meta; those stay specific to a real
+ *  simulation), but the sizing, the width/height-transition morph, the
+ *  scrim/title/corner-badge layout are the identical values and structure
+ *  RowCard uses, not a lookalike copy. Three real size tiers, not two:
+ *  "hero" (active row, this card selected), "side" (active row, a
+ *  different card selected), "compact" (row at rest -- every card here,
+ *  regardless of which one a later focus would pick as hero). */
+function HeroShelfCard({ item, large, active, onSelect }: { item: HeroItem; large: boolean; active: boolean; onSelect?: () => void }) {
+  const tier = large ? "hero" : active ? "side" : "compact";
+  const compactWord = hasLongWord(item.title);
+  const titleSize =
+    tier === "hero"
+      ? compactWord
+        ? "text-[21px] sm:text-[27px] md:text-[33px] lg:text-[37px]"
+        : "text-[26px] sm:text-[34px] md:text-[42px] lg:text-[46px]"
+      : tier === "side"
+        ? compactWord
+          ? "text-[21px] sm:text-[19px] md:text-[24px] lg:text-[27px]"
+          : "text-[26px] sm:text-[24px] md:text-[30px] lg:text-[34px]"
+        : "text-[14px] leading-[18px] sm:text-[16px] sm:leading-[20px]";
+  const subSize = tier === "hero" ? "text-[11px] sm:text-[13px] md:text-[15px]" : tier === "side" ? "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]" : "text-[10.5px] sm:text-[11.5px]";
+  const content = (
+    <div className="relative h-full w-full">
+      {item.cover ? (
+        <Image src={item.cover} alt="" fill sizes={tier === "hero" ? "(min-width: 1024px) 764px, 90vw" : tier === "side" ? "(min-width: 1024px) 304px, 45vw" : "(min-width: 768px) 347px, 60vw"} className="object-cover" />
       ) : (
         <span aria-hidden className="absolute inset-0 flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--glossary-accent, var(--world-business-money-office)) 20%, var(--card))" }}>
           <BookOpen className="h-10 w-10" style={{ color: "var(--glossary-accent, var(--world-business-money-office))" }} aria-hidden />
         </span>
       )}
-      {playable ? (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute top-1/2 left-1/2 flex size-[40px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110 sm:size-[46px]"
-          style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}
-        >
-          <Play className="ml-[2px] h-[16px] w-[16px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
+      {item.locked && tier !== "hero" && (
+        <span className={`absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold ${tier === "compact" ? "gap-[5px]" : ""}`} style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+          {tier === "compact" && <Lock className="h-[12px] w-[12px]" aria-hidden />}
+          Coming soon
         </span>
-      ) : (
-        <span
-          aria-hidden
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--background) 92%, transparent) 100%)" }}
-        />
       )}
-      <span className="absolute inset-x-0 bottom-0 flex flex-col gap-[1px] px-[12px] pt-[26px] pb-[10px]" style={{ backgroundImage: "var(--poster-scrim)" }}>
-        {!playable && (
-          <span className="flex items-center gap-[5px] pb-[2px] text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-            <Lock className="h-[12px] w-[12px]" aria-hidden />
+      <span className={`absolute inset-x-0 bottom-0 flex flex-col gap-[1px] px-[12px] pt-[26px] pb-[10px] sm:gap-[4px] sm:px-[14px] sm:pt-[32px] sm:pb-[14px] ${tier === "hero" ? "sm:pr-[80px] md:pr-[96px] lg:pr-[108px]" : "sm:pr-[64px] md:pr-[72px]"}`} style={{ backgroundImage: "var(--poster-scrim)" }}>
+        <span className={`block leading-[1.15] font-extrabold uppercase [overflow-wrap:normal] [word-break:keep-all] ${titleSize}`} style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>
+          {breakable(item.title)}
+        </span>
+        {item.sub && (
+          <span className={`block font-semibold ${subSize}`} style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
+            {item.sub}
+          </span>
+        )}
+        {item.world && (
+          <span className={`block font-semibold tracking-[0.6px] uppercase ${subSize}`} style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[item.world] }}>
+            {item.world}
+          </span>
+        )}
+        {tier === "hero" && item.locked && (
+          <span className="mt-[4px] text-[13px] font-bold sm:text-[14px]" style={{ color: "var(--foreground)" }}>
             Coming soon
           </span>
         )}
-        <span className="text-[14px] leading-[18px] font-extrabold sm:text-[16px] sm:leading-[20px]" style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>
-          {game.title}
-        </span>
-        <span className="text-[10.5px] sm:text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>
-          {game.sub}
-        </span>
       </span>
-    </>
-  );
-
-  if (!playable) {
-    return (
-      <span
-        aria-label={`${game.title} — coming soon`}
-        className={`group relative block flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_W} ${SHELF_HEIGHT}`}
-        style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
-      >
-        {art}
-      </span>
-    );
-  }
-
-  return (
-    // Size on this plain box, HoverBeam fills it: with the size classes on
-    // HoverBeam its own h-full won and the card collapsed to a line on
-    // phones (direct feedback, 11 Sept 2026).
-    <div className={`flex-none ${SHELF_W} ${SHELF_HEIGHT}`}>
-    <HoverBeam strength={0.8}>
-    <Link
-      href={`/play/glossary/${game.careerSlug}`}
-      className={`dm-tap group relative block h-full w-full overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_HEIGHT}`}
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
-    >
-      {art}
-    </Link>
-    </HoverBeam>
+      <CornerBadge kind={item.locked ? "lock" : "play"} large={tier === "hero"} />
     </div>
+  );
+  const sizeClass = tier === "hero" ? `${ROW_HEIGHT} ${FEATURED_W}` : tier === "side" ? `${ROW_HEIGHT} ${SIDE_W}` : `${COMPACT_HEIGHT} ${COMPACT_W}`;
+  return (
+    <article
+      data-card-id={item.id}
+      className={`dm-tap group relative flex-none overflow-hidden rounded-[var(--radius-lg)] border text-left ${sizeClass}`}
+      style={{
+        borderColor: "var(--color-glass-border-raised)",
+        background: "var(--glass-surface-1)",
+        transition: "width 0.5s cubic-bezier(0.16,1,0.3,1), height 0.5s cubic-bezier(0.16,1,0.3,1), transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease",
+      }}
+    >
+      {content}
+      {/* The hero card navigates for real (only when it actually has
+         somewhere to go); a side/compact card's whole face is the "make
+         me the hero" control instead, same split RowCard uses -- a
+         locked hero card is just not clickable, same as it isn't today.
+         A compact card can still be tapped to select it even before the
+         row is active -- that's what BRINGS the row into focus on touch,
+         where there's no remote down-arrow to do it for you. */}
+      {tier === "hero" && item.href && (
+        <Link href={item.href} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
+          <span className="sr-only">{item.title}</span>
+        </Link>
+      )}
+      {tier !== "hero" && onSelect && (
+        <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
+          <span className="sr-only">Feature {item.title}</span>
+        </button>
+      )}
+    </article>
   );
 }
 
