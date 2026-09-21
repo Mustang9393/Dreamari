@@ -10985,3 +10985,51 @@ screenshot Joshua sent) now read "$63K tuition & fees" for Princeton,
 
 Next step: still local-only, same not-yet-pushed batch as the two Play
 tab entries above.
+
+## 2026-09-21 · Play tab: every row gets the same phone card-stack
+
+Checked the Play tab on a phone viewport at the user's request ("check
+the play tab on mobile? whats the design there?") and found Glossary
+Games/In the works rendering the desktop hero/side/compact rail shrunk
+into a narrow horizontal scroller on a 375px screen -- direct feedback
+on seeing it: "its messed up lets use the same style for the hero row
+for the rest," i.e. Career Simulations' existing phone-only swipeable
+card stack (`MobileDeck`), not a cramped rail.
+
+Generalized `MobileDeck` into `CardDeck<T>` -- same swipe/rotate/idle-
+hint mechanics (state machine, spring constants, drag thresholds all
+byte-for-byte unchanged), now generic over `items`/`focusId` with a
+`renderCard(item, front)` callback instead of being hardcoded to
+`FeaturedCandidate`/`RowCard`. `hintReady` is now optional -- passing it
+(Career Simulations only, unchanged) keeps the one-time idle-advance
+hint; omitting it (every other row) just skips the hint, keeping that
+behavior exclusive to the row it was built for.
+
+- `FeaturedRow` now calls `<CardDeck items={candidates} ... renderCard={(c, front) => <RowCard candidate={c} large deck front={front} .../>} />` -- purely a call-site rename, unchanged behavior.
+- `HeroShelfCard` gained `deck`/`front` props (mirroring RowCard's own):
+  `deck` forces "hero" tier sizing at `h-full w-full` (fills its deck
+  slot instead of the fixed rail dimensions), `front` fades the corner
+  badge on the cards fanned out behind the front one. `large`/`active`
+  are now optional (default false) since deck mode needs neither.
+- `HeroShelfRow` now renders `<CardDeck items={items} focusId={featured.id} renderCard={(item, front) => <HeroShelfCard item={item} deck front={front} />} />` above its existing rail, and the rail itself is now `hidden ... sm:flex` (was unconditionally `flex`) -- exactly mirroring `FeaturedRow`'s own desktop/phone split, including dropping the rail's now-dead mobile bleed margins (`-mx-5 px-5`) since phones never reach it anymore.
+
+Files: `src/components/play/PlayHub.tsx` only.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean. Verified live on local
+dev at a 375x812 phone viewport: Glossary Games and In the works both
+now render as the identical swipeable stack Career Simulations uses --
+one tall poster card in front (Finance Terms, Airline Pilot), the next
+two fanned out behind, same title/world-label sizing, same corner
+badge, same "Coming soon"/lock treatment on In the works. Re-verified
+desktop (1280px) afterward: the rail still renders hero+side/compact
+exactly as before, no regression from hiding it below `sm`. Did not
+independently verify the swipe GESTURE itself fires on the new rows in
+this browser tool -- confirmed instead that `left_click_drag` doesn't
+trigger framer-motion's drag gesture on the ALREADY-shipped Career
+Simulations deck either (same tool limitation, not a regression), and
+the swipe/rotate logic itself is unchanged code, just parameterized, so
+there's no reason to expect it to behave differently on the new rows.
+Worth a real on-device swipe check before or during the demo if there's
+time.
+
+Next step: still local-only, same not-yet-pushed batch.

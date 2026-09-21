@@ -207,7 +207,7 @@ type FeaturedCandidate = { kind: "sim"; id: string; sim: Simulation } | { kind: 
 // page's HERO: it must dominate every row below it, the way Netflix's
 // billboard dwarfs the rows underneath -- at md the featured card is
 // ~676px wide, and the sm side card is literally PosterCard's own 210x297.
-// From sm up only -- phones render the MobileDeck stack instead of this rail
+// From sm up only -- phones render the CardDeck stack instead of this rail
 // (direct feedback, 10 Sept 2026, from a JioHotstar "For You" recording).
 const ROW_HEIGHT = "sm:h-[300px] md:h-[380px] lg:h-[430px]";
 // EXPLICIT widths (16:9 and 210/297 of ROW_HEIGHT) rather than aspect-ratio
@@ -295,7 +295,12 @@ function FeaturedRow({
          the CEO recorded (10 Sept 2026) -- one tall poster in front, the
          next two fanned out behind it to the right, swipe left to advance.
          The front card is the featured one; there is no separate selection. */}
-      <MobileDeck candidates={candidates} focusId={featured.id} hintReady={hintReady} onTrailer={(sim) => setTrailerSim(sim)} />
+      <CardDeck
+        items={candidates}
+        focusId={featured.id}
+        hintReady={hintReady}
+        renderCard={(candidate, front) => <RowCard candidate={candidate} large deck front={front} onTrailer={(sim) => setTrailerSim(sim)} />}
+      />
       {/* No CTA button anywhere -- the featured card carries a play badge
          in its bottom-right corner and is one whole-card link, with saved
          progress as a thin strip along the card's bottom edge (the exact
@@ -342,17 +347,33 @@ const SWIPE_DISTANCE = 72;
 const SWIPE_VELOCITY = 550;
 
 /** The phone-only card stack (hidden from sm up, where the free-scrolling
- *  rail takes over). Swipe left: the front card slides off and the deck
- *  rotates so it rejoins at the back. Swipe right: the previous card slides
- *  back in from the left. Idle hint: once the welcome splash is gone, if
- *  the student does nothing for a couple of seconds, the deck advances one
- *  card on its own -- a single time -- so it's obvious the stack moves and
- *  they can take over (direct feedback, 10 Sept 2026, from a JioHotstar
- *  recording). Any touch before that cancels it. */
-function MobileDeck({ candidates, focusId, hintReady, onTrailer }: { candidates: FeaturedCandidate[]; focusId: string; hintReady: boolean; onTrailer: (sim: Simulation) => void }) {
+ *  rail takes over) -- generic over the row, so every row gets the exact
+ *  same mobile treatment Career Simulations pioneered instead of a
+ *  cramped, narrower-feeling version of the desktop rail (direct feedback,
+ *  21 Sept 2026, after seeing Glossary Games/In the works on phone: "its
+ *  messed up lets use the same style for the hero row for the rest").
+ *  Swipe left: the front card slides off and the deck rotates so it
+ *  rejoins at the back. Swipe right: the previous card slides back in from
+ *  the left. Idle hint: once `hintReady` is passed (Career Simulations
+ *  only, per its own direct feedback, 10 Sept 2026, from a JioHotstar
+ *  recording), if the student does nothing for a couple of seconds the
+ *  deck advances one card on its own -- a single time -- so it's obvious
+ *  the stack moves and they can take over. Any touch before that cancels
+ *  it; omitting `hintReady` (every other row) skips the hint entirely. */
+function CardDeck<T extends { id: string }>({
+  items,
+  focusId,
+  hintReady,
+  renderCard,
+}: {
+  items: T[];
+  focusId: string;
+  hintReady?: boolean;
+  renderCard: (item: T, front: boolean) => React.ReactNode;
+}) {
   // Deck order, front first. The deep-linked/first card starts in front.
   const [order, setOrder] = useState<string[]>(() => {
-    const ids = candidates.map((c) => c.id);
+    const ids = items.map((c) => c.id);
     const at = Math.max(0, ids.indexOf(focusId));
     return [...ids.slice(at), ...ids.slice(0, at)];
   });
@@ -429,8 +450,8 @@ function MobileDeck({ candidates, focusId, hintReady, onTrailer }: { candidates:
          from the card ratio (319:386, measured off the recording) */}
       <div ref={slotRef} aria-hidden className="w-[calc(100%-32px)]" style={{ aspectRatio: "319 / 386" }} />
       {order.map((id, index) => {
-        const candidate = candidates.find((c) => c.id === id);
-        if (!candidate) return null;
+        const item = items.find((c) => c.id === id);
+        if (!item) return null;
         const isLeaving = leaving?.id === id;
         // everyone behind a leaving card already sits one slot forward
         const slot = leaving && !isLeaving ? index - 1 : index;
@@ -470,7 +491,7 @@ function MobileDeck({ candidates, focusId, hintReady, onTrailer }: { candidates:
               else if (info.offset.x > SWIPE_DISTANCE || info.velocity.x > SWIPE_VELOCITY) back();
             }}
           >
-            <RowCard candidate={candidate} large deck front={front} onTrailer={onTrailer} />
+            {renderCard(item, front)}
           </motion.div>
         );
       })}
@@ -758,7 +779,14 @@ function HeroShelfRow({ rowId, label, items, active }: { rowId: string; label: s
       >
         {label}
       </h2>
-      <div className="dreamari-card-rail flex items-start gap-[var(--space-3)] overflow-x-auto -mx-5 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
+      {/* Phones: the same swipeable stack Career Simulations uses, not a
+         shrunk-further version of the desktop rail (direct feedback, 21
+         Sept 2026, after seeing this row on phone: "its messed up lets use
+         the same style for the hero row for the rest"). The front card is
+         always the row's current "featured" pick; there is no separate
+         compact tier on phones at all. */}
+      <CardDeck items={items} focusId={featured.id} renderCard={(item, front) => <HeroShelfCard item={item} deck front={front} />} />
+      <div className="dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
         {items.map((item) => (
           <HeroShelfCard
             key={item.id}
@@ -787,9 +815,14 @@ function HeroShelfRow({ rowId, label, items, active }: { rowId: string; label: s
  *  RowCard uses, not a lookalike copy. Three real size tiers, not two:
  *  "hero" (active row, this card selected), "side" (active row, a
  *  different card selected), "compact" (row at rest -- every card here,
- *  regardless of which one a later focus would pick as hero). */
-function HeroShelfCard({ item, large, active, onSelect }: { item: HeroItem; large: boolean; active: boolean; onSelect?: () => void }) {
-  const tier = large ? "hero" : active ? "side" : "compact";
+ *  regardless of which one a later focus would pick as hero). `deck`/
+ *  `front` mirror RowCard's own: inside a phone CardDeck this card always
+ *  renders at "hero" size filling its deck slot, `front` fading the corner
+ *  badge on the cards fanned out behind the front one (direct feedback, 21
+ *  Sept 2026: Glossary Games/In the works get the same phone stack Career
+ *  Simulations already had, not the compact rail shrunk down further). */
+function HeroShelfCard({ item, large = false, active = false, onSelect, deck = false, front = true }: { item: HeroItem; large?: boolean; active?: boolean; onSelect?: () => void; deck?: boolean; front?: boolean }) {
+  const tier = deck || large ? "hero" : active ? "side" : "compact";
   const compactWord = hasLongWord(item.title);
   const titleSize =
     tier === "hero"
@@ -837,10 +870,10 @@ function HeroShelfCard({ item, large, active, onSelect }: { item: HeroItem; larg
           </span>
         )}
       </span>
-      <CornerBadge kind={item.locked ? "lock" : "play"} large={tier === "hero"} />
+      <CornerBadge kind={item.locked ? "lock" : "play"} large={tier === "hero"} faded={deck && !front} />
     </div>
   );
-  const sizeClass = tier === "hero" ? `${ROW_HEIGHT} ${FEATURED_W}` : tier === "side" ? `${ROW_HEIGHT} ${SIDE_W}` : `${COMPACT_HEIGHT} ${COMPACT_W}`;
+  const sizeClass = deck ? "h-full w-full" : tier === "hero" ? `${ROW_HEIGHT} ${FEATURED_W}` : tier === "side" ? `${ROW_HEIGHT} ${SIDE_W}` : `${COMPACT_HEIGHT} ${COMPACT_W}`;
   return (
     <article
       data-card-id={item.id}
