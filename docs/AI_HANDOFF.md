@@ -11560,3 +11560,19 @@ Files touched: `src/lib/useTop3.ts` (new), `src/components/career/Top3SwapModal.
 `npx tsc --noEmit -p .`, `npx eslint`, and `npm run build` all clean. Live-verified: add (toast), full-Top3 swap (modal, correct titles), remove (Minus icon + Undo toast, confirmed restores state), first-tap-only Like/Dislike explainer (silent on repeat taps) -- all with the corrected opaque card styling.
 
 Next step: none pending on this thread. A separate ask arrived mid-session (add a "Typical Pay over 100K" row to Explore Careers, assets in `new row/`) -- picked up next, unrelated to this work.
+
+## 2026-09-21 · Explore Browse: "Typical Pay: $100K +" row replaced with 7 new careers
+
+Slack request (Chandu M P): replace this row's content with Mental Health Social Worker, Urban Planner, Judicial Law Clerk, Environment Scientist, Principal, Community Program Manager, Detective, in that order. Assets supplied in a local `new row/` folder (not committed -- source PNGs, converted and placed under `public/images/app/browse/`).
+
+Four of the seven (Urban Planner, Judicial Law Clerk, Environment Scientist, Principal) are brand-new to the catalog -- no prior entry anywhere. Three already existed (Mental Health Social Worker, Community Program Manager in Counseling & Social Work; Detective in Law, Safety & Justice, per `browseLibrary.ts`); fresh photos were supplied for the first two and converted in, Detective reuses its existing photo (no new asset given). Because `BROWSE_TYPICAL_PAY` merges into `ALL_CATALOG_CAREERS` before `BROWSE_LIBRARY` (first occurrence wins), the new photos for those two become their canonical photo everywhere in the app, not just this row.
+
+**Read "add this row... over Typical Pay 100K" as replacing the existing "Typical Pay: $100K +" row's content** (the row already existed by that exact name/threshold) rather than appending a second $100K+ row -- flagging this interpretation explicitly since it removed the prior six (Pediatric Surgeon, Airline Pilot, Purchasing Manager, Cardiologist, PR Manager, Veterinarian); easy to revert if that reading was wrong.
+
+**Salary figures are placeholders, not sourced** -- same "general industry knowledge, not verified" caveat `career/data.ts`'s ladder pay already carries. Flagging two specifically: Mental Health Social Worker ($101K used here) and Judicial Law Clerk ($105K used here) sit well above their typical national medians at normal experience levels -- used senior/upper-range figures to keep every card honestly showing $100K+ for this specific row, but these two need a real source before shipping past prototype. Principal, Urban Planner, Environment Scientist, Community Program Manager and Detective are more defensible at senior/major-metro level.
+
+Files touched: `src/components/app/catalog.ts` (`BROWSE_TYPICAL_PAY` replaced), `public/images/app/browse/{mental-health-social-worker,community-program-manager,urban-planner,judicial-law-clerk,environment-scientist,principal}.webp` (new/replaced, converted from the supplied PNGs via `cwebp -q 82`).
+
+`npx tsc --noEmit -p .`, `npx eslint`, `npm run build`, `npm run tokens:check` all clean. Live-verified: the row itself (7 cards, correct photos/titles/worlds/salary badges), and Career Detail resolving correctly for a brand-new title (Principal) end to end.
+
+Next step: confirm with Chandu whether replace (not append) was the right call, and get real salary sourcing for Mental Health Social Worker and Judicial Law Clerk specifically.

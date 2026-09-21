@@ -108,17 +108,26 @@ export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
   C("Jewelry Designer", "Factories & Making Things", "/images/app/poster-jewelry-designer.webp"),
 ];
 
-// Air Traffic Controller lived here too until 20 Sept 2026 (Slack, Chandu M
-// P): it already appears in Skilled Trades, and the two rows sit on the
-// same page, so it repeated. Veterinarian, already the row's own closer,
-// now stands in for it -- no career appears twice on this page.
+// Replaced wholesale (Slack, Chandu M P, 21 Sept 2026): the seven below, in
+// this order, with fresh photos for the three (Mental Health Social Worker,
+// Community Program Manager, Detective already existed elsewhere in the
+// catalog; the new photos for the first two now travel with them everywhere
+// via ALL_CATALOG_CAREERS' first-occurrence merge, since this rail is merged
+// before BROWSE_LIBRARY). Urban Planner, Judicial Law Clerk, Environment
+// Scientist and Principal are new to the app. PROTOTYPE PAY: senior/upper-
+// range figures for each title (general industry knowledge, not a verified
+// source, same caveat as career/data.ts's ladder pay) -- flagged since two
+// of these (Mental Health Social Worker, Judicial Law Clerk) sit well above
+// their national medians at typical experience levels; worth a real source
+// before this ships past prototype.
 export const BROWSE_TYPICAL_PAY: CatalogCareer[] = [
-  C("Pediatric Surgeon", "Health & Medicine", "/images/app/poster-pediatric-surgeon.webp", "$559K"),
-  C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot-alt.webp", "$227K"),
-  C("Purchasing Manager", "Business & Finance", "/images/app/poster-purchasing-manager.webp", "$148K"),
-  C("Cardiologist", "Health & Medicine", "/images/app/poster-cardiologist.webp", "$496K"),
-  C("Public Relations Manager", "Business & Finance", "/images/app/poster-public-relations-manager.webp", "$146K"),
-  C("Veterinarian", "Farming, Animals & Nature", "/images/app/poster-veterinarian.webp", "$130K"),
+  C("Mental Health Social Worker", "Counseling & Social Work", "/images/app/browse/mental-health-social-worker.webp", "$101K"),
+  C("Urban Planner", "Building & Construction", "/images/app/browse/urban-planner.webp", "$104K"),
+  C("Judicial Law Clerk", "Law, Safety & Justice", "/images/app/browse/judicial-law-clerk.webp", "$105K"),
+  C("Environment Scientist", "Science & Research", "/images/app/browse/environment-scientist.webp", "$102K"),
+  C("Principal", "Teaching & Education", "/images/app/browse/principal.webp", "$118K"),
+  C("Community Program Manager", "Counseling & Social Work", "/images/app/browse/community-program-manager.webp", "$103K"),
+  C("Detective", "Law, Safety & Justice", "/images/app/browse/detective.webp", "$109K"),
 ];
 
 // Every catalogued career, deduped by title, for lookups that need to search
