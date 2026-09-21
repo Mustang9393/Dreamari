@@ -9437,7 +9437,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Shop Foreman", "pay": "$65K", "description": "You oversee the shop's jobs and train newer techs.", "whatYouDo": ["Assign jobs", "Quality-check repairs", "Train apprentices"], "toGetHere": ["Years of ASE-certified work", "Shop management experience"] }
     ],
     "education": { "studies": [{ "name": "Collision Repair Technology" }, { "name": "Automotive Technology" }], "where": [{ "count": "310", "credential": "Trade school certificate" }, { "count": "120", "credential": "Associate's degree" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "Most shops train you on the job; trade school helps but isn't required to start.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 8.0 }, { "label": "Finished high school", "pct": 45.0 }, { "label": "Some college, no degree", "pct": 25.0 }, { "label": "Associate's degree", "pct": 12.0 }, { "label": "Bachelor's degree", "pct": 8.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$32,000", "typical": "$47,770", "top": "$76,000" }
+    }
   },
   "auto-mechanic": {
     "slug": "auto-mechanic",
@@ -9460,7 +9464,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Master Technician", "pay": "$70K", "description": "You handle the hardest jobs and mentor the rest of the shop.", "whatYouDo": ["Complex diagnostics", "Mentor technicians", "Handle warranty work"], "toGetHere": ["Multiple ASE certifications", "5+ years experience"] }
     ],
     "education": { "studies": [{ "name": "Automotive Technology" }], "where": [{ "count": "420", "credential": "Trade school certificate" }, { "count": "140", "credential": "Associate's degree" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "Trade school or on-the-job", "note": "A trade school certificate gets you in the door faster than a degree would.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 35.0 }, { "label": "Some college, no degree", "pct": 30.0 }, { "label": "Associate's degree", "pct": 20.0 }, { "label": "Bachelor's degree", "pct": 8.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$32,000", "typical": "$47,770", "top": "$76,000" }
+    }
   },
   "aviation-maintenance-technician": {
     "slug": "aviation-maintenance-technician",
@@ -9483,7 +9491,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Lead Inspector", "pay": "$100K", "description": "You oversee inspections and sign off on the hardest calls.", "whatYouDo": ["Lead inspections", "Train mechanics", "Final sign-off authority"], "toGetHere": ["Years as licensed A&P", "Inspection Authorization (IA)"] }
     ],
     "education": { "studies": [{ "name": "Aviation Maintenance Technology" }], "where": [{ "count": "260", "credential": "FAA-approved A&P certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate (A&P license)", "experienceFirst": "No, but the license takes 18-24 months to earn", "trainingAfterHiring": "FAA-approved A&P school", "note": "The A&P license is the real requirement here, not a college degree.", "noBachelorPct": "81%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 20.0 }, { "label": "Some college, no degree", "pct": 25.0 }, { "label": "Associate's degree", "pct": 35.0 }, { "label": "Bachelor's degree", "pct": 16.0 }, { "label": "Master's degree", "pct": 2.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$50,000", "typical": "$75,660", "top": "$110,000" }
+    }
   },
   "avionics-technician": {
     "slug": "avionics-technician",
@@ -9506,7 +9518,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Lead Avionics Technician", "pay": "$98K", "description": "You handle the hardest electrical faults and train the team.", "whatYouDo": ["Complex diagnostics", "Train technicians", "Oversee upgrades"], "toGetHere": ["Years of certified experience", "Specialized system certifications"] }
     ],
     "education": { "studies": [{ "name": "Avionics Technology" }, { "name": "Electronics Technology" }], "where": [{ "count": "180", "credential": "FAA-approved certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No, but a certification program is expected", "trainingAfterHiring": "FAA/FCC certification programs", "note": "An avionics or electronics certificate is the common path in, not a four-year degree.", "noBachelorPct": "82%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 18.0 }, { "label": "Some college, no degree", "pct": 25.0 }, { "label": "Associate's degree", "pct": 38.0 }, { "label": "Bachelor's degree", "pct": 15.0 }, { "label": "Master's degree", "pct": 2.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$50,000", "typical": "$74,650", "top": "$108,000" }
+    }
   },
   "biomedical-equipment-technician": {
     "slug": "biomedical-equipment-technician",
@@ -9529,7 +9545,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Senior Biomed Technician", "pay": "$80K", "description": "You handle the hospital's most complex, critical equipment.", "whatYouDo": ["Lead complex repairs", "Train junior techs", "Manage equipment programs"], "toGetHere": ["Years of certified experience", "Specialty equipment training"] }
     ],
     "education": { "studies": [{ "name": "Biomedical Equipment Technology" }, { "name": "Electronics Technology" }], "where": [{ "count": "140", "credential": "Associate's degree" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Associate's degree", "experienceFirst": "No. Most programs place you in a hospital or vendor role", "trainingAfterHiring": "Manufacturer-specific equipment training", "note": "Hospitals want the associate's degree because the equipment itself is regulated.", "noBachelorPct": "78%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 12.0 }, { "label": "Some college, no degree", "pct": 20.0 }, { "label": "Associate's degree", "pct": 45.0 }, { "label": "Bachelor's degree", "pct": 19.0 }, { "label": "Master's degree", "pct": 2.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$40,000", "typical": "$59,720", "top": "$88,000" }
+    }
   },
   "diesel-mechanic": {
     "slug": "diesel-mechanic",
@@ -9552,7 +9572,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Shop Lead / Fleet Mechanic", "pay": "$75K", "description": "You handle the fleet's hardest jobs and train the shop.", "whatYouDo": ["Complex diagnostics", "Mentor mechanics", "Manage fleet schedules"], "toGetHere": ["Multiple ASE certifications", "5+ years experience"] }
     ],
     "education": { "studies": [{ "name": "Diesel Technology" }], "where": [{ "count": "290", "credential": "Trade school certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "Trade school or on-the-job", "note": "Most diesel shops will train you if you come in with basic mechanical aptitude.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 6.0 }, { "label": "Finished high school", "pct": 38.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 18.0 }, { "label": "Bachelor's degree", "pct": 8.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$38,000", "typical": "$56,140", "top": "$83,000" }
+    }
   },
   "heavy-equipment-mechanic": {
     "slug": "heavy-equipment-mechanic",
@@ -9575,7 +9599,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Lead Mechanic", "pay": "$78K", "description": "You handle the hardest jobs and manage the shop's schedule.", "whatYouDo": ["Complex diagnostics", "Train mechanics", "Manage repair schedules"], "toGetHere": ["5+ years experience", "Certifications in hydraulics/diesel"] }
     ],
     "education": { "studies": [{ "name": "Heavy Equipment Technology" }, { "name": "Diesel Technology" }], "where": [{ "count": "220", "credential": "Trade school certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "Trade school or on-the-job", "note": "Construction and mining companies often train on their own equipment once you're hired.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 6.0 }, { "label": "Finished high school", "pct": 38.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 19.0 }, { "label": "Bachelor's degree", "pct": 8.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$40,000", "typical": "$60,300", "top": "$89,000" }
+    }
   },
   "hvac-technician": {
     "slug": "hvac-technician",
@@ -9598,7 +9626,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Lead Technician / Estimator", "pay": "$78K", "description": "You handle the hardest jobs and quote new installations.", "whatYouDo": ["Complex diagnostics", "Estimate new jobs", "Train apprentices"], "toGetHere": ["5+ years experience", "NATE certification"] }
     ],
     "education": { "studies": [{ "name": "HVACR Technology" }], "where": [{ "count": "340", "credential": "Trade school certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Trade school + EPA 608 certification", "note": "You need the EPA 608 certification to handle refrigerants, but that's a test, not a degree.", "noBachelorPct": "89%", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 35.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 21.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$38,000", "typical": "$57,300", "top": "$85,000" }
+    }
   },
   "industrial-maintenance-technician": {
     "slug": "industrial-maintenance-technician",
@@ -9621,7 +9653,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Maintenance Lead / Millwright", "pay": "$80K", "description": "You handle the plant's most complex breakdowns and lead the team.", "whatYouDo": ["Complex diagnostics", "Train technicians", "Plan preventive maintenance"], "toGetHere": ["5+ years experience", "Specialized certifications"] }
     ],
     "education": { "studies": [{ "name": "Industrial Maintenance Technology" }, { "name": "Mechatronics" }], "where": [{ "count": "260", "credential": "Trade school certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "Trade school or on-the-job", "note": "Plants often promote from within, but a mechatronics or maintenance certificate speeds things up.", "noBachelorPct": "89%", "distribution": [{ "label": "Did not finish high school", "pct": 4.0 }, { "label": "Finished high school", "pct": 33.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 24.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$41,000", "typical": "$61,170", "top": "$91,000" }
+    }
   },
   "locksmith": {
     "slug": "locksmith",
@@ -9644,7 +9680,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Master Locksmith / Shop Owner", "pay": "$68K", "description": "You handle commercial security systems or run your own shop.", "whatYouDo": ["Commercial security installs", "Train apprentices", "Run the business"], "toGetHere": ["Years of licensed experience", "Certified Master Locksmith (CML)"] }
     ],
     "education": { "studies": [{ "name": "Locksmithing certificate programs" }], "where": [{ "count": "60", "credential": "Trade certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. Most learn through apprenticeship", "trainingAfterHiring": "Apprenticeship under a licensed locksmith", "note": "Most states require a license and background check, not a degree.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 8.0 }, { "label": "Finished high school", "pct": 48.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 10.0 }, { "label": "Bachelor's degree", "pct": 8.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$32,000", "typical": "$48,210", "top": "$72,000", "note": "Many locksmiths eventually work for themselves, which changes how pay is counted." }
+    }
   },
   "low-voltage-technician": {
     "slug": "low-voltage-technician",
@@ -9667,7 +9707,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Lead Technician / Project Lead", "pay": "$82K", "description": "You run full installation projects and train the crew.", "whatYouDo": ["Lead installation projects", "Design system layouts", "Train technicians"], "toGetHere": ["5+ years experience", "Advanced certifications"] }
     ],
     "education": { "studies": [{ "name": "Low voltage / electronics certificate programs" }], "where": [{ "count": "150", "credential": "Trade certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training + manufacturer certifications", "note": "Manufacturer certifications matter more here than a degree does.", "noBachelorPct": "89%", "distribution": [{ "label": "Did not finish high school", "pct": 6.0 }, { "label": "Finished high school", "pct": 42.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 14.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$41,000", "typical": "$61,150", "top": "$91,000" }
+    }
   },
   "millwright": {
     "slug": "millwright",
@@ -9690,7 +9734,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Lead Millwright", "pay": "$85K", "description": "You lead major installation projects and train apprentices.", "whatYouDo": ["Lead installations", "Train apprentices", "Plan rigging jobs"], "toGetHere": ["Journeyman status", "5+ years experience"] }
     ],
     "education": { "studies": [{ "name": "Millwright apprenticeship programs" }], "where": [{ "count": "90", "credential": "Apprenticeship certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Apprenticeship (3-4 years)", "note": "This is a union-apprenticeship trade in most of the country, paid from day one.", "noBachelorPct": "87%", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 45.0 }, { "label": "Some college, no degree", "pct": 23.0 }, { "label": "Associate's degree", "pct": 14.0 }, { "label": "Bachelor's degree", "pct": 11.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$43,000", "typical": "$63,300", "top": "$95,000" }
+    }
   },
   "motorcycle-mechanic": {
     "slug": "motorcycle-mechanic",
@@ -9713,7 +9761,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Master Technician / Shop Lead", "pay": "$58K", "description": "You handle the hardest jobs and run the service department.", "whatYouDo": ["Complex diagnostics", "Manufacturer-certified repairs", "Train technicians"], "toGetHere": ["Manufacturer certification", "5+ years experience"] }
     ],
     "education": { "studies": [{ "name": "Motorcycle Repair Technology" }], "where": [{ "count": "70", "credential": "Trade school certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "Trade school or manufacturer training", "note": "A love of motorcycles gets people in the door as much as any certificate does.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 8.0 }, { "label": "Finished high school", "pct": 42.0 }, { "label": "Some college, no degree", "pct": 26.0 }, { "label": "Associate's degree", "pct": 14.0 }, { "label": "Bachelor's degree", "pct": 8.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$28,000", "typical": "$41,200", "top": "$62,000" }
+    }
   },
   "office-equipment-technician": {
     "slug": "office-equipment-technician",
@@ -9736,7 +9788,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Senior Field Technician", "pay": "$60K", "description": "You handle the toughest tickets and mentor new techs.", "whatYouDo": ["Complex repairs", "Train technicians", "Manage key accounts"], "toGetHere": ["5+ years experience", "Multiple manufacturer certifications"] }
     ],
     "education": { "studies": [{ "name": "Electronics Technology" }], "where": [{ "count": "40", "credential": "On-the-job / manufacturer training" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "Manufacturer-specific training", "note": "Most training happens on the job, tied to whichever brands of equipment you'll service.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 6.0 }, { "label": "Finished high school", "pct": 44.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 13.0 }, { "label": "Bachelor's degree", "pct": 8.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$31,000", "typical": "$46,020", "top": "$68,000" }
+    }
   },
   "power-line-technician": {
     "slug": "power-line-technician",
@@ -9759,7 +9815,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Line Crew Foreman", "pay": "$110K", "description": "You lead a crew and make the safety calls on every job.", "whatYouDo": ["Lead crew on jobs", "Coordinate outage response", "Enforce safety protocol"], "toGetHere": ["Years as journeyman", "Leadership training"] }
     ],
     "education": { "studies": [{ "name": "Lineworker apprenticeship / trade programs" }], "where": [{ "count": "110", "credential": "Apprenticeship certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start as a groundman", "trainingAfterHiring": "Union apprenticeship (3-4 years)", "note": "This is one of the highest-paid trades that starts with just a high school diploma.", "noBachelorPct": "85%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 44.0 }, { "label": "Some college, no degree", "pct": 25.0 }, { "label": "Associate's degree", "pct": 13.0 }, { "label": "Bachelor's degree", "pct": 13.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$52,000", "typical": "$85,420", "top": "$130,000", "note": "Storm and emergency response overtime can add significantly to this." }
+    }
   },
   "semiconductor-equipment-technician": {
     "slug": "semiconductor-equipment-technician",
@@ -9782,7 +9842,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Senior Equipment Engineer Tech", "pay": "$135K", "description": "You handle the fab's most critical equipment and lead upgrades.", "whatYouDo": ["Lead equipment upgrades", "Train technicians", "Solve chronic issues"], "toGetHere": ["5+ years experience", "Advanced technical training"] }
     ],
     "education": { "studies": [{ "name": "Semiconductor Manufacturing Technology" }, { "name": "Electronics Technology" }], "where": [{ "count": "80", "credential": "Associate's degree" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Associate's degree", "experienceFirst": "No. Fabs hire straight out of a technical program", "trainingAfterHiring": "Fab-specific equipment certification", "note": "This is one of the higher-paying trades, and the associate's degree is the real gate.", "noBachelorPct": "75%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 10.0 }, { "label": "Some college, no degree", "pct": 22.0 }, { "label": "Associate's degree", "pct": 42.0 }, { "label": "Bachelor's degree", "pct": 22.0 }, { "label": "Master's degree", "pct": 2.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$70,000", "typical": "$105,420", "top": "$150,000" }
+    }
   },
   "telecom-technician": {
     "slug": "telecom-technician",
@@ -9805,7 +9869,11 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Lead Technician / Splicer", "pay": "$85K", "description": "You handle the hardest network faults and train new techs.", "whatYouDo": ["Complex fiber repairs", "Train technicians", "Plan network builds"], "toGetHere": ["5+ years experience", "Advanced fiber certification"] }
     ],
     "education": { "studies": [{ "name": "Telecommunications Technology" }], "where": [{ "count": "160", "credential": "Trade school certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start as an installer", "trainingAfterHiring": "Fiber splicing certification", "note": "Fiber-splicing certification opens up the better-paying repair roles.", "noBachelorPct": "89%", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 38.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 18.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$42,000", "typical": "$62,960", "top": "$93,000" }
+    }
   },
   "wind-turbine-technician": {
     "slug": "wind-turbine-technician",
@@ -9828,6 +9896,10 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       { "number": "3", "jobTitle": "Lead Turbine Technician", "pay": "$82K", "description": "You lead a maintenance crew across a wind farm.", "whatYouDo": ["Lead maintenance crew", "Handle major repairs", "Train technicians"], "toGetHere": ["5+ years experience", "Advanced safety certifications"] }
     ],
     "education": { "studies": [{ "name": "Wind Energy Technology" }], "where": [{ "count": "70", "credential": "Trade school certificate" }] },
-    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics."
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start right after certification", "trainingAfterHiring": "Wind energy technology certificate program", "note": "This is one of the fastest-growing trades in the country, and a one-to-two-year certificate is the standard path in.", "noBachelorPct": "87%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 27.0 }, { "label": "Some college, no degree", "pct": 30.0 }, { "label": "Associate's degree", "pct": 27.0 }, { "label": "Bachelor's degree", "pct": 11.0 }, { "label": "Master's degree", "pct": 1.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$42,000", "typical": "$62,580", "top": "$92,000" }
+    }
   },
 };

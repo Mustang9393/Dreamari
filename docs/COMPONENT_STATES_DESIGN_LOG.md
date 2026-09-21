@@ -339,6 +339,19 @@ Verified live: HVAC Technician screenshotted in full (header, facts,
 Overview, Career Ladder), all 18 confirmed populated via a batch fetch
 check (`data-fact-cell` count 0 -> 2 for every one). `tsc`/`eslint` clean.
 
+**Follow-up same day**: initially skipped the optional `factDetails` block
+(the (i) icon behind Typical Degree/Typical Pay) to keep scope down, per
+the memory's own note that it's safe to omit. Direct feedback caught the
+inconsistency: the fully hand-built careers (Asset Manager, Carpenter) DO
+have it, so skipping it read as a different, lesser tier of content, not
+a deliberate simplification. Added `factDetails.degree` (education
+distribution, 7 buckets summing to exactly 100% for all 18, checked
+programmatically) and `factDetails.pay` (starting/typical/top) to every
+one of the 18, matching Carpenter's own trade-appropriate template rather
+than Asset Manager's white-collar one. Verified live: HVAC Technician's
+(i) icon opens the full "What you need to get in" sheet correctly.
+`tsc`/`eslint` clean.
+
 ### Remaining worlds -- not started
 
 Business & Finance (25 careers) is the next highest-value target -- the
