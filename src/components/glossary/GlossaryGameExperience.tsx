@@ -5,7 +5,7 @@ import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap } from "lucide-react";
+import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Music, Paintbrush, Plug, RotateCcw, Siren, Sparkles, Stethoscope, UserRound, Trophy, Undo2, Volume2, VolumeX, Wind, Workflow, X, Zap } from "lucide-react";
 import { PlayBurst } from "@/components/play/PlayBurst";
 import { PlayBackdrop } from "@/components/play/PlayBackdrop";
 import { dispatchPlayPulse } from "@/components/play/backdropPulse";
@@ -20,16 +20,28 @@ import { QuickLinksMenu } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
+// Sourced from glossaryThemeSound, not sound.ts directly, so every
+// playCorrect/playWrong/playSelect/playSweep call already scattered
+// through this file (a dozen-plus question-type renderers) picks up
+// per-background-version sound automatically -- see that module's own
+// header comment for why this is a wrapper rather than an edit to the
+// app-wide sound.ts.
 import {
+  musicMutedSnapshot,
   mutedSnapshot,
   playCorrect,
   playSelect,
   playSweep,
   playWrong,
+  serverMusicMutedSnapshot,
   serverMutedSnapshot,
+  setGlossaryPlayTheme,
+  setMusicMuted,
   setMuted,
+  stopThemeMusic,
+  subscribeMusicMuted,
   subscribeMuted,
-} from "@/components/play/sound";
+} from "@/components/play/glossaryThemeSound";
 import {
   saveLessonComplete,
 } from "./progress";
@@ -221,18 +233,91 @@ function MuteToggle() {
   );
 }
 
-function TopBar({ onBack, bgVersion, onBgVersion }: { onBack: () => void; bgVersion: PlayBgVersion; onBgVersion: (v: PlayBgVersion) => void }) {
+function MusicToggle() {
+  const musicOff = useSyncExternalStore(subscribeMusicMuted, musicMutedSnapshot, serverMusicMutedSnapshot);
+  return (
+    <IconTip label={musicOff ? "Turn music on" : "Turn music off"}>
+      <button
+        type="button"
+        onClick={() => setMusicMuted(!musicOff)}
+        aria-pressed={musicOff}
+        aria-label={musicOff ? "Turn music on" : "Turn music off"}
+        className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+        style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: musicOff ? "var(--muted-foreground)" : "var(--foreground)" }}
+      >
+        <Music className="h-[16px] w-[16px]" style={{ opacity: musicOff ? 0.4 : 1 }} aria-hidden />
+      </button>
+    </IconTip>
+  );
+}
+
+// DEMO-ONLY: reload-from-start and step-back-one controls, requested
+// 21 Sept 2026 ("add a reload button as demo (clearly marked for usman so
+// ican reload the game from start, and also a back button at each step so
+// i can go back 1 step whenever i want)") -- for walking through/QAing the
+// lesson repeatedly without re-navigating from the career page each time.
+// Never part of the product UI, same spirit as PlayVersionChip below.
+function DemoStepControls({ onReload, onStepBack, stepBackDisabled }: { onReload: () => void; onStepBack: () => void; stepBackDisabled: boolean }) {
+  return (
+    <div className="flex items-center gap-[6px] rounded-full border px-[6px] py-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <span className="pl-[2px] text-[9px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+        Demo
+      </span>
+      <IconTip label="Go back one step">
+        <button
+          type="button"
+          onClick={onStepBack}
+          disabled={stepBackDisabled}
+          aria-label="Go back one step"
+          className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-30"
+          style={{ color: "var(--foreground)" }}
+        >
+          <Undo2 className="h-[15px] w-[15px]" aria-hidden />
+        </button>
+      </IconTip>
+      <IconTip label="Reload from start">
+        <button
+          type="button"
+          onClick={onReload}
+          aria-label="Reload from start"
+          className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full"
+          style={{ color: "var(--foreground)" }}
+        >
+          <RotateCcw className="h-[15px] w-[15px]" aria-hidden />
+        </button>
+      </IconTip>
+    </div>
+  );
+}
+
+function TopBar({
+  onBack,
+  bgVersion,
+  onBgVersion,
+  onReload,
+  onStepBack,
+  stepBackDisabled,
+}: {
+  onBack: () => void;
+  bgVersion: PlayBgVersion;
+  onBgVersion: (v: PlayBgVersion) => void;
+  onReload: () => void;
+  onStepBack: () => void;
+  stepBackDisabled: boolean;
+}) {
   return (
     <header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
-      {/* Mute stays (it is this game's own control); everything else is the
+      {/* Mute/music stay (this game's own controls); everything else is the
          app's one hamburger, same as every screen. The background-version
-         chip is demo-only (21 Sept 2026, "Now lets work on v2,v3,v4") --
-         never part of the product UI, same spirit as Connect's AT&T chip. */}
+         chip and the demo step controls are demo-only (never part of the
+         product UI, same spirit as Connect's AT&T chip). */}
       <div className="flex items-center gap-[var(--space-2)]">
+        <DemoStepControls onReload={onReload} onStepBack={onStepBack} stepBackDisabled={stepBackDisabled} />
         <PlayVersionChip version={bgVersion} onChange={onBgVersion} />
+        <MusicToggle />
         <MuteToggle />
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </div>
@@ -329,7 +414,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-[var(--space-2)]">
+        <div className="flex flex-wrap gap-[var(--space-3)]">
           {lesson.terms.map((term) => (
             <span key={term.id} className="rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               {term.term}
@@ -649,8 +734,13 @@ const CORRECT_COLOR = "var(--world-food-farming-nature)";
 type AnswerResult = { correct: boolean; creditedTermIds: string[] };
 
 function OptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
+  // Gap bumped 12px -> 16px: the card/text around this got scaled up
+  // ("lets scale up the question+answer content") but this gap didn't
+  // move with it, so at the new size the option borders read as touching
+  // (direct feedback, 21 Sept 2026: "dont have any padding and clash with
+  // eachothers borders").
   return (
-    <div className="flex w-full flex-col gap-[var(--space-3)]">
+    <div className="flex w-full flex-col gap-[var(--space-4)]">
       {options.map((option, i) => {
         const isPicked = picked === i;
         const isCorrect = i === correctIndex;
@@ -733,7 +823,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
   return (
     <div className="flex w-full flex-col gap-[var(--space-4)]">
       <div className="flex flex-col gap-[var(--space-2)]">
-        <div className="flex flex-wrap gap-[var(--space-2)]">
+        <div className="flex flex-wrap gap-[var(--space-3)]">
           {/* Real buttons, not decorative pills -- they look tappable (a
              rounded, bordered chip), so they need to actually be tappable.
              Picking one just fills the same input Check Answer already
@@ -870,7 +960,7 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
             />
           </svg>
         )}
-        <div className="flex flex-col gap-[var(--space-2)]">
+        <div className="flex flex-col gap-[var(--space-3)]">
           {question.pairs.map((p) => {
             const done = matched.has(p.left);
             const active = pickedLeft === p.left;
@@ -907,7 +997,7 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
             );
           })}
         </div>
-        <div className="flex flex-col gap-[var(--space-2)]">
+        <div className="flex flex-col gap-[var(--space-3)]">
           {rightOrder.map((right) => {
             const pair = question.pairs.find((p) => p.right === right)!;
             const done = matched.has(pair.left);
@@ -973,7 +1063,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
   return (
     <div className="flex w-full flex-col gap-[var(--space-4)]">
       {!allPlaced && (
-        <div className="flex flex-wrap gap-[var(--space-2)]">
+        <div className="flex flex-wrap gap-[var(--space-3)]">
           {items
             .filter((item) => !placed[item.text])
             .map((item) => (
@@ -996,7 +1086,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-[var(--space-3)]">
+      <div className="grid grid-cols-2 gap-[var(--space-4)]">
         {question.buckets.map((bucket) => (
           <button
             key={bucket}
@@ -1336,7 +1426,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
       <p className="text-center text-[14px]" style={{ color: "var(--muted-foreground)" }}>
         Fill in all {gaps} blanks.
       </p>
-      <div className="flex flex-wrap justify-center gap-[var(--space-2)]">
+      <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
         {[...lesson.powerPlay.answers]
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
           .map((word) => (
@@ -1551,6 +1641,17 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
     });
     return () => cancelAnimationFrame(raf);
   }, []);
+  // Swaps the whole sfx set AND starts/stops that version's own background
+  // loop -- direct request, 21 Sept 2026: "add sounds that fit the CRT
+  // version, the synth version etc... add a background track to each that
+  // fit each ones vibe." Every version (v1 included, per "v1 also could
+  // use a good tune") gets its own track. Stops the loop on unmount too,
+  // so leaving the game mid-lesson doesn't leave a synth line running in
+  // the background.
+  useEffect(() => {
+    setGlossaryPlayTheme(bgVersion);
+    return () => stopThemeMusic();
+  }, [bgVersion]);
   const pickBgVersion = (v: PlayBgVersion) => {
     setBgVersion(v);
     const url = new URL(window.location.href);
@@ -1571,6 +1672,60 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
 
   function exitToCareer() {
     router.push(`/career/${career.careerSlug}`);
+  }
+
+  // DEMO-ONLY: reload the whole lesson back to its very first screen --
+  // see DemoStepControls' own header comment for why this exists.
+  function resetGame() {
+    setScreen("intro");
+    setUnlockIndex(0);
+    setQueue([...lesson.questions].sort((a, b) => a.playOrder - b.playOrder));
+    setQueueIndex(0);
+    setMastery({});
+    setPendingResult(null);
+    setStreak(0);
+    setShowStreak(null);
+    setDismissedReview(false);
+  }
+
+  // DEMO-ONLY: step back exactly one screen. Mastery/streak/the question
+  // queue built up so far are left alone -- this rewinds WHERE the student
+  // is in the lesson, not their answers, which is what "go back 1 step
+  // whenever i want" is for (re-demoing a screen, not undoing progress).
+  function stepBack() {
+    setPendingResult(null);
+    switch (screen) {
+      case "dreamyIntro":
+        setScreen("intro");
+        return;
+      case "lessonIntro":
+        setScreen("dreamyIntro");
+        return;
+      case "unlock":
+        if (unlockIndex > 0) setUnlockIndex((i) => i - 1);
+        else setScreen("lessonIntro");
+        return;
+      case "question":
+        if (queueIndex > 0) setQueueIndex((i) => i - 1);
+        else setScreen("unlock");
+        return;
+      case "powerPlayIntro":
+        setScreen("question");
+        setQueueIndex(queue.length - 1);
+        return;
+      case "powerPlay":
+        setScreen("powerPlayIntro");
+        return;
+      case "masteryLoading":
+        setScreen("powerPlay");
+        return;
+      case "complete":
+        setScreen("powerPlay");
+        return;
+      default:
+        // "intro" is already the first screen -- nothing earlier to go to.
+        return;
+    }
   }
 
   function handleAnswer(result: AnswerResult) {
@@ -1660,7 +1815,14 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         className="pointer-events-none fixed inset-0 z-0"
         style={{ background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 30%, transparent), transparent 65%)" }}
       />
-      <TopBar onBack={() => router.back()} bgVersion={bgVersion} onBgVersion={pickBgVersion} />
+      <TopBar
+        onBack={() => router.back()}
+        bgVersion={bgVersion}
+        onBgVersion={pickBgVersion}
+        onReload={resetGame}
+        onStepBack={stepBack}
+        stepBackDisabled={screen === "intro"}
+      />
 
       {screen === "question" && (
         // An earlier pass shrunk this status strip down (direct feedback:
