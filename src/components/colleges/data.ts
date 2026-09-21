@@ -520,6 +520,25 @@ export const STATES = [...new Set(COLLEGES.map((c) => c.state))].map((s) => ({ c
 export const money = (n: number) => `$${n.toLocaleString("en-US")}`;
 export const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "")}K` : String(n));
 
+/** Tuition & fees (in-state), the published sticker price colleges and
+ *  every major college-search site (US News included) lead with -- NOT
+ *  `netPrice`, which is what a student actually pays after aid. The two
+ *  numbers can differ by 10x on the same school (Princeton: $62,688
+ *  tuition & fees vs. $6,128 average net price), so showing net price
+ *  under a generic "cost" label reads as wrong the moment it's checked
+ *  against an outside source (direct feedback, 21 Sept 2026, ahead of the
+ *  Harvard demo: "don't mix sticker price and net price under one
+ *  generic 'cost' label"). This is the ONE number Explore cards and a
+ *  school's own Overview show; `netPrice` stays, explicitly labeled
+ *  "after aid"/"after grants", inside the Cost tab and the compare table.
+ *  Null when the school's `detail` isn't loaded (15 of 56 schools, mostly
+ *  smaller ones without a full profile yet) -- callers show "Not
+ *  published" rather than silently falling back to net price. */
+export function tuitionFees(c: College): number | null {
+  const d = c.detail;
+  return d && d.tuitionInState !== null && d.fees !== null ? d.tuitionInState + d.fees : null;
+}
+
 // ---- Similar Schools --------------------------------------------------
 // Matches on the school being viewed, not the student's own profile (a
 // personalized "fit" block was removed from College Detail on 15 Sept 2026

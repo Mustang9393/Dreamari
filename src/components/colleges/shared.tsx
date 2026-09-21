@@ -9,7 +9,7 @@ import { OpenCue } from "@/components/app/PosterCard";
 import { announce } from "@/components/app/LiveRegion";
 import { IconTip } from "@/components/app/IconTip";
 import { SMALL } from "@/components/career/CareerDetailExperience";
-import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, type College } from "./data";
+import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, compact, tuitionFees, type College } from "./data";
 
 // One accent for the whole feature: colleges have no world, so they borrow
 // the app's primary blue. Cards for tribal colleges, trade schools etc. do
@@ -152,8 +152,9 @@ const BADGE_STYLE: Record<CardBadge["tone"], React.CSSProperties> = {
   muted: { background: "rgba(255,255,255,0.14)", color: "#fff" },
 };
 
-export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges, subline, hideTags = false, stats = false }: { /** Explore Schools: a three-number stat row (acceptance, price after aid, finish rate) instead of the two sentences */ stats?: boolean; c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": one fit chip, at most two */ badges?: CardBadge[]; /** one plain line under the place, e.g. the programme that matches the path */ subline?: string; /** For you: the 4-year / Public / City tags are noise next to the fit chip */ hideTags?: boolean }) {
+export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges, subline, hideTags = false, stats = false }: { /** Explore Schools: a three-number stat row (acceptance, tuition & fees, finish rate) instead of the two sentences */ stats?: boolean; c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": one fit chip, at most two */ badges?: CardBadge[]; /** one plain line under the place, e.g. the programme that matches the path */ subline?: string; /** For you: the 4-year / Public / City tags are noise next to the fit chip */ hideTags?: boolean }) {
   const img = collegeImage(c);
+  const tf = tuitionFees(c);
   return (
     // `poster-card`/`poster-photo` are the exact same hover classes Explore's
     // PosterCard uses (globals.css) -- direct feedback, 9 Sept 2026: college
@@ -220,7 +221,7 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
           <dl className="mt-auto grid grid-cols-3 gap-[var(--space-2)] pt-[var(--space-6)]" style={{ fontFamily: "var(--font-body)", textShadow: "none" }}>
             {[
               { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
-              { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "after aid" },
+              { v: tf === null ? "—" : `$${Math.round(tf / 1000)}K`, k: "tuition & fees" },
               { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
             ].map((x) => (
               <div key={x.k} className="flex min-w-0 flex-col">
@@ -319,9 +320,10 @@ export function SchoolCard({
   // seeded placeholder number for most visitors, which read as a made-up
   // stat once anyone checked it (direct feedback, 16 Sept 2026: "remove
   // the miles thing from the college cards").
+  const tf = tuitionFees(c);
   const stats = [
     { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
-    { v: c.netPrice === null ? "—" : `$${Math.round(c.netPrice / 1000)}K`, k: "avg. after aid" },
+    { v: tf === null ? "—" : `$${Math.round(tf / 1000)}K`, k: "tuition & fees" },
   ];
   // Was a literal white-alpha "ghost" -- fine while this sat on the photo's
   // own dark scrim, invisible once it moved onto the solid card below (a

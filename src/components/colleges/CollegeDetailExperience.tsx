@@ -9,7 +9,7 @@ import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinks
 import { HeaderActions } from "@/components/app/Inbox";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
-import { collegeBySlug, money, similarSchools } from "./data";
+import { collegeBySlug, money, similarSchools, tuitionFees } from "./data";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, SchoolCard, pct, tags, useSaved } from "./shared";
 import { Donut } from "./viz";
 import { EXTRA } from "./extra";
@@ -131,6 +131,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 
   const d = c.detail;
   const x = EXTRA[c.slug];
+  const tf = tuitionFees(c);
   // Financial Aid falls back to the net price calculator when a school has
   // no dedicated aid page but does have one of those (Princeton, for
   // instance) -- still genuinely aid-relevant, not a mislabeled dead end.
@@ -245,13 +246,18 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
         {/* Key Facts (was "At a glance", direct feedback, 15 Sept 2026: less
            copy, faster to scan) -- the four numbers a student came for, no
            explanatory sub-copy under any of them. Setting is already a chip
-           in the header and the sticker price lives in What it costs, so
-           neither repeats here. */}
+           in the header. Tuition & Fees is the published sticker price
+           (same field US News and every other college-search site leads
+           with) -- NOT the average net price after aid, which stays inside
+           What it costs, explicitly labeled "after aid" (direct feedback,
+           21 Sept 2026, ahead of the Harvard demo: showing net price here
+           under a generic "cost" label read as wrong the moment someone
+           checked it against an outside source). */}
         {tab === "overview" && (
           <section aria-labelledby="keyfacts-title" className="flex flex-col rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={PANEL}>
             <h2 id="keyfacts-title" className={`${BIG} -mx-[var(--space-5)] border-b px-[var(--space-5)] pb-[var(--space-4)] sm:-mx-[var(--space-6)] sm:px-[var(--space-6)]`} style={{ ...DISPLAY, borderColor: RULE }}>Key Facts</h2>
             <div className="pt-[var(--space-2)]">
-              <Row label="Yearly Cost" value={c.netPrice === null ? "Not published" : money(c.netPrice)} />
+              <Row label="Tuition & Fees" value={tf === null ? "Not published" : money(tf)} />
               <Row label="Acceptance Rate" value={c.admitRate === null ? "All of them" : `${c.admitRate}%`} />
               <Row label="Graduation Rate" value={pct(c.finish)} />
               <Row label="Undergraduate Population" value={c.undergrads.toLocaleString("en-US")} last />
@@ -314,7 +320,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             {tab === "cost" && (
             <TabPanel id="cost-title" title="What It Costs">
               {(() => {
-                const sticker = d.tuitionInState !== null && d.fees !== null ? d.tuitionInState + d.fees + (d.housingCost ?? 0) + (d.foodCost ?? 0) : null;
+                const sticker = tf !== null ? tf + (d.housingCost ?? 0) + (d.foodCost ?? 0) : null;
                 const breakdown: { label: string; value: string }[] = [];
                 if (d.tuitionInState !== null) breakdown.push({ label: d.tuitionInState === d.tuitionOutState ? "Tuition" : "Tuition, in state", value: money(d.tuitionInState) });
                 if (d.tuitionOutState !== null && d.tuitionOutState !== d.tuitionInState) breakdown.push({ label: "Tuition, out of state", value: money(d.tuitionOutState) });

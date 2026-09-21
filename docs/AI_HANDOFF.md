@@ -10929,3 +10929,59 @@ for a real user on an unusually tall/zoomed-out desktop display).
 
 Next step: still local-only, still awaiting go-ahead to push (same gate
 as the entry above -- this adds to the same not-yet-pushed batch).
+
+## 2026-09-21 · Colleges: cards/Overview show tuition & fees, not net price
+
+Joshua Pierce, Slack, ahead of the Harvard/university demos this week
+(assigned to Chandu specifically -- "update the UI labels accordingly";
+data-mapping correctness was assigned separately to Usman and is out of
+scope here, per standing instruction to ignore Usman's-scoped asks).
+Explore school cards were showing `netPrice` (average net price after
+aid/grants) as the primary "cost" figure -- e.g. Princeton's card read
+"$6K avg. after aid" -- next to a US News screenshot of the same school
+showing "Tuition & Fees: $65,210". Both numbers are correct, but showing
+the net-price one under a generic label, unlabeled as net price, reads
+as wrong the instant it's checked against an outside source. Direct
+instruction: cards and a school's own Overview should lead with
+Tuition & Fees (the published sticker price every major college site
+leads with); net price stays, but only inside the Cost tab, explicitly
+labeled "after aid" -- never mixed under one generic "cost" label.
+
+- Added `tuitionFees(c)` (`data.ts`): `detail.tuitionInState + detail.fees`,
+  null when a school's `detail` isn't loaded (15 of 56 schools, mostly
+  smaller ones without a full profile) -- callers show "Not published"/
+  "—" rather than silently substituting net price, which would repeat
+  the exact bug being fixed.
+- `shared.tsx`: `CollegeCard`'s stat row (acceptance / ~~after aid~~ / finish)
+  and `SchoolCard`'s stat row (the Reach/Target/Safety cards driving the
+  screenshot) both now show `tuitionFees(c)`, relabeled "tuition & fees".
+- `CollegeDetailExperience.tsx`: the Overview tab's Key Facts "Yearly
+  Cost" row (generic label, net-price value -- the exact anti-pattern
+  Joshua flagged) is now "Tuition & Fees" showing `tuitionFees(c)`. The
+  Cost tab's own "Full Price" (sticker + housing + food) and "Average
+  Cost After Aid" (net price, already explicitly labeled) needed no
+  change -- both were already correctly separated and labeled; reused
+  the new `tuitionFees()` helper there too instead of leaving a second,
+  duplicate inline computation of the same tuition+fees figure.
+- Left untouched, deliberately: `BrowseShelves.tsx`'s "cheap schools"
+  shelf and `CollegesExperience.tsx`'s cost-cap search filter both use
+  `netPrice` for genuine affordability filtering/sorting (not a
+  displayed sticker-price stat), and the compare table's "Cost for a
+  year, after grants" row is already explicitly labeled -- none of these
+  are the ambiguous-label problem Joshua described.
+
+Files: `src/components/colleges/data.ts`,
+`src/components/colleges/shared.tsx`,
+`src/components/colleges/CollegeDetailExperience.tsx`.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on all three. Verified
+live on local dev: Princeton's Overview Key Facts now reads "Tuition &
+Fees $62,688"; its Cost tab still shows "Full Price $82,938 / Before
+financial aid" and "Average Cost After Aid $6,128 / year" as two
+separate labeled headline numbers, plus Cost by Family Income, all
+already correct; the For You Reach/Target/Safety cards (the exact
+screenshot Joshua sent) now read "$63K tuition & fees" for Princeton,
+"$20K tuition & fees" for TCNJ, etc., instead of "avg. after aid".
+
+Next step: still local-only, same not-yet-pushed batch as the two Play
+tab entries above.
