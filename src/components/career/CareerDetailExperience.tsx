@@ -15,6 +15,7 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChro
 import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "./ConnectWithProfessionalsModal";
 import { PROS } from "@/components/connect/data";
+import { useSavedCareers } from "@/lib/savedCareers";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "./PayMap";
@@ -385,7 +386,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   // the (i) that opened the popover, kept in state (not a ref) so render can read it
   const [factAnchor, setFactAnchor] = useState<HTMLElement | null>(null);
   const [tab, setTab] = useState<CareerTab>("overview");
-  const [saved, setSaved] = useState(false);
+  const [savedCareers, toggleSavedCareer] = useSavedCareers();
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
   const [connectOpen, setConnectOpen] = useState(false);
@@ -406,6 +407,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const hasSimulation = !!simulationFor(career.slug);
   const hasGlossaryGame = hasGlossary(career.slug);
   const hasWorldProfessionals = PROS.some((pro) => pro.world === career.world);
+  const saved = savedCareers.has(career.slug);
   const vm = viewModel(career);
 
   return (
@@ -529,7 +531,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 <IconButton label="Not for me" active={disliked} onClick={() => { setDisliked((v) => !v); if (!disliked) setLiked(false); }}>
                   <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
-                <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => setSaved((v) => !v)}>
+                <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => toggleSavedCareer(career.slug)}>
                   <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
               </div>

@@ -39,6 +39,7 @@ import { collegeBySlug, collegeImage } from "@/components/colleges/data";
 import { SaveButton, tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
 import { useSavedVideos } from "@/lib/savedVideos";
+import { useSavedCareers } from "@/lib/savedCareers";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import {
   ACADEMIC_RECORD,
@@ -2777,6 +2778,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
   const [shelf, setShelf] = useState<"careers" | "schools" | "videos" | "events">("careers");
   const [savedSchools] = useSavedColleges();
   const [savedVideos] = useSavedVideos();
+  const [savedCareers, toggleSavedCareer] = useSavedCareers();
   const stubCount = EVENTS.filter((e) => e.lifecycle === "Active follow-up").length;
   const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", videos: "Videos", events: "Event Stubs" };
   const SHELF_COUNT: Record<typeof shelf, number> = { careers: locker.length, schools: savedSchools.size, videos: savedVideos.size, events: stubCount };
@@ -2815,6 +2817,13 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
               <span className="relative block aspect-[2/3] w-full">
                 <Image src={career.photo} alt="" fill sizes="220px" className="object-cover" />
+                {/* Careers had no save/unsave concept at all -- the bookmark
+                   on Career Detail was a local-only toggle that never
+                   persisted anywhere (direct feedback, 21 Sept 2026:
+                   "careers should also have unsave concept"). Same control
+                   as SchoolsShelf's own SaveButton, now backed by the same
+                   kind of real, shared, persisted state. */}
+                <span className="absolute top-[8px] right-[8px] z-10"><SaveButton on={savedCareers.has(career.id)} onToggle={() => toggleSavedCareer(career.id)} size={32} /></span>
                 <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)", paddingTop: "30px" }}>
                   <span className="w-full text-[14px] leading-[16px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
                   <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>

@@ -783,21 +783,22 @@ function ForYouFace() {
         /* night scene: the reel is always photo-on-dark; its ui keeps dark
            tokens in light mode (see tokens.css) */
         data-night-scene
-        // md:h-[672px], not h-full + max-h-[672px]: CSS only resolves a
-        // percentage height (h-full = height:100%) against an ancestor
-        // whose OWN height is an explicit value, not `auto` -- and at
-        // tablet widths (md but below lg, where `main` has no height rule
-        // of its own -- see main's className below, lg:-prefixed only)
-        // that chain was broken two levels deep. This container's own
-        // rendered box still landed on 672px (max-height capping its
-        // otherwise-taller content), but each snap-card inside it,
-        // ALSO h-full, had nothing definite to resolve against and fell
-        // back to its own natural content height -- so instead of one
-        // full-panel card at a time, several partial cards showed
-        // stacked (direct feedback, 21 Sept 2026: "the for you on tablet
-        // is breaking"). A literal fixed height sidesteps the whole
-        // ancestor-chain question.
-        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-lg)]"
+        // h-full (not a literal 672px): CSS only resolves a percentage
+        // height against an ancestor whose OWN height is an explicit
+        // value, not `auto` -- this used to break at tablet widths (md but
+        // below lg), where `main` had no height rule of its own (direct
+        // feedback, 21 Sept 2026: "the for you on tablet is breaking"),
+        // fixed at the time by hardcoding 672px instead. That traded one
+        // bug for another: a real Safari window shorter than 672px+nav
+        // couldn't shrink the card at all, so it ran past `main`'s own
+        // clipped bottom edge with the lower part of the card permanently
+        // unreachable (direct feedback, 21 Sept 2026, screenshot: "the for
+        // you looks... on desktop in safari... shorten its height").
+        // `main` now gets a real, definite height at md: too (see its own
+        // className), so h-full correctly resolves at both breakpoints --
+        // max-h-[672px] just keeps it from growing past its usual size on
+        // a tall viewport with room to spare.
+        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-full md:max-h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-lg)]"
       >
         {FOR_YOU_FEED.map((item, index) => (
           <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
@@ -887,7 +888,18 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             // until scrolled (direct feedback, 21 Sept 2026: "buttons...
             // only accessible after a scroll" / "For You | Browse All
             // navigation is hidden" -- both the same root cause).
-            : "gap-[var(--space-6)] pt-4 pb-0 lg:h-[calc(100dvh-86px)] lg:overflow-hidden lg:pb-[var(--space-6)]"
+            //
+            // md:, not lg:-only: a real Safari window (not our own full
+            // dev viewport) is often shorter than 760px of usable height,
+            // and the reel card was FIXED at 672px tall regardless -- on
+            // that shorter real window it ran past `main`'s own bottom
+            // edge, clipped by main's overflow:hidden with no way to
+            // reach the cut-off part (direct feedback, 21 Sept 2026,
+            // screenshot: "the for you looks... on desktop in safari").
+            // Giving `main` a real, definite height at md: too (not just
+            // lg:) is what lets the card size ITSELF against it below,
+            // instead of a hardcoded number that can't shrink.
+            : "gap-[var(--space-6)] pt-4 pb-0 md:h-[calc(100dvh-86px)] md:overflow-hidden md:pb-[var(--space-6)]"
         }`}
       >
         {/* Phone row: the view toggle, then Search (Browse only) and Schools;

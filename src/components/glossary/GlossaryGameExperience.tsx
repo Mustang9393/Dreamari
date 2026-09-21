@@ -1025,7 +1025,7 @@ function QuestionScreen({
 // the only way through.
 function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; text: string; onNext: () => void; isLast: boolean }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}>
       <div
         className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]"
         style={{ background: correct ? "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}
@@ -1065,7 +1065,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
     playCorrect();
   }, []);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5" onClick={onDismiss}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }} onClick={onDismiss}>
       <div
         className="relative flex w-full max-w-[320px] flex-col items-center gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] p-[var(--space-8)] text-center motion-safe:animate-[dreamy-pop_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{ background: "linear-gradient(160deg, var(--hero-accent-teal), var(--background))" }}

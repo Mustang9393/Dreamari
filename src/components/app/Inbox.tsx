@@ -246,7 +246,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
     return (
       <Portal>
         <div className="fixed inset-0 z-[90] flex items-end" role="dialog" aria-modal="true" aria-label="Notifications">
-          <button type="button" aria-label="Close notifications" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)" }} />
+          <button type="button" aria-label="Close notifications" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }} />
           <div className="dm-scroll relative z-[1] max-h-[80dvh] w-full overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-3)] pb-[calc(var(--space-4)+env(safe-area-inset-bottom))]" style={surface}>{body}</div>
         </div>
       </Portal>
