@@ -26,6 +26,82 @@ import type { Simulation } from "./types";
 // comes first, because a game for a career they already chose is the one worth
 // playing. Copy is deliberately thin -- the art and the level ladder say it.
 
+// Stable row order, top to bottom -- also the default/fallback active row
+// (Career Simulations, matching "simulations stay dominant by default").
+const PLAY_ROW_IDS = ["simulations", "glossary", "soon"];
+
+// TV UX (direct feedback, 21 Sept 2026: "he wants all rows like this" --
+// the row-focus treatment Glossary Games got on hover, but the actual
+// trigger Josh meant is scroll: whichever row you've scrolled to becomes
+// the dominant one, every other row recedes, same as Apple TV/Netflix's
+// own row navigation). Hover has no equivalent on a touch device at all,
+// so scroll position is the one signal that works identically on desktop
+// AND mobile -- this hook is what makes that possible: a single shared
+// IntersectionObserver watching a thin band across the vertical CENTER of
+// the viewport (rootMargin trims 45% off the top and bottom, leaving a
+// 10%-tall strip in the middle), and whichever registered row is
+// currently crossing that strip is "the" active one. Ties and gaps keep
+// the previous answer rather than flickering to null between rows.
+function useCenteredRow(ids: string[]): string | null {
+  const [active, setActive] = useState<string | null>(ids[0] ?? null);
+  const ratios = useRef<Record<string, number>>({});
+  useEffect(() => {
+    const els = ids
+      .map((id) => document.querySelector<HTMLElement>(`[data-row-id="${id}"]`))
+      .filter((el): el is HTMLElement => el !== null);
+    if (els.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = entry.target.getAttribute("data-row-id");
+          if (id) ratios.current[id] = entry.isIntersecting ? entry.intersectionRatio : 0;
+        }
+        let best: string | null = null;
+        let bestRatio = 0;
+        for (const id of ids) {
+          const r = ratios.current[id] ?? 0;
+          if (r > bestRatio) {
+            bestRatio = r;
+            best = id;
+          }
+        }
+        if (best) setActive(best);
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] },
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ids.join("|")]);
+  return active;
+}
+
+/** Wraps ONE row -- header and all -- so it can recede as a whole when
+ *  scroll has moved on to a different row, and sit at full presence
+ *  (unchanged from how the row already renders) when it's the active
+ *  one. Deliberately NOT the same mechanism Glossary Games uses for its
+ *  own per-card expand: this is coarser, row-level dominance for rows
+ *  that don't have their own per-card hover system (Career Simulations,
+ *  In the works) -- when `active` is true it applies NO transform at
+ *  all, so it never fights or compounds with a row's own internal
+ *  hover animations. */
+function RowFocusWrapper({ id, active, children }: { id: string; active: boolean; children: React.ReactNode }) {
+  return (
+    <motion.div
+      data-row-id={id}
+      animate={
+        active
+          ? { opacity: 1, scale: 1, filter: "brightness(1) saturate(1)" }
+          : { opacity: 0.72, scale: 0.975, filter: "brightness(0.82) saturate(0.9)" }
+      }
+      transition={{ type: "spring", stiffness: 220, damping: 26, mass: 0.8 }}
+      style={{ transformOrigin: "center top" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export function PlayHub() {
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   // A deep link from elsewhere in the app (Profile's "Play your #1 Career
@@ -54,6 +130,10 @@ export function PlayHub() {
   const featuredRowSoon = useMemo(() => SOON.filter((game) => FEATURED_ROW_SOON_IDS.includes(game.careerId)), []);
   // The hero row's idle swipe hint waits for the welcome splash to close.
   const [splashSettled, setSplashSettled] = useState(false);
+  // Which row the pointer/scroll is currently on (see useCenteredRow) --
+  // shared across every row on the page, not just Glossary Games, per
+  // direct feedback: "he wants all rows like this."
+  const activeRow = useCenteredRow(PLAY_ROW_IDS);
 
   return (
     <div
@@ -80,7 +160,9 @@ export function PlayHub() {
           Play
         </h1>
 
-        <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} focusId={focusId} hintReady={splashSettled} />
+        <RowFocusWrapper id="simulations" active={activeRow === "simulations"}>
+          <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} focusId={focusId} hintReady={splashSettled} />
+        </RowFocusWrapper>
 
         {/* Glossary Games: split by whether the career actually has authored
            content (hasGlossary) -- Finance Essentials has a real page now,
@@ -89,11 +171,17 @@ export function PlayHub() {
            feedback, 9 Sept 2026: "they dont have to work or lead anywhere,
            theyre just dummy cards to fill the row"), same idiom as the
            career-simulation placeholders below. */}
-        {GLOSSARY_GAMES.length > 0 && <GlossaryGamesRow games={GLOSSARY_GAMES} />}
+        {GLOSSARY_GAMES.length > 0 && (
+          <RowFocusWrapper id="glossary" active={activeRow === "glossary"}>
+            <GlossaryGamesRow games={GLOSSARY_GAMES} />
+          </RowFocusWrapper>
+        )}
         {/* The bridge from Play to Explore (Joshua Pierce, Slack, 5 Sept 2026):
            Play is for experiencing careers, Explore for discovering them.
            Sits after the Glossary Games so it closes the page instead of
-           interrupting it (direct feedback, 6 Sept 2026). */}
+           interrupting it (direct feedback, 6 Sept 2026). Not a row itself
+           (no cards, nothing to focus), so it sits outside the row-focus
+           system entirely -- always at rest. */}
         <NextStepBanner
           eyebrow="Looking for another career to play?"
           text="Explore more careers and find another simulation to play."
@@ -103,11 +191,13 @@ export function PlayHub() {
           storageKey="dreamari:play-explore-bridge-dismissed"
         />
 
-        <SoonSection label="In the works">
-          {soon.map((game) => (
-            <SoonCard key={game.careerId} title={game.title} cover={game.cover} />
-          ))}
-        </SoonSection>
+        <RowFocusWrapper id="soon" active={activeRow === "soon"}>
+          <SoonSection label="In the works">
+            {soon.map((game) => (
+              <SoonCard key={game.careerId} title={game.title} cover={game.cover} />
+            ))}
+          </SoonSection>
+        </RowFocusWrapper>
       </main>
 
       <MobileNav active="Play" />
@@ -669,57 +759,33 @@ function SoonCard({ title, cover, icon }: { title: string; cover?: string; icon?
  *  the cards are smaller by default... only less dominant until hovered."
  *  Hover state lives HERE, one level above the cards, because the dim
  *  treatment on a card depends on whether a DIFFERENT card in the row is
- *  hovered -- not something a single card can know about itself. The row
- *  header brightens the moment the pointer enters ANY card (the row
- *  "wakes up" as a whole); the specific hovered card additionally scales
- *  up and lifts above its neighbours, which dim slightly to hand it focus. */
+ *  hovered -- not something a single card can know about itself. Row-level
+ *  dominance (the whole row brightening/receding as scroll moves on or off
+ *  it) now lives ONE level up still, in the shared RowFocusWrapper every
+ *  row uses (PlayHub) -- this row no longer runs its own separate hover-
+ *  driven version of that (direct feedback, 21 Sept 2026: "we dont need
+ *  the elevated hover for this version... it should be like the first
+ *  row... scale should also borrow from the first row"). No per-card
+ *  expand-on-hover either, for the same reason: the first row's own cards
+ *  don't have one (just dm-tap's ordinary 1px lift), so this row doesn't
+ *  invent a bigger one either. */
 function GlossaryGamesRow({ games }: { games: { careerSlug: string; title: string; sub: string; cover?: string }[] }) {
-  const [hovered, setHovered] = useState<string | null>(null);
-  const rowActive = hovered !== null;
   return (
     <section className="flex flex-col gap-[var(--space-3)]">
-      <h2
-        className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
-        style={{ color: rowActive ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
-      >
+      <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
         Glossary Games
       </h2>
       {/* A small horizontal shelf (SHELF_HEIGHT), deliberately smaller
          than the hero row above -- the billboard dominates, the shelves
-         below it stay uniform and quiet at rest, Netflix-style, and now
-         come alive on hover the same way Netflix's own rows do. Same
-         full-bleed rail as FeaturedRow above (negative margins run it to
-         the viewport edge so the next card visibly peeks instead of
-         clipping at the content column, direct feedback, 9 Sept 2026)
-         rather than stopping dead at main's own padding.
-         pt-10/pb-8 is real headroom, not decoration: a focused card grows
-         to scale 1.16 from its own CENTER (not the top/bottom edge), so
-         roughly half that growth pushes up and half pushes down. On the
-         tallest breakpoint (195px) that's ~16px each way -- pt-10 (40px)
-         and pb-8 (32px) comfortably clear both the row title above and
-         the next section below with margin to spare (direct feedback, 21
-         Sept 2026: the card was overlapping the row title at the old
-         pt-6/origin-bottom combination, where ALL of the ~31px scale
-         growth pushed upward with only 24px to absorb it). overflow-x-auto
-         with overflow-y left alone reads as "visible" in the browser here
-         only because nothing inside ever actually exceeds this padded
-         box -- if the growth math above ever changes, the padding has to
-         grow with it, not the other way around. */}
-      <ul
-        className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto overflow-y-visible p-0 px-5 pt-10 pb-8 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]"
-        onMouseLeave={() => setHovered(null)}
-      >
+         below it stay uniform and quiet, Netflix-style. Same full-bleed
+         rail as FeaturedRow above (negative margins run it to the
+         viewport edge so the next card visibly peeks instead of clipping
+         at the content column, direct feedback, 9 Sept 2026) rather than
+         stopping dead at main's own padding. */}
+      <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-3)] overflow-x-auto p-0 px-5 pt-1 pb-3 md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
         {games.map((game) => (
-          <li
-            key={game.careerSlug}
-            className="flex-none"
-            onMouseEnter={() => setHovered(game.careerSlug)}
-          >
-            <GlossaryGameCard
-              game={game}
-              playable={hasGlossary(game.careerSlug)}
-              focusState={!rowActive ? "idle" : hovered === game.careerSlug ? "focused" : "dimmed"}
-            />
+          <li key={game.careerSlug} className="flex-none">
+            <GlossaryGameCard game={game} playable={hasGlossary(game.careerSlug)} />
           </li>
         ))}
       </ul>
@@ -734,34 +800,8 @@ function GlossaryGamesRow({ games }: { games: { careerSlug: string; title: strin
  *  already says "Glossary Games", so the card itself carries no type chip
  *  (direct feedback, 9 Sept 2026). A career with no authored content yet
  *  (!playable) renders as a dim, non-linking "Coming soon" dummy -- same
- *  idiom as SoonCard below -- rather than a real link into an empty game.
- *  `focusState` drives the Netflix-row hover behaviour (see
- *  GlossaryGamesRow): "idle" is at-rest, "dimmed" is a sibling ceding
- *  focus, "focused" is the one under the pointer. */
-function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: string; title: string; sub: string; cover?: string }; playable: boolean; focusState: "idle" | "focused" | "dimmed" }) {
-  // Spring physics, not a fixed-duration CSS transition (direct feedback,
-  // 21 Sept 2026: the Tailwind-transition version read as "rigid" --
-  // three fixed keyframes with no organic settle). A real spring gives it
-  // weight: a slight overshoot as it scales up, a softer float back down,
-  // instead of every card moving through the exact same eased curve at
-  // the exact same speed regardless of how far it's travelling. Scale
-  // from the CENTER (default transform-origin, no origin-* override) --
-  // an earlier bottom-anchored version pushed the entire ~31px of scale
-  // growth upward with nowhere near enough padding to absorb it, and the
-  // card overlapped the row title (direct feedback). Centered growth
-  // splits that ~16px up / ~16px down, and the lift itself is small (y:
-  // -3, down from -6) -- GlossaryGamesRow's pt-10/pb-8 padding is sized
-  // for exactly this math; if either number here changes, that padding
-  // needs rechecking too.
-  const FOCUS_SPRING = { type: "spring" as const, stiffness: 300, damping: 22, mass: 0.7 };
-  const DIM_SPRING = { type: "spring" as const, stiffness: 260, damping: 28, mass: 0.7 };
-  const focusAnimate =
-    focusState === "focused"
-      ? { scale: 1.16, opacity: 1, y: -3, boxShadow: "0 26px 48px -16px rgba(0,0,0,0.6)", transition: FOCUS_SPRING }
-      : focusState === "dimmed"
-        ? { scale: 0.96, opacity: 0.6, y: 0, boxShadow: "0 0px 0px 0px rgba(0,0,0,0)", transition: DIM_SPRING }
-        : { scale: 1, opacity: 1, y: 0, boxShadow: "0 0px 0px 0px rgba(0,0,0,0)", transition: DIM_SPRING };
-  const focusZ = focusState === "focused" ? 30 : 0;
+ *  idiom as SoonCard below -- rather than a real link into an empty game. */
+function GlossaryGameCard({ game, playable }: { game: { careerSlug: string; title: string; sub: string; cover?: string }; playable: boolean }) {
   const art = (
     <>
       {game.cover ? (
@@ -805,25 +845,21 @@ function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: 
 
   if (!playable) {
     return (
-      <motion.span
+      <span
         aria-label={`${game.title} — coming soon`}
         className={`group relative block flex-none overflow-hidden rounded-[var(--radius-lg)] border ${SHELF_W} ${SHELF_HEIGHT}`}
-        style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)", zIndex: focusZ }}
-        animate={focusAnimate}
+        style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}
       >
         {art}
-      </motion.span>
+      </span>
     );
   }
 
   return (
     // Size on this plain box, HoverBeam fills it: with the size classes on
     // HoverBeam its own h-full won and the card collapsed to a line on
-    // phones (direct feedback, 11 Sept 2026). The focus transform lives
-    // here too, on the outer box, so the whole card (HoverBeam's glow
-    // included) scales as one unit instead of the glow staying pinned to
-    // an unscaled box while the art inside it grows.
-    <motion.div className={`flex-none ${SHELF_W} ${SHELF_HEIGHT}`} style={{ zIndex: focusZ }} animate={focusAnimate}>
+    // phones (direct feedback, 11 Sept 2026).
+    <div className={`flex-none ${SHELF_W} ${SHELF_HEIGHT}`}>
     <HoverBeam strength={0.8}>
     <Link
       href={`/play/glossary/${game.careerSlug}`}
@@ -833,7 +869,7 @@ function GlossaryGameCard({ game, playable, focusState }: { game: { careerSlug: 
       {art}
     </Link>
     </HoverBeam>
-    </motion.div>
+    </div>
   );
 }
 
