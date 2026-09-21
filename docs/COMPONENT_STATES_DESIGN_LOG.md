@@ -18,13 +18,26 @@ accurate current state, not a gap to be embarrassed about -- that's what
 data is complete but real data will be sparse):
 
 1. Match (`src/components/match-lab/`)
-2. Build (`src/components/build/`, `src/components/flow/`)
-3. Explore (`src/components/marketing/ExploreExperience.tsx` and friends)
-4. Profile (`src/components/profile/`)
-5. Play (`src/components/play/`)
-6. Connect (`src/components/connect/`)
-7. Colleges (`src/components/colleges/`)
-8. Resume Builder (`src/components/resume/`)
+2. Career Detail (`src/components/career/`) -- elevated 22 Sept 2026, see
+   below: confirmed as the single highest-impact gap in the app (137 of
+   214 real catalog careers, 64%, render with zero data beyond title/
+   world/photo).
+3. Build (`src/components/build/`, `src/components/flow/`)
+4. Explore (`src/components/marketing/ExploreExperience.tsx` and friends)
+5. Profile (`src/components/profile/`)
+6. Play (`src/components/play/`)
+7. Connect (`src/components/connect/`)
+8. Colleges (`src/components/colleges/`)
+9. Resume Builder (`src/components/resume/`)
+
+**Cross-cutting theme, flagged 22 Sept 2026**: "important edge case
+throughout is missing data for almost any type of content, career,
+college, school, etc." -- not scoped to one feature. Confirmed as real and
+large (see Career Detail below) rather than theoretical. Also flagged:
+this isn't only whole-section gaps -- "sometimes a few points inside a
+section or 1 point inside a section will be missing (1 field)." Both are
+now being checked for on every component touched, not just whole-section
+absence.
 
 Screenshots referenced below live in
 `docs/reference/component-states-2026-09-22/`.
@@ -163,30 +176,120 @@ doesn't read as "not checked."
 
 ---
 
-## 2. Build
+## 2. Career Detail (`src/components/career/CareerDetailExperience.tsx`)
+
+Status: **in progress** -- the app-wide missing-data problem confirmed and
+fixed at the code level; a few tracked items remain.
+
+| Component / state | Status | Notes |
+|---|---|---|
+| A tab with no data for it renders nothing (dead gap before "Careers like this one") | **Done, 22 Sept** | `TabComingSoon`, all 5 tabs. |
+| Quick-facts strip with exactly 1 fact leaves a dead empty grid column | **Done, 22 Sept** | grid-cols-1 for the 1-fact case. |
+| `DotList` bullet with a blank/whitespace-only item in an otherwise-real array | **Done, 22 Sept** | Filtered; shared with College Detail. |
+| `DotList` where EVERY item in the array is blank | **Done, 22 Sept** | "Not written up yet." fallback. |
+| `Rung` (career ladder) with some fields missing (pay, description, sub-lists) | **Verified, already handled** | Every field independently optional-checked; no change needed. |
+| `PayRows` / Pay tab with a partial `payByState` (missing `yourStates` but has `best`, or vice versa) | Not started | |
+| Missing/failed cover photo | Not started | |
+| Structural order (facts vs. tabs) | **Investigated, kept as-is** | See below -- a real reversal was requested, then reverted same session after confirming the original order was a deliberate 15 Sept decision, not a mistake. |
+
+### The core finding: this is real and large, not theoretical
+
+Direct flag: "important edge case throughout is missing data for almost
+any type of content, career, college, school, etc." Rather than guess,
+counted it. Extracted all 219 catalog career titles (`catalog.ts` +
+`browseLibrary.ts`), converted each to its real URL slug (respecting the
+two `SLUG_OVERRIDES` in `career/slug.ts`), and fetched all 214 resolvable
+career pages from the running dev server, counting each page's
+`data-fact-cell` elements.
+
+**137 of 214 real catalog careers (64%) render with ZERO facts at all** --
+not a rare edge case, the majority case. Spot-verified live and
+screenshotted: "Financial Advisor" (a completely mainstream career, not an
+obscure one) shows no scenario line, no facts row at all, and every one of
+its 5 tabs used to go straight from the tab bar to "Careers like this one"
+with nothing in between.
+
+### Fix 1: every tab gets a real fallback instead of rendering nothing
+
+Each of the 5 tabs (`Overview`/`Education`/`Career Ladder`/`Pay`/`Software`)
+only ever rendered when its specific data existed (`vm.payByState`,
+`vm.ladder.length > 0`, etc.) -- when it didn't, the tab area was
+completely empty, reading as a broken page rather than "not written up
+yet." New shared `TabComingSoon` component (a muted Sparkles icon + "{tab}
+coming soon" + a one-line explanation naming the career), rendered as the
+`else` branch for every tab's existing condition. Deliberately NOT wrapped
+in the same bordered `Section` panel real content uses, so it reads as
+"nothing here," not "here's real content in a panel that happens to be
+short."
+
+### Fix 2: the facts strip's own single-item dead-space bug
+
+The same class of bug already fixed in Match's grid, found here too: a
+thin career with exactly one fact (median salary survives from the
+catalog; degree/majors are the literal "Coming soon" placeholder and get
+filtered out) still got `grid-cols-2`, leaving a dead empty second column
+inside the same full-bleed bordered panel. `grid-cols-1` for the
+single-fact case only; 2/3/4-fact layouts unchanged.
+
+### Fix 3: field-level gaps within an otherwise-populated list (`DotList`)
+
+Follow-up flag: "its not just the case of 1 whole section being missing,
+sometimes a few points inside a section or 1 point inside a section will
+be missing (1 field if you will)." `DotList` (shared between Career
+Detail's own Know-About/Good-At lists AND College Detail's admissions
+factor lists -- `CollegeDetailExperience.tsx` imports it directly) now
+filters blank/whitespace-only items before rendering, so one gap in an
+otherwise-real array doesn't render an empty bullet marker with nothing
+after it; and falls back to "Not written up yet." in the rarer case where
+every item was blank (callers gate the section heading on the raw array's
+length, so without this the heading would show with nothing under it).
+
+### Investigated: should facts move below the tabs? -- kept as-is
+
+Direct instruction mid-session to move the facts card below the tab
+switcher ("header > tabs > rest of the content"). Implemented, verified
+live, then a follow-up question ("was this intentional or a mistake?")
+surfaced that the current order (facts above tabs) was itself a deliberate
+15 Sept 2026 decision ("keep Typical Degree and Typical Pay visible near
+the top before the tabs") -- confirmed also live on the deployed Vercel
+prototype, not just local. Reverted back to the original order same
+session once that history was confirmed. No net change; logged so the
+back-and-forth doesn't get re-litigated blind next time.
+
+**Verified live throughout**: `tsc`/`eslint` clean on every touched file.
+Built and tested against a synthetic zero-data test career (added
+temporarily to `catalog.ts`, fully reverted after -- `git diff` clean) to
+control the exact scenario, THEN cross-checked against a real, common,
+live career ("Financial Advisor") to confirm it wasn't a synthetic-only
+fix. All 5 tabs screenshotted in both the broken (before) and fixed
+(after) states.
+
+---
+
+## 3. Build
 
 Status: not started
 
-## 3. Explore
+## 4. Explore
 
 Status: not started
 
-## 4. Profile
+## 5. Profile
 
 Status: not started
 
-## 5. Play
+## 6. Play
 
 Status: not started
 
-## 6. Connect
+## 7. Connect
 
 Status: not started
 
-## 7. Colleges
+## 8. Colleges
 
 Status: not started
 
-## 8. Resume Builder
+## 9. Resume Builder
 
 Status: not started

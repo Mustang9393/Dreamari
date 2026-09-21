@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Minus, Plus, ThumbsDown, Users, X } from "lucide-react";
+import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Minus, Plus, Sparkles, ThumbsDown, Users, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -159,12 +159,52 @@ export function Section({ id, title, action, children }: { id?: string; title: s
   );
 }
 
+// Custom-designed edge case, 22 Sept 2026: ~150 of ~200 catalog careers
+// have no authored profile or report yet (a real, common gap, not rare --
+// see COMPONENT_STATES_DESIGN_LOG.md), and every tab below used to render
+// nothing at all when its data was missing -- straight from the tab bar to
+// "Careers like this one" with a dead gap in between, reading as a broken
+// page rather than a career whose detail just isn't written yet. Verified
+// live with a synthetic catalog-only test career (no profile, no report).
+// Not wrapped in the same bordered `Section` panel real content uses --
+// deliberately lighter, so it reads as "nothing here yet," not "here's
+// real content in a panel that happens to be short."
+function TabComingSoon({ title, career }: { title: string; career: string }) {
+  return (
+    <div className="flex flex-col items-center gap-[var(--space-2)] px-[var(--space-5)] py-[var(--space-10)] text-center">
+      <Sparkles className="h-6 w-6" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      <p className={`${MEDIUM}`} style={{ color: "var(--foreground)" }}>{title} coming soon</p>
+      <p className={`${SMALL} max-w-[42ch]`} style={{ color: "var(--muted-foreground)" }}>
+        We don&apos;t have this written up for {career} yet. Check back soon, or explore a similar career below.
+      </p>
+    </div>
+  );
+}
+
 // One marker, one line per item. The marker is the world accent so the list
-// reads as this career's without a second color system.
+// reads as this career's without a second color system. Shared by College
+// Detail too (CollegeDetailExperience.tsx imports this directly).
 export function DotList({ items, accent, leading }: { items: string[]; accent: string; leading?: (item: string) => React.ReactNode }) {
+  // Custom-designed edge case, 22 Sept 2026: field-level gaps, not just a
+  // whole section missing -- direct report: "sometimes a few points inside
+  // a section or 1 point inside a section will be missing." An authored
+  // array with one blank/whitespace-only string in it (a partial content
+  // edit, a generation gap) used to render a bullet marker with nothing
+  // after it. Filtered here once, so every caller (Career Detail's Know
+  // About/Good At, College Detail's admissions factor lists) gets it for
+  // free rather than each needing its own filter.
+  const clean = items.filter((item) => item.trim().length > 0);
+  // The rarer case: every item in the array was blank (not just one), so
+  // filtering leaves nothing -- callers gate on the RAW array's length
+  // before rendering the section heading above this list, so without this
+  // the heading would show with an empty <ul> under it. One line, matching
+  // the same "not authored yet" convention as everywhere else.
+  if (clean.length === 0) {
+    return <p className={`${SMALL} italic`} style={{ color: "var(--muted-foreground)" }}>Not written up yet.</p>;
+  }
   return (
     <ul className="flex flex-col gap-[var(--space-3)]">
-      {items.map((item) => (
+      {clean.map((item) => (
         <li key={item} className={`${SMALL} flex items-center gap-[var(--space-3)]`}>
           {leading ? leading(item) : <span aria-hidden className="h-[6px] w-[6px] flex-none rounded-full" style={{ background: accent }} />}
           <span className="min-w-0">{item}</span>
@@ -622,9 +662,21 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         {/* Quick facts: one strip, internal dividers, label over figure.
            Stays above the tabs (direct feedback, 15 Sept 2026: "keep Typical
-           Degree and Typical Pay visible near the top before the tabs"). */}
+           Degree and Typical Pay visible near the top before the tabs").
+           Briefly reversed and reverted same day, 22 Sept 2026, after
+           confirming this was a deliberate earlier decision, not a mistake
+           -- kept as originally decided. */}
         {vm.facts.length > 0 && (
-          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] grid-cols-2 rounded-[var(--radius-lg)] border ${vm.facts.length === 3 ? "sm:grid-cols-3" : vm.facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
+          // Custom-designed edge case, 22 Sept 2026: a thin catalog-only
+          // career (no profile/report) can end up with exactly ONE fact
+          // (median salary survives from the catalog; degree/majors fall
+          // back to the literal "Coming soon" placeholder and viewModel()
+          // filters those out entirely). The grid was always grid-cols-2 at
+          // base regardless of count, so one fact left a dead, empty second
+          // column inside the same full-bleed bordered panel -- reproduced
+          // live with a synthetic thin-career test entry. grid-cols-1 for
+          // the single-fact case only; 2/3/4-fact layouts are unchanged.
+          <section id="facts" aria-label="Quick facts" className={`grid scroll-mt-[124px] ${vm.facts.length === 1 ? "grid-cols-1" : "grid-cols-2"} rounded-[var(--radius-lg)] border ${vm.facts.length === 1 ? "" : vm.facts.length === 3 ? "sm:grid-cols-3" : vm.facts.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-4"}`} style={PANEL}>
             {vm.facts.map((fact, i) => (
               <div
                 key={fact.label}
@@ -680,6 +732,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         )}
 
         <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={CAREER_TABS} grow />
+
+        {tab === "pay" && !vm.payByState && <TabComingSoon title="Pay" career={career.title} />}
 
         {tab === "pay" && vm.payByState && (
           <Section
@@ -741,6 +795,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           </Section>
         )}
 
+        {tab === "ladder" && vm.ladder.length === 0 && <TabComingSoon title="Career ladder" career={career.title} />}
+
         {tab === "ladder" && vm.ladder.length > 0 && (
           <Section id="ladder" title="Career ladder">
             <ol className="flex flex-col">
@@ -756,7 +812,9 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            Detail's own Overview tab groups (Key Facts, one panel per idea),
            just carried over as this page's existing three sections rather
            than reinvented. */}
-        {tab === "overview" && (
+        {tab === "overview" && !vm.whatTheyDo && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && <TabComingSoon title="Overview" career={career.title} />}
+
+        {tab === "overview" && (vm.whatTheyDo || vm.knowAbout.length > 0 || vm.goodAt.length > 0) && (
           <div className="flex flex-col gap-[var(--space-6)]">
             {vm.whatTheyDo && (
               <Section id="what-they-do" title="What they actually do">
@@ -776,11 +834,15 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           </div>
         )}
 
+        {tab === "software" && vm.software.length === 0 && <TabComingSoon title="Software" career={career.title} />}
+
         {tab === "software" && vm.software.length > 0 && (
           <Section id="software" title="Software you would use">
             <DotList items={vm.software} accent={accent} />
           </Section>
         )}
+
+        {tab === "education" && !vm.education && <TabComingSoon title="Education" career={career.title} />}
 
         {tab === "education" && vm.education && (
           <Section id="education" title="Education">
