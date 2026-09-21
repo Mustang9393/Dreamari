@@ -11033,3 +11033,55 @@ Worth a real on-device swipe check before or during the demo if there's
 time.
 
 Next step: still local-only, same not-yet-pushed batch.
+
+## 2026-09-21 · Play tab: new artwork for the 7 "coming soon" careers
+
+User dropped 8 new AI-generated career-scene images into a "Play tab"
+folder at the project root (untracked, left as-is) and asked to swap
+them into the "in the works" careers, then separately asked to also
+cover the 3 of those 7 that additionally ride in the Career Simulations
+hero row (accountant, aviation-maintenance-technician,
+emergency-medicine-doctor -- `FEATURED_ROW_SOON_IDS`, PlayHub.tsx).
+
+Identified each image by content (no filenames given, all generic
+"ChatGPT Image ..."), matched one-to-one against `SOON` (games.ts):
+airline pilot (cockpit), software engineer (coding, whiteboard),
+private equity (reviewing a deal book, boardroom), food scientist (lab,
+samples), accountant (calculator, ledgers), aviation maintenance
+technician (engine repair, hangar), emergency medicine doctor (ER,
+patient). Two of the 8 images both read as Emergency Medicine Doctor --
+used the more dynamic one (hands-on with a patient, matching the
+hands-on framing Investment Banker/Registered Nurse's own hero covers
+use); the alternate is still sitting in the source folder, unused, in
+case the pick should be swapped.
+
+Overwrote the existing `public/images/app/soon-*.png` files in place
+(same filenames, same PNG format -- the exact convention already used
+there) rather than adding new files or touching any code: `SOON`'s
+`cover` field already points at these paths, and both the "In the
+works" grid and the featured hero row read the same `SOON` entries, so
+replacing the 7 files covered both asks in one step, no code change
+needed.
+
+Hit one real snag verifying it: the Next dev server's own image
+optimizer cache (`.next/dev/cache/images`, not `.next/cache/images`)
+kept serving the OLD renditions for two of the seven after the file
+swap, even on a hard navigate -- confirmed via a direct raw fetch of
+the file (correct new bytes) vs. the rendered `<img>` (stale). Cleared
+that cache directory and reloaded; all 7 confirmed correct afterward,
+including a second pass on the 3 hero-row cards. This is a local dev-
+only cache; not expected to affect the Vercel deploy, which optimizes
+images fresh per deploy.
+
+Files: `public/images/app/soon-accountant.png`,
+`soon-airline-pilot.png`, `soon-aviation-maintenance-technician.png`,
+`soon-emergency-medicine-doctor.png`, `soon-food-scientist.png`,
+`soon-private-equity.png`, `soon-software-engineer.png`. No source code
+touched.
+
+Verified live on local dev: all 7 "In the works" cards and all 3
+hero-row "coming soon" cards show the new artwork.
+
+Next step: still local-only, same not-yet-pushed batch. Flag to the
+user: the unused alternate Emergency Medicine Doctor image is still in
+the "Play tab" source folder if they'd rather use that one instead.
