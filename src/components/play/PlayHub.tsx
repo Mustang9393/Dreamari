@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { PlayBackdrop } from "./PlayBackdrop";
+import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
@@ -118,7 +118,13 @@ export function PlayHub() {
         overflowX: "clip",
       }}
     >
-      <PlayBackdrop />
+      {/* The Play TAB (this hub) uses the same background as every other
+         tab (direct feedback, 21 Sept 2026: "Dont change the background of
+         the PLAY TAB. Use the same background as other tabs. ONLY CHANGE
+         THE BACKGROUND OF THE IN GAME BACKGROUND") -- PlayBackdrop's own
+         "new world" treatment is scoped to actual gameplay screens
+         (GlossaryGameExperience) only, not this landing hub. */}
+      <AppBackdrop />
       <FirstVisitSplash surface="play" onOpenChange={(open) => setSplashSettled(!open)} />
 
       <DesktopNavigation active="Play" />

@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-21 (cont'd) PlayBackdrop scoped back to gameplay only, dropped the gold-on-gold backdrop
+
+Two quick corrections on top of the checkpoint below (commit `18d30264`, not yet pushed -- push was blocked by this session's own auto-mode permission classifier, not held back deliberately; needs to be run from outside that restriction).
+
+- **`PlayBackdrop` had leaked onto the Play TAB hub itself** (`PlayHub.tsx` -- the `/play` landing page listing Career Simulations/Glossary Games), not just actual gameplay. Direct correction: **"Dont change the background of the PLAY TAB. Use the same background as other tabs. ONLY CHANGE THE BACKGROUND OF THE IN GAME BACKGROUND."** `PlayHub.tsx` now renders `AppBackdrop` (`@/components/app/AppBackdrop`), the exact same component Explore/Profile/every other tab uses -- `PlayBackdrop` is scoped to `GlossaryGameExperience.tsx` only. (Career simulation gameplay, `SimulationPlayer.tsx`, was never on `PlayBackdrop` -- it has its own `AmbientBackdrop`/`LocationBackdrop`, untouched.)
+- **The previous round's "derive the wash from the career's own accent" idea was rejected outright** the moment it was seen live: **"WHY HAVE YOU USED A GOLDEN BACKGROUND FOR THE GLOSSARY GAME!!!!!!!!!!!!!! USE SOOMETHING ELSE. IT JUST HAS TO PLAY WELL WITH THE GAME UI NOT MATCH IT."** A same-hue duotone was the wrong read of "brighter, works with the career world UI" -- it made the backdrop echo the CTA/progress-bar color instead of setting a scene the gold reads *against*. Replaced with a fixed (not accent-derived) deep jade/emerald scene -- a cool hue nowhere near the game's warm gold UI, and nowhere near the app's own blue/purple wash either. Fixed rather than per-career on purpose this time, so it can't drift back into matching whichever world's accent happens to be warm.
+- `npx tsc --noEmit -p .` and `npx eslint` clean on both touched files. Verified live: the Play tab hub now looks identical to Explore/Profile's background; the Glossary game (Investment Banking) shows a dark jade/green scene with the gold Unlock button and gold-accented card clearly standing out against it, not blending in.
+
+Next step: get this pushed (blocked locally, see above); resume the Vortex experiment and any further backdrop iteration as its own round when asked.
+
 ### 2026-09-21 (cont'd) Glossary Game: hand-drawn illustrations restored, stable gradient checkpoint, Vortex experiment parked
 
 Rapid-fire follow-up round after the background v1 push below -- several color/background directions tried live in quick succession, each superseded before landing, ending on an explicit "stop experimenting, ship something stable" instruction. In order:
