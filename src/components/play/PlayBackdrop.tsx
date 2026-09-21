@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { onPlayPulse, type PlayPulseKind } from "./backdropPulse";
+import { StarsBackground } from "@/components/ui/stars";
 
 // Play's own background -- deliberately NOT AppBackdrop (direct feedback,
 // Joshua Pierce via Slack, 21 Sept 2026: "it shouldn't have a similar
@@ -17,16 +18,29 @@ import { onPlayPulse, type PlayPulseKind } from "./backdropPulse";
 // FOR THE GLOSSARY GAME!!!!!!!!!!!!!! USE SOOMETHING ELSE. IT JUST HAS TO
 // PLAY WELL WITH THE GAME UI NOT MATCH IT" -- the backdrop was echoing the
 // CTA/progress-bar color instead of setting a scene the gold reads *against*.
-// This version is a fixed, always-dark, deep jade/emerald scene -- a cool
-// hue nowhere near the game's warm gold UI (so gold pops as the one bright
-// accent instead of blending in) and nowhere near the app's own blue/purple
-// wash either, per the earlier "not the same blue/purple thing" feedback.
-// It's fixed rather than derived from `accent` on purpose this time, so it
-// never risks matching whichever career's world color happens to be warm.
+// A fixed jade/emerald scene followed -- also since rejected: "Increase the
+// colored space so theres more color on the background overall too. Right
+// now it still feels black dominated. Maybe try a different combo than
+// green/yellow?" Rebuilt again on a berry/magenta palette instead (still
+// nowhere near the app's own blue/purple wash, and nowhere near the gold
+// CTA), with the glows themselves made much bigger and stronger so color
+// actually dominates the frame instead of two small accents on a mostly
+// black field.
 //
 // The canvas Vortex work (`src/components/ui/vortex.tsx`, adapted from
 // Aceternity's component) is left in place, unused, for when that
 // experiment resumes -- not deleted.
+//
+// Layered on top: animate-ui's Stars Background (`src/components/ui/
+// stars.tsx`, pulled in via `npx shadcn@latest view
+// @animate-ui/components-backgrounds-stars` -- direct request 21 Sept
+// 2026, "lets get back to experimenting"). Its own default is grayscale on
+// black; recolored here to the SAME berry wash below (passed as its
+// `background` prop) rather than the reference's own palette, and its
+// `starColor` kept a plain, high-contrast white so the three drifting
+// star layers read clearly against it instead of blending in (direct
+// instruction: "match it to the background so it plays well with the
+// background, not blend into it so i cant see it").
 //
 // `onPlayPulse` (backdropPulse.ts) still lets a game moment -- a correct
 // answer, a term unlocked, a lesson finished -- bloom a brief radial flash
@@ -34,27 +48,34 @@ import { onPlayPulse, type PlayPulseKind } from "./backdropPulse";
 // the background itself, not just on the card. This still uses the
 // career's own accent -- a brief, earned reaction is a different thing
 // from an always-on backdrop wash matching the UI.
-export function PlayBackdrop({ accent = "#ffb81f" }: { accent?: string } = {}) {
+const BACKDROP_WASH = [
+  "radial-gradient(115% 95% at 15% -10%, rgba(219,39,119,0.55) 0%, transparent 68%)",
+  "radial-gradient(105% 90% at 100% 105%, rgba(157,23,77,0.5) 0%, transparent 65%)",
+  "linear-gradient(160deg, #2a0a1f 0%, #170a14 45%, #3a0f2c 100%)",
+].join(", ");
+
+export function PlayBackdrop({ accent = "#ffb81f", showStars = true }: { accent?: string; showStars?: boolean } = {}) {
   const [bloom, setBloom] = useState<{ key: number; kind: PlayPulseKind } | null>(null);
   useEffect(() => onPlayPulse(({ kind }) => setBloom((b) => ({ key: (b?.key ?? 0) + 1, kind }))), []);
   const bloomColor = bloom?.kind === "wrong" ? "var(--destructive)" : accent;
   const bloomPeak = bloom?.kind === "celebrate" ? 0.7 : bloom?.kind === "wrong" ? 0.32 : 0.5;
 
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-      style={{
-        background: [
-          // Two asymmetric jade/emerald glows -- a cool color a warm gold
-          // UI reads clearly against, not a copy of it.
-          "radial-gradient(95% 75% at 12% -8%, rgba(23,168,120,0.35) 0%, transparent 58%)",
-          "radial-gradient(85% 70% at 105% 105%, rgba(15,120,110,0.28) 0%, transparent 55%)",
-          // A deep, near-black jade floor.
-          "linear-gradient(160deg, #0a1f19 0%, #0a0e12 48%, #10201c 100%)",
-        ].join(", "),
-      }}
-    >
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      {/* `showStars=false` on the two celebration screens (Unlock complete,
+         Lesson complete) -- direct instruction, 21 Sept 2026: "do not
+         combine the fireworks with the star background use only the
+         fireworks." Falls back to the plain berry wash with no stars, so
+         the screen's own FireworksBackground is the only motion. `speed`
+         is a duration in seconds for the smallest/fastest star layer (the
+         other two scale off it, *2 and *3) -- the reference's own default
+         of 50 read as too fast once seen live (direct feedback: "Slow the
+         movement of the stars upward... please"). */}
+      {showStars ? (
+        <StarsBackground background={BACKDROP_WASH} starColor="#ffffff" speed={140} className="absolute inset-0 h-full w-full" />
+      ) : (
+        <div className="absolute inset-0 h-full w-full" style={{ background: BACKDROP_WASH }} />
+      )}
       {bloom && (
         <span
           key={bloom.key}

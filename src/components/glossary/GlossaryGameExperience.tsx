@@ -9,6 +9,7 @@ import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Che
 import { PlayBurst } from "@/components/play/PlayBurst";
 import { PlayBackdrop } from "@/components/play/PlayBackdrop";
 import { dispatchPlayPulse } from "@/components/play/backdropPulse";
+import { FireworksBackground } from "@/components/ui/fireworks";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -175,6 +176,35 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
       </p>
     </div>
   );
+}
+
+// Resolves a CSS color expression (a var()/color-mix()/anything) to the
+// actual rgb() string the browser computed for it. Needed because canvas
+// fillStyle/strokeStyle can't parse `var(--glossary-accent)` directly --
+// canvas draws outside the CSS cascade, so it needs a real color, not a
+// custom-property reference. `getComputedStyle` on a real, standard
+// property (here, `color`) DOES resolve the full var() chain; reading the
+// custom property itself back out would not. Used to color-match
+// FireworksBackground's canvas particles to this game's own accent instead
+// of the library's default random rainbow.
+function useResolvedColor(cssColor: string): string | null {
+  const [resolved, setResolved] = useState<string | null>(null);
+  useEffect(() => {
+    // The measurement itself has to run after mount (needs `document`, and
+    // the color's own var() chain has to actually be in the DOM to
+    // resolve) -- deferred one frame via rAF so the setState call isn't
+    // synchronous inside the effect body itself (react-hooks/set-state-in-effect).
+    const raf = requestAnimationFrame(() => {
+      const probe = document.createElement("span");
+      probe.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;";
+      probe.style.color = cssColor;
+      document.body.appendChild(probe);
+      setResolved(getComputedStyle(probe).color);
+      document.body.removeChild(probe);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [cssColor]);
+  return resolved;
 }
 
 function MuteToggle() {
@@ -544,36 +574,69 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
     playSweep();
     dispatchPlayPulse("celebrate");
   }, []);
+  // Direct instruction, 21 Sept 2026: "use this [Fireworks Background] on
+  // success screens, color match to UI." Resolved once to an actual rgb()
+  // (see useResolvedColor) since canvas can't read var(--glossary-accent)
+  // directly; paired with a warm white so it reads as fireworks, not a
+  // single flat-colored burst.
+  const fireworkColor = useResolvedColor("var(--glossary-accent)");
   return (
     <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 py-[var(--space-5)] text-center">
-      <PlayBurst nonce={1} accent="var(--glossary-accent)" />
-      <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-[var(--space-4)]">
-        {lesson.terms.map((t) => (
-          <span key={t.id} className="relative flex size-11 flex-none items-center justify-center rounded-full sm:size-14" style={{ background: "var(--glossary-accent)", color: "#05070f" }}>
-            <TermIcon icon={t.icon} className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full border-2 sm:size-5" style={{ background: "var(--glossary-accent)", borderColor: "var(--background)" }}>
-              <Check className="h-[9px] w-[9px] sm:h-[11px] sm:w-[11px]" style={{ color: "#05070f" }} aria-hidden />
+      {fireworkColor && (
+        // A dedicated positioning wrapper, not a className override on
+        // FireworksBackground itself -- its own base classes hardcode
+        // `relative`, and appending `absolute` alongside it in one
+        // className string left both `position` utilities in the class
+        // list with `position` genuinely ambiguous (Tailwind's cascade
+        // order, not DOM order, decides the winner), which collapsed the
+        // container to zero height and hid every firework entirely. Here
+        // the wrapper owns the absolute positioning and real dimensions;
+        // FireworksBackground's own unmodified `size-full` fills it.
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+          <FireworksBackground
+            color={[fireworkColor, "#ff5f7e", "#ff3d9a", "#ffd93d", "#ffffff"]}
+            population={0.7}
+            fireworkSpeed={{ min: 3, max: 6 }}
+            particleSpeed={{ min: 1.5, max: 5 }}
+          />
+        </div>
+      )}
+      {/* Real content stacked explicitly above the fireworks layer -- both
+         are `position` elements now, and a positioned z-0 element still
+         paints over ordinary in-flow content by default, so without this
+         the fireworks were sitting in FRONT of the text/cards instead of
+         behind them (direct instruction: "make sure the fireworks happen
+         behind the content UI"). */}
+      <div className="relative z-10 flex flex-col items-center gap-[var(--space-4)]">
+        <PlayBurst nonce={1} accent="var(--glossary-accent)" />
+        <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-[var(--space-4)]">
+          {lesson.terms.map((t) => (
+            <span key={t.id} className="relative flex size-11 flex-none items-center justify-center rounded-full sm:size-14" style={{ background: "var(--glossary-accent)", color: "#05070f" }}>
+              <TermIcon icon={t.icon} className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full border-2 sm:size-5" style={{ background: "var(--glossary-accent)", borderColor: "var(--background)" }}>
+                <Check className="h-[9px] w-[9px] sm:h-[11px] sm:w-[11px]" style={{ color: "#05070f" }} aria-hidden />
+              </span>
             </span>
-          </span>
-        ))}
+          ))}
+        </div>
+        <div className="flex w-full max-w-[420px] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <Trophy className="h-8 w-8" style={{ color: "var(--glossary-accent)" }} aria-hidden />
+          <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            All {lesson.terms.length} terms unlocked!
+          </p>
+          <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>
+            {lesson.milestone}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onStartPractice}
+          className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+          style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
+        >
+          Start Practice <ChevronRight className="h-4 w-4" aria-hidden />
+        </button>
       </div>
-      <div className="flex w-full max-w-[420px] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-        <Trophy className="h-8 w-8" style={{ color: "var(--glossary-accent)" }} aria-hidden />
-        <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          All {lesson.terms.length} terms unlocked!
-        </p>
-        <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>
-          {lesson.milestone}
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={onStartPractice}
-        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
-        style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
-      >
-        Start Practice <ChevronRight className="h-4 w-4" aria-hidden />
-      </button>
     </div>
   );
 }
@@ -1381,50 +1444,78 @@ function CompleteScreen({
   useEffect(() => {
     playSweep();
   }, []);
+  // Same as UnlockCompleteScreen -- the lesson's own finish line is the
+  // other "success screen" this round's fireworks were asked for.
+  const fireworkColor = useResolvedColor("var(--glossary-accent)");
   return (
     <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center">
-      <PlayBurst nonce={1} accent="var(--glossary-accent)" />
-      <DreamyFace pose="party" size={120} />
-      <h2 className="text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-        Lesson Complete!
-      </h2>
+      {fireworkColor && (
+        // A dedicated positioning wrapper, not a className override on
+        // FireworksBackground itself -- its own base classes hardcode
+        // `relative`, and appending `absolute` alongside it in one
+        // className string left both `position` utilities in the class
+        // list with `position` genuinely ambiguous (Tailwind's cascade
+        // order, not DOM order, decides the winner), which collapsed the
+        // container to zero height and hid every firework entirely. Here
+        // the wrapper owns the absolute positioning and real dimensions;
+        // FireworksBackground's own unmodified `size-full` fills it.
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+          <FireworksBackground
+            color={[fireworkColor, "#ff5f7e", "#ff3d9a", "#ffd93d", "#ffffff"]}
+            population={0.7}
+            fireworkSpeed={{ min: 3, max: 6 }}
+            particleSpeed={{ min: 1.5, max: 5 }}
+          />
+        </div>
+      )}
+      {/* Real content stacked explicitly above the fireworks layer -- see
+         the matching comment in UnlockCompleteScreen for why this is
+         needed (a positioned z-0 layer still paints over ordinary in-flow
+         content by default). */}
+      <div className="relative z-10 flex flex-col items-center gap-[var(--space-6)]">
+        <PlayBurst nonce={1} accent="var(--glossary-accent)" />
+        <DreamyFace pose="party" size={120} />
+        <h2 className="text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+          Lesson Complete!
+        </h2>
 
-      <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))", borderColor: "var(--glossary-accent)" }}>
-        <span className="flex items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--glossary-accent)" }}>
-          <Sparkles className="h-4 w-4" aria-hidden /> Dream Score
-        </span>
-        <span className="text-[36px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          {dreamScore.toLocaleString()}
-        </span>
-      </div>
-
-      <div className="flex w-full max-w-[380px] flex-col gap-[var(--space-3)]">
-        <div className="flex items-center justify-between border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>
-            XP Earned
+        <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))", borderColor: "var(--glossary-accent)" }}>
+          <span className="flex items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--glossary-accent)" }}>
+            <Sparkles className="h-4 w-4" aria-hidden /> Dream Score
           </span>
-          <span className="text-[18px] font-extrabold" style={{ color: "var(--glossary-accent)" }}>
-            +{lesson.xpReward} XP
+          <span className="text-[36px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            {dreamScore.toLocaleString()}
           </span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>
-            Mastery Progress
-          </span>
-          <span className="text-[18px] font-extrabold" style={{ color: "var(--foreground)" }}>
-            {masteryPct}%
-          </span>
-        </div>
-      </div>
 
-      <button
-        type="button"
-        onClick={onContinue}
-        className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
-        style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
-      >
-        Continue <ChevronRight className="h-4 w-4" aria-hidden />
-      </button>
+        <div className="flex w-full max-w-[380px] flex-col gap-[var(--space-3)]">
+          <div className="flex items-center justify-between border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>
+              XP Earned
+            </span>
+            <span className="text-[18px] font-extrabold" style={{ color: "var(--glossary-accent)" }}>
+              +{lesson.xpReward} XP
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>
+              Mastery Progress
+            </span>
+            <span className="text-[18px] font-extrabold" style={{ color: "var(--foreground)" }}>
+              {masteryPct}%
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onContinue}
+          className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+          style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
+        >
+          Continue <ChevronRight className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
     </div>
   );
 }
@@ -1525,7 +1616,16 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         fontFamily: "var(--font-body)",
       } as React.CSSProperties}
     >
-      <PlayBackdrop accent={accent} />
+      {/* Stars are switched off on the two celebration screens -- their own
+         FireworksBackground is the only motion there (direct instruction,
+         21 Sept 2026: "do not combine the fireworks with the star
+         background use only the fireworks"). Note: "unlockComplete" is a
+         Screen type member that's never actually assigned by setScreen --
+         UnlockCompleteScreen instead renders as a sub-case of
+         screen === "unlock" once unlockIndex reaches the end (see below),
+         so that's the real condition to check here, not the unused
+         literal (comparing against it silently did nothing). */}
+      <PlayBackdrop accent={accent} showStars={!(screen === "unlock" && unlockIndex >= lesson.terms.length) && screen !== "complete"} />
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
@@ -1534,13 +1634,14 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
       <TopBar onBack={() => router.back()} />
 
       {screen === "question" && (
-        // Shrunk and quieted (direct feedback: "make the progress bar info
-        // smaller / less dominant so it is not much of a focus") -- smaller
-        // text, a thinner spark bar, smaller mastery dots, tighter gaps
-        // throughout, so this reads as a thin status strip, not a second
-        // header competing with the question itself.
-        <div className="relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[5px] px-5 pt-[var(--space-2)] md:px-8">
-          <div className="flex items-center justify-between text-[10px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        // An earlier pass shrunk this status strip down (direct feedback:
+        // "make the progress bar info smaller / less dominant") -- since
+        // superseded by "the HUD text size can be bigger, match it to the
+        // career simulation HUD sizes" (21 Sept 2026): text sized to match
+        // SimulationPlayer's own Hud (13px title line, 11px secondary
+        // line, src/components/play/SimulationPlayer.tsx's `Hud`).
+        <div className="relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[6px] px-5 pt-[var(--space-2)] md:px-8">
+          <div className="flex items-center justify-between text-[13px] font-extrabold" style={{ color: "var(--muted-foreground)" }}>
             <span>{lesson.title}</span>
             <span>
               {currentNumber}/{Math.max(mainLoopLength, queue.length)} · {percent}%
@@ -1559,15 +1660,15 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
                   <span
                     key={t.id}
                     title={t.term}
-                    className="flex size-4 items-center justify-center rounded-full"
+                    className="flex size-5 items-center justify-center rounded-full"
                     style={{ background: done ? "var(--glossary-accent)" : "var(--glass-surface-2)", color: "#05070f" }}
                   >
-                    {done && <Check className="h-[9px] w-[9px]" aria-hidden />}
+                    {done && <Check className="h-[11px] w-[11px]" aria-hidden />}
                   </span>
                 );
               })}
             </div>
-            <span className="text-[9px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <span className="text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
               Mastered {masteredCount}/{lesson.terms.length}
             </span>
           </div>
