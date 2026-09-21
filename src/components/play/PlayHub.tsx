@@ -106,7 +106,29 @@ export function PlayHub() {
   // Which row the pointer/scroll is currently on (see useCenteredRow) --
   // shared across every row on the page, not just Glossary Games, per
   // direct feedback: "he wants all rows like this."
-  const activeRow = useCenteredRow(PLAY_ROW_IDS);
+  const scrollActiveRow = useCenteredRow(PLAY_ROW_IDS);
+  // A real mouse hover OVERRIDES the scroll answer -- direct report, 22
+  // Sept 2026 (Josh, on a large Chrome screen): "the glossary games row
+  // scales up and does its job but when he hovers back on the first row it
+  // doesnt hover or scale up." The scroll-centered IntersectionObserver
+  // above is a real fix for touch (no hover exists there at all), but a
+  // mouse user on a tall/wide screen where every row already fits on
+  // screen never actually SCROLLS back up to row 1 -- they just move the
+  // pointer there, which the scroll-only mechanism has no way to notice,
+  // so the row stays stuck compact. Hovering any row's own section now
+  // takes over immediately; leaving it falls back to whatever the scroll
+  // position itself says, so touch/keyboard-scroll behavior is unchanged.
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const activeRow = hoveredRow ?? scrollActiveRow;
+  function rowHoverProps(id: string) {
+    return {
+      onMouseEnter: () => setHoveredRow(id),
+      // Only clear if this row is still the one that set it -- guards
+      // against the leave of the row you're moving AWAY from firing after
+      // the enter of the one you're moving INTO and wiping out its state.
+      onMouseLeave: () => setHoveredRow((current) => (current === id ? null : current)),
+    };
+  }
 
   return (
     <div
@@ -145,6 +167,7 @@ export function PlayHub() {
           focusId={focusId}
           hintReady={splashSettled}
           active={activeRow === "simulations"}
+          hoverProps={rowHoverProps("simulations")}
         />
 
         {/* Glossary Games: split by whether the career actually has authored
@@ -160,6 +183,7 @@ export function PlayHub() {
           <HeroShelfRow
             rowId="glossary"
             active={activeRow === "glossary"}
+            hoverProps={rowHoverProps("glossary")}
             label="Glossary Games"
             items={GLOSSARY_GAMES.map((game) => {
               const playable = hasGlossary(game.careerSlug);
@@ -193,6 +217,7 @@ export function PlayHub() {
         <HeroShelfRow
           rowId="soon"
           active={activeRow === "soon"}
+          hoverProps={rowHoverProps("soon")}
           label="In the works"
           items={soon.map((game) => ({ id: game.careerId, title: game.title, cover: game.cover, world: game.world, locked: true }))}
         />
@@ -257,6 +282,7 @@ function FeaturedRow({
   focusId,
   hintReady,
   active,
+  hoverProps,
 }: {
   simulations: Simulation[];
   soonCareers: SoonCareer[];
@@ -270,6 +296,9 @@ function FeaturedRow({
    *  feedback, 21 Sept 2026). The phone deck below is unaffected -- it has
    *  no compact state of its own, same as before. */
   active: boolean;
+  /** onMouseEnter/onMouseLeave that let a real mouse hover claim focus
+   *  directly, bypassing scroll -- see PlayHub's own rowHoverProps. */
+  hoverProps: { onMouseEnter: () => void; onMouseLeave: () => void };
 }) {
   const candidates: FeaturedCandidate[] = useMemo(
     () => [
@@ -290,7 +319,7 @@ function FeaturedRow({
   if (!featured) return null;
 
   return (
-    <section ref={sectionRef} data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]">
+    <section ref={sectionRef} data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
       {trailerSim?.trailer && <TrailerFlow simulation={trailerSim} onDone={() => setTrailerSim(null)} />}
       <h2
         className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
@@ -789,13 +818,27 @@ const COMPACT_W = "w-[267px] sm:w-[302px] md:w-[347px]";
  *  Tapping a side card (active rows only) doesn't navigate: it becomes
  *  the new hero, expanding in place -- exactly RowCard's own selection
  *  model, reused rather than reinvented. */
-function HeroShelfRow({ rowId, label, items, active }: { rowId: string; label: string; items: HeroItem[]; active: boolean }) {
+function HeroShelfRow({
+  rowId,
+  label,
+  items,
+  active,
+  hoverProps,
+}: {
+  rowId: string;
+  label: string;
+  items: HeroItem[];
+  active: boolean;
+  /** onMouseEnter/onMouseLeave that let a real mouse hover claim focus
+   *  directly, bypassing scroll -- see PlayHub's own rowHoverProps. */
+  hoverProps: { onMouseEnter: () => void; onMouseLeave: () => void };
+}) {
   const [featuredId, setFeaturedId] = useState<string | undefined>(items[0]?.id);
   const featured = items.find((item) => item.id === featuredId) ?? items[0];
   const sectionRef = useRef<HTMLElement>(null);
   if (!featured) return null;
   return (
-    <section ref={sectionRef} data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]">
+    <section ref={sectionRef} data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
       <h2
         className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
         style={{ color: active ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}

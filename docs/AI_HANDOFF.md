@@ -111,6 +111,44 @@ bug is deterministic -- every other call site gets the same correction.
 Next step: push (explicit go-ahead: "Fix and push" pattern this session).
 
 
+### 2026-09-22 Play tab's row-focus: hovering back to row 1 did nothing on a large screen
+
+Relayed report: "Jish showed me his play tab he has a large screen on
+chrome. THe glossary games row scales up and does its job but when he
+hovers back on the first row it doesnt hover or scale up, basically it
+doesnt work."
+
+Root cause: `PlayHub.tsx`'s row-focus ("TV UX" -- one row hero-sized, the
+rest compact, Netflix/Apple-TV remote-nav style) is driven ENTIRELY by
+`useCenteredRow`, an `IntersectionObserver` watching which row crosses a
+thin band across the vertical center of the viewport -- i.e. by SCROLL
+position, not by the mouse. That's deliberate and correct for touch (no
+hover exists there at all), but on a large screen where the whole page can
+already fit without scrolling, moving the mouse back over row 1 doesn't
+generate any scroll/intersection change for the observer to react to --
+there's simply no signal telling it row 1 is active again, so it stays
+stuck on whichever row last actually scrolled into the center band.
+
+Fixed by giving a real mouse hover its OWN, higher-priority signal rather
+than routing it through scroll: `PlayHub` now keeps a `hoveredRow` state
+that overrides `useCenteredRow`'s scroll-derived answer whenever it's set,
+via `onMouseEnter`/`onMouseLeave` on each row's own `data-row-id` section
+(`rowHoverProps`, guards against a stale leave from the row you're moving
+AWAY from clobbering the enter of the one you're moving INTO). Scroll
+behavior for touch/keyboard is completely unchanged; a mouse now claims a
+row immediately on hover instead of needing an actual scroll to happen.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean. Verified live at a
+1800x1100 viewport (no page scroll needed to see every row) by dispatching
+real `mouseenter`/`mouseleave` sequences matching Josh's exact report --
+hover Glossary Games (confirmed via its heading turning the accent color)
+-> hover back to Career Simulations without any scroll in between ->
+confirmed BOTH the heading color AND the actual hero/compact card sizing
+swap back correctly, screenshotted before/after.
+
+Next step: push (go-ahead given after reporting the fix: "Yes please").
+
+
 ### 2026-09-21 (cont'd) Per-version sound + music (incl. v1), app-wide chip/option gap sweep, demo reload/step-back, music toggle
 
 On top of the fine-tuning round below (commit `24709a99`, pushed).
