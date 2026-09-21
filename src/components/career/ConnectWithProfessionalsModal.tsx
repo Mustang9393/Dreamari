@@ -323,7 +323,9 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
               memoryKey="connect-career-chain"
             />
           </div>
-          <button className={styles.skip} onClick={onClose}>Close</button>
+          {/* Was a "Close" text button AND this X icon, both doing the
+             identical thing (direct feedback, 21 Sept 2026: "there is
+             close and x... this was a mistake, only x will remain"). */}
           <button className={styles.iconButton} aria-label="Close" onClick={onClose}><X size={18} /></button>
         </header>
 

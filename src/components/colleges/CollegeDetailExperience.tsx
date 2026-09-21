@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowUpRight, ChevronDown, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { BorderBeam } from "border-beam";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -207,20 +206,22 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                   {x?.links.map ? <a href={x.links.map} target="_blank" rel="noreferrer" className="dm-link underline decoration-[rgba(255,255,255,0.35)] underline-offset-2">{d.address}</a> : d.address}
                 </p>
               )}
-              {/* Three primary actions plus Save (direct feedback, 15 Sept
-                 2026) -- Website is the one every school always has, so it
-                 keeps the animated beam; Apply/Financial Aid are real but
-                 secondary, a plain solid fill. */}
+              {/* Three primary actions plus Save. Website used to carry the
+                 animated beam and a solid accent fill -- the most eye-
+                 catching button on the page -- but it's also the one
+                 action that takes a student out of the app entirely with
+                 nothing to show for it when they come back (direct
+                 feedback, 21 Sept 2026: "highlighting the website button
+                 ... will prompt users to click... result in DAU like
+                 metrics going down"). Downgraded to the same plain style
+                 as Apply/Financial Aid -- all three are equally
+                 external-link actions, so none should be visually
+                 promoted over the others. */}
               <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
                 {c.website && (
-                  // Solid ACCENT fill used to sit flush against the beam ring
-                  // and swallow it -- same fix as GetHired/Connect/Career
-                  // Detail's solid CTAs elsewhere this session.
-                  <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
-                  <a href={c.website} target="_blank" rel="noreferrer" className="dm-solid flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: `color-mix(in srgb, ${ACCENT} 22%, var(--glass-surface-2))`, borderColor: `color-mix(in srgb, ${ACCENT} 45%, transparent)`, color: "#fff" }}>
+                  <a href={c.website} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>
                     Website <ArrowUpRight className="h-4 w-4" aria-hidden />
                   </a>
-                  </BorderBeam>
                 )}
                 {applyHref && (
                   <a href={applyHref} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>

@@ -864,7 +864,16 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 sm:px-[var(--space-14)] lg:pt-[var(--space-10)] ${
           tab === "browse"
             ? "gap-[var(--space-10)] pt-4 pb-[120px]"
-            : "gap-[var(--space-6)] pt-4 pb-0 lg:h-[calc(100dvh-62px)] lg:overflow-hidden lg:pb-[var(--space-6)]"
+            // DesktopNavigation (chrome.tsx) is h-[86px], not 62px -- this
+            // was sized against a stale assumption, so `main` ran 24px
+            // taller than the space actually left below the sticky nav.
+            // That 24px was just enough real page-level scroll to shift
+            // the For You | Browse All row out from under the nav and
+            // leave the reel card's own Play/More Info buttons clipped
+            // until scrolled (direct feedback, 21 Sept 2026: "buttons...
+            // only accessible after a scroll" / "For You | Browse All
+            // navigation is hidden" -- both the same root cause).
+            : "gap-[var(--space-6)] pt-4 pb-0 lg:h-[calc(100dvh-86px)] lg:overflow-hidden lg:pb-[var(--space-6)]"
         }`}
       >
         {/* Phone row: the view toggle, then Search (Browse only) and Schools;

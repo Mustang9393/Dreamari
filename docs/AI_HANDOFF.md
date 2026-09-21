@@ -11340,3 +11340,84 @@ reproduce at any size tried here.
 
 Next step: push requested directly by the user for this batch --
 pushing this and the QA-fixes batch above together.
+
+## 2026-09-21 · Second QA round: Explore For You height bug, Connect/Website cleanup
+
+Usman sent a second round of notes with Chandu's own decisions already
+inline (bolded, in the Slack thread -- not reproduced here). Asked to
+verify each decision and fix what's fixable. Most items needed no code
+change (explicitly "ignore," "non-issue," or informational answers
+already correct); the concrete ones:
+
+- **Explore's "For You" reel needed a scroll to reach its own Play
+  Game/More Info buttons, and the For You | Browse All tabs could
+  scroll out of view** (`ExploreExperience.tsx`) -- root-caused, not
+  guessed at: `main`'s height was set to `calc(100dvh - 62px)`,
+  assuming a 62px desktop nav, but `DesktopNavigation` (`chrome.tsx`)
+  is actually 86px tall. That exact 24px gap was real, measurable page-
+  level scroll (confirmed via `document.scrollingElement.scrollHeight`
+  before/after: 824px of content in an 800px window, dropping to
+  exactly 800/800 once fixed) -- enough to shift the sticky tab row
+  out from under the nav and clip the card's own bottom buttons until
+  scrolled. One-line fix once found: `100dvh-62px` -> `100dvh-86px`.
+- **Connect-with-professionals modal had both a "Close" text button
+  and an "X" icon button doing the same thing** (`ConnectWithProfessionalsModal.tsx`)
+  -- confirmed a mistake, not a deliberate second affordance; removed
+  the text button, kept "X". The Replay/refresh icon next to it is
+  unrelated and stays (Josh's demo).
+- **Website button on the college detail page was the single most
+  visually prominent action** (`CollegeDetailExperience.tsx`) -- an
+  animated `BorderBeam` + solid accent fill, while Apply/Financial Aid
+  sat in plain secondary styling. Per the user's own flagged concern
+  (highlighting the one button that takes a student out of the app
+  entirely, with nothing to show for it on return, works against
+  engagement) -- downgraded Website to the identical plain style
+  already used for Apply/Financial Aid, so none of the three external-
+  link actions is visually promoted over the others. Removed the now-
+  unused `BorderBeam` import.
+
+Investigated, no fix made -- flagging the actual finding instead of
+guessing:
+- **Reach/Target/Safety vs. "Hardest to get into/Selective/Most
+  students get in" language inconsistency** between the Schools tab
+  and the Career Report's own School Pathways section. Traced both:
+  `ForYouSchools.tsx` has a real "Use my GPA" toggle (local UI state,
+  defaults on) that swaps to the generic admit-rate labels when
+  switched off -- correct, working as designed. The Career Report's
+  own Reach/Target/Safety badges (`CareerReport.tsx`, `BAND_ORDER`)
+  come from a **static field already baked into the report data**
+  (`college.status`), with no GPA-awareness and no equivalent toggle
+  at all. So this isn't one broken page copying the wrong label from
+  a working one -- it's one page having an interactive feature
+  (the GPA toggle) that no other page offers, which was never asked
+  for elsewhere. A real label-only patch is possible (swap the
+  Career Report's displayed text when the student's actual saved GPA
+  is empty) but wouldn't fully match ForYouSchools' behavior (that
+  page's toggle is a per-visit UI preference, not tied to the saved
+  profile GPA at all) -- flagging for a product decision on which
+  behavior is actually wanted app-wide rather than building a partial
+  fix that looks resolved but isn't the same thing.
+- **Tooltip positioning "far" from the trigger on Windows** (items 2
+  and 8: Save button and the career page's "+ Add to my list" button).
+  Both go through the same shared `IconTip`/`Tip` component
+  (`app/IconTip.tsx`), which already does the robust thing --
+  measures the trigger's real `getBoundingClientRect()` and portals
+  the tooltip to `document.body` with `position: fixed`, the same
+  pattern used to fix the Settings dropdown and GPA picker earlier
+  this session. No logic bug found in it. Likely a genuine Windows/
+  display-scaling rendering quirk not reproducible from this
+  environment, matching the user's own "(Windows issue)" read --
+  didn't find anything to indicate that read was wrong.
+
+Files: `src/components/app/ExploreExperience.tsx`,
+`src/components/career/ConnectWithProfessionalsModal.tsx`,
+`src/components/colleges/CollegeDetailExperience.tsx`.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on all three. Verified
+live: Explore For You's overflow measured exactly 0px after the fix
+(was 24px) at 1440x800, both buttons fully visible with no scroll
+possible; Connect modal now shows a single close control.
+
+Next step: local-only, not pushed -- no explicit push instruction in
+this round (the standing "show before push" preference for this
+project), unlike the batch above.
