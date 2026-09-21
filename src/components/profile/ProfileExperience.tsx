@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Snowflake, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -31,7 +31,6 @@ import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
 import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type PlanStage } from "./gradePlanData";
-import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
@@ -1655,7 +1654,7 @@ function OverviewTabV2({
           <div
             role="button" tabIndex={0} onClick={onGoPlan}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onGoPlan(); } }}
-            className="dm-season-host dm-tap group relative flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}
+            className="dm-tap group relative flex h-full w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={INSET}
           >
             <SeasonScene seasonId={currentWindow.id} />
             <DashHoverChevron />
@@ -2139,6 +2138,150 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
 
 const GRADE_WINDOW_MONTHS: Record<string, string> = { fall: "Sept – Nov", winter: "Dec – Feb", spring: "Mar – May" };
 
+// Purpose-drawn marks, not lucide's generic Leaf/Flower2 -- a simple single
+// leaf silhouette (two variants, so a cluster never repeats one shape) and
+// an actual five-petal sakura blossom, since "get better SVGs of actual
+// autumn leaves... spring can use better sakura style flows" asked for the
+// real thing, not an icon-font stand-in (direct feedback, 20 Sept). Winter
+// keeps lucide's own Snowflake -- "the snowflakes are okay." All three take
+// className/style just like a lucide icon so SeasonScene can treat every
+// season's marks identically.
+function LeafMarkA({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden>
+      <path d="M12 2C16 6 18 10.5 17 15.5C16.2 19.6 13.4 22 12 22C10.6 22 7.8 19.6 7 15.5C6 10.5 8 6 12 2Z" fill="currentColor" />
+      <path d="M12 4.5V20.5" stroke="rgba(0,0,0,0.3)" strokeWidth="0.8" strokeLinecap="round" />
+      <path d="M12 8.5L8.8 11M12 8.5L15.2 11M12 13L9.2 15.3M12 13L14.8 15.3" stroke="rgba(0,0,0,0.24)" strokeWidth="0.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+function LeafMarkB({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden>
+      <path d="M12 3C14.6 4.7 17.6 5.9 18.6 9C19.6 12 18 14 16 14.2C17 16.3 16.6 18.7 14.4 19.6C13.4 20 12.5 19.6 12 19C11.5 19.6 10.6 20 9.6 19.6C7.4 18.7 7 16.3 8 14.2C6 14 4.4 12 5.4 9C6.4 5.9 9.4 4.7 12 3Z" fill="currentColor" />
+      <path d="M12 5.5V19" stroke="rgba(0,0,0,0.26)" strokeWidth="0.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+function SakuraMark({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden>
+      {[0, 72, 144, 216, 288].map((deg) => (
+        <ellipse key={deg} cx="12" cy="6.6" rx="2.5" ry="3.9" fill="currentColor" transform={`rotate(${deg} 12 12)`} />
+      ))}
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" opacity="0.75" />
+    </svg>
+  );
+}
+
+// Each season's own two-tone tint + which marks fall through it -- the one
+// place in the app where "which season" is the whole point of the
+// surface, so it gets real color rather than the app's single accent.
+// Kept as a wash on the card's right half, not a full saturated fill: the
+// card's own dark surface still leads on the left (direct feedback, 20
+// Sept: "restrict it to only be there after the 50% width... slightly
+// more brighter color gradient... with 2 or more colors"). Used on both
+// the real My Plan tab's window accordions and Overview's own Plan tile,
+// so the same three moods read consistently everywhere.
+type SeasonParticle = { size: number; top: number; topStart: number; left: string; dy: number; dx: number; r0: number; r1: number; delay: string; dur: string; op: number; markIndex?: number };
+
+// Each season keeps its own hand-placed cluster, not one layout reused with
+// a different color -- three cards sitting one under another with the
+// identical composition read as one asset stamped three times (direct
+// feedback, 20 Sept: "dont compose all the cards the same so the elements
+// look like theyre repeating"). Every cluster sits tight and right-aligned
+// -- some marks crop against the card's own right edge on purpose, rather
+// than floating at an unanchored middle distance ("not aligned right nor
+// left... compose them a tad bit tighter together").
+const SEASON_STYLE: Record<"fall" | "winter" | "spring", { Marks: Array<React.ElementType>; tint: string; tint2: string; particles: SeasonParticle[] }> = {
+  fall: {
+    Marks: [LeafMarkA, LeafMarkB], tint: "#e2842a", tint2: "#c2410c",
+    particles: [
+      { size: 22, top: 60, topStart: 6, left: "78%", markIndex: 0, dy: 62, dx: 8, r0: -10, r1: 48, delay: "0s", dur: "5.4s", op: 0.6 },
+      { size: 15, top: 78, topStart: 10, left: "92%", markIndex: 1, dy: 56, dx: -8, r0: 8, r1: -34, delay: "1.1s", dur: "6.1s", op: 0.48 },
+      { size: 25, top: 58, topStart: 4, left: "99%", markIndex: 0, dy: 60, dx: 6, r0: -6, r1: 40, delay: "2.1s", dur: "5.8s", op: 0.52 },
+    ],
+  },
+  winter: {
+    Marks: [Snowflake], tint: "#3b82f6", tint2: "#6366f1",
+    particles: [
+      { size: 12, top: 58, topStart: 8, left: "76%", dy: 64, dx: 6, r0: 0, r1: 30, delay: "0s", dur: "6.8s", op: 0.46 },
+      { size: 17, top: 74, topStart: 6, left: "88%", dy: 58, dx: -6, r0: 10, r1: -20, delay: "1.6s", dur: "6.2s", op: 0.56 },
+      { size: 10, top: 90, topStart: 12, left: "97%", dy: 52, dx: 5, r0: -8, r1: 24, delay: "0.8s", dur: "7.4s", op: 0.38 },
+      { size: 15, top: 62, topStart: 4, left: "100%", dy: 60, dx: -4, r0: 6, r1: -28, delay: "2.6s", dur: "6.6s", op: 0.46 },
+    ],
+  },
+  spring: {
+    Marks: [SakuraMark], tint: "#f472b6", tint2: "#db2777",
+    particles: [
+      { size: 18, top: 62, topStart: 6, left: "80%", dy: 58, dx: 8, r0: -10, r1: 45, delay: "0s", dur: "5.6s", op: 0.56 },
+      { size: 13, top: 80, topStart: 10, left: "93%", dy: 54, dx: -8, r0: 8, r1: -32, delay: "1.4s", dur: "6.3s", op: 0.44 },
+      { size: 20, top: 58, topStart: 4, left: "100%", dy: 58, dx: 6, r0: -6, r1: 38, delay: "2.4s", dur: "5.9s", op: 0.48 },
+    ],
+  },
+};
+
+/** A live weather-widget scene, not a flat badge: a season-tinted glow
+ *  radiating from the card's own top-right corner, not a strict left/right
+ *  split -- a straight vertical seam down the middle read as a hard line
+ *  and the second color never blended in naturally (direct feedback, 20
+ *  Sept: "reads too left and right with the sharp line... second color
+ *  doesnt flow as organically... more top right corner... but still not
+ *  linear more organic... as long as it starts out 0% for a little bit
+ *  and organically grows im fine"). Sits over the card's own dark base,
+ *  and the season's marks sit visibly still at rest lower in that same
+ *  corner -- kept clear of the header's own number+chevron column, which
+ *  lives in the corner's top few rows (direct feedback: "dont clash with
+ *  the number and chevron... in default state"). REST is not invisible --
+ *  the marks drift down on a loop only while hovered (dm-season-fall,
+ *  app.css), starting from the exact resting opacity so hover never pops.
+ *  A fixed-height mask keeps the glow reading as part of the HEADER
+ *  specifically on an accordion: it fades to nothing well before the
+ *  card's own bottom edge, tapering into the opened body organically
+ *  rather than being sliced off by a straight edge. */
+function SeasonScene({ seasonId, className = "", fadeToHeader = false }: { seasonId: "fall" | "winter" | "spring"; className?: string; fadeToHeader?: boolean }) {
+  const { Marks, tint, tint2, particles } = SEASON_STYLE[seasonId];
+  // Only the accordion (fadeToHeader) needs the color kept local to its
+  // own header, tapering out before the opened body below it -- a plain,
+  // non-expanding card (Overview's own Plan tile) has nothing below to
+  // stay clear of, so its color runs the card's own full height instead
+  // of stopping short of the bottom edge (direct feedback, 20 Sept: "can
+  // also touch the bottom edge, dont stop where it is right now"). */
+  const fade = fadeToHeader ? "linear-gradient(to bottom, black 0px, black 64px, transparent 132px)" : undefined;
+  return (
+    <div
+      className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${className}`}
+      style={{
+        background: `radial-gradient(130% 180% at 100% 0%, color-mix(in srgb, ${tint2} 46%, transparent) 0%, color-mix(in srgb, ${tint} 34%, transparent) 34%, transparent 68%)`,
+        ...(fade ? { maskImage: fade, WebkitMaskImage: fade } : {}),
+      }}
+      aria-hidden
+    >
+      {particles.map((p, i) => {
+        const Mark = Marks[p.markIndex ?? i % Marks.length];
+        return (
+          <Mark
+            key={i}
+            className="dm-season-particle absolute"
+            style={{
+              top: p.top, left: p.left, height: p.size, width: p.size, color: tint, opacity: p.op,
+              transform: `rotate(${p.r0}deg)`,
+              // The fall itself starts from near the card's own top edge
+              // (--fy0), not from wherever the mark happens to rest --
+              // the resting position (top: p.top) stays put either way
+              // (direct feedback, 20 Sept: "should start from the top...
+              // but in default mode dont make the default position the
+              // top").
+              ["--dur" as string]: p.dur, ["--pdelay" as string]: p.delay, ["--dy" as string]: `${p.dy}px`,
+              ["--dx" as string]: `${p.dx}px`, ["--r0" as string]: `${p.r0}deg`, ["--r1" as string]: `${p.r1}deg`, ["--po" as string]: p.op,
+              ["--fy0" as string]: `${p.topStart - p.top}px`,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
 /** One calendar frame: a thin colored strip on its own (the "header," not
  *  shared with either month) sits above both months stacked underneath it
  *  in identical styling, so neither reads more important than the other
@@ -2282,7 +2425,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
         const isOpen = openWindow === w.id;
         const v2 = variant === "v2";
         return (
-          <section key={w.id} className="dm-season-host group relative flex w-full flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={INSET}>
+          <section key={w.id} className="group relative flex w-full flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={INSET}>
             {/* v1 stays exactly the plain dark card it always was; v2 gets
                the season scene, a subtle wash + hover-only falling marks
                over the SAME dark base, not a special lighter card (direct
@@ -2310,7 +2453,7 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
               </span>
             </button>
             {isOpen && (
-              <div className="filters-reveal relative z-[1] flex flex-col px-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
+              <div className="filters-reveal flex flex-col px-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
                 {(["app", "out"] as const).map((group) => {
                   const rows = w.steps.filter((s) => (group === "out") === !s.inApp);
                   if (rows.length === 0) return null;

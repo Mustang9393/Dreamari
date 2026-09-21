@@ -172,6 +172,33 @@
   }
 }
 
+/* My Plan's own seasonal cards (the real Fall/Winter/Spring accordions and
+   Overview's own Plan tile): leaves/snow/petals sit visibly still at rest
+   (their own inline top/opacity), and drift down and fade out on a slow,
+   continuous loop for as long as the card is hovered -- removing the
+   animation on mouse-leave snaps them back to that same resting state
+   with no reverse-play, so re-hovering always replays the same fall
+   (direct feedback, 20 Sept: "animate when i hover", "shouldnt stop after
+   playing once", "fall slower", and separately "the falling animations...
+   should start from the top... but in default mode dont make the default
+   position the top" -- the fall's own start point (--fy0) is independent
+   of the resting position, so hovering carries each mark up near the
+   card's top edge before it falls back down through where it normally
+   sits). Linear timing, not an ease, so a looping fall never visibly
+   decelerates into each restart. Each particle's own drift distance/
+   rotation/delay arrive as custom properties so a cluster never moves in
+   lockstep. */
+@keyframes dm-season-fall {
+  0% { transform: translateY(var(--fy0, -6px)) translateX(0) rotate(var(--r0, 0deg)); opacity: var(--po, 0.6); }
+  85% { opacity: var(--po, 0.6); }
+  100% { transform: translateY(var(--dy, 150px)) translateX(var(--dx, 14px)) rotate(var(--r1, 60deg)); opacity: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .group:hover .dm-season-particle {
+    animation: dm-season-fall var(--dur, 5.5s) linear var(--pdelay, 0s) infinite;
+  }
+}
+
 /* ---------------------------------------------------------------------------
    Interaction affordances
    ---------------------------------------------------------------------------
