@@ -430,12 +430,21 @@ export type Level = {
   /** Express mode: beat ids the trimmed demo run drops. All are teaching
    *  screens -- every scored beat must survive, and scoring, thresholds and
    *  endings stay untouched (Express handoff doc). Presence of this list is
-   *  what offers the mode at all. */
+   *  what offers the mode at all. Read against `expressSource` if that's
+   *  set (see below), not necessarily this level's own `beats`. */
   expressCut?: string[];
   /** True only on the derived level object actually being played in Express
    *  (the route builds it from `expressCut`) -- the player uses it to key a
    *  separate save slot and to turn the cut teaching into tappable panels. */
   express?: boolean;
+  /** Escape hatch for "Full mode moved on, Express mode didn't" (direct
+   *  feedback, 21 Sept 2026: IB Level 1's Full mode rebuild changed what
+   *  Express played too, and only Express was supposed to revert). When
+   *  set, Express mode is built from THIS level object's own `beats` +
+   *  `expressCut` instead of the level's -- a frozen snapshot, not a live
+   *  view of Full mode's own content. Full mode is completely unaffected;
+   *  this field is only ever read for the express derivation. */
+  expressSource?: Level;
 };
 
 /** One trailer card: full-bleed reused art (none = black), one line of

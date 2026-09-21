@@ -1,4 +1,5 @@
 import type { Level } from "./types";
+import { IB_LEVEL_1_EXPRESS_LEGACY } from "./ib-level-1-express-legacy";
 
 // LEVEL 1 INTERN, from DreamAri_IB_Levels1-3_Handoff_v8.xlsx (20 Sept), tab
 // "Level 1 Intern" -- the 20 Sept rebuild to a clean three-act flow (Act 1:
@@ -39,12 +40,17 @@ export const IB_LEVEL_1: Level = {
   // (Interaction Rules: "this is not a required screen anymore... opens
   // ONLY when the student taps the reputation score").
   hideBand: true,
-  // Express mode (Level 1 Intern tab, "Express Mode" column): only the three
-  // screens that teach the GAME rather than the JOB and add nothing a
-  // returning player needs twice -- the quick-check setup card, and the two
-  // Act Moments, which are celebratory pauses, not content. Every other
-  // screen stays, including every character card and every scored beat.
+  // Express mode reverted to its pre-20-Sept content (direct instruction,
+  // 21 Sept 2026: "the express mode changed to the full game with recent
+  // updates... ONLY EXPRESS MODE should revert") -- expressSource below
+  // points Express at the frozen legacy snapshot instead of this level's
+  // own beats. `expressCut` stays non-empty ONLY because PlayHub and the
+  // route both gate "is Express even offered" on its length; the actual
+  // cut list Express plays against is the legacy file's own expressCut,
+  // not this one. Full mode is entirely unaffected -- it still plays
+  // every beat below, three acts, binary scoring, all of it.
   expressCut: ["L1-05", "L1-ACT1", "L1-CHECK"],
+  expressSource: IB_LEVEL_1_EXPRESS_LEGACY,
   beats: [
     // ---- Act 1: Learn the Game ----
     {

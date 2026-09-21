@@ -29,9 +29,17 @@ export default async function GamePage({
   // scored beat, the scoring, the thresholds and the endings are the full
   // level's own -- the beats array is just shorter, and `express: true` tells
   // the player to key a separate save slot and offer the tappable panels.
-  const express = (Array.isArray(query.mode) ? query.mode[0] : query.mode) === "express" && !!picked.expressCut?.length;
+  //
+  // `expressSource`, when a level sets it, redirects that derivation to a
+  // DIFFERENT level object entirely (its own beats + its own expressCut) --
+  // the escape hatch for "Full mode moved on, Express mode didn't" (IB
+  // Level 1, 21 Sept 2026: the rebuild changed what Express played too,
+  // and only Express was supposed to revert). `picked` itself -- and so
+  // Full mode -- never reads expressSource; it's consulted here only.
+  const expressBase = picked.expressSource ?? picked;
+  const express = (Array.isArray(query.mode) ? query.mode[0] : query.mode) === "express" && !!expressBase.expressCut?.length;
   const level = express
-    ? { ...picked, id: `${picked.id}-express`, express: true, beats: picked.beats.filter((beat) => !picked.expressCut!.includes(beat.id)) }
+    ? { ...expressBase, id: `${picked.id}-express`, express: true, beats: expressBase.beats.filter((beat) => !expressBase.expressCut!.includes(beat.id)) }
     : picked;
   return (
     <>

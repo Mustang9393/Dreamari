@@ -289,6 +289,42 @@ export const BEAT_LOCATION: Record<string, LocationId> = {
   "L1-35": "l1-reception",
   // L1-36 is the Final Review -- deliberately absent (see the note above).
 
+  // Level 1 -- Intern, EXPRESS LEGACY (ib-level-1-express-legacy.ts). A
+  // separate id namespace (L1E- vs L1-) for content Full mode no longer
+  // plays -- these ids are exactly the pre-20-Sept "L1-" ids, renamed so
+  // they can never collide with the current rebuild's own same-numbered
+  // but semantically different beats. Same room assignments the original
+  // mapping used (arrival run at reception, Christina's teaching stretch
+  // at the cafe, the trading floor for the client-ready stretch, night for
+  // the late stretch), just under the new prefix. L1E-21/22 own their own
+  // hero art (l1-12/l1-13.webp) -- mapped anyway as the fallback once that
+  // art goes stale, same pattern as every art-owning beat elsewhere in
+  // this table. L1E-25 is the level's own Final Review -- deliberately
+  // absent, same as every other level's review beat.
+  "L1E-01": "l1-reception",
+  "L1E-02": "l1-reception",
+  "L1E-03": "l1-reception",
+  "L1E-03b": "l1-reception",
+  "L1E-04": "l1-reception",
+  "L1E-05": "l1-reception",
+  "L1E-06": "l1-reception",
+  "L1E-07": "l1-reception",
+  "L1E-08": "l1-reception",
+  "L1E-09": "l1-reception",
+  "L1E-10": "l1-reception",
+  "L1E-11": "cobalt-cafe-lounge-sunset",
+  "L1E-12": "cobalt-cafe-lounge-sunset",
+  "L1E-13": "cobalt-cafe-lounge-sunset",
+  "L1E-13b": "cobalt-trading-floor-sunset",
+  "L1E-17": "cobalt-trading-floor-sunset",
+  "L1E-18": "cobalt-trading-floor-sunset",
+  "L1E-19": "cobalt-trading-floor-sunset",
+  "L1E-20": "cobalt-cafe-lounge-sunset",
+  "L1E-21": "cobalt-trading-floor-sunset",
+  "L1E-22": "cobalt-trading-floor-sunset",
+  "L1E-23": "cobalt-trading-floor-night",
+  "L1E-24": "l1-reception",
+
   // Level 2 -- Analyst
   "L2-01": "cobalt-elevator-hallway-sunset",
   "L2-02": "cobalt-trading-floor-sunset",
