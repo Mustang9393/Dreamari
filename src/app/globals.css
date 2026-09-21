@@ -1043,6 +1043,46 @@ body {
   100% { opacity: 0; transform: scale(2.2); }
 }
 
+/* PlayBackdropV2Crt: a live TV-static step (not a smooth fade -- real
+   static flickers between frames) and a barely-there brightness drift so
+   the tube never reads perfectly steady. PlayBackdropV4Synthwave: the
+   perspective grid scrolls toward the viewer in a hard loop matching its
+   own repeat size (64px, doubled for the rotated axis), 21 Sept 2026. */
+@keyframes crt-static {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-1%, 1%); }
+}
+@keyframes crt-flicker {
+  0%, 19%, 21%, 100% { opacity: 1; }
+  20% { opacity: 0.85; }
+}
+@keyframes synth-grid-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(64px); }
+}
+
+/* Glossary Game v2 (CRT) background experiment, 21 Sept 2026: "match UI,
+   cards, fonts, etc to go along with that one." Rather than rewrite every
+   card/heading in GlossaryGameExperience.tsx, this scopes token overrides
+   under one class the root wrapper adds only when v2 is active -- every
+   card/heading in that file already reads var(--font-display)/var(--card)/
+   var(--glass-border), so redefining the tokens here reskins the whole
+   game's chrome to a terminal look from one reversible block. */
+/* .marketing-v2.play-crt, not just .play-crt: tokens.css's own
+   `.marketing-v2 { --font-display: ... }` is the exact same specificity
+   (one class) as a bare `.play-crt` rule, and source order put tokens.css
+   after this block in the bundle, so the plain single-class version here
+   silently lost every time. The root wrapper always carries both classes
+   together, so the compound selector is guaranteed to win regardless of
+   bundle order. */
+.marketing-v2.play-crt {
+  --font-display: "Courier New", monospace;
+  --card: #050805;
+  --glass-border: rgba(255, 183, 31, 0.4);
+  --speech-bubble-bg: #050805;
+  --speech-bubble-fg: #ffcf6e;
+}
+
 /* Marketing Explore "Browse All" rails: seamless marquee (content doubled,
    track slides half its width). Hover pauses; reduced-motion disables. */
 @keyframes mkt-rail-drift {

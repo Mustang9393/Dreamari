@@ -10,6 +10,11 @@ import { PlayBurst } from "@/components/play/PlayBurst";
 import { PlayBackdrop } from "@/components/play/PlayBackdrop";
 import { dispatchPlayPulse } from "@/components/play/backdropPulse";
 import { FireworksBackground } from "@/components/ui/fireworks";
+import { PlayVersionChip, type PlayBgVersion } from "@/components/play/PlayVersionChip";
+import { useResolvedColor } from "@/components/play/useResolvedColor";
+import { PlayBackdropV2Crt } from "@/components/play/PlayBackdropV2Crt";
+import { PlayBackdropV3Dots } from "@/components/play/PlayBackdropV3Dots";
+import { PlayBackdropV4Synthwave } from "@/components/play/PlayBackdropV4Synthwave";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -153,17 +158,20 @@ function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | 
 function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong" }) {
   // Neutral used to be var(--glass-surface-1) -- a translucent glass panel
   // that read fine over the game's old plain dark backdrop, but got lost
-  // once that backdrop became a busy, colorful animated vortex (direct
+  // once that backdrop became a busy, colorful animated background (direct
   // feedback 21 Sept 2026: "needs more solid surface, it gets lost in the
   // background now"). Needs a genuinely solid fill -- but NOT var(--card):
-  // that token flips to white in light mode, and PlayBackdrop's vortex
-  // stays the same fixed dark scene regardless of the app's light/dark
-  // toggle (deliberately -- Play is its own immersive "world," not a
-  // themed page), so a theme-following white card there read as a bug of
-  // its own the moment the app was in light mode ("lose the white
-  // background it doesnt work for the darkmode UI"). A literal, always-dark
-  // navy matches the vortex's own palette in both modes.
-  const bg = tone === "correct" ? "color-mix(in srgb, var(--success, #1f9d55) 14%, #151829)" : tone === "wrong" ? "color-mix(in srgb, var(--danger, #e0483e) 12%, #151829)" : "#151829";
+  // that token flips to white in light mode, and the backdrop stays the
+  // same fixed dark scene regardless of the app's light/dark toggle
+  // (deliberately -- Play is its own immersive "world," not a themed
+  // page), so a theme-following white card there read as a bug of its own
+  // the moment the app was in light mode ("lose the white background it
+  // doesnt work for the darkmode UI"). A LOCAL custom property
+  // (--speech-bubble-bg/-fg), not var(--card)/var(--foreground), with a
+  // literal always-dark fallback -- local because it still needs to be
+  // overridable per background *version* (globals.css's `.play-crt` block
+  // retints it for the CRT experiment), just never by the light/dark theme.
+  const bg = tone === "correct" ? "color-mix(in srgb, var(--success, #1f9d55) 14%, var(--speech-bubble-bg, #151829))" : tone === "wrong" ? "color-mix(in srgb, var(--danger, #e0483e) 12%, var(--speech-bubble-bg, #151829))" : "var(--speech-bubble-bg, #151829)";
   return (
     <div
       className="flex min-w-0 flex-1 items-start rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]"
@@ -171,40 +179,11 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
     >
       {/* var(--foreground) also flips dark in light mode -- fixed near-white
          to match the always-dark bubble above, same reasoning. */}
-      <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "#f4f2fa", fontFamily: "var(--font-display)" }}>
+      <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--speech-bubble-fg, #f4f2fa)", fontFamily: "var(--font-display)" }}>
         {children}
       </p>
     </div>
   );
-}
-
-// Resolves a CSS color expression (a var()/color-mix()/anything) to the
-// actual rgb() string the browser computed for it. Needed because canvas
-// fillStyle/strokeStyle can't parse `var(--glossary-accent)` directly --
-// canvas draws outside the CSS cascade, so it needs a real color, not a
-// custom-property reference. `getComputedStyle` on a real, standard
-// property (here, `color`) DOES resolve the full var() chain; reading the
-// custom property itself back out would not. Used to color-match
-// FireworksBackground's canvas particles to this game's own accent instead
-// of the library's default random rainbow.
-function useResolvedColor(cssColor: string): string | null {
-  const [resolved, setResolved] = useState<string | null>(null);
-  useEffect(() => {
-    // The measurement itself has to run after mount (needs `document`, and
-    // the color's own var() chain has to actually be in the DOM to
-    // resolve) -- deferred one frame via rAF so the setState call isn't
-    // synchronous inside the effect body itself (react-hooks/set-state-in-effect).
-    const raf = requestAnimationFrame(() => {
-      const probe = document.createElement("span");
-      probe.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;";
-      probe.style.color = cssColor;
-      document.body.appendChild(probe);
-      setResolved(getComputedStyle(probe).color);
-      document.body.removeChild(probe);
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [cssColor]);
-  return resolved;
 }
 
 function MuteToggle() {
@@ -229,15 +208,18 @@ function MuteToggle() {
   );
 }
 
-function TopBar({ onBack }: { onBack: () => void }) {
+function TopBar({ onBack, bgVersion, onBgVersion }: { onBack: () => void; bgVersion: PlayBgVersion; onBgVersion: (v: PlayBgVersion) => void }) {
   return (
     <header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
       {/* Mute stays (it is this game's own control); everything else is the
-         app's one hamburger, same as every screen. */}
+         app's one hamburger, same as every screen. The background-version
+         chip is demo-only (21 Sept 2026, "Now lets work on v2,v3,v4") --
+         never part of the product UI, same spirit as Connect's AT&T chip. */}
       <div className="flex items-center gap-[var(--space-2)]">
+        <PlayVersionChip version={bgVersion} onChange={onBgVersion} />
         <MuteToggle />
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </div>
@@ -1534,6 +1516,28 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
   const [streak, setStreak] = useState(0);
   const [showStreak, setShowStreak] = useState<number | null>(null);
   const [dismissedReview, setDismissedReview] = useState(false);
+  // Demo-only background version toggle (same idea as Connect's AT&T
+  // v1/v2.0 chip) -- ?bg=2/3/4 opens straight into that experiment, so a
+  // link can be shared to a specific one. v1 (Stars + berry backdrop) is
+  // the shipped default.
+  const [bgVersion, setBgVersion] = useState<PlayBgVersion>("v1");
+  useEffect(() => {
+    // Deferred one rAF tick so the setState call isn't synchronous inside
+    // the effect body itself (react-hooks/set-state-in-effect) -- same
+    // reasoning as useResolvedColor.
+    const raf = requestAnimationFrame(() => {
+      const v = new URLSearchParams(window.location.search).get("bg");
+      if (v === "2" || v === "3" || v === "4") setBgVersion(`v${v}` as PlayBgVersion);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  const pickBgVersion = (v: PlayBgVersion) => {
+    setBgVersion(v);
+    const url = new URL(window.location.href);
+    if (v === "v1") url.searchParams.delete("bg");
+    else url.searchParams.set("bg", v.slice(1));
+    window.history.replaceState(null, "", url.pathname + url.search);
+  };
 
   const mainLoopLength = lesson.questions.length;
   const current = queue[queueIndex];
@@ -1598,7 +1602,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
 
   return (
     <div
-      className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col"
+      className={`marketing-v2 themeable relative flex min-h-dvh w-full flex-col ${bgVersion === "v2" ? "play-crt" : ""}`}
       style={{
         "--glossary-accent": accent,
         // Play's own background, not AppBackdrop (direct feedback, 21 Sept
@@ -1625,13 +1629,18 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
          screen === "unlock" once unlockIndex reaches the end (see below),
          so that's the real condition to check here, not the unused
          literal (comparing against it silently did nothing). */}
-      <PlayBackdrop accent={accent} showStars={!(screen === "unlock" && unlockIndex >= lesson.terms.length) && screen !== "complete"} />
+      {bgVersion === "v1" && (
+        <PlayBackdrop accent={accent} showStars={!(screen === "unlock" && unlockIndex >= lesson.terms.length) && screen !== "complete"} />
+      )}
+      {bgVersion === "v2" && <PlayBackdropV2Crt accent={accent} />}
+      {bgVersion === "v3" && <PlayBackdropV3Dots accent={accent} />}
+      {bgVersion === "v4" && <PlayBackdropV4Synthwave accent={accent} />}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
         style={{ background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 30%, transparent), transparent 65%)" }}
       />
-      <TopBar onBack={() => router.back()} />
+      <TopBar onBack={() => router.back()} bgVersion={bgVersion} onBgVersion={pickBgVersion} />
 
       {screen === "question" && (
         // An earlier pass shrunk this status strip down (direct feedback:
