@@ -214,20 +214,80 @@ type Pattern = { notes: number[]; shape: Shape; stepMs: number; gain: number; no
 // right after, per "v1 also could use a good tune" -- distinct waveform
 // from every experimental version (triangle, vs. v2 square/v3 sine/v4
 // sawtooth) so it still reads as its own thing, not a leftover demo sound.
+// Rewritten again, 22 Sept 2026 -- direct feedback: "the music for the
+// glossary games are too short of loops being repeated and causes fatigue
+// we need full songs that vary... things like mario, pokemon etc have per
+// city etc." A single 8-16-note phrase repeating every few seconds is a
+// jingle, not a song -- real game themes get away with looping because
+// they have real FORM: an intro, a main idea, a contrasting second idea
+// (often a key/register change), sometimes a "lift" restatement, before
+// they ever return to the top. Every pattern below is now sectioned the
+// same way (marked in comments: Intro/A/B/Bridge/Return, or A/A'/B/Coda),
+// so the loop point is minutes apart instead of seconds, and the middle of
+// the loop genuinely sounds different from the start rather than just
+// being the start again.
 const PATTERNS: Partial<Record<PlayTheme, Pattern>> = {
-  // A gentle "twinkle" major arpeggio -- rises, peaks, settles back down
-  // with a held rest, matching the shipped starfield/Dreamy-cloud vibe
-  // rather than any of the experimental versions' own genre pastiche.
-  v1: { notes: [523.25, 659.25, 783.99, 1046.5, 783.99, 659.25, 523.25, 0], shape: "triangle", stepMs: 260, gain: 0.02, noteLen: 0.4 },
-  // A short NES-title-screen-style phrase: rises to a peak, resolves back
-  // down, one held beat of rest before it repeats.
-  v2: { notes: [523.25, 659.25, 783.99, 659.25, 587.33, 659.25, 523.25, 0], shape: "square", stepMs: 230, gain: 0.024, noteLen: 0.15 },
-  // A slow pentatonic rise-and-fall, wide rests between notes for genuine
-  // ambient space rather than a busy loop.
-  v3: { notes: [261.63, 0, 293.66, 0, 329.63, 0, 392, 0, 440, 0, 392, 0, 329.63, 0, 293.66, 0], shape: "sine", stepMs: 480, gain: 0.022, noteLen: 1.2 },
-  // A classic i-VII synthwave arpeggio (A minor to G major), the genre's
-  // own catchy hook.
-  v4: { notes: [110, 130.81, 164.81, 220, 98, 116.54, 146.83, 196], shape: "sawtooth", stepMs: 210, gain: 0.02, noteLen: 0.17 },
+  // v1: warm triangle-wave "twinkle" theme, C major. Intro pickup -> Theme A
+  // (the original rise-and-resolve) -> A' (the same shape recolored around
+  // the subdominant, G) -> Bridge (relative minor, A -- the one moment of
+  // real harmonic contrast) -> a quiet octave-down echo of Theme A -> Theme
+  // A returns at full pitch for a real "reprise" close, then a long rest.
+  v1: {
+    notes: [
+      0, 392, 523.25,
+      523.25, 659.25, 783.99, 1046.5, 783.99, 659.25, 523.25, 0,
+      392, 523.25, 659.25, 783.99, 659.25, 523.25, 392, 0,
+      440, 523.25, 659.25, 880, 659.25, 523.25, 440, 0,
+      261.63, 329.63, 392, 523.25, 392, 329.63, 261.63, 0,
+      523.25, 659.25, 783.99, 1046.5, 783.99, 659.25, 523.25, 0, 0, 0,
+    ],
+    shape: "triangle", stepMs: 260, gain: 0.02, noteLen: 0.4,
+  },
+  // v2: NES-title-screen square wave. Fanfare pickup -> Theme A (the
+  // original rising phrase) -> Theme B (a syncopated second idea over the
+  // dominant, G, using rests for the "gap" NES themes love) -> a
+  // same-register rhythmic variation on Theme A (faster repeated notes,
+  // the "hurry-up" NES trick) -> Theme A returns with an octave-leap finish.
+  v2: {
+    notes: [
+      0, 392, 523.25, 659.25,
+      523.25, 659.25, 783.99, 659.25, 587.33, 659.25, 523.25, 0,
+      587.33, 0, 783.99, 587.33, 0, 987.77, 783.99, 0,
+      523.25, 523.25, 659.25, 783.99, 783.99, 659.25, 523.25, 0,
+      523.25, 659.25, 783.99, 1046.5, 783.99, 659.25, 523.25, 0, 0, 0,
+    ],
+    shape: "square", stepMs: 230, gain: 0.024, noteLen: 0.15,
+  },
+  // v3: ambient sine pentatonic, slow and spacious. Section A (the original
+  // C-pentatonic rise-and-fall) -> Section B, the same shape recentered on
+  // A minor pentatonic a third below (a real mood shift, still unhurried)
+  // -> Section C, a sparse high "distant stars" coda with wide rests before
+  // the loop point.
+  v3: {
+    notes: [
+      261.63, 0, 293.66, 0, 329.63, 0, 392, 0, 440, 0, 392, 0, 329.63, 0, 293.66, 0,
+      220, 0, 261.63, 0, 293.66, 0, 329.63, 0, 392, 0, 329.63, 0, 293.66, 0, 261.63, 0,
+      523.25, 0, 0, 0, 587.33, 0, 0, 0, 659.25, 0, 0, 0, 523.25, 0, 0, 0,
+    ],
+    shape: "sine", stepMs: 480, gain: 0.022, noteLen: 1.2,
+  },
+  // v4: outrun sawtooth arpeggio, a real 4-chord progression (Am-F-G-Am)
+  // played low as the "verse," then the exact same progression again an
+  // octave up as the "chorus lift" -- the genre's own catchiest trick,
+  // rather than one 2-chord vamp repeating forever.
+  v4: {
+    notes: [
+      110, 130.81, 164.81, 220, 164.81, 130.81, 110, 0,
+      174.61, 220, 261.63, 349.23, 261.63, 220, 174.61, 0,
+      196, 246.94, 293.66, 392, 293.66, 246.94, 196, 0,
+      110, 130.81, 164.81, 220, 261.63, 220, 164.81, 130.81,
+      220, 261.63, 329.63, 440, 329.63, 261.63, 220, 0,
+      349.23, 440, 523.25, 698.46, 523.25, 440, 349.23, 0,
+      392, 493.88, 587.33, 783.99, 587.33, 493.88, 392, 0,
+      220, 261.63, 329.63, 440, 523.25, 440, 329.63, 261.63,
+    ],
+    shape: "sawtooth", stepMs: 210, gain: 0.02, noteLen: 0.17,
+  },
 };
 
 let loopTimer: ReturnType<typeof setInterval> | null = null;

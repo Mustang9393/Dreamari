@@ -352,6 +352,23 @@ than Asset Manager's white-collar one. Verified live: HVAC Technician's
 (i) icon opens the full "What you need to get in" sheet correctly.
 `tsc`/`eslint` clean.
 
+### Aside: Glossary Game background music extended (not a states task, logged for continuity)
+
+Direct feedback: "the music for the glossary games are too short of loops
+being repeated and causes fatigue we need full songs that vary... things
+like mario, pokemon etc." Every `src/components/play/glossaryThemeSound.ts`
+background pattern was an 8-16-note phrase looping every 2-8 seconds --
+catchy on first listen, fatiguing on repeat. Rewrote all four (v1
+twinkle/v2 NES/v3 ambient/v4 synthwave) as genuinely sectioned
+compositions (Intro/Theme A/Theme B or Bridge/Return, or a verse+chorus-
+register-lift pair for v4), 5-8x longer per loop (v1: 2.1s -> 11.7s, v2:
+1.8s -> 8.7s, v3: 7.7s -> 23.0s, v4: 1.7s -> 13.4s), each with real
+harmonic movement (a bridge to the relative minor for v1, a dominant-key
+second theme for v2, a pentatonic register shift for v3, a full 4-chord
+progression played twice for v4) rather than the same notes repeating.
+`tsc`/`eslint` clean; verified live on v4 with no console/server errors
+over a full loop cycle.
+
 ### Remaining worlds -- not started
 
 Business & Finance (25 careers) is the next highest-value target -- the
