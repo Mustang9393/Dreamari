@@ -96,6 +96,14 @@ export function simulationFor(id: string): Simulation | undefined {
   return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id);
 }
 
+/** A career's world by slug, checked across every catalogue that carries
+ *  one (SIMULATIONS, then SOON) -- so any card keyed to a career slug (e.g.
+ *  a Glossary Games tile) can pick up that career's own poster font/accent
+ *  instead of a generic default, without a second hand-maintained map. */
+export function worldForCareer(slug: string): string | undefined {
+  return SIMULATIONS.find((sim) => sim.careerId === slug)?.world ?? SOON.find((soon) => soon.careerId === slug)?.world;
+}
+
 /** The two other game types the hub promises alongside career simulations.
  *  Glossary Games now has one real page (/play/glossary/[career]) -- Finance
  *  Essentials is playable, per `hasGlossary` in glossary/data.ts; any other

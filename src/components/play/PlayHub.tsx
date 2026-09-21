@@ -17,7 +17,7 @@ import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { hasGlossary } from "@/components/glossary/data";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
-import { FEATURED_ROW_SOON_IDS, GLOSSARY_GAMES, SIMULATIONS, SOON } from "./games";
+import { FEATURED_ROW_SOON_IDS, GLOSSARY_GAMES, SIMULATIONS, SOON, worldForCareer } from "./games";
 import { TrailerFlow } from "./TrailerFlow";
 import type { Simulation } from "./types";
 
@@ -179,7 +179,15 @@ export function PlayHub() {
             label="Glossary Games"
             items={GLOSSARY_GAMES.map((game) => {
               const playable = hasGlossary(game.careerSlug);
-              return { id: game.careerSlug, title: game.title, cover: game.cover, sub: game.sub, href: playable ? `/play/glossary/${game.careerSlug}` : undefined, locked: !playable };
+              return {
+                id: game.careerSlug,
+                title: game.title,
+                cover: game.cover,
+                sub: game.sub,
+                world: worldForCareer(game.careerSlug),
+                href: playable ? `/play/glossary/${game.careerSlug}` : undefined,
+                locked: !playable,
+              };
             })}
           />
         )}
@@ -740,7 +748,14 @@ function HeroShelfRow({ rowId, label, items, active }: { rowId: string; label: s
             item={item}
             active={active}
             large={active && item.id === featured.id}
-            onSelect={item.id === featured.id ? undefined : () => setFeaturedId(item.id)}
+            // Only selectable once the row is already the focused one -- a
+            // compact card at rest has no select control at all, so a
+            // scroll-stop tap landing on it while merely scrolling PAST the
+            // row (not yet focused) can never silently promote it to hero.
+            // Matches the TV description exactly: cards "open... on
+            // clicking" only after the down-arrow has already brought the
+            // row into its hero+side shape, never before.
+            onSelect={active && item.id !== featured.id ? () => setFeaturedId(item.id) : undefined}
           />
         ))}
       </div>
@@ -786,7 +801,7 @@ function HeroShelfCard({ item, large, active, onSelect }: { item: HeroItem; larg
         </span>
       )}
       <span className={`absolute inset-x-0 bottom-0 flex flex-col gap-[1px] px-[12px] pt-[26px] pb-[10px] sm:gap-[4px] sm:px-[14px] sm:pt-[32px] sm:pb-[14px] ${tier === "hero" ? "sm:pr-[80px] md:pr-[96px] lg:pr-[108px]" : "sm:pr-[64px] md:pr-[72px]"}`} style={{ backgroundImage: "var(--poster-scrim)" }}>
-        <span className={`block leading-[1.15] font-extrabold uppercase [overflow-wrap:normal] [word-break:keep-all] ${titleSize}`} style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>
+        <span className={`block leading-[1.15] font-extrabold uppercase [overflow-wrap:normal] [word-break:keep-all] ${titleSize}`} style={{ ...(item.world ? posterTitleFont(item.world) : { fontFamily: "var(--font-display)" }), color: "var(--poster-title)" }}>
           {breakable(item.title)}
         </span>
         {item.sub && (

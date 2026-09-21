@@ -10815,3 +10815,72 @@ gated).
 Next step: none outstanding for this pass. Open items for the product
 owner: the Export-checklist rollback (#4) and the Approve-workflow trigger
 semantics (#3), both flagged above and in code comments at their source.
+
+## 2026-09-21 · Play tab TV row-focus: fixed the "wrong card becomes hero" bug + real per-world fonts
+
+Follow-up to the TV-style row-focus build already on `main` (commit
+`aaaeda4a`, same session). User reported: "Glossary games work, but the
+first tile should be big not the second, not unless I click on the
+second card" -- could not reproduce on a fresh load (local or live
+Vercel), which pointed at an interaction-state bug rather than a
+render-order bug.
+
+- **Root cause: compact (not-yet-focused) cards were still selectable.**
+  `HeroShelfCard`'s full-card `onSelect` button rendered for every
+  non-hero card regardless of whether its row was `active` --
+  including a row still at rest, COMPACT-sized, that the student
+  hasn't scrolled to yet. A "stop the momentum scroll" tap (a common
+  mobile gesture -- touching the screen to halt inertial scrolling,
+  not intending to activate whatever is under the finger) landing on
+  Medical Terms while merely scrolling PAST a still-compact Glossary
+  Games row would silently promote it to hero, so it was already the
+  hero by the time the row actually came into focus -- exactly what
+  "not unless I click" describes from the user's side. Fixed in
+  `HeroShelfRow` (`PlayHub.tsx`): `onSelect` is now
+  `active && item.id !== featured.id ? ... : undefined`, so a compact
+  card has no select control at all. Matches the user's own TV
+  description exactly: cards "open... on clicking" only after the
+  down-arrow (scroll) has already brought the row into its hero+side
+  shape, never before.
+- **Glossary Games / In the Works titles used a generic font, not the
+  career's own world font.** `HeroShelfCard`'s title was hardcoded to
+  `var(--font-display)` instead of `RowCard`'s `posterTitleFont(world)`
+  pattern (Career Simulations' own titles already did this correctly).
+  Root cause: `GLOSSARY_GAMES` (`games.ts`) never carried a `world`
+  field to pass through -- added `worldForCareer(slug)` (`games.ts`,
+  checks `SIMULATIONS` then `SOON`) and wired it into the Glossary
+  Games item mapping in `PlayHub.tsx`. `HeroShelfCard`'s title now
+  reads `item.world ? posterTitleFont(item.world) : { fontFamily:
+  "var(--font-display)" }` (the fallback only matters if a future item
+  has no resolvable world). Since `HeroShelfCard` is shared by both
+  Glossary Games and In the Works, and In the Works already carried
+  `world` from `SOON`, this one change fixes both rows at once --
+  confirmed live: Finance Terms now renders in Business & Finance's
+  poster serif, Medical Terms in Health & Medicine's rounded sans,
+  matching their Career Simulations counterparts exactly.
+
+Files: `src/components/play/PlayHub.tsx`, `src/components/play/games.ts`.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on both files. Verified
+live on the local dev server (desktop width, 1280px): scrolled Glossary
+Games into focus fresh -- Finance Terms (first item) is hero by
+default, correct serif font; clicked Medical Terms's now-active select
+button -- it correctly becomes hero with its own Health & Medicine
+font; confirmed via `find` that no select button exists on a
+still-compact row at all (the actual fix for the reported bug). Also
+re-checked the earlier "black gap / duplicated header" concern noted
+mid-session -- it was a misread of ordinary `position: sticky` nav
+behavior at a sub-`lg` viewport width, not a real defect; `TrailerFlow`
+already portals to `document.body` (pre-existing), so it was never
+affected by `RowFocusWrapper`'s transform/filter either. No fix needed
+there.
+
+Open design question from the user, not yet decided: should a side
+card in an already-active row promote itself to hero on hover (desktop)
+in addition to click/tap? Recommended keeping click/tap-only for now,
+consistent with Career Simulations' own `RowCard` (also click-only) and
+the user's own earlier explicit feedback rejecting a pure-hover expand
+for this exact row. Hover-preview could be layered on later if wanted.
+
+Next step: commit is local only, not pushed -- awaiting go-ahead per
+standing "show before push" preference for this project.
