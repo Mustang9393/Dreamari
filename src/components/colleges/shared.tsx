@@ -166,18 +166,21 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
       className="dm-tap poster-card relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
       style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${ACCENT} ${compared ? 70 : 40}%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
     >
-      <span aria-hidden className="poster-photo absolute inset-0">
+      {/* `poster-photo` on the image itself, not this wrapping span -- same
+         fix as SchoolCard above, so the gradient scrims stay static and
+         aligned with the card's own background while only the photo zooms. */}
+      <span aria-hidden className="absolute inset-0">
         {img ? (
-          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="poster-photo object-cover" />
         ) : collegeMark(c) ? (
           // No campus photo: the school's own mark, big, soft and dimmed,
           // becomes the cover so every card gets the same photo-and-blur
           // treatment (direct feedback, 10 Sept 2026).
-          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, #0e0c20) 0%, #0e0c20 65%)" }}>
+          <span className="poster-photo absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, #0e0c20) 0%, #0e0c20 65%)" }}>
             <Image src={collegeMark(c)!} alt="" fill sizes="480px" className="object-contain opacity-[0.55] blur-[10px]" style={{ transform: "scale(1.9) translateY(-8%)" }} />
           </span>
         ) : (
-          <span className="absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }} />
+          <span className="poster-photo absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }} />
         )}
         <CardProgressiveBlur size="40%" />
         {/* one bottom scrim for the name and stats, not a top-and-bottom
@@ -256,7 +259,7 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
  *  for fit. Tinted text on a faint fill so they read without shouting. */
 const CHIP_TONE: Record<CardBadge["tone"], string> = {
   program: "#ffffff",
-  path: "var(--accent-subtle)",
+  path: "#7db2ff",
   reach: "#ffb35c",
   target: "#7db2ff",
   safety: "#5fd6a8",
@@ -325,37 +328,46 @@ export function SchoolCard({
     { v: c.admitRate === null ? "Open" : `${c.admitRate}%`, k: "acceptance" },
     { v: tf === null ? "—" : `$${Math.round(tf / 1000)}K`, k: "tuition & fees" },
   ];
-  // Was a literal white-alpha "ghost" -- fine while this sat on the photo's
-  // own dark scrim, invisible once it moved onto the solid card below (a
-  // white ghost on a now-white --card is white-on-white). Theme tokens
-  // instead of a second hardcoded light-mode value, so this can't drift out
-  // of sync with the card color again (direct feedback, 17 Sept 2026, with
-  // a screenshot: "the card content is not matching light mode").
-  const ghost: React.CSSProperties = { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" };
+  // Back to a literal white-alpha ghost (21 Sept 2026): the card went full
+  // bleed again, so this always sits on the photo's own dark scrim, not a
+  // solid --card surface -- the theme-token version below was the fix for
+  // when it briefly sat on solid --card (17 Sept 2026, "the card content is
+  // not matching light mode"); that problem doesn't exist once there's no
+  // solid surface under it again.
+  const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "#fff" };
   return (
     <article
       className="dm-tap poster-card school-card relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border"
-      style={{ background: "var(--card)", borderColor: compared ? ACCENT : "var(--glass-border)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-body)" }}
+      style={{ background: "#0e0c20", borderColor: compared ? ACCENT : "var(--glass-border)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-body)" }}
     >
-      {/* the photo runs down behind the name and place, blurring and fading
-         into the card surface (direct feedback, 11 Sept 2026); everything
-         from the programme down sits on the solid card */}
-      <span aria-hidden className="poster-photo absolute inset-x-0 top-0 h-[300px] overflow-hidden">
+      {/* Full bleed (direct feedback, 21 Sept 2026): the photo now runs the
+         whole card, not a fixed 300px band handing off to a solid
+         `var(--card)` surface below it -- that handoff point was exactly
+         where a seam kept showing (the band and the card's own static
+         background had to meet at a pixel-perfect color match, and a hover
+         scale on the wrong element broke that alignment). One continuous
+         photo has no seam to misalign. A bottom-heavy dark scrim (matching
+         CollegeCard's own full-bleed treatment above) carries contrast for
+         the stats/actions text that now sits over photo instead of a card
+         surface -- `poster-photo` (the hover-zoom class) stays on the image
+         itself, never the scrim layers, so they stay static on hover. */}
+      <span aria-hidden className="absolute inset-0 overflow-hidden">
         {img ? (
-          <Image src={img} alt="" fill sizes="(min-width: 1024px) 340px, 86vw" className="object-cover" />
+          <Image src={img} alt="" fill sizes="(min-width: 1024px) 340px, 86vw" className="poster-photo object-cover" />
         ) : (
           /* No campus photo yet: a quiet brand field with the mark crisp and
              small at its centre. The blown-up blurred mark it replaces read
              as a broken image (direct feedback, 11 Sept 2026). */
-          <span className="absolute inset-0 flex items-center justify-center" style={{ background: "radial-gradient(120% 90% at 30% 20%, color-mix(in srgb, var(--primary) 34%, var(--card)) 0%, var(--card) 60%), linear-gradient(160deg, var(--card), color-mix(in srgb, var(--hero-accent-teal) 26%, var(--card)))" }}>
+          <span className="poster-photo absolute inset-0 flex items-center justify-center" style={{ background: "radial-gradient(120% 90% at 30% 20%, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%), linear-gradient(160deg, #0e0c20, color-mix(in srgb, var(--hero-accent-teal) 26%, #0e0c20))" }}>
             <span className="pointer-events-none absolute inset-0" style={{ background: "repeating-linear-gradient(135deg, rgba(255,255,255,0.028) 0 2px, transparent 2px 14px)" }} />
             {mark && <span className="relative mb-[36px] flex size-[72px] items-center justify-center rounded-full bg-white/95" style={{ boxShadow: "0 10px 30px -10px rgba(0,0,0,0.6)" }}><Image src={mark} alt="" width={48} height={48} className="object-contain" /></span>}
           </span>
         )}
-        <CardProgressiveBlur size="62%" />
-        {/* the name and place sit in the lower third of this run: blurred
-           photo still showing through, fading to the solid card just below */}
-        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--card) 0%, color-mix(in srgb, var(--card) 72%, transparent) 16%, color-mix(in srgb, var(--card) 40%, transparent) 38%, transparent 62%)" }} />
+        <CardProgressiveBlur size="72%" />
+        {/* one continuous scrim, darkest at the bottom (where stats/actions
+           sit) fading to nearly clear over the upper photo -- same curve
+           CollegeCard already uses for its own full-bleed cards */}
+        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.86) 30%, rgba(12,16,35,0.55) 52%, rgba(12,16,35,0.2) 70%, transparent 88%)" }} />
         <span className="absolute inset-x-0 top-0 h-[64px]" style={{ background: cardTopScrim() }} />
         {/* Hover cue, school cards only (direct feedback, 11 Sept 2026): a
            labelled pill, not a bare chevron, centred on the photo band. Uses
@@ -375,7 +387,7 @@ export function SchoolCard({
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={() => { onSave(); announce(saved ? `Removed ${c.name} from saved` : `Saved ${c.name}`); }} size={36} /></span>
 
-      <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[14px] px-[18px] pt-[118px] pb-[18px]">
+      <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[14px] px-[18px] pt-[118px] pb-[18px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
         {/* mark, name and place, over the blurred tail of the photo */}
         {/* Mark beside the name like a profile picture, centred on the
            name + place block, so the mark-to-name relationship is identical
@@ -400,7 +412,7 @@ export function SchoolCard({
         {(program || fit || extraChip) && (
           <div className="flex min-h-[24px] flex-wrap items-center gap-x-[8px] gap-y-[6px]">
             {program && (
-              <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+              <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: "#FFFFFF" }}>
                 <span className="truncate">{program}</span>
                 <span className="flex h-[16px] w-[16px] flex-none items-center justify-center rounded-full" style={{ background: ACCENT }} aria-hidden>
                   <Check className="h-[10px] w-[10px]" strokeWidth={3.5} style={{ color: "#fff" }} />
@@ -413,6 +425,18 @@ export function SchoolCard({
           </div>
         )}
 
+        {/* Stats, Why this school? and the actions row move as ONE group,
+           pinned to the card's bottom together (direct feedback, 21 Sept
+           2026: "awkward composition... CTA placement problems especially
+           when the cards don't have the why this school link"). Only the
+           actions row carried `mt-auto` before, so a card missing "Why this
+           school?" dumped all its leftover space into one gap right above
+           the button -- Compare read as floating, disconnected from the
+           stats above it. Now the whole group carries `mt-auto` instead: the
+           stats stay a fixed, tight gap from the CTA no matter what's
+           between them, and any leftover space shows up ABOVE this group
+           (under the chips row) instead of right above the button. */}
+        <div className="mt-auto flex flex-col gap-[14px]">
         {/* A 50/50 grid (built for 3 stats, then one removed) left each
            figure stranded in its own half-width column with dead space
            trailing it -- a plain flex row with a divider between the pair
@@ -427,18 +451,18 @@ export function SchoolCard({
         <dl className="flex items-start gap-[22px]">
           {stats.map((x, i) => (
             <div key={x.k} className="flex min-w-0 flex-col gap-[2px]" style={i > 0 ? { borderLeft: `1px solid ${RULE}`, paddingLeft: 22 } : undefined}>
-              <dd className="m-0 text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.v}</dd>
-              <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.k}</dt>
+              <dd className="m-0 text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{x.v}</dd>
+              <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{x.k}</dt>
             </div>
           ))}
         </dl>
 
         {why && (
           <div className="pointer-events-auto relative z-20">
-            <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link -my-[10px] flex cursor-pointer items-center gap-[3px] py-[10px] text-[13px] font-bold" style={{ color: SOFT }}>
+            <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link -my-[10px] flex cursor-pointer items-center gap-[3px] py-[10px] text-[13px] font-bold" style={{ color: "#8fb8ff" }}>
               Why this school? <ChevronDown className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-180" : ""}`} aria-hidden />
             </button>
-            {showWhy && <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{why}</p>}
+            {showWhy && <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</p>}
           </div>
         )}
 
@@ -447,9 +471,9 @@ export function SchoolCard({
            button and neither of these reads as the primary. "Not for me" is
            plain text on the left; Compare is a ghost button on the right. */}
         {(onCompare || onDismiss) && (
-          <div className="pointer-events-auto relative z-20 mt-auto flex items-center justify-between gap-[8px] pt-[6px]">
+          <div className="pointer-events-auto relative z-20 flex items-center justify-between gap-[8px]">
             {onDismiss ? (
-              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>Not for me</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.75)" }}>Not for me</button>
             ) : <span />}
             {onCompare && (
               // Was a 28%-opacity tint behind white text -- against dark
@@ -464,6 +488,7 @@ export function SchoolCard({
             )}
           </div>
         )}
+        </div>
       </div>
     </article>
   );

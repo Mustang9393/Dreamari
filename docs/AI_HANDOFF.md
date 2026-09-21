@@ -11607,3 +11607,17 @@ Files touched: `src/components/app/catalog.ts`, `src/components/app/ExploreExper
 `npx tsc --noEmit -p .`, `npx eslint`, `npm run build`, `npm run tokens:check` all clean. Live-verified: the Public Service row (correct title, careers, order, above Typical Pay untouched), Principal's now-full detail page, WelcomeSplash's blur-through on Resume and Explore.
 
 Next step: land and verify the in-progress app-wide backdrop-blur and icon-tooltip agent passes, then push those together.
+
+## 2026-09-21 · College SchoolCard: full-bleed rebuild, seam fixed, CTA placement fixed
+
+Two related bugs on the school cards (Explore Schools, Browse and For You both use `SchoolCard`/`CollegeCard` in `colleges/shared.tsx`), both direct feedback with a screenshot.
+
+**Seam at the photo/card boundary, worst on hover.** Root cause confirmed via computed `transform`, not guessed: the hover-zoom CSS rule (`.poster-card:hover .poster-photo { transform: scale(...) }`) was scoped to the WHOLE photo band -- image, gradient-to-`var(--card)` fade, dim, cue -- instead of just the image, same class of bug as `PosterCard.tsx` already avoids by scoping the class to the image alone. Scaling the whole band on hover grew its rect past its static 300px clip and shifted the gradient's fade-to-card-color edge out of alignment with the card's own actual background, showing as a visible line exactly where the photo met the card. First fix (moving the class to just the image) was correct but the user pushed further: went full bleed instead, matching `CollegeCard`'s own existing treatment -- the photo now runs the whole card height with one continuous bottom-heavy dark scrim, so there's no seam to misalign because there's no fixed-height handoff point left at all. Every text element that used to sit on the solid `var(--card)` surface (stats, chips, "Why this school?", Not for me/Compare) now uses white/photo-tuned colors instead of theme tokens, matching how the name/place text already worked. `ghost` (the Compare button's default style) reverted to its original white-alpha version from before a 17 Sept 2026 light-mode fix -- that fix was specifically for when this sat on solid `--card`; full bleed removes the problem it was solving.
+
+**CTA placement/balance, worst on cards without "Why this school?".** Only the actions row carried `mt-auto`, so a card missing that link dumped ALL its leftover vertical space into one gap right above Compare, reading as disconnected from the stats above it. Moved `mt-auto` onto a new wrapping group around stats + why + actions together, so the CTA always sits a fixed, tight gap from its stats regardless of what's between them, and any leftover space shows up higher on the card (under the chips) instead.
+
+Files touched: `src/components/colleges/shared.tsx` (`SchoolCard`, `CollegeCard`).
+
+`npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified: static and hovered states on both Browse and For You views, both with and without "Why this school?" present, expanded "Why this school?" text legible over the photo.
+
+Next step: none pending on this thread. Play/Glossary background differentiation picked up next, per direct feedback (separate ask, unrelated).
