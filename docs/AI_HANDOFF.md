@@ -38,6 +38,32 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-22 Match's pre-grid splash rewritten into a clear sequence
+
+Direct instruction: rewrite the splash shown before `/match-grid` (Build's
+"Congratulations" screen leads into it) so the flow reads as one sequence --
+"You've Been Matched" (what just happened) -> this splash's own copy (what
+happens next) -> "Find Your Top 3" (what to do, once the six cards are
+actually on screen) -- rather than the splash trying to explain the whole
+system (tap +, tap Learn more, more matches waiting) before the student has
+anything in front of them to look at.
+
+`WelcomeSplash.tsx`'s `matchGrid` scene: title "FIND YOUR TOP 3" -> "You've
+Been Matched!"; the three `rows` bullets ("Tap + to save." / "Tap Learn more
+for details." / "More matches are waiting.") replaced with one `line`:
+"Next, you'll see 6 careers matched to you. Save 1-3, and later our EXPLORE
+feature will recommend more careers like the ones you save."; cta "Start
+Matching" -> "See My Matches". The `/match-grid` page's own `<h1>` (`Find
+your Top 3`, in `MatchGrid.tsx`) is untouched, per the instruction to keep
+it as the second beat of the sequence.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean. Verified live at
+`/match-grid`: splash shows the new copy, "See My Matches" dismisses into
+the six-card grid with its own heading intact, no console/server errors.
+
+Next step: push (explicit go-ahead: "FIx and push").
+
+
 ### 2026-09-21 (cont'd) Per-version sound + music (incl. v1), app-wide chip/option gap sweep, demo reload/step-back, music toggle
 
 On top of the fine-tuning round below (commit `24709a99`, pushed).

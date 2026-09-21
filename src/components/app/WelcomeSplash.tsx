@@ -46,19 +46,18 @@ const SCENES: Record<SplashSurface, Scene> = {
     cta: "Start Matching",
   },
   // Between the Build flow's "Congratulations" screen and the live
-  // /match-grid picker (direct instruction, 14 Sept 2026, Slack): explains
-  // the grid's own interaction (+ to save, tap for detail) and reassures
-  // that the six shown aren't the only careers out there.
+  // /match-grid picker. Copy rewritten 22 Sept 2026 (direct instruction) to
+  // read as one clear sequence -- this splash says what's about to happen,
+  // the grid page's own heading ("Find Your Top 3", unchanged) says what to
+  // do once the six cards are actually on screen, rather than this splash
+  // trying to explain the whole system before the student has anything to
+  // look at yet.
   matchGrid: {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
-    title: "FIND YOUR TOP 3",
-    rows: [
-      { text: "Tap + to save." },
-      { text: "Tap Learn more for details." },
-      { text: "More matches are waiting." },
-    ],
-    cta: "Start Matching",
+    title: "You’ve Been Matched!",
+    line: "Next, you’ll see 6 careers matched to you. Save 1–3, and later our EXPLORE feature will recommend more careers like the ones you save.",
+    cta: "See My Matches",
   },
   explore: {
     sprite: "/images/dreamy/v2/splash/dreamy-explore.webp",
