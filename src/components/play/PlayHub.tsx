@@ -280,10 +280,11 @@ function FeaturedRow({
   // feedback (the handoff doc auto-plays it once on first open instead).
   const [trailerSim, setTrailerSim] = useState<Simulation | null>(null);
   const featured = candidates.find((c) => c.id === featuredId) ?? candidates[0];
+  const sectionRef = useRef<HTMLElement>(null);
   if (!featured) return null;
 
   return (
-    <section data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]">
+    <section ref={sectionRef} data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]">
       {trailerSim?.trailer && <TrailerFlow simulation={trailerSim} onDone={() => setTrailerSim(null)} />}
       <h2
         className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
@@ -324,7 +325,22 @@ function FeaturedRow({
             candidate={c}
             active={active}
             large={active && c.id === featured.id}
-            onSelect={active && c.id !== featured.id ? () => setFeaturedId(c.id) : undefined}
+            // Granted whenever this card ISN'T the current active hero --
+            // that includes a compact-tier card that happens to already be
+            // `featured` (direct feedback, 21 Sept 2026, a real bug: "when
+            // i hover [scroll] to go back to Day in the Life of Investment
+            // Banker, the career simulations stay small"). Previously this
+            // only fired for `active && c.id !== featured.id`, so once the
+            // row scrolled out of focus its OWN featured card had neither
+            // this button NOR the large-only Link overlay -- completely
+            // inert, with no way to bring the row back into focus by
+            // clicking it. Scrolling the row into the centered band here
+            // reuses the existing IntersectionObserver (useCenteredRow)
+            // rather than adding a second, competing "active" source.
+            onSelect={!active || c.id !== featured.id ? () => {
+              setFeaturedId(c.id);
+              if (!active) sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            } : undefined}
             onTrailer={(sim) => setTrailerSim(sim)}
           />
         ))}
@@ -770,9 +786,10 @@ const COMPACT_W = "w-[267px] sm:w-[302px] md:w-[347px]";
 function HeroShelfRow({ rowId, label, items, active }: { rowId: string; label: string; items: HeroItem[]; active: boolean }) {
   const [featuredId, setFeaturedId] = useState<string | undefined>(items[0]?.id);
   const featured = items.find((item) => item.id === featuredId) ?? items[0];
+  const sectionRef = useRef<HTMLElement>(null);
   if (!featured) return null;
   return (
-    <section data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]">
+    <section ref={sectionRef} data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]">
       <h2
         className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
         style={{ color: active ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
@@ -793,14 +810,19 @@ function HeroShelfRow({ rowId, label, items, active }: { rowId: string; label: s
             item={item}
             active={active}
             large={active && item.id === featured.id}
-            // Only selectable once the row is already the focused one -- a
-            // compact card at rest has no select control at all, so a
-            // scroll-stop tap landing on it while merely scrolling PAST the
-            // row (not yet focused) can never silently promote it to hero.
-            // Matches the TV description exactly: cards "open... on
-            // clicking" only after the down-arrow has already brought the
-            // row into its hero+side shape, never before.
-            onSelect={active && item.id !== featured.id ? () => setFeaturedId(item.id) : undefined}
+            // Granted whenever this card isn't the active hero -- including
+            // a compact card that already IS `featured` (same fix as
+            // FeaturedRow above: that combination previously had no select
+            // control and no Link overlay, so it was inert once the row
+            // scrolled out of focus). A compact-tier tap also scrolls the
+            // row into the centered band, which is what actually brings it
+            // into focus (HeroShelfCard's own comment already described
+            // this as the intent -- "that's what BRINGS the row into focus
+            // on touch" -- but the `active &&` guard here contradicted it).
+            onSelect={!active || item.id !== featured.id ? () => {
+              setFeaturedId(item.id);
+              if (!active) sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            } : undefined}
           />
         ))}
       </div>

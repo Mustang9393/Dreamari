@@ -11665,3 +11665,17 @@ Files touched: `src/components/colleges/shared.tsx` (`SchoolCard`).
 `npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified: every shelf still a uniform 420px; a Browse-shelf card (Schools with Finance, no why, no Not for me) with the name flush against its chips/stats and a full-width Compare; a For-You card (Not for me + Compare side by side, why-link present) unaffected; a 2-line-name, no-chip card (Texas A&M University-College Station) with no dead gap anywhere.
 
 Next step: none pending on this thread.
+
+## 2026-09-21 · Play tab: compact featured card was completely inert, fixed
+
+Real bug, found via code reading after extensive live testing (multiple viewport sizes, instant and simulated real scrolling) failed to reproduce a "scroll doesn't re-enlarge the row" issue as originally described. Direct feedback (Chandu, relaying testing on the Play tab): "it now makes glossary games bigger. But when I hover [scroll] to go back to Day in the Life of Investment Banker, the career simulations stay small."
+
+Root cause: in both `FeaturedRow` (Career Simulations) and `HeroShelfRow` (Glossary Games, In the works), the compact-tier card's click handler was gated `active && c.id !== featured.id`. When a row scrolls out of focus (`active` becomes false), that condition is false for EVERY card in the row -- but it's uniquely broken for whichever card is already `featured`: that card gets neither the compact-tier `onSelect` button (excluded by `c.id !== featured.id`) NOR the hero-tier `<Link>` overlay (gated on `large`, which also requires `active`). It has no click handler of any kind. A student scrolls away, the row shrinks, and the one card most likely to get clicked again -- the one they were just playing -- does nothing when tapped.
+
+Fixed by changing the condition to `!active || c.id !== featured.id`: every compact-tier card is now clickable, including the already-featured one. Clicking a compact card while its row isn't active now also calls `scrollIntoView({ behavior: "smooth", block: "center" })` on the row's own section, reusing the existing `useCenteredRow` IntersectionObserver (already watching each row's centered position) to bring it back into focus -- rather than adding a second, competing "active" state. This also matches intent already written in `HeroShelfCard`'s own comment ("a compact card can still be tapped to select it... that's what BRINGS the row into focus"), which the `active &&` guard had been silently contradicting.
+
+Files touched: `src/components/play/PlayHub.tsx` (`FeaturedRow`, `HeroShelfRow`).
+
+`npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified at 1280x640: scrolled to Glossary Games (Simulations row compact), clicked the small "Investment Banker" card -- page scrolled back up and Career Simulations returned to its large hero state. Same test the other direction (scrolled to bottom, clicked compact "Finance Terms") -- Glossary Games correctly returned to focus.
+
+Next step: the Play/Glossary background-color differentiation request (Joshua Pierce, Slack: distinct from Explore/Profile's AppBackdrop wash, not a Replit-color copy, subtle pattern optional) is still open -- picking that up next.
