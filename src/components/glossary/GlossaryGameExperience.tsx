@@ -1245,13 +1245,25 @@ function QuestionScreen({
     // text size below moved from a flat px value to a clamp() so it scales
     // with viewport height rather than jumping at a fixed breakpoint --
     // the same technique the prompt bubble's own text already used.
-    <div className="relative mx-auto flex w-full max-w-[620px] flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border p-[var(--space-6)] sm:p-[var(--space-7)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}>
+    //
+    // sm:p-[var(--space-8)], not --space-7: the marketing token scale only
+    // defines 1-6, 8, 10, 12, 13, 14 (see CareerDetailExperience.tsx's own
+    // header comment for the same trap hit earlier) -- an undefined custom
+    // property makes the whole `padding` declaration compute to 0px, which
+    // is exactly what silently zeroed this card's padding at sm+ widths
+    // (direct report with a screenshot, 21 Sept 2026: "the card containing
+    // the question+ the answers has no padding so they all sit with their
+    // borders on that big cards edge overlapping").
+    <div className="relative mx-auto flex w-full max-w-[620px] flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border p-[var(--space-6)] sm:p-[var(--space-8)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}>
       {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
         // No side padding here -- it was only ever there to "make room" for
         // Dreamy, but since he's absolutely positioned he doesn't need it,
         // and it was shifting the bubble (and the question text) off-center
         // on mobile, where this row is close to the full card width.
-        <div className="relative pt-[var(--space-7)]">
+        // 28px explicit (not --space-7 -- see the card's own comment above)
+        // since 24/32 (the real neighboring steps) read as visibly too
+        // tight/loose for Dreamy's own overlap room.
+        <div className="relative pt-[28px]">
           <span className="absolute -top-8 left-2 z-10">
             <DreamyFace pose="curious" size={56} />
           </span>
