@@ -132,7 +132,18 @@ export function MatchGrid() {
             {/* ---- the grid: all 6, always visible, no scroll -- rows
                sized to fill whatever space is left (grid-rows-3/2 with
                Tailwind's built-in minmax(0,1fr) tracks), cards stretch to
-               fill their cell instead of holding a fixed aspect ratio. ---- */}
+               fill their cell instead of holding a fixed aspect ratio.
+               Custom-designed edge case, 22 Sept 2026: DECK is a fixed
+               array of 6 today, but a real personalized-match backend can
+               return fewer for a student with narrow stated interests --
+               with a hard-coded 2x3/3x2 grid, anything short of 6 used to
+               leave dead, unexplained empty cells in the bottom-right
+               corner (confirmed live with a 4-item test slice). Padding
+               the remainder with PlaceholderMatchCard reads as "more are
+               coming," which is also just true -- it's what the splash
+               itself already promises ("later our EXPLORE feature will
+               recommend more careers"), rather than looking like a layout
+               bug. ---- */}
             <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2.5 sm:grid-cols-3 sm:grid-rows-2 sm:gap-4">
               {DECK.map((career) => (
                 <GridCard
@@ -142,6 +153,9 @@ export function MatchGrid() {
                   onOpen={() => setOpenId(career.id)}
                   onToggle={(origin) => toggle(career.id, origin)}
                 />
+              ))}
+              {Array.from({ length: Math.max(0, 6 - DECK.length) }).map((_, i) => (
+                <PlaceholderMatchCard key={`placeholder-${i}`} />
               ))}
             </div>
           </div>
@@ -221,6 +235,28 @@ export function MatchGrid() {
 }
 
 // ---------------------------------------------------------------- pieces ----
+
+// Custom-designed edge case (22 Sept 2026): fills any grid slot DECK
+// doesn't have a real career for -- see the grid's own header comment for
+// why. Dashed border + muted Sparkles + "More matches coming," the same
+// visual family the app already uses for "nothing here yet" (a dashed
+// shelf, not a solid card), so it reads as an intentional placeholder
+// rather than a missing/broken tile. Not a button -- there's nothing to
+// tap yet, so it's not focusable and carries no hover treatment.
+function PlaceholderMatchCard() {
+  return (
+    <div
+      aria-hidden
+      className="flex h-full w-full flex-col items-center justify-center gap-[6px] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-4)] text-center"
+      style={{ borderColor: "var(--color-glass-border)", background: "color-mix(in srgb, var(--color-night-background) 40%, transparent)" }}
+    >
+      <Sparkles className="h-5 w-5" style={{ color: "var(--color-night-muted-foreground)" }} />
+      <span className="text-[12px] font-semibold" style={{ color: "var(--color-night-muted-foreground)" }}>
+        More matches coming
+      </span>
+    </div>
+  );
+}
 
 function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: number; onOpen: () => void; onToggle: (origin?: { clientX: number; clientY: number }) => void }) {
   const isSelected = rank > 0;
