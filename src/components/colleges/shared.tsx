@@ -397,37 +397,29 @@ export function SchoolCard({
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
       <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={() => { onSave(); announce(saved ? `Removed ${c.name} from saved` : `Saved ${c.name}`); }} size={36} /></span>
 
-      <div className="pointer-events-none relative z-20 flex flex-1 flex-col gap-[10px] px-[18px] pt-[118px] pb-[18px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
+      {/* EVERYTHING -- name, chips, stats, why, actions -- is now one plain
+         flow, bottom-anchored on the card as a single unit via
+         justify-end (direct feedback, 21 Sept 2026: pinning only
+         chips/stats/why/actions as their own group left the name sitting
+         near the top with an awkward empty gap below it whenever a card
+         had little else to show; the whole block needed to move together,
+         not just its lower half). No slot is reserved for a chip/why that
+         isn't there -- everything present just stacks with a plain gap,
+         and the block's natural total height decides where it starts;
+         whatever's left shows as more photo above it, never as a gap
+         inside it. */}
+      <div className="pointer-events-none relative z-20 flex flex-1 flex-col justify-end gap-[10px] px-[18px] py-[18px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
         {/* mark, name and place, over the blurred tail of the photo */}
-        {/* Mark beside the name like a profile picture, centred on the
-           name + place block, so the mark-to-name relationship is identical
-           whether the name runs one line or two (direct feedback, 11 Sept
-           2026: stacking it above made the gap or the mark's height vary).
-           The block reserves two name lines and sits at its foot, so rows
-           still align across cards. */}
-        <div className="flex min-h-[77px] flex-none flex-col justify-end" style={{ textShadow: CARD_TEXT_SHADOW }}>
-          <div className="flex items-center gap-[10px]">
-            <MarkBadge c={c} size={44} />
-            <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-              <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
-              {/* wraps rather than truncates; the block above reserves the
-                 second line (two name lines + two place lines = 77) */}
-              <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
-                <MapPin className="mr-[4px] inline-block h-[12px] w-[12px] align-[-1px]" aria-hidden />{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}
-              </p>
-            </div>
+        <div className="flex items-center gap-[10px]">
+          <MarkBadge c={c} size={44} />
+          <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
+            <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
+            <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
+              <MapPin className="mr-[4px] inline-block h-[12px] w-[12px] align-[-1px]" aria-hidden />{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}
+            </p>
           </div>
         </div>
 
-        {/* Everything below the name moves as ONE group, pinned to the
-           card's bottom with a plain mt-auto (direct feedback, 21 Sept
-           2026: "don't reserve space for missing details... keep the cards
-           the same height and have the content pinned to the bottom").
-           Nothing here reserves a slot for a chip/why that isn't there --
-           an absent one just isn't in the group's natural flow, so the
-           group sits shorter and the leftover space (from mt-auto) shows up
-           ABOVE it as one clean gap, never as a stray empty row inside it. */}
-        <div className="mt-auto flex flex-col gap-[10px]">
         {/* Program name on its own line, truncated rather than wrapping
            (direct feedback, 21 Sept 2026: "the direct path chip should be
            consistent in its position... wraps for longer course names...
@@ -460,27 +452,34 @@ export function SchoolCard({
           ))}
         </dl>
 
-        {why && (
-          <div className="pointer-events-auto relative z-20">
-            <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link -my-[10px] flex cursor-pointer items-center gap-[3px] py-[10px] text-[13px] font-bold" style={{ color: "#8fb8ff" }}>
-              Why this school? <ChevronDown className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-180" : ""}`} aria-hidden />
-            </button>
-            {/* Capped, not free to grow (the card is a fixed height, so an
-               unusually long reason gets its own scrollbar here rather than
-               pushing the actions row down and off the card). */}
-            {showWhy && <p className="dm-scroll mt-[4px] max-h-[52px] overflow-y-auto text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</p>}
-          </div>
-        )}
+        {/* The one exception to "don't reserve space for what's missing"
+           (direct feedback, 21 Sept 2026): "Why this school?" specifically
+           stays reserved even when a card has none, so a card without it
+           still lands its stats/actions at the same relative spot as one
+           that has it -- a Browse-shelf card (never has "why") sitting next
+           to a For-You card (usually does) shouldn't read as a different
+           shape because of it. min-h matches the collapsed link's own box. */}
+        <div className="min-h-[24px]">
+          {why && (
+            <div className="pointer-events-auto relative z-20">
+              <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link -my-[10px] flex cursor-pointer items-center gap-[3px] py-[10px] text-[13px] font-bold" style={{ color: "#8fb8ff" }}>
+                Why this school? <ChevronDown className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-180" : ""}`} aria-hidden />
+              </button>
+              {/* Capped, not free to grow (the card is a fixed height, so an
+                 unusually long reason gets its own scrollbar here rather
+                 than pushing the actions row down and off the card). */}
+              {showWhy && <p className="dm-scroll mt-[4px] max-h-[52px] overflow-y-auto text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</p>}
+            </div>
+          )}
+        </div>
 
         {/* Two quiet actions at most (direct feedback, 11 Sept 2026): opening
            the school is the whole card (hover cue), so there is no View
            button and neither of these reads as the primary. "Not for me" is
            plain text on the left; Compare is a ghost button on the right --
-           and when there's no "Not for me" to pair with it, Compare stays
-           left-aligned with everything else on the card rather than
-           floating alone on the right (direct feedback, 21 Sept 2026: full
-           width read as too heavy; left-aligned matches the name/chips/
-           stats above it, which are all left-aligned too). */}
+           and when there's no "Not for me" to pair with it, Compare goes
+           full width instead of floating alone at one edge (direct
+           feedback, 21 Sept 2026). */}
         {(onCompare || onDismiss) && (
           <div className="pointer-events-auto relative z-20 flex items-center justify-between gap-[8px]">
             {onDismiss && (
@@ -493,13 +492,12 @@ export function SchoolCard({
               // --card leaves white text on pale blue (same class of bug as
               // `ghost` above). A near-solid fill keeps white legible in
               // either theme instead of depending on what's underneath it.
-              <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); announce(compared ? `Removed ${c.name} from compare` : `Comparing ${c.name}`); }} className={`dm-quiet flex min-h-[34px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[12.5px] font-bold ${onDismiss ? "" : "mr-auto"}`} style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 88%, transparent)`, color: "#fff" } : ghost}>
+              <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); announce(compared ? `Removed ${c.name} from compare` : `Comparing ${c.name}`); }} className={`dm-quiet flex min-h-[34px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[12.5px] font-bold ${onDismiss ? "" : "w-full"}`} style={compared ? { borderColor: ACCENT, background: `color-mix(in srgb, ${ACCENT} 88%, transparent)`, color: "#fff" } : ghost}>
                 <ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
               </button>
             )}
           </div>
         )}
-        </div>
       </div>
     </article>
   );

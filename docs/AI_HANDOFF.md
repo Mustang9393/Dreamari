@@ -11649,3 +11649,19 @@ Files touched: `src/components/colleges/shared.tsx` (`SchoolCard`).
 `npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified: every shelf on Browse and For You at a uniform 420px, the "Economics / DIRECT PATH / TARGET AT 3.9" 2-line-chip card with "Why this school?" expanded (text fully legible, Not for me/Compare fully visible below it, no overlap or clipping), and a lone-Compare card (Near you, Lower-cost options) left-aligned with no dead gap above it.
 
 Next step: none pending on this thread.
+
+## 2026-09-21 · SchoolCard: whole content block pinned to bottom, why-link reserved, Compare full width
+
+Final round of corrections on the same card, direct feedback.
+
+**"Princeton university, location, duration and logo should not sit above a huge gap anywhere."** The previous fix pinned chips+stats+why+actions to the bottom as their own group, but left the name/mark/place block separately anchored near the top (`pt-[118px]`) -- for a short card (no chips, no why) that left a big dead gap directly under the name, between it and the pinned group below. Merged everything (name included) into one plain flow, and pinned the WHOLE thing to the card's bottom via `justify-end` on the outer content div instead of a nested group. Now the name sits immediately above whatever the card actually has, with no internal gap anywhere -- any leftover space shows up as more visible photo above the name, never as a gap inside the content.
+
+**"Reserve space for the why this school link... leave that gap for ones that don't have it."** One deliberate exception to "don't reserve space for what's missing": a `min-h-[24px]` wrapper around the why-link slot, always present, so a Browse-shelf card (never has "why") lands its stats and actions at the same relative position as a For-You card (usually does) -- the two card families now read as the same shape even though one has strictly more content than the other.
+
+**"Do the full width Compare button, this is bad"** -- reversing the left-align from the previous pass. A lone Compare button (no "Not for me" to pair with) now spans the full content width instead of sitting at either edge.
+
+Files touched: `src/components/colleges/shared.tsx` (`SchoolCard`).
+
+`npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified: every shelf still a uniform 420px; a Browse-shelf card (Schools with Finance, no why, no Not for me) with the name flush against its chips/stats and a full-width Compare; a For-You card (Not for me + Compare side by side, why-link present) unaffected; a 2-line-name, no-chip card (Texas A&M University-College Station) with no dead gap anywhere.
+
+Next step: none pending on this thread.
