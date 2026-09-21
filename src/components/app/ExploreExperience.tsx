@@ -783,7 +783,21 @@ function ForYouFace() {
         /* night scene: the reel is always photo-on-dark; its ui keeps dark
            tokens in light mode (see tokens.css) */
         data-night-scene
-        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-full md:max-h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-lg)]"
+        // md:h-[672px], not h-full + max-h-[672px]: CSS only resolves a
+        // percentage height (h-full = height:100%) against an ancestor
+        // whose OWN height is an explicit value, not `auto` -- and at
+        // tablet widths (md but below lg, where `main` has no height rule
+        // of its own -- see main's className below, lg:-prefixed only)
+        // that chain was broken two levels deep. This container's own
+        // rendered box still landed on 672px (max-height capping its
+        // otherwise-taller content), but each snap-card inside it,
+        // ALSO h-full, had nothing definite to resolve against and fell
+        // back to its own natural content height -- so instead of one
+        // full-panel card at a time, several partial cards showed
+        // stacked (direct feedback, 21 Sept 2026: "the for you on tablet
+        // is breaking"). A literal fixed height sidesteps the whole
+        // ancestor-chain question.
+        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-lg)]"
       >
         {FOR_YOU_FEED.map((item, index) => (
           <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">

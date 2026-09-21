@@ -11418,6 +11418,39 @@ live: Explore For You's overflow measured exactly 0px after the fix
 (was 24px) at 1440x800, both buttons fully visible with no scroll
 possible; Connect modal now shows a single close control.
 
-Next step: local-only, not pushed -- no explicit push instruction in
-this round (the standing "show before push" preference for this
-project), unlike the batch above.
+Next step: pushed together with the tablet fix below (the user asked
+for that one directly, and to push both).
+
+## 2026-09-21 · Explore For You: fixed at tablet too (same feature, different bug)
+
+Immediate follow-up: "The for you on tablet is breaking." Root-caused
+via direct DOM measurement, not guessed at: at tablet widths (`md:` but
+below `lg:`), the reel panel (`.foryou-snap`, `ExploreExperience.tsx`)
+used `md:h-full md:max-h-[672px]` -- and CSS only resolves a percentage
+height (`h-full` = `height:100%`) against an ancestor whose own
+`height` is an explicit value, never `auto`, regardless of what pixel
+height that ancestor happens to render at. `main`'s own height rule is
+`lg:`-only (the earlier fix in this same file), so at tablet widths
+`main` has no explicit height -- `auto` all the way up. The panel's
+OWN box still landed on 672px in practice (`max-height` capping its
+otherwise-taller natural content), so that part looked fine, but each
+snap-card inside it is ALSO `h-full`, trying to resolve against a
+parent whose CSS `height` is technically `auto` even though it renders
+at 672px -- so every card fell back to its own natural content height
+instead (measured: 230/82/228px per card, wildly inconsistent) rather
+than filling the panel. Visually: several partial cards stacked instead
+of one full card at a time, i.e. exactly "breaking."
+
+Fix: `md:h-[672px]` instead of `md:h-full md:max-h-[672px]` -- a
+literal fixed height sidesteps the whole ancestor-chain question
+instead of depending on `main` also being fixed at this breakpoint.
+
+Files: `src/components/app/ExploreExperience.tsx` only.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean. Verified live at
+768x1024 (tablet): every reel card now measures exactly 390x672,
+matching its container, one full card visible at a time -- confirmed
+via direct DOM measurement, not just a screenshot.
+
+Next step: pushed together with the QA batch above, per direct
+instruction.
