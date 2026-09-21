@@ -141,7 +141,7 @@ export const BROWSE_PUBLIC_SERVICE: CatalogCareer[] = [
   C("Mental Health Social Worker", "Counseling & Social Work", "/images/app/browse/mental-health-social-worker.webp"),
   C("Urban Planner", "Building & Construction", "/images/app/browse/urban-planner.webp"),
   C("Judicial Law Clerk", "Law, Safety & Justice", "/images/app/browse/judicial-law-clerk.webp"),
-  C("Environment Scientist", "Science & Research", "/images/app/browse/environment-scientist.webp"),
+  C("Environmental Scientist", "Science & Research", "/images/app/browse/environment-scientist.webp"),
   C("Principal", "Teaching & Education", "/images/app/browse/principal.webp"),
   C("Community Program Manager", "Counseling & Social Work", "/images/app/browse/community-program-manager.webp"),
   C("Detective", "Law, Safety & Justice", "/images/app/browse/detective.webp"),

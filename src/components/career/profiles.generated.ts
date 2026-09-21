@@ -8856,9 +8856,9 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     },
     "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics. Clerkship pay is a national approximation -- federal and state courts vary widely, and law-firm signing bonuses after a clerkship (often six figures) are separate from the clerkship salary itself."
   },
-  "environment-scientist": {
-    "slug": "environment-scientist",
-    "title": "Environment Scientist",
+  "environmental-scientist": {
+    "slug": "environmental-scientist",
+    "title": "Environmental Scientist",
     "world": "Science & Research",
     "photo": "/images/app/browse/environment-scientist.webp",
     "summary": "Studies air, water and soil to protect the environment and public health.",
