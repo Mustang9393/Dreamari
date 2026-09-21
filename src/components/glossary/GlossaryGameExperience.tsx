@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
-import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { PlayBackdrop } from "@/components/play/PlayBackdrop";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -1390,20 +1390,22 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
       className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col"
       style={{
         "--glossary-accent": accent,
-        // The one app background (direct feedback, 21 Sept 2026: the page
-        // AND the feedback popup both read as flat and boring on plain
-        // near-black) -- not a custom gradient invented for this screen,
-        // the same layered purple/blue/teal wash plus starfield every other
-        // app screen already renders behind itself. transparent here on
-        // purpose so AppBackdrop (fixed, full-viewport) is what's actually
-        // visible; the career's own accent glows in on top of it, same idea
-        // as before, just no longer the whole background by itself.
+        // Play's own background, not AppBackdrop (direct feedback, 21 Sept
+        // 2026 -- first pass reused AppBackdrop so the page and the
+        // feedback popup weren't flat/boring on plain near-black; a later
+        // pass asked for real differentiation from Explore/Profile's own
+        // wash specifically, "it'll feel redundant... when playing a game
+        // it should feel like we are entering a new world"). transparent
+        // here on purpose so PlayBackdrop (fixed, full-viewport) is what's
+        // actually visible; the career's own accent glows in on top of it,
+        // same idea as before, just no longer the whole background by
+        // itself.
         background: "transparent",
         color: "var(--foreground)",
         fontFamily: "var(--font-body)",
       } as React.CSSProperties}
     >
-      <AppBackdrop />
+      <PlayBackdrop />
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"

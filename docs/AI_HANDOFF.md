@@ -11679,3 +11679,17 @@ Files touched: `src/components/play/PlayHub.tsx` (`FeaturedRow`, `HeroShelfRow`)
 `npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified at 1280x640: scrolled to Glossary Games (Simulations row compact), clicked the small "Investment Banker" card -- page scrolled back up and Career Simulations returned to its large hero state. Same test the other direction (scrolled to bottom, clicked compact "Finance Terms") -- Glossary Games correctly returned to focus.
 
 Next step: the Play/Glossary background-color differentiation request (Joshua Pierce, Slack: distinct from Explore/Profile's AppBackdrop wash, not a Replit-color copy, subtle pattern optional) is still open -- picking that up next.
+
+## 2026-09-21 · Play gets its own background, distinct from AppBackdrop
+
+Direct feedback (Joshua Pierce via Slack, relayed by Chandu): "it shouldn't have a similar background color as the Explore/my profile etc, it'll feel redundant... when playing a game it should feel like we are entering a new world, similar to how the career simulations are extremely immersive... the change of color will spike the neurological pleasure reward." Also asked for something "visually brilliant yet non-distracting," explicitly "not a direct replication of the Replit's colors," with an optional very subtle pattern.
+
+New `src/components/play/PlayBackdrop.tsx`, same structure and technique as the shared `AppBackdrop` (radial wash + linear base + the app's own starfield image, fixed to the viewport) but swaps `--hero-accent-teal` for `--hero-accent-pink` -- the design system's own third "hero accent" token (`marketing/tokens.css`), already defined but unused until now, so this is a real token-system color, not an invented one or a copy of the reference site's palette. Purple-to-pink instead of purple-to-teal reads as genuinely different from every other tab's cooler wash while staying inside the app's existing visual language. Added one very faint diagonal hairline texture on top (same technique already used elsewhere in the app for subtle surface texture, e.g. `SchoolCard`'s no-photo fallback) -- the "subtle pattern" ask, barely visible, never competing with card art.
+
+Swapped into both `PlayHub.tsx` (the Play tab itself) and `GlossaryGameExperience.tsx` (previously explicitly reusing `AppBackdrop`, per an earlier pass today) -- these were the only two screens using the generic app-wide wash; `SimulationPlayer.tsx` already has its own per-level scene photography and was never on `AppBackdrop`.
+
+Files touched: `src/components/play/PlayBackdrop.tsx` (new), `src/components/play/PlayHub.tsx`, `src/components/glossary/GlossaryGameExperience.tsx`.
+
+`npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified on both the Play hub (warm magenta/pink wash, faint diagonal texture visible but not distracting) and Investment Banking's Glossary Game (the career's own amber accent glow layers on top cleanly, no clash).
+
+Next step: none pending on this thread.

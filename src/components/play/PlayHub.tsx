@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { PlayBackdrop } from "./PlayBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
@@ -118,7 +118,7 @@ export function PlayHub() {
         overflowX: "clip",
       }}
     >
-      <AppBackdrop />
+      <PlayBackdrop />
       <FirstVisitSplash surface="play" onOpenChange={(open) => setSplashSettled(!open)} />
 
       <DesktopNavigation active="Play" />
