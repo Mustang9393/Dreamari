@@ -20,20 +20,25 @@ import { onPlayPulse, type PlayPulseKind } from "./backdropPulse";
 //   technique, rather than translating a doubled strip -- simpler, and
 //   the seam is guaranteed invisible since the tile repeats exactly.
 // - One grid color, not a two-tone cyan/magenta split -- the reference
-//   itself only uses one hue (magenta) for every line, and it's the SAME
-//   family as the sky gradient's own pink, so the grid reads as part of
-//   the same scene instead of a competing accent color layered on top.
+//   itself only uses one hue for every line. Recolored gold and given a
+//   flat dark floor underneath (see the inline comment further down) per
+//   later rounds of direct feedback.
 export function PlayBackdropV4Synthwave({ accent = "#ffb81f" }: { accent?: string } = {}) {
   const [bloom, setBloom] = useState<{ key: number; kind: PlayPulseKind } | null>(null);
   useEffect(() => onPlayPulse(({ kind }) => setBloom((b) => ({ key: (b?.key ?? 0) + 1, kind }))), []);
   const bloomColor = bloom?.kind === "wrong" ? "var(--destructive)" : accent;
   const bloomPeak = bloom?.kind === "celebrate" ? 0.7 : bloom?.kind === "wrong" ? 0.32 : 0.5;
 
+  // Recolored from the reference's own magenta to gold, matching the
+  // game's own accent (direct feedback, 21 Sept 2026: "Lets color the
+  // synth one gold rather than magenta"). Same oklch hue (~75, warm gold)
+  // used for the sky's horizon stop, the grid lines, and the horizon glow
+  // below, so the whole scene reads as one palette.
   return (
     <div
       aria-hidden
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-      style={{ background: "#0d0a1f", backgroundImage: "linear-gradient(180deg, oklch(0.1 0.05 292) 0%, oklch(0.56 0.2 350) 100%)" }}
+      style={{ background: "#0d0a1f", backgroundImage: "linear-gradient(180deg, oklch(0.1 0.05 292) 0%, oklch(0.72 0.18 75) 100%)" }}
     >
       {/* Night sky stars -- above the horizon line so they never fight the
          grid. */}
@@ -50,26 +55,31 @@ export function PlayBackdropV4Synthwave({ accent = "#ffb81f" }: { accent?: strin
          horizon (the vanishing point sits at perspective-origin, the top
          edge of this box, which lines up with the horizon line below). */}
       <div className="absolute inset-x-0 bottom-0 h-[58%]" style={{ perspective: "340px", perspectiveOrigin: "50% 0%" }}>
-        {/* Slowed and lightened per direct feedback, 21 Sept 2026: "Slow
-           down and also make the synth grid more transparent and
-           thinner. Its too distracting at the moment." -- 4s (was 1.4s),
-           1px lines (was 2px) at roughly a third the opacity. */}
+        {/* The floor briefly went fully transparent (checked against the
+           reference's own live demo, which shows its sky straight through
+           the grid), then corrected again: "have a darker floor sort of
+           color surface with accented gold lines for the gridlines" -- a
+           flat dark fill again, but a plain tone rather than a gradient
+           that mirrors/"reflects" the sky's own shape, so the gold lines
+           read as painted onto a dark floor rather than a mirror. Slowed
+           and lightened per an earlier round too ("Slow down and also
+           make the synth grid more transparent and thinner"): 4s scroll
+           (was 1.4s), 1px lines (was 2px). Recolored gold throughout,
+           matching the sky ("Lets color the synth one gold rather than
+           magenta"). */}
         <div
           aria-hidden
           className="motion-safe:animate-[synth-grid-scroll_4s_linear_infinite] absolute inset-0"
           style={{
-            backgroundColor: "#170a2e",
+            backgroundColor: "#0d0a14",
             backgroundImage:
-              "repeating-linear-gradient(90deg, oklch(0.78 0.22 330 / 0.22) 0 1px, transparent 1px 60px), repeating-linear-gradient(180deg, oklch(0.78 0.22 330 / 0.22) 0 1px, transparent 1px 60px)",
+              "repeating-linear-gradient(90deg, oklch(0.78 0.18 75 / 0.4) 0 1px, transparent 1px 60px), repeating-linear-gradient(180deg, oklch(0.78 0.18 75 / 0.4) 0 1px, transparent 1px 60px)",
             backgroundSize: "60px 60px",
             transform: "rotateX(78deg)",
             transformOrigin: "50% 0%",
           }}
         />
       </div>
-      {/* Horizon glow -- the grid's own color, softened, right at the seam
-         where the sky meets the floor (not tied to a sun shape). */}
-      <span aria-hidden className="absolute inset-x-0 top-[42%] h-[10%]" style={{ background: "linear-gradient(180deg, transparent, oklch(0.78 0.22 330 / 0.5))", filter: "blur(16px)" }} />
 
       {bloom && (
         <span

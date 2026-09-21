@@ -1072,11 +1072,19 @@ body {
 }
 /* box-shadow variant of the same RGB-split idea, for graphical HUD
    elements (the filled mastery dots) rather than text. */
+/* Peak dimmed per direct feedback, 21 Sept 2026: "We can limit the glow,
+   it shoudlnt get too bright at its max." */
 @keyframes crt-rgb-glow {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.6), 0 0 10px 2px rgba(0, 231, 255, 0.5); }
-  25% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.45), 0 0 8px 2px rgba(0, 231, 255, 0.4); }
-  50% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.7), 0 0 12px 3px rgba(0, 231, 255, 0.6); }
-  75% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.4), 0 0 8px 2px rgba(0, 231, 255, 0.35); }
+  0%, 100% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.4), 0 0 7px 1px rgba(0, 231, 255, 0.35); }
+  25% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.3), 0 0 5px 1px rgba(0, 231, 255, 0.28); }
+  50% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.48), 0 0 8px 2px rgba(0, 231, 255, 0.42); }
+  75% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.28), 0 0 5px 1px rgba(0, 231, 255, 0.24); }
+}
+/* A terminal cursor block, hard on/off (steps(1), not a fade) -- used in
+   place of the "·" separator in the CRT version's HUD strip. */
+@keyframes crt-cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 /* The reference's own technique: shift a single tiled grid image by
    exactly one cell so the loop is seamless -- a `background-position`
@@ -1102,7 +1110,14 @@ body {
    together, so the compound selector is guaranteed to win regardless of
    bundle order. */
 .marketing-v2.play-crt {
-  --font-display: "Courier New", monospace;
+  /* "Press Start 2P" (Google Fonts) -- a genuine 8-bit pixel face, per
+     direct feedback, 21 Sept 2026: "I think we can find a more
+     pixelated-pixel looking font for it all in this version." Swapped in
+     for the earlier "Courier New" (monospace, but not actually pixel
+     art). Only loaded when this version is active -- PlayBackdropV2Crt.tsx
+     injects the Google Fonts <link> itself on mount, since this is an
+     experimental toggle, not a font the rest of the app should pay for. */
+  --font-display: "Press Start 2P", "Courier New", monospace;
   --card: #050805;
   --glass-border: rgba(255, 61, 170, 0.4);
   --speech-bubble-bg: #050805;
@@ -1119,8 +1134,26 @@ body {
      on the dots themselves rather than any `text-shadow`. Slowed way down
      from the reference's own snappy 1s steps(9) to a gentle 3.5s ease
      drift to match "slowly."*/
-  --crt-glitch-glow: 0 0 0 2px rgba(255, 0, 170, 0.6), 0 0 10px 2px rgba(0, 231, 255, 0.5);
+  --crt-glitch-glow: 0 0 0 2px rgba(255, 0, 170, 0.4), 0 0 7px 1px rgba(0, 231, 255, 0.35);
   --crt-glitch-anim: crt-rgb-glow 3.5s ease-in-out infinite alternate;
+  /* "Go more Retro blocky pixelated with the UI on CRT" -- square corners
+     app-wide within this scope, since every card/button/chip in the game
+     already reads these three radius tokens. */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+}
+/* The blinking terminal cursor, moved here from the HUD per direct
+   correction ("it should be in the messages or after the questions") --
+   an ::after on any element carrying `crt-cursor-after`
+   (SpeechBubble, i.e. Dreamy's lines and every question prompt), CRT-only
+   via the same compound-selector scoping as the rest of this block. */
+.marketing-v2.play-crt .crt-cursor-after::after {
+  content: "\2588";
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--glossary-accent);
+  animation: crt-cursor-blink 1s steps(1) infinite;
 }
 
 /* Marketing Explore "Browse All" rails: seamless marquee (content doubled,

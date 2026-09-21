@@ -22,9 +22,22 @@ import { onPlayPulse, type PlayPulseKind } from "./backdropPulse";
 //    `var(--crt-glitch-shadow)`/`var(--crt-glitch-anim)` (both `none` by
 //    default, only ever defined under `.play-crt`) to get the reference's
 //    animated RGB-split glitch text.
+const PIXEL_FONT_HREF = "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap";
+
 export function PlayBackdropV2Crt({ accent = "#ffb81f" }: { accent?: string } = {}) {
   const [bloom, setBloom] = useState<{ key: number; kind: PlayPulseKind } | null>(null);
   useEffect(() => onPlayPulse(({ kind }) => setBloom((b) => ({ key: (b?.key ?? 0) + 1, kind }))), []);
+  // "Press Start 2P" only loaded while this experimental version is
+  // actually on screen -- never added to the app's own font loading in
+  // layout.tsx/marketing/fonts.ts, since v1 (the shipped default) has no
+  // use for an 8-bit pixel face.
+  useEffect(() => {
+    if (document.querySelector(`link[href="${PIXEL_FONT_HREF}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = PIXEL_FONT_HREF;
+    document.head.appendChild(link);
+  }, []);
   const bloomColor = bloom?.kind === "wrong" ? "var(--destructive)" : accent;
   const bloomPeak = bloom?.kind === "celebrate" ? 0.7 : bloom?.kind === "wrong" ? 0.32 : 0.5;
 

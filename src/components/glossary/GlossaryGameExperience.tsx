@@ -182,9 +182,15 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
       {/* No glitch text here on purpose -- this renders both Dreamy's
          intro line AND the actual question prompt (direct correction, 21
          Sept 2026: "Do not glitch the questions and answers... slowly
-         glitch the HUD elements not text"). */}
+         glitch the HUD elements not text"). `crt-cursor-after` is a
+         `.play-crt`-scoped ::after in globals.css -- a blinking block
+         cursor right after the last word, CRT-only, no bgVersion prop
+         needed here (direct correction: "The cursor shouldnt be up in the
+         HUD, it should be in the messages or after the questions"). Sized
+         up slightly per "scale up the question+answer content... but have
+         it be responsive... proportionately" (clamp, same technique). */}
       <p
-        className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold"
+        className="crt-cursor-after text-[clamp(19px,2.8dvh,23px)] leading-[1.35] font-extrabold"
         style={{ color: "var(--speech-bubble-fg, #f4f2fa)", fontFamily: "var(--font-display)" }}
       >
         {children}
@@ -1142,7 +1148,14 @@ function QuestionScreen({
     // card" decision (11 Sept 2026, "boxes inside boxes") -- the option
     // pills/tiles below keep their own border, which reads as normal
     // buttons-in-a-panel, not a second redundant outer card.
-    <div className="relative mx-auto flex w-full max-w-[560px] flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}>
+    // Scaled up per direct feedback, 21 Sept 2026: "lets scale up the
+    // question+answer content (whatever is centred)... but have it be
+    // responsive on all devices and screen sizes proportionately." Width
+    // grows within the existing 640px <main> cap (560px -> 620px); every
+    // text size below moved from a flat px value to a clamp() so it scales
+    // with viewport height rather than jumping at a fixed breakpoint --
+    // the same technique the prompt bubble's own text already used.
+    <div className="relative mx-auto flex w-full max-w-[620px] flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border p-[var(--space-6)] sm:p-[var(--space-7)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}>
       {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
         // No side padding here -- it was only ever there to "make room" for
         // Dreamy, but since he's absolutely positioned he doesn't need it,
@@ -1660,11 +1673,22 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
           <div className="flex items-center justify-between text-[13px] font-extrabold" style={{ color: "var(--muted-foreground)" }}>
             <span>{lesson.title}</span>
             <span>
+              {/* The blinking cursor moved OUT of the HUD per direct
+                 correction, 21 Sept 2026: "The cursor shouldnt be up in
+                 the HUD, it should be in the messages or after the
+                 questions" -- see SpeechBubble's own `.crt-cursor-after`
+                 instead. Plain middot here again, every version. */}
               {currentNumber}/{Math.max(mainLoopLength, queue.length)} · {percent}%
             </span>
           </div>
-          {/* Sparks on every correct answer that moves it (SparkBar), same as Build. */}
-          <SparkBar percent={percent} min={4} height={4} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
+          {/* Sparks on every correct answer that moves it (SparkBar), same
+             as Build. Wrapped so the CRT glitch glow can ride the whole
+             bar (graphical HUD element, direct feedback: "progress bar
+             master dots etc can glitch") without touching the shared
+             component itself. */}
+          <span className="block rounded-full" style={{ boxShadow: "var(--crt-glitch-glow, none)", animation: "var(--crt-glitch-anim, none)" }}>
+            <SparkBar percent={percent} min={4} height={4} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
+          </span>
           {/* Mastery reads as filled skill dots, one per term (Duolingo's own
              mastery visualization), not just a fraction in text -- seeing
              which specific term is still open is more useful than a count. */}
