@@ -1043,22 +1043,48 @@ body {
   100% { opacity: 0; transform: scale(2.2); }
 }
 
-/* PlayBackdropV2Crt: a live TV-static step (not a smooth fade -- real
-   static flickers between frames) and a barely-there brightness drift so
-   the tube never reads perfectly steady. PlayBackdropV4Synthwave: the
-   perspective grid scrolls toward the viewer in a hard loop matching its
-   own repeat size (64px, doubled for the rotated axis), 21 Sept 2026. */
-@keyframes crt-static {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-1%, 1%); }
+/* PlayBackdropV2Crt, rebuilt to match the actual "vhs retro style" CodePen
+   reference (creme, codepen.io/creme/pen/aPJwEz) after an initial pass
+   read as nothing like it (direct feedback 21 Sept 2026: "The crt is bad,
+   nothing like the reference... like an OLD TV"). Values transcribed
+   directly from that pen's SCSS:
+   - `@keyframes scanlines { from { background: linear-gradient(to bottom,
+     transparent 50%, rgba(0,0,0,.5) 51%); background-size: 100% 4px; } }`
+     -- a hard, visible band every 4px, not a faint 1px hairline.
+   - `.noise { opacity: .6; animation: opacity 3s linear infinite; }` --
+     the static layer itself visibly breathes, not just the odd texture.
+   - The glitch text effect is a `text-shadow` animated in `steps(9)`
+     through a rotating set of saturated RGB-split offsets (magenta/cyan/
+     green/red/violet in the source; simplified to a clean magenta/cyan
+     dual-channel split here for legibility against this app's own UI
+     text, which the reference's own one-word "PLAY" readout didn't have
+     to preserve).
+   - Base screen color swapped from the reference's own `#2b52ff` blue to
+     black, per this project's own earlier, still-standing instruction
+     ("instead of a blue screen lets keep it black"). */
+@keyframes crt-scanline-roll {
+  0% { background-position-y: 0; }
+  100% { background-position-y: 4px; }
 }
-@keyframes crt-flicker {
-  0%, 19%, 21%, 100% { opacity: 1; }
-  20% { opacity: 0.85; }
+@keyframes crt-noise-flicker {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.4; }
 }
+/* box-shadow variant of the same RGB-split idea, for graphical HUD
+   elements (the filled mastery dots) rather than text. */
+@keyframes crt-rgb-glow {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.6), 0 0 10px 2px rgba(0, 231, 255, 0.5); }
+  25% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.45), 0 0 8px 2px rgba(0, 231, 255, 0.4); }
+  50% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.7), 0 0 12px 3px rgba(0, 231, 255, 0.6); }
+  75% { box-shadow: 0 0 0 2px rgba(255, 0, 170, 0.4), 0 0 8px 2px rgba(0, 231, 255, 0.35); }
+}
+/* The reference's own technique: shift a single tiled grid image by
+   exactly one cell so the loop is seamless -- a `background-position`
+   shift, not a translated strip (avoids ever needing a doubled element to
+   hide the seam). 60px matches the grid's own `background-size`. */
 @keyframes synth-grid-scroll {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(64px); }
+  0% { background-position: 0 0; }
+  100% { background-position: 0 60px; }
 }
 
 /* Glossary Game v2 (CRT) background experiment, 21 Sept 2026: "match UI,
@@ -1078,9 +1104,23 @@ body {
 .marketing-v2.play-crt {
   --font-display: "Courier New", monospace;
   --card: #050805;
-  --glass-border: rgba(255, 183, 31, 0.4);
+  --glass-border: rgba(255, 61, 170, 0.4);
   --speech-bubble-bg: #050805;
-  --speech-bubble-fg: #ffcf6e;
+  --speech-bubble-fg: #ffffff;
+  /* Applied to graphical HUD elements only (the filled mastery dots) in
+     GlossaryGameExperience.tsx via `boxShadow`/`animation` reading these
+     two vars with a `none` fallback -- harmless everywhere outside this
+     scope, since the vars simply don't exist there. Went through two
+     scoping corrections, both direct, 21 Sept 2026: first off every
+     question/answer/prose string ("Do not glitch the questions and
+     answers... slowly glitch the HUD elements not text"), then off HUD
+     TEXT entirely too ("Do not glitch the text on the HUD, glitch the
+     graphical elements only") -- landed on a `box-shadow` RGB-split pulse
+     on the dots themselves rather than any `text-shadow`. Slowed way down
+     from the reference's own snappy 1s steps(9) to a gentle 3.5s ease
+     drift to match "slowly."*/
+  --crt-glitch-glow: 0 0 0 2px rgba(255, 0, 170, 0.6), 0 0 10px 2px rgba(0, 231, 255, 0.5);
+  --crt-glitch-anim: crt-rgb-glow 3.5s ease-in-out infinite alternate;
 }
 
 /* Marketing Explore "Browse All" rails: seamless marquee (content doubled,

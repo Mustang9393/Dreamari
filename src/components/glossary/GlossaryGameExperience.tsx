@@ -179,7 +179,14 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
     >
       {/* var(--foreground) also flips dark in light mode -- fixed near-white
          to match the always-dark bubble above, same reasoning. */}
-      <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--speech-bubble-fg, #f4f2fa)", fontFamily: "var(--font-display)" }}>
+      {/* No glitch text here on purpose -- this renders both Dreamy's
+         intro line AND the actual question prompt (direct correction, 21
+         Sept 2026: "Do not glitch the questions and answers... slowly
+         glitch the HUD elements not text"). */}
+      <p
+        className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold"
+        style={{ color: "var(--speech-bubble-fg, #f4f2fa)", fontFamily: "var(--font-display)" }}
+      >
         {children}
       </p>
     </div>
@@ -1670,7 +1677,17 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
                     key={t.id}
                     title={t.term}
                     className="flex size-5 items-center justify-center rounded-full"
-                    style={{ background: done ? "var(--glossary-accent)" : "var(--glass-surface-2)", color: "#05070f" }}
+                    style={{
+                      background: done ? "var(--glossary-accent)" : "var(--glass-surface-2)",
+                      color: "#05070f",
+                      // Graphical HUD element, not text -- the CRT glitch
+                      // reads as a chromatic box-shadow pulse here instead
+                      // of a text-shadow (direct correction, 21 Sept 2026:
+                      // "Do not glitch the text on the HUD, glitch the
+                      // graphical elements only"). `none` outside .play-crt.
+                      boxShadow: done ? "var(--crt-glitch-glow, none)" : undefined,
+                      animation: done ? "var(--crt-glitch-anim, none)" : undefined,
+                    }}
                   >
                     {done && <Check className="h-[11px] w-[11px]" aria-hidden />}
                   </span>

@@ -5,13 +5,24 @@ import { onPlayPulse, type PlayPulseKind } from "./backdropPulse";
 
 // v4 experiment: a retro synthwave grid horizon -- direct request 21 Sept
 // 2026, linking a CSS "retro cyberpunk grid synthwave horizon" reference
-// (codefronts.com). Same three ingredients as that style of effect: a
-// night-sky gradient, a striped sun sitting on the horizon, and a receding
-// perspective grid floor (`transform: perspective() rotateX()` on a
-// repeating grid, not a canvas). Recolored so the sun reads in the game's
-// own gold accent instead of the classic hot-pink synthwave sun --
-// "color match to compliment the background" -- with the grid kept in a
-// cooler magenta/cyan pair for the genre's usual warm/cool contrast.
+// (codefronts.com). Rebuilt to match that reference's actual technique and
+// palette closely, per direct correction ("the synth one should be exactly
+// like its reference, remove the round sun thing in the background and
+// apply perspective: make sure the grid colors match the background
+// colors"):
+// - No sun -- the reference has one, but this was explicitly told to drop
+//   it, so the scene is just the sky gradient and the grid.
+// - Real perspective: `perspective` + `perspective-origin: 50% 0%` on the
+//   parent (vanishing point at the horizon), `rotateX(78deg)` on the floor
+//   -- the convergence comes from the 3D projection itself, not a faked
+//   taper. The floor animates via `background-position` (a single tiled
+//   grid image shifting exactly one cell per loop), the reference's own
+//   technique, rather than translating a doubled strip -- simpler, and
+//   the seam is guaranteed invisible since the tile repeats exactly.
+// - One grid color, not a two-tone cyan/magenta split -- the reference
+//   itself only uses one hue (magenta) for every line, and it's the SAME
+//   family as the sky gradient's own pink, so the grid reads as part of
+//   the same scene instead of a competing accent color layered on top.
 export function PlayBackdropV4Synthwave({ accent = "#ffb81f" }: { accent?: string } = {}) {
   const [bloom, setBloom] = useState<{ key: number; kind: PlayPulseKind } | null>(null);
   useEffect(() => onPlayPulse(({ kind }) => setBloom((b) => ({ key: (b?.key ?? 0) + 1, kind }))), []);
@@ -19,50 +30,46 @@ export function PlayBackdropV4Synthwave({ accent = "#ffb81f" }: { accent?: strin
   const bloomPeak = bloom?.kind === "celebrate" ? 0.7 : bloom?.kind === "wrong" ? 0.32 : 0.5;
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden" style={{ background: "linear-gradient(180deg, #0a0518 0%, #170a2e 45%, #2c0f3a 68%, #170a2e 100%)" }}>
-      {/* Night sky stars -- a cheap fixed dot texture, well above the
-         horizon line so it never fights the grid. */}
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      style={{ background: "#0d0a1f", backgroundImage: "linear-gradient(180deg, oklch(0.1 0.05 292) 0%, oklch(0.56 0.2 350) 100%)" }}
+    >
+      {/* Night sky stars -- above the horizon line so they never fight the
+         grid. */}
       <span
         aria-hidden
-        className="absolute inset-0"
+        className="absolute inset-x-0 top-0 h-[45%]"
         style={{
-          backgroundImage: "radial-gradient(1.4px 1.4px at 20% 15%, rgba(255,255,255,0.65), transparent), radial-gradient(1.2px 1.2px at 65% 8%, rgba(255,255,255,0.5), transparent), radial-gradient(1.6px 1.6px at 85% 22%, rgba(255,255,255,0.55), transparent), radial-gradient(1.1px 1.1px at 40% 28%, rgba(255,255,255,0.4), transparent), radial-gradient(1.3px 1.3px at 10% 35%, rgba(255,255,255,0.45), transparent)",
-          backgroundSize: "100% 50%",
-          backgroundRepeat: "no-repeat",
+          backgroundImage:
+            "radial-gradient(1.4px 1.4px at 20% 15%, rgba(255,255,255,0.65), transparent), radial-gradient(1.2px 1.2px at 65% 8%, rgba(255,255,255,0.5), transparent), radial-gradient(1.6px 1.6px at 85% 22%, rgba(255,255,255,0.55), transparent), radial-gradient(1.1px 1.1px at 40% 28%, rgba(255,255,255,0.4), transparent), radial-gradient(1.3px 1.3px at 10% 35%, rgba(255,255,255,0.45), transparent)",
         }}
       />
-      {/* The sun -- horizontal slices near the bottom read as "cut" by the
-         grid, the classic synthwave sun silhouette. */}
-      <span
-        aria-hidden
-        className="absolute left-1/2 -translate-x-1/2 rounded-full"
-        style={{
-          top: "30%",
-          width: "46vmax",
-          height: "46vmax",
-          background: `linear-gradient(180deg, ${accent} 0%, color-mix(in srgb, ${accent} 60%, #ff3d9a) 55%, color-mix(in srgb, ${accent} 30%, #ff3d9a) 100%)`,
-          boxShadow: `0 0 120px color-mix(in srgb, ${accent} 55%, transparent)`,
-          maskImage: "repeating-linear-gradient(180deg, #000 0 3%, transparent 3% 4.6%)",
-          WebkitMaskImage: "repeating-linear-gradient(180deg, #000 0 3%, transparent 3% 4.6%)",
-        }}
-      />
-      {/* Horizon glow -- softens the seam where the sun meets the grid. */}
-      <span aria-hidden className="absolute inset-x-0 bottom-[38%] h-[18%]" style={{ background: `linear-gradient(180deg, transparent, color-mix(in srgb, ${accent} 45%, transparent))`, filter: "blur(18px)" }} />
-      {/* The floor -- a perspective grid, tilted back via rotateX so the
-         lines recede to a vanishing point instead of sitting flat. */}
-      <div className="absolute inset-x-0 bottom-0 h-[62%] overflow-hidden" style={{ perspective: "300px", perspectiveOrigin: "50% 0%" }}>
+      {/* The floor -- a single tiled grid, tilted back in real 3D via
+         perspective + rotateX so it genuinely converges toward the
+         horizon (the vanishing point sits at perspective-origin, the top
+         edge of this box, which lines up with the horizon line below). */}
+      <div className="absolute inset-x-0 bottom-0 h-[58%]" style={{ perspective: "340px", perspectiveOrigin: "50% 0%" }}>
+        {/* Slowed and lightened per direct feedback, 21 Sept 2026: "Slow
+           down and also make the synth grid more transparent and
+           thinner. Its too distracting at the moment." -- 4s (was 1.4s),
+           1px lines (was 2px) at roughly a third the opacity. */}
         <div
           aria-hidden
-          className="motion-safe:animate-[synth-grid-scroll_2.4s_linear_infinite] absolute inset-x-[-50%] top-0 h-[220%]"
+          className="motion-safe:animate-[synth-grid-scroll_4s_linear_infinite] absolute inset-0"
           style={{
+            backgroundColor: "#170a2e",
             backgroundImage:
-              "repeating-linear-gradient(90deg, rgba(45,212,191,0.55) 0 2px, transparent 2px 64px), repeating-linear-gradient(180deg, rgba(255,61,154,0.5) 0 2px, transparent 2px 64px)",
+              "repeating-linear-gradient(90deg, oklch(0.78 0.22 330 / 0.22) 0 1px, transparent 1px 60px), repeating-linear-gradient(180deg, oklch(0.78 0.22 330 / 0.22) 0 1px, transparent 1px 60px)",
+            backgroundSize: "60px 60px",
             transform: "rotateX(78deg)",
             transformOrigin: "50% 0%",
           }}
         />
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-[38%]" style={{ background: "linear-gradient(180deg, transparent, #170a2e 85%)" }} />
+      {/* Horizon glow -- the grid's own color, softened, right at the seam
+         where the sky meets the floor (not tied to a sun shape). */}
+      <span aria-hidden className="absolute inset-x-0 top-[42%] h-[10%]" style={{ background: "linear-gradient(180deg, transparent, oklch(0.78 0.22 330 / 0.5))", filter: "blur(16px)" }} />
 
       {bloom && (
         <span
