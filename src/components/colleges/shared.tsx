@@ -337,7 +337,16 @@ export function SchoolCard({
   const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "#fff" };
   return (
     <article
-      className="dm-tap poster-card school-card relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border"
+      // A fixed height, not h-full (direct feedback, 21 Sept 2026: "the
+      // heights don't match" across shelves): h-full only equalizes cards
+      // stretched together in the SAME flex row, so one shelf with the
+      // program-chip row present (Schools with X) landed at a different
+      // total height than a shelf without it (Near you, Lower-cost
+      // options...) even though each shelf was internally uniform. A fixed
+      // pixel height matches every card on the page to every other, not
+      // just its own row-mates. 356px = the tallest current content (a
+      // 2-line name + chips + stats + actions) with a little headroom.
+      className="dm-tap poster-card school-card relative flex h-[380px] flex-col overflow-hidden rounded-[var(--radius-lg)] border"
       style={{ background: "#0e0c20", borderColor: compared ? ACCENT : "var(--glass-border)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-body)" }}
     >
       {/* Full bleed (direct feedback, 21 Sept 2026): the photo now runs the
@@ -409,21 +418,24 @@ export function SchoolCard({
           </div>
         </div>
 
-        {(program || fit || extraChip) && (
-          <div className="flex min-h-[24px] flex-wrap items-center gap-x-[8px] gap-y-[6px]">
-            {program && (
-              <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: "#FFFFFF" }}>
-                <span className="truncate">{program}</span>
-                <span className="flex h-[16px] w-[16px] flex-none items-center justify-center rounded-full" style={{ background: ACCENT }} aria-hidden>
-                  <Check className="h-[10px] w-[10px]" strokeWidth={3.5} style={{ color: "#fff" }} />
-                </span>
+        {/* Always rendered, even empty (direct feedback, 21 Sept 2026): this
+           row's height used to be part of the card only when a chip existed,
+           which is exactly what made a card's total height depend on
+           whether it happened to carry a program/fit chip -- now every
+           card reserves the same slot whether or not anything sits in it. */}
+        <div className="flex min-h-[24px] flex-wrap items-center gap-x-[8px] gap-y-[6px]">
+          {program && (
+            <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: "#FFFFFF" }}>
+              <span className="truncate">{program}</span>
+              <span className="flex h-[16px] w-[16px] flex-none items-center justify-center rounded-full" style={{ background: ACCENT }} aria-hidden>
+                <Check className="h-[10px] w-[10px]" strokeWidth={3.5} style={{ color: "#fff" }} />
               </span>
-            )}
-            {program && <Chip label={PATH_WORD[c.level]} tone="path" />}
-            {fit && <Chip label={fit.label} tone={fit.tone} />}
-            {extraChip && <Chip label={extraChip.label} tone={extraChip.tone} />}
-          </div>
-        )}
+            </span>
+          )}
+          {program && <Chip label={PATH_WORD[c.level]} tone="path" />}
+          {fit && <Chip label={fit.label} tone={fit.tone} />}
+          {extraChip && <Chip label={extraChip.label} tone={extraChip.tone} />}
+        </div>
 
         {/* Stats, Why this school? and the actions row move as ONE group,
            pinned to the card's bottom together (direct feedback, 21 Sept
@@ -462,7 +474,13 @@ export function SchoolCard({
             <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link -my-[10px] flex cursor-pointer items-center gap-[3px] py-[10px] text-[13px] font-bold" style={{ color: "#8fb8ff" }}>
               Why this school? <ChevronDown className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-180" : ""}`} aria-hidden />
             </button>
-            {showWhy && <p className="mt-[4px] text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</p>}
+            {/* Capped, not free to grow (direct feedback, 21 Sept 2026: the
+               card is now a fixed height so every card matches every other
+               -- a long reason expanding past its slack would clip against
+               that fixed box instead of pushing the card taller). Typical
+               reasons are one short clause and never hit this; a scrollbar
+               only appears for an unusually long one. */}
+            {showWhy && <p className="mt-[4px] max-h-[52px] overflow-y-auto text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</p>}
           </div>
         )}
 

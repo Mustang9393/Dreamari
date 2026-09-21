@@ -11621,3 +11621,15 @@ Files touched: `src/components/colleges/shared.tsx` (`SchoolCard`, `CollegeCard`
 `npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified: static and hovered states on both Browse and For You views, both with and without "Why this school?" present, expanded "Why this school?" text legible over the photo.
 
 Next step: none pending on this thread. Play/Glossary background differentiation picked up next, per direct feedback (separate ask, unrelated).
+
+## 2026-09-21 · SchoolCard: fixed height app-wide, not just per-row
+
+Follow-up correction on the full-bleed work above. `h-full` only equalizes cards stretched together in the SAME flex row/grid line -- it was working exactly as measured (each shelf internally uniform), but different shelves landed at genuinely different total heights depending on whether that shelf's cards carried the program-chip row (Schools with X: 351px) or not (Near you, Lower-cost options, etc: 312px), since that row was conditionally rendered. Direct feedback: "the heights don't match" was about across-the-page consistency, not within-a-row consistency, which is a different (stricter) requirement than what shipped.
+
+Fixed by making the card a fixed pixel height (380px) instead of `h-full`, and always rendering the program-chip row's container (with its `min-h-[24px]`) even when nothing's inside it, so every card reserves the identical internal slots regardless of what's actually present. The one interaction this affects: "Why this school?" used to be free to grow the card when expanded (verified working in the full-bleed pass above); with a fixed height and `overflow-hidden` on the card, an expansion that grew past the remaining slack would now clip instead. Capped the expanded text at `max-h-[52px] overflow-y-auto` -- invisible for the typical one-clause reason, only kicks in for an unusually long one.
+
+Files touched: `src/components/colleges/shared.tsx` (`SchoolCard`).
+
+`npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified via DOM measurement across every shelf on both Browse and For You (`Schools with Finance`, `Near you`, `Lower-cost options`, `High acceptance`, `More schools for your path`, `Target`, `Safety`, `Reach`, `Lower-cost ways to start`) -- all 380px, no exceptions. Also verified "Why this school?" expands cleanly within the fixed box without pushing the card taller than its neighbors.
+
+Next step: none pending on this thread.
