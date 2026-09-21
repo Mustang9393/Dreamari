@@ -12,6 +12,7 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 4. `docs/AI_HANDOFF.md` is a chronological session log kept for archaeology. Do not build from it; where it disagrees with a spec, the spec wins.
 5. Pull a tagged commit, not "whatever is on main". Tags named `demo-YYYY-MM-DD` are demo-ready builds.
 6. Before any layout, scrolling, positioning or icon-only-control work, read `docs/CROSS_BROWSER_GUARDRAILS.md`. Most students are on Windows laptops or Chromebooks, not Mac, and that mismatch has already shipped real bugs no one on a Mac could see. It has a self-check to run before calling UI work done.
+6a. When a screen needs an empty, loading, error, or edge-case treatment and no locked spec says otherwise, use `docs/COMPONENT_STATES_PLAYBOOK.md`'s default instead of inventing one or waiting on a design pass.
 7. Before treating anything below as still true, grep for it (`DEMO-ONLY` in code, the flag name, the file). This section decays; the code is the source of truth for whether a flag still exists.
 
 ## Source of truth for content
