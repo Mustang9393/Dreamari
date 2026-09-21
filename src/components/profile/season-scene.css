@@ -10,13 +10,20 @@
 .dm-season-flow { opacity:0; }
 .dm-season-mark,.dm-season-drop { position:absolute; display:block; }
 .dm-season-mark img,.dm-season-drop img { display:block; width:100%; height:100%; object-fit:contain; }
-.dm-season-drop { top:-34px; opacity:0; animation:dm-season-descent var(--duration) linear var(--phase) infinite paused; }
+.dm-season-drop { top:-34px; opacity:0; filter:blur(var(--blur,0px)); animation:dm-season-descent var(--duration) linear var(--phase) infinite paused; }
 .dm-season-sway,.dm-season-turn { display:block; width:100%; height:100%; }
 .dm-season-sway { animation:dm-season-sway calc(var(--duration) * .58) ease-in-out var(--phase) infinite alternate paused; }
 .dm-season-turn { animation:dm-season-turn var(--duration) ease-in-out var(--phase) infinite alternate paused; }
-@keyframes dm-season-descent { 0%{transform:translate3d(0,0,0);opacity:0} 14%{opacity:var(--alpha)} 52%{opacity:var(--alpha)} 85%,100%{transform:translate3d(0,220px,0);opacity:0} }
+/* Depth reads through blur and fade, not through squashing the art on one
+   axis -- painted watercolor detail doesn't hold up to that the way a
+   flat SVG silhouette did (direct feedback, 21 Sept 2026: "skewing and
+   squishing and stretching... unnaturally rotate twist"). A uniform scale
+   (both axes, never scaleX/scaleY alone) reads as the mark receding, the
+   same way the resting composition's own smaller/more-transparent marks
+   already read as farther away -- this just carries that into motion. */
+@keyframes dm-season-descent { 0%{transform:translate3d(0,0,0) scale(1);opacity:0} 14%{opacity:var(--alpha)} 52%{opacity:var(--alpha)} 85%,100%{transform:translate3d(0,220px,0) scale(.85);opacity:0} }
 @keyframes dm-season-sway { from{transform:translate3d(calc(var(--sway) * -.5),0,0)} to{transform:translate3d(var(--sway),0,0)} }
-@keyframes dm-season-turn { 0%{transform:rotate(var(--angle)) scaleX(.85)} 50%{transform:rotate(calc(var(--angle) + var(--turn) * .5)) scaleX(.5)} 100%{transform:rotate(calc(var(--angle) + var(--turn))) scaleX(1)} }
+@keyframes dm-season-turn { 0%{transform:rotate(var(--angle))} 100%{transform:rotate(calc(var(--angle) + var(--turn)))} }
 @media(prefers-reduced-motion:no-preference){
   .dm-season-host:is(:hover,:focus-visible):not(:active) > .dm-season-scene .dm-season-rest,
   .dm-season-host:has(> button:focus-visible) > .dm-season-scene .dm-season-rest { opacity:0; }

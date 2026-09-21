@@ -102,6 +102,10 @@ export function SeasonScene({ seasonId, className = "", fadeToHeader = false }: 
             "--sway": `${(i % 2 ? -1 : 1) * (seasonId === "winter" ? 9 : 22)}px`,
             "--angle": `${angle}deg`, "--turn": `${seasonId === "winter" ? 35 : i % 2 ? -115 : 135}deg`,
             "--alpha": opacity * (depth === 2 ? .65 : 1),
+            // Depth of field, not distortion: the furthest layer (smallest,
+            // most transparent already) also blurs, the nearest stays
+            // crisp -- reads as depth without touching the art's own shape.
+            "--blur": depth === 2 ? "1.6px" : depth === 1 ? "0.6px" : "0px",
           } as CSSProperties}><span className="dm-season-sway"><span className="dm-season-turn"><SeasonMark kind={kind} tint={tint} /></span></span></span>;
         })}
       </div>
