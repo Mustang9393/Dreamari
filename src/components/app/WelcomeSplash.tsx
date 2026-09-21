@@ -58,7 +58,7 @@ const SCENES: Record<SplashSurface, Scene> = {
       { text: "Tap Learn more for details." },
       { text: "More matches are waiting." },
     ],
-    cta: "Start Exploring",
+    cta: "Start Matching",
   },
   explore: {
     sprite: "/images/dreamy/v2/splash/dreamy-explore.webp",

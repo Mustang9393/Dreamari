@@ -816,6 +816,27 @@ body {
   }
 }
 
+/* Both flow-scroll-fade and its own [scrollbar-width:none] sibling class
+   (on the flow shell, BuildFlowExperience.tsx) only hid the scrollbar on
+   Firefox -- Chrome/Safari need the -webkit- pseudo-element too, or the
+   OS's native scrollbar still renders. Invisible on Mac (its overlay
+   scrollbars auto-hide by default) but very visible on Windows Chrome as
+   the old chunky scrollbar with arrow buttons (direct feedback, 21 Sept
+   2026, a Windows/Chrome tester's screenshot, reproduced at DESKTOP width)
+   -- a real gap in both platforms' CSS, just masked by Mac's own default
+   scrollbar behavior. Deliberately outside the phone-only media query
+   above: the bug reproduces at every width, not just under 640px. */
+.flow-scroll-fade::-webkit-scrollbar,
+.flow-scroll::-webkit-scrollbar {
+  display: none;
+}
+/* The same hidden-scrollbar treatment for a Build step's OWN inner scroll
+   container, which has no fade mask of its own (that lives on the flow
+   shell around it) but shares the identical scrollbar gap. */
+.flow-scroll {
+  scrollbar-width: none;
+}
+
 /* Connect: the presence dot. A community that shows nothing moving reads as
    abandoned, so live counts and unread answers get one slow pulse -- not a
    blink, which would be noise on a page you are trying to read. */

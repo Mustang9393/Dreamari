@@ -44,7 +44,12 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
       <p className="-mt-[6px] text-[13px] leading-[19px]" style={{ color: "var(--ink-soft)" }}>Everything you’ve done to explore this career.</p>
       {/* Logged first on phones (stacked), side by side from sm; same shape
          as 05's two panels. */}
-      <div className="grid gap-[14px] sm:grid-cols-2" data-keep-together>
+      {/* items-start: a CSS grid row stretches every cell to its tallest
+         sibling by default, so opening the Add-your-own checklist (right)
+         was also stretching the unrelated Logged-in-Dreamari box (left) to
+         match its new height (direct feedback, 21 Sept 2026). Each column
+         sizes to its own content instead. */}
+      <div className="grid items-start gap-[14px] sm:grid-cols-2" data-keep-together>
         {/* LEFT: logged in Dreamari. Heavier than the form: tinted field, a
            stronger border and check marks on every row. */}
         <section aria-labelledby={`${idPrefix}logged`} className="flex flex-col gap-[12px] rounded-[var(--radius-sm)] border px-[16px] py-[14px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 45%, var(--rule))", background: "color-mix(in srgb, var(--primary) 7%, var(--paper-sunken))", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 12%, transparent)" }}>

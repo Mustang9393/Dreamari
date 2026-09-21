@@ -24,8 +24,19 @@ export function GpaField({ value, onChange }: { value: string; onChange: (next: 
     const rect = field.getBoundingClientRect();
     const width = Math.min(360, window.innerWidth - 32);
     panel.style.setProperty("--picker-left", `${Math.max(16, Math.min(rect.left, window.innerWidth - width - 16))}px`);
-    panel.style.setProperty("--picker-top", `${Math.max(16, Math.min(rect.bottom + 8, window.innerHeight - 436))}px`);
+    // Show first, positioned provisionally -- it's about to move -- so the
+    // dialog's REAL rendered height (heading + all 6 rows of GPA choices)
+    // is available to clamp against. A hardcoded height guess here (436px)
+    // previously ran a few pixels short of the actual content, so the
+    // dialog could be positioned low enough that its last row rendered
+    // past the bottom of the viewport with no way to reach it (direct
+    // feedback, 21 Sept 2026: "last option is not accessible"). Measuring
+    // the real height instead adapts to any content size or OS/browser
+    // font-metric difference, not just this one dialog's current row count.
+    panel.style.setProperty("--picker-top", `${Math.max(16, rect.bottom + 8)}px`);
     panel.showModal();
+    const height = panel.getBoundingClientRect().height;
+    panel.style.setProperty("--picker-top", `${Math.max(16, Math.min(rect.bottom + 8, window.innerHeight - height - 16))}px`);
     const buttons = panel.querySelectorAll<HTMLButtonElement>("[data-gpa]");
     (Array.from(buttons).find(button => button.dataset.gpa === selected) ?? buttons[0])?.focus();
   }

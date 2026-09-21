@@ -52,11 +52,19 @@ const GREEN = "var(--color-world-food-farming-nature)";
 export function LocationStep({ state, patch, onBack, onNext, react, percent, almostDone, sprite, onSkip }: StepProps) {
   const { theme } = useTheme();
   const [view, setView] = useState<"map" | "list">("map");
-  // Short phones (Safari with its bars up) open on the list: 50 state labels
-  // at 6px is the hard way in (UX audit, 11 Sept 2026). After paint, so the
-  // server and first client render agree.
+  // Phones default to the list: a real US map's ~50 state shapes, some no
+  // bigger than a few CSS px across even at full desktop width (Rhode
+  // Island, the Northeast cluster), are not a reliable tap target on a
+  // small screen (direct feedback, 21 Sept 2026: "I dont think the map
+  // will be accessible on small screens") -- width is the real signal for
+  // "this is a phone," not viewport height alone. Short-viewport desktop/
+  // tablet windows (Safari with its bars up: 50 state labels at 6px is
+  // also the hard way in, UX audit 11 Sept 2026) still get the same
+  // fallback for the same underlying reason -- not enough room for the
+  // map to stay legible. After paint, so the server and first client
+  // render agree.
   useEffect(() => {
-    const t = window.setTimeout(() => { if (window.innerHeight < 700) setView("list"); }, 0);
+    const t = window.setTimeout(() => { if (window.innerWidth < 640 || window.innerHeight < 700) setView("list"); }, 0);
     return () => window.clearTimeout(t);
   }, []);
   const selected = state.state;
@@ -91,7 +99,7 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
       <QuestionHeading sprite={sprite} title="Where are you open to going to school?" subtitle="Choose 1 state." />
 

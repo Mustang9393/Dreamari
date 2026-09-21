@@ -31,7 +31,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
       <QuestionHeading sprite={sprite} title="How much are you comfortable spending on tuition each year?" subtitle="Choose what feels realistic for you." />
 
@@ -134,7 +134,12 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
                 // etc are too small") -- wider max-width to match, so the
                 // longer labels ("Cost isn't a major factor") still wrap
                 // to two lines instead of overflowing.
-                className={`absolute top-0 max-w-[92px] text-[12.5px] leading-tight font-bold transition-colors sm:max-w-[112px] sm:text-[13.5px] ${
+                // Narrower on phones (direct feedback, 21 Sept 2026: "no
+                // overlapping content") -- at 92px wide, the centered
+                // "Cost isn't a / major factor" label and the right-
+                // aligned "I'm not / sure" label sit close enough at
+                // narrow widths to overlap each other.
+                className={`absolute top-0 max-w-[74px] text-[11.5px] leading-tight font-bold transition-colors sm:max-w-[112px] sm:text-[13.5px] ${
                   isFirst ? "text-left" : isLast ? "text-right" : "-translate-x-1/2 text-center"
                 }`}
                 style={{

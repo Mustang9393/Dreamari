@@ -11145,3 +11145,198 @@ Next step: push this once committed. Also worth telling the user
 directly (not just burying in this log) that Codex's real output
 folder is `~/Documents/Dreamari/Play tab`, in case that changes how
 they hand off future images.
+
+## 2026-09-21 · QA batch: dropdown/scrollbar/layout bugs across Build, Profile, Career Report
+
+Usman sent a 10-item QA list (Slack, screenshots from a Windows/Chrome
+test pass) after using the app end to end. Triaged before touching
+code: all 10 turned out to be UI/frontend, not data-mapping -- nothing
+fell into Usman's own scope. Four items were genuine open product
+questions, not bugs (GPA-scale-for-college-search, the missing-game
+Play/Learn-more treatment, My Reflection's counselor-visibility
+question, the saved-career button's exact wording) -- answered by the
+user directly rather than guessed at:
+- GPA scale + how it's used in college search: still open, needs the
+  team -- not built either way.
+- Missing-game Top 3 fallback: kept as-is (Play always routes to the
+  focused Play tab, never shows "Coming soon" -- an existing, deliberate
+  instruction from Joshua Pierce for demo purposes, found while
+  investigating this exact item, still correct and unrelated to
+  Usman's report). A "disabled Play + Coming soon" treatment is a
+  **deferred follow-up instruction, not built now** -- flagged here for
+  whenever demo season isn't the constraint.
+- My Reflection: confirmed shared with counselors, needs conflict
+  handling -- implemented (see below).
+- Saved-career button label: already conditional in the existing code
+  (`ProfileExperience.tsx`'s `LockerTab`) -- "Add to Top 3" when a Top
+  3 slot is open, "Swap in" only once Top 3 is full. No change needed;
+  this was already correct, just not obviously so from one screenshot.
+
+Fixed:
+- **GPA picker's last row unreachable** (`GpaField.tsx`): its popup
+  position was clamped against a hardcoded 436px height guess that ran
+  a few px short of the real 6-row content on some viewports. Now
+  measures the dialog's actual rendered height and repositions against
+  that, so it adapts to any content size instead of a magic number.
+- **Native chunky scrollbar in the Build flow** (`globals.css`,
+  `LocationStep.tsx`, `CostStep.tsx`, `steps.tsx`): the flow's own
+  masked-fade scroll shell only hid the scrollbar on Firefox
+  (`scrollbar-width: none` has no Chrome/Safari equivalent without the
+  `-webkit-` pseudo-element) -- invisible on Mac by default (overlay
+  scrollbars auto-hide there) but very visible on Windows Chrome as the
+  old chunky scrollbar with arrow buttons. Real gap on both platforms,
+  just masked on Mac. Added the missing webkit rule, plus a new
+  `.flow-scroll` class (same treatment, no fade) for every individual
+  step's own inner scroll container, which had no scrollbar handling
+  of any kind before.
+- **"Add your own" expanding the unrelated box beside it**
+  (`CareerExploration.tsx`): a two-column CSS grid stretches every
+  cell to its tallest row-mate by default, so opening the Add-your-own
+  checklist (right column) was also stretching the Logged-in-Dreamari
+  box (left column) to match. `items-start` on the grid fixes it --
+  each column now sizes to its own content.
+- **Settings dropdown not fully visible** (`ProfileExperience.tsx`):
+  it rendered `position: absolute` inside the profile header, which
+  clips overflow (the exact reason the Cover photo modal right next to
+  it already goes through a Portal). Portalled it too, now positioned
+  via the trigger button's real screen coordinates (measured on open,
+  same approach as `GpaField`'s dialog) instead of a parent-relative
+  offset that assumed no clipping ancestor.
+- **No way to unsave a school or video from the Saved page**
+  (`ProfileExperience.tsx`): `SchoolsShelf`/`VideosShelf` only
+  destructured the saved-items Set, never the toggle function, and had
+  no remove control on their cards -- unsaving required reopening the
+  original school/video page and un-tapping its own bookmark. Added a
+  `SaveButton`/remove-icon overlay to each card (reusing `SaveButton`
+  from `colleges/shared.tsx` for schools, since it already handles
+  stopping its own click from bubbling into the card's Link). Saved
+  **careers** turned out to be a different data model entirely --
+  `LockerTab`'s list is "everything not yet in Top 3," not an
+  explicitly-saved set, so there's nothing to "unsave" there; a career
+  leaves the list automatically once promoted to Top 3. Left as-is,
+  noted for clarity.
+- **My Reflection / counselor conflict** (`CareerReport.tsx`): added a
+  visible (not blocking) warning when a student picks "Probably/
+  Definitely Not For Me" on the career currently set as their #1 Top
+  Three pick, since the user confirmed this reflection is
+  counselor-visible. Names the career, says plainly that it's shared,
+  and points at Top Three as the one-tap fix. `isPrimary` is threaded
+  in from `CareerReportView`'s existing `top3` prop (`top3?.[0]` is
+  already how "primary" is determined elsewhere in this file, e.g.
+  "Make My Primary") -- no new concept invented.
+- **Match's welcome splash said "Start Exploring"**
+  (`WelcomeSplash.tsx`): the `matchGrid` scene's `cta` was a leftover
+  copy-paste from the `explore` scene right below it in the same file.
+  The already-existing (currently dormant) `match` scene had the
+  correct wording; reused it -- "Start Matching".
+
+Files: `src/components/build/GpaField.tsx`, `LocationStep.tsx`,
+`CostStep.tsx`, `steps.tsx`, `ui.tsx`; `src/app/globals.css`;
+`src/components/profile/CareerExploration.tsx`, `CareerReport.tsx`,
+`ProfileExperience.tsx`; `src/components/app/WelcomeSplash.tsx`.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on every touched file
+(only pre-existing, unrelated warnings remain: an `<img>` LCP hint in
+`ui.tsx`, an unused `AnimatePresence` import in `ProfileExperience.tsx`
+-- neither introduced this pass). Verified live on local dev: GPA
+picker's "2.0 or below" row fully reachable; Settings dropdown renders
+correctly positioned and un-clipped; Saved > Schools unsave button
+removes a school in one tap (confirmed end to end: save from a college
+page, appears in Saved, unsave button removes it, "No schools saved
+yet" returns); Career Exploration's two boxes size independently; My
+Reflection shows the counselor-visibility warning exactly when
+`isPrimary && negative rating`, with the career's name correctly
+interpolated (fixed a real JSX whitespace bug of my own along the
+way -- `{expr}\ntext` on separate source lines drops the space between
+them, since JSX only preserves inline whitespace on the SAME line;
+switched to one template-literal string to avoid relying on that rule
+at all); Match's splash now reads "Start Matching".
+
+Next step: pushed as part of the same batch as the entry below (the
+Build-flow scroll/crop pass) -- see there for the actual push.
+
+## 2026-09-21 · Build flow: audited every step for scroll-free desktop fit
+
+Direct instruction, mid-review of the QA batch above: "no screen ever
+on the build ever needs to be scrolled, and nothing gets cropped
+either... its okay if scroll is required in mobile/tablet... on mobile
+default to the dropdown/list view for state selection." Triggered by a
+real, reproduced bug: at 1024x700 (an ordinary small-laptop desktop
+size, not tablet), the Interests step's citation line
+("Harvard FAS Mignone + O*NET Interest Profiler") was rendering fully
+hidden behind the sticky footer, and the Profile Basics step's "How
+far would you go for school?" field was visibly clipped/overlapping
+its own reassurance caption below it -- confirmed by measuring
+`getBoundingClientRect()` on the actual DOM: `.flow-scroll`'s content
+needed a genuine ~25-40px more height than the container had at these
+ordinary window sizes, on multiple different steps.
+
+- **`LocationStep.tsx`**: mobile default changed from height-only
+  (`window.innerHeight < 700`) to `width < 640 || height < 700` -- a
+  real US map's ~50 state shapes are not a reliable tap target on a
+  phone regardless of viewport height, which the old check never
+  caught on a tall phone with a full-height browser. Short desktop/
+  tablet windows keep falling back to the list too, for the original
+  reason (Safari's bars eating vertical space).
+- **`ProfileStep.tsx`** (in `steps.tsx`): restructured Grade+GPA and
+  Zip Code+"How far would you go" from four stacked full-width rows
+  into two two-column rows (`sm:grid-cols-2`, stacked on phones, where
+  a taller card is allowed to scroll) -- directly halves this step's
+  own vertical footprint, the single biggest lever available since the
+  fields themselves can't get any shorter.
+- **Shared components trimmed** (`ui.tsx`), since these repeat on
+  every step and set a floor under every step's own fit: `QuestionHeading`
+  (heading block margin, sprite icon, and title font size all reduced
+  modestly), `Citation` (top margin), `ChipGrid` (grid gap), `StepFooter`
+  (outer margins). None of these individually matter much, but every
+  step pays all four costs, so trimming the shared components fixes
+  every step that uses them at once instead of hand-tuning nine
+  screens separately.
+- **`CostStep.tsx`**: separately, a pre-existing (not scroll-related)
+  overlap on phones -- the "Cost isn't a / major factor" and "I'm not
+  sure" slider-stop labels sit close enough at narrow widths to
+  overlap each other, since they're two independently-positioned
+  (centered vs. right-aligned) absolute labels. Narrowed their max-
+  width and font size on phones only (`sm:` unchanged) to add
+  clearance; not pixel-perfect at every width but meaningfully
+  improved, flagged here rather than claimed as fully solved.
+
+Files: `src/components/build/LocationStep.tsx`, `steps.tsx`, `ui.tsx`,
+`CostStep.tsx`.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean. Verified live by
+clicking through the ENTIRE flow (Welcome through Profile Basics) at
+three desktop sizes -- 1280x720, 1024x700, and the worst case 1024x680
+-- measuring `scrollHeight` vs `clientHeight` on each step's own
+`.flow-scroll` container directly via the DOM (not just eyeballing
+screenshots): zero overflow on every single step at all three sizes
+after the fix, where before the fix Interests/Profile Basics both
+measured 16-40px of genuine unaccounted overflow at 1024px-tall
+windows. Also re-verified at 1440x900 (nothing reads as
+over-compressed at a generous size) and at phone width (375px) that
+the mobile map/list default and the collapsed 6-item ChipGrid both
+still work correctly. Did not exhaustively test every possible
+viewport size -- 680px height is the tested floor; a genuinely tiny
+window (e.g. a non-maximized laptop browser under ~650px tall) is
+still plausible to need scroll, which the user's own instruction
+allows for implicitly by saying "no screen EVER needs to be scrolled"
+about ordinary desktop use, not an unbounded claim -- worth a spot
+check if it comes up again.
+
+Also investigated, could not reproduce: "My Profile > Avatar selection
+modal is compressing and making them all overlap instead of proper
+rows" (direct feedback). Measured the actual grid via
+`getBoundingClientRect()` at three sizes (1440x900, 1024x700,
+1024x680) and it laid out as a clean, non-overlapping grid every time
+-- 64x64 circles, correct row spacing, `AVATAR_POOL` has no duplicate
+entries (ruled out as a React-key collision). Applied the concrete,
+unambiguous part of the request regardless -- the avatar grid was
+missing the shared `.dm-scroll` thin-scrollbar treatment the adjacent
+Cover photo picker already has (same modal, same pattern, this one
+just wasn't updated when that convention was established) -- added it
+for consistency. If the compression/overlap recurs, a fresh screenshot
+or the exact window size it happened at would help, since it didn't
+reproduce at any size tried here.
+
+Next step: push requested directly by the user for this batch --
+pushing this and the QA-fixes batch above together.

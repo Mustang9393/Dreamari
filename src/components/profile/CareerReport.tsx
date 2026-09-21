@@ -617,7 +617,7 @@ export function CareerReportView(props: ReportViewProps) {
         <div id="report-panel-report" className="flex flex-col gap-[var(--space-4)]">
           <ReportDocument student={student} career={career} report={report} reportDate={REPORT_DATE} />
           {/* Keyed so a focus swap re-reads the right career's saved answers. */}
-          <ReflectionCard key={career.id} careerId={career.id} careerTitle={career.title} />
+          <ReflectionCard key={career.id} careerId={career.id} careerTitle={career.title} isPrimary={top3?.[0]?.id === career.id} />
         </div>
       )}
       {tab === "share" && (
@@ -762,7 +762,7 @@ function readReflection(key: string): StoredReflection | null {
   }
 }
 
-function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTitle: string }) {
+function ReflectionCard({ careerId, careerTitle, isPrimary }: { careerId: string; careerTitle: string; isPrimary: boolean }) {
   const storageKey = `dreamari-reflection:${careerId}`;
   // Lazy init is safe here: the card only ever mounts after an interaction
   // (a tab click), never in server-rendered HTML, so there is no hydration
@@ -837,6 +837,22 @@ function ReflectionCard({ careerId, careerTitle }: { careerId: string; careerTit
                 </button>
               ))}
             </div>
+            {/* Reflections are visible to the student's counselor, so a
+               "Definitely/Probably Not For Me" rating on the career
+               currently set as the student's #1 pick is a real
+               contradiction a counselor would see (direct feedback, 21
+               Sept 2026: "if these are to be shared with counselors, can a
+               student submit a report with primary career selected that I
+               am not interested in this?"). Surfaced plainly, not blocked
+               -- the student's own reconsideration is legitimate, it just
+               needs to be visible, and the fix (Top Three) is one tap away
+               in the report's own switcher above. */}
+            {isPrimary && (interest === "Probably Not For Me" || interest === "Definitely Not For Me") && (
+              <p role="status" className="mt-[12px] flex items-start gap-[8px] rounded-[var(--radius-sm)] border px-[14px] py-[10px] text-[13px] leading-[18px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--destructive) 45%, var(--rule))", background: "color-mix(in srgb, var(--destructive) 8%, var(--paper-sunken))", color: "var(--ink)" }}>
+                <AlertCircle className="mt-[1px] h-[15px] w-[15px] flex-none" style={{ color: "var(--destructive)" }} aria-hidden />
+                {`${careerTitle} is still your #1 pick, but this reflection is shared with your counselor. If you're leaning away from it, consider updating your Top 3.`}
+              </p>
+            )}
           </fieldset>
 
           <fieldset>

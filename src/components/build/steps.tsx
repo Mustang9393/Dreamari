@@ -67,14 +67,14 @@ export function InterestsStep({ state, patch, onNext, react, reactionNonce, perc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which career fields interest you?" subtitle="Choose up to 2" />
         {/* "Your picks" — same panel treatment as Work Vibe's "Your Setup":
            caption row (label + counter), then the picks side by side as
            Bricolage statements in their world colors, separated by a dot.
            flex-wrap lets two long names break onto a second line cleanly. */}
-        <div className={`mb-2 rounded-[var(--radius-md)] border px-3.5 py-2 sm:mb-3 sm:py-2.5 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
+        <div className={`mb-2 rounded-[var(--radius-md)] border px-3.5 py-2 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-[10.5px] font-bold tracking-[0.14em] text-[var(--color-night-muted-foreground)] uppercase">Your picks</span>
             <span
@@ -120,7 +120,7 @@ export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Which subjects do you enjoy?" subtitle="Choose up to 2" />
         <ChipGrid
@@ -204,7 +204,7 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} reactionNonce={reactionNonce} title="Where do you work best?" subtitle="Pick one from each row." />
         {/* Replit pattern: options on the left, the chosen words rise on the
@@ -246,7 +246,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <GlassCard>
         <QuestionHeading sprite={sprite} title="How many years of education are you open to after high school?" />
         {/* Auto-fit grid, not the old horizontal-scroll-on-mobile pattern (per
@@ -351,49 +351,58 @@ export function ProfileStep({ state, patch, onBack, onNext, react, percent, almo
   return (
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} almostDone={almostDone} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-5 sm:pt-8">
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto pt-5 sm:pt-8">
       <GlassCard>
         <QuestionHeading sprite={sprite} title="Profile Basics" />
         <div className="flex flex-col gap-4">
-          {/* Grade alone in what used to be a two-column row: GPA moved to
-             its own full-width slider below (direct feedback, 11 Sept
-             2026), so a lone select no longer shares a row with anything. */}
-          <SelectField label="Grade" options={GRADE_OPTIONS} value={state.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
-          {/* The reassurance line now lives inside GpaField itself, right
-             under its "GPA" label (direct feedback, 11 Sept 2026). */}
-          <GpaField value={state.gpa} onChange={(gpa) => { react(); patch({ gpa }); }} />
-          {/* A real label, not just a placeholder -- Zip Code was the one
-             field on this card with no persistent title once Grade/GPA
-             grew theirs, and it started reading as easy to miss (direct
-             feedback, 11 Sept 2026). */}
-          <div>
-            <p className="mb-2 text-[15px] font-extrabold" style={{ color: "var(--color-night-foreground)" }}>Zip Code</p>
-            {/* A boxed field like Grade/GPA's own boxes, not the lone
-               underline input on the card (direct feedback, 11 Sept 2026:
-               "since everything else is a box, lets make the zip code
-               line also a box type input like the others"). */}
-            <input
-              className={`w-full rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors placeholder:text-[var(--color-night-muted-foreground)] placeholder:opacity-70 focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
-              style={{ background: GLASS_PANEL_BG, borderColor: state.zipCode ? "var(--color-brand-400)" : GLASS_PANEL_BORDER, color: "var(--color-night-foreground)" }}
-              // A real example, not the label repeated (direct feedback,
-              // 11 Sept 2026) -- now that the field has its own title
-              // above it, the placeholder can actually show the format.
-              placeholder="10001"
-              aria-label="Zip code"
-              inputMode="numeric"
-              maxLength={5}
-              value={state.zipCode}
-              onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })}
-              autoComplete="postal-code"
+          {/* Two fields per row (from sm up; stacked on phones, where a
+             taller card is fine to scroll) -- four full-width rows was
+             tall enough to push the last field's bottom past this step's
+             own scroll container at ordinary desktop window heights, no
+             actual overflow indicator, just a cropped/overlapping field
+             (direct feedback, 21 Sept 2026: "no screen ever on the build
+             ever needs to be scrolled... grade and gpa side by side...
+             zip code and how far thing too"). */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <SelectField label="Grade" options={GRADE_OPTIONS} value={state.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
+            {/* The reassurance line now lives inside GpaField itself, right
+               under its "GPA" label (direct feedback, 11 Sept 2026). */}
+            <GpaField value={state.gpa} onChange={(gpa) => { react(); patch({ gpa }); }} />
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* A real label, not just a placeholder -- Zip Code was the one
+               field on this card with no persistent title once Grade/GPA
+               grew theirs, and it started reading as easy to miss (direct
+               feedback, 11 Sept 2026). */}
+            <div>
+              <p className="mb-2 text-[15px] font-extrabold" style={{ color: "var(--color-night-foreground)" }}>Zip Code</p>
+              {/* A boxed field like Grade/GPA's own boxes, not the lone
+                 underline input on the card (direct feedback, 11 Sept 2026:
+                 "since everything else is a box, lets make the zip code
+                 line also a box type input like the others"). */}
+              <input
+                className={`w-full rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors placeholder:text-[var(--color-night-muted-foreground)] placeholder:opacity-70 focus:border-[var(--color-brand-400)] ${GLASS_PANEL_CLASS}`}
+                style={{ background: GLASS_PANEL_BG, borderColor: state.zipCode ? "var(--color-brand-400)" : GLASS_PANEL_BORDER, color: "var(--color-night-foreground)" }}
+                // A real example, not the label repeated (direct feedback,
+                // 11 Sept 2026) -- now that the field has its own title
+                // above it, the placeholder can actually show the format.
+                placeholder="10001"
+                aria-label="Zip code"
+                inputMode="numeric"
+                maxLength={5}
+                value={state.zipCode}
+                onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })}
+                autoComplete="postal-code"
+              />
+            </div>
+            <SelectField
+              label="How far would you go for school?"
+              options={TRAVEL_DISTANCE_OPTIONS}
+              value={state.travelDistance}
+              placeholder="Select"
+              onChange={(travelDistance) => { react(); patch({ travelDistance }); }}
             />
           </div>
-          <SelectField
-            label="How far would you go for school?"
-            options={TRAVEL_DISTANCE_OPTIONS}
-            value={state.travelDistance}
-            placeholder="Select"
-            onChange={(travelDistance) => { react(); patch({ travelDistance }); }}
-          />
         </div>
       </GlassCard>
       </div>
@@ -431,7 +440,7 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
     // one-way door.
     <div className="flex h-full w-full flex-col">
       <CardHud percent={percent} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <div className="mx-auto w-full max-w-[560px]">
       <GlassCard className="text-center">
         {/* No "50% Complete" eyebrow: the HUD two lines up already says it. */}
@@ -640,7 +649,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
          disappeared here, so the bar the student watched fill for eight
          steps never got to show itself full. */}
       <CardHud percent={100} />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
       <div className="mx-auto w-full max-w-[640px]">
       <GlassCard className="text-center">
         <div data-dreamy-anchor className="relative mx-auto mb-3 h-28 w-28 sm:h-32 sm:w-32 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">

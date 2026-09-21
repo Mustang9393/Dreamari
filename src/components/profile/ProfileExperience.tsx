@@ -34,7 +34,7 @@ import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
 import { collegeBySlug, collegeImage } from "@/components/colleges/data";
-import { tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
+import { SaveButton, tags as collegeTags, useSaved as useSavedColleges } from "@/components/colleges/shared";
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
@@ -177,6 +177,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Which Settings section the gear menu asked for; Settings scrolls to it.
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+  // Screen position for the portaled settings menu (see settingsBtnRef
+  // below) -- computed fresh each open, since the button can move (window
+  // resize, scroll) between opens.
+  const [settingsMenuPos, setSettingsMenuPos] = useState({ top: 0, right: 0 });
+  const settingsBtnRef = useRef<HTMLButtonElement>(null);
   if (initialTab !== seenInitialTab) {
     setSeenInitialTab(initialTab);
     if (initialTab && (TAB_IDS as string[]).includes(initialTab)) setTab(initialTab as TabId);
@@ -567,19 +572,32 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                  opens Settings scrolled to that section. */}
               <span className="relative">
                 <button
+                  ref={settingsBtnRef}
                   type="button"
                   aria-label="Settings menu"
                   aria-expanded={settingsMenuOpen}
-                  onClick={() => setSettingsMenuOpen((open) => !open)}
+                  onClick={() => {
+                    // Was `absolute top-[44px] right-0` inside this header,
+                    // which clips overflow (the same reason Cover's own
+                    // modal above already goes through Portal) -- the menu
+                    // could render partly or fully hidden (direct feedback,
+                    // 21 Sept 2026: "the dropdown for settings is not
+                    // visible properly"). Portalling it needs real screen
+                    // coordinates instead of a parent-relative offset,
+                    // computed fresh on each open since the button can move.
+                    const rect = settingsBtnRef.current?.getBoundingClientRect();
+                    if (rect) setSettingsMenuPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+                    setSettingsMenuOpen((open) => !open);
+                  }}
                   className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
                   style={{ background: tab === "settings" || settingsMenuOpen ? "var(--glass-surface-3)" : "transparent", color: tab === "settings" || settingsMenuOpen ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
                 >
                   <Settings className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Settings</span>
                 </button>
                 {settingsMenuOpen && (
-                  <>
+                  <Portal>
                     <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
-                    <div role="menu" className="absolute top-[44px] right-0 z-[56] w-[236px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-lg, 0 20px 50px -20px rgba(0,0,0,0.6))" }}>
+                    <div role="menu" className="fixed z-[56] w-[236px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ top: settingsMenuPos.top, right: settingsMenuPos.right, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-lg, 0 20px 50px -20px rgba(0,0,0,0.6))" }}>
                       {SETTINGS_SECTIONS.map((item) => (
                         <Fragment key={item.id}>
                           {item.divider && <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />}
@@ -595,7 +613,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                         </Fragment>
                       ))}
                     </div>
-                  </>
+                  </Portal>
                 )}
               </span>
             </div>
@@ -639,7 +657,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                             <X className="h-4 w-4" aria-hidden />
                           </button>
                         </div>
-                        <div className="grid max-h-[60vh] grid-cols-5 gap-[10px] overflow-y-auto pr-[2px] sm:grid-cols-6">
+                        {/* dm-scroll: same thin, quiet scrollbar treatment
+                           as the Cover photo picker just above (direct
+                           feedback, 21 Sept 2026: "have that be a
+                           scrollable modal... use the same scrollbar rules
+                           as mac") -- this grid already scrolled via
+                           max-h-[60vh] + overflow-y-auto, it was just
+                           missing the shared styling that makes the
+                           scrollbar itself read as intentional instead of
+                           the OS-default chrome. */}
+                        <div className="dm-scroll grid max-h-[60vh] grid-cols-5 gap-[10px] overflow-y-auto pr-[2px] sm:grid-cols-6">
                           {AVATAR_POOL.map((src) => (
                             <button key={src} type="button" aria-label="Use this picture" aria-pressed={avatarSrc === src} onClick={() => pickAvatar(src)} className="dm-tap relative aspect-square cursor-pointer overflow-hidden rounded-full" style={{ boxShadow: avatarSrc === src ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
                               <Image src={src} alt="" fill sizes="64px" className="object-cover" />
@@ -2812,7 +2839,7 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
 // ---- Locker tab: rich poster grid ----
 
 function SchoolsShelf() {
-  const [saved] = useSavedColleges();
+  const [saved, toggleSaved] = useSavedColleges();
   const colleges = [...saved].map((slug) => collegeBySlug(slug)).filter((c): c is NonNullable<typeof c> => !!c);
   if (colleges.length === 0) {
     return (
@@ -2825,10 +2852,16 @@ function SchoolsShelf() {
   return (
     <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
       {colleges.map((c) => (
-        <Link key={c.slug} href={`/colleges/${c.slug}`} className="dm-tap flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
+        <Link key={c.slug} href={`/colleges/${c.slug}`} className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
           <span className="relative block aspect-[4/3] w-full" style={{ background: "var(--glass-surface-1)" }}>
             {collegeImage(c) && <Image src={collegeImage(c)!} alt="" fill sizes="220px" className="object-cover" />}
           </span>
+          {/* Unsaving from here was only possible by reopening the school's
+             own detail page and un-tapping its bookmark there (direct
+             feedback, 21 Sept 2026: "do we have an option to unsave...
+             saved colleges"). SaveButton already stops its own click from
+             bubbling into this card's Link. */}
+          <span className="absolute top-[8px] right-[8px] z-10"><SaveButton on={saved.has(c.slug)} onToggle={() => toggleSaved(c.slug)} size={32} /></span>
           <span className="dm-glass flex flex-col gap-[2px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="truncate text-[14px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{collegeTags(c).join(" · ")}</span>
@@ -2840,7 +2873,7 @@ function SchoolsShelf() {
 }
 
 function VideosShelf() {
-  const [saved] = useSavedVideos();
+  const [saved, toggleSaved] = useSavedVideos();
   const videos = COMPANY_VIDEOS.filter((v) => saved.has(v.video));
   if (videos.length === 0) {
     return (
@@ -2853,10 +2886,20 @@ function VideosShelf() {
   return (
     <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
       {videos.map((v) => (
-        <div key={v.video} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
+        <div key={v.video} className="relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
           <span className="relative block aspect-[3/4] w-full">
             <Image src={v.poster} alt="" fill sizes="220px" className="object-cover" />
           </span>
+          {/* Same unsave gap as SchoolsShelf (direct feedback, 21 Sept 2026). */}
+          <button
+            type="button"
+            aria-label="Remove from saved"
+            onClick={() => toggleSaved(v.video)}
+            className="dm-quiet absolute top-[8px] right-[8px] z-10 flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border"
+            style={{ borderColor: "rgba(255,255,255,0.22)", background: "rgba(12,16,35,0.55)", color: "#fff", backdropFilter: "blur(8px)" }}
+          >
+            <X className="h-[16px] w-[16px]" aria-hidden />
+          </button>
           <span className="dm-glass flex flex-col gap-[2px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="truncate text-[14px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{v.title}</span>
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{v.company}</span>

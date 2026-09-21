@@ -215,9 +215,15 @@ export function QuestionHeading({
   }, [reactionNonce]);
 
   return (
-    <div className="mb-5 flex items-center gap-3 sm:mb-7 sm:gap-4">
+    // Trimmed from mb-5/sm:mb-7 and the sprite from 72px (direct feedback,
+    // 21 Sept 2026: "no screen ever on the build ever needs to be
+    // scrolled... nothing gets cropped") -- this heading repeats on every
+    // step, so its own vertical footprint sets a floor under every step's
+    // fit at ordinary desktop window heights (as low as ~650-700px usable
+    // once browser chrome is subtracted), not just the tallest one.
+    <div className="mb-4 flex items-center gap-3 sm:mb-5 sm:gap-4">
       {sprite && (
-        <div data-dreamy-anchor className="relative h-[52px] w-[52px] flex-none sm:h-[72px] sm:w-[72px]">
+        <div data-dreamy-anchor className="relative h-[52px] w-[52px] flex-none sm:h-[60px] sm:w-[60px]">
           <img
             key={reacting ? REACTION_SPRITE : sprite}
             src={reacting ? REACTION_SPRITE : sprite}
@@ -229,7 +235,7 @@ export function QuestionHeading({
         </div>
       )}
       <div>
-      <h1 className={`${bricolage.className} text-[24px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[40px]`}>
+      <h1 className={`${bricolage.className} text-[24px] leading-[1.08] font-extrabold tracking-tight text-[var(--color-night-foreground)] sm:text-[34px]`}>
         <InkText text={title} />
       </h1>
       {subtitle && (
@@ -250,7 +256,7 @@ export function QuestionHeading({
 export function Citation({ children }: { children: ReactNode }) {
   return (
     <p
-      className="mt-4 bg-transparent text-center text-[11px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-60"
+      className="mt-2 bg-transparent text-center text-[11px] font-medium tracking-wide text-[var(--color-night-muted-foreground)] opacity-60"
       style={{ background: "transparent" }}
     >
       {children}
@@ -296,7 +302,7 @@ export function StepFooter({
     // a dedicated flex-1 block, with this footer as a plain sibling after
     // it and CardHud as a plain sibling before it -- no auto margins
     // anywhere, so justify-content on the middle block actually applies.
-    <div className="flow-sticky-footer sticky bottom-0 z-10 mt-3 flex w-full items-center justify-between gap-3 pt-2 pb-1">
+    <div className="flow-sticky-footer sticky bottom-0 z-10 mt-2 flex w-full items-center justify-between gap-3 pt-1 pb-1">
       {onBack ? (
         <Button variant="secondary" onClick={(e) => { dispatchAuroraPulse("select", e); onBack(); }} type="button">
           Back
@@ -415,7 +421,7 @@ export function ChipGrid({
 
   return (
     <div>
-      <div ref={gridRef} className={`grid auto-rows-fr gap-2 ${columns}`}>
+      <div ref={gridRef} className={`grid auto-rows-fr gap-1.5 ${columns}`}>
         {visibleOptions.map((option, index) => {
         const isSelected = selected.includes(option);
         const isLocked = atMax && !isSelected;
