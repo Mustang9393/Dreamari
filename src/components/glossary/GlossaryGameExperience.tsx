@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap } from "lucide-react";
-import { LocalBurst } from "@/components/build/DreamyGuide";
+import { PlayBurst } from "@/components/play/PlayBurst";
 import { PlayBackdrop } from "@/components/play/PlayBackdrop";
+import { dispatchPlayPulse } from "@/components/play/backdropPulse";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -471,6 +472,7 @@ function UnlockScreen({
           // same soft tick as any tap. The "correct" chime is the area's own
           // reward sound, so it now reads as one.
           playCorrect();
+          dispatchPlayPulse("correct");
           onUnlock();
         }}
         whileTap={reduced ? undefined : { scale: 0.97 }}
@@ -491,10 +493,11 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
   // line uses, so the two landmarks read as one family.
   useEffect(() => {
     playSweep();
+    dispatchPlayPulse("celebrate");
   }, []);
   return (
     <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 py-[var(--space-5)] text-center">
-      <LocalBurst nonce={1} />
+      <PlayBurst nonce={1} accent="var(--glossary-accent)" />
       <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-[var(--space-4)]">
         {lesson.terms.map((t) => (
           <span key={t.id} className="relative flex size-11 flex-none items-center justify-center rounded-full sm:size-14" style={{ background: "var(--glossary-accent)", color: "#05070f" }}>
@@ -700,6 +703,7 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
     if (!pair) return;
     if (pair.right === right) {
       playCorrect();
+      dispatchPlayPulse("correct");
       const next = new Set(matched);
       next.add(left);
       setMatched(next);
@@ -854,8 +858,8 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
     setChecked(true);
     const correctItems = items.filter((item) => placed[item.text] === item.bucket);
     const allCorrect = correctItems.length === items.length;
-    if (allCorrect) playCorrect();
-    else playWrong();
+    if (allCorrect) { playCorrect(); dispatchPlayPulse("correct"); }
+    else { playWrong(); dispatchPlayPulse("wrong"); }
     onAnswer({ correct: allCorrect, creditedTermIds: correctItems.map((i) => i.termId) });
   }
 
@@ -941,8 +945,8 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
   function check() {
     setChecked(true);
     const allCorrect = question.steps.every((step, i) => Number(values[i].replace(/[,$]/g, "")) === step.answer);
-    if (allCorrect) playCorrect();
-    else playWrong();
+    if (allCorrect) { playCorrect(); dispatchPlayPulse("correct"); }
+    else { playWrong(); dispatchPlayPulse("wrong"); }
     onAnswer({ correct: allCorrect, creditedTermIds: allCorrect && question.termId ? [question.termId] : [] });
   }
 
@@ -1030,7 +1034,14 @@ function QuestionScreen({
   // own background like the intro/unlock screens already do, and use the
   // taller mobile viewport instead of being squeezed into a fixed card.
   return (
-    <div className="relative flex w-full flex-col gap-[var(--space-8)]">
+    // Centered, on a real surface -- not sitting directly on the page's own
+    // background (direct feedback, 21 Sept 2026: "centre the content
+    // always including the questions and answers... make sure they are in
+    // containers with surface tokens"). Supersedes an earlier "no enclosing
+    // card" decision (11 Sept 2026, "boxes inside boxes") -- the option
+    // pills/tiles below keep their own border, which reads as normal
+    // buttons-in-a-panel, not a second redundant outer card.
+    <div className="relative mx-auto flex w-full max-w-[560px] flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}>
       {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
         // No side padding here -- it was only ever there to "make room" for
         // Dreamy, but since he's absolutely positioned he doesn't need it,
@@ -1061,8 +1072,8 @@ function QuestionScreen({
                 if (picked !== null) return;
                 setPicked(i);
                 const correct = shuffledOptions[i].i === question.correctIndex;
-                if (correct) playCorrect();
-                else playWrong();
+                if (correct) { playCorrect(); dispatchPlayPulse("correct"); }
+                else { playWrong(); dispatchPlayPulse("wrong"); }
                 onAnswer({ correct, creditedTermIds: correct && question.termId ? [question.termId] : [] });
               }}
             />
@@ -1124,6 +1135,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
   // burst, so it lands as the bonus it is.
   useEffect(() => {
     playCorrect();
+    dispatchPlayPulse("celebrate");
   }, []);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} onClick={onDismiss}>
@@ -1132,7 +1144,7 @@ function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => v
         style={{ background: "linear-gradient(160deg, var(--hero-accent-teal), var(--background))" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <LocalBurst nonce={1} />
+        <PlayBurst nonce={1} accent="var(--glossary-accent)" />
         <DreamyFace pose="party" size={100} />
         <p className="flex items-center gap-[8px] text-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--amber-400)" }}>
           <Flame className="h-7 w-7" fill="currentColor" aria-hidden /> {streak} in a row!
@@ -1193,6 +1205,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
     const correct = lesson.powerPlay.answers.every((a, i) => values[i].trim().toLowerCase() === a.toLowerCase());
     if (correct) {
       playSweep();
+      dispatchPlayPulse("celebrate");
       setBurstNonce((n) => n + 1);
     } else {
       playWrong();
@@ -1220,7 +1233,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
       </div>
 
       <div className="relative flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-[17px] leading-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-        <LocalBurst nonce={burstNonce} />
+        <PlayBurst nonce={burstNonce} accent="var(--glossary-accent)" />
         {parts.map((part, i) => {
           const gapMatch = part.match(/^\{(\d+)\}$/);
           if (!gapMatch) return <span key={i}>{part}</span>;
@@ -1321,7 +1334,7 @@ function CompleteScreen({
   }, []);
   return (
     <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center">
-      <LocalBurst nonce={1} />
+      <PlayBurst nonce={1} accent="var(--glossary-accent)" />
       <DreamyFace pose="party" size={120} />
       <h2 className="text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         Lesson Complete!
@@ -1463,7 +1476,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         fontFamily: "var(--font-body)",
       } as React.CSSProperties}
     >
-      <PlayBackdrop />
+      <PlayBackdrop accent={accent} />
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"

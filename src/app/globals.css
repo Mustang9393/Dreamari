@@ -1018,6 +1018,42 @@ body {
   }
 }
 
+/* PlayBackdrop: slow ambient drift for its glow blobs (direct feedback, 21
+   Sept 2026: "richer gradients... a moving gradient"), and the brief bloom
+   a correct-answer/unlock/celebrate moment fires into the background behind
+   the card, not just on the card itself. */
+@keyframes backdrop-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4%, -6%) scale(1.12); }
+}
+@keyframes backdrop-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5%, 5%) scale(1.08); }
+}
+@keyframes backdrop-bloom {
+  0% { opacity: 0; transform: scale(0.7); }
+  30% { opacity: var(--bloom-peak, 0.55); transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* PlayBurst (replaces the flat, uniform-square LocalBurst confetti for
+   Play/Glossary's own celebration moments, direct feedback 21 Sept 2026:
+   "not flat basic confetti, ever"): a punchier pop-then-arc-out path, an
+   overshoot at launch rather than a flat linear fly-out. */
+@keyframes play-burst {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.3) rotate(0deg); }
+  15% { opacity: 1; transform: translate(calc(var(--bx) * 0.25), calc(var(--by) * 0.2)) scale(1.25) rotate(calc(var(--br) * 0.2)); }
+  100% { opacity: 0; transform: translate(var(--bx), var(--by)) scale(0.4) rotate(var(--br)); }
+}
+@keyframes play-burst-flash {
+  0% { opacity: 0.9; transform: scale(0.4); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
 /* Marketing Explore "Browse All" rails: seamless marquee (content doubled,
    track slides half its width). Hover pauses; reduced-motion disables. */
 @keyframes mkt-rail-drift {
