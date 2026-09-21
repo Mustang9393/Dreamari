@@ -218,7 +218,7 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
       role="dialog"
       aria-modal="true"
       aria-label={`${item.company}: ${item.title}`}
-      className="fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-4)] backdrop-blur-[16px]"
+      className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-4)] backdrop-blur-[16px]"
       style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)" }}
       onClick={onClose}
     >

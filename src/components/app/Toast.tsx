@@ -4,12 +4,12 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { announce } from "./LiveRegion";
 
-// A six-second toast with one Undo (UX audit, 11 Sept 2026: "Not for me" and
-// "Remove from Top 3" had no way back). Mounted by the screen that owns the
-// action; the message is announced to screen readers as it appears.
-export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { message: string; onUndo: () => void; onClose: () => void; duration?: number }) {
+/** A short, self-dismissing confirmation -- same visual language as
+ *  UndoToast, for actions that need acknowledgement but nothing to undo
+ *  (a first Like/Dislike tap's explainer, "Added to your Top 3"). */
+export function Toast({ message, onClose, duration = 3200 }: { message: string; onClose: () => void; duration?: number }) {
   useEffect(() => {
-    announce(`${message}. Undo available.`);
+    announce(message);
     const t = window.setTimeout(onClose, duration);
     return () => window.clearTimeout(t);
   }, [message, onClose, duration]);
@@ -22,9 +22,6 @@ export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { messa
         style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
       >
         <span className="min-w-0 flex-1">{message}</span>
-        <button type="button" onClick={() => { onUndo(); onClose(); }} className="dm-link flex-none cursor-pointer rounded-[8px] px-[10px] py-[6px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-          Undo
-        </button>
         <button type="button" aria-label="Dismiss" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>×</button>
       </div>
     </div>,

@@ -3088,7 +3088,7 @@ function EventView({
 
           {/* the viewer: one photo large, the count, previous and next; Escape or the X closes */}
           {photoOpen !== null && event.photos && typeof document !== "undefined" && createPortal(
-            <div role="dialog" aria-modal="true" aria-label={`Photo ${photoOpen + 1} of ${event.photos.count}`} className="fixed inset-0 z-[95] flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "rgba(6,7,16,0.9)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
+            <div role="dialog" aria-modal="true" aria-label={`Photo ${photoOpen + 1} of ${event.photos.count}`} className="marketing-v2 themeable fixed inset-0 z-[95] flex flex-col items-center justify-center p-4 sm:p-8" style={{ background: "rgba(6,7,16,0.9)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
               <button type="button" aria-label="Close" onClick={() => setPhotoOpen(null)} className="absolute inset-0 cursor-default backdrop-blur-[14px]" />
               <div className="relative z-[1] flex w-full max-w-[1100px] flex-col gap-[var(--space-3)]">
                 <div className="flex items-center justify-between text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)" }}>

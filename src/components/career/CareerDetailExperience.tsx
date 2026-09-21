@@ -8,14 +8,19 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Plus, ThumbsDown, Users, X } from "lucide-react";
+import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Minus, Plus, ThumbsDown, Users, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "./ConnectWithProfessionalsModal";
+import { Top3SwapModal } from "./Top3SwapModal";
 import { PROS } from "@/components/connect/data";
 import { useSavedCareers } from "@/lib/savedCareers";
+import { useTop3 } from "@/lib/useTop3";
+import type { Picks } from "@/lib/picks";
+import { Toast } from "@/components/app/Toast";
+import { UndoToast } from "@/components/app/UndoToast";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "./PayMap";
@@ -79,6 +84,27 @@ const HERO_FOCUS: Record<string, string> = {
   electrician: "50% 0%",
   quant: "50% 48%",
 };
+
+// Like/Not for me explain themselves once, on the student's very first tap
+// ever, then just rely on the icon's own filled state (direct feedback, 21
+// Sept 2026: a toast on every tap would be noise, no toast at all leaves a
+// silent, unexplained icon flip on the first try).
+const LIKE_TIP_KEY = "dreamari-seen-like-tip";
+const DISLIKE_TIP_KEY = "dreamari-seen-dislike-tip";
+function tipSeen(key: string): boolean {
+  try {
+    return window.localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+function markTipSeen(key: string) {
+  try {
+    window.localStorage.setItem(key, "1");
+  } catch {
+    /* private mode */
+  }
+}
 
 function IconButton({ label, active = false, onClick, children }: { label: string; active?: boolean; onClick?: () => void; children: React.ReactNode }) {
   return (
@@ -390,6 +416,10 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
   const [connectOpen, setConnectOpen] = useState(false);
+  const { ids: top3Ids, addToTop3, confirmSwap, removeFromTop3, restore } = useTop3();
+  const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
 
   if (!career) {
     return (
@@ -408,6 +438,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const hasGlossaryGame = hasGlossary(career.slug);
   const hasWorldProfessionals = PROS.some((pro) => pro.world === career.world);
   const saved = savedCareers.has(career.slug);
+  const inTop3 = top3Ids.includes(career.slug);
   const vm = viewModel(career);
 
   return (
@@ -524,11 +555,54 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </button>
               )}
               <div className="flex items-center gap-[var(--space-2)]">
-                <IconButton label="Add to my list"><Plus className="h-5 w-5" aria-hidden /></IconButton>
-                <IconButton label="Like this career" active={liked} onClick={() => { setLiked((v) => !v); if (!liked) setDisliked(false); }}>
+                <IconButton
+                  label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
+                  active={inTop3}
+                  onClick={() => {
+                    if (inTop3) {
+                      setToast(null);
+                      const before = removeFromTop3(career.slug);
+                      setUndoRemove(before);
+                      return;
+                    }
+                    setUndoRemove(null);
+                    const result = addToTop3(career.slug);
+                    if (result === "added") setToast("Added to your Top 3");
+                    else if (result === "full") setSwapCandidate(career.slug);
+                  }}
+                >
+                  {inTop3 ? <Minus className="h-5 w-5" aria-hidden /> : <Plus className="h-5 w-5" aria-hidden />}
+                </IconButton>
+                <IconButton
+                  label="Like this career"
+                  active={liked}
+                  onClick={() => {
+                    const next = !liked;
+                    setLiked(next);
+                    if (next) setDisliked(false);
+                    if (next && !tipSeen(LIKE_TIP_KEY)) {
+                      setUndoRemove(null);
+                      setToast("Saved to what you like. This helps tailor your matches.");
+                      markTipSeen(LIKE_TIP_KEY);
+                    }
+                  }}
+                >
                   <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
-                <IconButton label="Not for me" active={disliked} onClick={() => { setDisliked((v) => !v); if (!disliked) setLiked(false); }}>
+                <IconButton
+                  label="Not for me"
+                  active={disliked}
+                  onClick={() => {
+                    const next = !disliked;
+                    setDisliked(next);
+                    if (next) setLiked(false);
+                    if (next && !tipSeen(DISLIKE_TIP_KEY)) {
+                      setUndoRemove(null);
+                      setToast("Noted, we'll show you less like this.");
+                      markTipSeen(DISLIKE_TIP_KEY);
+                    }
+                  }}
+                >
                   <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
                 <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => toggleSavedCareer(career.slug)}>
@@ -773,6 +847,27 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
       </main>
 
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
+      {swapCandidate && (
+        <Top3SwapModal
+          incomingId={swapCandidate}
+          currentIds={top3Ids}
+          onConfirm={(outgoingId) => {
+            confirmSwap(outgoingId, swapCandidate);
+            setSwapCandidate(null);
+            setUndoRemove(null);
+            setToast("Added to your Top 3");
+          }}
+          onCancel={() => setSwapCandidate(null)}
+        />
+      )}
+      {undoRemove && (
+        <UndoToast
+          message="Removed from your Top 3"
+          onUndo={() => restore(undoRemove)}
+          onClose={() => setUndoRemove(null)}
+        />
+      )}
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       <MobileNav active="Explore" />
     </div>
