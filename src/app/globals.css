@@ -1018,26 +1018,15 @@ body {
   }
 }
 
-/* PlayBackdrop: slow ambient drift for its glow blobs (direct feedback, 21
-   Sept 2026: "richer gradients... a moving gradient"), and the brief bloom
-   a correct-answer/unlock/celebrate moment fires into the background behind
-   the card, not just on the card itself. */
-@keyframes backdrop-drift-a {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(4%, -6%) scale(1.12); }
-}
-@keyframes backdrop-drift-b {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-5%, 5%) scale(1.08); }
-}
+/* PlayBackdrop: the brief bloom a correct-answer/unlock/celebrate moment
+   fires into the background behind the card, not just on the card itself.
+   (The ambient drift blobs and the second, PlayBackdrop-only star-twinkle
+   that used to live here were removed with PlayStarfield -- superseded by
+   a canvas Vortex background, 21 Sept 2026.) */
 @keyframes backdrop-bloom {
   0% { opacity: 0; transform: scale(0.7); }
   30% { opacity: var(--bloom-peak, 0.55); transform: scale(1); }
   100% { opacity: 0; transform: scale(1.35); }
-}
-@keyframes star-twinkle {
-  0%, 100% { opacity: 0.15; transform: scale(0.85); }
-  50% { opacity: 1; transform: scale(1.15); }
 }
 
 /* PlayBurst (replaces the flat, uniform-square LocalBurst confetti for

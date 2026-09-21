@@ -41,7 +41,11 @@ import { SparkBar } from "@/components/flow/SparkBar";
 // inheriting Finance's amber. Power Play still uses var(--hero-accent-purple),
 // the same violet Play's own hub background already blends in, so the bonus
 // round's color shift matches a palette this app already owns instead of
-// inventing a new one.
+// inventing a new one. (A same-day pass briefly made this one fixed violet
+// app-wide, folding Power Play into it -- reverted per direct correction:
+// "Keep the yellow for CTAs. The career world accents can stay, its the
+// background that we need to work on." The actual gold/purple complaint was
+// about PlayBackdrop's own wash, not these per-career and Power Play colors.)
 //
 // Dreamy reuses the exact mascot already in the sprite library
 // (public/images/dreamy/v2/dreamy-*.png, the same flat pose-swap the Build
@@ -146,10 +150,27 @@ function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | 
 }
 
 function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong" }) {
-  const bg = tone === "correct" ? "color-mix(in srgb, var(--success, #1f9d55) 14%, var(--card))" : tone === "wrong" ? "color-mix(in srgb, var(--danger, #e0483e) 12%, var(--card))" : "var(--glass-surface-1)";
+  // Neutral used to be var(--glass-surface-1) -- a translucent glass panel
+  // that read fine over the game's old plain dark backdrop, but got lost
+  // once that backdrop became a busy, colorful animated vortex (direct
+  // feedback 21 Sept 2026: "needs more solid surface, it gets lost in the
+  // background now"). Needs a genuinely solid fill -- but NOT var(--card):
+  // that token flips to white in light mode, and PlayBackdrop's vortex
+  // stays the same fixed dark scene regardless of the app's light/dark
+  // toggle (deliberately -- Play is its own immersive "world," not a
+  // themed page), so a theme-following white card there read as a bug of
+  // its own the moment the app was in light mode ("lose the white
+  // background it doesnt work for the darkmode UI"). A literal, always-dark
+  // navy matches the vortex's own palette in both modes.
+  const bg = tone === "correct" ? "color-mix(in srgb, var(--success, #1f9d55) 14%, #151829)" : tone === "wrong" ? "color-mix(in srgb, var(--danger, #e0483e) 12%, #151829)" : "#151829";
   return (
-    <div className="flex min-w-0 flex-1 items-start rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={{ background: bg, borderColor: "var(--glass-border)" }}>
-      <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+    <div
+      className="flex min-w-0 flex-1 items-start rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]"
+      style={{ background: bg, borderColor: "var(--glass-border)", boxShadow: tone === "neutral" ? "0 18px 40px -22px rgba(0,0,0,0.45)" : undefined }}
+    >
+      {/* var(--foreground) also flips dark in light mode -- fixed near-white
+         to match the always-dark bubble above, same reasoning. */}
+      <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "#f4f2fa", fontFamily: "var(--font-display)" }}>
         {children}
       </p>
     </div>
@@ -330,13 +351,32 @@ function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: Glossary
       ))}
     </span>
   );
+  // The term drawn, not just labeled -- its icon blown up to illustration
+  // size and run through a wobble displacement filter, so the clean vector
+  // strokes read as pencil on paper (brought back after it was dropped
+  // when the flip-to-reveal requirement was removed -- direct feedback,
+  // 21 Sept 2026: "why have we lost the hand-drawn illustrations on the
+  // cards? Please bring that back"). Ruled sketchbook lines behind it and a
+  // hand-drawn underline squiggle under the term name finish the feel,
+  // same as the original SketchFace, now sized to share the face with the
+  // definition/example text instead of owning the whole card.
   const glyph = (
-    <span className="flex items-center gap-[10px]">
-      <span className="flex size-11 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 18%, var(--card))", color: "var(--glossary-accent)" }}>
-        <TermIcon icon={term.icon} className="h-6 w-6" />
+    <span className="flex flex-col items-center gap-[clamp(4px,1dvh,8px)] text-center">
+      <span className="relative -rotate-2" style={{ filter: "url(#glossary-sketch)", color: "color-mix(in srgb, var(--glossary-accent) 88%, var(--foreground) 12%)" }}>
+        <TermIcon icon={term.icon} className="h-[clamp(44px,8.5dvh,72px)] w-[clamp(44px,8.5dvh,72px)]" />
+        <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[20px] h-[calc(100%+40px)] w-[calc(100%+40px)]" style={{ color: "var(--glossary-accent)" }}>
+          {[30, 90, 150, 210, 270, 330].map((deg) => (
+            <line key={deg} x1="60" y1="4" x2="60" y2="14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" transform={`rotate(${deg} 60 60)`} />
+          ))}
+        </svg>
       </span>
-      <span className="block text-[clamp(22px,5dvh,30px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-        {term.term}
+      <span className="flex flex-col items-center gap-[2px]">
+        <span className="block text-[clamp(20px,4.4dvh,28px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#glossary-sketch)" }}>
+          {term.term}
+        </span>
+        <svg viewBox="0 0 120 8" aria-hidden className="h-[7px] w-[100px]" style={{ color: "var(--glossary-accent)", filter: "url(#glossary-sketch)" }}>
+          <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        </svg>
       </span>
     </span>
   );
@@ -346,11 +386,11 @@ function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: Glossary
       style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)", backfaceVisibility: "hidden", transform: side === "back" ? "rotateY(180deg)" : undefined }}
     >
       {rings}
-      <span className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
+      <span className="flex min-w-0 flex-1 flex-col items-center justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
         {glyph}
         {side === "front" ? (
           <>
-            <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
+            <span className="block w-full text-center text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
               {term.definition}
             </span>
             {/* Optional, small, never required -- pressing Unlock below
@@ -366,7 +406,7 @@ function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: Glossary
           </>
         ) : (
           <>
-            <span className="flex flex-col gap-[6px]">
+            <span className="flex w-full flex-col items-center gap-[6px] text-center">
               <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--glossary-accent)" }}>
                 {lesson.exampleCompany} Example
               </span>
@@ -389,6 +429,15 @@ function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: Glossary
   );
   return (
     <div style={{ perspective: 1200 }}>
+      {/* The wobble filter that makes every illustration stroke on both
+         faces look hand-drawn, defined once so the two faces' `url(...)`
+         references share it rather than colliding on a duplicate id. */}
+      <svg width="0" height="0" aria-hidden className="absolute">
+        <filter id="glossary-sketch">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
+        </filter>
+      </svg>
       <motion.div
         className="relative"
         style={{ transformStyle: "preserve-3d" }}
@@ -1525,18 +1574,13 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         </div>
       )}
 
-      {/* Question screens sit HIGH, right under the progress strip (direct
-         feedback: "the game content should immediately feel like the main
-         focus" -- centering it in the leftover space below the strip was
-         pushing its true midpoint below the screen's actual center). Every
-         other screen keeps its own internal centering (each one is its own
-         `flex-1 items-center justify-center`), so this only moves the
-         question/answer screens. */}
-      <main
-        className={`relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8 ${
-          screen === "question" ? "justify-start pt-[var(--space-6)]" : "justify-center"
-        }`}
-      >
+      {/* Every screen, including question/answer, centers vertically and
+         horizontally in the space below the progress strip (direct
+         feedback 21 Sept 2026: "the question block is still not centred in
+         the screen... centred vertically and horizontally" -- supersedes
+         an earlier decision to pin question screens high under the strip). */}
+      <main className="relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
+
         {screen === "intro" && <IntroScreen lesson={lesson} onNext={() => setScreen("dreamyIntro")} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => setScreen("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => setScreen("unlock")} />}
