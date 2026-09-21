@@ -11100,4 +11100,48 @@ scene, different character). Overwrote
 previous entry). Verified live: Food Scientist's "In the works" card
 shows the new image.
 
-Next step: still local-only, same not-yet-pushed batch.
+Next step: pushed (see next entry -- this note was stale, both image
+commits landed on main).
+
+## 2026-09-21 · Play tab: corrected Airline Pilot image, and a source-folder correction
+
+User said they were "updating the pilot image once more" via Codex and
+asked to swap it in once placed -- watched the project-root "Play tab"
+folder (the one used for every image swap above) for ~20 minutes with
+nothing new landing. User then said it was already there; it wasn't,
+in that folder. Found the REAL, actively-maintained source instead:
+**`~/Documents/Dreamari/Play tab`** (outside this git checkout
+entirely) -- a properly organized Codex output folder with a
+`README.md`, `preview.html`, and `prompts-and-crops.json` (full
+generation prompts + portrait/landscape CSS crop positions per
+career), files named by career slug (`airline-pilot.png`,
+`accountant.png`, etc.) rather than generic "ChatGPT Image ..."
+timestamps. **This is the folder to watch/check for any future Play
+tab art from Codex, not the project-root one** -- the project-root
+"Play tab" folder used for the earlier 7-image swap this session was
+a one-time manual drop, not Codex's ongoing output location.
+
+`prompts-and-crops.json`'s airline-pilot entry explains the update: the
+original render had "physically impossible cockpit layout" (sky
+visible behind the pilot's head where the rear of the cockpit should
+be); the regenerated version fixes the scene's spatial logic --
+viewed from behind/right of the captain, sky only in the forward
+windshield. Copied `airline-pilot.png` over
+`public/images/app/soon-airline-pilot.png` (same overwrite-in-place
+approach as every other image this session), cleared
+`.next/dev/cache/images` again, verified live: the "In the works" card
+now shows the corrected composition.
+
+Not yet applied: `prompts-and-crops.json`'s per-career
+`portraitPosition`/`landscapePosition` CSS crop hints -- every cover
+image in this codebase currently renders with plain `object-cover`
+(centered), no per-career position override anywhere. Worth revisiting
+if a future pass wants tighter framing per the JSON's guidance, but
+out of scope for a straight image swap.
+
+Files: `public/images/app/soon-airline-pilot.png` only.
+
+Next step: push this once committed. Also worth telling the user
+directly (not just burying in this log) that Codex's real output
+folder is `~/Documents/Dreamari/Play tab`, in case that changes how
+they hand off future images.
