@@ -61,6 +61,8 @@ it as the second beat of the sequence.
 `/match-grid`: splash shows the new copy, "See My Matches" dismisses into
 the six-card grid with its own heading intact, no console/server errors.
 
+**Follow-up same day**: the two sentences wrapped badly as one paragraph, stranding "like the ones you save" as its own orphaned line -- "Keep the save 1-3 line in a seperate line. Rigth now it wraps badly and we have 3 words int he end." `Scene.line` widened from `string` to `ReactNode` (every other scene's plain-string `line` still satisfies that type, no other callers touched) so the matchGrid scene could put a real `<br />` between the two sentences instead of leaving the wrap to chance at every viewport width. Verified live: first sentence on its own line, second sentence starts fresh and wraps normally.
+
 Next step: push (explicit go-ahead: "FIx and push").
 
 

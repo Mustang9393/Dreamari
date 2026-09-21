@@ -16,7 +16,7 @@ type Scene = {
   wide?: boolean;
   tint: [string, string];
   title: string;
-  line?: string;
+  line?: ReactNode;
   /** plain lines, no icons (direct feedback, 11 Sept 2026: splashes were
    *  inconsistent, some with icons, some without) */
   /** Connect keeps icons on its rows (direct feedback, 11 Sept 2026: "the
@@ -56,7 +56,18 @@ const SCENES: Record<SplashSurface, Scene> = {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
     title: "You’ve Been Matched!",
-    line: "Next, you’ll see 6 careers matched to you. Save 1–3, and later our EXPLORE feature will recommend more careers like the ones you save.",
+    // Two sentences, forced onto their own lines (direct feedback, 22 Sept
+    // 2026: as one wrapped paragraph the second sentence broke badly,
+    // stranding "like the ones you save" as its own orphaned line) --
+    // `line` widened from `string` to `ReactNode` so a real `<br />` can
+    // sit between them instead of leaving the wrap to chance at every width.
+    line: (
+      <>
+        Next, you’ll see 6 careers matched to you.
+        <br />
+        Save 1–3, and later our EXPLORE feature will recommend more careers like the ones you save.
+      </>
+    ),
     cta: "See My Matches",
   },
   explore: {
