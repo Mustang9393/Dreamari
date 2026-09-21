@@ -1,0 +1,35 @@
+{
+  "generator": "Built-in image_gen",
+  "assets": [
+    {
+      "name": "maple",
+      "prompt": "Use case: stylized-concept. Asset: a single isolated transparent PNG sprite for a premium anime-inspired seasonal UI animation. Paint one autumn Japanese maple leaf, five elegantly pointed lobes, organically serrated edges, fine branching veins, slender curved stem. Muted burnt sienna, amber and russet, golden translucent edges, naturally asymmetrical. High-fidelity hand-painted watercolor in refined anime background-art tradition: delicate pigment granulation, layered translucent washes, fine naturalistic contours, elegant dimensional shading. Rich illustrative detail, natural recognizable form, not a geometric icon or flat vector. ONE object only, centered, filling 80% of a square canvas with small clear margins. TRUE transparent alpha background, no paper rectangle, no colored background, no checkerboard painted into image, no drop shadow, no halo, no surrounding wash, no extra objects or floating particles. Crisp enough silhouette to read at 40-64px while retaining beautiful painted texture at larger size. No letters, labels, logos or border.",
+      "source": "/Users/chandump/.codex/generated_images/01a0c2c9-284b-7aa0-a251-49cc87c7d358/exec-d92f0b21-4ea1-48b1-98da-a74ae665e676.png"
+    },
+    {
+      "name": "leaf",
+      "prompt": "Use case: stylized-concept. Asset: a single isolated transparent PNG sprite for a premium anime-inspired seasonal UI animation. Paint one autumn gingko leaf, recognizable graceful fan shape with subtly ruffled scalloped rim, fine radiating veins and slender curved stem. Muted honey gold and warm apricot, softly shaded folded edge. High-fidelity hand-painted watercolor in refined anime background-art tradition: delicate pigment granulation, layered translucent washes, fine naturalistic contours, elegant dimensional shading. Rich illustrative detail, natural recognizable form, not a geometric icon or flat vector. ONE object only, centered, filling 80% of a square canvas with small clear margins. TRUE transparent alpha background, no paper rectangle, no colored background, no checkerboard painted into image, no drop shadow, no halo, no surrounding wash, no extra objects or floating particles. Crisp enough silhouette to read at 40-64px while retaining beautiful painted texture at larger size. No letters, labels, logos or border.",
+      "source": "/Users/chandump/.codex/generated_images/01a0c2c9-284b-7aa0-a251-49cc87c7d358/exec-a1885599-a0a7-447a-90a3-03f1a0085145.png"
+    },
+    {
+      "name": "snow",
+      "prompt": "Use case: stylized-concept. Asset: a single isolated transparent PNG sprite for a premium anime-inspired seasonal UI animation. Paint one exquisite six-armed snow crystal, botanically precise snowflake structure, branching feathered dendrites, tiny translucent ice facets and subtle powdery edges. Muted icy periwinkle and pale blue with pearl highlights, enough blue substance to remain visible on dark backgrounds. High-fidelity hand-painted watercolor in refined anime background-art tradition: delicate pigment granulation, layered translucent washes, fine naturalistic contours, elegant dimensional shading. Rich illustrative detail, natural recognizable form, not a geometric icon or flat vector. ONE object only, centered, filling 80% of a square canvas with small clear margins. TRUE transparent alpha background, no paper rectangle, no colored background, no checkerboard painted into image, no drop shadow, no halo, no surrounding wash, no extra objects or floating particles. Crisp enough silhouette to read at 40-64px while retaining beautiful painted texture at larger size. No letters, labels, logos or border.",
+      "source": "/Users/chandump/.codex/generated_images/01a0c2c9-284b-7aa0-a251-49cc87c7d358/exec-b1644a1a-6f64-41a8-b177-c4c010dfb78e.png"
+    },
+    {
+      "name": "crystal",
+      "prompt": "Create a single isolated transparent PNG sprite for a premium anime-watercolor seasonal UI: one small delicate six-point ice crystal, simple natural hexagonal structure with six tapered arms, translucent blue facets and subtle pearl highlights, elegant restrained icy periwinkle. High fidelity delicate watercolor pigment, fine naturalistic contours, layered translucent color, dimensional softly curled edges. One recognizable natural object only centered with 10% clear margins. TRUE transparent alpha background. No paper, backdrop, checkerboard, cast shadow, halo, surrounding wash or other objects. Soft refined hand painted anime background-art quality, not flat vector or geometric icon. Readable silhouette at 40px. No text.",
+      "source": "/Users/chandump/.codex/generated_images/01a0c2c9-284b-7aa0-a251-49cc87c7d358/exec-45bff9a4-0b1b-4d58-b3db-00b7180b80db.png"
+    },
+    {
+      "name": "blossom",
+      "prompt": "Create a single isolated transparent PNG sprite for a premium anime-watercolor seasonal UI: one Japanese cherry blossom viewed slightly obliquely, five naturally asymmetrical overlapping petals with distinctly notched tips, delicate warm golden stamens, fine rose veins, softly curled translucent edges. Dusty blush pink, subtle rose center, pale pink highlights. High fidelity delicate watercolor pigment, fine naturalistic contours, layered translucent color, dimensional softly curled edges. One recognizable natural object only centered with 10% clear margins. TRUE transparent alpha background. No paper, backdrop, checkerboard, cast shadow, halo, surrounding wash or other objects. Soft refined hand painted anime background-art quality, not flat vector or geometric icon. Readable silhouette at 40px. No text.",
+      "source": "/Users/chandump/.codex/generated_images/01a0c2c9-284b-7aa0-a251-49cc87c7d358/exec-0d8360c4-b892-467d-9a32-f6b859c9b279.png"
+    },
+    {
+      "name": "petal",
+      "prompt": "Create a single isolated transparent PNG sprite for a premium anime-watercolor seasonal UI: one loose Japanese cherry blossom petal, recognizable delicate oval teardrop shape with a tiny notched broad tip, slightly curled and folded, fine rose veins. Dusty blush pink with subtle rose shading and translucent pale pink edge. High fidelity delicate watercolor pigment, fine naturalistic contours, layered translucent color, dimensional softly curled edges. One recognizable natural object only centered with 10% clear margins. TRUE transparent alpha background. No paper, backdrop, checkerboard, cast shadow, halo, surrounding wash or other objects. Soft refined hand painted anime background-art quality, not flat vector or geometric icon. Readable silhouette at 40px. No text.",
+      "source": "/Users/chandump/.codex/generated_images/01a0c2c9-284b-7aa0-a251-49cc87c7d358/exec-71161dae-07df-41db-bb84-5ad8413189c0.png"
+    }
+  ]
+}

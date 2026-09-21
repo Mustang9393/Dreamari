@@ -12,12 +12,8 @@ export const SEASON_STYLE = {
 
 type Mark = "maple" | "leaf" | "snow" | "crystal" | "blossom" | "petal";
 
-// The three hand-drawn marks the shipped V1 season art used, before this
-// watercolor pass -- kept here as the fallback for any watercolor sprite
-// that isn't actually on disk yet. Ported as-is from ProfileExperience.tsx
-// (this file used to live there) rather than redrawn, so a missing PNG
-// degrades to the exact art that was already reviewed and approved, not a
-// broken image icon. `currentColor`-filled, tinted via the `color` prop.
+// Lightweight vector fallback for a failed image request. All six painted
+// sprites are bundled; normal rendering never depends on missing assets.
 function LeafMarkA(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden {...props}>
@@ -54,14 +50,8 @@ const FALLBACK: Record<Mark, (props: SVGProps<SVGSVGElement>) => React.ReactNode
   petal: SakuraMark,
 };
 
-// Painted transparent assets preserve watercolor pigment and fine natural
-// detail -- native img is deliberate for these tiny, repeated alpha
-// sprites. Not every kind has a real exported file yet (watercolor art is
-// generated outside this repo and dropped in by hand); an <img> whose file
-// 404s fires onError, and this falls back to the equivalent V1 SVG mark
-// instead of the browser's own broken-image glyph -- per kind, so a
-// partial set of real assets (e.g. only "maple" and "snow" delivered so
-// far) upgrades automatically as more arrive, with no further code change.
+// Six bundled, alpha-preserving watercolor sprites. Keep the native image
+// element for repeated tiny sprites; fallback is only for a network failure.
 function SeasonMark({ kind, tint }: { kind: Mark; tint: string }) {
   const [broken, setBroken] = useState(false);
   if (broken) {
@@ -69,7 +59,7 @@ function SeasonMark({ kind, tint }: { kind: Mark; tint: string }) {
     return <Fallback className="block h-full w-full" style={{ color: tint }} />;
   }
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={`/images/seasons/watercolor/${kind}.png`} width={256} height={256} alt="" draggable={false} decoding="async" onError={() => setBroken(true)} />;
+  return <img src={`/images/seasons/watercolor/${kind}.webp`} width={256} height={256} alt="" draggable={false} decoding="async" onError={() => setBroken(true)} />;
 }
 
 // Art-directed resting arrangements: right-weighted, with a quiet lane for
@@ -81,6 +71,18 @@ const ARRANGEMENTS: Record<Season, Placement[]> = {
   spring: [["blossom", 68, 37, 51, 18, .88], ["petal", 127, 61, 28, -30, .57], ["petal", 22, 75, 26, 42, .63], ["blossom", -17, 105, 36, -15, .36], ["petal", 106, 108, 19, 65, .32]],
 };
 
+// Stable, irregular flight profiles avoid repeated four-mark cycles and
+// hydration-time randomness. Widely separated starting phases and alternating
+// lanes leave breathing room; each leaf has an independent orientation/gust.
+const FALL_FLIGHTS = [
+  { mark: 0, right: 58, size: 37, angle: -72, turn: 23, sway: 9, duration: 16.7, phase: .08, gust: 5.9 },
+  { mark: 1, right: 151, size: 27, angle: 104, turn: -41, sway: -17, duration: 21.3, phase: .57, gust: 8.3 },
+  { mark: 0, right: 101, size: 29, angle: 161, turn: -32, sway: 13, duration: 19.1, phase: .29, gust: 7.1 },
+  { mark: 1, right: 176, size: 22, angle: -19, turn: 47, sway: -8, duration: 24.7, phase: .88, gust: 9.7 },
+  { mark: 0, right: 77, size: 24, angle: 43, turn: -19, sway: -12, duration: 22.9, phase: .72, gust: 6.7 },
+  { mark: 1, right: 130, size: 32, angle: -137, turn: 31, sway: 18, duration: 18.3, phase: .43, gust: 10.1 },
+];
+
 export function SeasonScene({ seasonId, className = "", fadeToHeader = false }: { seasonId: Season; className?: string; fadeToHeader?: boolean }) {
   const { tint, tint2 } = SEASON_STYLE[seasonId];
   const arrangement = ARRANGEMENTS[seasonId];
@@ -91,21 +93,23 @@ export function SeasonScene({ seasonId, className = "", fadeToHeader = false }: 
         {arrangement.map(([kind, right, top, size, angle, opacity], i) => <span key={i} className="dm-season-mark" style={{ right, top, width: size, height: size, opacity, transform: `rotate(${angle}deg)` }}><SeasonMark kind={kind} tint={tint} /></span>)}
       </div>
       <div className="dm-season-flow">
-        {Array.from({ length: seasonId === "winter" ? 14 : 10 }, (_, i) => {
-          const [kind, , , size, angle, opacity] = arrangement[i % arrangement.length];
+        {Array.from({ length: seasonId === "fall" ? FALL_FLIGHTS.length : seasonId === "winter" ? 10 : 8 }, (_, i) => {
+          const flight = seasonId === "fall" ? FALL_FLIGHTS[i] : undefined;
+          const [kind, , , size, angle, opacity] = arrangement[flight?.mark ?? i % arrangement.length];
           const depth = i % 3;
-          const duration = (seasonId === "winter" ? 11 : 8.5) + depth * 2.1 + i * .31;
+          const duration = flight?.duration ?? (seasonId === "winter" ? 14 : 12) + depth * 1.7 + i * .31;
           return <span key={i} className="dm-season-drop" style={{
-            right: 8 + ((i * 47 + (seasonId === "spring" ? 26 : 0)) % 155),
-            width: size * (depth === 2 ? .55 : .85), height: size * (depth === 2 ? .55 : .85),
-            "--duration": `${duration}s`, "--phase": `${-duration * ((i * .237 + .11) % 1)}s`,
-            "--sway": `${(i % 2 ? -1 : 1) * (seasonId === "winter" ? 9 : 22)}px`,
-            "--angle": `${angle}deg`, "--turn": `${seasonId === "winter" ? 35 : i % 2 ? -115 : 135}deg`,
+            right: flight?.right ?? 48 + ((i * 37 + (seasonId === "spring" ? 26 : 0)) % 117),
+            width: flight?.size ?? size * (depth === 2 ? .55 : .85), height: flight?.size ?? size * (depth === 2 ? .55 : .85),
+            "--duration": `${duration}s`, "--phase": `${-duration * (flight?.phase ?? ((i * .237 + .11) % 1))}s`,
+            "--gust-duration": flight ? `${flight.gust}s` : undefined,
+            "--sway": `${flight?.sway ?? (i % 2 ? -1 : 1) * (seasonId === "winter" ? 7 : 14)}px`,
+            "--angle": `${flight?.angle ?? angle}deg`, "--turn": `${flight?.turn ?? (seasonId === "winter" ? 16 : i % 2 ? -28 : 34)}deg`,
             "--alpha": opacity * (depth === 2 ? .65 : 1),
             // Depth of field, not distortion: the furthest layer (smallest,
             // most transparent already) also blurs, the nearest stays
             // crisp -- reads as depth without touching the art's own shape.
-            "--blur": depth === 2 ? "1.6px" : depth === 1 ? "0.6px" : "0px",
+            "--blur": depth === 2 ? "0.45px" : "0px",
           } as CSSProperties}><span className="dm-season-sway"><span className="dm-season-turn"><SeasonMark kind={kind} tint={tint} /></span></span></span>;
         })}
       </div>

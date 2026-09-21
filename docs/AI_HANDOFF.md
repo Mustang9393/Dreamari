@@ -11909,3 +11909,18 @@ Files touched: `src/components/play/PlayBackdrop.tsx`, `src/components/play/Play
 `npx tsc --noEmit -p .`, `npx eslint`, `npm run build`, `npm run tokens:check` all clean. Live-verified: stars visible and twinkling on the intro/unlock/question screens, the "All 5 terms unlocked!" milestone blooming a warm gold wash across the whole background, a question screen's prompt+options sitting in one centered card, a correct-answer pulse (the feedback panel's own blur overlay dims the bloom during that specific modal, expected -- the unlock screen's bloom, with nothing covering it, is clearly visible).
 
 Next step: none pending on this thread.
+
+
+## 2026-09-22 · Complete painted seasons; preserve artwork proportions
+
+Continued in `work/season-card-motion` on `codex/season-card-motion`, fast-forwarded cleanly to origin/main 0c7ddc2 before editing. Latest upstream had already removed scaleX; this pass also removes animated uniform scale, reduces rotation from ±115–135° to ±28–34° (winter 16°), slows descent, reduces moving counts to 8/10, and reduces blur to at most 0.45px. Fixed size, translation and gentle rotation only; no skew, squash, perspective, or resize during motion. Preserve existing header color and masks / reduced-motion / per-card interaction.
+
+Completed missing crystal, blossom and petal with built-in image_gen. Earlier generation had hit a usage limit; old screenshots predated the painted integration and were SVG, not evidence of missing local PNGs. All six current sprites now bundled as 256px alpha WebP exports (~145KB total) with explicitly transparent contain-padding. Original PNGs preserved in workspace `assets/generated/season-watercolor`. Prompts in docs/season-art-prompts.json. Retain graceful network-error fallback.
+
+Validation: TypeScript, targeted ESLint, tokens:check and diff whitespace pass. Actual v2 profile browser check: all six image URLs decode, zero fallback SVGs, zero missing sprites, all sampled animated transform scales = 1 on both axes (floating-point tolerance). Desktop 1280px, mobile 390px: no horizontal overflow; expanded Spring and Overview tested. Reduced motion: moving layers hidden, static artwork visible for all three. Corner alpha checked to avoid black export padding. No new scrolling/positioned controls. Screenshots: outputs/seasons-painted-{desktop,expanded,mobile,overview}.png in root workspace.
+
+Preview remains http://localhost:3107/profile. Select V2 beneath the tabs, then My Plan; Overview's Season QA button cycles all three. User requested QA before pushing: these changes are uncommitted and not pushed. Next: review artwork and motion in local preview, then commit/push only when authorized.
+
+## 2026-09-22 · Fall leaf variation
+
+User found consecutive Fall leaves too similar and tightly spaced. Replaced the repeated four-mark flight cycle with six independently varied, deterministic profiles: distinct orientations (-137° through 161°), sizes, staggered phases, separated lanes, fall durations (16.7–24.7s), opposite rotation directions and independent gust periods (5.9–10.1s). Fewer simultaneous leaves provide breathing room. Fixed proportions preserved; Winter and Spring unchanged. TypeScript, targeted ESLint and diff checks passed; browser inspected Fall flight parameters. Local preview on 3107, not pushed.
