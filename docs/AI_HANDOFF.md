@@ -10884,3 +10884,48 @@ for this exact row. Hover-preview could be layered on later if wanted.
 
 Next step: commit is local only, not pushed -- awaiting go-ahead per
 standing "show before push" preference for this project.
+
+## 2026-09-21 · Play tab: Career Simulations now falls back to compact too
+
+Follow-up in the same session. Direct feedback: "when the glossary games
+row scales up and highlights, lets have the simulations row fall back
+into the normal card sizes... only the focused row should look like
+that." Career Simulations was the one row NOT using the compact/hero
+tier system -- it stayed at full hero+side size always, just dimmed and
+scaled down slightly as a whole (`RowFocusWrapper`) when unfocused,
+which is a different, lesser treatment than what Glossary Games/In the
+Works actually do (fall back to the small COMPACT_W/COMPACT_HEIGHT
+every other row rests at).
+
+Generalized `RowCard` (`PlayHub.tsx`) to the same three real tiers
+`HeroShelfCard` already has -- hero / side / compact, driven by a new
+`active` prop threaded in from `FeaturedRow`, which now takes `active`
+from `PlayHub` the same way `HeroShelfRow` already did. Removed
+`RowFocusWrapper` entirely (now unused, no other call sites) -- with
+real compact sizing doing the work, the separate dim/scale/opacity
+wrapper was redundant and would have double-treated the row. Moved
+`data-row-id="simulations"` onto `FeaturedRow`'s own `<section>` (was on
+`RowFocusWrapper`'s div) so `useCenteredRow`'s observer still finds it.
+Also restricted `FeaturedRow`'s own card `onSelect` to `active` rows
+only, same fix as the Glossary Games bug earlier this session (a
+still-compact Simulations row had the identical stop-scroll-tap
+exposure once it could go compact).
+
+Files: `src/components/play/PlayHub.tsx` only.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean. Verified live on local
+dev at a realistic laptop viewport (1280x800): Career Simulations is
+hero+side by default at the top of the page; scrolling to Glossary
+Games shrinks Simulations down to the same compact card size Glossary/
+In the Works rest at, and Glossary expands to hero+side in its place;
+scrolling back up restores Simulations to hero+side. Note: at an
+unusually tall viewport (1280x1100) the *initial* active row can
+resolve to Glossary Games instead of Simulations even at scroll top,
+because Simulations' own hero-height layout (before the observer's
+first callback settles) is tall enough to push the row boundary into
+the observer's center band at that specific height -- not reproduced at
+normal viewport heights, not fixed (flagged here in case it surfaces
+for a real user on an unusually tall/zoomed-out desktop display).
+
+Next step: still local-only, still awaiting go-ahead to push (same gate
+as the entry above -- this adds to the same not-yet-pushed batch).

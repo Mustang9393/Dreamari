@@ -75,32 +75,6 @@ function useCenteredRow(ids: string[]): string | null {
   return active;
 }
 
-/** Wraps ONE row -- header and all -- so it can recede as a whole when
- *  scroll has moved on to a different row, and sit at full presence
- *  (unchanged from how the row already renders) when it's the active
- *  one. Deliberately NOT the same mechanism Glossary Games uses for its
- *  own per-card expand: this is coarser, row-level dominance for rows
- *  that don't have their own per-card hover system (Career Simulations,
- *  In the works) -- when `active` is true it applies NO transform at
- *  all, so it never fights or compounds with a row's own internal
- *  hover animations. */
-function RowFocusWrapper({ id, active, children }: { id: string; active: boolean; children: React.ReactNode }) {
-  return (
-    <motion.div
-      data-row-id={id}
-      animate={
-        active
-          ? { opacity: 1, scale: 1, filter: "brightness(1) saturate(1)" }
-          : { opacity: 0.72, scale: 0.975, filter: "brightness(0.82) saturate(0.9)" }
-      }
-      transition={{ type: "spring", stiffness: 220, damping: 26, mass: 0.8 }}
-      style={{ transformOrigin: "center top" }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 export function PlayHub() {
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   // A deep link from elsewhere in the app (Profile's "Play your #1 Career
@@ -159,9 +133,13 @@ export function PlayHub() {
           Play
         </h1>
 
-        <RowFocusWrapper id="simulations" active={activeRow === "simulations"}>
-          <FeaturedRow simulations={[...mine, ...rest]} soonCareers={featuredRowSoon} focusId={focusId} hintReady={splashSettled} />
-        </RowFocusWrapper>
+        <FeaturedRow
+          simulations={[...mine, ...rest]}
+          soonCareers={featuredRowSoon}
+          focusId={focusId}
+          hintReady={splashSettled}
+          active={activeRow === "simulations"}
+        />
 
         {/* Glossary Games: split by whether the career actually has authored
            content (hasGlossary) -- Finance Essentials has a real page now,
@@ -267,7 +245,26 @@ function breakable(title: string): string {
  *  level ladder / CTA / "Coming soon" state for whichever card is
  *  currently selected, the way Netflix's own info panel sits below its row
  *  rather than being baked into one oversized card. */
-function FeaturedRow({ simulations, soonCareers, focusId, hintReady }: { simulations: Simulation[]; soonCareers: SoonCareer[]; focusId?: string; hintReady: boolean }) {
+function FeaturedRow({
+  simulations,
+  soonCareers,
+  focusId,
+  hintReady,
+  active,
+}: {
+  simulations: Simulation[];
+  soonCareers: SoonCareer[];
+  focusId?: string;
+  hintReady: boolean;
+  /** Whether scroll has brought this row into focus (see useCenteredRow,
+   *  PlayHub) -- when false the rail falls back to the same COMPACT card
+   *  size every other row rests at, instead of staying big and merely
+   *  dimming: "only the focused row should look like that... the other
+   *  [rows] should have the same card sizes when not focused" (direct
+   *  feedback, 21 Sept 2026). The phone deck below is unaffected -- it has
+   *  no compact state of its own, same as before. */
+  active: boolean;
+}) {
   const candidates: FeaturedCandidate[] = useMemo(
     () => [
       ...simulations.map((sim): FeaturedCandidate => ({ kind: "sim", id: sim.id, sim })),
@@ -286,9 +283,12 @@ function FeaturedRow({ simulations, soonCareers, focusId, hintReady }: { simulat
   if (!featured) return null;
 
   return (
-    <section className="flex flex-col gap-[var(--space-3)]">
+    <section data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]">
       {trailerSim?.trailer && <TrailerFlow simulation={trailerSim} onDone={() => setTrailerSim(null)} />}
-      <h2 className={ROW_HEADER} style={{ color: "var(--foreground)" }}>
+      <h2
+        className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
+        style={{ color: active ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
+      >
         Career Simulations
       </h2>
       {/* Phones: a swipeable stack, matching the JioHotstar "For You" deck
@@ -317,8 +317,9 @@ function FeaturedRow({ simulations, soonCareers, focusId, hintReady }: { simulat
           <RowCard
             key={c.id}
             candidate={c}
-            large={c.id === featured.id}
-            onSelect={c.id === featured.id ? undefined : () => setFeaturedId(c.id)}
+            active={active}
+            large={active && c.id === featured.id}
+            onSelect={active && c.id !== featured.id ? () => setFeaturedId(c.id) : undefined}
             onTrailer={(sim) => setTrailerSim(sim)}
           />
         ))}
@@ -490,6 +491,7 @@ function MobileDeck({ candidates, focusId, hintReady, onTrailer }: { candidates:
  *  but just not pressable"). */
 function RowCard({
   candidate,
+  active = false,
   large = false,
   deck = false,
   front = true,
@@ -497,6 +499,12 @@ function RowCard({
   onTrailer,
 }: {
   candidate: FeaturedCandidate;
+  /** Whether this card's row is the one scroll has brought into focus.
+   *  Ignored in deck mode (the phone stack has no compact state). Drives
+   *  the three real size tiers below -- same split HeroShelfCard uses, so
+   *  "only the focused row should look like that" is true of every row,
+   *  Career Simulations included (direct feedback, 21 Sept 2026). */
+  active?: boolean;
   /** Inside the phone stack: the card fills its deck slot (the slot sets
    *  the size), never the rail's own width/height classes. */
   deck?: boolean;
@@ -516,36 +524,45 @@ function RowCard({
   const title = candidate.kind === "sim" ? candidate.sim.title : candidate.soon.title;
   const world = candidate.kind === "sim" ? candidate.sim.world : candidate.soon.world;
   const cover = candidate.kind === "sim" ? candidate.sim.cover : candidate.soon.cover;
+  // Three real size tiers, not two -- "hero" (this row active, this card
+  // featured), "side" (row active, a different card featured), "compact"
+  // (row at rest, same COMPACT_W/COMPACT_HEIGHT every other row rests at).
+  const tier = large ? "hero" : active ? "side" : "compact";
   // Every card reads left-aligned now: the play/lock badge lives in the
   // bottom-right corner (reference carousel, 10 Sept 2026), so the copy
   // keeps to the left of it on the side cards too.
-  const className = `dm-tap group relative flex-none overflow-hidden rounded-[var(--radius-lg)] border text-left ${deck ? "h-full w-full" : `${ROW_HEIGHT} ${large ? FEATURED_W : SIDE_W}`}`;
+  const sizeClass = tier === "hero" ? `${ROW_HEIGHT} ${FEATURED_W}` : tier === "side" ? `${ROW_HEIGHT} ${SIDE_W}` : `${COMPACT_HEIGHT} ${COMPACT_W}`;
+  const className = `dm-tap group relative flex-none overflow-hidden rounded-[var(--radius-lg)] border text-left ${deck ? "h-full w-full" : sizeClass}`;
   const style = {
     borderColor: "var(--color-glass-border-raised)",
     background: "var(--glass-surface-1)",
     // Inline because dm-tap's own transition shorthand (unlayered app.css)
     // beats any Tailwind transition utility -- this is what animates the
     // expand-in-place, re-laying-out each frame instead of scaling.
-    transition: "width 0.5s cubic-bezier(0.16,1,0.3,1), transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease",
+    transition: "width 0.5s cubic-bezier(0.16,1,0.3,1), height 0.5s cubic-bezier(0.16,1,0.3,1), transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease",
   };
   // Proportioned exactly like Browse: PosterCard is a 210x297 card with a
   // 24px title (19px compact) and a 10px world label -- the sm side card
   // here IS that size, and every other step scales the same ~8%-of-height
   // ratio up or down. Compact tier mirrors PosterCard's long-word rule.
   const compact = hasLongWord(title);
-  const titleSize = large
-    ? compact
-      ? "text-[21px] sm:text-[27px] md:text-[33px] lg:text-[37px]"
-      : "text-[26px] sm:text-[34px] md:text-[42px] lg:text-[46px]"
-    : compact
-      ? "text-[21px] sm:text-[19px] md:text-[24px] lg:text-[27px]"
-      : "text-[26px] sm:text-[24px] md:text-[30px] lg:text-[34px]";
-  const worldSize = large ? "text-[11px] sm:text-[13px] md:text-[15px]" : "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]";
+  const titleSize =
+    tier === "hero"
+      ? compact
+        ? "text-[21px] sm:text-[27px] md:text-[33px] lg:text-[37px]"
+        : "text-[26px] sm:text-[34px] md:text-[42px] lg:text-[46px]"
+      : tier === "side"
+        ? compact
+          ? "text-[21px] sm:text-[19px] md:text-[24px] lg:text-[27px]"
+          : "text-[26px] sm:text-[24px] md:text-[30px] lg:text-[34px]"
+        : "text-[14px] leading-[18px] sm:text-[16px] sm:leading-[20px]";
+  const worldSize = tier === "hero" ? "text-[11px] sm:text-[13px] md:text-[15px]" : tier === "side" ? "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]" : "text-[10.5px] sm:text-[11.5px]";
   const content = (
     <div className="relative h-full w-full">
-      <Image src={cover} alt="" fill sizes={large ? "(min-width: 1024px) 764px, 90vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
+      <Image src={cover} alt="" fill sizes={large ? "(min-width: 1024px) 764px, 90vw" : tier === "compact" ? "(min-width: 768px) 347px, 60vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
       {candidate.kind === "soon" && !large && (
-        <span className="absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+        <span className={`absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold ${tier === "compact" ? "gap-[5px]" : ""}`} style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+          {tier === "compact" && <Lock className="h-[12px] w-[12px]" aria-hidden />}
           Coming soon
         </span>
       )}
