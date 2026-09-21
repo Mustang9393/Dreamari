@@ -11085,3 +11085,19 @@ hero-row "coming soon" cards show the new artwork.
 Next step: still local-only, same not-yet-pushed batch. Flag to the
 user: the unused alternate Emergency Medicine Doctor image is still in
 the "Play tab" source folder if they'd rather use that one instead.
+
+## 2026-09-21 · Play tab: swapped in a replacement Food Scientist image
+
+Immediate follow-up: user dropped one more image into the same "Play
+tab" folder and asked to use it for Food Scientist instead. The file
+wasn't there yet on the first check (folder still showed only the
+original 8) -- asked the user to confirm rather than guessing, they
+said to check again, and by then it had finished saving
+(`ChatGPT Image Sep 21, 2026, 01_39_52 PM.png`, a food-science lab
+scene, different character). Overwrote
+`public/images/app/soon-food-scientist.png` with it and cleared
+`.next/dev/cache/images` again (same stale-rendition issue as the
+previous entry). Verified live: Food Scientist's "In the works" card
+shows the new image.
+
+Next step: still local-only, same not-yet-pushed batch.
