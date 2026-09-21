@@ -11693,3 +11693,17 @@ Files touched: `src/components/play/PlayBackdrop.tsx` (new), `src/components/pla
 `npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified on both the Play hub (warm magenta/pink wash, faint diagonal texture visible but not distracting) and Investment Banking's Glossary Game (the career's own amber accent glow layers on top cleanly, no clash).
 
 Next step: none pending on this thread.
+
+## 2026-09-21 · Glossary Game: example is optional again, via a real flip, not crammed onto one card
+
+Direct correction on the interaction-friction fix from earlier today, after Joshua Pierce watched it and recorded a full walkthrough. His actual spec (paraphrased from the recording): 5 terms per level, and the FRONT of each card should already show the word and definition -- so getting through all 5 is 5 actions (one Unlock tap each), never 10. But the example shouldn't be permanently glued onto that same card either ("that way it's not a bunch of information on one card at once"). It should be optional, reachable with a small "tap for an example" -- same logic as an Instagram carousel: the first slide is the whole story on its own, swiping deeper is for whoever wants more, never mandatory. Chandu's own addition: keep an actual tap-to-flip gesture (not a content swap), the same illustration on both faces, example living on the back.
+
+Earlier today's fix (removing the flip entirely, showing definition AND example together on one face) over-corrected: it killed the mandatory-two-actions problem, but also killed the "optional deeper context" feature Joshua wanted kept, and put everything on one card despite Joshua explicitly saying to avoid that.
+
+New `TermFlipCard`: front face is graphic + term + definition + a small "Tap for an example" link; back face is the same graphic + the example, reached by an actual 3D `rotateY` flip (`backfaceVisibility: hidden` on both faces, a `perspective`d wrapper), not a fade/crossfade. "Unlock {term}" sits below the card, outside the flip, and works identically regardless of which face is showing. Fresh `flipped` state every term (the parent's existing `key={term.id}` remount handles the reset for free) -- advancing to the next term always opens back on the front.
+
+Files touched: `src/components/glossary/GlossaryGameExperience.tsx` (new `TermFlipCard`, `UnlockScreen` simplified to use it).
+
+`npx tsc --noEmit -p .`, `npx eslint`, `npm run build` all clean. Live-verified end to end: Company's card opens on the front (graphic, term, definition, Unlock all visible, no tap needed); tapping "Tap for an example" flips to the Dream Sneakers example on the back; Unlock works from the flipped state and advances to Product, which correctly opens fresh on ITS front face, not still flipped.
+
+Next step: none pending on this thread.

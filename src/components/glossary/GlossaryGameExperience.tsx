@@ -26,7 +26,7 @@ import {
 import {
   saveLessonComplete,
 } from "./progress";
-import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion } from "./data";
+import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion, GlossaryTerm } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
@@ -306,6 +306,101 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
 // ---------------------------------------------------------------------------
 // Screen: Term unlock carousel
 
+/** One term's card, with an optional flip to an example on the back --
+ *  never required to advance (direct feedback, 21 Sept 2026, matching
+ *  Instagram's own carousel logic: the first slide is the whole story on
+ *  its own, swiping deeper is for whoever wants more). Fresh `flipped`
+ *  state per term (the parent's `key={term.id}` remounts this on every
+ *  term change, so it always opens on the front). A real 3D flip, not a
+ *  content swap -- "still have the tap to flip functionality" -- with the
+ *  same graphic on both faces and the ring-bound page identity carried
+ *  through on each side. */
+function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: GlossaryTerm }) {
+  const [flipped, setFlipped] = useState(false);
+  const reduced = useReducedMotion();
+  const rings = (
+    <span
+      aria-hidden
+      className="flex w-9 flex-none flex-col items-center justify-evenly border-r py-[var(--space-6)]"
+      style={{ background: "color-mix(in srgb, var(--foreground) 5%, var(--card))", borderColor: "var(--glass-border)" }}
+    >
+      {[0, 1, 2].map((i) => (
+        <span key={i} className="size-3 rounded-full border" style={{ background: "var(--background)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.25)" }} />
+      ))}
+    </span>
+  );
+  const glyph = (
+    <span className="flex items-center gap-[10px]">
+      <span className="flex size-11 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 18%, var(--card))", color: "var(--glossary-accent)" }}>
+        <TermIcon icon={term.icon} className="h-6 w-6" />
+      </span>
+      <span className="block text-[clamp(22px,5dvh,30px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+        {term.term}
+      </span>
+    </span>
+  );
+  const face = (side: "front" | "back") => (
+    <div
+      className={`flex overflow-hidden rounded-[var(--radius-lg)] border text-left ${side === "back" ? "absolute inset-0" : ""}`}
+      style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)", backfaceVisibility: "hidden", transform: side === "back" ? "rotateY(180deg)" : undefined }}
+    >
+      {rings}
+      <span className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
+        {glyph}
+        {side === "front" ? (
+          <>
+            <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
+              {term.definition}
+            </span>
+            {/* Optional, small, never required -- pressing Unlock below
+               works identically whether or not this was ever tapped. */}
+            <button
+              type="button"
+              onClick={() => setFlipped(true)}
+              className="dm-link flex w-fit cursor-pointer items-center gap-[3px] text-[12.5px] font-bold"
+              style={{ color: "var(--glossary-accent)" }}
+            >
+              Tap for an example <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
+            </button>
+          </>
+        ) : (
+          <>
+            <span className="flex flex-col gap-[6px]">
+              <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--glossary-accent)" }}>
+                {lesson.exampleCompany} Example
+              </span>
+              <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
+                {term.example}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setFlipped(false)}
+              className="dm-link flex w-fit cursor-pointer items-center gap-[3px] text-[12.5px] font-bold"
+              style={{ color: "var(--muted-foreground)" }}
+            >
+              <ChevronLeft className="h-[13px] w-[13px]" aria-hidden /> Back to the definition
+            </button>
+          </>
+        )}
+      </span>
+    </div>
+  );
+  return (
+    <div style={{ perspective: 1200 }}>
+      <motion.div
+        className="relative"
+        style={{ transformStyle: "preserve-3d" }}
+        animate={{ rotateY: flipped ? 180 : 0 }}
+        transition={{ duration: reduced ? 0 : 0.5, ease: [0.4, 0, 0.2, 1] }}
+      >
+        {face("front")}
+        {face("back")}
+      </motion.div>
+    </div>
+  );
+}
+
 function UnlockScreen({
   lesson,
   index,
@@ -342,13 +437,19 @@ function UnlockScreen({
         Term {index + 1} of {lesson.terms.length}
       </p>
 
-      {/* The definition shows immediately -- no flip required to read it
-         (direct feedback, 21 Sept 2026: tap-to-flip then Unlock was two
-         required actions per term, doubling the taps needed to get
-         through a lesson against the reference's one-tap flow). Still the
-         same ring-bound page identity as before, it just isn't hidden
-         behind a gesture anymore. Term-to-term still page-turns via a
-         quick slide/fade instead of the old 3D flip. */}
+      {/* The definition shows immediately, no tap required -- but the
+         example is genuinely optional now, not crammed onto the same face
+         (direct feedback, 21 Sept 2026, from a full walkthrough recording:
+         "you shouldn't be mandated to go through both cards... you should
+         have the option to click example... same logic as Instagram
+         carousels -- I have the liberty to swipe through if I find it
+         intriguing, but I'm not forced to"). Front: graphic, term,
+         definition -- five terms, five "Unlock" taps, nothing else
+         required. A small "Tap for example" flips the SAME card to its
+         back face (the graphic again, plus the example) -- entirely
+         optional, and Unlock below works identically whichever face is
+         showing. Term-to-term still page-turns via a quick slide; the
+         flip is a separate, second gesture within one term. */}
       <div className="relative w-full max-w-[440px]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -357,51 +458,8 @@ function UnlockScreen({
             animate={{ opacity: 1, x: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, x: -24 }}
             transition={{ duration: reduced ? 0.12 : 0.26, ease: [0.4, 0, 0.2, 1] }}
-            className="flex overflow-hidden rounded-[var(--radius-lg)] border text-left"
-            style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}
           >
-            <span
-              aria-hidden
-              className="flex w-9 flex-none flex-col items-center justify-evenly border-r py-[var(--space-6)]"
-              style={{ background: "color-mix(in srgb, var(--foreground) 5%, var(--card))", borderColor: "var(--glass-border)" }}
-            >
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className="size-3 rounded-full border"
-                  style={{ background: "var(--background)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.25)" }}
-                />
-              ))}
-            </span>
-
-            <span className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
-              <span className="flex items-center gap-[10px]">
-                <span
-                  className="flex size-11 flex-none items-center justify-center rounded-[var(--radius-md)]"
-                  style={{ background: "color-mix(in srgb, var(--glossary-accent) 18%, var(--card))", color: "var(--glossary-accent)" }}
-                >
-                  <TermIcon icon={term.icon} className="h-6 w-6" />
-                </span>
-                <span className="block text-[clamp(22px,5dvh,30px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                  {term.term}
-                </span>
-              </span>
-
-              <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
-                {term.definition}
-              </span>
-
-              <span className="block h-px w-full" style={{ background: "var(--glass-border)" }} aria-hidden />
-
-              <span className="flex flex-col gap-[6px]">
-                <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--glossary-accent)" }}>
-                  {lesson.exampleCompany} Example
-                </span>
-                <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
-                  {term.example}
-                </span>
-              </span>
-            </span>
+            <TermFlipCard term={term} lesson={lesson} />
           </motion.div>
         </AnimatePresence>
       </div>
