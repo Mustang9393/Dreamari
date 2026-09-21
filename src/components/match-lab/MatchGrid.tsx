@@ -126,9 +126,35 @@ export function MatchGrid() {
               </span>
             </div>
             <p className="mb-2.5 flex-none px-1 text-[12.5px] leading-[16px] font-medium text-[var(--color-night-muted-foreground)]">
-              Tap a card to see details. Tap + to save it.
+              {DECK.length > 0 ? "Tap a card to see details. Tap + to save it." : " "}
             </p>
 
+            {/* Custom-designed edge case, 22 Sept 2026: a genuinely empty
+               DECK (0 real matches) is a real, different situation from a
+               SPARSE one -- padding all 6 slots with PlaceholderMatchCard
+               would leave a student staring at six "more matches coming"
+               tiles with no real content and a permanently-disabled
+               Continue button, a dead end with no way forward. Whole-route
+               empty state instead (COMPONENT_STATES_PLAYBOOK.md tier 4),
+               with a real way out. */}
+            {DECK.length === 0 ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+                <Sparkles className="h-8 w-8" style={{ color: "var(--color-night-muted-foreground)" }} aria-hidden />
+                <h2 className={`${bricolage.className} text-[20px] font-extrabold text-[var(--color-night-foreground)]`}>No matches yet</h2>
+                <p className="max-w-[320px] text-[14px] leading-[19px] font-medium text-[var(--color-night-muted-foreground)]">
+                  We don&apos;t have any careers matched to you yet. Explore is a good place to start.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => router.push("/explore")}
+                  className="mt-1 flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-[var(--radius-md)] px-5 text-[14px] font-bold whitespace-nowrap text-white"
+                  style={{ background: "var(--color-brand-500)" }}
+                >
+                  Explore careers <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+                </button>
+              </div>
+            ) : (
+            <>
             {/* ---- the grid: all 6, always visible, no scroll -- rows
                sized to fill whatever space is left (grid-rows-3/2 with
                Tailwind's built-in minmax(0,1fr) tracks), cards stretch to
@@ -158,6 +184,8 @@ export function MatchGrid() {
                 <PlaceholderMatchCard key={`placeholder-${i}`} />
               ))}
             </div>
+            </>
+            )}
           </div>
         </section>
 
@@ -165,7 +193,13 @@ export function MatchGrid() {
         {/* No blur (direct feedback, 14 Sept 2026: "stuttering... Match
            grid etc" -- fixed + full-width + backdrop-blur-xl recomposites
            every scroll frame, permanently on screen, for a bar that was
-           already 88% opaque and barely needed the blur to read solid). */}
+           already 88% opaque and barely needed the blur to read solid).
+           Hidden entirely when DECK is empty (22 Sept 2026): a Continue
+           control that can never enable, and a "save up to 3" message
+           with nothing to save, is a second dead-end signal on top of the
+           empty state above -- the empty state's own CTA is the only way
+           forward there. */}
+        {DECK.length > 0 && (
         <div
           className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t px-4 py-3"
           style={{ background: "color-mix(in srgb, var(--color-night-background) 94%, transparent)", borderColor: "var(--color-glass-border)" }}
@@ -199,6 +233,7 @@ export function MatchGrid() {
             </button>
           </div>
         </div>
+        )}
 
         {/* ---- toast: trying to add a 4th ---- */}
         <AnimatePresence>
@@ -389,7 +424,13 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
               Learn more
             </span>
           </BorderBeam>
-          <p style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 17, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.02em", color: "var(--color-night-foreground)" }}>
+          {/* Custom-designed edge case, 22 Sept 2026: verified live with a
+             pathologically long title -- both this card and DetailModal's
+             own hero title already grow gracefully (absolute/flex scrims,
+             no fixed height), no clipping or collision. line-clamp-3 is a
+             defensive cap only, matching this app's own truncation
+             convention, so a truly extreme title can't grow unbounded. */}
+          <p className="line-clamp-3" style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 17, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.02em", color: "var(--color-night-foreground)" }}>
             {career.title}
           </p>
           <p className="text-[9px] font-semibold tracking-[0.06em]" style={{ color: career.color }}>
@@ -540,7 +581,7 @@ function DetailModal({
                   "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-night-background) 50%, transparent) 30%, color-mix(in srgb, var(--color-night-background) 75%, transparent) 51%, var(--color-night-background) 100%)",
               }}
             >
-              <p style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 26, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.03em", color: "var(--color-night-foreground)" }}>
+              <p className="line-clamp-3" style={{ fontFamily: career.font, fontWeight: career.fontWeight, fontSize: 26, lineHeight: 1.15, letterSpacing: career.letterSpacing ?? "0.03em", color: "var(--color-night-foreground)" }}>
                 {career.title}
               </p>
               <p className="text-[10.5px] font-semibold tracking-[0.06em]" style={{ color: career.color }}>
@@ -621,6 +662,15 @@ function BreakdownDivider() {
  * differently-formatted blocks. Sized below the section heading (direct
  * feedback, 14 Sept 2026: headings should read first, bullets second). */
 function BulletList({ items }: { items: string[] }) {
+  // Custom-designed edge case, 22 Sept 2026: every DECK entry today is
+  // fully authored, but a newly-added or thin real career could reach this
+  // with an empty array before content catches up -- an empty <ul> with a
+  // heading above it and nothing below used to read as broken, not "not
+  // authored yet." Matches this app's own "Coming soon" convention for
+  // thin content (COMPONENT_STATES_PLAYBOOK.md).
+  if (items.length === 0) {
+    return <p className="text-[13px] font-medium italic" style={{ color: "var(--color-night-muted-foreground)" }}>Details coming soon.</p>;
+  }
   return (
     <ul className="flex flex-col gap-1.5">
       {items.map((item) => (
