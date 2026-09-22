@@ -60,32 +60,36 @@ function DonutCard({ title, centerPct, centerLabel, rows }: { title: string; cen
   );
 }
 
-// Career Pathways gets a ranked bar list instead of the same ring -- with 7
-// categories a donut this size would be mostly hairline slivers, illegible
-// at a glance (direct instruction: "the career pathways tile can have a
-// different graph or something if needed"). A ranked bar reads its own
-// order (already sorted, most-common pathway first) the way a ring can't.
+// A donut this size with 7 categories would be mostly hairline slivers,
+// illegible at a glance -- but a set of separate ranked bars was wrong for
+// a different reason (direct correction, 23 Sept 2026): "it's supposed to
+// show how many out of the total number of students... are in different
+// pathways... individually for them to fill up a bar doesn't make sense,
+// we're showing distribution or breakdown." A bar that fills on its own
+// reads as progress toward ITS OWN goal; what this data actually is, is
+// parts of one whole. Fixed with the graph a "distribution" chart actually
+// is: one stacked bar, its own segments sized to each pathway's real share
+// of the roster (all segments together always sum to the full bar), with
+// the ranked legend as the supporting detail below it -- same "graph on
+// top, bigger; other info below" shape as the two ring cards.
 function PathwaysCard({ total, topPathways, colors }: { total: number; topPathways: [string, number][]; colors: string[] }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
         <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways</h2>
-        <div className="flex flex-col justify-center gap-[10px]">
-          {topPathways.map(([label, value], i) => {
-            const pct = total > 0 ? (value / total) * 100 : 0;
-            const color = colors[i % colors.length];
-            return (
-              <div key={label} className="flex flex-col gap-[4px]">
-                <span className="flex items-center justify-between gap-[8px] text-[12.5px] font-semibold">
-                  <span className="min-w-0 truncate" style={{ color: "var(--foreground)" }}>{label}</span>
-                  <span className="flex-none tabular-nums" style={{ color: "var(--muted-foreground)" }}>{value}</span>
-                </span>
-                <span className="block h-[7px] w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
-                  <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
-                </span>
-              </div>
-            );
-          })}
+        <div className="flex flex-col gap-[var(--space-5)]">
+          <span className="flex h-[18px] w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+            {topPathways.map(([label, value], i) => {
+              const pct = total > 0 ? (value / total) * 100 : 0;
+              if (pct <= 0) return null;
+              return <span key={label} aria-hidden className="h-full flex-none first:rounded-l-full last:rounded-r-full" style={{ width: `${pct}%`, background: colors[i % colors.length] }} title={`${label}: ${value}`} />;
+            })}
+          </span>
+          <div className="flex flex-col gap-[8px]">
+            {topPathways.map(([label, value], i) => (
+              <StatRow key={label} label={label} value={value} color={colors[i % colors.length]} />
+            ))}
+          </div>
         </div>
       </div>
     </HoverBeam>

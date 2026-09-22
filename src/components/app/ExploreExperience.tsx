@@ -3,6 +3,7 @@
  
 
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
@@ -440,6 +441,10 @@ const REEL_PHOTO_FOCUS: Record<string, string> = {};
 // overindexed on shadows").
 const LEGIBLE_TEXT_SHADOW = "0 1px 3px rgba(0,0,0,0.55)";
 
+// Shared by the autoplay timer and the progress track's own fill animation
+// duration below, so the two can never drift apart.
+const AUTOPLAY_MS = 6000;
+
 function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   const [face, setFace] = useState<"Summary" | "Details">("Summary");
   // Tracks a genuine manual flip (tap, swipe, or chevron), separate from an
@@ -466,43 +471,31 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   // or looping), and only while the card is the one actually on screen.
   useEffect(() => {
     if (!active || face !== "Summary") return;
-    const t = setTimeout(() => setFace("Details"), 6000);
+    const t = setTimeout(() => setFace("Details"), AUTOPLAY_MS);
     return () => clearTimeout(t);
   }, [active, face]);
+  // The progress track's fill animation (below) is keyed on `${face}-
+  // ${active}` rather than a separately-tracked counter -- every entry
+  // into a face's own timer above corresponds 1:1 to either `face` or
+  // `active` changing value (leaving and re-entering a face always passes
+  // through `active` going false first), so the key remounts the fill span
+  // exactly when the real timer (re)starts, with no extra state needed.
+  // Direct instruction: "they can fill up along with the seconds... track
+  // progress according to how long they are visible."
 
-  // Real swipe, not just tap -- direct instruction, 23 Sept 2026. Lives on
-  // the same panel the tap-to-flip button already covers, so "swipe or tap
-  // anywhere" is genuinely anywhere on the text, not just the small chevron
-  // row. `touchAction: pan-y` on the element lets the reel's own vertical
-  // swipe-between-cards keep working underneath this -- only a drag whose
-  // horizontal movement dominates counts as a face-swipe.
-  const dragStart = useRef<{ x: number; y: number } | null>(null);
-  const dragged = useRef(false);
-  const onPanelPointerDown = useCallback((e: React.PointerEvent) => {
-    dragStart.current = { x: e.clientX, y: e.clientY };
-    dragged.current = false;
-  }, []);
-  const onPanelPointerMove = useCallback((e: React.PointerEvent) => {
-    const start = dragStart.current;
-    if (!start) return;
-    const dx = e.clientX - start.x;
-    const dy = e.clientY - start.y;
-    if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) dragged.current = true;
-  }, []);
-  const onPanelPointerUp = useCallback((e: React.PointerEvent) => {
-    const start = dragStart.current;
-    dragStart.current = null;
-    if (!start || !dragged.current) return;
-    setHasInteracted(true);
-    setFace(e.clientX - start.x < 0 ? "Details" : "Summary");
-  }, []);
+  // Real swipe that follows the finger, not just a gesture that resolves
+  // to an instant switch at the end -- direct instructions, 23 Sept 2026:
+  // first that swipe simply did nothing on a touch device ("only the tiny
+  // chevron or auto rotate" worked -- a hand-rolled pointermove/pointerup
+  // threshold detector, since removed, could lose the gesture mid-drag to
+  // native scrolling), then that a working swipe still wasn't enough: "the
+  // slide should move with my finger, not just switch... when i swipe."
+  // Framer Motion's own `drag="x"` on the carousel below replaces all of
+  // that hand-rolled detection -- it's the one thing actually built to
+  // track a live pointer AND hand back a real per-frame offset, which is
+  // what makes the panel genuinely follow the finger instead of just
+  // firing once past a threshold.
   const flipFace = useCallback(() => {
-    if (dragged.current) {
-      // a real drag already set the face on pointer-up -- the click that
-      // follows it shouldn't also toggle it back
-      dragged.current = false;
-      return;
-    }
     setHasInteracted(true);
     setFace((current) => (current === "Summary" ? "Details" : "Summary"));
   }, []);
@@ -511,6 +504,23 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
     setHasInteracted(true);
     setFace(next);
   }, []);
+  // Committing past this offset (px) counts as a real swipe; anything
+  // smaller springs back to whichever face was already showing (dragElastic
+  // below is what gives that spring-back its resistance while still
+  // dragging).
+  const SWIPE_COMMIT_PX = 50;
+  const onCarouselDragEnd = useCallback((_: unknown, info: { offset: { x: number } }) => {
+    if (info.offset.x < -SWIPE_COMMIT_PX && face === "Summary") {
+      setHasInteracted(true);
+      setFace("Details");
+    } else if (info.offset.x > SWIPE_COMMIT_PX && face === "Details") {
+      setHasInteracted(true);
+      setFace("Summary");
+    }
+    // else: real drag, but short of the commit distance -- the `animate`
+    // prop below re-asserts the current face's resting position, which
+    // Framer springs back to on its own.
+  }, [face]);
 
   return (
     <article
@@ -583,23 +593,8 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                can't contain another `<button>` (direct instruction, 23 Sept
                2026: real swipe AND click-able chevrons, not just tap). */}
             <div
-              role="button"
-              tabIndex={0}
-              aria-label={face === "Summary" ? "Show more info" : "Show summary"}
-              onClick={flipFace}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipFace(); } }}
-              onPointerDown={onPanelPointerDown}
-              onPointerMove={onPanelPointerMove}
-              onPointerUp={onPanelPointerUp}
-              // Plain, not dm-tap -- dm-tap's hover lift + drop shadow
-              // (translateY + box-shadow) is meant for a discrete card or
-              // button, not a full text panel sitting over a photo (direct
-              // correction, 23 Sept 2026: "should not hover/lift and drop
-              // shadow... just a layer there, no other hover effects").
-              // Kept the focus-visible ring by hand so keyboard users still
-              // get one.
-              className="flex w-full cursor-pointer flex-col gap-[var(--space-2)] text-left focus-visible:outline-2 focus-visible:outline-offset-2"
-              style={{ textShadow: LEGIBLE_TEXT_SHADOW, touchAction: "pan-y", outlineColor: "var(--accent-subtle)" }}
+              className="flex w-full flex-col gap-[var(--space-2)] text-left"
+              style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
             >
               <div className="face-swap flex w-full flex-col gap-[var(--space-2)] md:w-[326px]">
                 {/* Swipe/autoplay row: a short, fixed-width progress track
@@ -609,41 +604,53 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                    Like / Not for me / Save, which live in their own row
                    above this whole panel, untouched (direct instruction, 23
                    Sept 2026: keep the action buttons exactly where they are;
-                   chevrons must sit "farthest away" from them). Replaces the
-                   old two-dot pair with the same information plus motion:
-                   the fill animates while on Summary (see the `active`
-                   effect above), so it visibly counts down to the
-                   auto-advance instead of just marking a static position.
-                   The chevrons are their own real buttons (stopPropagation
-                   so a click doesn't also bubble into the flip above) --
-                   mostly a desktop/mouse affordance; swipe and tap are the
-                   primary gestures on touch. */}
-                <div className="relative flex items-center gap-[7px]">
+                   chevrons must sit "farthest away" from them). Each
+                   segment's own fill animates in real time over
+                   AUTOPLAY_MS while ITS face is the active one -- not a
+                   flat full/empty split -- so it visibly counts down to the
+                   auto-advance instead of just marking a static position
+                   (direct instruction: "they can fill up along with the
+                   seconds... track progress according to how long they are
+                   visible"). Chevrons sized up below `lg:` (32px, not 16px)
+                   so they're an actual tappable target on a tablet, not
+                   just a decorative arrow (direct instruction: "the
+                   chevrons can maybe be bigger on tablet too so i can tap
+                   them") -- `lg:` keeps the tight desktop size, a mouse
+                   doesn't need the extra hit area. */}
+                <div className="relative flex items-center gap-[9px]">
                   <button
                     type="button"
                     aria-label="Previous: summary"
                     onClick={jumpTo("Summary")}
-                    className="dm-quiet flex size-4 flex-none cursor-pointer items-center justify-center rounded-full"
+                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:size-4"
                     style={{ color: face === "Summary" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
                   >
-                    <ChevronLeft className="h-3 w-3" aria-hidden />
+                    <ChevronLeft className="h-4 w-4 lg:h-3 lg:w-3" aria-hidden />
                   </button>
                   <span aria-hidden className="flex w-[34px] gap-[3px]">
                     <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
-                      <span className="block h-full w-full rounded-full bg-white" />
+                      {face === "Summary" ? (
+                        <span key={`s-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
+                      ) : (
+                        <span className="block h-full w-full rounded-full bg-white" />
+                      )}
                     </span>
                     <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
-                      <span className="block h-full rounded-full bg-white transition-[width] duration-300" style={{ width: face === "Details" ? "100%" : "0%" }} />
+                      {face === "Details" ? (
+                        <span key={`d-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
+                      ) : (
+                        <span className="block h-full rounded-full bg-white" style={{ width: "0%" }} />
+                      )}
                     </span>
                   </span>
                   <button
                     type="button"
                     aria-label="Next: more info"
                     onClick={jumpTo("Details")}
-                    className="dm-quiet flex size-4 flex-none cursor-pointer items-center justify-center rounded-full"
+                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:size-4"
                     style={{ color: face === "Details" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
                   >
-                    <ChevronRight className="h-3 w-3" aria-hidden />
+                    <ChevronRight className="h-4 w-4 lg:h-3 lg:w-3" aria-hidden />
                   </button>
                 </div>
                 {/* Heading > subheading > body BY SIZE, strictly top-down --
@@ -673,7 +680,13 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                    just brighter than Major/Main Skills below it rather
                    than a new hue on the card: "maybe it can [be] white but
                    just slightly brighter than what major and main skills
-                   are." 0.88 vs their 0.62. */}
+                   are." 0.88 vs their 0.62. Shimmer/spark always on here,
+                   NOT the one-time discovery-nudge gate the rest of the
+                   app uses this pattern for -- direct instruction, 23 Sept
+                   2026: "should always be playing... dont make it
+                   disappear after the first thing." A permanent shine on
+                   the one evaluative label, not a "learn this feature"
+                   teaching moment like the swipe hint below is. */}
                 <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.88)" }}>
                   {/* textShadow: none -- dm-text-nudge clips its background
                      to the glyph shapes and makes the actual text fill
@@ -685,13 +698,11 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                      sparkle shimmer... also add[s] a dark overlay on the
                      text"). The sweep gradient already carries its own
                      contrast; it doesn't need the shadow too. */}
-                  <span className={`relative ${nudge ? "dm-text-nudge" : ""}`} style={nudge ? { textShadow: "none" } : undefined}>
+                  <span className="relative dm-text-nudge" style={{ textShadow: "none" }}>
                     {career.matchLabel}
-                    {nudge && (
-                      <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
-                        <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
-                      </svg>
-                    )}
+                    <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                      <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+                    </svg>
                   </span>
                 </span>
                 {/* Both faces stay mounted, stacked in the same grid cell, so
@@ -699,58 +710,94 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                    never shrinks when Details' shorter content shows, which
                    used to expose a hard blur/photo seam right above the text
                    and leave part of it sitting on barely-blurred photo. */}
-                <div className="grid">
-                  <div
-                    aria-hidden={face !== "Summary"}
-                    className={`col-start-1 row-start-1 flex flex-col gap-[var(--space-2)] transition-opacity duration-150 ${face === "Summary" ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                {/* Real two-panel carousel, not a cross-fade -- Summary and
+                   Details sit side by side in a row twice the container's
+                   width, each panel exactly half of THAT row, so `x:"-50%"`
+                   moves by exactly one panel. `drag="x"` makes the offset
+                   genuinely track the pointer every frame while dragging
+                   (direct instruction: "the slide should move with my
+                   finger not just switch... when i swipe"); releasing
+                   short of SWIPE_COMMIT_PX springs back to the current
+                   face via the `animate` prop, past it commits via
+                   onDragEnd. A plain tap (negligible drag distance) still
+                   fires a normal click, which bubbles to flipFace below --
+                   Framer doesn't suppress the click for a drag that never
+                   crossed its own activation distance. `overflow-hidden`
+                   wrapper clips the off-screen panel; row height still
+                   auto-sizes to the taller panel (flex, same principle the
+                   old grid-stacking relied on), so "keep the height
+                   constant" from the auto-advance work above still holds.
+                   dm-swipe-nudge (one-time, same discovery-nudge gate as
+                   the rest of this card) is the actual "you can swipe
+                   this" teaching moment -- a small wiggle, not a label,
+                   since the card's copy can't change for it (direct
+                   instruction: "add a swipe nudge... so its understood i
+                   can swipe left or right"). */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={face === "Summary" ? "Show more info" : "Show summary"}
+                  onClick={flipFace}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipFace(); } }}
+                  className="overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{ outlineColor: "var(--accent-subtle)" }}
+                >
+                  <motion.div
+                    className={`flex ${nudge ? "dm-swipe-nudge" : ""}`}
+                    style={{ width: "200%", touchAction: "pan-y", cursor: "grab" }}
+                    drag="x"
+                    dragElastic={0.22}
+                    dragMomentum={false}
+                    onDragEnd={onCarouselDragEnd}
+                    animate={{ x: face === "Summary" ? "0%" : "-50%" }}
+                    transition={{ type: "spring", stiffness: 380, damping: 38 }}
                   >
-                    <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
-                      {career.title}
-                    </h2>
-                    {/* Custom-designed edge case, 22 Sept 2026: this sits in a
-                       fixed-height, overflow-hidden card (`h-full` +
-                       `overflow-hidden` on EnvCard's own <article>) with no
-                       scroll -- unclamped, a longer description can grow the
-                       stacked content past the card's bounds and clip
-                       something else in it. line-clamp caps it defensively,
-                       matching this app's own truncation convention. */}
-                    <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
-                      {career.description}
-                    </p>
-                    {/* Eyebrow (dim, small, uppercase) over the actual value
-                       (the brighter, body-sized line) -- title > subtitle >
-                       body by size AND brightness, not two same-weight
-                       labels sitting side by side (direct instruction, 23
-                       Sept 2026: "everything read like one hierarchy...
-                       use brightness too"). */}
-                    <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
-                      <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Median salary</span>
-                      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.salary}</span>
+                    <div aria-hidden={face !== "Summary"} className="flex flex-none flex-col gap-[var(--space-2)]" style={{ width: "50%" }}>
+                      <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
+                        {career.title}
+                      </h2>
+                      {/* Custom-designed edge case, 22 Sept 2026: this sits in a
+                         fixed-height, overflow-hidden card (`h-full` +
+                         `overflow-hidden` on EnvCard's own <article>) with no
+                         scroll -- unclamped, a longer description can grow the
+                         stacked content past the card's bounds and clip
+                         something else in it. line-clamp caps it defensively,
+                         matching this app's own truncation convention. */}
+                      <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
+                        {career.description}
+                      </p>
+                      {/* Eyebrow (dim, small, uppercase) over the actual value
+                         (the brighter, body-sized line) -- title > subtitle >
+                         body by size AND brightness, not two same-weight
+                         labels sitting side by side (direct instruction, 23
+                         Sept 2026: "everything read like one hierarchy...
+                         use brightness too"). */}
+                      <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
+                        <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Median salary</span>
+                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.salary}</span>
+                      </div>
                     </div>
-                  </div>
-                  {/* justify-center: Details has less content than Summary
-                     (no title/description of its own), but the grid cell is
-                     always sized to Summary, the taller sibling -- top-
-                     aligned by default, that left a dead gap below Main
-                     Skills before the CTA row (direct instruction, 23 Sept
-                     2026: "keep the height constant... align the text in
-                     slide 2 so it doesn't look like it has awkward empty
-                     space"). Centering distributes that same gap evenly
-                     above and below instead of dumping it all at the
-                     bottom. */}
-                  <div
-                    aria-hidden={face !== "Details"}
-                    className={`col-start-1 row-start-1 flex flex-col justify-center gap-[var(--space-3)] transition-opacity duration-150 ${face === "Details" ? "opacity-100" : "pointer-events-none opacity-0"}`}
-                  >
-                    <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
-                      <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Major</span>
-                      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.major}</span>
+                    {/* justify-center: Details has less content than Summary
+                       (no title/description of its own), but the row is
+                       always sized to Summary, the taller sibling -- top-
+                       aligned by default, that left a dead gap below Main
+                       Skills before the CTA row (direct instruction, 23 Sept
+                       2026: "keep the height constant... align the text in
+                       slide 2 so it doesn't look like it has awkward empty
+                       space"). Centering distributes that same gap evenly
+                       above and below instead of dumping it all at the
+                       bottom. */}
+                    <div aria-hidden={face !== "Details"} className="flex flex-none flex-col justify-center gap-[var(--space-3)]" style={{ width: "50%" }}>
+                      <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
+                        <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Major</span>
+                        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.major}</span>
+                      </div>
+                      <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
+                        <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Main skills</span>
+                        <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.mainSkills}</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
-                      <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Main skills</span>
-                      <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.mainSkills}</span>
-                    </div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </div>

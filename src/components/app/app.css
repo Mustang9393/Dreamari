@@ -589,3 +589,31 @@ html.light .dm-report {
   24% { opacity: .7; transform: scale(.75) rotate(45deg); }
 }
 @media (prefers-reduced-motion: reduce) { .dm-nudge-spark { animation: none; } }
+
+/* For You reel card (ExploreExperience.tsx EnvCard): the Summary/Details
+   progress track fills over the SAME duration as the real autoplay timer
+   (`AUTOPLAY_MS`, currently 6000ms) instead of snapping to full the instant
+   a face shows -- direct instruction, 23 Sept 2026: "they can fill up
+   along with the seconds... track progress according to how long they are
+   visible." Width, not transform/scaleX, since the bar's own rounded-full
+   overflow-hidden track already clips it correctly either way and width is
+   simpler to reason about at a glance. */
+@keyframes dm-progress-fill { from { width: 0%; } to { width: 100%; } }
+.dm-progress-fill { animation: dm-progress-fill linear forwards; }
+@media (prefers-reduced-motion: reduce) { .dm-progress-fill { animation: none; width: 100%; } }
+
+/* One-time "you can swipe this" tease on the reel card's text panel -- a
+   small horizontal wiggle, not a label, since the card's copy isn't
+   allowed to change for this (direct instruction, 23 Sept 2026: "add a
+   swipe nudge for obvious help on mobile and tablet... so its understood
+   i can swipe left or right"). Shares the same discovery-nudge gate as the
+   card's other first-view cues (dm-text-nudge/dm-nudge-spark), so it only
+   plays once, before the first real interaction. */
+@keyframes dm-swipe-nudge {
+  0%, 100% { transform: translateX(0); }
+  28% { transform: translateX(-18px); }
+  56% { transform: translateX(12px); }
+  78% { transform: translateX(-5px); }
+}
+.dm-swipe-nudge { animation: dm-swipe-nudge 1.3s cubic-bezier(.4,0,.2,1) 0.9s 1 both; }
+@media (prefers-reduced-motion: reduce) { .dm-swipe-nudge { animation: none; } }
