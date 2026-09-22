@@ -38,6 +38,29 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-22 Glossary Games shell: width and height now scale together on tablet/desktop, anchored to a MacBook Air "home base"
+
+Direct ask: the central Glossary Games shell (`GlossaryGameExperience.tsx`) was 1:1/desktop-sizing-never-done -- `<main>` (and the header progress strip) were hard-capped at `max-w-[640px]` while every `dvh`-based `clamp()` inside it (TermFlipCard, SpeechBubble, UnlockScreen, QuestionScreen's prompt) scaled purely off viewport HEIGHT. The two axes were never tied together, so a tall+wide screen kept growing text/icons toward their height-driven max while width stayed pinned at 640px (and vice versa on a narrow+tall screen) -- the same class of bug `globals.css`'s `--match-card-size` comment already documents for Build's MatchCard ("nothing tied the two dimensions together").
+
+Fix: one new CSS custom property, `--glossary-shell-scale`, defined once on the component's own outer wrapper (same place `--glossary-accent` already lives), multiplied into every previously-hardcoded width (`max-w-[640px]` x2, the question/answer card's `620px`, and every intro/unlock/complete screen's own content-wrapper width) and into all 12 `dvh`-clamp text/icon sizes via `calc(Npx*var(--glossary-shell-scale))` -- one shared driving value instead of width and height moving independently. `FeedbackPanel` and `StreakModal` (fixed overlay modals, not part of the shared `<main>` shell) were deliberately left untouched.
+
+**Went through two rounds of direct correction on the formula itself, worth recording so nobody re-derives this from scratch:**
+1. First pass anchored growth at 640x800 (`clamp(1, min(vw/640, dvh/800), 1.4)`) -- floored at 1 for phones, grew only slightly past 1x elsewhere. Rejected: "keep the macbook air screen (ours as a benchmark) and scale up from there proportionately and down proportionately... I think it's still too small on wider screens."
+2. Second pass re-anchored to 1440x900 (a 13" MacBook Air's own CSS viewport) as the true "1x, not scaled" home base, using `max(widthRatio, heightRatio)` so a window that's only taller than the anchor (not wider) still grows -- `min()` would have frozen that case at a flat 1.0 forever. Still rejected with a screenshot: a pure ratio only grows as fast as the viewport does (39% wider viewport -> only 39% bigger content), which reads as barely different on a genuinely large monitor -- "theres so much space that the modals can use."
+3. **Landed formula**: `clamp(1, min(calc(1 + max(calc(max(0px, (100vw - 1440px)) / 750px), calc(max(0px, (100dvh - 900px)) / 750px))), calc(100vw / 640px)), 2.2)` -- additive beyond the anchor (every 750px past 1440 width or 900 height adds a full extra 1x of scale, whichever axis is ahead), which grows noticeably faster than the viewport itself. A separate `100vw / 640px` term is `min()`'d in purely as an overflow guard (640 being the largest base width this scale multiplies, so if `<main>` never exceeds the viewport, nothing smaller does either) -- it only binds in a genuinely narrow-but-very-tall edge case, never at any real test size. Floors at exactly 1 for phone/tablet-below-the-anchor, so mobile is provably byte-identical (checked live: `<main>`'s computed `max-width` and the SpeechBubble's computed `font-size` matched the pre-change formula's output to the pixel, not just visually).
+
+Verified live (`/play/glossary/investment-banking`, `npx tsc --noEmit -p .` and `npx eslint` clean throughout):
+- 375x812: `--glossary-shell-scale` floors to exactly 1; `<main>` max-width = 640px and SpeechBubble font-size = 22.736px, both matching the pre-change formula exactly.
+- 768x1024: scale ~1.165, `<main>` max-width ~746px, mild growth.
+- 1440x900 (the anchor): scale = 1 exactly, `<main>` max-width = 640px -- genuine unscaled home base.
+- 1920x1080: scale ~1.64, `<main>` max-width ~1050px, no horizontal overflow.
+- 1440x1600: scale ~1.93, `<main>` max-width ~1237px (comfortably under the 1440px viewport), no horizontal overflow -- confirms the tall-but-not-wider case still grows.
+- 2000x1100 (an extra check after the "still too small" screenshot, specifically re-testing IntroScreen/DreamyIntroScreen/LessonIntroScreen, not just the question card): IntroScreen's own card max-width = 838.4px, up from a base of 480px.
+
+Cross-browser guardrails self-check: this file doesn't touch scrollbars, native OS controls, `getBoundingClientRect()` positioning, or `title=` tooltips, so only the `tsc`/`eslint` item applied (clean).
+
+Not committed or pushed per instruction -- on branch `glossary-shell-scale` in its own worktree, ready for review.
+
 ### 2026-09-22 Match's pre-grid splash rewritten into a clear sequence
 
 Direct instruction: rewrite the splash shown before `/match-grid` (Build's

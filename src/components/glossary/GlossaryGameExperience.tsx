@@ -223,7 +223,7 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
          up slightly per "scale up the question+answer content... but have
          it be responsive... proportionately" (clamp, same technique). */}
       <p
-        className="crt-cursor-after text-[clamp(19px,2.8dvh,23px)] leading-[1.35] font-extrabold"
+        className="crt-cursor-after text-[clamp(calc(19px*var(--glossary-shell-scale)),calc(2.8*var(--glossary-shell-scale)*1dvh),calc(23px*var(--glossary-shell-scale)))] leading-[1.35] font-extrabold"
         style={{ color: "var(--speech-bubble-fg, #f4f2fa)", fontFamily: "var(--font-display)" }}
       >
         {children}
@@ -313,18 +313,8 @@ function DemoStepControls({ onReload, onStepBack, stepBackDisabled }: { onReload
 
 function TopBar({
   onBack,
-  bgVersion,
-  onBgVersion,
-  onReload,
-  onStepBack,
-  stepBackDisabled,
 }: {
   onBack: () => void;
-  bgVersion: PlayBgVersion;
-  onBgVersion: (v: PlayBgVersion) => void;
-  onReload: () => void;
-  onStepBack: () => void;
-  stepBackDisabled: boolean;
 }) {
   return (
     <header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
@@ -334,15 +324,46 @@ function TopBar({
       {/* Mute/music stay (this game's own controls); everything else is the
          app's one hamburger, same as every screen. The background-version
          chip and the demo step controls are demo-only (never part of the
-         product UI, same spirit as Connect's AT&T chip). */}
+         product UI, same spirit as Connect's AT&T chip) -- moved off this
+         bar entirely into DemoControlsDock (bottom-center, out of the way
+         of real UI), per direct feedback 22 Sept 2026: "it gets confused
+         with actual UI" sitting up here next to Music/Mute/the hamburger. */}
       <div className="flex items-center gap-[var(--space-2)]">
-        <DemoStepControls onReload={onReload} onStepBack={onStepBack} stepBackDisabled={stepBackDisabled} />
-        <PlayVersionChip version={bgVersion} onChange={onBgVersion} />
         <MusicToggle />
         <MuteToggle />
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </div>
     </header>
+  );
+}
+
+// DEMO-ONLY: the background-version chip and the reload/step-back controls,
+// docked bottom-center instead of living in the top bar next to the real
+// Music/Mute/hamburger controls -- direct feedback, 22 Sept 2026: up there
+// they read as part of the actual product UI and got confused for it.
+// Centered and out of the way of the game's own content, same "demo
+// scaffolding, clearly separate from the product" spirit as before, just
+// relocated.
+function DemoControlsDock({
+  bgVersion,
+  onBgVersion,
+  onReload,
+  onStepBack,
+  stepBackDisabled,
+}: {
+  bgVersion: PlayBgVersion;
+  onBgVersion: (v: PlayBgVersion) => void;
+  onReload: () => void;
+  onStepBack: () => void;
+  stepBackDisabled: boolean;
+}) {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-5">
+      <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-2)]">
+        <DemoStepControls onReload={onReload} onStepBack={onStepBack} stepBackDisabled={stepBackDisabled} />
+        <PlayVersionChip version={bgVersion} onChange={onBgVersion} />
+      </div>
+    </div>
   );
 }
 
@@ -354,7 +375,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
       <DreamyFace pose="idea" size={64} />
-      <div className="flex w-full max-w-[480px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex w-full max-w-[calc(480px*var(--glossary-shell-scale))] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <h1 className="text-[26px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           Meet {lesson.exampleCompany}
         </h1>
@@ -365,7 +386,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
       <button
         type="button"
         onClick={onNext}
-        className="dm-solid flex w-full max-w-[480px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+        className="dm-solid flex w-full max-w-[calc(480px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Next <ChevronRight className="h-4 w-4" aria-hidden />
@@ -387,13 +408,13 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
          "make room" for him was shifting the bubble (and its text)
          off-center on mobile, where this wrapper is close to the full
          viewport width and the shift reads as a real layout bug. */}
-      <div className="relative w-full max-w-[520px] pt-8">
+      <div className="relative w-full max-w-[calc(520px*var(--glossary-shell-scale))] pt-8">
         <span className="absolute -top-8 left-5 z-10">
           <DreamyFace pose="happy" size={64} />
         </span>
         <SpeechBubble>Hi, I&apos;m Dreamy! Let&apos;s get started.</SpeechBubble>
       </div>
-      <div className="flex w-full max-w-[520px] flex-col gap-[var(--space-3)]">
+      <div className="flex w-full max-w-[calc(520px*var(--glossary-shell-scale))] flex-col gap-[var(--space-3)]">
         <button
           type="button"
           onClick={onStart}
@@ -420,7 +441,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
         Learn the Language of Finance
       </h1>
 
-      <div className="flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="flex w-full max-w-[calc(440px*var(--glossary-shell-scale))] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))" }}>
           <span className="text-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--glossary-accent)" }}>
             ${lesson.companyValue.toLocaleString()}
@@ -447,7 +468,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
       <button
         type="button"
         onClick={onStart}
-        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+        className="dm-solid flex w-full max-w-[calc(440px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Start Lesson {lesson.lessonNumber} <ChevronRight className="h-4 w-4" aria-hidden />
@@ -492,9 +513,9 @@ function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: Glossary
   // same as the original SketchFace, now sized to share the face with the
   // definition/example text instead of owning the whole card.
   const glyph = (
-    <span className="flex flex-col items-center gap-[clamp(4px,1dvh,8px)] text-center">
+    <span className="flex flex-col items-center gap-[clamp(calc(4px*var(--glossary-shell-scale)),calc(1*var(--glossary-shell-scale)*1dvh),calc(8px*var(--glossary-shell-scale)))] text-center">
       <span className="relative -rotate-2" style={{ filter: "url(#glossary-sketch)", color: "color-mix(in srgb, var(--glossary-accent) 88%, var(--foreground) 12%)" }}>
-        <TermIcon icon={term.icon} className="h-[clamp(44px,8.5dvh,72px)] w-[clamp(44px,8.5dvh,72px)]" />
+        <TermIcon icon={term.icon} className="h-[clamp(calc(44px*var(--glossary-shell-scale)),calc(8.5*var(--glossary-shell-scale)*1dvh),calc(72px*var(--glossary-shell-scale)))] w-[clamp(calc(44px*var(--glossary-shell-scale)),calc(8.5*var(--glossary-shell-scale)*1dvh),calc(72px*var(--glossary-shell-scale)))]" />
         <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[20px] h-[calc(100%+40px)] w-[calc(100%+40px)]" style={{ color: "var(--glossary-accent)" }}>
           {[30, 90, 150, 210, 270, 330].map((deg) => (
             <line key={deg} x1="60" y1="4" x2="60" y2="14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" transform={`rotate(${deg} 60 60)`} />
@@ -502,7 +523,7 @@ function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: Glossary
         </svg>
       </span>
       <span className="flex flex-col items-center gap-[2px]">
-        <span className="block text-[clamp(20px,4.4dvh,28px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#glossary-sketch)" }}>
+        <span className="block text-[clamp(calc(20px*var(--glossary-shell-scale)),calc(4.4*var(--glossary-shell-scale)*1dvh),calc(28px*var(--glossary-shell-scale)))] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#glossary-sketch)" }}>
           {term.term}
         </span>
         <svg viewBox="0 0 120 8" aria-hidden className="h-[7px] w-[100px]" style={{ color: "var(--glossary-accent)", filter: "url(#glossary-sketch)" }}>
@@ -517,11 +538,11 @@ function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: Glossary
       style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)", backfaceVisibility: "hidden", transform: side === "back" ? "rotateY(180deg)" : undefined }}
     >
       {rings}
-      <span className="flex min-w-0 flex-1 flex-col items-center justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
+      <span className="flex min-w-0 flex-1 flex-col items-center justify-center gap-[clamp(calc(6px*var(--glossary-shell-scale)),calc(1.8*var(--glossary-shell-scale)*1dvh),calc(16px*var(--glossary-shell-scale)))] p-[clamp(calc(14px*var(--glossary-shell-scale)),calc(3.2*var(--glossary-shell-scale)*1dvh),calc(24px*var(--glossary-shell-scale)))]">
         {glyph}
         {side === "front" ? (
           <>
-            <span className="block w-full text-center text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
+            <span className="block w-full text-center text-[clamp(calc(14px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*1dvh),calc(15px*var(--glossary-shell-scale)))] leading-[1.4]" style={{ color: "var(--foreground)" }}>
               {term.definition}
             </span>
             {/* Optional, small, never required -- pressing Unlock below
@@ -541,7 +562,7 @@ function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: Glossary
               <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--glossary-accent)" }}>
                 {lesson.exampleCompany} Example
               </span>
-              <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
+              <span className="block text-[clamp(calc(14px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*1dvh),calc(15px*var(--glossary-shell-scale)))] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
                 {term.example}
               </span>
             </span>
@@ -595,7 +616,7 @@ function UnlockScreen({
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[clamp(10px,3.5dvh,28px)] px-5 py-[clamp(8px,3dvh,32px)] text-center">
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[clamp(calc(10px*var(--glossary-shell-scale)),calc(3.5*var(--glossary-shell-scale)*1dvh),calc(28px*var(--glossary-shell-scale)))] px-5 py-[clamp(calc(8px*var(--glossary-shell-scale)),calc(3*var(--glossary-shell-scale)*1dvh),calc(32px*var(--glossary-shell-scale)))] text-center">
       {/* No Dreamy on this screen -- it repeats 5 times as the student cycles
          through terms, and is the tightest screen for vertical space (the
          binder card + 5-term progress row + button already fill a short
@@ -606,7 +627,7 @@ function UnlockScreen({
          no scroll even on an old, small phone) and grows continuously up to
          its max on anything roomier, with iPhone 15 Safari's usable height
          landing comfortably inside that range rather than at either edge. */}
-      <h2 className="text-[clamp(18px,3.2dvh,26px)] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <h2 className="text-[clamp(calc(18px*var(--glossary-shell-scale)),calc(3.2*var(--glossary-shell-scale)*1dvh),calc(26px*var(--glossary-shell-scale)))] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {lesson.title}
       </h2>
 
@@ -631,7 +652,7 @@ function UnlockScreen({
          optional, and Unlock below works identically whichever face is
          showing. Term-to-term still page-turns via a quick slide; the
          flip is a separate, second gesture within one term. */}
-      <div className="relative w-full max-w-[440px]">
+      <div className="relative w-full max-w-[calc(440px*var(--glossary-shell-scale))]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={term.id}
@@ -657,7 +678,7 @@ function UnlockScreen({
         }}
         whileTap={reduced ? undefined : { scale: 0.97 }}
         transition={{ duration: 0.12 }}
-        className="dm-solid flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+        className="dm-solid flex w-full max-w-[calc(440px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Unlock {term.term} <TermIcon icon={term.icon} className="h-4 w-4" />
@@ -720,7 +741,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
             </span>
           ))}
         </div>
-        <div className="flex w-full max-w-[420px] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <div className="flex w-full max-w-[calc(420px*var(--glossary-shell-scale))] flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
           <Trophy className="h-8 w-8" style={{ color: "var(--glossary-accent)" }} aria-hidden />
           <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             All {lesson.terms.length} terms unlocked!
@@ -732,7 +753,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
         <button
           type="button"
           onClick={onStartPractice}
-          className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+          className="dm-solid flex w-full max-w-[calc(420px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
           style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
         >
           Start Practice <ChevronRight className="h-4 w-4" aria-hidden />
@@ -1275,7 +1296,7 @@ function QuestionScreen({
     // (direct report with a screenshot, 21 Sept 2026: "the card containing
     // the question+ the answers has no padding so they all sit with their
     // borders on that big cards edge overlapping").
-    <div className="relative mx-auto flex w-full max-w-[620px] flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border p-[var(--space-6)] sm:p-[var(--space-8)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}>
+    <div className="relative mx-auto flex w-full max-w-[calc(620px*var(--glossary-shell-scale))] flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border p-[var(--space-6)] sm:p-[var(--space-8)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}>
       {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
         // No side padding here -- it was only ever there to "make room" for
         // Dreamy, but since he's absolutely positioned he doesn't need it,
@@ -1292,7 +1313,7 @@ function QuestionScreen({
         </div>
       )}
       {(question.kind === "matchUp" || question.kind === "sortBuckets") && (
-        <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+        <p className="text-[clamp(calc(18px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*1dvh),calc(21px*var(--glossary-shell-scale)))] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
           {question.prompt}
         </p>
       )}
@@ -1413,14 +1434,14 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
         <h2 className="flex items-center justify-center gap-[8px] text-[26px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
           <Zap className="h-6 w-6" style={{ color: "var(--hero-accent-purple)" }} fill="currentColor" aria-hidden /> Power Play
         </h2>
-        <p className="mx-auto max-w-[380px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
+        <p className="mx-auto max-w-[calc(380px*var(--glossary-shell-scale))] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
           Use everything you just learned to fill in the blanks.
         </p>
       </div>
       <button
         type="button"
         onClick={onStart}
-        className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+        className="dm-solid flex w-full max-w-[calc(420px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ background: "var(--hero-accent-purple)", color: "#fff", fontFamily: "var(--font-display)" }}
       >
         <Zap className="h-4 w-4" fill="currentColor" aria-hidden /> Unlock &amp; Test My Knowledge <ChevronRight className="h-4 w-4" aria-hidden />
@@ -1540,7 +1561,7 @@ function MasteryLoadingScreen({ fact }: { fact: string | null }) {
         Checking Your Mastery
       </p>
       {fact && (
-        <p className="mt-[var(--space-4)] max-w-[420px] rounded-[var(--radius-md)] border p-[var(--space-4)] text-[13px] leading-[18px] italic" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+        <p className="mt-[var(--space-4)] max-w-[calc(420px*var(--glossary-shell-scale))] rounded-[var(--radius-md)] border p-[var(--space-4)] text-[13px] leading-[18px] italic" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
           {fact}
         </p>
       )}
@@ -1609,7 +1630,7 @@ function CompleteScreen({
           Lesson Complete!
         </h2>
 
-        <div className="flex w-full max-w-[380px] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))", borderColor: "var(--glossary-accent)" }}>
+        <div className="flex w-full max-w-[calc(380px*var(--glossary-shell-scale))] flex-col items-center gap-[2px] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 14%, var(--card))", borderColor: "var(--glossary-accent)" }}>
           <span className="flex items-center gap-[6px] text-[15px] font-bold" style={{ color: "var(--glossary-accent)" }}>
             <Sparkles className="h-4 w-4" aria-hidden /> Dream Score
           </span>
@@ -1618,7 +1639,7 @@ function CompleteScreen({
           </span>
         </div>
 
-        <div className="flex w-full max-w-[380px] flex-col gap-[var(--space-3)]">
+        <div className="flex w-full max-w-[calc(380px*var(--glossary-shell-scale))] flex-col gap-[var(--space-3)]">
           <div className="flex items-center justify-between border-b pb-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
             <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>
               XP Earned
@@ -1640,7 +1661,7 @@ function CompleteScreen({
         <button
           type="button"
           onClick={onContinue}
-          className="dm-solid flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+          className="dm-solid flex w-full max-w-[calc(380px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
           style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
         >
           Continue <ChevronRight className="h-4 w-4" aria-hidden />
@@ -1818,6 +1839,81 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
       className={`marketing-v2 themeable relative flex min-h-dvh w-full flex-col ${bgVersion === "v2" ? "play-crt" : ""}`}
       style={{
         "--glossary-accent": accent,
+        // Root-cause fix for "the game shell doesn't grow proportionally on
+        // taller/wider screens" (22 Sept 2026): the shell's own max-width
+        // (<main>, the header progress strip) was a flat 640px cap, while
+        // every dvh-based clamp() inside it (TermFlipCard, SpeechBubble,
+        // UnlockScreen, QuestionScreen's prompt) scaled purely off viewport
+        // HEIGHT -- the two axes were never tied together, so a tall+wide
+        // screen kept growing text/icons toward their height-driven max
+        // while width stayed pinned, and a narrow+tall screen did the
+        // reverse. Same underlying bug globals.css's --match-card-size
+        // comment already documents for Build's MatchCard ("nothing tied
+        // the two dimensions together") -- same fix shape: one shared
+        // driving value, everything else a calc() of it, so width and
+        // height can no longer move independently.
+        //
+        // Re-anchored per direct follow-up feedback the same day: "keep the
+        // macbook air screen (ours as a benchmark) and scale up from there
+        // proportionately and down proportionately... I think it's still
+        // too small on wider screens" -- the first pass anchored growth at
+        // 640x800 (so it only ever grew slightly past 1x), when what was
+        // wanted is 1440x900 (a 13" MacBook Air's own CSS viewport -- this
+        // team's dev machines) as the TRUE "1x, not scaled at all" home
+        // base, with real growth above it, not just a marginal bump.
+        //
+        // A ratio-based re-anchor (scale = vw/1440) was tried next and
+        // rejected after a second round of direct feedback with a
+        // screenshot proving it still looked small on a genuinely wide
+        // monitor ("theres so much space that the modals can use"): a pure
+        // ratio only grows as fast as the viewport itself does (39% wider
+        // viewport -> only 39% bigger content), which reads as barely
+        // different once you're already looking at a big screen, even
+        // though the math is "proportionally correct." What's here instead
+        // is additive beyond the anchor -- for every 750px of viewport
+        // beyond 1440 (width) or 900 (height), add a full extra 1x of
+        // scale -- which grows noticeably faster than the viewport itself
+        // and matches "so much space... can use" -- e.g. 1920x1080 now
+        // lands at ~1.64x (was ~1.33x under the plain ratio version),
+        // 1440x1600 at ~1.93x (was flat 1.0x under a min()-coupled version,
+        // ~1.78x under the plain-ratio max() version).
+        // Each axis's growth is measured independently past ITS OWN anchor
+        // (max(0px, vw-1440px) / 750px, same for height against 900) --
+        // zero if that axis hasn't passed its anchor yet -- and the LARGER
+        // of the two drives the result, so a window that's only wider, only
+        // taller, or both, all grow; one axis sitting still (e.g.
+        // 1440x1600's width, exactly at the anchor) doesn't zero out the
+        // other axis's contribution the way a min()-coupled formula would
+        // have (that was tried and rejected first -- verified algebraically
+        // it froze 1440x1600 at a flat 1.0, contradicting "meaningfully
+        // larger, not marginal" for that exact case).
+        // The trade-off of driving growth from the LARGER axis alone is
+        // that a genuinely narrow-but-very-tall window (rare, but possible)
+        // could otherwise push the shell wider than its own viewport -- so
+        // a second, separate term (100vw / 640px, 640 being the largest of
+        // every base width this scale multiplies -- <main>'s own -- so if
+        // IT never exceeds the viewport, nothing smaller does either) is
+        // min()'d in purely as an overflow guard, not as part of the
+        // intended growth curve; it only ever binds in that narrow+tall
+        // edge case, never at any of this team's real test sizes (checked
+        // live: no horizontal scrollbar/overflow at any tested viewport,
+        // including 1440x1600).
+        // Floors at exactly 1 for phone AND tablet-below-the-anchor (both
+        // axes' growth terms are 0 there, clamped by the outer max(0px,...)
+        // before ever reaching the shared 1+... expression) -- so at scale
+        // 1 every `calc(Npx*var(--glossary-shell-scale))` below reduces
+        // algebraically back to the literal original Npx: mobile is
+        // provably byte-identical to before this whole change, not just
+        // visually close (checked live: computed font-size/max-width match
+        // the pre-change clamp() output to the pixel). Caps at 2.2 -- a
+        // deliberately generous backstop (per "don't be conservative") that
+        // only a hypothetical giant/ultrawide monitor would ever reach; it
+        // doesn't bind at any of this team's real test sizes, including a
+        // 2560x1440 desktop monitor (~2.2x, right at the cap) or the
+        // required 1440x1600 case (~1.93x, still under it).
+        // No @media steps -- continuous, not breakpoint jumps.
+        "--glossary-shell-scale":
+          "clamp(1, min(calc(1 + max(calc(max(0px, (100vw - 1440px)) / 750px), calc(max(0px, (100dvh - 900px)) / 750px))), calc(100vw / 640px)), 2.2)",
         // Play's own background, not AppBackdrop (direct feedback, 21 Sept
         // 2026 -- first pass reused AppBackdrop so the page and the
         // feedback popup weren't flat/boring on plain near-black; a later
@@ -1853,8 +1949,8 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         className="pointer-events-none fixed inset-0 z-0"
         style={{ background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 30%, transparent), transparent 65%)" }}
       />
-      <TopBar
-        onBack={() => router.back()}
+      <TopBar onBack={() => router.back()} />
+      <DemoControlsDock
         bgVersion={bgVersion}
         onBgVersion={pickBgVersion}
         onReload={resetGame}
@@ -1869,7 +1965,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         // career simulation HUD sizes" (21 Sept 2026): text sized to match
         // SimulationPlayer's own Hud (13px title line, 11px secondary
         // line, src/components/play/SimulationPlayer.tsx's `Hud`).
-        <div className="relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[6px] px-5 pt-[var(--space-2)] md:px-8">
+        <div className="relative z-10 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-col gap-[6px] px-5 pt-[var(--space-2)] md:px-8">
           <div className="flex items-center justify-between text-[13px] font-extrabold" style={{ color: "var(--muted-foreground)" }}>
             <span>{lesson.title}</span>
             <span>
@@ -1930,7 +2026,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
          feedback 21 Sept 2026: "the question block is still not centred in
          the screen... centred vertically and horizontally" -- supersedes
          an earlier decision to pin question screens high under the strip). */}
-      <main className="relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
+      <main className="relative z-0 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
 
         {screen === "intro" && <IntroScreen lesson={lesson} onNext={() => setScreen("dreamyIntro")} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => setScreen("lessonIntro")} />}
