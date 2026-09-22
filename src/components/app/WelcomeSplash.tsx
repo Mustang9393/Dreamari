@@ -16,6 +16,12 @@ type Scene = {
   wide?: boolean;
   tint: [string, string];
   title: string;
+  /** Forces the title onto one line at a smaller, all-caps size matching
+   *  the app's own compact heading style (e.g. the match grid page's own
+   *  "FIND YOUR TOP 3") instead of the default multi-line hero size --
+   *  for a title long enough to otherwise wrap and crowd the line(s)
+   *  below it out of room. */
+  compactTitle?: boolean;
   line?: ReactNode;
   /** plain lines, no icons (direct feedback, 11 Sept 2026: splashes were
    *  inconsistent, some with icons, some without) */
@@ -51,11 +57,22 @@ const SCENES: Record<SplashSurface, Scene> = {
   // the grid page's own heading ("Find Your Top 3", unchanged) says what to
   // do once the six cards are actually on screen, rather than this splash
   // trying to explain the whole system before the student has anything to
-  // look at yet.
+  // look at yet. This isn't decorative copy -- direct context, 22 Sept
+  // 2026: it stands in for a disclaimer the user used to have to give
+  // live in every demo ("these 6 aren't the only matches, Explore finds
+  // more"), so a presenter can just let a viewer read it in under 7
+  // seconds instead of a 45-second monologue. That's the reasoning behind
+  // giving it more room below (see compactTitle right below).
   matchGrid: {
     sprite: "/images/dreamy/v2/splash/dreamy-heart.webp",
     tint: ["100, 70, 255", "180, 40, 240"],
-    title: "You’ve Been Matched!",
+    title: "YOU’VE BEEN MATCHED!",
+    // One line, all-caps, matching the match grid page's own compact
+    // heading style ("FIND YOUR TOP 3") instead of this splash's default
+    // multi-line hero size -- direct feedback, 22 Sept 2026: the title
+    // wrapping to two huge lines crowded the explanatory copy below it
+    // (the actual disclaimer, see above) out of room to breathe.
+    compactTitle: true,
     // Two sentences, forced onto their own lines (direct feedback, 22 Sept
     // 2026: as one wrapped paragraph the second sentence broke badly,
     // stranding "like the ones you save" as its own orphaned line) --
@@ -185,7 +202,7 @@ function SplashDialog({ surface, onDone, onSecondary, override }: { surface: Spl
           </div>}
         </div>
         <div className={styles.header}>
-          <h2 id={`splash-${surface}-title`} className={styles.title}>{scene.title}</h2>
+          <h2 id={`splash-${surface}-title`} className={`${styles.title} ${scene.compactTitle ? styles.titleCompact : ""}`}>{scene.title}</h2>
         </div>
         {scene.line && <p id={`splash-${surface}-description`} className={styles.line}>{scene.line}</p>}
         {scene.rows && <ul className={styles.rows}>{scene.rows.map((row, i) => (

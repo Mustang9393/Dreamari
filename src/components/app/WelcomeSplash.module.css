@@ -43,6 +43,14 @@
 .dialog:focus { outline: none; }
 .header { text-align: center; position: relative; }
 .title { margin: 0; font-family: var(--font-display); font-size: clamp(44px, 13vw, 60px); font-weight: 800; line-height: 1; letter-spacing: -.055em; padding-right: .055em; color: var(--foreground); }
+/* One line, all-caps, matching the app's own compact heading style (e.g.
+   the match grid page's own "FIND YOUR TOP 3") -- for a title long enough
+   that the default hero size would wrap to two lines and crowd whatever
+   copy sits below it. Sized to fit this dialog's own 520px max-width
+   (minus its 28px padding) down to a 360px-wide phone (minus the scrim's
+   16px padding) without wrapping -- checked against the longest current
+   user of this modifier, "YOU'VE BEEN MATCHED!" (21 characters). */
+.titleCompact { font-size: clamp(22px, 6.4vw, 32px); text-transform: uppercase; white-space: nowrap; letter-spacing: -.02em; padding-right: 0; }
 .dreamy { position: relative; width: 120px; height: 120px; flex: none; }
 .dreamyWide { width: 170px; }
 .sprite { object-fit: contain; }
