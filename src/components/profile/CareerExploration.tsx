@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Check, ChevronDown, PenLine, Trash2 } from "lucide-react";
+import { Check, ChevronDown, PenLine, Trash2, X } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { IconTip } from "@/components/app/IconTip";
 import { Portal } from "@/components/profile/CareerReport";
@@ -29,6 +29,7 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
   const logged = loggedActivity(careerId, careerTitle, picks.ids);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [ownOpen, setOwnOpen] = useState(false);
   // Rows added from the dropdown start undated (Joshua, 11 Sept 2026: the
   // date is typed, never pre-filled with today); the editor opens on the
   // first one so the one required field is right there.
@@ -75,23 +76,108 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
           )}
         </section>
 
-        {/* RIGHT: add your own. */}
+        {/* RIGHT: add your own. Interactive editing happens in a popout
+           modal (below), not inline -- the row list used to grow this
+           section's own content, and even with items-start keeping the
+           LEFT box from visually stretching, the shared grid row still
+           auto-sizes to its tallest cell, so the row (and everything
+           below it) kept getting taller and taller as more rows were
+           added or expanded (direct feedback, 22 Sept 2026). A fixed-size
+           trigger keeps this column's height constant regardless of how
+           many rows exist. The rows themselves stay in the DOM
+           (`hidden print:flex` below) so Download/print still shows every
+           logged experience -- the file's own standing requirement. */}
         <section aria-labelledby={`${idPrefix}own`} className="flex flex-col gap-[12px] rounded-[var(--radius-sm)] border px-[16px] py-[14px]" style={{ borderColor: "var(--rule)", background: "var(--paper-sunken)" }}>
           <h4 id={`${idPrefix}own`} className={LABEL} style={{ color: "var(--primary)" }}><PenLine className="h-[13px] w-[13px] flex-none" aria-hidden />Add your own</h4>
-          <AddMenu open={menuOpen} onToggle={() => setMenuOpen((v) => !v)} onAdd={addTypes} idPrefix={idPrefix} />
-          {mine.length === 0 && (
-            <p data-print-hide className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>Pick one or more above; each becomes a row you can fill in.</p>
-          )}
+          <div data-print-hide className="flex flex-col gap-[10px]">
+            {mine.length === 0 ? (
+              <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>Nothing added yet -- log a job shadow, project, or conversation.</p>
+            ) : (
+              <p className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--ink)" }}>{mine.length} {mine.length === 1 ? "experience" : "experiences"} logged</p>
+            )}
+            <button
+              type="button"
+              onClick={() => setOwnOpen(true)}
+              className={`dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center font-bold ${FIELD}`}
+              style={fieldStyle}
+            >
+              {mine.length === 0 ? "Add your own" : "Manage"}
+            </button>
+          </div>
+          {/* Print/Download-only: the real rows, screen-hidden. */}
           {mine.length > 0 && (
-            <ul className="flex list-none flex-col gap-[8px] p-0">
+            <ul className="hidden list-none flex-col gap-[8px] p-0 print:flex">
               {mine.map((e) => (
-                <ExperienceRow key={e.id} e={e} editing={editing === e.id} onEdit={() => setEditing(editing === e.id ? null : e.id)} onDone={() => setEditing(null)} />
+                <ExperienceRow key={e.id} e={e} editing={false} onEdit={() => {}} onDone={() => {}} />
               ))}
             </ul>
           )}
         </section>
       </div>
+      {ownOpen && (
+        <AddYourOwnModal
+          idPrefix={idPrefix}
+          items={mine}
+          editing={editing}
+          onEdit={(id) => setEditing(editing === id ? null : id)}
+          onDone={() => setEditing(null)}
+          menuOpen={menuOpen}
+          onToggleMenu={() => setMenuOpen((v) => !v)}
+          onAddTypes={addTypes}
+          onClose={() => { setOwnOpen(false); setMenuOpen(false); setEditing(null); }}
+        />
+      )}
     </div>
+  );
+}
+
+/** The popout that holds everything interactive for "add your own" --
+ *  the checklist trigger and every logged row, editable in place. Keeps
+ *  the inline column (above) at a fixed height no matter how many rows
+ *  exist, since all of the growth now happens inside this overlay instead
+ *  of in the page's own layout flow. */
+function AddYourOwnModal({ idPrefix, items, editing, onEdit, onDone, menuOpen, onToggleMenu, onAddTypes, onClose }: {
+  idPrefix: string;
+  items: Experience[];
+  editing: string | null;
+  onEdit: (id: string) => void;
+  onDone: () => void;
+  menuOpen: boolean;
+  onToggleMenu: () => void;
+  onAddTypes: (types: ExperienceTypeId[]) => void;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [onClose]);
+
+  return (
+    <Portal>
+      <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label="Add your own">
+        <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(20,16,8,0.5)", backdropFilter: "blur(20px)" }} />
+        <div
+          className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[480px] flex-col gap-[14px] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[18px] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
+          style={{ background: "var(--paper-raised)", borderColor: "var(--rule)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.5)" }}
+        >
+          <div className="flex items-center justify-between gap-[8px]">
+            <h3 className={LABEL} style={{ color: "var(--primary)" }}><PenLine className="h-[13px] w-[13px] flex-none" aria-hidden />Add your own</h3>
+            <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--ink-faint)" }}><X className="h-4 w-4" aria-hidden /></button>
+          </div>
+          <AddMenu open={menuOpen} onToggle={onToggleMenu} onAdd={onAddTypes} idPrefix={idPrefix} />
+          {items.length === 0 ? (
+            <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>Pick one or more above; each becomes a row you can fill in.</p>
+          ) : (
+            <ul className="flex list-none flex-col gap-[8px] p-0">
+              {items.map((e) => (
+                <ExperienceRow key={e.id} e={e} editing={editing === e.id} onEdit={() => onEdit(e.id)} onDone={onDone} />
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </Portal>
   );
 }
 
@@ -105,7 +191,11 @@ export function CareerExplorationBody({ careerId, careerTitle, idPrefix }: { car
  *  around). Portalled and positioned from the trigger's own measured rect,
  *  same pattern as ProfileExperience's Settings menu: it floats above
  *  whatever is below in the document instead of displacing it, and closes
- *  on an outside click via the full-screen backdrop button. */
+ *  on an outside click via the full-screen backdrop button. Now mounted
+ *  inside AddYourOwnModal rather than directly in the page -- its own
+ *  panel is portalled too, so its z-index (128/129) stays above the
+ *  modal's (120), both competing in the same document-root stacking
+ *  order. */
 function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle: () => void; onAdd: (types: ExperienceTypeId[]) => void; idPrefix: string }) {
   const [checked, setChecked] = useState<Set<ExperienceTypeId>>(new Set());
   const [menuRect, setMenuRect] = useState({ top: 0, left: 0, width: 0, maxHeight: 320, openUp: false });
@@ -179,11 +269,11 @@ function AddMenu({ open, onToggle, onAdd, idPrefix }: { open: boolean; onToggle:
       </button>
       {open && (
         <Portal>
-          <button type="button" aria-label="Close menu" className="fixed inset-0 z-[58] cursor-default" onClick={onToggle} />
+          <button type="button" aria-label="Close menu" className="fixed inset-0 z-[128] cursor-default" onClick={onToggle} />
           <div
             ref={panelRef}
             id={`${idPrefix}add-menu`}
-            className="fixed z-[59] flex flex-col gap-[6px] rounded-[var(--radius-sm)] border p-[6px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
+            className="fixed z-[129] flex flex-col gap-[6px] rounded-[var(--radius-sm)] border p-[6px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
             style={{
               ...fieldStyle,
               top: menuRect.top,

@@ -12662,3 +12662,34 @@ compatible -- every other `BarChart` caller (Overview, Milestone Tracker's
 neighbors) is unaffected.
 
 `tsc`/`eslint` clean. Verified live: all 9 report types, desktop and mobile.
+
+### 2026-09-22 Career Report: Add-your-own moved into a popout modal (grid row was still growing unbounded)
+
+Direct feedback: even after the items-start fix (21 Sept 2026, which stopped
+the LOGGED-IN-DREAMARI box from visually stretching), the shared CSS grid
+row still auto-sizes its track height to its tallest cell -- so the ROW
+itself (and everything below it on the page) kept growing as rows were
+added to Add-your-own or expanded into their edit form, even though the
+left box's own content stayed static. items-start controls alignment
+within a row's height, not the row's height itself, so there was no CSS-only
+fix that kept both columns' content inline AND capped the row.
+
+User's call: make it a popout modal instead. Implemented as `AddYourOwnModal`
+-- the inline right column is now a fixed-height trigger ("N experiences
+logged" + a Manage/Add-your-own button); all interactive add/edit/delete
+happens in an overlay. Constraint that shaped the implementation: this
+file's own header comment says the rows "also have to read in the Download
+preview and in print, where the controls hide and the rows stay" --
+confirmed in globals.css, `.career-report button { display: none !important
+}` in print, so gating the rows behind a closed-by-default modal would have
+silently dropped them from every PDF/print export. Fix: the real rows stay
+rendered in their original DOM position unconditionally (`hidden
+print:flex` -- invisible on screen, present for print), while the modal
+holds a second, fully interactive copy for on-screen editing. Also bumped
+AddMenu's own nested portal panel from z-58/59 to z-128/129 since it now
+portals into a document root that also holds this modal at z-120.
+
+`tsc`/`eslint` clean. Verified live: added 2 items via the modal, confirmed
+both columns stayed at their original fixed height throughout, confirmed
+the print-only row list is present in the DOM with `display:none` on
+screen.
