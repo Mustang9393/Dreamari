@@ -12767,3 +12767,19 @@ AreaChart primitive, which 4 other screens (AdminDashboard, ProDashboard,
 both AttCommunityView variants) depend on for its single-series shape.
 
 `tsc`/`eslint` clean. Verified live: desktop and mobile.
+
+### 2026-09-22 Counselor Dashboard: My Impact rebuilt -- roughly half the reference page was missing
+
+Biggest content gap found in the whole 1:1 alignment pass: this screen was
+missing 5 entire sections the reference has (Counselor Activity &
+Accountability, Platform-Facilitated Student Engagement, ASCA National
+Model Alignment, Notable Achievements, District Compliance Summary, plus
+the report footer) -- roughly half the reference page. What existed also
+had real bugs, not just gaps:
+
+- The 4th milestone tile was labeled "Senior Plan Compliance" but computed
+  `dreamScore >= 100` (a totally unrelated engagement metric) while the
+  CORRECT senior-compliance number was computed separately and only used in
+  the footer sentence -- so the tile and the sentence below it showed two
+  different numbers under the same claim, and the sentence hardcoded
+  "meets the district 87
