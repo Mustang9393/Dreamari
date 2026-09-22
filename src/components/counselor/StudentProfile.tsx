@@ -283,7 +283,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               setNotes(addNote(studentId, draft.trim()));
               setDraft("");
             }}
-            className="dm-solid flex h-9 w-fit cursor-pointer items-center justify-center self-end rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
+            className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 w-fit cursor-pointer items-center justify-center self-end rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
           >
             {notes.length === 0 ? "Add First Note" : "Add Note"}
           </button>

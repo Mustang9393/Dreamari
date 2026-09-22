@@ -105,7 +105,7 @@ export function CounselorSignup() {
             </button>
           </span>
         </Field>
-        <button type="submit" className="dm-solid mt-[6px] flex h-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[14px] font-bold">Create account</button>
+        <button type="submit" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] mt-[6px] flex h-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[14px] font-bold">Create account</button>
       </form>
     </Shell>
   );
@@ -148,7 +148,7 @@ export function CounselorLogin() {
           </span>
         </Field>
         {error && <p className="text-[13px] font-semibold" style={{ color: "var(--destructive)" }}>{error}</p>}
-        <button type="submit" className="dm-solid mt-[6px] flex h-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[14px] font-bold">Sign in</button>
+        <button type="submit" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] mt-[6px] flex h-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[14px] font-bold">Sign in</button>
       </form>
     </Shell>
   );

@@ -106,7 +106,7 @@ function QuestionsPanel() {
               type="button"
               disabled={response.trim().length === 0}
               onClick={() => { setStatuses((s) => ({ ...s, [selected.id]: "resolved" })); setResponse(""); }}
-              className="dm-solid flex h-10 flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
+              className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Send className="h-[14px] w-[14px]" aria-hidden /> Send Response
             </button>
@@ -124,7 +124,7 @@ function DiscussionsPanel() {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex justify-end">
-        <button type="button" className="dm-solid flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+        <button type="button" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
           <Plus className="h-[14px] w-[14px]" aria-hidden /> Create Discussion
         </button>
       </div>
@@ -161,7 +161,7 @@ export function CounselorConnect() {
           ]}
         />
         {tab === "announcements" && (
-          <button type="button" className="dm-solid flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+          <button type="button" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
             <Plus className="h-[14px] w-[14px]" aria-hidden /> New Announcement
           </button>
         )}

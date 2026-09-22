@@ -12609,3 +12609,19 @@ Student Progress, Counselor Connect, Career + College Insights, Productivity
 Suite, Platform Engagement, My Impact, Settings, Students/drill-down) before
 starting the creative-refinement pass the user asked for after 1:1 alignment
 is confirmed done.
+
+### 2026-09-22 Counselor Dashboard: fixed every solid CTA button rendering unfilled
+
+Found while checking Review Queue against the reference: "Approve" rendered
+as plain text next to a properly-bordered "Request Changes" button -- no fill
+at all. Root cause: `.dm-solid` (app.css) only defines hover/active/focus
+*transition* behavior (lift + brightness), not the actual background/text
+color -- every other `dm-solid` button in the app (see `Button.tsx`'s
+`primary` variant) pairs it with `bg-[var(--primary)]
+text-[var(--primary-foreground)]`, but 11 counselor-dashboard buttons across
+7 files used `dm-solid` alone: Review Queue's Approve, both Auth submit
+buttons (Create account / Sign in), Settings' Save Changes, Productivity
+Suite's two Generate Draft buttons, Student Profile's note-save button, My
+Impact's export button, and Counselor Connect's three post/respond buttons.
+Added the missing fill classes to all 11. `tsc`/`eslint` clean, verified live
+on Review Queue and Productivity Suite.

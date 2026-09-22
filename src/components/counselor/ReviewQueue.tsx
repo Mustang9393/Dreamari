@@ -145,7 +145,7 @@ export function ReviewQueue() {
                 />
               </div>
               <div className="flex gap-[10px]">
-                <button type="button" onClick={() => resolve("Approved")} className="dm-solid flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[13.5px] font-bold">Approve</button>
+                <button type="button" onClick={() => resolve("Approved")} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[13.5px] font-bold">Approve</button>
                 <button type="button" onClick={() => resolve("Changes Requested")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Request Changes</button>
               </div>
             </>

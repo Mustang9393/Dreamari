@@ -52,7 +52,7 @@ export function MyImpact() {
           <button type="button" className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <Share2 className="h-[14px] w-[14px]" aria-hidden /> Share
           </button>
-          <button type="button" className="dm-solid flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+          <button type="button" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
             <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Generate Principal / District Report
           </button>
         </div>

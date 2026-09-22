@@ -109,14 +109,14 @@ export function ProductivitySuite() {
                     </select>
                   </label>
                 )}
-                <button type="button" onClick={generate} disabled={!studentId} className="dm-solid flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
+                <button type="button" onClick={generate} disabled={!studentId} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
                   <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate Draft
                 </button>
                 <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Dreamari will generate a first draft using available student data. You review, edit, and approve — your professional judgment is what matters.</p>
               </div>
             )}
             {toolId === "attention" && (
-              <button type="button" onClick={generate} className="dm-solid flex h-10 w-fit cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold">
+              <button type="button" onClick={generate} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold">
                 <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate Prioritized List
               </button>
             )}
