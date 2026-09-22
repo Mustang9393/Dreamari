@@ -13295,3 +13295,40 @@ identical code path rendering correctly at the tool's own "mobile"
 preset. Trusted the DOM measurements over that screenshot.
 
 `tsc`/`eslint` clean.
+
+### 2026-09-22 Explore For You: found the real reason `main` kept overflowing the viewport -- an existing, known zoom-compounding bug class
+
+Direct report + screenshot: the reel's Play/More Info buttons still ran
+off the bottom edge with zero margin, and the page itself could be
+scrolled to reach them -- both explicitly against spec ("should never
+allow a scroll to see more of the screen, only the reels should scroll").
+
+Root cause: `main`'s own height, `md:h-[calc(100dvh-86px)]`, is exactly
+the kind of bug this app already has a documented, established fix for
+(globals.css's "Zoom-compensated viewport heights" block, built for a
+DIFFERENT exact-height surface earlier this month) -- `zoom` multiplies
+an element's RENDERED size by the zoom factor, but `100dvh` always
+resolves to the true, un-zoomed viewport first. So at the wide-screen
+zoom rules this app already ships (zoom 1.1 at >=1441x800, 1.25 at
+>=1800x900), `calc(100dvh - 86px)` computes correctly in "local" units,
+then gets multiplied by the zoom factor AGAIN on render -- main ends up
+literally `zoom×` taller than the real viewport allows. Reproduced at
+1512x982 (a real MacBook's own default resolution, not a hypothetical --
+zoom 1.1 there): `document.documentElement.scrollHeight` measured 1080
+against a 982px viewport, a 98px overflow, matching the screenshot
+exactly. This is a separate, distinct bug from the `self-start`
+alignment fix earlier today -- that one was about WHERE the card sits
+inside its box; this one is about the BOX ITSELF being the wrong size.
+
+Fixed the same way the codebase's existing pattern does it: added
+`body .md\:h-\[calc\(100dvh-86px\)\] { height: calc((100dvh / var(--vz)) - 86px); }`
+to globals.css's zoom-compensation block, dividing by the ambient zoom
+BEFORE subtracting the navbar offset (not after -- got the order wrong on
+the first derivation, worked through the algebra with `main`'s own
+measured local vs rendered height to confirm which one the browser
+actually needs). Reverified at both 1512x982 (zoom 1.1) and 1920x1200
+(zoom 1.25): `document.documentElement.scrollHeight` now equals
+`window.innerHeight` exactly at both, and the reel card sits with
+100+px of real margin below it instead of zero.
+
+`tsc` clean; this is a CSS-only change so no lint target.

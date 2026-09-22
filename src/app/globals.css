@@ -1366,6 +1366,18 @@ body .min-h-dvh { min-height: calc(100dvh / var(--vz)); }
 body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 @media (min-width: 768px) {
   body .md\:h-\[calc\(100dvh-62px\)\] { height: calc((100dvh / var(--vz)) - 62px); }
+  /* Explore's For You `main` (ExploreExperience.tsx): zoom multiplies the
+     un-compensated calc()'s result on render, so at zoom 1.1/1.25 this box
+     rendered taller than the real viewport by exactly that factor -- main's
+     own overflow:hidden couldn't help, since main itself was the thing
+     overshooting the viewport, producing real page-level scroll and a reel
+     card whose Play/More Info buttons ran off the bottom edge with no
+     margin (direct feedback, 22 Sept 2026, screenshot: "still extending
+     past bottom border... should never allow a scroll to see more of the
+     screen, only the reels should scroll"). Reproduced directly at
+     1512x982 (a real MacBook's own resolution, zoom 1.1 there): body
+     .scrollHeight measured 1080 against a 982 viewport before this fix. */
+  body .md\:h-\[calc\(100dvh-86px\)\] { height: calc((100dvh / var(--vz)) - 86px); }
 }
 
 /* Home highlights (4 Sept 2026): the showing panel's photo pushes in slowly
