@@ -138,3 +138,7 @@ for Usman, not a UI one.
 - Only Investment Banking and Private Equity carry the official roadmap copy.
 - Next-step banner does not yet change after the simulation is completed (no copy specified).
 - Career detail "Pay by state" panel shows state pay next to the national median; product decision pending.
+
+## College image fallback assets — 23 September 2026
+
+Usman / importing agent: read [College image fallbacks](handoff/specs/college-image-fallbacks.md) before changing school image handling. The branded SVG fallback is installed behind existing photos, including failed-load handling. Assets, PNG exports, shareable ZIP and image-only preview live in `public/images/colleges/placeholders/`. All working existing photos remain visible; the absence of a visible change in the demo is expected. This is a real fallback, not a demo-only flag.

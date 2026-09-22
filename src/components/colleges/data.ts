@@ -43,6 +43,8 @@ export type College = {
   religion?: string;
   /** kept for reference; the files on disk decide (images.ts) */
   photo?: boolean;
+  /** Explicit review state overrides the prototype file inventory. */
+  photoStatus?: "approved" | "unverified" | "rejected";
   mark?: boolean;
   website?: string;
   detail?: CollegeDetail;
@@ -504,6 +506,7 @@ export function collegeBySlug(slug: string): College | undefined {
 }
 
 export function collegeImage(c: College): string | null {
+  if (c.photoStatus && c.photoStatus !== "approved") return null;
   return PHOTOS.has(c.slug) ? `/images/colleges/${c.slug}.webp` : null;
 }
 export function collegeMark(c: College): string | null {

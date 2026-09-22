@@ -13607,3 +13607,35 @@ compounding), on a component already carrying a lot of hard-won, narrowly
 second fix into the same file without being asked.
 
 `tsc`/`eslint` clean.
+
+## 2026-09-22 · College placeholder illustration collection
+
+Created four original generic campus SVG scenes (courtyard, library, pavilion, garden), each exported in three accents under `public/images/colleges/placeholders/`. `preview.html` is a static asset review sheet, not an app feature flag. Inline CollegePlaceholder supports stable slug selection, explicit variant/accent, inherited CSS custom properties, and proportional portrait/wide crops. Shared CollegePicture, CollegeCard and SchoolCard now use it for absent imagery. Optional College.photoStatus suppresses unverified/rejected photos through collegeImage; undefined preserves the existing prototype inventory, not a claim of approval. See asset README for production CMS default guidance.
+
+Validation: TypeScript and targeted ESLint passed; token check passed. Browser reviewed exported gallery. No new scrolling, controls, portals, positioning calculations or motion. Existing photo approval metadata has not been audited. Next: user QA of collection; no push authorized for this new work.
+
+## 2026-09-22 · Replace generic college illustrations with Dreamari brand artwork
+
+User rejected the generic architectural palette/compositions and requested image assets only, aligned to Dreamari Explore. Supersedes the earlier collection above: removed the twelve newly generated campus SVGs, replacing them with orbit/aurora/horizon.svg, exact Dreamari mark, existing blue/violet space palette, layered gradient light and glass. 800 × 1050 native size for 320 × 420 school cards, top-anchored focus, quiet lower area for the existing overlay. Preview is now images only (no sample card copy, borders, or UI). Inline component keeps the same shared fallback integration and adds useId-scoped SVG definitions. README and exporter updated.
+
+Validation: TypeScript and targeted ESLint passed; desktop browser image-only preview visually reviewed against current /colleges. No new controls, motion, scrolling or positioning math. Next: user artwork QA; not pushed.
+
+## 2026-09-23 · Quiet college-search missing-photo state
+
+User clarified this is a temporary neutral placeholder, not fully colored branded artwork. Inspected /colleges Browse All's real 320 × 420 cards. Replaced orbit/aurora/horizon exports with neutral (recommended), contour and weave SVGs: neutral dark card surfaces, subtle texture, 4.5% maximum blue wash, small muted exact Dreamari mark in upper image band. Removed vivid geometry, starfield, lens badge and glows. Existing shared fallback integration remains; no school records changed.
+
+Validated TypeScript and targeted ESLint. Browser QA temporarily substituted the three exported SVGs into the real Browse All photo slots (DOM-only; data untouched) to inspect existing blur, scrims, marks, text and actions. Screenshot captured at /tmp/college-search-neutral-preview.png. Next: user visual QA; not pushed.
+
+## 2026-09-23 · Recognizable school-image placeholder
+
+User requested the familiar mountain-and-sun image-placeholder convention, adapted to schools with Dreamari branding. Added a muted rounded image frame, sun, generic school roofline, windows, doorway and exact Dreamari mark in the pediment. Keeps neutral surfaces and faint texture variants; school symbol stays within the upper photo band. Regenerated all three SVGs and image-only preview. TypeScript and targeted ESLint passed. No school records or card layout changed. Awaiting visual QA; not pushed.
+
+## 2026-09-23 · Expand campus fallback to fill the image area
+
+User rejected the tiny framed school glyph and empty composition. Removed the frame; campus now spans the canvas with cropped wings, arched windows, trees and path. Dreamari mark remains on the pediment, with restrained orbital lines echoing the app background. Neutral tones retained. Art fades toward the existing content overlay. Regenerated SVGs and image-only preview. Not pushed.
+
+## 2026-09-23 · Package and release college placeholder assets
+
+User authorized repository push and Vercel deployment. Added 800 × 1050 PNG exports alongside SVGs, a shareable ZIP containing all variants and README, and handoff instructions for Usman. Existing photo records are preserved. TypeScript, targeted ESLint and token checks passed before upstream synchronization. Release validation continues after integrating latest main.
+
+Release follow-up: rebased onto current main, preserving the newer photo onError and MarkBadge error handling. All three photo surfaces now use branded art on failed loads as well as missing/unverified/rejected photos. Added a dedicated Usman handoff at docs/handoff/specs/college-image-fallbacks.md and linked it from HANDOFF_INDEX.md. Post-rebase TypeScript, targeted ESLint, tokens:check and production build all passed. User authorized pushing to main and production Git deployment.
