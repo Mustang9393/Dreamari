@@ -452,8 +452,13 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                     <Row label="Total students" value={(c.undergrads + (d.gradStudents ?? 0)).toLocaleString("en-US")} />
                     <Row label="Undergraduate students" value={c.undergrads.toLocaleString("en-US")} />
                     {d.gradStudents !== undefined && <Row label="Graduate students" value={d.gradStudents.toLocaleString("en-US")} />}
-                    <Row label="Full-time students" value={`${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}%`} />
-                    <Row label="Part-time students" value={`${Math.round((d.partTime / (d.fullTime + d.partTime)) * 100)}%`} />
+                    {/* Custom-designed edge case, 22 Sept 2026: divides by
+                       fullTime + partTime with no zero-guard -- no
+                       current college has both at 0, but same unguarded-
+                       arithmetic class as Play's own masteryPct NaN bug,
+                       and undefended against any future data gap. */}
+                    <Row label="Full-time students" value={d.fullTime + d.partTime === 0 ? "—" : `${Math.round((d.fullTime / (d.fullTime + d.partTime)) * 100)}%`} />
+                    <Row label="Part-time students" value={d.fullTime + d.partTime === 0 ? "—" : `${Math.round((d.partTime / (d.fullTime + d.partTime)) * 100)}%`} />
                     <Row label="Women" value={`${d.women}%`} />
                     <Row label="Men" value={`${d.men}%`} last />
                   </div>

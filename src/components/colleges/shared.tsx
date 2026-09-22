@@ -72,12 +72,20 @@ export function useTopSchool(): [string | null, (slug: string | null) => void] {
 export function CollegePicture({ c, sizes, priority = false, className = "", position }: { c: College; sizes: string; priority?: boolean; className?: string; /** CSS object-position for the cover crop; default centre */ position?: string }) {
   const img = collegeImage(c);
   const mark = collegeMark(c);
+  // Custom-designed edge case, 22 Sept 2026: no onError handling anywhere
+  // in this file -- every college card and the detail page's own hero go
+  // through one of these four call sites. Each already has a real "no
+  // image" fallback (the mark, or a quiet color field), so a failed LOAD
+  // just needs to fall through to that same tier rather than needing a
+  // new placeholder -- treated identically to "no image was ever there."
+  const [imgFailed, setImgFailed] = useState(false);
+  const [markFailed, setMarkFailed] = useState(false);
   return (
     <span className={`relative block overflow-hidden ${className}`} style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 22%, #0e0c20) 100%)" }} aria-hidden>
-      {img ? (
-        <Image src={img} alt="" fill sizes={sizes} priority={priority} className="object-cover" style={position ? { objectPosition: position } : undefined} />
-      ) : mark ? (
-        <Image src={mark} alt="" fill sizes="120px" className="object-contain p-[18%] opacity-90" />
+      {img && !imgFailed ? (
+        <Image src={img} alt="" fill sizes={sizes} priority={priority} className="object-cover" style={position ? { objectPosition: position } : undefined} onError={() => setImgFailed(true)} />
+      ) : mark && !markFailed ? (
+        <Image src={mark} alt="" fill sizes="120px" className="object-contain p-[18%] opacity-90" onError={() => setMarkFailed(true)} />
       ) : (
         <span className="absolute inset-0 flex items-center justify-center"><GraduationCap className="h-10 w-10" style={{ color: "rgba(255,255,255,0.45)" }} /></span>
       )}
@@ -116,15 +124,20 @@ function slugHue(slug: string) {
 
 export function MarkBadge({ c, size = 44, ring = "dark" }: { c: College; size?: number; /** "light": translucent white ring for sitting on a photo */ ring?: "dark" | "light" }) {
   const mark = collegeMark(c);
+  // Custom-designed edge case, 22 Sept 2026: see CollegePicture's own
+  // comment above -- a failed load now falls back to the same initial-
+  // letter treatment already used when a college has no mark at all.
+  const [markFailed, setMarkFailed] = useState(false);
+  const hasMark = !!mark && !markFailed;
   const ringColor = ring === "light" ? "rgba(255,255,255,0.55)" : "#0e0c20";
   return (
     <span
       className="relative flex flex-none items-center justify-center overflow-hidden rounded-full border-2"
-      style={{ width: size, height: size, background: mark ? "#fff" : `hsl(${slugHue(c.slug)} 42% 30%)`, borderColor: ringColor, boxShadow: "0 6px 18px -6px rgba(0,0,0,0.6)" }}
+      style={{ width: size, height: size, background: hasMark ? "#fff" : `hsl(${slugHue(c.slug)} 42% 30%)`, borderColor: ringColor, boxShadow: "0 6px 18px -6px rgba(0,0,0,0.6)" }}
       aria-hidden
     >
-      {mark ? (
-        <Image src={mark} alt="" fill sizes={`${size * 2}px`} className="object-contain p-[12%]" />
+      {hasMark ? (
+        <Image src={mark} alt="" fill sizes={`${size * 2}px`} className="object-contain p-[12%]" onError={() => setMarkFailed(true)} />
       ) : (
         <span className="leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", fontSize: Math.round(size * 0.42), color: "#fff" }}>{c.name[0]}</span>
       )}
@@ -155,6 +168,10 @@ const BADGE_STYLE: Record<CardBadge["tone"], React.CSSProperties> = {
 export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges, subline, hideTags = false, stats = false }: { /** Explore Schools: a three-number stat row (acceptance, tuition & fees, finish rate) instead of the two sentences */ stats?: boolean; c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": one fit chip, at most two */ badges?: CardBadge[]; /** one plain line under the place, e.g. the programme that matches the path */ subline?: string; /** For you: the 4-year / Public / City tags are noise next to the fit chip */ hideTags?: boolean }) {
   const img = collegeImage(c);
   const tf = tuitionFees(c);
+  // Custom-designed edge case, 22 Sept 2026: see CollegePicture's own
+  // comment above -- same fix, this card's own bespoke cover.
+  const [imgFailed, setImgFailed] = useState(false);
+  const [markFailed, setMarkFailed] = useState(false);
   return (
     // `poster-card`/`poster-photo` are the exact same hover classes Explore's
     // PosterCard uses (globals.css) -- direct feedback, 9 Sept 2026: college
@@ -170,14 +187,14 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
          fix as SchoolCard above, so the gradient scrims stay static and
          aligned with the card's own background while only the photo zooms. */}
       <span aria-hidden className="absolute inset-0">
-        {img ? (
-          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="poster-photo object-cover" />
-        ) : collegeMark(c) ? (
+        {img && !imgFailed ? (
+          <Image src={img} alt="" fill sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw" className="poster-photo object-cover" onError={() => setImgFailed(true)} />
+        ) : collegeMark(c) && !markFailed ? (
           // No campus photo: the school's own mark, big, soft and dimmed,
           // becomes the cover so every card gets the same photo-and-blur
           // treatment (direct feedback, 10 Sept 2026).
           <span className="poster-photo absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, #0e0c20) 0%, #0e0c20 65%)" }}>
-            <Image src={collegeMark(c)!} alt="" fill sizes="480px" className="object-contain opacity-[0.55] blur-[10px]" style={{ transform: "scale(1.9) translateY(-8%)" }} />
+            <Image src={collegeMark(c)!} alt="" fill sizes="480px" className="object-contain opacity-[0.55] blur-[10px]" style={{ transform: "scale(1.9) translateY(-8%)" }} onError={() => setMarkFailed(true)} />
           </span>
         ) : (
           <span className="poster-photo absolute inset-0" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%, color-mix(in srgb, var(--hero-accent-teal) 24%, #0e0c20) 100%)" }} />
@@ -317,6 +334,11 @@ export function SchoolCard({
   const [showWhy, setShowWhy] = useState(false);
   const img = collegeImage(c);
   const mark = collegeMark(c);
+  // Custom-designed edge case, 22 Sept 2026: see CollegePicture's own
+  // comment above -- same fix, this card's own bespoke cover and its
+  // inner mark badge.
+  const [imgFailed, setImgFailed] = useState(false);
+  const [markFailed, setMarkFailed] = useState(false);
   // "Miles from home" (a third stat here, previously) is gone for good --
   // same reason Similar Schools never had a distance factor: there's no
   // reliable per-student location signal, so it silently fell back to a
@@ -362,15 +384,15 @@ export function SchoolCard({
          surface -- `poster-photo` (the hover-zoom class) stays on the image
          itself, never the scrim layers, so they stay static on hover. */}
       <span aria-hidden className="absolute inset-0 overflow-hidden">
-        {img ? (
-          <Image src={img} alt="" fill sizes="(min-width: 1024px) 340px, 86vw" className="poster-photo object-cover" />
+        {img && !imgFailed ? (
+          <Image src={img} alt="" fill sizes="(min-width: 1024px) 340px, 86vw" className="poster-photo object-cover" onError={() => setImgFailed(true)} />
         ) : (
           /* No campus photo yet: a quiet brand field with the mark crisp and
              small at its centre. The blown-up blurred mark it replaces read
              as a broken image (direct feedback, 11 Sept 2026). */
           <span className="poster-photo absolute inset-0 flex items-center justify-center" style={{ background: "radial-gradient(120% 90% at 30% 20%, color-mix(in srgb, var(--primary) 34%, #0e0c20) 0%, #0e0c20 60%), linear-gradient(160deg, #0e0c20, color-mix(in srgb, var(--hero-accent-teal) 26%, #0e0c20))" }}>
             <span className="pointer-events-none absolute inset-0" style={{ background: "repeating-linear-gradient(135deg, rgba(255,255,255,0.028) 0 2px, transparent 2px 14px)" }} />
-            {mark && <span className="relative mb-[36px] flex size-[72px] items-center justify-center rounded-full bg-white/95" style={{ boxShadow: "0 10px 30px -10px rgba(0,0,0,0.6)" }}><Image src={mark} alt="" width={48} height={48} className="object-contain" /></span>}
+            {mark && !markFailed && <span className="relative mb-[36px] flex size-[72px] items-center justify-center rounded-full bg-white/95" style={{ boxShadow: "0 10px 30px -10px rgba(0,0,0,0.6)" }}><Image src={mark} alt="" width={48} height={48} className="object-contain" onError={() => setMarkFailed(true)} /></span>}
           </span>
         )}
         <CardProgressiveBlur size="72%" />

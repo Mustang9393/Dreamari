@@ -63,7 +63,18 @@ function matches(c: College, f: Filters, q: string, saved: Set<string>): boolean
     if (f.also.has("religious") && !c.flags?.includes("religious")) return false;
     if (f.also.has("forProfit") && c.control !== "For profit") return false;
   }
-  if (f.savedOnly && !saved.has(c.slug)) return false;
+  // Custom-designed edge case, 22 Sept 2026: `savedOnly` used to filter
+  // unconditionally -- unsaving the LAST college while this filter was
+  // active left `filters.savedOnly` stuck true with no visible way to
+  // turn it off (its own quick-pick chip only renders `if (saved.size)`,
+  // so the chip vanishes right along with the last save). Every college
+  // then failed `saved.has(c.slug)` against an empty set, and the
+  // zero-results panel's generic "take off a filter" copy pointed at a
+  // filter with no visible control left to take off -- a real, reachable
+  // dead end recoverable only via the unrelated "Start over" button.
+  // `saved.size > 0` makes the filter a no-op once there's nothing left
+  // to filter by, same as every other empty-set filter here already is.
+  if (f.savedOnly && saved.size > 0 && !saved.has(c.slug)) return false;
   return true;
 }
 
@@ -263,7 +274,12 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
             <button type="button" onClick={clearAll} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>Start over</button>
           </section>
         ) : (
-          <ul className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2 lg:grid-cols-3" aria-label="Colleges">
+          // Custom-designed edge case, 22 Sept 2026: fixed sm:grid-cols-2
+          // lg:grid-cols-3 regardless of result count -- a narrowed
+          // search/filter plausibly returns 1-2 colleges, leaving dead
+          // grid columns. Same class already fixed 5x this session
+          // (Match, Career Detail, Explore, Profile, Connect's PeopleTab).
+          <ul className={`grid grid-cols-1 gap-[var(--space-5)] ${results.length === 1 ? "sm:grid-cols-1 lg:grid-cols-1" : results.length === 2 ? "sm:grid-cols-2 lg:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"}`} aria-label="Colleges">
             {results.map((c) => (
               <li key={c.slug} className="min-w-0">
                 <SchoolCard c={c} saved={saved.has(c.slug)} onSave={() => toggleSaved(c.slug)} compared={compare.includes(c.slug)} onCompare={() => toggleCompare(c.slug)} />

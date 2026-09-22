@@ -12232,3 +12232,44 @@ before this session's changes via `git stash`).
 
 Next step: continue to Colleges (`src/components/colleges/`), next in
 priority order. Not pushed -- awaiting go-ahead.
+
+### 2026-09-22 Colleges: closed 4 real gaps (image fallbacks, stuck Saved filter, grid dead-space, NaN guard)
+
+Continuing the design-log priority order after Match/Career Detail/Build/
+Explore/Profile/Play/Connect. Audited `src/components/colleges/` in full
+-- confirmed `DotList` is genuinely shared with Career Detail (College
+Detail imports it directly), so the blank-item-list fallback already
+applies here for free; no separate list component was missed. Also
+confirmed the `college-lookup` branch is a strictly smaller, older
+version of what's already on `main` (not experimental/ahead-of-main as
+project memory suggested) -- nothing to reconcile there.
+
+**Image fallbacks**: `shared.tsx` has its own bespoke image rendering
+(doesn't reuse Explore's `PosterCard`), so none of `CollegePicture`,
+`CollegeCard`'s cover, `SchoolCard`'s cover + inner mark badge, or
+`MarkBadge`'s logo tracked load failure. Each already had a real
+"no image" fallback tier (the mark, or a quiet color field, or an
+initial letter) -- a failed load now falls through to that same tier
+instead of needing a new placeholder. Verified via a synthetic `error`
+event dispatched on a real rendered cover, confirmed the DOM swapped to
+the mark-tier fallback.
+
+**Real, reachable dead end fixed**: `matches()` applied `savedOnly`
+unconditionally, but its own quick-pick chip only renders when something
+is saved -- unsaving the LAST college while the filter was active left
+`filters.savedOnly` stuck `true` with the only control to turn it off now
+gone, silently zeroing every search until the unrelated "Start over"
+button was used. `saved.size > 0` now gates the filter, making it a
+no-op once there's nothing left to filter by. Verified live end-to-end
+(save → filter → unsave → results correctly revert).
+
+Also: Browse results grid had the same fixed-column dead-space bug
+already fixed 5x this session (column count now matches result count);
+Enrollment's full/part-time % divides by `fullTime + partTime` with no
+zero-guard, same class as Play's `masteryPct` NaN bug, now guarded (not
+reachable with today's data, defensive only).
+
+`npx tsc --noEmit -p .` and `npx eslint` clean.
+
+Next step: continue to Resume Builder (`src/components/resume/`), the
+last of the 9 priority areas. Not pushed -- awaiting go-ahead.

@@ -1012,9 +1012,72 @@ ternary approach as Profile's Top3 grid fix.
   input) -- lower risk than the URL-param case since this data doesn't
   change at runtime, left alone per "trust internal invariants."
 
-## 8. Colleges
+## 8. Colleges (`src/components/colleges/`)
 
-Status: not started
+Status: **Done** -- the real gaps found via a full audit.
+
+| Component / state | Status | Notes |
+|---|---|---|
+| `CollegePicture`/`CollegeCard`/`SchoolCard`/`MarkBadge`: missing/failed image | **Done, 22 Sept** | Failed load now falls through to each component's own existing no-image tier, see below. |
+| Browse results grid: dead space with 1-2 results | **Done, 22 Sept** | Column count now matches the real count. |
+| Unsaving the last college while "Saved" filter is active gets stuck | **Done, 22 Sept** | `savedOnly` is now a no-op once nothing is saved, see below. |
+| Enrollment %: latent `NaN` risk (`fullTime + partTime === 0`) | **Done, 22 Sept** | Zero-guard, same class as Play's `masteryPct`. |
+| `DotList` (admissions-factor lists) | **Verified, already handled** | Imported directly from Career Detail -- gets the blank-item fallback for free. |
+
+### College images: missing or failed load -- Done, 22 Sept 2026
+
+**Why this matters**: `shared.tsx` has its own bespoke image call sites
+(does not reuse Explore's `PosterCard`/`PosterPhoto`, which is typed to
+`CatalogCareer`) -- `CollegePicture`, `CollegeCard`'s cover,
+`SchoolCard`'s cover (plus its own inner mark badge), and `MarkBadge`'s
+logo, none tracking load failure. Every college card and the detail
+page's hero go through one of these four. All 55 current colleges'
+images physically exist today, so this was a pure defensive gap, not a
+live bug -- but exactly the class already closed for every other feature
+this session.
+
+**Design**: each of these four already has a real "no image" fallback
+tier (the school's mark, or a quiet color field, or an initial letter) --
+a failed *load* now falls through to that same existing tier instead of
+needing a new placeholder, treated identically to "no image was ever
+provided."
+
+**Verified live**: dispatched a synthetic `error` event on a real
+rendered college cover (`the-college-of-new-jersey.webp`) and confirmed
+via DOM inspection the broken `<img>` was replaced by the mark-tier
+fallback, matching the design exactly.
+
+### `savedOnly` filter stuck after unsaving the last college -- Done, 22 Sept 2026
+
+**Why this matters**: `matches()` applied `f.savedOnly` unconditionally.
+The "Saved" quick-pick chip only renders `if (saved.size)`, so unsaving
+the last college while that filter was active made the chip (the only
+control that turns it off) vanish while `filters.savedOnly` stayed `true`
+in state -- every college then failed `saved.has(c.slug)` against an
+empty set, and the zero-results panel's generic "take off a filter" copy
+pointed at a filter with no visible control left. Recoverable only via
+the unrelated "Start over" button -- a real, reachable, confusing dead
+end, not a crash.
+
+**Design**: `saved.size > 0` gates the filter in `matches()` -- once
+there's nothing saved to filter by, `savedOnly` becomes a no-op, same as
+every other empty-set filter in this file already behaves, rather than a
+stuck filter for a set that no longer has anything in it.
+
+**Verified live**: saved Princeton, applied the Saved filter (1 result),
+unsaved it from the card while the filter was still active, confirmed
+results correctly reverted to the full unfiltered list ("Schools with
+Finance (8)") instead of staying stuck empty.
+
+### Enrollment percentage: latent `NaN` -- Done, 22 Sept 2026
+
+**Why this matters**: `Math.round((d.fullTime / (d.fullTime +
+d.partTime)) * 100)` has no zero-guard -- same unguarded-arithmetic class
+as Play's own `masteryPct` bug. No current college has both fields at 0,
+so not reachable today, but undefended against any future data gap.
+
+**Design**: one-line zero-guard on both the full-time and part-time rows,
+rendering "—" instead of "NaN%".
 
 ## 9. Resume Builder
 
