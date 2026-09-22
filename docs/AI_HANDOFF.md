@@ -38,6 +38,18 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-23 For You card swipe: fixed a real "gets stuck" bug -- imperative spring-back instead of a declarative `animate` prop
+
+Direct report: "i can swipe left on the first slide and it goes and gets stuck, they should snap back to their original state if i swipe the wrong way." (Landed right after the tablet width-cap fix above, same session, same carousel.)
+
+**Root cause**: the carousel used `<motion.div animate={{ x: face === "Summary" ? "0%" : "-50%" }}>` -- a DECLARATIVE target. Dragging "the wrong way" (e.g. swiping right while already on Summary, which has no previous slide to go back to) doesn't change `face`, so the `animate` target's VALUE is literally identical before and after the drag ends. Framer Motion resuming control of a motion value after a `drag` gesture releases it isn't guaranteed to re-run a spring purely because the prop *object* re-rendered with an unchanged target -- there's no new value to animate TO, so nothing visibly happened: the panel stayed wherever the raw drag left it. That's the "gets stuck."
+
+**Fix**: switched from the declarative `animate` prop to an imperative one. `x` is now a real `useMotionValue(0)` bound directly via `style={{ x }}` (Framer's own recommended pattern for exactly this). A new `settleAt(face)` helper calls `animateValue(x, target, spring)` directly, where `target` is computed from a LIVE measurement (`carouselTrackRef.current.offsetWidth / 2` -- half the track's real rendered width, since the card's actual width differs by breakpoint). `onCarouselDragEnd` now ALWAYS calls something: past the swipe-commit distance it sets `face` (which a `useEffect` picks up and calls `settleAt`), short of it (in EITHER direction) it calls `settleAt(face)` directly right there in the handler -- there is never a code path where a drag ends and nothing explicitly commands `x` to a real resting position.
+
+One side-effect fix bundled in: `dm-swipe-nudge` (the one-time "you can swipe this" wiggle) was on the SAME motion.div as the new `style={{x}}` binding -- a CSS `transform` keyframe animation and a Framer-driven `transform` on the identical element fight each other. Moved the wiggle to the outer non-Framer wrapper div instead.
+
+Verified live at 820x1180 (tablet) with real drag-simulated gestures in all four combinations: Summary swipe-forward (commits to Details), Details swipe-backward (commits to Summary), and both "wrong way" cases (swiping further past either end now visibly springs back to the same face, confirmed via screenshot each time -- no stuck/misaligned state). Also re-checked 375x812 (mobile) for regressions. `npx tsc --noEmit -p .` and `npx eslint` clean.
+
 ### 2026-09-23 For You card: fixed a stale `md:` width cap breaking the swipe carousel on tablet
 
 Direct report: "the swiping breaks on the tablet mode of for you page. it clips off and breaks, then disappears into space because the container is small and left aligned." Root cause: `.face-swap` (the wrapper around the chevron row, "Strong match," and the new swipe carousel) still capped at `md:w-[326px]` -- a width meant only for the small FRAMED desktop card. The reel's own full-bleed immersive layout was widened from a `md:` gate to `lg:` back on 22 Sept 2026 so tablet got the same phone treatment as mobile, but this particular width cap was never updated to match at the time. Tablet (768-1023px) inherited the 326px cap anyway, so on a card that's actually the tablet's full viewport width, the whole swipeable panel sat pinned to a narrow, left-aligned 326px column -- text wrapped/clipped against that fake boundary, and dragging past it looked like the slide "disappeared into space" since nothing tracked the pointer beyond the cap.

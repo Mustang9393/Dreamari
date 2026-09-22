@@ -3,7 +3,7 @@
  
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, animate as animateValue } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
@@ -495,6 +495,32 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   // track a live pointer AND hand back a real per-frame offset, which is
   // what makes the panel genuinely follow the finger instead of just
   // firing once past a threshold.
+  //
+  // `x` is a real MotionValue in PIXELS, not a declarative `animate={{x}}`
+  // prop -- direct report, 23 Sept 2026: "i can swipe left on the first
+  // slide and it goes and gets stuck, they should snap back... if i swipe
+  // the wrong way." A declarative `animate` target that doesn't CHANGE
+  // value between renders (e.g. dragging right on Summary, which has
+  // nowhere to commit to, so `face` never updates) isn't guaranteed to
+  // re-fire the spring after `drag` has been imperatively driving the same
+  // motion value -- confirmed live, that's exactly the stuck case. Calling
+  // `animateValue(x, target, spring)` directly in `onDragEnd`, every time,
+  // regardless of whether `face` changed, removes that ambiguity: there is
+  // always an explicit command to move `x` to a real resting position.
+  const carouselTrackRef = useRef<HTMLDivElement | null>(null);
+  const x = useMotionValue(0);
+  const settleAt = useCallback((next: "Summary" | "Details") => {
+    // The track is width:200% of its container (two 50%-wide panels), so
+    // half its OWN rendered width in px is exactly one panel's travel
+    // distance -- measured live rather than assumed, since the card's
+    // real width differs by breakpoint (phone, tablet, the small framed
+    // desktop card).
+    const panelWidth = (carouselTrackRef.current?.offsetWidth ?? 0) / 2;
+    animateValue(x, next === "Summary" ? 0 : -panelWidth, { type: "spring", stiffness: 380, damping: 38 });
+  }, [x]);
+  useEffect(() => {
+    settleAt(face);
+  }, [face, settleAt]);
   const flipFace = useCallback(() => {
     setHasInteracted(true);
     setFace((current) => (current === "Summary" ? "Details" : "Summary"));
@@ -512,15 +538,17 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   const onCarouselDragEnd = useCallback((_: unknown, info: { offset: { x: number } }) => {
     if (info.offset.x < -SWIPE_COMMIT_PX && face === "Summary") {
       setHasInteracted(true);
-      setFace("Details");
+      setFace("Details"); // the effect above settles to it
     } else if (info.offset.x > SWIPE_COMMIT_PX && face === "Details") {
       setHasInteracted(true);
-      setFace("Summary");
+      setFace("Summary"); // the effect above settles to it
+    } else {
+      // short of the commit distance, in either direction -- `face` isn't
+      // changing, so the effect above won't re-fire on its own. Explicitly
+      // spring back to wherever this face already rests.
+      settleAt(face);
     }
-    // else: real drag, but short of the commit distance -- the `animate`
-    // prop below re-asserts the current face's resting position, which
-    // Framer springs back to on its own.
-  }, [face]);
+  }, [face, settleAt]);
 
   return (
     <article
@@ -724,45 +752,52 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                    and leave part of it sitting on barely-blurred photo. */}
                 {/* Real two-panel carousel, not a cross-fade -- Summary and
                    Details sit side by side in a row twice the container's
-                   width, each panel exactly half of THAT row, so `x:"-50%"`
-                   moves by exactly one panel. `drag="x"` makes the offset
-                   genuinely track the pointer every frame while dragging
-                   (direct instruction: "the slide should move with my
-                   finger not just switch... when i swipe"); releasing
-                   short of SWIPE_COMMIT_PX springs back to the current
-                   face via the `animate` prop, past it commits via
-                   onDragEnd. A plain tap (negligible drag distance) still
-                   fires a normal click, which bubbles to flipFace below --
-                   Framer doesn't suppress the click for a drag that never
-                   crossed its own activation distance. `overflow-hidden`
-                   wrapper clips the off-screen panel; row height still
-                   auto-sizes to the taller panel (flex, same principle the
-                   old grid-stacking relied on), so "keep the height
-                   constant" from the auto-advance work above still holds.
-                   dm-swipe-nudge (one-time, same discovery-nudge gate as
-                   the rest of this card) is the actual "you can swipe
-                   this" teaching moment -- a small wiggle, not a label,
-                   since the card's copy can't change for it (direct
-                   instruction: "add a swipe nudge... so its understood i
-                   can swipe left or right"). */}
+                   width, each panel exactly half of THAT row, so
+                   `x: -panelWidth` moves by exactly one panel. `drag="x"`
+                   makes the offset genuinely track the pointer every frame
+                   while dragging (direct instruction: "the slide should
+                   move with my finger not just switch... when i swipe");
+                   `onDragEnd` (`onCarouselDragEnd` above) always calls
+                   `settleAt` explicitly -- past SWIPE_COMMIT_PX that's a
+                   real face change, short of it (either direction) it's an
+                   explicit spring back to the CURRENT face, not a
+                   declarative prop hoping to notice nothing changed (that
+                   was the literal "gets stuck" bug -- see the comment on
+                   `x`/`settleAt` above). A plain tap (negligible drag
+                   distance) still fires a normal click, which bubbles to
+                   flipFace below -- Framer doesn't suppress the click for a
+                   drag that never crossed its own activation distance.
+                   `overflow-hidden` wrapper clips the off-screen panel; row
+                   height still auto-sizes to the taller panel (flex, same
+                   principle the old grid-stacking relied on), so "keep the
+                   height constant" from the auto-advance work above still
+                   holds. dm-swipe-nudge (one-time, same discovery-nudge
+                   gate as the rest of this card) lives on THIS wrapper, not
+                   the motion.div below -- that div's own `style={{x}}` is a
+                   live Framer-controlled `transform`, which a parallel CSS
+                   `transform` keyframe animation on the SAME element would
+                   fight over. It's the actual "you can swipe this" teaching
+                   moment -- a small wiggle, not a label, since the card's
+                   copy can't change for it (direct instruction: "add a
+                   swipe nudge... so its understood i can swipe left or
+                   right"). */}
                 <div
                   role="button"
                   tabIndex={0}
                   aria-label={face === "Summary" ? "Show more info" : "Show summary"}
                   onClick={flipFace}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipFace(); } }}
-                  className="overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className={`overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 ${nudge ? "dm-swipe-nudge" : ""}`}
                   style={{ outlineColor: "var(--accent-subtle)" }}
                 >
                   <motion.div
-                    className={`flex ${nudge ? "dm-swipe-nudge" : ""}`}
-                    style={{ width: "200%", touchAction: "pan-y", cursor: "grab" }}
+                    ref={carouselTrackRef}
+                    className="flex"
+                    style={{ x, width: "200%", touchAction: "pan-y", cursor: "grab" }}
                     drag="x"
                     dragElastic={0.22}
                     dragMomentum={false}
                     onDragEnd={onCarouselDragEnd}
-                    animate={{ x: face === "Summary" ? "0%" : "-50%" }}
-                    transition={{ type: "spring", stiffness: 380, damping: 38 }}
                   >
                     <div aria-hidden={face !== "Summary"} className="flex flex-none flex-col gap-[var(--space-2)]" style={{ width: "50%" }}>
                       <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
