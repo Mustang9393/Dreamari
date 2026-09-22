@@ -10934,4 +10934,436 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       "pay": { "starting": "$36,000", "typical": "$49,050", "top": "$68,000" }
     }
   },
+  "ambulance-driver-and-attendant": {
+    "slug": "ambulance-driver-and-attendant",
+    "title": "Ambulance Driver and Attendant",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/ambulance-driver-and-attendant.webp",
+    "summary": "Drives the ambulance and assists patients on the way to the hospital.",
+    "scenario": "Imagine racing through traffic with a patient in the back who needs to reach the ER in minutes, not just fast but safely.",
+    "facts": [{ "label": "Typical degree", "value": "Postsecondary certificate (EMT-Basic)" }, { "label": "Typical pay", "value": "$36,930/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$48K" }, { "state": "California", "pay": "$44K" }, { "state": "Massachusetts", "pay": "$42K" }] },
+    "knowAbout": ["Basic patient care and first aid", "Safe emergency driving", "Ambulance equipment", "Local hospital routes"],
+    "goodAt": ["Staying calm in emergencies", "Safe, fast driving under pressure", "Basic patient comfort and care", "Physical stamina for lifting patients"],
+    "software": ["Dispatch/radio systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "EMT-Basic", "pay": "$34K", "description": "You provide basic patient care and drive on non-emergency transports.", "whatYouDo": ["Basic patient care", "Drive transports", "Assist EMTs/paramedics"], "toGetHere": ["EMT-Basic certification"] },
+      { "number": "2", "jobTitle": "Ambulance Driver/Attendant", "pay": "$37K", "description": "You drive emergency runs and assist patient care en route.", "whatYouDo": ["Drive emergency runs", "Assist patient care", "Maintain the ambulance"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Lead EMT / Shift Supervisor", "pay": "$48K", "description": "You lead a shift and train newer EMTs.", "whatYouDo": ["Supervise shift", "Train new EMTs", "Handle scheduling"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "EMT-Basic certification program" }], "where": [{ "count": "40", "credential": "Postsecondary certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate (EMT-Basic)", "experienceFirst": "No. You can start right after certification", "trainingAfterHiring": "EMT-Basic course + state certification", "note": "The EMT-Basic certification, not a college degree, is what actually lets you work.", "noBachelorPct": "88%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 40.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 17.0 }, { "label": "Bachelor's degree", "pct": 10.5 }, { "label": "Master's degree", "pct": 1.2 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$30,000", "typical": "$36,930", "top": "$48,000" }
+    }
+  },
+  "cargo-handling-supervisor": {
+    "slug": "cargo-handling-supervisor",
+    "title": "Cargo Handling Supervisor",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/cargo-handling-supervisor.webp",
+    "summary": "Leads the crew that loads and unloads cargo at a port, warehouse or airport.",
+    "scenario": "Imagine a ship is due to leave in three hours and half the containers still need loading in the right order. You're the one directing the whole crew.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + experience" }, { "label": "Typical pay", "value": "$59,340/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$76K" }, { "state": "New Jersey", "pay": "$70K" }, { "state": "Washington", "pay": "$68K" }] },
+    "knowAbout": ["Cargo loading and weight distribution", "Equipment and crew scheduling", "Safety regulations", "Shipping/logistics documentation"],
+    "goodAt": ["Leading a crew under time pressure", "Spatial planning for loads", "Clear, fast communication", "Staying calm during delays"],
+    "software": ["Cargo/logistics tracking systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Cargo Handler", "pay": "$40K", "description": "You load and unload cargo as part of a crew.", "whatYouDo": ["Load/unload cargo", "Operate equipment", "Follow safety protocols"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Cargo Handling Supervisor", "pay": "$59K", "description": "You lead a crew and plan loading operations.", "whatYouDo": ["Supervise crew", "Plan load sequencing", "Coordinate with dispatch"], "toGetHere": ["3-5 years experience"] },
+      { "number": "3", "jobTitle": "Operations Manager", "pay": "$78K", "description": "You oversee cargo operations across a whole facility.", "whatYouDo": ["Manage full operations", "Oversee multiple crews", "Handle vendor relationships"], "toGetHere": ["7+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "20", "credential": "On-the-job promotion" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + experience", "experienceFirst": "Yes, usually promoted from a cargo handler role", "trainingAfterHiring": "On-the-job, promoted from within", "note": "Almost every supervisor was promoted from the crew, not hired directly.", "noBachelorPct": "86%", "distribution": [{ "label": "Did not finish high school", "pct": 4.0 }, { "label": "Finished high school", "pct": 40.0 }, { "label": "Some college, no degree", "pct": 26.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 12.5 }, { "label": "Master's degree", "pct": 1.2 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$40,000", "typical": "$59,340", "top": "$82,000" }
+    }
+  },
+  "commercial-pilot": {
+    "slug": "commercial-pilot",
+    "title": "Commercial Pilot",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/commercial-pilot.webp",
+    "summary": "Flies aircraft for cargo, charter, agriculture or other commercial operations.",
+    "scenario": "Imagine a storm system rolling in and you have to decide, right now, whether to fly the route or reroute around it entirely.",
+    "facts": [{ "label": "Typical degree", "value": "Postsecondary certificate (FAA license)" }, { "label": "Typical pay", "value": "$99,640/year" }],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$135K" }, { "state": "California", "pay": "$120K" }, { "state": "Texas", "pay": "$112K" }] },
+    "knowAbout": ["Flight operations and navigation", "FAA regulations", "Aircraft systems", "Weather reading"],
+    "goodAt": ["Calm, precise decision-making", "Comfortable with responsibility for others' safety", "Strong spatial awareness", "Handling long, irregular hours"],
+    "software": ["Flight planning software", "Aircraft avionics systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Flight Instructor / Charter Pilot", "pay": "$56K", "description": "You build flight hours as an instructor or small charter pilot.", "whatYouDo": ["Instruct student pilots", "Fly small charters", "Build flight hours"], "toGetHere": ["Commercial pilot license", "Flight instructor rating"] },
+      { "number": "2", "jobTitle": "Commercial Pilot", "pay": "$100K", "description": "You fly cargo, charter or specialty commercial routes.", "whatYouDo": ["Fly commercial routes", "Complete pre-flight checks", "Navigate weather decisions"], "toGetHere": ["1,500+ flight hours", "Commercial license"] },
+      { "number": "3", "jobTitle": "Captain / Senior Pilot", "pay": "$150K", "description": "You command the aircraft and lead the flight crew.", "whatYouDo": ["Command flights", "Lead flight crew", "Make final safety calls"], "toGetHere": ["Years of commercial flying", "Airline transport pilot license"] }
+    ],
+    "education": { "studies": [{ "name": "Aviation flight training programs" }], "where": [{ "count": "90", "credential": "FAA commercial pilot license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate (FAA license)", "experienceFirst": "Yes, real flight hours are required before commercial work", "trainingAfterHiring": "Flight school + FAA commercial license", "note": "Flight hours and FAA licensing are the real requirement, not a college degree, though many pilots do have one.", "noBachelorPct": "44%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 10.0 }, { "label": "Some college, no degree", "pct": 18.0 }, { "label": "Associate's degree", "pct": 15.5 }, { "label": "Bachelor's degree", "pct": 46.0 }, { "label": "Master's degree", "pct": 8.0 }, { "label": "Doctorate or professional degree", "pct": 2.0 }] },
+      "pay": { "starting": "$56,000", "typical": "$99,640", "top": "$165,000" }
+    }
+  },
+  "delivery-driver": {
+    "slug": "delivery-driver",
+    "title": "Delivery Driver",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/delivery-driver.webp",
+    "summary": "Delivers packages and goods to homes and businesses on a daily route.",
+    "scenario": "Imagine 150 packages in the truck, a route that has to be finished before dark, and a dog loose in someone's yard at stop 47.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$37,890/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$47K" }, { "state": "California", "pay": "$44K" }, { "state": "New York", "pay": "$42K" }] },
+    "knowAbout": ["Safe driving and route navigation", "Package handling", "Basic vehicle maintenance checks", "Customer service at the door"],
+    "goodAt": ["Efficient time management", "Physical stamina (lifting, walking)", "Safe driving under time pressure", "Reliable, independent work"],
+    "software": ["Route/GPS navigation apps", "Delivery scanning devices"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Delivery Driver", "pay": "$36K", "description": "You drive a daily route delivering packages.", "whatYouDo": ["Drive delivery routes", "Scan and deliver packages", "Basic vehicle checks"], "toGetHere": ["High school diploma", "Valid driver's license"] },
+      { "number": "2", "jobTitle": "Senior Route Driver", "pay": "$42K", "description": "You handle higher-volume or specialized routes.", "whatYouDo": ["Handle complex routes", "Train new drivers", "Manage time-sensitive deliveries"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Dispatch / Fleet Supervisor", "pay": "$54K", "description": "You coordinate a team of drivers and their routes.", "whatYouDo": ["Coordinate driver schedules", "Plan routes", "Handle delivery issues"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "20", "credential": "Valid driver's license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "A valid driver's license and clean driving record matter more than any degree.", "noBachelorPct": "92%", "distribution": [{ "label": "Did not finish high school", "pct": 6.0 }, { "label": "Finished high school", "pct": 43.0 }, { "label": "Some college, no degree", "pct": 26.0 }, { "label": "Associate's degree", "pct": 17.0 }, { "label": "Bachelor's degree", "pct": 7.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$32,000", "typical": "$37,890", "top": "$48,000" }
+    }
+  },
+  "demand-planner": {
+    "slug": "demand-planner",
+    "title": "Demand Planner",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/demand-planner.webp",
+    "summary": "Forecasts how much product a company will need, so shelves stay stocked without overordering.",
+    "scenario": "Imagine predicting how many umbrellas to order for a city three months out, before you even know if it'll rain.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$79,400/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$98K" }, { "state": "California", "pay": "$94K" }, { "state": "Washington", "pay": "$88K" }] },
+    "knowAbout": ["Forecasting and demand modeling", "Inventory and supply chain basics", "Data analysis", "Working with sales and operations teams"],
+    "goodAt": ["Analytical, data-driven thinking", "Spotting patterns and trends", "Cross-team communication", "Comfortable with uncertainty in forecasts"],
+    "software": ["Forecasting/ERP software (SAP, Oracle)", "Excel and data analysis tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Supply Chain Analyst", "pay": "$56K", "description": "You support forecasting models and data cleanup.", "whatYouDo": ["Support forecasting models", "Clean and organize data", "Run basic reports"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Demand Planner", "pay": "$79K", "description": "You build and own demand forecasts for a product category.", "whatYouDo": ["Build demand forecasts", "Work with sales teams", "Adjust for trends"], "toGetHere": ["2-4 years experience"] },
+      { "number": "3", "jobTitle": "Senior Demand Planner", "pay": "$105K", "description": "You lead forecasting strategy across multiple categories.", "whatYouDo": ["Lead forecasting strategy", "Mentor analysts", "Present to leadership"], "toGetHere": ["6+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Supply Chain Management" }, { "name": "Business" }, { "name": "Statistics" }], "where": [{ "count": "130", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "No, entry roles exist for new grads", "trainingAfterHiring": "On-the-job, tool by tool", "note": "Comfort with data and forecasting tools matters more than a specific major.", "noBachelorPct": "24%", "distribution": [{ "label": "Did not finish high school", "pct": 0.3 }, { "label": "Finished high school", "pct": 3.5 }, { "label": "Some college, no degree", "pct": 8.0 }, { "label": "Associate's degree", "pct": 12.2 }, { "label": "Bachelor's degree", "pct": 57.0 }, { "label": "Master's degree", "pct": 16.0 }, { "label": "Doctorate or professional degree", "pct": 3.0 }] },
+      "pay": { "starting": "$56,000", "typical": "$79,400", "top": "$112,000" }
+    }
+  },
+  "driver-and-sales-worker": {
+    "slug": "driver-and-sales-worker",
+    "title": "Driver and Sales Worker",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/driver-and-sales-worker.webp",
+    "summary": "Drives a route delivering and selling products directly to businesses.",
+    "scenario": "Imagine driving the same route every week, but each stop is also a sales pitch to keep the store ordering more from you, not a competitor.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$34,730/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$44K" }, { "state": "California", "pay": "$42K" }, { "state": "New York", "pay": "$40K" }] },
+    "knowAbout": ["Route driving and delivery", "Basic sales techniques", "Inventory tracking", "Customer relationships"],
+    "goodAt": ["Friendly, persistent sales conversations", "Efficient route management", "Physical stamina for loading/unloading", "Building repeat customer relationships"],
+    "software": ["Route/inventory tracking apps"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Route Driver", "pay": "$33K", "description": "You drive a delivery route and restock existing accounts.", "whatYouDo": ["Deliver to accounts", "Restock shelves", "Collect payments"], "toGetHere": ["High school diploma", "Valid driver's license"] },
+      { "number": "2", "jobTitle": "Driver and Sales Worker", "pay": "$35K", "description": "You manage your route and grow sales at each stop.", "whatYouDo": ["Manage route accounts", "Sell additional products", "Build customer relationships"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Route Sales Supervisor", "pay": "$48K", "description": "You oversee a team of route drivers and their sales targets.", "whatYouDo": ["Supervise drivers", "Set sales targets", "Manage territory assignments"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "20", "credential": "Valid driver's license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "A friendly sales manner matters as much as any credential here.", "noBachelorPct": "93%", "distribution": [{ "label": "Did not finish high school", "pct": 7.0 }, { "label": "Finished high school", "pct": 44.0 }, { "label": "Some college, no degree", "pct": 26.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 6.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$30,000", "typical": "$34,730", "top": "$46,000" }
+    }
+  },
+  "flight-attendant": {
+    "slug": "flight-attendant",
+    "title": "Flight Attendant",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/flight-attendant.webp",
+    "summary": "Keeps passengers safe and comfortable on commercial flights.",
+    "scenario": "Imagine turbulence hits mid-flight and passengers are nervous. You're the calm, trained presence making sure everyone stays safe.",
+    "facts": [{ "label": "Typical degree", "value": "Postsecondary certificate" }, { "label": "Typical pay", "value": "$68,370/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$85K" }, { "state": "New York", "pay": "$80K" }, { "state": "Texas", "pay": "$74K" }] },
+    "knowAbout": ["Aviation safety procedures", "Emergency response training", "Customer service", "FAA regulations"],
+    "goodAt": ["Staying calm in emergencies", "Friendly, professional customer service", "Comfortable with irregular schedules and travel", "Quick decision-making"],
+    "software": ["In-flight service/safety systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Flight Attendant Trainee", "pay": "$32K", "description": "You complete FAA-required safety training before flying.", "whatYouDo": ["Complete safety training", "Shadow flights", "Learn emergency procedures"], "toGetHere": ["Airline-sponsored training program"] },
+      { "number": "2", "jobTitle": "Flight Attendant", "pay": "$68K", "description": "You work flights, ensuring safety and passenger service.", "whatYouDo": ["Ensure passenger safety", "Serve in-flight needs", "Handle emergencies if needed"], "toGetHere": ["Completed FAA certification"] },
+      { "number": "3", "jobTitle": "Lead / Purser", "pay": "$90K", "description": "You lead the cabin crew on a flight.", "whatYouDo": ["Lead cabin crew", "Coordinate with pilots", "Handle complex passenger issues"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Airline-sponsored training programs" }], "where": [{ "count": "60", "credential": "FAA certification" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. Airlines train and certify you", "trainingAfterHiring": "Airline-sponsored FAA safety training (weeks)", "note": "Airlines run their own training program; a college degree isn't the requirement, the certification is.", "noBachelorPct": "58%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 14.0 }, { "label": "Some college, no degree", "pct": 22.0 }, { "label": "Associate's degree", "pct": 21.5 }, { "label": "Bachelor's degree", "pct": 38.0 }, { "label": "Master's degree", "pct": 3.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$32,000", "typical": "$68,370", "top": "$95,000", "note": "Pay often includes per-flight-hour rates on top of a base salary." }
+    }
+  },
+  "hand-packer": {
+    "slug": "hand-packer",
+    "title": "Hand Packer",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/hand-packer.webp",
+    "summary": "Packs products into boxes and containers for shipping by hand.",
+    "scenario": "Imagine a shift where thousands of items need to be packed correctly before the truck leaves at midnight. Every box has to be right.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$33,730/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$42K" }, { "state": "California", "pay": "$39K" }, { "state": "New Jersey", "pay": "$37K" }] },
+    "knowAbout": ["Packing procedures and standards", "Basic warehouse equipment", "Quality checking", "Shipping labels and documentation"],
+    "goodAt": ["Working fast and accurately", "Physical stamina for repetitive tasks", "Attention to detail", "Reliable, consistent work"],
+    "software": ["Barcode scanning systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Hand Packer", "pay": "$32K", "description": "You pack products by hand to meet shipping standards.", "whatYouDo": ["Pack products", "Check quality", "Apply shipping labels"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Senior Packer / Line Lead", "pay": "$38K", "description": "You take on quality checks and help train new packers.", "whatYouDo": ["Lead a packing line", "Quality control", "Train new packers"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Packing Supervisor", "pay": "$48K", "description": "You supervise the packing floor's daily operations.", "whatYouDo": ["Supervise packing floor", "Manage schedules", "Meet shipping deadlines"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "10", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "This is one of the most accessible warehouse roles -- almost no barrier to entry.", "noBachelorPct": "95%", "distribution": [{ "label": "Did not finish high school", "pct": 12.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 22.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 4.5 }, { "label": "Master's degree", "pct": 0.3 }, { "label": "Doctorate or professional degree", "pct": 0.2 }] },
+      "pay": { "starting": "$29,000", "typical": "$33,730", "top": "$42,000" }
+    }
+  },
+  "parking-attendant": {
+    "slug": "parking-attendant",
+    "title": "Parking Attendant",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/parking-attendant.webp",
+    "summary": "Parks and retrieves cars at a garage, lot or valet stand.",
+    "scenario": "Imagine a packed event lot with fifty cars needing to move at once, and you're the one keeping track of where every key and car actually is.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$31,930/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$42K" }, { "state": "California", "pay": "$39K" }, { "state": "Nevada", "pay": "$37K" }] },
+    "knowAbout": ["Safe, careful driving", "Parking systems and ticketing", "Customer service", "Multiple vehicle types"],
+    "goodAt": ["Careful, confident driving", "Staying organized under pressure", "Friendly customer interaction", "Comfortable working outdoors"],
+    "software": ["Parking ticket/payment systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Parking Attendant", "pay": "$30K", "description": "You park and retrieve vehicles for customers.", "whatYouDo": ["Park and retrieve cars", "Issue tickets", "Assist customers"], "toGetHere": ["High school diploma", "Valid driver's license"] },
+      { "number": "2", "jobTitle": "Senior Attendant / Lot Lead", "pay": "$36K", "description": "You coordinate the lot during busy periods and train new attendants.", "whatYouDo": ["Coordinate lot flow", "Train new attendants", "Handle customer issues"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Parking Facility Manager", "pay": "$48K", "description": "You manage the whole facility's operations and staff.", "whatYouDo": ["Manage staff", "Handle facility operations", "Oversee revenue and reporting"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "10", "credential": "Valid driver's license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "A clean driving record matters more than any degree here.", "noBachelorPct": "94%", "distribution": [{ "label": "Did not finish high school", "pct": 10.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 14.0 }, { "label": "Bachelor's degree", "pct": 5.5 }, { "label": "Master's degree", "pct": 0.3 }, { "label": "Doctorate or professional degree", "pct": 0.2 }] },
+      "pay": { "starting": "$28,000", "typical": "$31,930", "top": "$40,000" }
+    }
+  },
+  "railroad-conductor": {
+    "slug": "railroad-conductor",
+    "title": "Railroad Conductor",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/railroad-conductor.webp",
+    "summary": "Coordinates a train crew and ensures freight or passengers move safely.",
+    "scenario": "Imagine a mile-long freight train and you're responsible for every signal, every stop, every crew member along the whole route.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + training" }, { "label": "Typical pay", "value": "$69,900/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$90K" }, { "state": "Illinois", "pay": "$84K" }, { "state": "Texas", "pay": "$78K" }] },
+    "knowAbout": ["Railroad operations and signals", "Federal railroad regulations", "Crew coordination", "Freight/passenger safety procedures"],
+    "goodAt": ["Attention to detail with safety rules", "Clear communication with the crew", "Comfortable with irregular schedules", "Calm decision-making"],
+    "software": ["Railroad dispatch/communication systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Conductor Trainee", "pay": "$48K", "description": "You train on railroad operations and safety rules.", "whatYouDo": ["Learn signals and rules", "Shadow experienced conductors", "Complete safety certification"], "toGetHere": ["High school diploma", "Railroad training program"] },
+      { "number": "2", "jobTitle": "Railroad Conductor", "pay": "$70K", "description": "You coordinate the train crew and ensure safe operations.", "whatYouDo": ["Coordinate crew", "Monitor signals and stops", "Ensure safety compliance"], "toGetHere": ["Completed certification"] },
+      { "number": "3", "jobTitle": "Senior Conductor / Yardmaster", "pay": "$92K", "description": "You oversee rail yard operations or lead the most complex routes.", "whatYouDo": ["Oversee yard operations", "Lead complex routes", "Train new conductors"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Railroad conductor training programs" }], "where": [{ "count": "30", "credential": "Railroad certification" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + training", "experienceFirst": "No. Railroads train and certify you", "trainingAfterHiring": "Railroad-sponsored training + federal certification", "note": "Railroads run their own certification program; a college degree isn't the requirement.", "noBachelorPct": "89%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 42.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 17.0 }, { "label": "Bachelor's degree", "pct": 9.5 }, { "label": "Master's degree", "pct": 1.2 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$48,000", "typical": "$69,900", "top": "$96,000" }
+    }
+  },
+  "sanitation-worker": {
+    "slug": "sanitation-worker",
+    "title": "Sanitation Worker",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/sanitation-worker.webp",
+    "summary": "Collects trash and recycling to keep neighborhoods clean.",
+    "scenario": "Imagine a route with 800 stops before noon, in every kind of weather, keeping a whole neighborhood running on schedule.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$42,590/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$56K" }, { "state": "New York", "pay": "$52K" }, { "state": "Washington", "pay": "$50K" }] },
+    "knowAbout": ["Collection routes and schedules", "Safe equipment operation", "Recycling sorting rules", "Vehicle safety checks"],
+    "goodAt": ["Physical stamina", "Working outdoors in all weather", "Efficient, fast-paced work", "Reliable and punctual"],
+    "software": ["Route tracking systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Sanitation Worker", "pay": "$38K", "description": "You collect trash and recycling on an assigned route.", "whatYouDo": ["Collect trash/recycling", "Operate collection equipment", "Follow safety procedures"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Driver / Equipment Operator", "pay": "$48K", "description": "You drive and operate the collection vehicle.", "whatYouDo": ["Drive collection routes", "Operate compactor equipment", "Train new workers"], "toGetHere": ["CDL license", "1-2 years experience"] },
+      { "number": "3", "jobTitle": "Route Supervisor", "pay": "$60K", "description": "You oversee multiple routes and crews.", "whatYouDo": ["Supervise routes", "Manage crew schedules", "Handle service issues"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "10", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "Physical stamina matters more than any classroom credential here.", "noBachelorPct": "93%", "distribution": [{ "label": "Did not finish high school", "pct": 9.0 }, { "label": "Finished high school", "pct": 45.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 6.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$34,000", "typical": "$42,590", "top": "$58,000" }
+    }
+  },
+  "ship-captain-or-mate": {
+    "slug": "ship-captain-or-mate",
+    "title": "Ship Captain or Mate",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/ship-captain-or-mate.webp",
+    "summary": "Commands or assists in commanding a ship, from cargo vessels to ferries.",
+    "scenario": "Imagine navigating a cargo ship through a narrow, busy harbor at night, responsible for the vessel, the cargo, and every person on board.",
+    "facts": [{ "label": "Typical degree", "value": "Postsecondary certificate (USCG license)" }, { "label": "Typical pay", "value": "$99,110/year" }],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$130K" }, { "state": "Washington", "pay": "$118K" }, { "state": "Louisiana", "pay": "$108K" }] },
+    "knowAbout": ["Maritime navigation and regulations", "Vessel operations and safety", "Coast Guard licensing", "Weather and sea conditions"],
+    "goodAt": ["Calm, decisive leadership", "Reading weather and sea conditions", "Comfortable with long stretches at sea", "Responsibility for crew and cargo safety"],
+    "software": ["Navigation/GPS systems", "Vessel communication equipment"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Deckhand / Mate Trainee", "pay": "$44K", "description": "You work the deck and build sea time toward licensing.", "whatYouDo": ["Deck operations", "Assist navigation", "Build sea time"], "toGetHere": ["USCG entry-level credential"] },
+      { "number": "2", "jobTitle": "Mate", "pay": "$85K", "description": "You assist the captain and can command the vessel when needed.", "whatYouDo": ["Assist captain", "Navigate the vessel", "Oversee deck crew"], "toGetHere": ["USCG mate's license", "Sea time requirement"] },
+      { "number": "3", "jobTitle": "Ship Captain", "pay": "$130K", "description": "You command the vessel and are responsible for the whole crew.", "whatYouDo": ["Command the vessel", "Make final safety decisions", "Oversee full crew"], "toGetHere": ["USCG master's license", "Years of sea time"] }
+    ],
+    "education": { "studies": [{ "name": "Maritime academy / USCG licensing programs" }], "where": [{ "count": "50", "credential": "USCG license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate (USCG license)", "experienceFirst": "Yes, sea time is required for every license level", "trainingAfterHiring": "Maritime academy or USCG-approved training + sea time", "note": "The Coast Guard license and logged sea time are the real requirement, not a four-year degree.", "noBachelorPct": "56%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 16.0 }, { "label": "Some college, no degree", "pct": 20.0 }, { "label": "Associate's degree", "pct": 19.0 }, { "label": "Bachelor's degree", "pct": 35.0 }, { "label": "Master's degree", "pct": 7.5 }, { "label": "Doctorate or professional degree", "pct": 1.5 }] },
+      "pay": { "starting": "$44,000", "typical": "$99,110", "top": "$155,000" }
+    }
+  },
+  "shuttle-driver-or-chauffeur": {
+    "slug": "shuttle-driver-or-chauffeur",
+    "title": "Shuttle Driver or Chauffeur",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/shuttle-driver-or-chauffeur.webp",
+    "summary": "Drives passengers safely and comfortably to their destination.",
+    "scenario": "Imagine driving a client to a flight they can't miss, through traffic that keeps getting worse, staying calm so they don't have to.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$33,110/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$44K" }, { "state": "California", "pay": "$41K" }, { "state": "Massachusetts", "pay": "$38K" }] },
+    "knowAbout": ["Safe, defensive driving", "Local routes and traffic patterns", "Customer service", "Vehicle maintenance basics"],
+    "goodAt": ["Calm, careful driving", "Professional, friendly demeanor", "Punctuality and reliability", "Comfortable with varied schedules"],
+    "software": ["GPS navigation apps", "Ride-scheduling apps"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Shuttle Driver", "pay": "$32K", "description": "You drive scheduled shuttle routes for a company or venue.", "whatYouDo": ["Drive shuttle routes", "Assist passengers", "Basic vehicle checks"], "toGetHere": ["High school diploma", "Valid driver's license"] },
+      { "number": "2", "jobTitle": "Chauffeur", "pay": "$40K", "description": "You provide dedicated, higher-end driving service to clients.", "whatYouDo": ["Drive clients directly", "Plan efficient routes", "Provide concierge-level service"], "toGetHere": ["1-2 years experience", "Clean driving record"] },
+      { "number": "3", "jobTitle": "Fleet Coordinator", "pay": "$50K", "description": "You manage a small fleet of drivers and vehicles.", "whatYouDo": ["Coordinate driver schedules", "Manage vehicle fleet", "Handle client requests"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "10", "credential": "Valid driver's license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "A clean driving record matters more than any classroom credential.", "noBachelorPct": "94%", "distribution": [{ "label": "Did not finish high school", "pct": 9.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 5.5 }, { "label": "Master's degree", "pct": 0.3 }, { "label": "Doctorate or professional degree", "pct": 0.2 }] },
+      "pay": { "starting": "$28,000", "typical": "$33,110", "top": "$44,000" }
+    }
+  },
+  "stocker-and-order-picker": {
+    "slug": "stocker-and-order-picker",
+    "title": "Stocker and Order Picker",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/stocker-and-order-picker.webp",
+    "summary": "Stocks shelves and pulls orders in a warehouse or store.",
+    "scenario": "Imagine a wall of orders that all need to ship today, and every item has to come off the exact right shelf, fast.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$36,850/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$46K" }, { "state": "California", "pay": "$43K" }, { "state": "New Jersey", "pay": "$41K" }] },
+    "knowAbout": ["Warehouse organization systems", "Order picking equipment", "Inventory basics", "Safe lifting techniques"],
+    "goodAt": ["Working fast and accurately", "Physical stamina for standing/lifting", "Attention to detail", "Comfortable with repetitive tasks"],
+    "software": ["Warehouse management systems (WMS)", "Barcode scanners"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Stocker/Order Picker", "pay": "$34K", "description": "You stock shelves and pull orders to meet daily targets.", "whatYouDo": ["Stock shelves", "Pick and pack orders", "Scan inventory"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Senior Picker / Team Lead", "pay": "$42K", "description": "You lead a small picking team and handle priority orders.", "whatYouDo": ["Lead picking team", "Handle priority orders", "Train new hires"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Warehouse Supervisor", "pay": "$54K", "description": "You supervise warehouse operations and staff.", "whatYouDo": ["Supervise warehouse floor", "Manage schedules", "Meet shipping targets"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "10", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "Speed and accuracy matter more than any classroom credential.", "noBachelorPct": "94%", "distribution": [{ "label": "Did not finish high school", "pct": 10.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 23.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 5.5 }, { "label": "Master's degree", "pct": 0.3 }, { "label": "Doctorate or professional degree", "pct": 0.2 }] },
+      "pay": { "starting": "$32,000", "typical": "$36,850", "top": "$46,000" }
+    }
+  },
+  "supply-chain-manager": {
+    "slug": "supply-chain-manager",
+    "title": "Supply Chain Manager",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/supply-chain-manager.webp",
+    "summary": "Oversees how goods move from suppliers to warehouses to customers.",
+    "scenario": "Imagine a key supplier's shipment gets stuck at customs, and three factories are waiting on it to keep production running.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$102,880/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$128K" }, { "state": "California", "pay": "$122K" }, { "state": "Texas", "pay": "$112K" }] },
+    "knowAbout": ["Logistics and supply chain systems", "Vendor and supplier management", "Inventory optimization", "Data analysis and forecasting"],
+    "goodAt": ["Systems thinking across a whole network", "Problem-solving under time pressure", "Negotiating with vendors", "Managing a team"],
+    "software": ["ERP/supply chain software (SAP, Oracle)", "Data analysis tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Supply Chain Analyst", "pay": "$58K", "description": "You support supply chain operations and data analysis.", "whatYouDo": ["Analyze supply data", "Support vendor coordination", "Track shipments"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Supply Chain Manager", "pay": "$103K", "description": "You own supply chain operations for a product line or region.", "whatYouDo": ["Manage vendor relationships", "Optimize inventory flow", "Lead a team"], "toGetHere": ["5-7 years experience"] },
+      { "number": "3", "jobTitle": "Director of Supply Chain", "pay": "$155K", "description": "You lead supply chain strategy across the whole company.", "whatYouDo": ["Set supply chain strategy", "Manage multiple managers", "Report to executives"], "toGetHere": ["10+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Supply Chain Management" }, { "name": "Business" }, { "name": "Logistics" }], "where": [{ "count": "170", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Yes, usually several years in supply chain roles first", "trainingAfterHiring": "On-the-job, often with an eventual MBA", "note": "This is a leadership role most people grow into rather than start in.", "noBachelorPct": "20%", "distribution": [{ "label": "Did not finish high school", "pct": 0.3 }, { "label": "Finished high school", "pct": 3.0 }, { "label": "Some college, no degree", "pct": 7.0 }, { "label": "Associate's degree", "pct": 9.7 }, { "label": "Bachelor's degree", "pct": 57.0 }, { "label": "Master's degree", "pct": 20.0 }, { "label": "Doctorate or professional degree", "pct": 3.0 }] },
+      "pay": { "starting": "$58,000", "typical": "$102,880", "top": "$160,000" }
+    }
+  },
+  "transit-bus-driver": {
+    "slug": "transit-bus-driver",
+    "title": "Transit Bus Driver",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/transit-bus-driver.webp",
+    "summary": "Drives a public bus route, keeping riders safe and on schedule.",
+    "scenario": "Imagine a packed bus at rush hour, a schedule to keep, and a rider who needs extra time to board safely. You handle both, calmly.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + CDL" }, { "label": "Typical pay", "value": "$52,690/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$68K" }, { "state": "New York", "pay": "$64K" }, { "state": "Washington", "pay": "$60K" }] },
+    "knowAbout": ["Safe passenger vehicle operation", "Transit routes and schedules", "Accessibility procedures", "Local traffic regulations"],
+    "goodAt": ["Calm, patient driving under pressure", "Punctuality and reliability", "Customer service with a wide range of riders", "Handling unexpected situations"],
+    "software": ["Transit dispatch/GPS systems"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Bus Driver Trainee", "pay": "$42K", "description": "You train for your CDL and learn transit routes.", "whatYouDo": ["CDL training", "Learn routes", "Shadow experienced drivers"], "toGetHere": ["High school diploma", "Commercial driver's license (CDL)"] },
+      { "number": "2", "jobTitle": "Transit Bus Driver", "pay": "$53K", "description": "You drive a regular route, keeping riders safe and on schedule.", "whatYouDo": ["Drive transit routes", "Assist riders", "Follow safety procedures"], "toGetHere": ["CDL with passenger endorsement"] },
+      { "number": "3", "jobTitle": "Senior Driver / Trainer", "pay": "$64K", "description": "You train new drivers and handle the most demanding routes.", "whatYouDo": ["Train new drivers", "Handle complex routes", "Mentor junior drivers"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "CDL training programs" }], "where": [{ "count": "30", "credential": "Commercial driver's license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + CDL", "experienceFirst": "No, but the CDL with passenger endorsement is required", "trainingAfterHiring": "CDL training program + transit agency training", "note": "The commercial driver's license is the real requirement, not a college degree.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 42.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 18.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$42,000", "typical": "$52,690", "top": "$70,000" }
+    }
+  },
+  "vehicle-cleaner": {
+    "slug": "vehicle-cleaner",
+    "title": "Vehicle Cleaner",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/vehicle-cleaner.webp",
+    "summary": "Cleans and prepares vehicles for the road or for sale.",
+    "scenario": "Imagine a fleet of forty rental cars all need to be spotless before tomorrow morning's pickups, and it's already 9pm.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$31,780/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$40K" }, { "state": "Washington", "pay": "$38K" }, { "state": "New York", "pay": "$37K" }] },
+    "knowAbout": ["Vehicle cleaning equipment and products", "Interior and exterior detailing", "Basic vehicle inspection", "Time management under deadlines"],
+    "goodAt": ["Fast, thorough attention to detail", "Physical stamina", "Working efficiently under deadlines", "Reliable, consistent work"],
+    "software": ["None specific -- cleaning equipment"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Vehicle Cleaner", "pay": "$30K", "description": "You clean and prep vehicles to meet a standard.", "whatYouDo": ["Wash and detail vehicles", "Vacuum and clean interiors", "Basic inspections"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Detail Specialist", "pay": "$36K", "description": "You handle higher-end detailing and specialty cleaning.", "whatYouDo": ["Detailed interior/exterior work", "Specialty treatments", "Train new cleaners"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Fleet Cleaning Supervisor", "pay": "$44K", "description": "You supervise a cleaning crew for a fleet or dealership.", "whatYouDo": ["Supervise cleaning crew", "Manage schedules", "Ensure quality standards"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "10", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "This is one of the most accessible entry points in this world.", "noBachelorPct": "95%", "distribution": [{ "label": "Did not finish high school", "pct": 13.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 22.0 }, { "label": "Associate's degree", "pct": 14.0 }, { "label": "Bachelor's degree", "pct": 4.5 }, { "label": "Master's degree", "pct": 0.3 }, { "label": "Doctorate or professional degree", "pct": 0.2 }] },
+      "pay": { "starting": "$28,000", "typical": "$31,780", "top": "$40,000" }
+    }
+  },
+  "warehouse-worker": {
+    "slug": "warehouse-worker",
+    "title": "Warehouse Worker",
+    "world": "Driving, Flying & Shipping",
+    "photo": "/images/app/browse/warehouse-worker.webp",
+    "summary": "Handles the general work that keeps a warehouse running -- receiving, storing and shipping goods.",
+    "scenario": "Imagine a truck full of pallets shows up unannounced and needs to be unloaded and stored before the next shipment arrives in an hour.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$36,850/year" }],
+    "payByState": { "best": [{ "state": "Washington", "pay": "$46K" }, { "state": "California", "pay": "$43K" }, { "state": "New Jersey", "pay": "$41K" }] },
+    "knowAbout": ["Warehouse organization and safety", "Forklift and pallet jack operation", "Inventory basics", "Receiving and shipping procedures"],
+    "goodAt": ["Physical stamina", "Working fast and accurately", "Following safety procedures", "Team coordination"],
+    "software": ["Warehouse management systems (WMS)", "Barcode scanners"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Warehouse Worker", "pay": "$34K", "description": "You receive, store and prep goods for shipping.", "whatYouDo": ["Receive shipments", "Store inventory", "Prep orders"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Forklift Operator / Team Lead", "pay": "$42K", "description": "You operate equipment and lead a small warehouse team.", "whatYouDo": ["Operate forklift", "Lead a team", "Train new workers"], "toGetHere": ["Forklift certification", "1-2 years experience"] },
+      { "number": "3", "jobTitle": "Warehouse Supervisor", "pay": "$54K", "description": "You supervise warehouse operations and staff.", "whatYouDo": ["Supervise operations", "Manage schedules", "Meet shipping targets"], "toGetHere": ["3+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "10", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "A forklift certification (easy to get on the job) opens up better-paying roles quickly.", "noBachelorPct": "94%", "distribution": [{ "label": "Did not finish high school", "pct": 10.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 23.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 5.5 }, { "label": "Master's degree", "pct": 0.3 }, { "label": "Doctorate or professional degree", "pct": 0.2 }] },
+      "pay": { "starting": "$32,000", "typical": "$36,850", "top": "$46,000" }
+    }
+  },
 };

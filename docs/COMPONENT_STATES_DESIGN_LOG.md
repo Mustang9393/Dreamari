@@ -300,6 +300,7 @@ significant thin counts:
 | Fixing Machines & Engines | ~~18/18~~ **0/18 -- closed 22 Sept** |
 | Business & Finance | ~~25/36~~ **0/36 -- closed 22 Sept** |
 | Building & Construction | ~~18/23~~ **0/23 -- closed 22 Sept** |
+| Driving, Flying & Shipping | ~~18/23~~ **0/23 -- closed 22 Sept** |
 | Driving, Flying & Shipping | 18/23 |
 | Factories & Making Things | 11/12 |
 | Health & Medicine | 11/17 |
@@ -409,12 +410,24 @@ from the expected `factCellCount: 2`), Elevator Technician screenshotted
 live with its (i) icons in place. `tsc`/`eslint` clean, all 18
 distributions checked programmatically to sum to exactly 100%.
 
+### Driving, Flying & Shipping -- Done, 22 Sept 2026 (18 careers)
+
+Now 0% thin. Ambulance Driver and Attendant, Cargo Handling Supervisor,
+Commercial Pilot, Delivery Driver, Demand Planner, Driver and Sales
+Worker, Flight Attendant, Hand Packer, Parking Attendant, Railroad
+Conductor, Sanitation Worker, Ship Captain or Mate, Shuttle Driver or
+Chauffeur, Stocker and Order Picker, Supply Chain Manager, Transit Bus
+Driver, Vehicle Cleaner, Warehouse Worker.
+
+Verified: all 18 confirmed populated via batch fetch check, `tsc`/`eslint`
+clean, all 18 distributions checked programmatically to sum to exactly
+100%.
+
 ### Remaining worlds -- not started
 
-Next highest-value by career count: Driving, Flying & Shipping (18);
-then Factories & Making Things (11), Health & Medicine (11), Law Safety
-& Justice (9), Counseling & Social Work (8), Personal Care & Community
-Services (6), Tech & Engineering (7), Farming Animals & Nature (2),
+Factories & Making Things (11), Health & Medicine (11), Law Safety &
+Justice (9), Counseling & Social Work (8), Tech & Engineering (7),
+Personal Care & Community Services (6), Farming Animals & Nature (2),
 Science & Research (1), Food & Cooking (1).
 
 ---
