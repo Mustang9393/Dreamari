@@ -13121,3 +13121,25 @@ now gets it) and visually confirmed the panel renders within bounds with no
 clipped items.
 
 `tsc`/`eslint` clean.
+
+### 2026-09-22 Profile: removed the Overview v1/v2 demo toggle -- v2 is now the only Overview
+
+Direct instruction: "remove the v1 from the my profile. v2 has been
+approved." This is a separate toggle from My Plan's own v1/v2 (already
+locked to v2 earlier today) -- Overview had its own session-only chip
+(`OverviewVersionChip`, `overviewVersion` state, default `"v1"`) added 20
+Sept 2026 so the new dashboard-style Overview could ship side-by-side with
+the original three-doorway bento for review. That review is done, so
+removed both the toggle and the entire v1 bento path: `overviewVersion`
+state, the ternary in the Overview tab panel (now renders `OverviewTabV2`
+unconditionally), `OverviewTab` (the v1 component) and `OverviewVersionChip`
+deleted outright rather than left as dead code. `DoThisNextCard` was only
+ever called from v1's bento -- v2 has its own separate "Do this next"
+section already -- so it's deleted too, along with the now-unused
+`REPORT_SECTIONS`/`BorderBeam`/`Gamepad2` imports that only it used. The
+Season QA toggle (cycles fall/winter/spring art) stays, no longer gated on
+`overviewVersion === "v2"` since v2 is the only version now. Verified live:
+`/profile` loads straight into the dashboard Overview, no toggle chip
+anywhere, Season QA toggle still renders on its own.
+
+`tsc`/`eslint` clean.

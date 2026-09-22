@@ -12,12 +12,11 @@ import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, t
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { BorderBeam } from "border-beam";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, ImageOff, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -30,7 +29,7 @@ import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
-import { CareerReportView, ComparisonTable, Portal, REPORT_SECTIONS } from "./CareerReport";
+import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
 import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type PlanStage } from "./gradePlanData";
 import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
 import { EventStubs } from "./EventStubs";
@@ -166,10 +165,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
-  // DEMO-ONLY, session-only -- same pattern as the AT&T board's own
-  // VersionChip (direct instruction, 20 Sept 2026). See
-  // docs/HANDOFF_INDEX.md's Demo vs Production section.
-  const [overviewVersion, setOverviewVersion] = useState<"v1" | "v2">("v1");
   // QA-only: overrides currentPlanWindowId()'s real-date result so the
   // season art can be checked without waiting for the calendar (direct
   // instruction, 20 Sept 2026: "a toggle... where i can cycle through
@@ -831,22 +826,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
             {tab === "overview" && (
             <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
-              {overviewVersion === "v2" ? (
-                <OverviewTabV2
-                  focus={focus}
-                  top3Careers={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
-                  onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
-                  onGoResume={() => setTab("resume")}
-                  onGoLocker={() => setTab("locker")}
-                  seasonOverride={seasonOverride}
-                />
-              ) : (
-                <OverviewTab
-                  focus={focus} planProgress={planProgress} top3Count={top3.length}
-                  onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
-                  onGoLocker={() => setTab("locker")}
-                />
-              )}
+              <OverviewTabV2
+                focus={focus}
+                top3Careers={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
+                onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
+                onGoResume={() => setTab("resume")}
+                onGoLocker={() => setTab("locker")}
+                seasonOverride={seasonOverride}
+              />
             </div>
             )}
         {tab === "top3" && (
@@ -869,10 +856,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {tab === "plan" && (
           <div role="tabpanel" id="profile-panel-plan" aria-labelledby="profile-tab-plan">
             {/* V2 approved, 22 Sept 2026 ("v2 is approved for my plan...
-               no more toggle") -- hard-coded "v2" rather than reading
-               overviewVersion, so this tab no longer moves with the
-               Overview demo chip below. Overview itself is untouched --
-               only My Plan was approved, not the whole toggle. */}
+               no more toggle") -- hard-coded "v2". */}
             <MyPlanTab focus={focus} onGoRoutes={() => setTab("routes")} variant="v2" />
           </div>
         )}
@@ -917,20 +901,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           </div>
         )}
           </div>
-          {/* Demo-only v1/v2 toggle -- below the whole card, bottom
-             center, so it never adds space between the header and the
-             card itself. Toggles the whole Profile section, not just
-             Overview, so it stays put across every tab rather than
-             vanishing the moment a student leaves Overview (direct
-             feedback, 20 Sept 2026: "should be toggling the entire my
-             profile section not just overview"). */}
+          {/* QA-only: cycles the season art without waiting on the real
+             calendar (direct instruction, 20 Sept 2026: "a toggle...
+             where i can cycle through season so i can QA each seasons
+             graphics"). */}
           <div className="flex justify-center gap-[6px]">
-            <OverviewVersionChip version={overviewVersion} onChange={setOverviewVersion} />
-            {/* QA-only: cycles the season art without waiting on the real
-               calendar (direct instruction, 20 Sept 2026: "a toggle...
-               where i can cycle through season so i can QA each seasons
-               graphics"). Only meaningful once v2 is on. */}
-            {overviewVersion === "v2" && <SeasonQAToggle value={seasonOverride} onChange={setSeasonOverride} />}
+            <SeasonQAToggle value={seasonOverride} onChange={setSeasonOverride} />
           </div>
           </>
         )}
@@ -1463,142 +1439,16 @@ function NothingSavedYet({ onGoLocker }: { onGoLocker: () => void }) {
   );
 }
 
-export function OverviewTab({
-  focus, planProgress, top3Count,
-  onGoTop3, onGoPlan, onGoReport, onGoLocker,
-}: {
-  focus: ProfileCareer | null;
-  planProgress: (career: ProfileCareer) => { complete: number; total: number; pct: number };
-  top3Count: number;
-  onGoTop3: () => void;
-  onGoPlan: () => void;
-  onGoReport: () => void;
-  onGoLocker: () => void;
-}) {
-  if (!focus) return <NothingSavedYet onGoLocker={onGoLocker} />;
-
-  const progress = planProgress(focus);
-
-  return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      {/* Bento: three equal doorways, same shape each time (caption, one
-          number, one line) — matches how the reference architecture weighs
-          Top Three / Plan / Report the same, instead of one dominant tile. */}
-      <section aria-labelledby="bento-title" className="grid grid-cols-3 gap-[var(--space-2)] sm:gap-[var(--space-3)]">
-        <h3 id="bento-title" className="sr-only">Your top three, plan and report at a glance</h3>
-
-        {/* Bento cards get the same hover beam as everything else (direct
-           feedback, 9 Sept 2026: "hover states of cards everywhere," same
-           3.5s duration as "Do This Next"), tuned to a moderate strength --
-           these are everyday navigation, not a singled-out next action. */}
-        <HoverBeam strength={0.8} className="min-w-0">
-          <button type="button" onClick={onGoTop3} className="dm-tap flex h-full min-w-0 w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
-            <span className="flex items-start justify-between gap-[var(--space-2)]">
-              <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Top Three</span><span className="hidden sm:inline">My Top Three</span></span>
-              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-            </span>
-            <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{top3Count} of 3 chosen</span>
-          </button>
-        </HoverBeam>
-
-        <HoverBeam strength={0.8} className="min-w-0">
-          <button type="button" onClick={onGoPlan} className="dm-tap flex h-full min-w-0 w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
-            <span className="flex items-start justify-between gap-[var(--space-2)]">
-              <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Plan</span><span className="hidden sm:inline">My Plan</span></span>
-              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-            </span>
-            <span className="flex flex-col gap-[6px]">
-              <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{progress.complete} of {progress.total} steps</span>
-              <SparkBar percent={progress.pct} min={2} height={6} track="var(--glass-surface-2)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
-            </span>
-          </button>
-        </HoverBeam>
-
-        <HoverBeam strength={0.8} className="min-w-0">
-          <button type="button" onClick={onGoReport} className="dm-tap flex h-full min-w-0 w-full cursor-pointer flex-col justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-3)] text-left sm:gap-[var(--space-4)] sm:p-[var(--space-5)]" style={INSET}>
-            <span className="flex items-start justify-between gap-[var(--space-2)]">
-              <span className="text-[15px] leading-[19px] font-extrabold sm:text-[19px] sm:leading-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><span className="sm:hidden">Report</span><span className="hidden sm:inline">Career Report</span></span>
-              <ArrowUpRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-            </span>
-            <span className="text-[13px] leading-[17px] font-medium sm:text-[15px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{REPORT_SECTIONS.length} sections</span>
-          </button>
-        </HoverBeam>
-      </section>
-
-      <DoThisNextCard />
-    </div>
-  );
-}
-
-// Shared by both Overview versions (v1's original bento, v2's dashboard
-// below) so the one actual next-step CTA never has two copies to drift out
-// of sync. Do this next (official copy, 5 Sept 2026): Explore leads (it is
-// where a new student starts); Play is the alternative for someone with a
-// #1 already. One shared card (not two standalone ones -- splitting it
-// read as disintegrated, direct feedback, 9 Sept 2026), holding two
-// full-width list rows instead of a pill button sitting mid-sentence: each
-// row is the whole tap target, with an icon, the verb plain in the
-// sentence, and a solid CTA at the end matching NextStepBanner. Hover
-// fills only the row's own rect (dm-quiet, no radius of its own) -- the
-// section's overflow-hidden clips it to the card's rounded corners, so the
-// boundary still reads as one piece. The border itself is BorderBeam
-// (border-beam npm package), the same one used on NextStepBanner -- no
-// literal `border` class here, the beam supplies the whole outline.
-function DoThisNextCard() {
-  return (
-    <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
-      <section aria-labelledby="next-title" className="flex flex-col overflow-hidden rounded-[var(--radius-lg)]" style={{ background: INSET.background }}>
-        <h3 id="next-title" className="px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-2)] text-[12px] font-bold tracking-[1.4px] uppercase sm:px-[var(--space-5)] sm:pt-[var(--space-5)]" style={{ color: "var(--accent-subtle)" }}>Do this next</h3>
-        {[
-          { href: "/explore?tab=browse", verb: "Explore", Icon: Compass, rest: "10 Finance Careers" },
-          { href: "/play/investment-banking", verb: "Play", Icon: Gamepad2, rest: "Day in the Life of an Investment Banker Simulation" },
-        ].map((line, index, list) => (
-          <Fragment key={line.verb}>
-            {index > 0 && (
-              <div className="flex items-center gap-[10px] px-[var(--space-4)] sm:px-[var(--space-5)]" aria-hidden="true">
-                <span className="h-px flex-1" style={{ background: "var(--glass-border)" }} />
-                <span className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>or</span>
-                <span className="h-px flex-1" style={{ background: "var(--glass-border)" }} />
-              </div>
-            )}
-            <Link
-              href={line.href}
-              className={`dm-quiet group flex items-center justify-between gap-[var(--space-3)] rounded-none px-[var(--space-4)] py-[var(--space-3)] sm:px-[var(--space-5)] ${index === list.length - 1 ? "pb-[var(--space-4)] sm:pb-[var(--space-5)]" : ""}`}
-            >
-              {/* Plain sentence, verb uncoloured, and the action is a real
-                 button at the end -- the same solid CTA NextStepBanner's
-                 "Your next step" cards use -- instead of a gradient verb
-                 plus a "Let's go" that only appeared on hover (direct
-                 feedback, 10 Sept 2026: "uncolor the first word in both
-                 sentences and add a cta button to the end where 'let's go'
-                 appears ... consistent with the other your next step
-                 cards"). The whole row stays the link; the CTA is a styled
-                 span inside it, since a button can't nest in an anchor. */}
-              <span className="min-w-0 text-[14px] leading-[19px] font-semibold sm:text-[15px]" style={{ color: "var(--foreground)" }}>
-                {line.verb} {line.rest}
-              </span>
-              <span className="dm-solid flex min-h-[40px] flex-none items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)]" style={{ background: "var(--primary)", color: "#FFFFFF" }}>
-                <line.Icon className="h-4 w-4" aria-hidden /> Let&rsquo;s go <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
-              </span>
-            </Link>
-          </Fragment>
-        ))}
-      </section>
-    </BorderBeam>
-  );
-}
-
-// ---- Overview v2: a real dashboard, not three doorways ----
-// v1's bento is navigation dressed as data (a caption + one number, each
-// tile just a link to a tab that's already in the tab strip right below
-// it, direct feedback 20 Sept). This is the alternative: the same three
-// destinations, given a real graphic treatment instead of a bare caption
-// each -- gradient-filled marks throughout (RingStat, GradientPips), the
-// same technique, not a chart per tile. No career-match bar chart here on
-// purpose (direct feedback, 20 Sept: cut) -- "3 of 3 chosen" is the real
-// metric for Top Three, the same one v1 uses, just drawn as a mark instead
-// of printed as a sentence. Never changes v1 -- purely additive, reached
-// through OverviewVersionChip.
+// ---- Overview dashboard: a real dashboard, not three doorways ----
+// Replaced the original bento (a caption + one number, each tile just a
+// link to a tab that's already in the tab strip right below it, direct
+// feedback 20 Sept) with a real graphic treatment -- gradient-filled marks
+// throughout (RingStat, GradientPips), the same technique, not a chart per
+// tile. No career-match bar chart here on purpose (direct feedback, 20
+// Sept: cut) -- "3 of 3 chosen" is the real metric for Top Three, drawn as
+// a mark instead of printed as a sentence. The v1/v2 toggle this shipped
+// behind is gone (v2 approved app-wide, 22 Sept 2026) -- this is the only
+// Overview now.
 
 // Rings kept getting rebuilt back to life here across several rounds of
 // feedback before landing on bars (SparkBar, this app's own established
@@ -1839,34 +1689,6 @@ function OverviewTabV2({
           <DashHoverChevron />
         </button>
       </div>
-    </div>
-  );
-}
-
-// Same demo-only pattern as the AT&T board's own VersionChip (a small,
-// muted toggle beside the main content, never mistaken for product UI):
-// v1 is the shipped bento, v2 is this dashboard -- both real, neither
-// hidden, switching is session-only (direct instruction, 20 Sept: "subtle,
-// out of the way... outside that whole card surface thing").
-function OverviewVersionChip({ version, onChange }: { version: "v1" | "v2"; onChange: (v: "v1" | "v2") => void }) {
-  return (
-    <div role="tablist" aria-label="Overview version" className="flex flex-none items-center gap-[2px] rounded-[var(--radius-sm)] border p-[2px]" style={{ borderColor: "var(--glass-border)" }}>
-      {(["v1", "v2"] as const).map((key) => {
-        const on = key === version;
-        return (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={on}
-            onClick={() => onChange(key)}
-            className="dm-quiet cursor-pointer rounded-[4px] px-[7px] py-[1px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
-            style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", background: on ? "var(--glass-surface-2)" : "transparent" }}
-          >
-            {key}
-          </button>
-        );
-      })}
     </div>
   );
 }
