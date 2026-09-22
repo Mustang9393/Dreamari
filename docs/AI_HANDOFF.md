@@ -12878,3 +12878,86 @@ Next step: the creative screen-by-screen refinement pass the user asked
 for once 1:1 alignment was confirmed done.
 
 `tsc`/`eslint` clean. Verified live: desktop (all 5 sections) and mobile.
+
+### 2026-09-22 App-wide: fixed a real, systemic wide-screen bug -- zoom double-applying to every JS-positioned floating element
+
+Direct report with real screenshots from a wide external monitor: a Listbox
+dropdown rendering 150-250px away from its own trigger, and the Career
+Report's "Add your own" checklist rendering as a fully unstyled transparent
+wireframe with native checkboxes. Reproduced independently on a real,
+non-emulated Chrome window (not a testing-tool artifact) at 1470x693 --
+confirmed the same bug reproduces well short of an actual ultrawide
+monitor.
+
+**Root cause, confirmed by disabling it and watching the bug disappear:**
+globals.css applies `body { zoom: 1.1 }` above 1441px/800px and `zoom: 1.25`
+above 1800px/900px ("proportional wide-screen scaling," 2026-08-21, so the
+app reads at 1440-Figma-frame proportions on a big monitor). Every one of
+these floating-UI primitives computes its position from
+`triggerEl.getBoundingClientRect()` -- which already returns TRUE, POST-zoom
+screen pixels -- then writes that straight into a `top`/`left`/`transform`
+inline style on an element mounted as a descendant of the zoomed `<body>`.
+Because CSS zoom applies to a subtree's own rendering, those already-correct
+pixel values get zoomed a SECOND time on render, landing 10-25% away from
+where they should be (exactly matching both reported bugs' magnitude at
+zoom 1.1-1.25). The "hollow wireframe" checklist was a second, independent
+bug with the same trigger (see below).
+
+**Fix, one line repeated at every affected mount point:** `zoom: 1` on the
+portalled/appended element resets the ambient scale for that subtree, so a
+rect measured in real screen pixels renders at exactly those pixels again --
+same precedent this codebase already trusted for `.play-no-zoom`
+(SimulationPlayer opting a full-bleed stage out of the same scaling for the
+same reason). Fixed at every confirmed mount point:
+- `profile/CareerReport.tsx`'s shared `Portal` -- used by Listbox, DatePicker,
+  IconTip, Inbox, the resume builder, Connect community/mentorship, and
+  CareerExploration's AddMenu. One fix here covers all of them.
+- `app/xpFlight.ts`'s `flyXp()` -- the shared "+N XP flies into the nav chip"
+  helper, appended directly to `document.body` (not through the Portal
+  above, since it isn't a React portal). Coordinates were already correctly
+  computed from the real target chip, per direct follow-up ("make sure its
+  not a hardcoded value") -- confirmed not hardcoded, just double-zoomed.
+- Three older, NOT-yet-migrated duplicates of that same XP-fly choreography
+  that xpFlight.ts's own comment says it was "lifted out" from, but which
+  were apparently never actually switched over to call it:
+  `career/ConnectWithProfessionalsModal.tsx`, `play/ConnectInterstitial.tsx`.
+- `career/CareerDetailExperience.tsx`'s `FactPopover` (the small popover
+  next to a fact's (i) icon) -- an unrelated third component with the exact
+  same getBoundingClientRect-then-portal-to-body pattern.
+
+**Root cause of the "hollow wireframe" checklist specifically:** the shared
+Portal's host carried `marketing-v2 themeable` (the dark-glass token
+namespace) but not `dm-report` -- the Career Report's own separate "paper"
+token namespace (--paper-raised, --ink, --rule, ...) that
+CareerExploration.tsx's AddMenu is actually styled with. Added `dm-report`
+to the Portal host too; additive and harmless for every other caller, which
+only ever reads the marketing-v2 tokens.
+
+**Guardrail, not just a patch:** left a matching code comment at every fix
+point (and on the Portal itself) explaining the mechanism and stating
+explicitly that any future portal/floating-UI primitive positioning itself
+via getBoundingClientRect() must either mount through the existing shared
+Portal or replicate the `zoom: 1` reset -- a fresh
+`document.body.appendChild` (or a fresh `createPortal(..., document.body)`)
+is exactly how this class of bug happens. Searched the whole codebase for
+every remaining `document.body.appendChild`/`createPortal` call and checked
+each one for `getBoundingClientRect` usage; only one true positive
+(resumeExport.ts) turned out to be a hidden, never-displayed download-link
+element with no positioning at all, confirmed safe.
+
+Separately investigated but NOT a bug: the marketing homepage's BUILD
+chapter (the two-column "your profile... / Question 3 of 10" section) looks
+sparse with large flanking negative space on a wide screen, which was
+initially suspected to be part of the same report. Measured directly:
+its container is a deliberately max-w-[1200px], `mx-auto`-centered,
+symmetric two-rail layout (confirmed 135px margins on both sides at
+1470px) -- working exactly as designed, not a zoom bug (zoom was
+confirmed inactive at that reproduction's viewport height). Flagged here
+rather than silently reinterpreted as something to fix.
+
+`tsc`/`eslint` clean on every touched file. Verified live on a real,
+non-emulated Chrome window: the AddMenu checklist is now fully styled and
+correctly positioned directly under its trigger at 1470px width (the exact
+reproduction). The remaining fixes share the identical, mechanically
+verified pattern; not each one re-screenshotted individually under time
+pressure ("fix and push asap").

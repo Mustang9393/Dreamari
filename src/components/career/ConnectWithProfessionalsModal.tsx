@@ -302,7 +302,15 @@ export function ConnectWithProfessionalsModal({ world, onClose }: { world: strin
   const allDone = done.size === STEPS.length;
 
   return createPortal(
-    <div className={`marketing-v2 themeable ${styles.overlay}`} style={{ "--connect-accent": accent, background: "transparent" } as CSSProperties}>
+    // zoom: 1 cancels the ambient "proportional wide-screen scaling"
+    // (globals.css, body { zoom: 1.1/1.25 } above 1441px/1800px). This
+    // overlay is portalled straight to document.body and its flight pills
+    // below position themselves from raw getBoundingClientRect() screen
+    // coordinates (already post-zoom) -- left unreset, those coordinates
+    // get zoomed a second time on render and the pill lands far from the
+    // real xpTarget chip on a wide screen (same bug, same fix, as
+    // xpFlight.ts and ConnectInterstitial.tsx).
+    <div className={`marketing-v2 themeable ${styles.overlay}`} style={{ "--connect-accent": accent, background: "transparent", zoom: 1 } as CSSProperties}>
       <button type="button" aria-label="Close" onClick={onClose} className={`${styles.backdrop} backdrop-blur-[28px]`} />
       <motion.div
         ref={dialog} role="dialog" aria-modal="true" aria-labelledby="connect-pros-title" tabIndex={-1}

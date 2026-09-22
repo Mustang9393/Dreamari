@@ -61,6 +61,15 @@ export function flyXp({ from, amount, milestone, tone }: { from: Element | Point
     position: "fixed", left: "0", top: "0", zIndex: "9999", pointerEvents: "none", whiteSpace: "nowrap",
     font: `800 24px/1.1 ${displayFont}`, letterSpacing: "-0.01em",
     transform: `translate(${start.x}px, ${start.y}px) translate(-50%, -50%) scale(0.5)`, opacity: "0", willChange: "transform, opacity",
+    // zoom: 1 cancels the ambient "proportional wide-screen scaling"
+    // (globals.css, body { zoom: 1.1/1.25 } above 1441px/1800px). start/end
+    // above are already TRUE post-zoom screen coordinates from
+    // getBoundingClientRect(), so without this reset they'd be re-zoomed a
+    // second time on render and the pill would land nowhere near the real
+    // chip on a wide screen -- same bug and same fix as the shared Portal
+    // in CareerReport.tsx, which this element can't use since it isn't a
+    // React portal.
+    zoom: "1",
   } as Partial<CSSStyleDeclaration>);
   document.body.appendChild(el);
 
