@@ -12356,3 +12356,151 @@ confirmed, animation running), disappears immediately on click, and the
 
 Not pushed yet -- this landed after the 9-area sweep was already pushed;
 awaiting go-ahead for this one too.
+
+### 2026-09-22 Counselor Dashboard: new product, Phase 1 (foundation + Overview)
+
+Direct instructions, in order: (1) build a real counselor-facing dashboard
+1:1 from a reference (`web-app-prototype-maishak.replit.app`, all 11
+sections browsed and catalogued), our own visual/interactivity execution
+only, same copy/structure; (2) explicit correction once building started:
+"the counsellor dashboard is supposed to be an entirely separate thing
+from our student facing vercel... its an isolated thing but it should
+draw data from the students version." That second instruction is the
+architectural spine of everything below -- it overrode an earlier
+assumption (a Profile-tab-style integration) with a genuinely separate
+product that happens to read the same underlying data.
+
+**Why a separate product, not a Profile tab.** A school counselor and a
+student are different users entirely -- there's no real account system in
+this prototype (confirmed: no NextAuth, no DB, no session API anywhere in
+the repo), so "separate audience" has to mean "separate everything":
+own route tree (`/counselor`, `/counselor/login`, `/counselor/signup`),
+own shell (`src/components/counselor/shell.tsx` -- its own sidebar/topbar,
+never imports `DesktopNavigation`/`MobileNav` from
+`src/components/app/chrome.tsx`), own sign-up/sign-in
+(`src/lib/counselorAccount.ts`, same localStorage-as-record idiom as
+`studentProfile.ts`, cosmetic password field like the student signup's
+own). Reachable for now only from the hamburger's "Quick links" menu,
+under its own `DEMO-ONLY:`-commented divider ("Counselor Demo") separate
+from `QUICK_LINKS` (the real site map) and from the Connect role-switcher
+-- see `chrome.tsx`.
+
+**Why "one real student, many seeded ones," not a fake full roster.**
+"Draw data from the students' version" with no backend and no concept of
+multiple real student accounts can only honestly mean: read whatever this
+browser's own student has actually done. `src/lib/counselorRoster.ts`
+generates a deterministic 119-student seeded roster (FNV-1a hash PRNG,
+same technique as `demoSeries()` in `connect/viz.tsx` -- stable across
+reloads, not `Math.random()`) and inserts ONE real entry
+(`realStudentEntry()`) read live from `studentProfile.ts`, `picks.ts`,
+`resume.ts`, `reportHistory.ts`, `dreamScore.ts`, plus saved-careers/
+saved-colleges counts. Verified this actually works: seeding a student
+profile with a Tech & Engineering interest live-updated the Overview's
+Career Pathways count. The file's own header comment is explicit that
+every OTHER row is synthetic, so nobody mistakes this for real aggregate
+school data later.
+
+**What shipped this phase:** the data layer above; the isolated shell
+(desktop sidebar, `lg:` and up; a slide-out drawer + compact top bar below
+that -- see the mobile note below); counselor sign-up/sign-in; the
+hamburger entry point; and Overview (Student Status / Postsecondary Plans
+/ Career Pathways donut cards, Career Readiness + Academic Readiness bar
+charts, all live-filtered by the topbar's grade selector). Every other nav
+item (Students, Milestone Tracker, Review Queue, Student Progress,
+Counselor Connect, Career + College Insights, Productivity Suite,
+Platform Engagement, My Impact, Settings) renders the same honest
+"Coming soon" placeholder the Resume tab used pre-build, not a broken
+link -- next phases per the approved plan.
+
+**Real bug caught and fixed live, not carried over:** the reference this
+was built from has zero mobile handling at all -- a permanently pinned
+sidebar that crushes the whole page into a sliver at phone width. Ours
+doesn't repeat that: `shell.tsx` hides the desktop sidebar below `lg:` and
+replaces it with a hamburger-triggered drawer (own backdrop, closes on
+nav/backdrop/X), verified live at 375×812, 768×1024, and 1440×900 with
+real screenshots at each, not just resized-desktop.
+
+**Also caught live:** an `useSyncExternalStore` hydration race in the
+auth gate -- the server snapshot (and the client's pre-hydration render,
+which must match it) always reads signed-out, so an effect keyed only on
+`account.isSignedIn` fired the login redirect on that transient render
+and bounced a genuinely signed-in counselor straight back to the login
+page on every hard reload. Fixed with a `hydrated` flag set after mount
+(the redirect effect now waits on it) -- confirmed the bug reproduces
+without the fix and is gone with it (hard-reloaded `/counselor?view=
+overview` post-signup, stayed on Overview instead of redirecting).
+
+New chart primitive added to the shared `connect/viz.tsx` (not a new
+file) since it already had every other shape this needed except grouped
+bars: `BarChart`, same no-library-SVG conventions as its neighbors
+(`AreaChart`/`Ring`/`Meter`).
+
+`tsc`/`eslint` clean across every touched/new file. Not committed, not
+pushed -- per this project's standing rule, awaiting explicit go-ahead.
+
+### 2026-09-22 Counselor Dashboard: Phase 2 (Students → Settings, all 11 sections), a real root-cause fix, and a visual-language correction
+
+Phase 2 built out every remaining nav item per the approved plan --
+Students (sortable roster + drill-down), Milestone Tracker, Review
+Queue, Student Progress, Counselor Connect, Career + College Insights,
+Productivity Suite (template-drafted AI tools, matching the
+`resume-bullets` route's own "graceful without a key" pattern rather
+than adding a new API route this pass), Platform Engagement, My Impact,
+Settings. All 11 reference sections are now live, not placeholders.
+
+**Real bug found and root-caused, not just polished around:** direct
+report -- "the student screen has absolutely nothing" on mobile. Root
+cause: the Students roster had no pagination, so all 120 rows rendered
+in one pass -- a ~10,460px-tall page. That combined with a sticky,
+backdrop-blurred mobile header compositing against the full scroll
+range to produce a genuine blank paint on a real mobile viewport (500ms+
+of DOM inspection showed every element correctly positioned and
+opaque -- this was a browser rendering-engine problem with the page's
+sheer height, not a CSS mistake). Fixed by paginating to 20 rows with
+Previous/Next controls (`StudentsRoster.tsx`) -- confirmed live on a
+fresh tab at 375px: page now renders correctly, and the underlying UX
+problem (scrolling 10,000px to find a student) is also gone.
+
+**Second real bug:** Overview's three donut cards didn't align --
+"Postsecondary Plans" wraps to two lines while its neighbors sit on one,
+so every ring landed at a different height across the row. Fixed with a
+shared minimum title height across all three cards.
+
+**Visual-language correction, direct instruction:** "we don't need the
+background from the dreamari app either... its all about legibility and
+clarity." Removed `<AppBackdrop />` (the gradient/starfield wash
+borrowed from the student app) from the shell entirely -- this product
+doesn't need to look like the same app, it needs to scan fast on a
+shared office monitor or a projector, and a flat `var(--background)`
+reads faster than a colorful wash competing with data. `.marketing-v2`/
+`.themeable` stay on the wrapper (they're what define `--primary`,
+`--card`, etc. -- see the Phase-1 root-cause note above); only the
+decorative backdrop layer was removed.
+
+**Chart primitives upgraded** (`connect/viz.tsx`, shared by every
+screen): `Ring` and `BarChart` gained gradients and a glow filter;
+`Meter` and `AreaChart` got the same treatment; a new `SegmentedRing`
+replaces `Ring` everywhere a donut represents more than one category
+(Overview's three cards, Milestone Tracker's per-milestone rings) --
+the old pattern drew a single accent-colored arc next to a 3+ color
+legend, so only one of the categories was ever actually drawn. Direct
+feedback: "only one color is being represented when there's more colors
+in the legend." Every counselor screen's card surface now imports one
+shared `GLASS_CARD` token (`counselor/surfaces.ts`) instead of each
+screen declaring its own identical constant.
+
+A full parity-and-heuristic audit against the reference and against
+Nielsen's usability heuristics was written up separately (not in this
+repo -- a shared document) covering per-screen parity, dead/decorative
+controls (School and Year selectors, the notification bell, several
+buttons that don't do anything yet), and UX findings, with a prioritized
+punch list. Flagged honestly in that doc: a full screen-by-screen
+relayout re-deriving every screen's spacing from the reference more
+literally was requested but not completed this pass -- only the two
+confirmed-broken cases above were fixed.
+
+`tsc`/`eslint` clean across every touched/new file.
+
+Next step: work through the audit's punch list (dead controls, Review
+Queue/Connect persistence, Student Progress's missing filter row), and/or
+the deferred full-relayout pass.

@@ -77,7 +77,10 @@ export function MetricTile({ icon: TileIcon, value, label, delta, accent }: { ic
     // one tight group: icon at the left, the figure with its change on one
     // line, the label under the figure. Nothing floats to the far corner.
     <div className="flex items-start gap-[12px]">
-      <span className="mt-[2px] flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }}>
+      <span
+        className="mt-[2px] flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]"
+        style={{ background: `linear-gradient(155deg, color-mix(in srgb, ${accent} 30%, transparent), color-mix(in srgb, ${accent} 12%, transparent))`, boxShadow: `0 0 14px -2px color-mix(in srgb, ${accent} 55%, transparent), inset 0 1px 0 0 color-mix(in srgb, #FFFFFF 20%, transparent)`, color: accent }}
+      >
         <TileIcon className="h-[18px] w-[18px]" aria-hidden />
       </span>
       <div className="flex min-w-0 flex-col gap-[2px]">
@@ -135,20 +138,26 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
   const total = points.reduce((a, b) => a + b, 0);
   return (
     <figure className="m-0 flex flex-col gap-[6px]">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${total.toLocaleString("en-US")} students reached; peak ${max} in one day`} className="h-auto w-full" preserveAspectRatio="none" style={{ height }}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${total.toLocaleString("en-US")} students reached; peak ${max} in one day`} className="h-auto w-full overflow-visible" preserveAspectRatio="none" style={{ height }}>
         <defs>
           <linearGradient id={`fill-${id}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.38" />
+            <stop offset="0%" stopColor={accent} stopOpacity="0.5" />
+            <stop offset="55%" stopColor={accent} stopOpacity="0.12" />
             <stop offset="100%" stopColor={accent} stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id={`line-${id}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.7" />
+            <stop offset="100%" stopColor={accent} stopOpacity="1" />
           </linearGradient>
         </defs>
         {[0.25, 0.5, 0.75].map((t) => (
-          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
         ))}
         <path d={area} fill={`url(#fill-${id})`} />
-        <path d={line} fill="none" stroke={accent} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-        <circle cx={x(last)} cy={y(points[last])} r="5" fill={accent} stroke="#0e0c20" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-        <text x={Math.min(W - 40, Math.max(28, x(peak)))} y={Math.max(12, y(max) - 8)} textAnchor="middle" style={{ fontSize: 12, fontWeight: 700, fill: "rgba(255,255,255,0.85)", fontFamily: "var(--font-body)" }}>{max}</text>
+        <path d={line} fill="none" stroke={`url(#line-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 60%, transparent))` }} />
+        <circle cx={x(last)} cy={y(points[last])} r="9" fill={accent} opacity="0.25" />
+        <circle cx={x(last)} cy={y(points[last])} r="5" fill={accent} stroke="#0e0c20" strokeWidth="2" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 5px ${accent})` }} />
+        <text x={Math.min(W - 40, Math.max(28, x(peak)))} y={Math.max(12, y(max) - 8)} textAnchor="middle" style={{ fontSize: 12, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>{max}</text>
       </svg>
       <figcaption className="flex justify-between text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <span>{labels[0]}</span><span>{labels[1]}</span><span>{labels[2]}</span>
@@ -157,29 +166,185 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
   );
 }
 
-/** Progress toward a goal as a ring, the number inside. */
+/** Grouped vertical bars, no library -- the one chart shape AreaChart/Ring/
+ *  Meter don't already cover (category-by-series comparisons: readiness by
+ *  grade, logins by month). Each series gets its own accent and a swatch in
+ *  the legend row below; bars are drawn to `max` (percent charts pass 100,
+ *  count charts pass their own ceiling). A missing/zero value in a series
+ *  just draws no bar for that slot -- matches the reference's own "Gr. 9"
+ *  columns with nothing plotted yet. */
+export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%" }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string }) {
+  const id = useId().replace(/:/g, "");
+  const W = 600;
+  const H = height;
+  const padX = 16;
+  const padTop = 22;
+  const padBottom = 24;
+  const plotH = H - padTop - padBottom;
+  const groupW = (W - padX * 2) / Math.max(1, groups.length);
+  const barGap = 4;
+  const barW = Math.max(4, (groupW - barGap * (series.length + 1)) / Math.max(1, series.length));
+  const y = (v: number) => padTop + (1 - Math.max(0, Math.min(max, v)) / max) * plotH;
+  return (
+    <figure className="m-0 flex flex-col gap-[10px]">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Bar chart: ${series.map((s) => s.label).join(", ")} by ${groups.join(", ")}`} className="h-auto w-full overflow-visible" preserveAspectRatio="none" style={{ height }}>
+        <defs>
+          {series.map((s, si) => (
+            <linearGradient key={s.label} id={`bar-grad-${id}-${si}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={s.accent} stopOpacity="1" />
+              <stop offset="100%" stopColor={s.accent} stopOpacity="0.55" />
+            </linearGradient>
+          ))}
+        </defs>
+        {[0, 0.25, 0.5, 0.75, 1].map((t) => (
+          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * plotH} y2={padTop + t * plotH} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+        ))}
+        {groups.map((label, gi) => {
+          const groupX = padX + gi * groupW;
+          return (
+            <g key={label}>
+              {series.map((s, si) => {
+                const v = s.values[gi] ?? 0;
+                if (v <= 0) return null;
+                const barX = groupX + barGap + si * (barW + barGap);
+                const barY = y(v);
+                return (
+                  <g key={s.label}>
+                    <rect x={barX} y={barY} width={barW} height={H - padBottom - barY} fill={`url(#bar-grad-${id}-${si})`} rx={5} style={{ filter: `drop-shadow(0 0 8px color-mix(in srgb, ${s.accent} 55%, transparent))` }} />
+                    <rect x={barX} y={barY} width={barW} height={Math.min(3, H - padBottom - barY)} fill={s.accent} rx={1.5} opacity={0.9} />
+                    <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+                      {Math.round(v)}{valueSuffix}
+                    </text>
+                  </g>
+                );
+              })}
+              <text x={groupX + groupW / 2} y={H - 6} textAnchor="middle" style={{ fontSize: 11.5, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
+                {label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      {series.length > 1 && (
+        <div className="flex flex-wrap gap-x-[16px] gap-y-[4px]">
+          {series.map((s) => (
+            <span key={s.label} className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: s.accent }} />
+              {s.label}
+            </span>
+          ))}
+        </div>
+      )}
+    </figure>
+  );
+}
+
+/** Progress toward a goal as a ring, the number inside. A soft glow and a
+ *  gradient sweep (not a flat stroke) so the ring reads as lit, not drawn --
+ *  the same "glassy/glow" language the rest of the dashboard uses. */
 export function Ring({ pct, size = 84, stroke = 8, accent, children }: { pct: number; size?: number; stroke?: number; accent: string; children?: React.ReactNode }) {
+  const id = useId().replace(/:/g, "");
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, pct));
   return (
     <span className="relative inline-flex flex-none items-center justify-center" style={{ width: size, height: size }} role="img" aria-label={`${Math.round(clamped)} percent`}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 -rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={stroke} />
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={accent} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(clamped / 100) * c} ${c}`} />
+      <span aria-hidden className="absolute inset-[-14%] rounded-full opacity-70 blur-[16px]" style={{ background: `radial-gradient(circle, color-mix(in srgb, ${accent} 45%, transparent), transparent 70%)` }} />
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 -rotate-90 overflow-visible">
+        <defs>
+          <linearGradient id={`ring-grad-${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.65" />
+            <stop offset="100%" stopColor={accent} stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={`url(#ring-grad-${id})`}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${(clamped / 100) * c} ${c}`}
+          style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 70%, transparent))` }}
+        />
       </svg>
       <span className="relative text-center">{children}</span>
     </span>
   );
 }
 
-/** A fill meter: value of max, as a bar with the figure beside it. */
+/** A real multi-segment donut -- every category in the legend gets its own
+ *  drawn arc, sized to its share of the total, each with its own gradient
+ *  and glow. Replaces a single-value Ring wherever the number actually
+ *  breaks down into more than one category (Student Status, Postsecondary
+ *  Plans, Career Pathways, ...) -- a single green arc next to a 3-color
+ *  legend was misleading: only one of the three values was ever drawn. */
+export function SegmentedRing({ segments, size = 92, stroke = 10, children }: { segments: { value: number; color: string }[]; size?: number; stroke?: number; children?: React.ReactNode }) {
+  const id = useId().replace(/:/g, "");
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const total = Math.max(1, segments.reduce((sum, s) => sum + Math.max(0, s.value), 0));
+  const gapDeg = segments.filter((s) => s.value > 0).length > 1 ? 2.5 : 0;
+  const arcs = segments
+    .filter((s) => s.value > 0)
+    .reduce<{ color: string; value: number; key: string; arcLen: number; offset: number; cursorDeg: number }[]>((acc, s, i) => {
+      const cursorDeg = acc.length > 0 ? acc[acc.length - 1].cursorDeg : 0;
+      const frac = s.value / total;
+      const arcLen = Math.max(0, frac * c - (gapDeg / 360) * c);
+      const offset = -(cursorDeg / 360) * c;
+      acc.push({ ...s, key: `${s.color}-${i}`, arcLen, offset, cursorDeg: cursorDeg + frac * 360 });
+      return acc;
+    }, []);
+  return (
+    <span className="relative inline-flex flex-none items-center justify-center" style={{ width: size, height: size }} role="img" aria-label={segments.map((s) => `${s.value}`).join(", ")}>
+      {arcs.length > 0 && (
+        <span aria-hidden className="absolute inset-[-14%] rounded-full opacity-60 blur-[16px]" style={{ background: `radial-gradient(circle, color-mix(in srgb, ${arcs[0].color} 45%, transparent), transparent 70%)` }} />
+      )}
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 -rotate-90 overflow-visible">
+        <defs>
+          {arcs.map((a, i) => (
+            <linearGradient key={a.key} id={`seg-grad-${id}-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={a.color} stopOpacity="0.7" />
+              <stop offset="100%" stopColor={a.color} stopOpacity="1" />
+            </linearGradient>
+          ))}
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
+        {arcs.map((a, i) => (
+          <circle
+            key={a.key}
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            fill="none"
+            stroke={`url(#seg-grad-${id}-${i})`}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={`${a.arcLen} ${c}`}
+            strokeDashoffset={a.offset}
+            style={{ filter: `drop-shadow(0 0 5px color-mix(in srgb, ${a.color} 65%, transparent))` }}
+          />
+        ))}
+      </svg>
+      <span className="relative text-center">{children}</span>
+    </span>
+  );
+}
+
+/** A fill meter: value of max, as a bar with the figure beside it. A
+ *  gradient fill plus a soft glow so even a small inline bar reads as part
+ *  of the same lit-glass language as the bigger charts. */
 export function Meter({ value, max, accent, label }: { value: number; max: number; accent: string; label?: string }) {
   const pct = Math.max(0, Math.min(100, Math.round((value / Math.max(1, max)) * 100)));
   return (
     <span className="flex items-center gap-[8px]" aria-label={`${label ? label + ": " : ""}${value} of ${max}`}>
-      <span className="relative block h-[6px] w-[72px] overflow-hidden rounded-[3px]" style={{ background: "rgba(255,255,255,0.12)" }} aria-hidden>
-        <span className="absolute inset-y-0 left-0 rounded-[3px]" style={{ width: `${pct}%`, background: accent }} />
+      <span className="relative block h-[7px] w-[72px] overflow-hidden rounded-[4px]" style={{ background: "rgba(255,255,255,0.1)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)" }} aria-hidden>
+        <span
+          className="absolute inset-y-0 left-0 rounded-[4px]"
+          style={{ width: `${pct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 70%, transparent), ${accent})`, boxShadow: `0 0 8px color-mix(in srgb, ${accent} 65%, transparent)` }}
+        />
       </span>
       <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
         <strong className="font-extrabold" style={{ color: "var(--foreground)" }}>{value}</strong>/{max}{label ? ` ${label}` : ""}

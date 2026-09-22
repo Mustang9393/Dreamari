@@ -183,6 +183,13 @@ const DEMO_LINKS = [
   { label: "Staff", href: "/connect?admin=1&as=admin" },
 ] as const;
 
+// DEMO-ONLY: entry point into the separate Counselor Dashboard product --
+// its own isolated app (own sign-up/sign-in, own shell, no shared chrome
+// with the student app) by direct product decision, reachable for now only
+// from here since there's no real counselor-account/org onboarding yet.
+// Remove/replace once that exists. See docs/HANDOFF_INDEX.md.
+const COUNSELOR_LINKS = [{ label: "Counselor Dashboard", href: "/counselor" }] as const;
+
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
   const router = useRouter();
   return (
@@ -226,6 +233,18 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
           href={link.href}
           onClick={onNavigate}
           className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2h,10px)] text-[13px] leading-[18px] font-semibold tracking-[0.08em] uppercase transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+          style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+        >
+          {link.label}
+        </Link>
+      ))}
+      <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Counselor demo</span>
+      {COUNSELOR_LINKS.map((link) => (
+        <Link
+          key={link.label}
+          href={link.href}
+          onClick={onNavigate}
+          className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
           style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
         >
           {link.label}

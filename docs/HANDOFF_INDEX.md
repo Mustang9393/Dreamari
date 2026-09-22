@@ -70,9 +70,11 @@ file.
 | `DEMO_ALWAYS_SHOW_SPLASH` | `src/components/app/WelcomeSplash.tsx` | The welcome splash shows on every visit instead of once, and a plain refresh brings it back. |
 | `DEMO_CONNECT_SHORTCUT` | `src/components/play/SimulationPlayer.tsx` | A HUD button jumps straight to the Connect interstitial without replaying a level, for faster QA. |
 | `DEMO_LINKS` | `src/components/app/chrome.tsx` | The role-perspective quick links (Student / Attendee / Volunteer / Partner / Staff) shown from the nav. |
+| `COUNSELOR_LINKS` | `src/components/app/chrome.tsx` | The "Counselor Dashboard" quick link ("Counselor Demo" divider). Entry point into the separate `/counselor` product -- see below and `docs/AI_HANDOFF.md`, 22 Sept 2026. |
 
 ### Demo-only UI, not behind a single flag
 
+- **Counselor Dashboard** (`/counselor`, `/counselor/login`, `/counselor/signup`) -- `src/app/counselor/`, `src/components/counselor/`. A genuinely separate product from the student app (own shell, own sign-up/sign-in, no shared chrome), reachable only from the hamburger's "Counselor Demo" quick link since there's no real counselor-account/org onboarding yet. Reads real data where it exists (one live student, from this browser's own localStorage) inside an otherwise seeded 119-student roster -- see `src/lib/counselorRoster.ts`'s own header comment before treating any one row as real aggregate data, and `docs/AI_HANDOFF.md`, 22 Sept 2026 for the full rationale.
 - **Connect role switch** (`Student / Attendee / Volunteer / Partner / Staff`) and the `?as=` URL parameter, plus the volunteer picker row under it -- `src/components/connect/ConnectExperience.tsx` (search `DEMO-ONLY: role switcher`). Production has one role per signed-in user; there is no role-switching UI in production at all.
 - **AT&T board version chip** (`v1`/`v2`, `?v=2`) -- `src/components/connect/att/VersionChip.tsx` and its state in `ConnectExperience.tsx`. v1 is Joshua's Replit reference, faithfully ported; v2.0 is the reach-first rebuild. Both are real, neither is hidden; the chip is demo-only plumbing to compare them live. AT&T-specific changes only ship on explicit instruction naming AT&T.
 - **Profile Overview version chip** (`v1`/`v2`) -- `src/components/profile/ProfileExperience.tsx` (search `DEMO-ONLY, session-only`). Same pattern as the AT&T chip: both versions are real, the toggle is demo-only.
