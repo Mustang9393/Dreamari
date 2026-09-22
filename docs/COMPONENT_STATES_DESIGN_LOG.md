@@ -1079,6 +1079,57 @@ so not reachable today, but undefended against any future data gap.
 **Design**: one-line zero-guard on both the full-time and part-time rows,
 rendering "—" instead of "NaN%".
 
-## 9. Resume Builder
+## 9. Resume Builder (`src/components/resume/`)
 
-Status: not started
+Status: **Done** -- audited in full; genuinely in good shape already.
+
+**This feature had state-handling as an explicit design goal from the
+start**, confirmed by reading the code, not just the plan: `src/lib/
+resume.ts` normalizes every field on read (no trust in stored/URL
+shape); all three AI-backed routes (`resume-bullets`, `resume-tailor`,
+`resume-ats-check`) have real, working template/heuristic fallbacks when
+`ANTHROPIC_API_KEY` is absent (verified by reading the fallback code
+paths, not just the comments); the two examples
+`COMPONENT_STATES_PLAYBOOK.md`'s own quick-reference table already cites
+as canonical good patterns (`ExperienceModal.tsx:260`,
+`ATSCheckPanel.tsx:91`) plus the "ongoing check" retry pill
+(`ResumeBuilderExperience.tsx:411`) are intact and consistent with every
+other AI action's loading/error pattern elsewhere in the app; zero-
+education/zero-experience/zero-saved-resume all have real, dedicated
+empty-state UI (`ResumeExperience.tsx` "No resume yet", `wizardSteps.tsx`
+`EmptyStateAdd`, `TailorScreen.tsx`'s explicit "on file yet" copy); Save
+& Export is actually gated (`wizardSteps.tsx` `disabled={!complete}`) so
+a resume can't be exported empty; the `.docx` exporter guards every
+section with `.length > 0` and falls back to "Resume" for a blank name.
+No images anywhere in this feature, so the app-wide image-`onError` gap
+class doesn't apply here.
+
+| Component / state | Status | Notes |
+|---|---|---|
+| `?version=` URL param: bad id silently drops into the wizard | **Done, 22 Sept** | See below. |
+| AI action loading/error states (bullets, tailor, ATS check) | **Verified, already handled** | Matches this session's own established standard everywhere. |
+| Zero education/experience/saved-resume states | **Verified, already handled** | Real, dedicated empty-state UI throughout. |
+| `.docx` export with mostly-empty sections | **Verified, already handled** | Every section guarded, name falls back to "Resume". |
+
+### `?version=` URL param: bad id silently drops into the wizard -- Done, 22 Sept 2026
+
+**Why this matters**: `activeVersion` is read straight from the URL
+(`?version=`) with no validation beyond a null-safe `.find() ?? null`. A
+stale bookmark, a deleted resume, or a hand-edited link matching no saved
+version fell through every `view === ...` branch (none of them match
+`"version"` once `activeVersion` is null) and landed on the full
+multi-step wizard at step 0 -- silently, with no message that the
+requested resume wasn't found. Doesn't crash (unlike Profile's old
+`?picks=` bug, since `activeVersion` was already null-safe), but the same
+confusing-dead-end class already fixed this session in Profile and
+Connect.
+
+**Design**: routes back to the resume list (`ResumeExperience`, the
+`view === "list"` shell) instead of inventing a new not-found screen --
+this feature's own natural "nothing to show here" destination, which
+already has real empty/populated states of its own.
+
+**Verified live**: `/resume-builder?view=version&version=totally-bogus-id`
+now lands on "Saved Resumes" showing its existing "No resume yet" empty
+state, instead of silently opening the wizard (screenshotted). No console
+errors beyond the known, already-investigated telemetry noise.

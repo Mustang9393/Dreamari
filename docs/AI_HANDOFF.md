@@ -12273,3 +12273,58 @@ reachable with today's data, defensive only).
 
 Next step: continue to Resume Builder (`src/components/resume/`), the
 last of the 9 priority areas. Not pushed -- awaiting go-ahead.
+
+### 2026-09-22 Resume Builder: audited (last of 9 priority areas) -- one real gap, everything else already solid
+
+Completing the design-log priority order: Match, Career Detail, Build,
+Explore, Profile, Play, Connect, Colleges, and now Resume Builder --
+**all 9 areas are closed** in `docs/COMPONENT_STATES_DESIGN_LOG.md`.
+
+Resume Builder audited in full and found genuinely in good shape already
+-- state-handling was clearly a design goal from the start of this
+feature, not something retrofitted today. Verified (by reading the actual
+code, not trusting the plan): `src/lib/resume.ts` normalizes every field
+on read; all three AI routes (bullets, tailor, ATS check) have real
+template/heuristic fallbacks when `ANTHROPIC_API_KEY` is absent; the
+playbook's own two canonical loading/error examples
+(`ExperienceModal.tsx:260`, `ATSCheckPanel.tsx:91`) are intact; zero-
+education/experience/saved-resume states all have real empty-state UI;
+Save & Export is gated so nothing empty can be exported; the `.docx`
+exporter guards every section.
+
+**One real gap closed**: `?version=` was read straight from the URL with
+no validation -- a bad id fell through every view branch and silently
+landed on the full wizard at step 0, no message that the requested resume
+wasn't found. Same class already fixed in Profile (`?picks=`) and Connect
+(`?pro=`/`?board=`/etc.). Now routes back to the resume list (this
+feature's own natural fallback destination, with its own real empty
+state) instead of a confusing silent wizard restart. Verified live:
+`/resume-builder?view=version&version=totally-bogus-id` now lands on
+"Saved Resumes" showing "No resume yet" instead of opening the wizard.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean.
+
+**Milestone**: the full "every state for every component" sweep across
+all 9 priority areas is done for this pass. Cross-cutting totals across
+the session: every missing/failed-image gap closed feature-by-feature
+(Match's CareerPhoto, Career Detail's HeroPhoto, Build's DreamySprite/
+QuestionSprite, Explore's app-wide PosterPhoto via PosterCard covering 7
+importers, Profile's ProfilePhoto/StudentAvatarImage, Play's CoverPhoto/
+DreamyFace, Connect's AvatarImage/CoverImage/CommunityCover/
+CommunityThumb, Colleges' four bespoke image sites); the dead-space-grid
+bug fixed 6x (Match, Career Detail, Explore, Profile, Connect, Colleges);
+three genuine dead-end/crash-risk bugs fixed from unvalidated URL params
+(Profile's `?picks=` -- the highest-severity finding of the session,
+Connect's `?pro=`/`?board=`/etc., Resume Builder's `?version=`); two NaN/
+divide-by-zero guards (Play, Colleges); Build's silent data-wipe bug and
+two other out-of-scope issues flagged separately rather than folded in.
+Remaining open items are logged per-section in the design log's own
+"deliberately NOT fixed here" notes (lower-priority/consistency-only,
+explicitly not silently skipped).
+
+Next step: none pending from this priority list. Broader "every
+component" scope remains open per the design log's own honesty note (139
+component files total) -- resume at Build/Explore/Profile/Play/Connect/
+Colleges/Resume Builder's own sub-components not yet individually
+audited, or continue wherever directed next. Not pushed -- awaiting
+go-ahead.

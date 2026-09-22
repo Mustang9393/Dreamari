@@ -703,6 +703,26 @@ function ResumeBuilderInner() {
     );
   }
 
+  // Custom-designed edge case, 22 Sept 2026: `versionId` is read straight
+  // from the URL (`?version=`) with no validation -- a stale bookmark, a
+  // deleted resume, or a hand-edited link that matches no saved version
+  // used to fall through every `view === ...` branch below (none of them
+  // match `"version"`) and land on the full multi-step wizard at step 0,
+  // silently, with no message that the requested resume wasn't found.
+  // Same bug class already fixed this session in Profile (?picks=) and
+  // Connect (?pro=/?board=/etc.) -- doesn't crash (activeVersion is
+  // already null-safe), but a confusing dead end. Routes back to the
+  // resume list -- this feature's own natural "nothing to show here"
+  // destination, which already has its own empty/populated states --
+  // rather than inventing a new not-found screen.
+  if (view === "version") {
+    return (
+      <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active="saved" router={router} onClose={backToProfile} />}>
+        <ResumeExperience />
+      </Shell>
+    );
+  }
+
   if (view === "document") {
     // "Your Resume" used to be a version-less document, which silently lost
     // every version tool (ATS Check, Tailor, Edit Sections -- direct
