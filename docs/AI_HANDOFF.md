@@ -12120,3 +12120,44 @@ copy have diverged wording (a copy nit, not a functional gap).
 
 Next step: continue to Profile (`src/components/profile/`), next in
 priority order. Not pushed -- awaiting go-ahead.
+
+### 2026-09-22 Profile: fixed a real crash risk plus four more state/edge-case gaps
+
+Continuing the design-log priority order after Match/Career Detail/Build/
+Explore. Audited `ProfileExperience.tsx` in full.
+
+**Highest-severity finding of any area audited so far**: `base`'s
+`fromHandoff` branch trusted `?picks=`/`?focus=` URL params completely
+unfiltered (only trimmed/deduped/capped by `parsePicksParam`, never
+checked against the real catalog), while the `stored.ids` branch two
+lines below already validates. Several call sites read a Top3 id with a
+non-null assertion (`careerById(id)!`) -- a stale bookmark or a renamed/
+removed career throws on the null read, and with no error boundary
+anywhere in the app, that blanks the entire Profile page. Fixed by
+filtering the handoff branch the same way the stored branch already is,
+falling through to the student's real saved picks if every handed-off id
+was bad. Verified live: `/profile?picks=totally-bogus-career-id-xyz` now
+loads normally instead of crashing.
+
+**Four more real gaps closed**:
+- `OverviewTabV2` used to `return null` for a zero-Top3 student (the
+  always-visible v1/v2 toggle isn't demo-gated) -- extracted v1's existing
+  empty state into a shared `NothingSavedYet`, now used by both. Verified
+  live by removing both of the demo student's Top3 picks through the real
+  UI and confirming the empty state renders.
+- Top3's grid was a fixed `md:grid-cols-3` with no minimum -- 1-2 picks
+  left dead grid space. Column count now matches the real count. Verified
+  live against the demo student's real 2-pick state.
+- Top3/Locker/Add-to-Top3-sheet career photos had no `onError` handling --
+  a distinct gap from Explore's app-wide `PosterCard` fix, since
+  `PosterCard` isn't imported into this file. New shared `ProfilePhoto`.
+  Verified live with a temporarily broken photo path.
+- The student's own avatar (shown on every Profile visit, can be a
+  localStorage-persisted override with no existence check) had no
+  `onError` handling either -- new `StudentAvatarImage`, keyed by src.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean throughout (one pre-
+existing unrelated warning, not a regression).
+
+Next step: continue to Play (`src/components/play/`), next in priority
+order. Not pushed -- awaiting go-ahead.

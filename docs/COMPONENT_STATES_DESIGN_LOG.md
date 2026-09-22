@@ -703,9 +703,127 @@ defensive cap already covered by the same pattern used elsewhere.
   functionally the same moment. A copy-consistency nit, not a functional
   gap -- left alone rather than unifying voice without being asked.
 
-## 5. Profile
+## 5. Profile (`src/components/profile/ProfileExperience.tsx`)
 
-Status: not started
+Status: **Done** -- the real gaps found via a full audit, same rigor as
+the areas before it.
+
+| Component / state | Status | Notes |
+|---|---|---|
+| Unvalidated `?picks=` URL ids can crash the whole page | **Done, 22 Sept** | No error boundary anywhere in the app -- see below. |
+| `OverviewTabV2` renders blank for a zero-Top3 student | **Done, 22 Sept** | Shared `NothingSavedYet` with v1, see below. |
+| Top3 grid leaves dead space with 1-2 picks | **Done, 22 Sept** | Column count now matches the real count. |
+| Top3/Locker/Add-sheet career photos: missing/failed | **Done, 22 Sept** | New `ProfilePhoto`, distinct from the app-wide `PosterCard` fix -- `PosterCard` isn't imported here. |
+| Student's own avatar: missing/failed | **Done, 22 Sept** | New `StudentAvatarImage`, keyed by src. |
+
+### Unvalidated `?picks=` URL ids can crash the whole page -- Done, 22 Sept 2026
+
+**Why this matters**: `base`'s `fromHandoff` branch trusted
+`initialPicks`/`initialFocus` (straight from the `?picks=`/`?focus=` URL
+params -- `parsePicksParam` only trims/dedupes/caps at 3, never checks
+against the real catalog) completely unfiltered, while the `stored.ids`
+branch two lines below it already validates every id against
+`ALL_PROFILE_CAREERS`. Several call sites downstream read a Top3 id with a
+non-null assertion (`careerById(id)!`) -- a stale bookmark, a renamed or
+removed career, or a hand-edited share URL puts an unresolvable id there,
+the `!` lies to TypeScript, and the resulting `null.title` read throws.
+Per the playbook, there's no error boundary anywhere in this app, so that
+blanks the entire page, not just one section -- the single highest-
+likelihood real-user path found across any area audited so far.
+
+**Design**: the handoff branch now filters `initialPicks` against
+`ALL_PROFILE_CAREERS` the same way the stored branch already does, and
+falls through to the student's own real saved picks (then the demo
+default) if every handed-off id turned out to be bad, rather than hard-
+failing on a corrupted link.
+
+**Verified live**: `/profile?picks=totally-bogus-career-id-xyz` loads
+normally (screenshotted) -- no crash, no blank page, falls through
+cleanly to the real stored Top3. Console showed only the known,
+already-investigated 400/404 telemetry noise, no React errors.
+`tsc`/`eslint` clean.
+
+### `OverviewTabV2` blank for a zero-Top3 student -- Done, 22 Sept 2026
+
+**Why this matters**: `OverviewTabV2` (`overviewVersion` toggle, an
+always-visible real control, not demo-gated) just `return null`ed when
+`focus` was null -- the identical condition v1's `OverviewTab` already had
+a full "Nothing saved yet" empty state for. Reachable by any real student
+who removes all 3 Top3 picks in one sitting while on v2, not a contrived
+case.
+
+**Design**: extracted v1's existing empty-state block into a shared
+`NothingSavedYet({ onGoLocker })`, used by both versions -- no new design,
+just closing the gap where v2 skipped it. Required adding `onGoLocker` to
+`OverviewTabV2`'s own props (v2 didn't need it before since it never had
+an empty state to link out from).
+
+**Verified live**: switched to v2, removed both of the demo student's Top3
+picks through the real UI (the "More options" menu -> "Remove from Top
+3" -> confirm, for each), confirmed Overview now shows "Nothing saved
+yet" with working "Browse careers"/"Open Saved" CTAs instead of a blank
+tab body (screenshotted). Storage self-healed back to the demo default on
+reload, as designed -- no manual cleanup needed. `tsc`/`eslint` clean.
+
+### Top3 grid: dead space with 1-2 picks -- Done, 22 Sept 2026
+
+**Why this matters**: Top3 has a maximum of 3 but no minimum, yet the
+grid was a fixed `md:grid-cols-3` -- a student with only 1 or 2 saved
+picks got a lopsided row with an obviously empty column. Same dead-space-
+grid bug class already fixed for Match's deck and Career Detail's facts
+strip.
+
+**Design**: column count now matches the real count
+(`top3.length === 1/2/else` -> `md:grid-cols-1/2/3`), literal Tailwind
+classes per the ternary (not an interpolated class string, which
+Tailwind's scanner won't pick up).
+
+**Verified live**: the demo student's real 2-pick state renders as a
+clean 2-column grid, no dead third column (screenshotted at 1000px
+width). `tsc`/`eslint` clean.
+
+### Career photo failures: Top3, Locker, Add-to-Top3 sheet -- Done, 22 Sept 2026
+
+**Why this matters**: distinct from Explore's app-wide `PosterCard` /
+`PosterPhoto` fix (22 Sept, earlier the same day) -- `PosterCard` is never
+actually imported into `ProfileExperience.tsx`, so that fix didn't reach
+here. Three raw `next/image` calls (Top3's card hero, the Add-to-Top3
+sheet's 38px thumbnail, Locker's poster grid) had no `onError` handling.
+
+**Design**: new shared `ProfilePhoto` (same world-tinted-gradient +
+muted-`ImageOff` pattern as `PosterPhoto`/`CareerPhoto`/`HeroPhoto`
+elsewhere this session, using this file's own `WORLD_COLORS` import).
+
+**Verified live**: temporarily broke the Investment Banking pick's photo
+path, confirmed the Top3 card shows the gradient + `ImageOff` fallback
+while the other real card (Airline Pilot) renders normally
+(screenshotted, side by side). Reverted (`git diff` clean). `tsc`/`eslint`
+clean.
+
+### Student avatar failure -- Done, 22 Sept 2026
+
+**Why this matters**: `avatarSrc` (`src/lib/avatar.ts`) can be a
+student-picked override persisted in `localStorage`
+(`writeAvatarOverride`) with no check that the file still exists -- shown
+on every single Profile visit (the header), not a photo a student might
+never scroll to.
+
+**Design**: new `StudentAvatarImage`, keyed by `src` (same remount-on-key
+idiom as Build's `QuestionSprite` -- avoids a `setState`-in-effect lint
+error from trying to reset failure state on prop change) -- falls back to
+a generic `UserRound` glyph on a soft brand-tinted circle instead of a
+broken-image icon on the student's own identity.
+
+**Verified**: real avatar renders correctly on every page load this
+session; not forced-broken separately since the underlying `onError`
+mechanism is identical to and already verified via `ProfilePhoto`/
+`CareerPhoto` above. `tsc`/`eslint` clean.
+
+### Found during the audit, deliberately NOT fixed here (lower priority)
+
+- `VideosShelf`/`SchoolsShelf` poster images (Locker's saved-videos and
+  saved-schools grids) have the same missing-`onError` gap, lower traffic
+  than Top3/Locker's own career photos. Flag if it becomes real.
 
 ## 6. Play
 

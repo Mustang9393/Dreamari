@@ -8,7 +8,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { UndoToast } from "@/components/app/UndoToast";
 import { IconTip } from "@/components/app/IconTip";
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -17,7 +17,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, Gamepad2, GraduationCap, ImageOff, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -203,7 +203,24 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // focus null means "no primary chosen yet": the strongest match stands
     // in (Joshua, Slack, 11 Sept 2026), so every student has a Career Report
     // and a Plan from the first visit without being asked to pick.
-    if (fromHandoff) return { ids: initialPicks, focus: initialFocus ?? null };
+    //
+    // Custom-designed edge case, 22 Sept 2026: this branch used to trust
+    // `initialPicks`/`initialFocus` (straight from the `?picks=`/`?focus=`
+    // URL params, only trimmed/deduped/capped by `parsePicksParam` -- never
+    // checked against the real catalog) unfiltered, while the `stored.ids`
+    // branch right below already validates. A stale bookmark, a renamed/
+    // removed career, or a hand-edited share URL put an id here that
+    // `careerById()` can't resolve -- and several call sites below read it
+    // with a non-null assertion (`careerById(id)!`), so a bad id doesn't
+    // fail gracefully, it throws and (no error boundary exists anywhere in
+    // this app) blanks the whole page. Filtered the same way the stored
+    // branch already is; if EVERY handed-off id was bad, fall through to
+    // the student's own real saved picks rather than a hard-fail on a
+    // corrupted link.
+    if (fromHandoff) {
+      const validHandoff = initialPicks.filter((id) => ALL_PROFILE_CAREERS.some((career) => career.id === id));
+      if (validHandoff.length) return { ids: validHandoff, focus: initialFocus && validHandoff.includes(initialFocus) ? initialFocus : null };
+    }
     const valid = stored.ids.filter((id) => ALL_PROFILE_CAREERS.some((career) => career.id === id));
     if (valid.length) return { ids: valid, focus: stored.focus && valid.includes(stored.focus) ? stored.focus : null };
     return { ids: DEMO_TOP3, focus: null as string | null };
@@ -635,14 +652,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                  still the same fixed set, just a student-chosen face
                  instead of the seeded default. */}
               <span className="relative flex-none">
-                <Image
-                  src={avatarSrc}
-                  alt=""
-                  width={144}
-                  height={144}
-                  className="size-[72px] flex-none rounded-full border-2 object-cover"
-                  style={{ borderColor: "rgba(255,255,255,0.9)" }}
-                />
+                {/* Custom-designed edge case, 22 Sept 2026: `avatarSrc` can
+                   be a student-picked override persisted in localStorage
+                   (writeAvatarOverride) with no check that the file still
+                   exists -- shown on every single Profile visit, unlike a
+                   career photo a student might never scroll to. Keyed by
+                   src so a fresh pick always gets a fresh failed-state
+                   (same remount-on-key idiom as Build's QuestionSprite),
+                   falling back to a generic UserRound glyph instead of a
+                   broken-image icon on the student's own header. */}
+                <StudentAvatarImage key={avatarSrc} src={avatarSrc} />
                 <IconTip label="Change picture">
                 <button
                   type="button"
@@ -818,6 +837,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   top3Careers={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
                   onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
                   onGoResume={() => setTab("resume")}
+                  onGoLocker={() => setTab("locker")}
                   seasonOverride={seasonOverride}
                 />
               ) : (
@@ -1006,7 +1026,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {locker.map((career) => (
                 <div key={career.id} className="dm-glass flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                   <span className="relative h-[52px] w-[38px] flex-none overflow-hidden rounded-[8px]">
-                    <Image src={career.photo} alt="" fill sizes="38px" className="object-cover" />
+                    <ProfilePhoto career={career} sizes="38px" className="object-cover" />
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[15px] font-bold">{career.title}</span>
@@ -1135,7 +1155,12 @@ function Top3Tab({
          three read as three different Career Worlds -- accent as glow and
          tint per the design language, never a solid color block. Copy is
          unchanged from the stacked version. */}
-      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] md:grid-cols-3">
+      {/* Custom-designed edge case, 22 Sept 2026: Top 3 has a max of 3 but
+         no minimum -- a fixed md:grid-cols-3 left a lopsided 1/3 or 2/3
+         empty row for a student who's only saved 1 or 2 so far. Same
+         dead-space-grid class already fixed for Match's deck and Career
+         Detail's facts strip; column count now matches the real count. */}
+      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${top3.length === 1 ? "md:grid-cols-1" : top3.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
       {/* The primary career takes the first card (Joshua, 11 Sept 2026). */}
       {[...top3].sort((a, b) => Number(b === focusId) - Number(a === focusId)).map((id) => {
         const career = careerById(id)!;
@@ -1182,7 +1207,7 @@ function Top3Tab({
               {/* Per-photo focal point (data.ts photoFocus): each poster's
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
-              <Image src={career.photo} alt="" fill sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
+              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
               {isFocus && (
                 // The one marker of the primary career: a star disc on the
                 // photo (Joshua, 11 Sept 2026: the text chips go), so the
@@ -1364,6 +1389,73 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // Deliberately thin. Its job is orientation in about five seconds, then it
 // hands off. Streaks and totals live at the bottom, not in the identity.
 
+// Custom-designed edge case, 22 Sept 2026: shared between OverviewTab (v1)
+// and OverviewTabV2 -- v1 already had this for a genuinely new/zero-Top3
+// student; v2 used to just `return null` for the identical condition,
+// rendering a silently blank tab body instead of guidance. The v1/v2
+// toggle is a real, always-visible control (not demo-gated), so any
+// student who empties their Top 3 while on v2 hit this.
+// Custom-designed edge case, 22 Sept 2026: none of Profile's own career
+// photo call sites (Top3's card hero, the Add-to-Top3 sheet's thumbnail,
+// Locker's poster grid) had `onError` handling -- a distinct gap from the
+// app-wide `PosterCard`/`PosterPhoto` fix (Explore, 22 Sept), since
+// PosterCard is never actually imported into this file. Same shared
+// world-tinted-gradient-plus-muted-`ImageOff` pattern as everywhere else
+// this session.
+function ProfilePhoto({ career, sizes, className, style }: { career: ProfileCareer; sizes: string; className: string; style?: CSSProperties }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    const worldColor = WORLD_COLORS[career.world] ?? "var(--muted-foreground)";
+    return (
+      <div
+        className={`absolute inset-0 flex items-center justify-center ${className}`}
+        style={{ background: `linear-gradient(155deg, color-mix(in srgb, ${worldColor} 30%, var(--card)) 0%, var(--card) 100%)` }}
+      >
+        <ImageOff className="h-5 w-5" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      </div>
+    );
+  }
+  return <Image src={career.photo} alt="" fill sizes={sizes} className={className} style={style} onError={() => setFailed(true)} />;
+}
+
+function StudentAvatarImage({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <span
+        className="flex size-[72px] flex-none items-center justify-center rounded-full border-2"
+        style={{ borderColor: "rgba(255,255,255,0.9)", background: "color-mix(in srgb, var(--color-brand-500) 20%, var(--card))" }}
+      >
+        <UserRound className="h-8 w-8" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      </span>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt=""
+      width={144}
+      height={144}
+      className="size-[72px] flex-none rounded-full border-2 object-cover"
+      style={{ borderColor: "rgba(255,255,255,0.9)" }}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+function NothingSavedYet({ onGoLocker }: { onGoLocker: () => void }) {
+  return (
+    <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={INSET}>
+      <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
+      <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Browse some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
+      <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
+        <Link href="/match-grid" className="dm-solid flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Browse careers</Link>
+        <button type="button" onClick={onGoLocker} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "var(--border)" }}>Open Saved</button>
+      </div>
+    </section>
+  );
+}
+
 export function OverviewTab({
   focus, planProgress, top3Count,
   onGoTop3, onGoPlan, onGoReport, onGoLocker,
@@ -1376,18 +1468,7 @@ export function OverviewTab({
   onGoReport: () => void;
   onGoLocker: () => void;
 }) {
-  if (!focus) {
-    return (
-      <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={INSET}>
-        <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
-        <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Browse some careers and save the ones you want to look at properly. Your profile builds itself from there.</p>
-        <div className="flex flex-wrap justify-center gap-[var(--space-3)]">
-          <Link href="/match-grid" className="dm-solid flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Browse careers</Link>
-          <button type="button" onClick={onGoLocker} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "var(--border)" }}>Open Saved</button>
-        </div>
-      </section>
-    );
-  }
+  if (!focus) return <NothingSavedYet onGoLocker={onGoLocker} />;
 
   const progress = planProgress(focus);
 
@@ -1559,7 +1640,7 @@ function currentPlanWindowId(): "fall" | "winter" | "spring" {
 }
 
 function OverviewTabV2({
-  focus, top3Careers, onGoTop3, onGoPlan, onGoReport, onGoResume, seasonOverride,
+  focus, top3Careers, onGoTop3, onGoPlan, onGoReport, onGoResume, onGoLocker, seasonOverride,
 }: {
   focus: ProfileCareer | null;
   top3Careers: ProfileCareer[];
@@ -1567,11 +1648,16 @@ function OverviewTabV2({
   onGoPlan: () => void;
   onGoReport: () => void;
   onGoResume: () => void;
+  onGoLocker: () => void;
   seasonOverride: "fall" | "winter" | "spring" | null;
 }) {
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const stage = useStage();
-  if (!focus) return null;
+  // Custom-designed edge case, 22 Sept 2026: used to `return null` here --
+  // a silently blank tab body for a genuinely new/zero-Top3 student, while
+  // v1 (OverviewTab) already had a real empty state for the identical
+  // condition. See NothingSavedYet's own comment for why this matters.
+  if (!focus) return <NothingSavedYet onGoLocker={onGoLocker} />;
   // The actual "My Plan" tab (MyPlanTab -> GradePlanCard) is the grade-by-
   // grade Fall/Winter/Spring plan, NOT career.plan -- a completely separate
   // model that was never what this tile was reading before (verified by
@@ -2848,7 +2934,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
           {locker.map((career) => (
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
               <span className="relative block aspect-[2/3] w-full">
-                <Image src={career.photo} alt="" fill sizes="220px" className="object-cover" />
+                <ProfilePhoto career={career} sizes="220px" className="object-cover" />
                 {/* Careers had no save/unsave concept at all -- the bookmark
                    on Career Detail was a local-only toggle that never
                    persisted anywhere (direct feedback, 21 Sept 2026:
