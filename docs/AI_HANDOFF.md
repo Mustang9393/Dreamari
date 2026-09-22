@@ -38,6 +38,14 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-23 Counselor Dashboard Overview: first-row tiles restack (ring on top, bigger; Career Pathways swapped to a ranked bar list)
+
+Direct instruction: "the graph has to be bigger and on top, the other info below. The career pathways tile can have a different graph or something if needed." The three Overview tiles (`Overview.tsx`) previously laid the ring and its legend out side by side at a fairly small 92px ring size -- restacked vertically (ring centered on top, legend below it) and the ring grown to 152px (stroke 11px -> 17px) so it reads as the card's headline number, with the legend as supporting detail underneath.
+
+Career Pathways has 7 categories, which at this larger ring size would be mostly illegible hairline slivers -- replaced with a new `PathwaysCard` component: a ranked horizontal-bar list (already sorted, most-common pathway first), each row a label, its count, and a bar proportional to its share of the roster. `SegmentedRing` still backs `DonutCard` (Student Status, Postsecondary Plans), just no longer used for Career Pathways.
+
+Verified live at desktop and 375x812 (mobile) -- both DonutCards and the new PathwaysCard hold equal card height via the existing grid, ring glow/legend dots render correctly at the larger size, pathway bars scale proportionally. `npx tsc --noEmit -p .` and `npx eslint` clean.
+
 ### 2026-09-23 Explore For You card: real swipe + paced autoplay between Summary/Details, redesigned scrim, hierarchy and legibility pass
 
 Direct request, following a round of artifact mockups reviewed and iterated together: the For You reel card's tap-to-flip (Summary <-> Details) wasn't discoverable ("its not understood that i can swipe or tap anywhere"), and a string of follow-up corrections landed the final design. Recorded here as one entry since the corrections built directly on each other in the same session.

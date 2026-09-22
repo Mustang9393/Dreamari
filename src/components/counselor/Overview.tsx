@@ -30,30 +30,62 @@ function StatRow({ label, value, color }: { label: string; value: number; color:
   );
 }
 
+// Ring on top, bigger, legend stacked below it -- not side-by-side at the
+// old 92px size (direct instruction, 23 Sept 2026: "the graph has to be
+// bigger and on top, the other info below"). Centered so the ring reads as
+// the card's headline number, same job a hero stat does elsewhere in this
+// dashboard, with the legend as supporting detail underneath it.
 function DonutCard({ title, centerPct, centerLabel, rows }: { title: string; centerPct: number; centerLabel: string; rows: { label: string; value: number; color: string }[] }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
-      <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        {/* Plain text title, no icon badge -- the reference's own card
-           header is just a heading, nothing else (direct instruction:
-           align composition to the reference 1:1). min-height still
-           covers 2 lines so "Postsecondary Plans" wrapping doesn't throw
-           off the ring's vertical position relative to its neighbors. */}
-        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)", minHeight: 38 }}>{title}</h2>
-        <div className="flex items-center gap-[var(--space-5)]">
+      <div className="flex h-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
+        <div className="flex flex-col items-center gap-[var(--space-5)]">
           {/* Every category in the legend below gets its own drawn arc here
              -- not a single accent-colored ring next to an unrelated
              multi-color legend (direct feedback: "only one color is being
              represented when there's more colors in the legend"). */}
-          <SegmentedRing segments={rows.map((r) => ({ value: r.value, color: r.color }))} size={92} stroke={11}>
+          <SegmentedRing segments={rows.map((r) => ({ value: r.value, color: r.color }))} size={152} stroke={17}>
             <span className="flex flex-col items-center">
-              <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{Math.round(centerPct)}%</span>
-              <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{centerLabel}</span>
+              <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{Math.round(centerPct)}%</span>
+              <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{centerLabel}</span>
             </span>
           </SegmentedRing>
-          <div className="flex min-w-0 flex-1 flex-col gap-[6px]">
+          <div className="flex w-full flex-col gap-[8px]">
             {rows.map((r) => <StatRow key={r.label} {...r} />)}
           </div>
+        </div>
+      </div>
+    </HoverBeam>
+  );
+}
+
+// Career Pathways gets a ranked bar list instead of the same ring -- with 7
+// categories a donut this size would be mostly hairline slivers, illegible
+// at a glance (direct instruction: "the career pathways tile can have a
+// different graph or something if needed"). A ranked bar reads its own
+// order (already sorted, most-common pathway first) the way a ring can't.
+function PathwaysCard({ total, topPathways, colors }: { total: number; topPathways: [string, number][]; colors: string[] }) {
+  return (
+    <HoverBeam strength={0.7} className="h-full">
+      <div className="flex h-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways</h2>
+        <div className="flex flex-col justify-center gap-[10px]">
+          {topPathways.map(([label, value], i) => {
+            const pct = total > 0 ? (value / total) * 100 : 0;
+            const color = colors[i % colors.length];
+            return (
+              <div key={label} className="flex flex-col gap-[4px]">
+                <span className="flex items-center justify-between gap-[8px] text-[12.5px] font-semibold">
+                  <span className="min-w-0 truncate" style={{ color: "var(--foreground)" }}>{label}</span>
+                  <span className="flex-none tabular-nums" style={{ color: "var(--muted-foreground)" }}>{value}</span>
+                </span>
+                <span className="block h-[7px] w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                  <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </HoverBeam>
@@ -111,24 +143,7 @@ export function Overview() {
             { label: "Undecided", value: undecided, color: "#5B6470" },
           ]}
         />
-        <HoverBeam strength={0.7} className="h-full">
-          <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)", minHeight: 38 }}>Career Pathways</h2>
-            <div className="flex items-center gap-[var(--space-5)]">
-              <SegmentedRing segments={topPathways.map(([, value], i) => ({ value, color: pathwayColors[i % pathwayColors.length] }))} size={92} stroke={11}>
-                <span className="flex flex-col items-center">
-                  <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{total}</span>
-                  <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students</span>
-                </span>
-              </SegmentedRing>
-              <div className="flex min-w-0 flex-1 flex-col gap-[6px]">
-                {topPathways.map(([label, value], i) => (
-                  <StatRow key={label} label={label} value={value} color={pathwayColors[i % pathwayColors.length]} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </HoverBeam>
+        <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} />
       </div>
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
