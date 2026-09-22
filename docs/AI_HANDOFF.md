@@ -12625,3 +12625,40 @@ Suite's two Generate Draft buttons, Student Profile's note-save button, My
 Impact's export button, and Counselor Connect's three post/respond buttons.
 Added the missing fill classes to all 11. `tsc`/`eslint` clean, verified live
 on Review Queue and Productivity Suite.
+
+### 2026-09-22 Counselor Dashboard: Student Progress charts rebuilt to match reference 1:1
+
+Checked all 9 report types against the live reference (clicked through each
+one). Found the chart shape itself was wrong, not just styling: every report
+rendered the same generic "% approved by grade, grouped bar" chart. The
+reference actually draws a different, report-specific chart per type --
+mostly a single aggregate bar per status/outcome category across the whole
+filtered roster (e.g. Career Report Completion: approved / pending review /
+in progress / overdue), not grouped by grade at all. Two exceptions:
+Students Needing Intervention IS grade-grouped (At Risk count per grade),
+and two report types (Application Progress, Financial Aid Progress) render
+no chart at all on the reference -- just the filters and summary table --
+so ours now matches that too instead of showing an invented chart.
+
+Also wrong: the "Summary by Grade" table below the chart was showing
+"Total Students" + the selected report's own metric, recomputed per report.
+On the reference it's a constant 4-row table (Total Students / On Track /
+Needs Attention / At Risk) that never changes with the report picker --
+fixed to match.
+
+Each report's categories are computed from real roster fields (milestone
+status per key, postsecondaryIntent, at-risk status by grade) rather than
+invented -- see the per-report `chart()` functions in StudentProgress.tsx.
+Counselor Review Activity's categories don't map to any single roster field
+on the reference itself (it reads like a recent-activity log, which this
+prototype has no real analog for), so those five bars are derived from
+pending-review / changes-requested counts on the relevant milestones --
+closest honest approximation, flagged in a comment.
+
+Added `barColors` to the shared `BarChart` primitive (`connect/viz.tsx`) to
+support this: one full-width, distinctly-colored bar per category for a
+single-series chart, instead of the existing per-series coloring. Backward
+compatible -- every other `BarChart` caller (Overview, Milestone Tracker's
+neighbors) is unaffected.
+
+`tsc`/`eslint` clean. Verified live: all 9 report types, desktop and mobile.

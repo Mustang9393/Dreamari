@@ -173,7 +173,7 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
  *  count charts pass their own ceiling). A missing/zero value in a series
  *  just draws no bar for that slot -- matches the reference's own "Gr. 9"
  *  columns with nothing plotted yet. */
-export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%" }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string }) {
+export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%", barColors }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string; barColors?: string[] }) {
   const id = useId().replace(/:/g, "");
   const W = 600;
   const H = height;
@@ -183,24 +183,58 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
   const plotH = H - padTop - padBottom;
   const groupW = (W - padX * 2) / Math.max(1, groups.length);
   const barGap = 4;
-  const barW = Math.max(4, (groupW - barGap * (series.length + 1)) / Math.max(1, series.length));
+  // barColors: one full-width, distinctly colored bar per group instead of
+  // series.length bars -- for a single-series chart where each category
+  // (not each series) carries its own meaning/color, e.g. a status
+  // breakdown (approved/pending/overdue). Only meaningful with one series.
+  const perGroupColor = barColors && series.length === 1;
+  const barW = perGroupColor ? Math.max(4, groupW - barGap * 2) : Math.max(4, (groupW - barGap * (series.length + 1)) / Math.max(1, series.length));
   const y = (v: number) => padTop + (1 - Math.max(0, Math.min(max, v)) / max) * plotH;
   return (
     <figure className="m-0 flex flex-col gap-[10px]">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Bar chart: ${series.map((s) => s.label).join(", ")} by ${groups.join(", ")}`} className="h-auto w-full overflow-visible" preserveAspectRatio="none" style={{ height }}>
         <defs>
-          {series.map((s, si) => (
-            <linearGradient key={s.label} id={`bar-grad-${id}-${si}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={s.accent} stopOpacity="1" />
-              <stop offset="100%" stopColor={s.accent} stopOpacity="0.55" />
-            </linearGradient>
-          ))}
+          {perGroupColor
+            ? groups.map((label, gi) => (
+                <linearGradient key={label} id={`bar-grad-${id}-g${gi}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={barColors[gi]} stopOpacity="1" />
+                  <stop offset="100%" stopColor={barColors[gi]} stopOpacity="0.55" />
+                </linearGradient>
+              ))
+            : series.map((s, si) => (
+                <linearGradient key={s.label} id={`bar-grad-${id}-${si}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={s.accent} stopOpacity="1" />
+                  <stop offset="100%" stopColor={s.accent} stopOpacity="0.55" />
+                </linearGradient>
+              ))}
         </defs>
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
           <line key={t} x1={padX} x2={W - padX} y1={padTop + t * plotH} y2={padTop + t * plotH} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
         ))}
         {groups.map((label, gi) => {
           const groupX = padX + gi * groupW;
+          if (perGroupColor) {
+            const v = series[0].values[gi] ?? 0;
+            const color = barColors[gi];
+            const barX = groupX + barGap;
+            const barY = y(v);
+            return (
+              <g key={label}>
+                {v > 0 && (
+                  <g>
+                    <rect x={barX} y={barY} width={barW} height={H - padBottom - barY} fill={`url(#bar-grad-${id}-g${gi})`} rx={5} style={{ filter: `drop-shadow(0 0 8px color-mix(in srgb, ${color} 55%, transparent))` }} />
+                    <rect x={barX} y={barY} width={barW} height={Math.min(3, H - padBottom - barY)} fill={color} rx={1.5} opacity={0.9} />
+                    <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+                      {Math.round(v)}{valueSuffix}
+                    </text>
+                  </g>
+                )}
+                <text x={groupX + groupW / 2} y={H - 6} textAnchor="middle" style={{ fontSize: 11.5, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
+                  {label}
+                </text>
+              </g>
+            );
+          }
           return (
             <g key={label}>
               {series.map((s, si) => {
