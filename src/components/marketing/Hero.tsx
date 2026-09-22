@@ -35,7 +35,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
     // The result keeps the headline block in the upper third (where a hero headline
     // reads as a headline) while the toggle sits in the quiet zone between nav and
     // headline rather than glued to either.
-    <section ref={heroRef} className="mkt-snap relative isolate flex min-h-[100dvh] flex-col overflow-hidden px-6 pt-[clamp(120px,15vh,176px)]">
+    <section ref={heroRef} className="mkt-snap relative isolate flex min-h-[100dvh] flex-col overflow-hidden px-6 pt-[calc(clamp(120px,15vh,176px)/var(--vz,1))]">
       {/* color.styles "hero-surface": Purple-dark gradient for hero/featured backgrounds
          (hero-accent-purple -> hero-mid -> background). Vertically masked to fade out
          before the section's own bottom edge — this used to cover Hero's full height
@@ -75,18 +75,36 @@ export function Hero({ view, onChangeView }: HeroProps) {
          the scroll hint and Dreamy at the bezel, which reads as his airspace —
          and he's visibly holding the bottom of it the whole time it scrolls by. */}
       <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-start">
-        <div className="mb-[34px] flex justify-center [@media(max-height:600px)]:mb-2">
+        {/* Every vertical gap from here through the scroll hint divides by
+           --vz (this app's own wide-screen zoom, globals.css: 1.1x/1.25x
+           past 1441x800/1800x900) instead of scaling up WITH it, the way
+           font sizes and the headline correctly do. Measured live: with
+           zoom on, this stack's ordinary margins alone (not the text) were
+           what pushed "Scroll Down" 15-135px into the mascot -- Mascot.tsx's
+           own stage already cancels the SAME zoom on itself (`zoom: calc(1 /
+           var(--vz, 1))`, since it's `position:fixed` and its transform math
+           assumes 1 local px = 1 real px), so its real position no longer
+           grows with zoom at all, while this content kept growing toward
+           it. Canceling zoom on the GAPS (not the type) keeps the mascot
+           clearance solid at every zoom tier while type still gets
+           appropriately bigger on a wide screen, which is the zoom system's
+           actual job (direct feedback, 23 Sept 2026, screenshot: "Landing
+           page issue on chrome. Overlapping elements"). */}
+        <div className="mb-[calc(34px_/_var(--vz,1))] flex justify-center [@media(max-height:600px)]:mb-2">
           <AudienceToggle view={view} onChange={onChangeView} />
         </div>
         <div
           className="relative z-[2] mx-auto flex max-w-[720px] flex-col items-center text-center"
-          // Reserves room below the CTAs for the mascot's peeking sliver (77% of its
-          // own box, since it's cropped to show its top 77% — see Mascot.tsx's
-          // VISIBLE_FRACTION) so the copy and the mascot can never overlap, at any hero
-          // height or viewport size. Reads the same --mascot-size Mascot.tsx uses
-          // (tokens.css), so the two can't drift apart; the multiplier itself has to be
-          // kept in sync by hand with VISIBLE_FRACTION since it's not a shared import.
-          style={{ paddingBottom: "calc(var(--mascot-size) * .72 + 8px)" }}
+          // Extends the section past 100dvh by the mascot's own local peek
+          // height (77% of --mascot-size, matching Mascot.tsx's own
+          // VISIBLE_FRACTION so the two can't drift apart) -- NOT what
+          // creates the mascot clearance itself (padding after the last
+          // child can't push that child up; confirmed empirically, a 1000px
+          // override here moved nothing). Its real job is giving `main`
+          // (min-h-[100dvh]) genuine scroll room below the fold sized to
+          // the mascot, for the scroll-snap section below and the exit
+          // animation's own scroll-driven math.
+          style={{ paddingBottom: "calc((var(--mascot-size) * .77 + 8px) / var(--vz, 1))" }}
         >
           <h1
             className="font-display text-[42px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(58px,4.4vw,72px)]"
@@ -98,7 +116,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
              ACTUAL rendered width, keeping every line a reasonably even
              length instead of stranding a lone short word (a widow). */}
           <p
-            className="mt-5 max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
+            className="mt-[calc(20px_/_var(--vz,1))] max-w-[580px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed [@media(max-height:600px)]:mt-1 [@media(max-height:600px)]:text-[13px] [@media(max-height:600px)]:leading-snug"
             style={{ color: "var(--muted-foreground)", textWrap: "balance" }}
           >
             Discover careers, find your path, experience the work, and connect with professionals who do it every day.
@@ -118,7 +136,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
              (direct feedback, 9 Sept 2026: beam candidates "even on the
              landing page"). Same 3.5s family as everywhere else, full
              strength. */}
-          <div className="mt-10 flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-3">
+          <div className="mt-[calc(40px_/_var(--vz,1))] flex flex-wrap justify-center gap-3 [@media(max-height:600px)]:mt-3">
             <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={1} brightness={1.8}>
               <MarketingButton href="/flow" variant="primary" size="lg">
                 Start Journey
@@ -129,7 +147,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
               tightens elsewhere) so this never competes with the mascot's peeking sliver
               for the little vertical room a short phone has above the fold. */}
           <div
-            className="mt-8 text-[11px] font-semibold tracking-[0.14em] uppercase [@media(max-height:600px)]:hidden"
+            className="mt-[calc(32px_/_var(--vz,1))] text-[11px] font-semibold tracking-[0.14em] uppercase [@media(max-height:600px)]:hidden"
             style={{ color: "var(--muted-foreground)" }}
           >
             Scroll Down To Learn More

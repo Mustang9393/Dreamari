@@ -13521,3 +13521,61 @@ empty state; Top Three's card also lost its "Coming soon" placeholders,
 showing $156,100 and the real education line like its two siblings.
 
 `tsc`/`eslint` clean.
+
+### 2026-09-23 Landing page: "Scroll Down" sat directly on the mascot's face on a real Chrome window
+
+Direct report + screenshot (a real Chrome window, wide enough to trigger
+this app's own wide-screen zoom): the hero's "Scroll Down To Learn More"
+hint overlapped the cloud mascot's head. Same bug class as everything else
+fixed this session under this app's zoom system (globals.css: 1.1x at
+>=1441x800, 1.25x at >=1800x900) -- Mascot.tsx's stage had never been
+audited against it at all (zero mention anywhere in its own extensive
+tuning comments). Reproduced live at 1920x929 (zoom 1.25 there): the
+mascot's `position:fixed` stage, sized via `--mascot-size` (400px local),
+rendered at a REAL 500px (400 * 1.25) since nothing canceled the ambient
+zoom on it -- while Hero.tsx's own "reserve room for the mascot"
+padding-bottom assumed 1 local px = 1 real px throughout. Fixed the
+mascot the established way, `zoom: calc(1 / var(--vz, 1))` on its stage
+(same fix already applied to Portal/FactPopover/XP-fly/etc. earlier this
+session) -- cut the overlap from 135px to 58px, confirming the diagnosis
+but not finishing the job.
+
+The remaining 58px took real investigation. Hero.tsx's padding-bottom
+formula (`--mascot-size * .72 + 8px`, with an existing comment already
+flagging the .72-vs-VISIBLE_FRACTION(.77) mismatch as a known manual sync
+point) looked like the obvious next lever -- but a direct experiment
+proved it does NOTHING: overriding it to 1000px live left the "Scroll
+Down" text's own position completely unchanged (before/after identical to
+the pixel), while ballooning the page's scrollHeight to 11,130px. Padding
+after an element can't retroactively move that same element up; the
+comment's claim that it "reserves room... so the copy and the mascot can
+never overlap" was never actually true, zoom or no zoom -- it only ever
+affected how much the page could scroll past the fold. Confirmed the REAL
+driver by toggling `play-no-zoom` at the same 1920x929: with zoom off,
+"Scroll Down" sits a clean 78px clear of the mascot; the zoom-INFLATED
+ordinary margins between hero elements (not the mascot at all) were what
+pushed it down into a mascot that, once fixed, no longer grows to meet it.
+
+Canceled `--vz` on every plain vertical GAP in the hero stack (the
+audience toggle's `mb-34`, the subhead's `mt-5`, the CTA's `mt-10`, the
+hint's own `mt-8`, and the section's `pt-[clamp(...,15vh,...)]`, which
+carries the exact same dvh-style double-scaling this session already
+fixed once for `main`) -- deliberately NOT touching font sizes or
+line-heights, since those SHOULD keep growing with zoom; that's the
+zoom system's actual job, just not the whitespace between elements.
+Verified: 1920x929 (zoom 1.25, the reported case) now clears by 8.5px,
+confirmed with a clean screenshot -- text sits visibly above the cloud's
+head; 1512x982 (zoom 1.1, a real MacBook's own default resolution) clears
+by 101px.
+
+Found, but deliberately left unfixed and flagged separately rather than
+folded into this change: at 1280x800 with NO zoom at all (below every
+zoom threshold, so mathematically unaffected by anything above), the same
+two elements still overlap by ~17px -- a distinct, pre-existing bug with
+a different cause (this viewport's natural tightness, not zoom
+compounding), on a component already carrying a lot of hard-won, narrowly
+-scoped tuning. Confirmed it predates this session's changes (dividing by
+`var(--vz, 1)` is a no-op wherever `--vz` is unset) rather than shipping a
+second fix into the same file without being asked.
+
+`tsc`/`eslint` clean.

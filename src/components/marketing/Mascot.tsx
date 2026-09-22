@@ -245,6 +245,21 @@ export function Mascot({ heroRef }: MascotProps) {
         // fixed-to-viewport design. Everything below 77% is off-screen anyway.
         WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 71%, transparent 83%)",
         maskImage: "linear-gradient(to bottom, black 0%, black 71%, transparent 83%)",
+        // Cancels this app's own wide-screen zoom (globals.css: 1.1x/1.25x past
+        // 1441x800/1800x900), the same fix already applied elsewhere this
+        // session to every other `position:fixed` element with local-px
+        // transform math. Without it, this stage's CSS size (--mascot-size,
+        // already viewport-scaled by its own 34vw/38dvh clamp) got a SECOND,
+        // unaccounted-for scale-up from the ambient zoom -- 400px computed
+        // became a real 500px on a 1920x929 window (measured live) -- while
+        // Hero.tsx's padding-bottom reservation (`--mascot-size * .72 + 8px`)
+        // was written assuming 1 local px = 1 real px, since nothing in
+        // either file's own extensive tuning notes ever accounts for zoom.
+        // The mascot's real visible top ended up 135px above where the
+        // reservation assumed it would be, so the "Scroll Down" text sat
+        // directly on the cloud's face (direct feedback, 23 Sept 2026,
+        // screenshot: "Landing page issue on chrome. Overlapping elements").
+        zoom: "calc(1 / var(--vz, 1))",
       }}
     >
       <div className="absolute inset-0 [animation:mkt-mascot-float_5.5s_ease-in-out_infinite]">
