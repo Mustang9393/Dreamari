@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { Users, GraduationCap, Compass } from "lucide-react";
 import { SegmentedRing, BarChart } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -31,27 +30,16 @@ function StatRow({ label, value, color }: { label: string; value: number; color:
   );
 }
 
-function CardIcon({ icon: Icon, accent }: { icon: typeof Users; accent: string }) {
-  return (
-    <span className="flex size-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
-      <Icon className="h-[15px] w-[15px]" aria-hidden />
-    </span>
-  );
-}
-
-function DonutCard({ title, icon, accent, centerPct, centerLabel, rows }: { title: string; icon: typeof Users; accent: string; centerPct: number; centerLabel: string; rows: { label: string; value: number; color: string }[] }) {
+function DonutCard({ title, centerPct, centerLabel, rows }: { title: string; centerPct: number; centerLabel: string; rows: { label: string; value: number; color: string }[] }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        {/* min-height covers 2 lines even when a title fits on one --
-           "Student Status" and "Career Pathways" are one line,
-           "Postsecondary Plans" wraps to two, and without this every
-           ring in the row below sat at a different height (direct
-           feedback: "the graphs are up top not aligned"). */}
-        <span className="flex items-start gap-[10px]" style={{ minHeight: 44 }}>
-          <CardIcon icon={icon} accent={accent} />
-          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
-        </span>
+        {/* Plain text title, no icon badge -- the reference's own card
+           header is just a heading, nothing else (direct instruction:
+           align composition to the reference 1:1). min-height still
+           covers 2 lines so "Postsecondary Plans" wrapping doesn't throw
+           off the ring's vertical position relative to its neighbors. */}
+        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)", minHeight: 38 }}>{title}</h2>
         <div className="flex items-center gap-[var(--space-5)]">
           {/* Every category in the legend below gets its own drawn arc here
              -- not a single accent-colored ring next to an unrelated
@@ -106,8 +94,6 @@ export function Overview() {
       <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3">
         <DonutCard
           title="Student Status"
-          icon={Users}
-          accent={STATUS_COLORS["On Track"]}
           centerPct={(onTrack / total) * 100}
           centerLabel="on track"
           rows={[
@@ -118,8 +104,6 @@ export function Overview() {
         />
         <DonutCard
           title="Postsecondary Plans"
-          icon={GraduationCap}
-          accent="#2F6BF2"
           centerPct={(withPlan / total) * 100}
           centerLabel="have a plan"
           rows={[
@@ -129,10 +113,7 @@ export function Overview() {
         />
         <HoverBeam strength={0.7} className="h-full">
           <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <span className="flex items-start gap-[10px]" style={{ minHeight: 44 }}>
-              <CardIcon icon={Compass} accent="#7C5CFA" />
-              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways</h2>
-            </span>
+            <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)", minHeight: 38 }}>Career Pathways</h2>
             <div className="flex items-center gap-[var(--space-5)]">
               <SegmentedRing segments={topPathways.map(([, value], i) => ({ value, color: pathwayColors[i % pathwayColors.length] }))} size={92} stroke={11}>
                 <span className="flex flex-col items-center">

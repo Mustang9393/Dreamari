@@ -12554,3 +12554,58 @@ confirmed-broken cases above were fixed.
 Next step: work through the audit's punch list (dead controls, Review
 Queue/Connect persistence, Student Progress's missing filter row), and/or
 the deferred full-relayout pass.
+
+### 2026-09-22 Counselor Dashboard: Milestone Tracker rebuilt to match reference 1:1 (composition + content)
+
+**Direct instruction:** "Please align to the replit 1:1 for now. Including how
+the graphs etc and content is composed in a card etc. I need it 1:1 and then
+we can go component by component, screen by screen and improve it." Milestone
+Tracker was the first screen checked against the live reference under this
+instruction, and both its composition and its content turned out to be wrong.
+
+**Composition:** the reference draws a small muted (i) icon beside the plain
+title (not the colored icon-badge pattern used elsewhere), a subtitle line
+under the title (occasionally a second, lower-emphasis line -- e.g.
+"Counselor Review" / "Counselor review"), one large centered ring with
+"X% completed" + "X of Y" beneath it, then a 2-column stat grid below the
+ring (not beside it), then a "View Details & Student Breakdown" link. What
+was built before had a small ring beside a 2x2 grid with a colored icon
+badge -- rebuilt to match.
+
+**Content -- the bigger find:** the Milestone Tracker's required-milestone
+list is its own grade-specific taxonomy on the reference, completely
+different from (and unrelated to) the generic 11-key MILESTONE_KEYS used by
+the roster table / Student Profile / Review Queue / Overview / Student
+Progress. What was built before reused that generic list (3-11 items,
+generic names). The reference actually ships 7/8/10/10 milestones for
+Grades 9/10/11/12 respectively, each with real, specific names (e.g.
+Grade 9: "Career Goals", "Four-Year Academic Plan", "Grade 9 College &
+Career Reflection"; Grade 12: "Transcript & Document Status", "Postsecondary
+Decision & Transition Plan") and per-card review-type subtitles. Captured
+verbatim off the live reference (all 4 grade tabs, via get_page_text) into a
+new `src/lib/milestoneReadiness.ts` -- kept deliberately separate from
+`counselorRoster.ts`'s MILESTONE_KEYS rather than merged into it, since the
+reference itself keeps these as two different systems and every other
+screen already depends on the existing generic one.
+
+Also includes Grade 12's one structural wrinkle: "Financial Aid & FAFSA
+Status" has a 5th stat row ("Not Applicable: 3") and a smaller denominator
+(13 of 27, not 30) -- the card view handles an optional 5th stat row rather
+than assuming a fixed 2x2.
+
+While verifying live, found the dev server was serving a stale Turbopack
+cache (`.next`) with old, already-fixed versions of shell.tsx/
+StudentProfile.tsx/Overview.tsx -- console showed parse errors and a
+`PANEL is not defined` crash that don't exist in the current files on disk
+(confirmed via `git diff`, which was empty for those files). Cleared `.next`
+and opened a fresh tab to resolve; not a real bug, but worth noting since it
+looked exactly like one at first.
+
+`tsc`/`eslint` clean. Verified live at desktop and mobile widths, all 4
+grade tabs, including the Grade 12 5-stat card.
+
+Next step: continue the reference re-check screen by screen (Review Queue,
+Student Progress, Counselor Connect, Career + College Insights, Productivity
+Suite, Platform Engagement, My Impact, Settings, Students/drill-down) before
+starting the creative-refinement pass the user asked for after 1:1 alignment
+is confirmed done.
