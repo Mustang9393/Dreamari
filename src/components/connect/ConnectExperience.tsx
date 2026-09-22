@@ -1511,7 +1511,7 @@ export function ConnectExperience() {
         // centred 992px column, because a reading column pinned to the
         // left rail sat awkwardly on wide screens (direct feedback, 4 Sept
         // 2026).
-        className={`relative z-10 mx-auto flex w-full flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)] ${
+        className={`relative z-10 mx-auto flex w-full flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8 ${
           view.kind === "home" || view.kind === "board" || view.kind === "partner" || view.kind === "proDashboard" || view.kind === "admin" ? "max-w-[1440px]" : "max-w-[992px]"
         }`}
       >
@@ -2275,7 +2275,7 @@ function HomeView({
          screens (same pattern as Explore's header: title left, controls
          right, one row instead of three stacked blocks) and wrap onto
          their own line on phones where there isn't room. */}
-      <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
+      <div className="mb-[2px] flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
         <div className="min-w-0">
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Connect</h1>
         </div>

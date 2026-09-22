@@ -129,7 +129,16 @@ function Rail({ title, subtitle, children }: { title: string; subtitle?: string;
           </p>
         )}
       </div>
-      <div className="poster-row explore-poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
+      {/* md:px-[space-6], not [space-14]: the rail's own inset is
+         deliberately SHORTER than the page's title/content margin, so
+         cards bleed past that margin line and the trailing card peeks at
+         the edge instead of stopping flush with it (direct feedback, 22
+         Sept 2026: "cards should not get clipped... let them exceed the
+         limits and peek through"). Still fully symmetric left/right --
+         the "margins not consistent" report traced to card rows not
+         evenly filling their track, not an actual left/right CSS
+         mismatch (measured: both sides resolve to the same inset). */}
+      <div className="poster-row explore-poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
     </section>
   );
 }
@@ -152,7 +161,7 @@ function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
       <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         Top 5 Trending Careers Among Gen Z
       </h2>
-      <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
+      <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
         {trending.map((career, index) => (
           <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
         ))}
@@ -1016,11 +1025,13 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
       </MobileHeaderShell>
 
       {/* One standard gap between the navbar and page content everywhere
-         (space-10); For You fits the viewport with the card centered. */}
+         (pt-3/md:pt-8, the shared "title page" rhythm -- see
+         HomeExperience.tsx's own comment); For You fits the viewport with
+         the card centered. */}
       <main
-        className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 sm:px-[var(--space-14)] lg:pt-[var(--space-10)] ${
+        className={`relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-start px-5 pt-3 sm:px-[var(--space-14)] md:pt-8 ${
           tab === "browse"
-            ? "gap-[var(--space-10)] pt-4 pb-[120px]"
+            ? "gap-[22px] pb-[120px]"
             // DesktopNavigation (chrome.tsx) is h-[86px], not 62px -- this
             // was sized against a stale assumption, so `main` ran 24px
             // taller than the space actually left below the sticky nav.
@@ -1041,7 +1052,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             // Giving `main` a real, definite height at md: too (not just
             // lg:) is what lets the card size ITSELF against it below,
             // instead of a hardcoded number that can't shrink.
-            : "gap-[var(--space-6)] pt-4 pb-0 md:h-[calc(100dvh-86px)] md:overflow-hidden md:pb-[var(--space-6)]"
+            : "gap-[var(--space-6)] pb-0 md:h-[calc(100dvh-86px)] md:overflow-hidden md:pb-[var(--space-6)]"
         }`}
       >
         {/* Phone row: the view toggle, then Search (Browse only) and Schools;
@@ -1081,9 +1092,15 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* Explore Header (desktop) -- Browse only. For You gets its own
            row below: the title block, the reel and the search+toggle all
            share one row there instead of the reel sitting in a second row
-           beneath a full-width header. */}
+           beneath a full-width header. mb-[2px]: the title and the
+           Careers/Schools strip under it are one visual unit (direct
+           feedback, 22 Sept 2026: "treat the career title and the
+           career/schools toggle as one element"), so the gap from THIS
+           unit down to the rails below should match every other page's
+           title-to-content gap (24px) -- 2px more than main's own 22px
+           section rhythm, same pattern as every other title page. */}
         {tab === "browse" && (
-        <div className="hidden w-full flex-col gap-[var(--space-6)] lg:flex">
+        <div className="mb-[2px] hidden w-full flex-col gap-[var(--space-6)] lg:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
             <div className="flex flex-col gap-[var(--space-2)]">
               <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>

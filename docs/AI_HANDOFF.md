@@ -13189,3 +13189,60 @@ the localStorage gate entirely, so the sweep runs every time the student is
 on Browse, not just before their first For You visit.
 
 `tsc`/`eslint` clean.
+
+### 2026-09-22 App-wide spacing pass: one title-page rhythm, nav width matches content, rail cards bleed past the margin
+
+Direct feedback: "the gap between the career title and the content is too
+much on the home page... apply the same consistent spacing on all pages,"
+plus a request to treat Explore's title + Careers/Schools strip as one
+unit, tighten the nav-to-title gap, match the navbar's width to the page's
+own content width, and shave the section-to-section gap down a couple
+pixels -- all applied consistently.
+
+Audited every page using the shared `PAGE_TITLE_CLASS` (Home, Explore,
+Colleges, Profile, Play, Connect -- the "title pages"): their `main`
+elements turned out to use FOUR different gap values (Home: space-10/
+space-14 = 40/56px; Explore Browse: space-10 = 40px; Profile/Play/Connect:
+space-6 = 24px; Colleges: space-5 = 20px) and THREE different top-padding
+breakpoints (Home: sm:, Explore: lg:, Colleges: lg:, the rest: md:) for
+what's supposed to be the same visual rhythm -- which is exactly why Home
+(roughly double everyone else's gap) was the one that read as broken, even
+though every page technically had *a* gap.
+
+Standardized all six to: `pt-3 md:pt-8` (12px mobile / 32px desktop,
+down from the prevailing 40px -- a deliberate "little" reduction per
+direct instruction, landing in the 24-32px range common on dashboard-style
+apps like Linear/Notion/Vercel rather than the airier 40px this app had)
+between the nav and the title; `gap-[22px]` as the shared section-to-
+section rhythm (2px under the old 24px majority, per direct instruction);
+and `mb-[2px]` on the title element itself (or Explore/Colleges' title+
+tabs unit, or Connect's title+toggle row) so title-to-first-content lands
+at 24px -- one notch more breathing room than plain section-to-section,
+without needing two different flex containers to express it.
+
+Fixed `DesktopNavigation` (chrome.tsx): its inner bar was `max-w-[1320px]
+px-3`, while every page's own content is `max-w-[1440px]` + `px-[space-
+14]` (56px) at desktop -- the two never lined up (direct feedback: "top
+navbar should be as wide as the content is... stick to margin standards").
+Matched the navbar to the page standard exactly; verified live on Home,
+`nav`/`h1`/`hero` all measured left:136 right:1464 -- pixel-identical.
+
+Explore's rail cards (`Rail`, `TrendingRail`): were inset by the SAME
+56px as the page's own title margin, so a row's cards stopped flush at the
+exact spot the title above them started, reading as too conservative next
+to the reference (direct feedback: "cards should not get clipped by right
+margin or left, let them exceed the limits and peek through"). Reduced the
+rail's own inset to 24px (space-6) -- less than the title's 56px -- so
+cards now bleed visibly past the page's text margin on both edges while
+the section heading stays put, aligned with the title above it. The
+"margins not consistent, left has more" report didn't trace to an actual
+CSS asymmetry (measured: both sides resolve identically via `mx-auto`) --
+most likely read that way because a row's last card didn't always fill its
+track evenly; the peek-through change makes that visually moot regardless.
+
+Verified live (real Chrome + JS measurement, not just eyeballing) on Home,
+Explore (Browse + For You), Profile, Play, Colleges, Connect. Restarted
+the dev server mid-task after it had stopped responding -- unrelated to
+these edits, caught via a failed navigate.
+
+`tsc`/`eslint` clean across every touched file.

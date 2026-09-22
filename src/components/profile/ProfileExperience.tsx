@@ -468,8 +468,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
          documents it as the app-wide convention. Profile was the one outlier,
          narrower than its siblings for no stated reason (16 Sept 2026 direct
          feedback: "margins aren't consistent... my profile especially"). */}
-      <main className="no-print relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
-        <div className={buildIn(0).className} style={buildIn(0).style}>
+      {/* gap-[22px] + title's own +2px margin, pt-3/md:pt-8: the shared
+         "title page" rhythm (Home/Explore/Profile/Play/Colleges/Connect),
+         direct feedback 22 Sept 2026 -- see HomeExperience.tsx's own
+         comment for the full reasoning. */}
+      <main className="no-print relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
+        <div className={`${buildIn(0).className} mb-[2px]`} style={buildIn(0).style}>
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Profile</h1>
         </div>
         {/* ---- Identity: an editorial masthead. Name and school read as a

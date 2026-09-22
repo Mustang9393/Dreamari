@@ -372,7 +372,14 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
     // hamburger up top; the bottom nav for destinations), which is what the
     // student learns on their phone anyway (direct feedback, 18 Sept 2026).
     <div className={`sticky top-0 z-40 hidden h-[86px] w-full lg:block ${extraClassName ?? ""}`}>
-      <div className="mx-auto flex h-[62px] max-w-[1320px] items-center justify-between px-3 pt-3">
+      {/* max-w-[1440px] + px-[space-14]: matches every page's own content
+         column exactly (Home/Explore/Profile/Play/Colleges/Connect all use
+         this same max-width + inset), not the narrower 1320/px-3 this used
+         to carry -- the bar's outer edge lined up ~16px inside the page's
+         own edge instead of flush with it (direct feedback, 22 Sept 2026:
+         "top navbar should be as wide as the content is... stick to margin
+         standards"). */}
+      <div className="mx-auto flex h-[62px] max-w-[1440px] items-center justify-between px-[var(--space-14)] pt-3">
         <header
           className="relative flex h-[62px] w-full items-center justify-between rounded-[28px] px-[var(--space-6)] transition-[background-color,border-color,box-shadow] duration-300"
           style={{

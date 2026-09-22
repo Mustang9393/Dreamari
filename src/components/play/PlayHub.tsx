@@ -156,8 +156,12 @@ export function PlayHub() {
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-6)] px-5 pt-2 pb-[120px] sm:px-[var(--space-14)] md:pt-[var(--space-10)]">
-        <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
+      {/* gap-[22px] + title's own +2px margin, pt-3/md:pt-8: the shared
+         "title page" rhythm (Home/Explore/Profile/Play/Colleges/Connect),
+         direct feedback 22 Sept 2026 -- see HomeExperience.tsx's own
+         comment for the full reasoning. */}
+      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
+        <h1 className={`${PAGE_TITLE_CLASS} mb-[2px]`} style={PAGE_TITLE_STYLE}>
           Play
         </h1>
 

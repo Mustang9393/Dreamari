@@ -171,7 +171,11 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-5)] px-5 pt-4 pb-[140px] sm:px-[var(--space-14)] lg:pt-[var(--space-10)]">
+      {/* gap-[22px] + the desktop header's own +2px margin, pt-3/md:pt-8:
+         the shared "title page" rhythm (Home/Explore/Profile/Play/
+         Colleges/Connect), direct feedback 22 Sept 2026 -- see
+         HomeExperience.tsx's own comment for the full reasoning. */}
+      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[140px] sm:px-[var(--space-14)] md:pt-8">
         <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
           <ForYouBrowseToggle tab={view} onTab={setView} />
           <IconTip label="Careers">

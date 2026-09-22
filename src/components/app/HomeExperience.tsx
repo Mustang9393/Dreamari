@@ -505,8 +505,20 @@ export function HomeExperience() {
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[var(--space-10)] px-5 pt-4 pb-[120px] sm:gap-[var(--space-14)] sm:px-[var(--space-14)] sm:pt-[var(--space-10)]">
-        <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Home</h1>
+      {/* gap-[22px]: the shared section-to-section rhythm every "title page"
+         (Home/Explore/Profile/Play/Colleges/Connect) now uses (direct
+         feedback, 22 Sept 2026: "section/section gap... 2px smaller",
+         "apply the same consistent spacing on all pages") -- was
+         space-10/space-14 (40/56px) here specifically, roughly double
+         every other page's rhythm, which is why the title-to-content gap
+         read as too loose on Home alone. The title itself gets +2px
+         margin (see its own className) so title-to-first-content lands at
+         24px, one notch more breathing room than the 22px between
+         sections after it. pt-3/md:pt-8: same reduced nav-to-title gap as
+         every other title page (see PAGE_TOP_PADDING's own comment in
+         chrome.tsx-adjacent pages). */}
+      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
+        <h1 className={`${PAGE_TITLE_CLASS} mb-[2px]`} style={PAGE_TITLE_STYLE}>Home</h1>
         <HeroBanner />
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
