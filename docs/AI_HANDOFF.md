@@ -12038,3 +12038,42 @@ eslint` clean. Career Detail is now **fully done** in
 
 Next step: continue to Build (`src/components/build/`, `src/components/flow/`),
 next in priority order. Not pushed -- awaiting go-ahead.
+
+### 2026-09-22 Build: closed both real state/edge-case gaps; flagged three unrelated bugs found during the audit
+
+Continuing the design-log priority order after Match and Career Detail
+closed out. Audited Build (`src/components/build/`, `src/components/flow/`)
+in full -- confirmed it has zero async/fetch actions (its localStorage
+writes are already try/catch-wrapped), so unlike Match/Career Detail there
+was no missing loading-state gap here.
+
+**Two real state/edge-case gaps closed**:
+1. `EducationStep`'s `EDUCATION_ICONS[optionIndex]` was positional with no
+   bounds check, unlike this file's other keyed icon lookups -- a future
+   edit to `EDUCATION_OPTIONS` without a matching icon throws and blanks
+   the step (no error boundary exists anywhere in the app). Now falls back
+   to `FALLBACK_EDUCATION_ICON` (Sparkles).
+2. Every Dreamy sprite (Welcome's hero, QuestionHeading's per-step icon,
+   Milestone's and Completion's celebration art) had no `onError`
+   handling. New shared `DreamySprite` (`fill`-based) and `QuestionSprite`
+   (plain-`<img>`, keyed for the reaction-swap remount) in `ui.tsx`, both
+   falling back to a brand-blue-tinted circle with a Sparkles glyph --
+   same visual family as Match/Career's photo fallbacks. Verified live by
+   stepping through Welcome through Education (all real sprites unchanged)
+   and by temporarily breaking Welcome's own sprite path (fallback
+   rendered correctly, reverted clean).
+
+**Three more real issues found, deliberately not fixed in this pass**
+(data-correctness/product-behavior bugs, not state-rendering gaps -- see
+the design log's own "Found during the audit" note for full detail):
+`persistAnswers` silently blanks a real stored email/path on every Build
+completion (spawned as a standalone follow-up task, `task_978ec81b`);
+`CostStep.tsx` hand-duplicates `COST_STOPS`'s labels instead of deriving
+from the one source; `Skip` discards in-progress answers with no
+confirmation for every real user, not just demos.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on all touched files.
+
+Next step: continue to Explore (`src/components/marketing/
+ExploreExperience.tsx` and friends), next in priority order. Not pushed --
+awaiting go-ahead.

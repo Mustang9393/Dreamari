@@ -502,9 +502,91 @@ Science & Research (1), Food & Cooking (1).
 
 ---
 
-## 3. Build
+## 3. Build (`src/components/build/`, `src/components/flow/`)
 
-Status: not started
+Status: **Done** -- the real state/edge-case gaps in this area, found via a
+full audit of the step flow, its shared UI shell, and everything they
+import. Build has **zero async/fetch actions** (`persistAnswers` /
+`writeStudentProfile` are synchronous localStorage writes already wrapped
+in try/catch, `src/lib/studentProfile.ts:110-119`), so there was no
+missing `Working`-chip gap to close here, unlike Match/Career Detail.
+
+| Component / state | Status | Notes |
+|---|---|---|
+| `EducationStep`'s icon lookup can throw and blank the step | **Done, 22 Sept** | Bounds-checked with a fallback icon. |
+| Every Dreamy sprite (Welcome, QuestionHeading, Milestone, Completion) has no failed-load handling | **Done, 22 Sept** | New `DreamySprite` / `QuestionSprite`, see below. |
+
+### `EducationStep`'s positional icon array -- Done, 22 Sept 2026
+
+**Why this matters**: `EDUCATION_ICONS` (`steps.tsx`) is a plain 5-item
+array indexed positionally against `EDUCATION_OPTIONS` (`types.ts`), with
+no bounds check -- unlike this same file's other per-option lookups
+(`SUBJECT_ICONS`, `WORLD_ACCENTS`), which are keyed with a `?? fallback`.
+`EDUCATION_OPTIONS`'s wording has already changed more than once in this
+file's own git history without the icon array being touched. An option
+added or reordered without a matching icon entry throws "Element type is
+invalid" at render -- and per `COMPONENT_STATES_PLAYBOOK.md`'s own "no
+error boundary" gap, that blanks the whole step with no recovery, not a
+graceful degradation.
+
+**Design**: `EDUCATION_ICONS[optionIndex] ?? FALLBACK_EDUCATION_ICON`
+(Sparkles, already the array's own last icon) -- a one-line defensive
+guard, not a redesign.
+
+**Verified live**: stepped through Build to the Education step; all 5
+real icons (Rocket, Wrench, GraduationCap, BookOpen, Sparkles) render
+exactly as before. `tsc`/`eslint` clean.
+
+### Dreamy sprite failure handling -- Done, 22 Sept 2026
+
+**Why this matters**: every Dreamy sprite across Build (`WelcomeScreen`'s
+hero, `QuestionHeading`'s per-step icon, Milestone's and Completion's
+celebration art) rendered with no `onError` handling -- all bundled static
+assets, not per-record data like Match/Career's photos, so the real-world
+risk is lower, but it's the broadest surface area of any missing-image gap
+in the app since it repeats on every single Build screen.
+
+**Design**: two new shared pieces in `ui.tsx` -- `DreamySprite` (the
+`fill`-based case: Welcome's hero, Milestone/Completion's celebration art)
+and `QuestionSprite` (`QuestionHeading`'s own small, plain-`<img>`,
+src-keyed sprite, kept separate since it needs to remount per reaction
+swap rather than use `fill`). Both fall back to `DreamyFallback` -- a
+brand-blue-tinted circle with a centered Sparkles glyph, the same
+"nothing here yet" visual family as Match/Career's photo fallbacks --
+instead of a broken-image glyph on a screen that's supposed to feel alive.
+
+**Verified live**: stepped through Welcome -> Interests (confirms
+`QuestionSprite`) -> ... -> Milestone -> Education, screenshotting each;
+all four real sprites render unchanged. Temporarily broke Welcome's own
+sprite path, confirmed `DreamyFallback` renders cleanly in its place
+(screenshotted), reverted (`git diff` clean). `tsc`/`eslint` clean (one
+pre-existing `no-img-element` warning on the relocated `<img>`, not a
+regression).
+
+### Found during the audit, deliberately NOT fixed here (flagged, not state/edge-case work)
+
+Three more real issues turned up while auditing Build -- logged here for
+visibility since they're genuine bugs, but out of scope for this pass:
+they're data-correctness/product-behavior bugs, not empty/loading/error/
+edge-case *rendering* gaps, and two of them (Skip's data loss, a possible
+behavior change) are product calls, not unilateral fixes to make mid-sweep.
+
+- **`persistAnswers` can overwrite a real stored email/path with blank.**
+  `BuildFlowExperience.tsx:53-65` merges `state.email`/`state.path` into
+  the shared student-profile store on every Build completion, but neither
+  is ever set anywhere in Build (`email` is deliberately not asked per
+  `steps.tsx`'s own comment; `path` has no step or `patch()` call at all)
+  -- so both are permanently blank in `INITIAL_BUILD_STATE` and every
+  completion silently blanks whatever was really stored. Highest-impact of
+  the three: hits every real user, silently, no error surfaced.
+- **`CostStep.tsx:126-135` hand-duplicates `COST_STOPS`'s 6 labels** in a
+  second array instead of deriving from the one in `types.ts` (whose own
+  comment already flags it's been edited before) -- any future add/
+  remove/reorder desyncs the two.
+- **Skip discards in-progress answers with no confirmation**, for every
+  real user, not just demos -- `BuildFlowExperience.tsx:100` passes
+  `onSkip` unconditionally despite the code's own comment calling it
+  demo-only chrome.
 
 ## 4. Explore
 

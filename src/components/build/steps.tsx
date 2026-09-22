@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { CardHud, ChipGrid, Citation, ConfirmShimmer, GLASS_CHIP_IDLE_BG, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
+import { CardHud, ChipGrid, Citation, ConfirmShimmer, DreamySprite, GLASS_CHIP_IDLE_BG, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, InkText, LocalBurst, QuestionHeading, StepFooter, useConfirmGlow } from "./ui";
 import { ChevronRight, BookOpen, Brain, Briefcase, Calculator, Code2, FlaskConical, GraduationCap, Landmark, Languages, Music, Palette, Rocket, Sparkles, Wrench } from "lucide-react";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
@@ -44,7 +43,16 @@ export type StepProps = {
   onSkip?: () => void;
 };
 
+// Custom-designed edge case, 22 Sept 2026: positional against
+// EDUCATION_OPTIONS with no bounds check -- unlike this file's other
+// per-option lookups (SUBJECT_ICONS, WORLD_ACCENTS), which are keyed with
+// a `?? fallback`. EDUCATION_OPTIONS has already been reworded more than
+// once in this file's own git history without touching this array; an
+// option added or reordered without a matching icon throws "Element type
+// is invalid" here, and per COMPONENT_STATES_PLAYBOOK.md's own "no error
+// boundary" gap, that blanks the whole step with no recovery.
 const EDUCATION_ICONS = [Rocket, Wrench, GraduationCap, BookOpen, Sparkles];
+const FALLBACK_EDUCATION_ICON = Sparkles;
 
 // Per-subject icons per the Figma Subjects frame (3002:14277).
 const SUBJECT_ICONS: Record<string, React.ReactNode> = {
@@ -280,7 +288,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
                 }}
               >
                 <ConfirmShimmer active={glowing} />
-                {(() => { const Icon = EDUCATION_ICONS[optionIndex]; return <Icon className="mb-1.5 h-5 w-5" style={{ color: isSelected ? "var(--color-brand-300)" : "var(--color-night-muted-foreground)" }} aria-hidden />; })()}
+                {(() => { const Icon = EDUCATION_ICONS[optionIndex] ?? FALLBACK_EDUCATION_ICON; return <Icon className="mb-1.5 h-5 w-5" style={{ color: isSelected ? "var(--color-brand-300)" : "var(--color-night-muted-foreground)" }} aria-hidden />; })()}
                 <span className="block text-[14px] font-bold text-[var(--color-night-foreground)]">{option.title}</span>
               </button>
             );
@@ -431,7 +439,7 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
       <GlassCard className="text-center">
         {/* No "50% Complete" eyebrow: the HUD two lines up already says it. */}
         <div data-dreamy-anchor className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite] sm:h-32 sm:w-32">
-          <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
+          <DreamySprite src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />
         </div>
         <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="You’re halfway there. ✨" /></h1>
@@ -639,7 +647,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       <div className="mx-auto w-full max-w-[640px]">
       <GlassCard className="text-center">
         <div data-dreamy-anchor className="relative mx-auto mb-3 h-28 w-28 sm:h-32 sm:w-32 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
-          <Image src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" fill sizes="128px" className="object-contain" />
+          <DreamySprite src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />
           <span
             aria-hidden

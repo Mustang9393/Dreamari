@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
 import { BorderBeam } from "border-beam";
-import { InkText } from "./ui";
+import { DreamySprite, InkText } from "./ui";
 import styles from "./WelcomeScreen.module.css";
 
 // Every position below is static so server and client render the same
@@ -170,7 +169,7 @@ export function WelcomeScreen({ onNext, onSkip }: { onNext: () => void; onSkip?:
             aria-label="Say hello to Dreamy"
             data-dreamy-anchor
           >
-            <Image src="/images/dreamy/v2/splash/dreamy-happy.webp" alt="Dreamy welcomes you" fill sizes="(max-width: 639px) 200px, 260px" unoptimized preload className={styles.sprite} />
+            <DreamySprite src="/images/dreamy/v2/splash/dreamy-happy.webp" alt="Dreamy welcomes you" sizes="(max-width: 639px) 200px, 260px" unoptimized preload className={styles.sprite} />
           </button>
         </div>
 

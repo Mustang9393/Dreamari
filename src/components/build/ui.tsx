@@ -1,15 +1,64 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { bricolage } from "./fonts";
 import { cascade } from "./variant";
 import { CONFIRM_GLOW_MS, dispatchConfirmPulse, useConfirmGlow } from "./confirmPulse";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { barGradientColorAt } from "./ProgressSpark";
 import { SparkBar } from "@/components/flow/SparkBar";
+
+// Custom-designed edge case, 22 Sept 2026: every Dreamy sprite across Build
+// (WelcomeScreen, this file's own QuestionHeading, Build's Milestone and
+// Completion screens) rendered its image with no failure handling -- all
+// bundled static assets, not per-record data, but the broadest surface
+// area of any missing-image gap in the app since it repeats on every
+// screen. A generic centered mark on a soft brand-tinted circle, matching
+// the same "nothing here yet" family used for Match/Career photo
+// failures, rather than a broken-image glyph on a screen that's supposed
+// to feel alive.
+function DreamyFallback({ className }: { className?: string }) {
+  return (
+    <div
+      className={`flex items-center justify-center rounded-full ${className ?? "h-full w-full"}`}
+      style={{ background: "color-mix(in srgb, var(--color-brand-500) 16%, transparent)" }}
+    >
+      <Sparkles className="h-1/2 w-1/2" style={{ color: "var(--color-brand-400, var(--color-brand-500))" }} aria-hidden />
+    </div>
+  );
+}
+
+/** `fill`-based Dreamy sprite (WelcomeScreen's hero, Milestone/Completion's
+ *  celebration art) -- falls back to DreamyFallback on a failed load. */
+export function DreamySprite({ src, alt, sizes, className, unoptimized, priority, preload }: { src: string; alt: string; sizes: string; className?: string; unoptimized?: boolean; priority?: boolean; preload?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <DreamyFallback className={`absolute inset-0 ${className ?? ""}`} />;
+  return <Image src={src} alt={alt} fill sizes={sizes} unoptimized={unoptimized} priority={priority} preload={preload} className={className} onError={() => setFailed(true)} />;
+}
+
+/** QuestionHeading's small, plain-`<img>` sprite -- a separate component
+ *  (not DreamySprite, which is `fill`-based) so it can be keyed by src and
+ *  remount cleanly on every reaction swap, restarting the celebrate
+ *  animation, while still giving each mount its own fresh failed-load
+ *  state rather than sharing one flag across every src the parent cycles
+ *  through. */
+function QuestionSprite({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <DreamyFallback />;
+  return (
+    <img
+      src={src}
+      alt=""
+      aria-hidden
+      className="h-full w-full object-contain motion-safe:animate-[dreamy-celebrate_3.2s_ease-in-out_infinite]"
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 export { useConfirmGlow };
 
@@ -224,13 +273,7 @@ export function QuestionHeading({
     <div className="mb-4 flex items-center gap-3 sm:mb-5 sm:gap-4">
       {sprite && (
         <div data-dreamy-anchor className="relative h-[52px] w-[52px] flex-none sm:h-[60px] sm:w-[60px]">
-          <img
-            key={reacting ? REACTION_SPRITE : sprite}
-            src={reacting ? REACTION_SPRITE : sprite}
-            alt=""
-            aria-hidden
-            className="h-full w-full object-contain motion-safe:animate-[dreamy-celebrate_3.2s_ease-in-out_infinite]"
-          />
+          <QuestionSprite key={reacting ? REACTION_SPRITE : sprite} src={reacting ? REACTION_SPRITE : sprite} />
           {reactionNonce !== undefined && <LocalBurst nonce={reactionNonce} />}
         </div>
       )}
