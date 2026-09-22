@@ -596,7 +596,19 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
               className="flex w-full flex-col gap-[var(--space-2)] text-left"
               style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
             >
-              <div className="face-swap flex w-full flex-col gap-[var(--space-2)] md:w-[326px]">
+              {/* lg:, not md: -- this 326px cap is for the small FRAMED
+                 desktop card specifically. The reel's own full-bleed
+                 immersive layout was widened from a md: gate to lg: on 22
+                 Sept 2026 (so tablet got the same phone treatment as
+                 mobile), but this width cap was never updated to match --
+                 tablet (768-1023px) inherited a fixed 326px-wide, left-
+                 aligned panel inside a card that's actually the tablet's
+                 full viewport width, so most of the swipeable carousel sat
+                 off in dead space past 326px and clipped/"disappeared"
+                 partway through a drag (direct report, 23 Sept 2026:
+                 "swiping breaks on tablet... clips off... disappears into
+                 space because the container is small and left aligned"). */}
+              <div className="face-swap flex w-full flex-col gap-[var(--space-2)] lg:w-[326px]">
                 {/* Swipe/autoplay row: a short, fixed-width progress track
                    (not a full-width bar -- that reads as a page-level
                    control) with quiet chevrons grouped tight around it, all

@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-23 For You card: fixed a stale `md:` width cap breaking the swipe carousel on tablet
+
+Direct report: "the swiping breaks on the tablet mode of for you page. it clips off and breaks, then disappears into space because the container is small and left aligned." Root cause: `.face-swap` (the wrapper around the chevron row, "Strong match," and the new swipe carousel) still capped at `md:w-[326px]` -- a width meant only for the small FRAMED desktop card. The reel's own full-bleed immersive layout was widened from a `md:` gate to `lg:` back on 22 Sept 2026 so tablet got the same phone treatment as mobile, but this particular width cap was never updated to match at the time. Tablet (768-1023px) inherited the 326px cap anyway, so on a card that's actually the tablet's full viewport width, the whole swipeable panel sat pinned to a narrow, left-aligned 326px column -- text wrapped/clipped against that fake boundary, and dragging past it looked like the slide "disappeared into space" since nothing tracked the pointer beyond the cap.
+
+Fixed: `md:w-[326px]` -> `lg:w-[326px]`, matching every other breakpoint fix this session traced back to the same 22 Sept `md:`->`lg:` change. Verified live: a real drag-simulated swipe at 820x1180 now spans the card's true width with no clipping; mobile (375x812, never affected either way) and the small framed desktop card (326px cap intact) both re-checked as regressions. `npx tsc --noEmit -p .` and `npx eslint` clean.
+
 ### 2026-09-23 For You card: real finger-following swipe (Framer Motion), timed progress fill, one-time swipe nudge, bigger chevrons
 
 Two rounds of direct correction on the same interaction, worth recording together since the second reworked the first's approach entirely:
