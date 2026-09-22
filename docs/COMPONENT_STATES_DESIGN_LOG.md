@@ -58,8 +58,7 @@ Screenshots referenced below live in
 
 ## 1. Match (`src/components/match-lab/MatchGrid.tsx`)
 
-Status: **in progress** -- 5 of 6 known states done, 1 remaining (image
-load failure).
+Status: **Done** -- all 6 known states designed and verified live.
 
 | Component / state | Status | Notes |
 |---|---|---|
@@ -68,8 +67,33 @@ load failure).
 | GridCard / DetailModal: very long career title | **Done, 22 Sept** | line-clamp-3, defensive. |
 | DetailModal: empty "What You'd Do" / "Good Fit If" / "School & Path" | **Done, 22 Sept** | "Details coming soon." fallback. |
 | GridCard: picks fail to save (`writePicks` throws) | **Verified, already handled** | See below -- no change needed. |
-| DetailModal / GridCard: missing/failed cover image | Not started | |
+| DetailModal / GridCard: missing/failed cover image | **Done, 22 Sept** | New shared `CareerPhoto`, see below. |
 | Splash: zero careers matched at all | Superseded | Covered by the grid's own empty state; splash copy unchanged since it's shown before the count is known. |
+
+### DetailModal / GridCard: missing or failed cover image -- Done, 22 Sept 2026
+
+**Why this matters**: `career.photo` was rendered with a bare `next/image`
+in both the grid card and the detail modal's hero, with no `onError`
+handler -- `next/image` has no built-in fallback, so a 404'd or missing
+photo used to leave a blank box (grid, since the card's own dark gradient
+sits behind it) or the browser's raw broken-image glyph (modal, on a plain
+white-ish box). Neither read as an intentional state.
+
+**Design**: new shared `CareerPhoto` component wrapping both call sites --
+tracks load failure in local state, and on failure renders a world-tinted
+gradient (`career.color` mixed into `--color-night-card`, fading to
+`--color-night-background`) with a centered, muted `ImageOff` icon --
+same "nothing here yet" visual family as `PlaceholderMatchCard`, not a
+broken-page look.
+
+**Verified live**: temporarily pointed the first `DECK` entry's `photo` at
+a nonexistent path, confirmed the gradient + `ImageOff` fallback rendered
+correctly in both the grid card (inspected via DOM query -- the fallback
+div and `lucide-image-off` svg were present, using
+`var(--color-world-business-money-office)` as its tint) and the open
+detail modal (screenshotted). Reverted the test path (`git diff` clean on
+`data.ts`), re-verified the real 6-item deck renders all real photos with
+no regression. `npx tsc --noEmit -p .` and `npx eslint` clean.
 
 ### Grid: `DECK` has fewer than 6 careers -- Done, 22 Sept 2026
 

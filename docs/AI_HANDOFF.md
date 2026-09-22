@@ -11962,3 +11962,47 @@ Preview remains http://localhost:3107/profile. Select V2 beneath the tabs, then 
 ## 2026-09-22 · Fall leaf variation
 
 User found consecutive Fall leaves too similar and tightly spaced. Replaced the repeated four-mark flight cycle with six independently varied, deterministic profiles: distinct orientations (-137° through 161°), sizes, staggered phases, separated lanes, fall durations (16.7–24.7s), opposite rotation directions and independent gust periods (5.9–10.1s). Fewer simultaneous leaves provide breathing room. Fixed proportions preserved; Winter and Spring unchanged. TypeScript, targeted ESLint and diff checks passed; browser inspected Fall flight parameters. Local preview on 3107, not pushed.
+
+### 2026-09-22 Component states: visual dictionary artifact, corrected against live tokens; Match's cover-image fallback closed
+
+Direct instruction, following the "every state for every component" work
+this session: "push, then give me the full documentation and log for the
+component state, empty, loading, edge case list with the visual dictionary
+for review." Built and published a review artifact compiling the standing
+WHY rule, `COMPONENT_STATES_PLAYBOOK.md`'s defaults, and
+`COMPONENT_STATES_DESIGN_LOG.md`'s progress -- including small HTML/CSS
+reproductions of the shipped patterns (Working chip, PlaceholderMatchCard,
+TabComingSoon, DotList's blank-item fallback, the match splash's compact
+title) since real screenshots aren't saved as files in this session.
+
+**Follow-up correction, same day**: "The visual dictionary doesnt seam to
+match whats actualy live... dont use the purple for accents please use the
+brand blue and glass effects and border beams etc." The first cut invented
+an indigo/violet accent rather than checking the real tokens. Cross-checked
+against `design-tokens.generated.css` and a live pass over `/match-grid`
+and `/career/financial-advisor`: the app's actual accent in every one of
+these surfaces is `--color-brand-500` (#2f6bf2) -- icons and helper text
+stay muted gray (`--color-night-muted-foreground`), never tinted; cards sit
+on real `--color-night-background`/`--color-night-card` with genuine
+`--color-glass-border` and `backdrop-filter: blur()`; added a rotating
+brand-blue ring reproducing the `border-beam` package's hover/active
+treatment (`HoverBeam.tsx`, used site-wide on card surfaces). Republished
+to the same artifact URL.
+
+**Match's last open state closed**: `DetailModal`/`GridCard`'s
+`career.photo` had no `onError` handling -- a 404'd photo rendered a blank
+box (grid) or the browser's raw broken-image glyph (modal). New shared
+`CareerPhoto` component (`MatchGrid.tsx`) renders a world-tinted gradient
+(`career.color` mixed into `--color-night-card`) with a muted `ImageOff`
+icon on failure, matching `PlaceholderMatchCard`'s existing "nothing here
+yet" visual language. Verified live with a temporarily broken photo path
+(confirmed via DOM inspection in the grid, screenshotted in the modal),
+reverted (`git diff` clean on `data.ts`), real deck re-verified unaffected.
+`npx tsc --noEmit -p .` and `npx eslint` clean. Match is now **fully done**
+in `COMPONENT_STATES_DESIGN_LOG.md` -- 6 of 6 states.
+
+Next step: continue the design-log priority order one area at a time
+(Career Detail's two remaining items, then Build/Explore/Profile/Play/
+Connect/Colleges/Resume Builder), per direct instruction to keep going
+"one by one." Not pushed yet -- awaiting go-ahead per standing project
+rule (push only with explicit confirmation).

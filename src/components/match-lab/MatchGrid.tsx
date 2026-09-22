@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, Info, Plus, Sparkles, X } from "lucide-react";
+import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, Info, Plus, Sparkles, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
@@ -293,6 +293,40 @@ function PlaceholderMatchCard() {
   );
 }
 
+// Custom-designed edge case, 22 Sept 2026: neither the grid card nor the
+// detail modal's hero handled a failed/missing career.photo -- next/image
+// has no built-in fallback, so a broken source used to leave a blank box
+// (grid) or the browser's own broken-image glyph (modal). Shared by both
+// call sites so a failed load reads as an intentional "no photo yet"
+// placeholder -- a world-tinted gradient plus a muted ImageOff icon, the
+// same visual family as PlaceholderMatchCard's "nothing here yet" -- not a
+// broken page.
+function CareerPhoto({ career, className, sizes, priority }: { career: Career; className: string; sizes: string; priority?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ background: `linear-gradient(155deg, color-mix(in srgb, ${career.color} 32%, var(--color-night-card)) 0%, var(--color-night-background) 100%)` }}
+      >
+        <ImageOff className="h-6 w-6" style={{ color: "var(--color-night-muted-foreground)" }} aria-hidden />
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={career.photo}
+      alt=""
+      fill
+      sizes={sizes}
+      priority={priority}
+      draggable={false}
+      className={className}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: number; onOpen: () => void; onToggle: (origin?: { clientX: number; clientY: number }) => void }) {
   const isSelected = rank > 0;
   // career.color for warm hues (amber/business-money-office, orange/
@@ -356,13 +390,10 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
         }
       }}
     >
-      <Image
-        src={career.photo}
-        alt=""
-        fill
+      <CareerPhoto
+        career={career}
         sizes="(max-width: 640px) 46vw, 280px"
         className="object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.03]"
-        draggable={false}
       />
       {/* Dim wash, same as poster-card's .poster-dim -- fades in on hover,
          no icon on top of it here. */}
@@ -545,7 +576,7 @@ function DetailModal({
              portrait. Anchoring to the top means any crop this ratio still
              needs comes only from the bottom, below the subject. */}
           <div className="relative w-full" style={{ aspectRatio: "3 / 2" }}>
-            <Image src={career.photo} alt="" fill sizes="440px" className="object-cover object-top" draggable={false} priority />
+            <CareerPhoto career={career} sizes="440px" className="object-cover object-top" priority />
             {/* prev/next through the deck without closing -- scoped to the
                hero image so top-1/2 centers on the photo, not the whole
                scrollable card (it used to drift onto "Career Breakdown"
