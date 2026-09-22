@@ -13088,3 +13088,36 @@ matches it to the cards' full height, and it's still a real button (always
 was -- the wrap was almost certainly what read as "not pressable").
 
 `tsc`/`eslint` clean.
+
+### 2026-09-22 Fixed a black bar behind toasts
+
+Direct report + screenshot: a solid near-black bar spanned the full window
+width behind every toast (Toast.tsx and UndoToast.tsx both use the same
+outer wrapper). Root cause is a third variant of the same anti-pattern
+found earlier today in FactPopover and the shared Portal host: `.marketing-v2`
+(tokens.css) sets `background: var(--background)` directly on itself for
+page-root usage, so any small floating wrapper that reaches for the class
+only for its CSS custom properties (`--card`, `--foreground`, etc.) also
+inherits an unwanted solid background. Fixed by adding
+`style={{ background: "transparent" }}` to both toasts' outer wrapper --
+same fix shape as FactPopover, different call site. Deliberately did NOT
+touch FlowChrome.tsx, which uses the identical wrapper string for the top
+nav bar -- there a background is legitimate/needed, not a bug. Verified
+live: toggled Add/Remove Top 3 on a career detail page in real Chrome,
+confirmed both toast variants now render as clean floating pills with no
+bar, matching the reported screenshot's absence once fixed.
+
+### 2026-09-22 Hamburger QuickLinksMenu: fixed overflow off the bottom of the screen
+
+Direct report: the panel had grown (QUICK_LINKS + Counselor demo entry +
+Connect demo/view-as section + theme toggle) to the point of exceeding
+viewport height on shorter windows, with no way to reach the lower items.
+The `<nav>` had no max-height or overflow handling at all. Fixed by adding
+`dm-scroll` (the app's existing shared scroll-panel styling), `max-h-[min(70dvh,520px)]`,
+`overflow-y-auto`, and `overscroll-contain`. Verified via computed styles in
+real Chrome (`maxHeight: 485.8px`, `overflowY: auto`, `scrollHeight: 781`,
+`clientHeight: 484`, confirming the real content genuinely needs scroll and
+now gets it) and visually confirmed the panel renders within bounds with no
+clipped items.
+
+`tsc`/`eslint` clean.

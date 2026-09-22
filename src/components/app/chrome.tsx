@@ -308,8 +308,18 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
       {open && (
         <>
           <button type="button" aria-label="Close quick links" onClick={() => setOpen(false)} className="fixed inset-0 z-40 cursor-default" />
+          {/* max-h + overflow-y-auto: this panel has grown row by row as
+             more demo sections were added to it (Connect's view-as list,
+             then the Counselor Dashboard entry) and had no ceiling at all --
+             on a shorter window it now runs taller than the viewport, with
+             no way to scroll to the rows past the bottom edge (direct
+             report, 22 Sept 2026). Capped relative to the viewport (not a
+             flat px number) since this menu opens from different trigger
+             heights across the app (the main site header vs. the counselor
+             dashboard's own topbar). dm-scroll matches every other
+             internally-scrolling panel's own scrollbar styling. */}
           <nav
-            className={`filters-reveal absolute z-50 mt-2 min-w-[180px] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px] ${align === "left" ? "left-0" : "right-0"}`}
+            className={`filters-reveal dm-scroll absolute z-50 mt-2 max-h-[min(70dvh,520px)] min-w-[180px] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px] ${align === "left" ? "left-0" : "right-0"}`}
             /* near-solid: the old glass-surface let page content bleed through
                and made rows illegible in both themes */
             style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}

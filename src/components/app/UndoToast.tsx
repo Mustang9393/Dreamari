@@ -16,7 +16,14 @@ export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { messa
   }, [message, onClose, duration]);
   if (typeof document === "undefined") return null;
   return createPortal(
-    <div className="marketing-v2 themeable pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[130] flex justify-center px-5 md:bottom-8">
+      // background: transparent -- .marketing-v2 (tokens.css) sets
+      // `background: var(--background)` on itself for page-root usage; this
+      // wrapper only wants the class for its CSS variables (--card etc used
+      // below), not a solid near-black bar spanning the full width behind a
+      // toast meant to float over the page (direct report + screenshot, 22
+      // Sept 2026). Same fix as CareerDetailExperience.tsx's FactPopover
+      // (minHeight: 0, same root cause, different unwanted inherited rule).
+      <div className="marketing-v2 themeable pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[130] flex justify-center px-5 md:bottom-8" style={{ background: "transparent" }}>
       <div
         role="status"
         className="pointer-events-auto flex max-w-[420px] items-center gap-[14px] rounded-[14px] border px-[16px] py-[12px] text-[14px] font-semibold shadow-2xl motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
