@@ -299,7 +299,7 @@ significant thin counts:
 |---|---|
 | Fixing Machines & Engines | ~~18/18~~ **0/18 -- closed 22 Sept** |
 | Business & Finance | ~~25/36~~ **0/36 -- closed 22 Sept** |
-| Building & Construction | 18/23 |
+| Building & Construction | ~~18/23~~ **0/23 -- closed 22 Sept** |
 | Driving, Flying & Shipping | 18/23 |
 | Factories & Making Things | 11/12 |
 | Health & Medicine | 11/17 |
@@ -395,14 +395,27 @@ fixed two rounding errors (claims-adjuster, event-director distributions
 summing to 99.5% instead of 100%) via a programmatic sum check across all
 25 -- now exact. `tsc`/`eslint` clean.
 
+### Building & Construction -- Done, 22 Sept 2026 (18 careers)
+
+Now 0% thin. Boilermaker, Bricklayer, Building Inspector, Concrete
+Finisher, Construction Foreman, Construction Laborer, Construction
+Manager, Drywall Installer, Elevator Technician, Glazier, Hazardous
+Materials Worker, Heavy Equipment Operator, Highway Maintenance Worker,
+Iron Worker, Painter, Pest Control Technician, Plumber, Solar Panel
+Installer.
+
+Verified: all 18 confirmed populated via batch fetch check (0 exceptions
+from the expected `factCellCount: 2`), Elevator Technician screenshotted
+live with its (i) icons in place. `tsc`/`eslint` clean, all 18
+distributions checked programmatically to sum to exactly 100%.
+
 ### Remaining worlds -- not started
 
-Next highest-value by career count: Building & Construction (18) and
-Driving, Flying & Shipping (18), tied; then Factories & Making Things
-(11), Health & Medicine (11), Law Safety & Justice (9), Counseling &
-Social Work (8), Personal Care & Community Services (6), Tech &
-Engineering (7), Farming Animals & Nature (2), Science & Research (1),
-Food & Cooking (1).
+Next highest-value by career count: Driving, Flying & Shipping (18);
+then Factories & Making Things (11), Health & Medicine (11), Law Safety
+& Justice (9), Counseling & Social Work (8), Personal Care & Community
+Services (6), Tech & Engineering (7), Farming Animals & Nature (2),
+Science & Research (1), Food & Cooking (1).
 
 ---
 

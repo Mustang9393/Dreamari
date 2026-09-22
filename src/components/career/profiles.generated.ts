@@ -10502,4 +10502,436 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       "pay": { "starting": "$50,000", "typical": "$76,900", "top": "$150,000", "note": "Commission on assets managed can meaningfully change total pay." }
     }
   },
+  "boilermaker": {
+    "slug": "boilermaker",
+    "title": "Boilermaker",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/boilermaker.webp",
+    "summary": "Builds and repairs boilers, tanks and other large pressure vessels.",
+    "scenario": "Imagine welding a seam on a boiler taller than a house, knowing that one bad weld could mean a dangerous leak years from now.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + apprenticeship" }, { "label": "Typical pay", "value": "$68,720/year" }],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$88K" }, { "state": "Illinois", "pay": "$80K" }, { "state": "Washington", "pay": "$76K" }] },
+    "knowAbout": ["Welding and metal fabrication", "Blueprint reading", "Pressure vessel safety codes", "Rigging and heavy lifting"],
+    "goodAt": ["Precise, high-stakes welding", "Physical strength and stamina", "Working at heights or in confined spaces", "Following exact safety codes"],
+    "software": ["Welding equipment and inspection tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Boilermaker Apprentice", "pay": "$44K", "description": "You learn welding and rigging through a paid apprenticeship.", "whatYouDo": ["Assist welds", "Learn rigging", "Basic fabrication"], "toGetHere": ["High school diploma", "Union apprenticeship (4 years)"] },
+      { "number": "2", "jobTitle": "Boilermaker", "pay": "$69K", "description": "You build, repair and inspect boilers and pressure vessels.", "whatYouDo": ["Weld pressure vessels", "Repair boilers", "Read blueprints"], "toGetHere": ["Completed apprenticeship"] },
+      { "number": "3", "jobTitle": "Boilermaker Foreman", "pay": "$92K", "description": "You lead a crew on large industrial jobs.", "whatYouDo": ["Lead crew", "Plan jobs", "Ensure code compliance"], "toGetHere": ["Years of journeyman experience"] }
+    ],
+    "education": { "studies": [{ "name": "Boilermaker apprenticeship programs" }], "where": [{ "count": "60", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + apprenticeship", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Union apprenticeship (4 years)", "note": "This is a union-apprenticeship trade with real, demanding safety standards.", "noBachelorPct": "91%", "distribution": [{ "label": "Did not finish high school", "pct": 4.0 }, { "label": "Finished high school", "pct": 48.0 }, { "label": "Some college, no degree", "pct": 23.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 7.5 }, { "label": "Master's degree", "pct": 1.0 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$44,000", "typical": "$68,720", "top": "$100,000" }
+    }
+  },
+  "bricklayer": {
+    "slug": "bricklayer",
+    "title": "Bricklayer",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/bricklayer.webp",
+    "summary": "Builds walls, walkways and structures out of brick, block and stone.",
+    "scenario": "Imagine laying a brick wall that has to be perfectly straight for forty feet. One crooked row means starting that section over.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + apprenticeship" }, { "label": "Typical pay", "value": "$61,750/year" }],
+    "payByState": { "best": [{ "state": "Illinois", "pay": "$78K" }, { "state": "New York", "pay": "$74K" }, { "state": "Hawaii", "pay": "$70K" }] },
+    "knowAbout": ["Masonry materials and techniques", "Blueprint reading", "Mortar mixing", "Structural basics"],
+    "goodAt": ["Precision and a steady hand", "Physical stamina", "Working outdoors in all weather", "Visualizing the finished structure"],
+    "software": ["Basic measuring/layout tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Bricklayer Apprentice", "pay": "$38K", "description": "You learn masonry basics through a paid apprenticeship.", "whatYouDo": ["Mix mortar", "Assist laying brick", "Learn measurements"], "toGetHere": ["High school diploma", "Apprenticeship program"] },
+      { "number": "2", "jobTitle": "Bricklayer", "pay": "$62K", "description": "You lay brick, block and stone on your own projects.", "whatYouDo": ["Lay brick and block", "Read blueprints", "Finish joints"], "toGetHere": ["Completed apprenticeship (3 years)"] },
+      { "number": "3", "jobTitle": "Masonry Foreman", "pay": "$80K", "description": "You lead a masonry crew on larger jobs.", "whatYouDo": ["Lead crew", "Plan masonry work", "Quality control"], "toGetHere": ["Years of journeyman experience"] }
+    ],
+    "education": { "studies": [{ "name": "Masonry apprenticeship programs" }], "where": [{ "count": "70", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + apprenticeship", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Apprenticeship (3 years)", "note": "A steady hand and patience matter more here than any classroom credential.", "noBachelorPct": "92%", "distribution": [{ "label": "Did not finish high school", "pct": 6.0 }, { "label": "Finished high school", "pct": 48.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 14.0 }, { "label": "Bachelor's degree", "pct": 6.5 }, { "label": "Master's degree", "pct": 1.0 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$38,000", "typical": "$61,750", "top": "$88,000" }
+    }
+  },
+  "building-inspector": {
+    "slug": "building-inspector",
+    "title": "Building Inspector",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/building-inspector.webp",
+    "summary": "Checks buildings meet safety codes before and during construction.",
+    "scenario": "Imagine a new apartment building is ready to open, but your inspection finds a wiring issue that could be dangerous. You're the one who says wait.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + experience" }, { "label": "Typical pay", "value": "$67,700/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$92K" }, { "state": "New York", "pay": "$85K" }, { "state": "Washington", "pay": "$80K" }] },
+    "knowAbout": ["Building codes and safety standards", "Blueprint reading", "Electrical, plumbing and structural basics", "Report writing"],
+    "goodAt": ["Careful, methodical inspection", "Standing firm on safety even under pressure", "Clear written reports", "Knowledge from hands-on trade experience"],
+    "software": ["Inspection tracking/permitting software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Inspector Trainee", "pay": "$46K", "description": "You shadow inspectors and learn code requirements.", "whatYouDo": ["Shadow inspections", "Learn code basics", "Assist paperwork"], "toGetHere": ["High school diploma", "Trade experience helpful"] },
+      { "number": "2", "jobTitle": "Building Inspector", "pay": "$68K", "description": "You inspect buildings independently and issue approvals or violations.", "whatYouDo": ["Inspect construction sites", "Check code compliance", "Write inspection reports"], "toGetHere": ["Trade experience", "Certification exam"] },
+      { "number": "3", "jobTitle": "Chief Building Inspector", "pay": "$92K", "description": "You lead a team of inspectors for a city or county.", "whatYouDo": ["Lead inspection team", "Set inspection policy", "Handle appeals"], "toGetHere": ["Years of experience", "Management role"] }
+    ],
+    "education": { "studies": [{ "name": "Construction trade background (any)" }], "where": [{ "count": "50", "credential": "Certification exam" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + experience", "experienceFirst": "Yes, usually years in a trade (electrical, plumbing, etc.) first", "trainingAfterHiring": "Inspector certification exam", "note": "Most inspectors come from years working in a construction trade, not a classroom.", "noBachelorPct": "76%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 30.0 }, { "label": "Some college, no degree", "pct": 26.0 }, { "label": "Associate's degree", "pct": 19.0 }, { "label": "Bachelor's degree", "pct": 20.0 }, { "label": "Master's degree", "pct": 3.5 }, { "label": "Doctorate or professional degree", "pct": 0.5 }] },
+      "pay": { "starting": "$46,000", "typical": "$67,700", "top": "$95,000" }
+    }
+  },
+  "concrete-finisher": {
+    "slug": "concrete-finisher",
+    "title": "Concrete Finisher",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/concrete-finisher.webp",
+    "summary": "Pours, smooths and finishes concrete for foundations, sidewalks and floors.",
+    "scenario": "Imagine a concrete truck just poured a driveway and you have maybe an hour before it sets. Every minute matters for how smooth it turns out.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$53,510/year" }],
+    "payByState": { "best": [{ "state": "Hawaii", "pay": "$68K" }, { "state": "Alaska", "pay": "$66K" }, { "state": "Illinois", "pay": "$64K" }] },
+    "knowAbout": ["Concrete mixing and curing", "Finishing tools and techniques", "Forms and layout", "Weather's effect on concrete"],
+    "goodAt": ["Working fast under time pressure", "Physical stamina", "Attention to a smooth, level finish", "Comfortable outdoors in all seasons"],
+    "software": ["Basic layout/leveling tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Laborer / Finisher Helper", "pay": "$36K", "description": "You assist with pours and basic finishing work.", "whatYouDo": ["Assist pours", "Basic finishing", "Set forms"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Concrete Finisher", "pay": "$54K", "description": "You finish concrete surfaces to a smooth, level standard.", "whatYouDo": ["Pour and finish concrete", "Set grades and forms", "Apply finishes/textures"], "toGetHere": ["2-3 years experience"] },
+      { "number": "3", "jobTitle": "Concrete Foreman", "pay": "$70K", "description": "You lead a concrete crew on larger jobs.", "whatYouDo": ["Lead crew", "Plan pours", "Quality control"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "40", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "Most finishers learn entirely on the job, working alongside experienced crews.", "noBachelorPct": "93%", "distribution": [{ "label": "Did not finish high school", "pct": 10.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 13.0 }, { "label": "Bachelor's degree", "pct": 6.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$34,000", "typical": "$53,510", "top": "$76,000" }
+    }
+  },
+  "construction-foreman": {
+    "slug": "construction-foreman",
+    "title": "Construction Foreman",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/construction-foreman.webp",
+    "summary": "Leads a crew of construction workers and keeps the job on schedule.",
+    "scenario": "Imagine three trades are all supposed to be on site today but only two showed up. You have to rework the day's plan before 7am.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + experience" }, { "label": "Typical pay", "value": "$77,220/year" }],
+    "payByState": { "best": [{ "state": "Hawaii", "pay": "$100K" }, { "state": "Alaska", "pay": "$96K" }, { "state": "New York", "pay": "$92K" }] },
+    "knowAbout": ["Construction scheduling", "Crew management and safety", "Reading blueprints", "Materials and equipment coordination"],
+    "goodAt": ["Leading a crew under deadline pressure", "Clear, direct communication", "Solving problems on the fly", "Years of hands-on trade experience"],
+    "software": ["Scheduling and project tracking apps"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Construction Worker", "pay": "$44K", "description": "You work the trades and learn the job site from the ground up.", "whatYouDo": ["Perform trade work", "Follow site safety rules", "Learn scheduling basics"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Construction Foreman", "pay": "$77K", "description": "You lead a crew and keep the job on schedule.", "whatYouDo": ["Lead crew daily", "Coordinate trades", "Enforce safety"], "toGetHere": ["5+ years trade experience"] },
+      { "number": "3", "jobTitle": "Superintendent", "pay": "$105K", "description": "You oversee the whole job site across multiple crews.", "whatYouDo": ["Oversee full site", "Manage multiple foremen", "Report to the project owner"], "toGetHere": ["10+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Construction trade background (any)" }], "where": [{ "count": "30", "credential": "On-the-job promotion" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + experience", "experienceFirst": "Yes, usually years of trade experience first", "trainingAfterHiring": "On-the-job, promoted from within a trade", "note": "Almost every foreman was promoted from the trades, not hired straight into the role.", "noBachelorPct": "87%", "distribution": [{ "label": "Did not finish high school", "pct": 4.0 }, { "label": "Finished high school", "pct": 42.0 }, { "label": "Some college, no degree", "pct": 25.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 11.5 }, { "label": "Master's degree", "pct": 1.2 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$44,000", "typical": "$77,220", "top": "$115,000" }
+    }
+  },
+  "construction-laborer": {
+    "slug": "construction-laborer",
+    "title": "Construction Laborer",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/construction-laborer.webp",
+    "summary": "Does the hands-on physical work that keeps a construction site moving.",
+    "scenario": "Imagine hauling materials across a site all day, digging trenches, and setting up equipment for six different trades that all need you at once.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$45,300/year" }],
+    "payByState": { "best": [{ "state": "Illinois", "pay": "$60K" }, { "state": "Hawaii", "pay": "$58K" }, { "state": "New York", "pay": "$56K" }] },
+    "knowAbout": ["Basic tools and equipment", "Site safety procedures", "Materials handling", "Following instructions from multiple trades"],
+    "goodAt": ["Physical stamina and strength", "Following directions closely", "Working outdoors in all conditions", "Reliable and on time"],
+    "software": ["None specific -- hands-on trade tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Construction Laborer", "pay": "$41K", "description": "You do the general physical work a job site needs.", "whatYouDo": ["Haul materials", "Dig and clear sites", "Assist multiple trades"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Skilled Laborer / Trade Apprentice", "pay": "$52K", "description": "You specialize into a trade apprenticeship (electrical, plumbing, etc.).", "whatYouDo": ["Specialize in one trade", "Take on more skilled tasks", "Begin an apprenticeship"], "toGetHere": ["1-2 years as a laborer"] },
+      { "number": "3", "jobTitle": "Crew Lead", "pay": "$62K", "description": "You lead a small crew of laborers on site.", "whatYouDo": ["Lead a laborer crew", "Coordinate daily tasks", "Train new laborers"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "20", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "This is one of the most accessible ways into the construction trades.", "noBachelorPct": "94%", "distribution": [{ "label": "Did not finish high school", "pct": 14.0 }, { "label": "Finished high school", "pct": 44.0 }, { "label": "Some college, no degree", "pct": 22.0 }, { "label": "Associate's degree", "pct": 14.0 }, { "label": "Bachelor's degree", "pct": 5.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$34,000", "typical": "$45,300", "top": "$62,000" }
+    }
+  },
+  "construction-manager": {
+    "slug": "construction-manager",
+    "title": "Construction Manager",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/construction-manager.webp",
+    "summary": "Plans and oversees a construction project from budget to final walkthrough.",
+    "scenario": "Imagine a $10 million building project, a client asking for weekly updates, and five different subcontractors all needing decisions today.",
+    "facts": [{ "label": "Typical degree", "value": "Bachelor's degree" }, { "label": "Typical pay", "value": "$104,900/year" }],
+    "payByState": { "best": [{ "state": "Hawaii", "pay": "$135K" }, { "state": "New York", "pay": "$128K" }, { "state": "California", "pay": "$122K" }] },
+    "knowAbout": ["Construction scheduling and budgeting", "Building codes and contracts", "Subcontractor management", "Blueprint and site plan reading"],
+    "goodAt": ["Big-picture project planning", "Managing many moving pieces at once", "Negotiating with contractors and clients", "Staying calm under deadline pressure"],
+    "software": ["Project management software (Procore)", "Scheduling tools (MS Project)"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Assistant Project Manager", "pay": "$62K", "description": "You support scheduling and budgets under a senior manager.", "whatYouDo": ["Track schedules", "Support budgeting", "Coordinate subcontractors"], "toGetHere": ["Bachelor's degree"] },
+      { "number": "2", "jobTitle": "Construction Manager", "pay": "$105K", "description": "You own a project's budget, schedule and quality from start to finish.", "whatYouDo": ["Manage project budget", "Oversee subcontractors", "Report to the client"], "toGetHere": ["4-6 years experience"] },
+      { "number": "3", "jobTitle": "Senior Construction Manager", "pay": "$150K", "description": "You manage the largest, most complex projects or multiple projects at once.", "whatYouDo": ["Lead multiple projects", "Manage other managers", "Own client relationships"], "toGetHere": ["10+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Construction Management" }, { "name": "Civil Engineering" }], "where": [{ "count": "160", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Sometimes -- trade experience can substitute at some firms", "trainingAfterHiring": "On-the-job, project by project", "note": "A construction management or engineering degree is the common path, though some managers rise from the trades instead.", "noBachelorPct": "32%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 6.0 }, { "label": "Some college, no degree", "pct": 13.0 }, { "label": "Associate's degree", "pct": 12.5 }, { "label": "Bachelor's degree", "pct": 56.0 }, { "label": "Master's degree", "pct": 10.0 }, { "label": "Doctorate or professional degree", "pct": 2.0 }] },
+      "pay": { "starting": "$62,000", "typical": "$104,900", "top": "$165,000" }
+    }
+  },
+  "drywall-installer": {
+    "slug": "drywall-installer",
+    "title": "Drywall Installer",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/drywall-installer.webp",
+    "summary": "Hangs and finishes drywall to build the interior walls of a building.",
+    "scenario": "Imagine a whole office floor needs walls hung and finished in a week before the next trade moves in behind you.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$54,050/year" }],
+    "payByState": { "best": [{ "state": "Illinois", "pay": "$70K" }, { "state": "New York", "pay": "$66K" }, { "state": "Hawaii", "pay": "$64K" }] },
+    "knowAbout": ["Drywall hanging and taping", "Basic framing", "Finishing and texturing techniques", "Measuring and cutting"],
+    "goodAt": ["Physical stamina, working overhead", "Precision with finishing work", "Working efficiently on a deadline", "Comfortable on ladders/scaffolding"],
+    "software": ["Basic measuring/layout tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Drywall Helper", "pay": "$36K", "description": "You assist hanging and carrying material on site.", "whatYouDo": ["Carry and hang sheets", "Basic taping", "Site prep"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Drywall Installer", "pay": "$54K", "description": "You hang, tape and finish drywall on your own.", "whatYouDo": ["Hang drywall", "Tape and mud joints", "Sand and finish"], "toGetHere": ["2-3 years experience"] },
+      { "number": "3", "jobTitle": "Drywall Foreman", "pay": "$70K", "description": "You lead a drywall crew on larger jobs.", "whatYouDo": ["Lead crew", "Estimate jobs", "Quality control"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "30", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "Most drywall installers learn entirely on the job.", "noBachelorPct": "93%", "distribution": [{ "label": "Did not finish high school", "pct": 9.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 14.0 }, { "label": "Bachelor's degree", "pct": 6.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$36,000", "typical": "$54,050", "top": "$76,000" }
+    }
+  },
+  "elevator-technician": {
+    "slug": "elevator-technician",
+    "title": "Elevator Technician",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/elevator-technician.webp",
+    "summary": "Installs and repairs elevators and escalators -- one of the highest-paid trades.",
+    "scenario": "Imagine an elevator in a hospital gets stuck between floors. You have to fix it fast, and it has to be exactly right, because lives depend on it.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + apprenticeship" }, { "label": "Typical pay", "value": "$102,420/year" }],
+    "payByState": { "best": [{ "state": "New York", "pay": "$130K" }, { "state": "Illinois", "pay": "$120K" }, { "state": "New Jersey", "pay": "$115K" }] },
+    "knowAbout": ["Elevator mechanical and electrical systems", "Safety codes and inspections", "Hydraulics", "Troubleshooting complex systems"],
+    "goodAt": ["Precision and extreme care with safety", "Comfortable in shafts and confined spaces", "Electrical and mechanical troubleshooting", "Calm decision-making under pressure"],
+    "software": ["Diagnostic testing equipment"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Elevator Apprentice", "pay": "$52K", "description": "You learn the trade through a long, paid apprenticeship.", "whatYouDo": ["Assist installs", "Learn safety codes", "Basic maintenance"], "toGetHere": ["High school diploma", "Union apprenticeship (4 years)"] },
+      { "number": "2", "jobTitle": "Elevator Technician", "pay": "$102K", "description": "You install, repair and inspect elevators and escalators.", "whatYouDo": ["Install/repair elevators", "Diagnose faults", "Perform safety inspections"], "toGetHere": ["Completed apprenticeship"] },
+      { "number": "3", "jobTitle": "Lead Technician / Supervisor", "pay": "$135K", "description": "You lead a team and handle the most complex jobs.", "whatYouDo": ["Lead technician team", "Handle complex repairs", "Train apprentices"], "toGetHere": ["Years of journeyman experience"] }
+    ],
+    "education": { "studies": [{ "name": "Elevator apprenticeship programs" }], "where": [{ "count": "40", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + apprenticeship", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Union apprenticeship (4 years)", "note": "This is one of the best-paid trades in the country, and it starts with an apprenticeship, not a degree.", "noBachelorPct": "88%", "distribution": [{ "label": "Did not finish high school", "pct": 2.0 }, { "label": "Finished high school", "pct": 40.0 }, { "label": "Some college, no degree", "pct": 26.0 }, { "label": "Associate's degree", "pct": 20.0 }, { "label": "Bachelor's degree", "pct": 10.5 }, { "label": "Master's degree", "pct": 1.2 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$52,000", "typical": "$102,420", "top": "$150,000" }
+    }
+  },
+  "glazier": {
+    "slug": "glazier",
+    "title": "Glazier",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/glazier.webp",
+    "summary": "Installs glass windows, storefronts and mirrors in buildings.",
+    "scenario": "Imagine lifting a glass panel the size of a garage door into place on the tenth floor. One wrong move and it's a very expensive mistake.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + apprenticeship" }, { "label": "Typical pay", "value": "$52,080/year" }],
+    "payByState": { "best": [{ "state": "Illinois", "pay": "$68K" }, { "state": "Hawaii", "pay": "$64K" }, { "state": "New York", "pay": "$62K" }] },
+    "knowAbout": ["Glass types and installation techniques", "Blueprint reading", "Rigging and lifting large panels", "Sealants and weatherproofing"],
+    "goodAt": ["Precision handling of heavy, fragile materials", "Physical strength", "Comfortable working at heights", "Careful measurement"],
+    "software": ["Basic measuring/layout tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Glazier Apprentice", "pay": "$36K", "description": "You learn glass handling and installation through an apprenticeship.", "whatYouDo": ["Assist installs", "Learn glass handling", "Basic measurements"], "toGetHere": ["High school diploma", "Apprenticeship program"] },
+      { "number": "2", "jobTitle": "Glazier", "pay": "$52K", "description": "You install glass, windows and storefronts on your own.", "whatYouDo": ["Install windows/storefronts", "Cut and fit glass", "Seal and finish"], "toGetHere": ["Completed apprenticeship (3 years)"] },
+      { "number": "3", "jobTitle": "Glazing Foreman", "pay": "$70K", "description": "You lead a glazing crew on commercial jobs.", "whatYouDo": ["Lead crew", "Estimate jobs", "Quality control"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "Glazing apprenticeship programs" }], "where": [{ "count": "30", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + apprenticeship", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Apprenticeship (3 years)", "note": "Handling large glass panels safely is the real skill this apprenticeship teaches.", "noBachelorPct": "91%", "distribution": [{ "label": "Did not finish high school", "pct": 6.0 }, { "label": "Finished high school", "pct": 45.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 8.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$36,000", "typical": "$52,080", "top": "$75,000" }
+    }
+  },
+  "hazardous-materials-worker": {
+    "slug": "hazardous-materials-worker",
+    "title": "Hazardous Materials Worker",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/hazardous-materials-worker.webp",
+    "summary": "Safely removes asbestos, lead and other hazardous materials from buildings.",
+    "scenario": "Imagine suiting up in full protective gear to remove asbestos from an old school building, knowing every step has a safety protocol for a reason.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + certification" }, { "label": "Typical pay", "value": "$48,510/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$62K" }, { "state": "New Jersey", "pay": "$58K" }, { "state": "Illinois", "pay": "$56K" }] },
+    "knowAbout": ["Hazardous material handling and containment", "Protective equipment and protocols", "EPA and OSHA regulations", "Site decontamination"],
+    "goodAt": ["Strict attention to safety procedures", "Comfortable in full protective gear", "Careful, methodical work", "Following exact protocols"],
+    "software": ["None specific -- protective equipment and monitoring tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "HazMat Technician Trainee", "pay": "$36K", "description": "You learn containment and safety procedures under supervision.", "whatYouDo": ["Assist containment setup", "Learn safety protocols", "Basic decontamination"], "toGetHere": ["High school diploma", "OSHA HAZWOPER certification"] },
+      { "number": "2", "jobTitle": "Hazardous Materials Worker", "pay": "$49K", "description": "You handle hazardous material removal and containment on your own.", "whatYouDo": ["Remove hazardous materials", "Set up containment", "Follow decontamination procedures"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Site Supervisor", "pay": "$65K", "description": "You lead a HazMat crew and ensure regulatory compliance.", "whatYouDo": ["Lead crew", "Ensure compliance", "Coordinate with regulators"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "OSHA HAZWOPER certification programs" }], "where": [{ "count": "20", "credential": "Certification" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + certification", "experienceFirst": "No. You can start with the certification", "trainingAfterHiring": "OSHA HAZWOPER certification course", "note": "The certification is what actually lets you work with hazardous materials, not a college degree.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 42.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$34,000", "typical": "$48,510", "top": "$68,000" }
+    }
+  },
+  "heavy-equipment-operator": {
+    "slug": "heavy-equipment-operator",
+    "title": "Heavy Equipment Operator",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/heavy-equipment-operator.webp",
+    "summary": "Operates bulldozers, cranes and other heavy machinery on job sites.",
+    "scenario": "Imagine operating a crane to lift a steel beam into place fifteen stories up, with a whole crew waiting below for it to land exactly right.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + apprenticeship" }, { "label": "Typical pay", "value": "$58,090/year" }],
+    "payByState": { "best": [{ "state": "Alaska", "pay": "$78K" }, { "state": "Hawaii", "pay": "$72K" }, { "state": "Illinois", "pay": "$68K" }] },
+    "knowAbout": ["Heavy machinery operation", "Site safety procedures", "Load limits and rigging basics", "Reading grading/site plans"],
+    "goodAt": ["Precise machine control", "Spatial awareness", "Staying calm operating large equipment", "Following exact safety procedures"],
+    "software": ["GPS-guided equipment systems (on newer machines)"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Operator Apprentice", "pay": "$40K", "description": "You learn equipment operation through a paid apprenticeship.", "whatYouDo": ["Learn machine controls", "Operate under supervision", "Basic site work"], "toGetHere": ["High school diploma", "Apprenticeship program"] },
+      { "number": "2", "jobTitle": "Heavy Equipment Operator", "pay": "$58K", "description": "You operate cranes, bulldozers and other heavy machinery independently.", "whatYouDo": ["Operate heavy machinery", "Follow site plans", "Perform equipment checks"], "toGetHere": ["Completed apprenticeship", "Equipment-specific licenses"] },
+      { "number": "3", "jobTitle": "Master Operator / Crew Lead", "pay": "$78K", "description": "You handle the most complex lifts and lead an equipment crew.", "whatYouDo": ["Lead equipment crew", "Handle complex lifts", "Train operators"], "toGetHere": ["Years of experience", "Crane certification"] }
+    ],
+    "education": { "studies": [{ "name": "Heavy equipment operator apprenticeship" }], "where": [{ "count": "50", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + apprenticeship", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Apprenticeship + equipment-specific licenses", "note": "Real hands-on control matters more here than any classroom credential.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 42.0 }, { "label": "Some college, no degree", "pct": 27.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$40,000", "typical": "$58,090", "top": "$82,000" }
+    }
+  },
+  "highway-maintenance-worker": {
+    "slug": "highway-maintenance-worker",
+    "title": "Highway Maintenance Worker",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/highway-maintenance-worker.webp",
+    "summary": "Repairs and maintains roads, signs and highway infrastructure.",
+    "scenario": "Imagine filling potholes on a busy highway at 2am, with traffic cones as your only real protection and a shift that ends at sunrise.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$47,110/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$60K" }, { "state": "Alaska", "pay": "$58K" }, { "state": "Washington", "pay": "$54K" }] },
+    "knowAbout": ["Road repair and paving basics", "Traffic control and work zone safety", "Equipment operation", "Weather-related maintenance (snow/ice)"],
+    "goodAt": ["Working outdoors in all conditions, including nights", "Physical stamina", "Following strict safety procedures near traffic", "Reliable, team-oriented work"],
+    "software": ["Basic equipment operation"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Maintenance Worker I", "pay": "$38K", "description": "You handle basic road repair and cleanup tasks.", "whatYouDo": ["Fill potholes", "Clear debris", "Set up traffic control"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Highway Maintenance Worker", "pay": "$47K", "description": "You handle a full range of road and equipment maintenance.", "whatYouDo": ["Repair road surfaces", "Operate maintenance equipment", "Respond to weather events"], "toGetHere": ["1-2 years experience", "CDL license"] },
+      { "number": "3", "jobTitle": "Crew Supervisor", "pay": "$62K", "description": "You lead a highway maintenance crew.", "whatYouDo": ["Lead crew", "Plan maintenance schedules", "Manage equipment"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "20", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training + CDL license", "note": "A commercial driver's license (CDL) matters more here than any degree.", "noBachelorPct": "92%", "distribution": [{ "label": "Did not finish high school", "pct": 8.0 }, { "label": "Finished high school", "pct": 44.0 }, { "label": "Some college, no degree", "pct": 25.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 7.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$34,000", "typical": "$47,110", "top": "$64,000" }
+    }
+  },
+  "iron-worker": {
+    "slug": "iron-worker",
+    "title": "Iron Worker",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/iron-worker.webp",
+    "summary": "Builds the steel skeleton of bridges and skyscrapers, often high above the ground.",
+    "scenario": "Imagine walking a steel beam twenty stories up with nothing but a harness between you and the ground, bolting the next section into place.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + apprenticeship" }, { "label": "Typical pay", "value": "$63,730/year" }],
+    "payByState": { "best": [{ "state": "Illinois", "pay": "$85K" }, { "state": "New York", "pay": "$80K" }, { "state": "Alaska", "pay": "$76K" }] },
+    "knowAbout": ["Structural steel erection", "Welding and bolting techniques", "Rigging and crane signals", "Fall protection and safety"],
+    "goodAt": ["Comfortable working at extreme heights", "Physical strength and balance", "Calm, precise decision-making", "Trust in your crew and equipment"],
+    "software": ["None specific -- rigging and welding tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Iron Worker Apprentice", "pay": "$40K", "description": "You learn steel erection and safety through a paid apprenticeship.", "whatYouDo": ["Assist steel erection", "Learn rigging", "Ground-level support"], "toGetHere": ["High school diploma", "Union apprenticeship (3-4 years)"] },
+      { "number": "2", "jobTitle": "Iron Worker", "pay": "$64K", "description": "You erect and connect structural steel on high-rise and bridge projects.", "whatYouDo": ["Erect structural steel", "Weld and bolt connections", "Work at height"], "toGetHere": ["Completed apprenticeship"] },
+      { "number": "3", "jobTitle": "Iron Worker Foreman", "pay": "$90K", "description": "You lead a crew on major steel erection projects.", "whatYouDo": ["Lead crew", "Plan steel sequencing", "Ensure safety compliance"], "toGetHere": ["Years of journeyman experience"] }
+    ],
+    "education": { "studies": [{ "name": "Ironworking apprenticeship programs" }], "where": [{ "count": "40", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + apprenticeship", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Union apprenticeship (3-4 years)", "note": "This is one of the most physically demanding trades, and the apprenticeship is where you prove you can do it safely.", "noBachelorPct": "90%", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 43.0 }, { "label": "Some college, no degree", "pct": 25.0 }, { "label": "Associate's degree", "pct": 17.0 }, { "label": "Bachelor's degree", "pct": 9.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$40,000", "typical": "$63,730", "top": "$95,000" }
+    }
+  },
+  "painter": {
+    "slug": "painter",
+    "title": "Painter",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/painter.webp",
+    "summary": "Paints and finishes the interior and exterior of buildings.",
+    "scenario": "Imagine a whole house needs to be repainted in three days before the new owners move in, and half of it is trim work that has to be perfect.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma or equivalent" }, { "label": "Typical pay", "value": "$47,940/year" }],
+    "payByState": { "best": [{ "state": "Hawaii", "pay": "$62K" }, { "state": "Illinois", "pay": "$58K" }, { "state": "New York", "pay": "$56K" }] },
+    "knowAbout": ["Paints, primers and finishes", "Surface prep techniques", "Color matching", "Safety with ladders/scaffolding"],
+    "goodAt": ["Steady hands and attention to detail", "Working efficiently on a deadline", "Comfortable on ladders and scaffolding", "An eye for a clean, even finish"],
+    "software": ["None specific -- paint sprayers and hand tools"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Painter's Helper", "pay": "$34K", "description": "You prep surfaces and assist experienced painters.", "whatYouDo": ["Prep and tape surfaces", "Assist with painting", "Clean up job sites"], "toGetHere": ["High school diploma"] },
+      { "number": "2", "jobTitle": "Painter", "pay": "$48K", "description": "You paint interiors and exteriors on your own.", "whatYouDo": ["Paint interiors/exteriors", "Match and mix colors", "Finish trim work"], "toGetHere": ["1-2 years experience"] },
+      { "number": "3", "jobTitle": "Lead Painter / Crew Foreman", "pay": "$62K", "description": "You lead a painting crew and estimate jobs.", "whatYouDo": ["Lead crew", "Estimate jobs", "Quality control"], "toGetHere": ["3-5 years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "20", "credential": "On-the-job training" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "Most painters learn entirely on the job, developing speed and precision over time.", "noBachelorPct": "93%", "distribution": [{ "label": "Did not finish high school", "pct": 9.0 }, { "label": "Finished high school", "pct": 45.0 }, { "label": "Some college, no degree", "pct": 24.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 6.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$32,000", "typical": "$47,940", "top": "$68,000" }
+    }
+  },
+  "pest-control-technician": {
+    "slug": "pest-control-technician",
+    "title": "Pest Control Technician",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/pest-control-technician.webp",
+    "summary": "Inspects homes and businesses for pests and applies treatments safely.",
+    "scenario": "Imagine a restaurant calls in a panic about a rodent problem before a health inspection tomorrow. You have to find the source and fix it fast.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + license" }, { "label": "Typical pay", "value": "$42,090/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$54K" }, { "state": "New Jersey", "pay": "$50K" }, { "state": "New York", "pay": "$48K" }] },
+    "knowAbout": ["Pest biology and behavior", "Safe pesticide application", "State licensing requirements", "Customer communication"],
+    "goodAt": ["Careful, methodical inspection", "Comfortable around insects and rodents", "Clear communication with customers", "Following exact safety protocols"],
+    "software": ["Route/scheduling apps", "Treatment tracking software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Technician Trainee", "pay": "$32K", "description": "You learn pest identification and treatment under a licensed technician.", "whatYouDo": ["Shadow inspections", "Learn treatments", "Study for licensing exam"], "toGetHere": ["High school diploma", "State pest control license"] },
+      { "number": "2", "jobTitle": "Pest Control Technician", "pay": "$42K", "description": "You inspect and treat properties on your own route.", "whatYouDo": ["Inspect properties", "Apply treatments", "Advise customers on prevention"], "toGetHere": ["State license", "1-2 years experience"] },
+      { "number": "3", "jobTitle": "Senior Technician / Route Manager", "pay": "$56K", "description": "You handle the hardest jobs and manage other technicians' routes.", "whatYouDo": ["Handle complex infestations", "Train new technicians", "Manage routes"], "toGetHere": ["5+ years experience"] }
+    ],
+    "education": { "studies": [{ "name": "No specific major required" }], "where": [{ "count": "30", "credential": "State pest control license" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + license", "experienceFirst": "No, but the state license exam is required", "trainingAfterHiring": "State licensing exam + company training", "note": "The state pesticide license is the real requirement, not a college degree.", "noBachelorPct": "89%", "distribution": [{ "label": "Did not finish high school", "pct": 5.0 }, { "label": "Finished high school", "pct": 40.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 16.0 }, { "label": "Bachelor's degree", "pct": 10.0 }, { "label": "Master's degree", "pct": 0.7 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$30,000", "typical": "$42,090", "top": "$58,000" }
+    }
+  },
+  "plumber": {
+    "slug": "plumber",
+    "title": "Plumber",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/plumber.webp",
+    "summary": "Installs and repairs the pipes that bring water in and take waste out.",
+    "scenario": "Imagine a burst pipe is flooding someone's basement at 11pm. You're the one they call, and you have to find and fix it before more damage happens.",
+    "facts": [{ "label": "Typical degree", "value": "High school diploma + apprenticeship" }, { "label": "Typical pay", "value": "$61,550/year" }],
+    "payByState": { "best": [{ "state": "Illinois", "pay": "$82K" }, { "state": "Alaska", "pay": "$78K" }, { "state": "Hawaii", "pay": "$74K" }] },
+    "knowAbout": ["Pipefitting and water systems", "Local plumbing codes", "Reading blueprints", "Troubleshooting leaks and blockages"],
+    "goodAt": ["Hands-on problem-solving", "Working in tight, awkward spaces", "Comfortable with emergency/on-call work", "Explaining a fix to a worried homeowner"],
+    "software": ["Pipe inspection cameras", "Scheduling/dispatch apps"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Plumber Apprentice", "pay": "$40K", "description": "You learn pipefitting and codes through a paid apprenticeship.", "whatYouDo": ["Assist installs and repairs", "Learn plumbing codes", "Basic pipefitting"], "toGetHere": ["High school diploma", "Apprenticeship (4-5 years)"] },
+      { "number": "2", "jobTitle": "Plumber", "pay": "$62K", "description": "You install and repair plumbing systems on your own.", "whatYouDo": ["Install/repair pipes", "Diagnose leaks and blockages", "Ensure code compliance"], "toGetHere": ["Completed apprenticeship", "State license"] },
+      { "number": "3", "jobTitle": "Master Plumber", "pay": "$92K", "description": "You handle the most complex jobs or run your own plumbing business.", "whatYouDo": ["Handle complex systems", "Mentor apprentices", "Run business operations"], "toGetHere": ["Master plumber license", "Years of journeyman experience"] }
+    ],
+    "education": { "studies": [{ "name": "Plumbing apprenticeship programs" }], "where": [{ "count": "100", "credential": "Apprenticeship certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "High school diploma + apprenticeship", "experienceFirst": "No. You can start as an apprentice", "trainingAfterHiring": "Apprenticeship (4-5 years) + state license", "note": "The apprenticeship and state license are the real path in -- not a college degree.", "noBachelorPct": "89%", "distribution": [{ "label": "Did not finish high school", "pct": 4.0 }, { "label": "Finished high school", "pct": 41.0 }, { "label": "Some college, no degree", "pct": 26.0 }, { "label": "Associate's degree", "pct": 18.0 }, { "label": "Bachelor's degree", "pct": 9.5 }, { "label": "Master's degree", "pct": 1.2 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$40,000", "typical": "$61,550", "top": "$92,000" }
+    }
+  },
+  "solar-panel-installer": {
+    "slug": "solar-panel-installer",
+    "title": "Solar Panel Installer",
+    "world": "Building & Construction",
+    "photo": "/images/app/browse/solar-panel-installer.webp",
+    "summary": "Installs solar panels on roofs and properties -- one of the fastest-growing trades.",
+    "scenario": "Imagine installing a full solar array on a roof in one day, wiring it exactly right so a family's power bill drops the moment it's switched on.",
+    "facts": [{ "label": "Typical degree", "value": "Postsecondary certificate" }, { "label": "Typical pay", "value": "$49,050/year" }],
+    "payByState": { "best": [{ "state": "California", "pay": "$62K" }, { "state": "New Jersey", "pay": "$58K" }, { "state": "Massachusetts", "pay": "$56K" }] },
+    "knowAbout": ["Solar panel systems and wiring", "Roofing and mounting basics", "Electrical safety codes", "Reading site/electrical plans"],
+    "goodAt": ["Comfortable working on roofs", "Electrical troubleshooting", "Physical stamina", "Following exact safety codes"],
+    "software": ["Solar design/monitoring software"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Installer Trainee", "pay": "$36K", "description": "You assist with panel mounting and wiring under supervision.", "whatYouDo": ["Assist mounting panels", "Learn wiring basics", "Site safety setup"], "toGetHere": ["High school diploma", "Solar certificate program"] },
+      { "number": "2", "jobTitle": "Solar Panel Installer", "pay": "$49K", "description": "You install and wire full solar systems on your own.", "whatYouDo": ["Mount and wire panels", "Test systems", "Ensure code compliance"], "toGetHere": ["Certificate program", "1-2 years experience"] },
+      { "number": "3", "jobTitle": "Lead Installer / Crew Supervisor", "pay": "$65K", "description": "You lead an installation crew and handle the most complex systems.", "whatYouDo": ["Lead crew", "Handle complex installs", "Train new installers"], "toGetHere": ["3-5 years experience", "NABCEP certification"] }
+    ],
+    "education": { "studies": [{ "name": "Solar Energy Technology" }], "where": [{ "count": "70", "credential": "Postsecondary certificate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Postsecondary certificate", "experienceFirst": "No. You can start right after certification", "trainingAfterHiring": "Solar installer certificate program", "note": "This is one of the fastest-growing trades in the country, and a short certificate program is the standard path in.", "noBachelorPct": "88%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 35.0 }, { "label": "Some college, no degree", "pct": 28.0 }, { "label": "Associate's degree", "pct": 22.0 }, { "label": "Bachelor's degree", "pct": 10.5 }, { "label": "Master's degree", "pct": 1.2 }, { "label": "Doctorate or professional degree", "pct": 0.3 }] },
+      "pay": { "starting": "$36,000", "typical": "$49,050", "top": "$68,000" }
+    }
+  },
 };
