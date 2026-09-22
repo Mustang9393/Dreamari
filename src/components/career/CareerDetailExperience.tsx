@@ -85,6 +85,20 @@ const HERO_FOCUS: Record<string, string> = {
   quant: "50% 48%",
 };
 
+// Custom-designed edge case, 22 Sept 2026: the header photo had no
+// `onError` handling -- unlike Match's grid, this hero already sits on a
+// solid dark base (`#0e0c20`) with its own gradient/blur scrims layered as
+// separate elements, so a failed photo doesn't need a new placeholder
+// graphic; it just needs to stop trying to paint a broken image on top of
+// an already-complete backdrop. On failure this renders nothing, and the
+// existing base + scrims (plus the title, which never depended on the
+// photo) carry the header exactly as designed.
+function HeroPhoto({ photo, sizes, className, objectPosition }: { photo: string; sizes: string; className: string; objectPosition: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return <Image src={photo} alt="" fill sizes={sizes} className={className} style={{ objectPosition }} onError={() => setFailed(true)} />;
+}
+
 // Like/Not for me explain themselves once, on the student's very first tap
 // ever, then just rely on the icon's own filled state (direct feedback, 21
 // Sept 2026: a toast on every tap would be noise, no toast at all leaves a
@@ -274,6 +288,16 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
 // than usual" stays plain text, a pay figure gets the accent gradient. ----
 
 function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
+  // Custom-designed edge case, 22 Sept 2026: a `payByState` object can
+  // exist (so the tab doesn't fall back to TabComingSoon) while its own
+  // `best` array is empty -- a partial-content gap one level down, same
+  // class as DotList's blank-item fallback. Without this, "Best states"
+  // rendered as either a bare heading over nothing, or (with no
+  // `yourStates` either) a section with a tab toggle and no content
+  // beneath it at all.
+  if (rows.length === 0) {
+    return <p className={`${SMALL} italic`} style={{ color: "var(--muted-foreground)" }}>Pay data coming soon.</p>;
+  }
   return (
     <ul className="flex flex-col">
       {rows.map((row) => {
@@ -527,9 +551,9 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
              dark base toward the text, so nothing is cropped to fit a wide
              band. */}
           <div className="absolute inset-0" aria-hidden style={{ background: "#0e0c20" }}>
-            <Image src={career.photo} alt="" fill sizes="100vw" className="object-cover md:hidden" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 12%" }} />
+            <HeroPhoto photo={career.photo} sizes="100vw" className="object-cover md:hidden" objectPosition={HERO_FOCUS[career.slug] ?? "50% 12%"} />
             <span className="absolute inset-y-0 right-0 hidden w-[50%] md:block">
-              <Image src={career.photo} alt="" fill sizes="520px" className="object-cover" style={{ objectPosition: HERO_FOCUS[career.slug] ?? "50% 12%" }} />
+              <HeroPhoto photo={career.photo} sizes="520px" className="object-cover" objectPosition={HERO_FOCUS[career.slug] ?? "50% 12%"} />
               <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
             </span>
             <CardProgressiveBlur size="52%" />

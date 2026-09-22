@@ -214,8 +214,7 @@ doesn't read as "not checked."
 
 ## 2. Career Detail (`src/components/career/CareerDetailExperience.tsx`)
 
-Status: **in progress** -- the app-wide missing-data problem confirmed and
-fixed at the code level; a few tracked items remain.
+Status: **Done** -- every tracked item designed and verified live.
 
 | Component / state | Status | Notes |
 |---|---|---|
@@ -224,9 +223,56 @@ fixed at the code level; a few tracked items remain.
 | `DotList` bullet with a blank/whitespace-only item in an otherwise-real array | **Done, 22 Sept** | Filtered; shared with College Detail. |
 | `DotList` where EVERY item in the array is blank | **Done, 22 Sept** | "Not written up yet." fallback. |
 | `Rung` (career ladder) with some fields missing (pay, description, sub-lists) | **Verified, already handled** | Every field independently optional-checked; no change needed. |
-| `PayRows` / Pay tab with a partial `payByState` (missing `yourStates` but has `best`, or vice versa) | Not started | |
-| Missing/failed cover photo | Not started | |
+| `PayRows` / Pay tab with a partial `payByState` (missing `yourStates` but has `best`, or vice versa) | **Done, 22 Sept** | See below -- `best` empty now falls back to text instead of a dead list. |
+| Missing/failed cover photo | **Done, 22 Sept** | New `HeroPhoto`, see below. |
 | Structural order (facts vs. tabs) | **Investigated, kept as-is** | See below -- a real reversal was requested, then reverted same session after confirming the original order was a deliberate 15 Sept decision, not a mistake. |
+
+### `PayRows` / partial `payByState` -- Done, 22 Sept 2026
+
+**Why this matters**: `payByState.yourStates` was already guarded (only
+rendered, with a heading, when non-empty), but `payByState.best` was
+rendered unconditionally through `PayRows`, which mapped over `rows` with
+no empty check. A `payByState` object that exists (so the tab doesn't fall
+back to `TabComingSoon`) but whose `best` array is empty used to render
+either a bare "Best states" heading over nothing, or -- with `yourStates`
+also absent -- a "Pay by state" section with its Your-states/Whole-country
+toggle and no content underneath at all. The "Whole country" map view
+(`PayMap.tsx`) was already fully defensive (falls back to the career's
+`typical` pay with a deterministic per-state spread when it has no real
+figures), so this only affected the list view.
+
+**Design**: `PayRows` now checks `rows.length === 0` first and renders
+"Pay data coming soon." (italic, muted) instead of an empty `<ul>` --
+matching this app's established "coming soon" convention for unauthored
+content, same as `DotList`'s own blank-array fallback one section over.
+
+**Verified live**: temporarily emptied Asset Manager's `payByState.best`
+array, confirmed "Your states" still shows its one real row (South Dakota,
+$118K) and "Best states" now shows the fallback text instead of a blank
+list (screenshotted). Reverted (`git diff` clean), re-verified the real
+data renders all three "best" states with no regression. `tsc`/`eslint`
+clean.
+
+### Missing / failed cover photo -- Done, 22 Sept 2026
+
+**Why this matters**: the header photo (`career.photo`, resolved from
+profile/catalog/reel data by `resolveCareer()`) had no `onError` handling,
+unlike Match's grid this header already sits on a solid dark base
+(`#0e0c20`) with its own gradient/blur scrims as separate sibling
+elements, so a failed photo didn't need a new placeholder graphic -- it
+just needed to stop trying to paint a broken image on top of an
+already-complete backdrop.
+
+**Design**: new local `HeroPhoto` component wrapping both the mobile and
+desktop `<Image>` calls -- tracks load failure in state, renders `null` on
+failure. The existing dark base, gradient scrims, and title (which never
+depended on the photo) carry the header exactly as designed either way.
+
+**Verified live**: temporarily pointed Financial Advisor's `photo` at a
+nonexistent path, confirmed the header renders as a clean dark card with
+title and no broken-image glyph (screenshotted). Reverted (`git diff`
+clean), re-verified the real photo renders with no regression.
+`tsc`/`eslint` clean.
 
 ### The core finding: this is real and large, not theoretical
 

@@ -12006,3 +12006,35 @@ Next step: continue the design-log priority order one area at a time
 Connect/Colleges/Resume Builder), per direct instruction to keep going
 "one by one." Not pushed yet -- awaiting go-ahead per standing project
 rule (push only with explicit confirmation).
+
+### 2026-09-22 Career Detail: closed both remaining tracked states (partial pay data, failed cover photo) -- fully done
+
+Continuing the "one by one" pass through `COMPONENT_STATES_DESIGN_LOG.md`'s
+priority order after Match closed out. Career Detail's last two open items:
+
+**`PayRows` / partial `payByState`.** `payByState.best` was rendered
+through an unconditional `.map()` -- an empty `best` array (while the
+`payByState` object itself still exists, so the tab doesn't fall back to
+`TabComingSoon`) rendered a dead "Best states" heading over nothing, or a
+whole toggle-less Pay section with no content. `PayRows` now falls back to
+"Pay data coming soon." for an empty `rows` array, same convention as
+`DotList`'s blank-array fallback. `PayMap` (the "Whole country" view) was
+already fully defensive via its `typical`-pay spread -- no change needed
+there.
+
+**Missing/failed cover photo.** `career.photo` had no `onError` handling.
+Unlike Match's cards, this header already sits on a solid dark base with
+its own gradient scrims as separate elements, so the fix is smaller than
+Match's `CareerPhoto`: new `HeroPhoto` component just renders `null` on
+failure, letting the existing base/scrims/title carry the header as
+designed.
+
+Both verified live with temporarily broken test data (Asset Manager's
+`payByState.best` emptied; Financial Advisor's `photo` pointed at a
+nonexistent path), screenshotted, then reverted clean (`git diff` clean on
+`profiles.generated.ts` both times). `npx tsc --noEmit -p .` and `npx
+eslint` clean. Career Detail is now **fully done** in
+`COMPONENT_STATES_DESIGN_LOG.md`.
+
+Next step: continue to Build (`src/components/build/`, `src/components/flow/`),
+next in priority order. Not pushed -- awaiting go-ahead.
