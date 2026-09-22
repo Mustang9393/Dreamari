@@ -463,7 +463,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
          bottom-anchored as a pair) -- NOT pinned to the top of the card,
          which was a misreading of that flex layout the first time around. */}
       <div className="relative -mx-[var(--space-4)] -mb-[var(--space-4)] flex flex-col">
-        <div className="flex flex-col items-end gap-[var(--space-4)] px-[var(--space-4)] pb-[var(--space-4)] md:hidden">
+        <div className="flex flex-col items-end gap-[var(--space-4)] px-[var(--space-4)] pb-[var(--space-4)] lg:hidden">
           <PreferenceButton label="Like this career" Icon={Heart} bare />
           <PreferenceButton label="Not for me" Icon={ThumbsDown} bare />
           <PreferenceButton label="Save for later" Icon={Bookmark} bare />
@@ -815,9 +815,18 @@ function ForYouFace() {
   }, [step]);
 
   return (
-    <div className="relative flex w-full items-center justify-center gap-[10px] md:min-h-0 md:flex-1">
-      {/* The feed: TikTok-style vertical snap scroll. Full-bleed viewport on
-         mobile; the Env Card frame (390×672) on desktop. */}
+    <div className="relative flex w-full items-center justify-center gap-[10px] lg:min-h-0 lg:flex-1">
+      {/* The feed: TikTok/Instagram-style full-bleed vertical snap scroll on
+         phone AND tablet (lg:hidden's boundary, 1024px -- not md:'s 768px
+         any more); the small Env Card frame (390×672) beside a preference
+         rail is desktop-only now. Was md:-gated before, which put a tablet
+         (768-1023px) window into the small framed-card treatment -- a tiny
+         card floating in a sea of empty space, since nothing else fills a
+         tablet's real screen real estate the way a full-bleed reel does
+         (direct feedback, 22 Sept 2026, tablet screenshot: "horrendous,
+         please scale content to fit the space properly" + "center the main
+         content area (reels style, instagram/tiktok)"). Tablet now gets
+         the exact same true full-viewport reel phones already had. */}
       <div
         ref={feedRef}
         /* night scene: the reel is always photo-on-dark; its ui keeps dark
@@ -825,20 +834,22 @@ function ForYouFace() {
         data-night-scene
         // h-full (not a literal 672px): CSS only resolves a percentage
         // height against an ancestor whose OWN height is an explicit
-        // value, not `auto` -- this used to break at tablet widths (md but
-        // below lg), where `main` had no height rule of its own (direct
-        // feedback, 21 Sept 2026: "the for you on tablet is breaking"),
-        // fixed at the time by hardcoding 672px instead. That traded one
-        // bug for another: a real Safari window shorter than 672px+nav
-        // couldn't shrink the card at all, so it ran past `main`'s own
-        // clipped bottom edge with the lower part of the card permanently
-        // unreachable (direct feedback, 21 Sept 2026, screenshot: "the for
-        // you looks... on desktop in safari... shorten its height").
-        // `main` now gets a real, definite height at md: too (see its own
-        // className), so h-full correctly resolves at both breakpoints --
-        // max-h-[672px] just keeps it from growing past its usual size on
-        // a tall viewport with room to spare.
-        className="foryou-snap fixed inset-0 z-0 overflow-y-auto md:relative md:inset-auto md:z-auto md:h-full md:max-h-[672px] md:w-[390px] md:overflow-y-auto md:rounded-[var(--radius-lg)]"
+        // value, not `auto`. `main` gives that a real, definite height at
+        // this same lg: breakpoint (see its own className), so h-full
+        // correctly resolves and max-h-[672px] just caps it on a tall
+        // desktop monitor with room to spare.
+        // lg:self-start: on a genuinely tall/wide desktop monitor, this
+        // box's real height (h-full, capped at 672) ends up well short of
+        // the row's own full height -- the parent's `items-center` then
+        // centers that shorter box within the leftover room, reading as a
+        // large dead gap above the card and misaligning it with the For
+        // You/Browse All chip beside it (direct feedback, 22 Sept 2026,
+        // external wide monitor screenshot: "still not fixed"). A laptop's
+        // own (much shorter) screen has little slack, so this went
+        // unnoticed there. self-start overrides just this one flex item
+        // so it anchors to the row's top regardless of how much slack
+        // exists below it.
+        className="foryou-snap fixed inset-0 z-0 overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:h-full lg:max-h-[672px] lg:w-[390px] lg:self-start lg:overflow-y-auto lg:rounded-[var(--radius-lg)]"
       >
         {FOR_YOU_FEED.map((item, index) => (
           <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
@@ -848,15 +859,16 @@ function ForYouFace() {
       </div>
 
       {/* Desktop Career Preference Rail — "Place immediately to the right of
-         an Env Card. Mobile keeps these controls inside the card." */}
-      <div className="hidden flex-col items-center gap-[var(--space-6)] md:flex">
+         an Env Card. Phone AND tablet keep these controls inside the card
+         instead (see EnvCard's own lg:hidden buttons)." */}
+      <div className="hidden flex-col items-center gap-[var(--space-6)] lg:flex">
         <PreferenceButton label="Like this career" Icon={Heart} />
         <PreferenceButton label="Not for me" Icon={ThumbsDown} />
         <PreferenceButton label="Save for later" Icon={Bookmark} />
       </div>
 
       {/* Previous / Next paging */}
-      <div className="absolute right-0 hidden flex-col gap-[10px] md:flex">
+      <div className="absolute right-0 hidden flex-col gap-[10px] lg:flex">
         <IconTip label="Previous career">
           <button
             type="button"

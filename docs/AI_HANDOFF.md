@@ -13246,3 +13246,52 @@ the dev server mid-task after it had stopped responding -- unrelated to
 these edits, caught via a failed navigate.
 
 `tsc`/`eslint` clean across every touched file.
+
+### 2026-09-22 For You reel: fixed the real cause of the chip-misalignment (a laptop screen was hiding it), then fixed tablet too
+
+Direct report with an external wide-monitor screenshot: the desktop For
+You fix from earlier today "still not fixed." Root cause, found by
+reproducing with the SAME technique that cracked the app's earlier zoom
+bugs (forcing real width/height via the sandboxed browser, not just
+resizing a window) -- the reel's feed div uses `h-full` capped at
+`max-h-[672px]` inside a flex row whose parent centers its children
+(`items-center`). On a real laptop screen there's little vertical slack
+past 672px, so the feed's box ends up nearly as tall as the row and
+"centered" reads as "basically at the top" -- which is exactly why my
+earlier verification (a capped ~694px-tall real Chrome window) never
+caught this. A genuinely tall monitor has 400px+ of slack past 672px,
+and centering THAT reads as a large dead gap above the card, misaligned
+from the chip beside it. Reproduced directly: forced `zoom: 1.25` at
+1920x1200 (this app's own wide-screen zoom rule engages at >=1800x900),
+watched the exact same gap appear, confirmed `self-start` on just the
+feed (not the whole row) fixes it by anchoring the card to the row's top
+regardless of how much slack exists below -- reverified at 1920x1200,
+card top and chip top both measured 147.5px/147.75px (sub-pixel identical).
+
+Also checked tablet per direct instruction ("heck mobile and tablet
+too") and found it was its own, different problem: tablet (768-1023px)
+was on the `md:` breakpoint, which put it into the SAME small 390x672
+framed-card treatment as desktop, floating in the middle of a real
+tablet's much bigger screen with no side rail filling the rest (direct
+feedback, screenshot: "tablet is horrendous... scale content to fit the
+space properly" / "center the main content area (reels style,
+instagram/tiktok)"). Moved every one of the reel's mobile/desktop split
+points from `md:` (768px) to `lg:` (1024px) -- the feed itself, its
+preference rail, its paging chevrons, EnvCard's own internal buttons --
+so tablet now gets the exact same true full-bleed edge-to-edge reel
+phones already had (verified via DOM measurement: `fixed inset-0`
+correctly resolves to the full viewport rect at both 768x1024 and
+820x1180), rather than a half-desktop, half-mobile treatment. This also
+lines up the CSS breakpoint with the JS `isDesktop` gate (already 1024px)
+that decides which of the two ForYouFace mounts -- previously a 768 vs
+1024 mismatch that was its own source of tablet weirdness.
+
+Screenshot verification at custom/tablet-preset sizes in the sandboxed
+browser tool turned out to be unreliable here -- it rendered the reel
+tiny in a corner of an otherwise-blank canvas, contradicted by every DOM
+measurement (`getBoundingClientRect`, computed `zoom`, full ancestor
+chain checked for a stray transform/zoom -- all clean) and by the
+identical code path rendering correctly at the tool's own "mobile"
+preset. Trusted the DOM measurements over that screenshot.
+
+`tsc`/`eslint` clean.
