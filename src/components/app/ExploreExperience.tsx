@@ -486,8 +486,12 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
            true reserved height (56px + its own safe-area padding, ~90px on
            a notched phone) -- a few px of this panel's bottom content was
            sitting under the nav bar on those devices (mobile audit, 9 Sept
-           2026). */}
-        <div className="relative flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
+           2026). lg:, not md:: MobileNav itself is `lg:hidden` (chrome.tsx),
+           so it's still on screen through 1023px -- dropping this clearance
+           at md: (768px) left the CTA row sitting behind the fixed nav bar
+           on tablet, unreachable (direct report, 23 Sept 2026: "Ctas are
+           hidden behind the bottom navbar on tablet"). */}
+        <div className="relative flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-0">
           <ProgressiveBlur />
           <div className="relative z-[1] flex w-full flex-col gap-[var(--space-3)] p-[var(--space-4)]">
             {/* The tap-to-flip Summary <-> Details interaction wraps only the
@@ -677,7 +681,16 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
       style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
     >
       <video ref={videoRef} src={item.video} className="absolute inset-0 h-full w-full object-cover" loop playsInline preload={active ? "auto" : "none"} />
-      <IconTip label={soundOn ? "Mute video" : "Unmute video"} className="absolute top-[var(--space-4)] right-[var(--space-4)] z-[1]">
+      {/* top-[86px]: below `lg:` this card is the fixed, viewport-filling
+         reel layer (see `.foryou-snap`), sitting directly under
+         MobileHeaderShell's floating pill (chrome.tsx, `lg:hidden`, a real
+         74px tall including its own top inset) -- top-4 alone put this
+         button right underneath that header, unreachable (direct report,
+         23 Sept 2026: "the sound toggle etc are hidden behind the top
+         navbar"). lg:top-4 restores the tight offset once this card is the
+         small framed desktop reel instead, which has no overlapping fixed
+         header of its own. */}
+      <IconTip label={soundOn ? "Mute video" : "Unmute video"} className="absolute top-[86px] right-[var(--space-4)] z-[1] lg:top-[var(--space-4)]">
         <button
           type="button"
           aria-label={soundOn ? "Mute video" : "Unmute video"}
@@ -689,7 +702,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
           {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         </button>
       </IconTip>
-      <div className="relative z-[1] p-[var(--space-4)] pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-[var(--space-4)]">
+      <div className="relative z-[1] p-[var(--space-4)] pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-[var(--space-4)]">
         {/* Same rounded panel language as the Env Card v2 details panel, but
            a SOLID scrim rather than the frosted-glass blur -- blurring part
            of a playing video looks muddy in a way it doesn't over a still
@@ -1067,14 +1080,23 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
       <DesktopNavigation active="Explore" forceBlur={tab === "foryou"} />
 
       {/* Phones and tablets: the same header shell as every other page
-         (logo, search on Browse, streak | XP, bell, hamburger). The For you |
-         Browse All pill and the Schools button sit on their own row at the
-         top of main, so nothing overlaps the icon cluster at 375px (the old
-         absolute tab row collided with it, 19 Sept 2026). */}
-      <MobileHeaderShell forceBlur={tab === "foryou"}>
-        <Wordmark />
-        <HeaderActions><QuickLinksMenu /></HeaderActions>
-      </MobileHeaderShell>
+         (logo, search on Browse, streak | XP, bell, hamburger) -- Browse
+         only. For You drops it entirely below `lg:` (direct instruction,
+         23 Sept 2026: "let's not have the top navbar on mobile and
+         tablet") -- the reel is a full-bleed, TikTok-style immersive
+         layer there, and the fixed header was sitting on top of it,
+         covering the sound toggle and eating into the reel's own
+         For You | Browse All row (the same one-row-at-a-time overlap
+         this file has fought before, e.g. the 19 Sept 2026 absolute-tab-row
+         collision noted in git history). Navigation elsewhere stays
+         reachable via the persistent bottom nav; MobileNav never depended
+         on this header. */}
+      {tab === "browse" && (
+        <MobileHeaderShell>
+          <Wordmark />
+          <HeaderActions><QuickLinksMenu /></HeaderActions>
+        </MobileHeaderShell>
+      )}
 
       {/* One standard gap between the navbar and page content everywhere
          (pt-3/md:pt-8, the shared "title page" rhythm -- see
