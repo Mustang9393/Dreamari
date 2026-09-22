@@ -1534,27 +1534,35 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
              monthly lets me pick a month." Quarter reuses the pill-style
              Segmented (matches the reference's own Q1-Q4 pills); Month uses
              Listbox rather than a native &lt;select&gt; per the cross-browser
-             guardrail against restyling native selects. */}
-          <div className="flex flex-wrap items-center gap-[var(--space-4)]">
+             guardrail against restyling native selects.
+             justify-between + no caption label, both direct corrections
+             (23 Sept 2026, screenshot: "badly aligned and should align
+             properly and maybe on the right side... instead of hugging the
+             tab bar") -- the first version wrapped the picker in its own
+             `flex-col` "QUARTER"/"MONTH" caption block, a taller two-line
+             shape sitting right beside SubTabs' single-line underlined
+             text with no caption of its own, which read as misaligned
+             baselines rather than one row. Dropping the caption (the pill
+             labels Q1-Q4 / the month name are already self-explanatory,
+             same as the reference's own picker needs no second label once
+             it's this close to "Quarterly"/"Monthly") puts both controls on
+             one shared, vertically centered baseline; justify-between
+             pushes the picker to the row's far right instead of crowding
+             the tab bar's own right edge. */}
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
             <SubTabs ariaLabel="Time period" value={ePeriod} onChange={setEPeriod} options={D.ENGAGEMENT_PERIODS.map((p) => ({ key: p.key, label: p.label }))} />
             {ePeriod === "quarterly" && (
-              <label className="flex items-center gap-[8px]">
-                <span className="text-[11px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Quarter</span>
-                <Segmented ariaLabel="Quarter" value={String(quarterIdx)} onChange={(v) => setQuarterIdx(Number(v))} options={D.QUARTER_LABELS.map((label, i) => ({ key: String(i), label }))} />
-              </label>
+              <Segmented ariaLabel="Quarter" value={String(quarterIdx)} onChange={(v) => setQuarterIdx(Number(v))} options={D.QUARTER_LABELS.map((label, i) => ({ key: String(i), label }))} />
             )}
             {ePeriod === "monthly" && (
-              <label className="flex items-center gap-[8px]">
-                <span className="text-[11px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Month</span>
-                <Listbox
-                  ariaLabel="Month"
-                  value={String(monthIdx)}
-                  onChange={(v) => setMonthIdx(Number(v))}
-                  options={D.MONTH_LABELS.map((label, i) => ({ value: String(i), label }))}
-                  className="dm-quiet h-[42px] min-w-[104px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-bold"
-                  style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--foreground)" }}
-                />
-              </label>
+              <Listbox
+                ariaLabel="Month"
+                value={String(monthIdx)}
+                onChange={(v) => setMonthIdx(Number(v))}
+                options={D.MONTH_LABELS.map((label, i) => ({ value: String(i), label }))}
+                className="dm-quiet h-[36px] min-w-[104px] rounded-[var(--radius-md)] border px-[14px] text-[13px] font-bold"
+                style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--foreground)" }}
+              />
             )}
           </div>
 
