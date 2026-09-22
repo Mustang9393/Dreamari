@@ -5,7 +5,22 @@
 .trigger:disabled { cursor: default; border-color: var(--color-glass-border-raised); color: var(--color-night-muted-foreground); }
 .optOut { display: flex; align-items: center; gap: 9px; min-height: 44px; width: fit-content; font-size: 13px; color: var(--color-night-muted-foreground); cursor: pointer; }
 .optOut input { width: 16px; height: 16px; accent-color: var(--color-brand-400); cursor: pointer; }
-.dialog { position: fixed; inset: auto; left: var(--picker-left, 16px); top: var(--picker-top, 16px); margin: 0; padding: 0; width: min(360px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; border: 1px solid var(--color-brand-400); border-radius: 20px; background: var(--color-night-card); color: var(--color-night-foreground); box-shadow: 0 20px 70px color-mix(in srgb, var(--color-night-background) 75%, transparent); }
+/* zoom: calc(1 / var(--vz, 1)): this app's own wide-screen zoom
+   (globals.css, 1.1x/1.25x) was multiplying this dialog a SECOND,
+   unaccounted-for time on render. Two separate symptoms, one cause: (1)
+   --picker-left/--picker-top (GpaField.tsx) are set from a real
+   getBoundingClientRect() -- already true post-zoom screen pixels -- so
+   `left: 970px` meant to land the dialog flush with its trigger instead
+   rendered at a real 1212.5px (970 * 1.25, confirmed live at zoom 1.25),
+   drifting the whole picker away from the field that opened it; (2) the
+   raw dvh in max-height below got the same double-scale. A native
+   <dialog> promoted to the top layer via showModal() still inherits an
+   ambient `zoom` from its ancestors, same as a plain `position:fixed`
+   div -- same fix as the landing mascot's stage and every other
+   `position:fixed`, JS-positioned element fixed this session, applied
+   here on the whole dialog so both position and size cancel together
+   instead of needing two separate, easy-to-drift-apart corrections. */
+.dialog { position: fixed; inset: auto; left: var(--picker-left, 16px); top: var(--picker-top, 16px); margin: 0; padding: 0; width: min(360px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; border: 1px solid var(--color-brand-400); border-radius: 20px; background: var(--color-night-card); color: var(--color-night-foreground); box-shadow: 0 20px 70px color-mix(in srgb, var(--color-night-background) 75%, transparent); zoom: calc(1 / var(--vz, 1)); }
 .dialog::backdrop { background: color-mix(in srgb, var(--color-night-background) 35%, transparent); }
 .panel { padding: 20px; }
 .heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 16px; }

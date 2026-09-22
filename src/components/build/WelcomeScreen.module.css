@@ -43,7 +43,11 @@
   display: grid;
   place-items: center;
   width: min(100%, 420px);
-  height: clamp(180px, 29dvh, 260px);
+  /* / var(--vz, 1): cancels this app's own wide-screen zoom (globals.css)
+     double-scaling a raw dvh size -- same bug fixed across the app this
+     session, here on the one screen in Build that explicitly can't
+     scroll at all (see the "Fit without scrolling" comment below). */
+  height: calc(clamp(180px, 29dvh, 260px) / var(--vz, 1));
   flex-shrink: 0;
   transition: transform 400ms ease-out;
 }
@@ -134,7 +138,7 @@
 /* --- Dreamy ----------------------------------------------------------- */
 .dreamy {
   position: relative;
-  width: clamp(180px, 28dvh, 260px);
+  width: calc(clamp(180px, 28dvh, 260px) / var(--vz, 1));
   aspect-ratio: 1;
   border: 0;
   border-radius: 50%;
@@ -274,8 +278,8 @@
 @keyframes dotArrive { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: scale(1); } }
 @media (max-width: 639px) {
   .scene { padding-top: 12px; padding-bottom: 24px; }
-  .dreamyStage { max-width: 320px; height: clamp(160px, 25dvh, 220px); }
-  .dreamy { width: clamp(170px, 24dvh, 210px); }
+  .dreamyStage { max-width: 320px; height: calc(clamp(160px, 25dvh, 220px) / var(--vz, 1)); }
+  .dreamy { width: calc(clamp(170px, 24dvh, 210px) / var(--vz, 1)); }
   .description { max-width: 330px; margin-top: 16px; }
   .actions { margin-top: 24px; }
 }
@@ -285,8 +289,8 @@
    give, anything shorter takes this tier, and phones the one below. */
 @media (max-height: 960px) {
   .scene { padding-top: 8px; padding-bottom: 12px; }
-  .dreamyStage { height: clamp(150px, 22dvh, 210px); }
-  .dreamy { width: clamp(150px, 21dvh, 200px); }
+  .dreamyStage { height: calc(clamp(150px, 22dvh, 210px) / var(--vz, 1)); }
+  .dreamy { width: calc(clamp(150px, 21dvh, 200px) / var(--vz, 1)); }
   .build { font-size: clamp(64px, 9vw, 96px); }
   .description { margin-top: 12px; }
   .actions { margin-top: 20px; }

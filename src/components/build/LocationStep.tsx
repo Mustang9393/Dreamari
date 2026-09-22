@@ -161,8 +161,18 @@ export function LocationStep({ state, patch, onBack, onNext, react, percent, alm
 
           {/* Height-aware: on a phone with Safari's bars up the map must leave
              room for the heading, the toggle and the footer, or the step
-             scrolls (direct feedback, 11 Sept 2026). */}
-          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 w-[calc(100%+8px)] max-h-[clamp(150px,calc(100dvh-470px),44dvh)]">
+             scrolls (direct feedback, 11 Sept 2026).
+             / var(--vz,1): this app's own wide-screen zoom (globals.css,
+             1.1x/1.25x) multiplies a raw dvh-based size a second, unaccounted
+             -for time on render -- confirmed live at 1920x873 (zoom 1.1
+             there): this clamp computed 384px locally but rendered a real
+             422.5px (384 * 1.1 exactly), pushing the step past the flow's
+             own no-scroll container on screens with less headroom than
+             that. Same fix as `main`'s height and the landing mascot
+             earlier this session (direct feedback, 23 Sept 2026: "the map
+             screen in build requires scrolling on larger screens... it
+             shouldn't"). */}
+          <svg ref={svgRef} viewBox={TIGHT_VIEWBOX} role="group" aria-label="Map of the United States" className="-mx-1 w-[calc(100%+8px)] max-h-[calc(clamp(150px,calc(100dvh-470px),44dvh)/var(--vz,1))]">
             {USA.locations.map((location) => {
               const name = displayName(location.name);
               const isSelected = selected === name;
