@@ -72,8 +72,40 @@ function formatDate(ts: number) {
 // Classic template's) and read as no color chosen at all.
 const TAG_COLORS = ["var(--primary)", "#a855f7", "#ec4899", "#f97316", "#eab308", "#22c55e", "#14b8a6", "#ef4444"];
 
-function TagDot({ color, onPick }: { color: string; onPick: (color: string) => void }) {
+// Same discoverability problem as Explore's "For you" tab before its own
+// nudge (direct feedback there: a control with no visual hint it's
+// interactive goes unnoticed) -- this dot IS the only way to tag a resume
+// with a color, but nothing about a bare 8px circle says "tap me." One
+// sparkle, on the first card's dot only (not every card in the grid --
+// same "not too much that they ignore it" restraint as For You's), until
+// the student opens the picker once; the flag lives in localStorage so it
+// never comes back, same lifecycle as For You's own nudge.
+const TAG_COLOR_NUDGE_SEEN_KEY = "dreamari:nudge:resume-tag-color";
+function readTagColorNudgeSeen(): boolean {
+  try { return window.localStorage.getItem(TAG_COLOR_NUDGE_SEEN_KEY) === "1"; } catch { return false; }
+}
+function markTagColorNudgeSeen(): void {
+  try { window.localStorage.setItem(TAG_COLOR_NUDGE_SEEN_KEY, "1"); } catch { /* no storage */ }
+}
+/** true until the tag-color picker has been opened once. */
+function useTagColorNudge(): boolean {
+  const [seen, setSeen] = useState(true); // assume seen until the client checks, so SSR never flashes the spark
+  useEffect(() => {
+    // deliberate: syncing a client-only store into state after mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSeen(readTagColorNudgeSeen());
+  }, []);
+  return !seen;
+}
+
+function TagDot({ color, onPick, nudge = false }: { color: string; onPick: (color: string) => void; /** For You-style sparkle: shown on the first card only, until the picker is opened once */ nudge?: boolean }) {
   const [open, setOpen] = useState(false);
+  // Local, not just the localStorage flag: the flag only takes effect on
+  // the NEXT page load (useTagColorNudge only reads it on mount), so
+  // without this the spark would keep reappearing every time the picker
+  // is closed and reopened within the same visit.
+  const [dismissed, setDismissed] = useState(false);
+  const showSpark = nudge && !dismissed;
   return (
     <span className="relative">
       <button
@@ -81,11 +113,17 @@ function TagDot({ color, onPick }: { color: string; onPick: (color: string) => v
         aria-label="Choose a tag color"
         onClick={(e) => {
           e.stopPropagation();
+          if (showSpark) { markTagColorNudgeSeen(); setDismissed(true); }
           setOpen((v) => !v);
         }}
-        className="dm-tap flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full"
+        className="dm-tap relative flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full"
       >
         <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />
+        {showSpark && (
+          <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[6px] -right-[6px] h-[9px] w-[9px]">
+            <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+          </svg>
+        )}
       </button>
       {open && (
         <>
@@ -147,7 +185,7 @@ function StatusTags({ version }: { version: ResumeVersion }) {
 // badges exactly as they rendered, the four icon actions, Open), just
 // reflowed for a card: status tags up top, identity, scores, then a
 // footer row for actions instead of one continuous horizontal line.
-function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void }) {
+function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete, tagNudge = false }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void; /** show the tag-color sparkle nudge on this card's dot */ tagNudge?: boolean }) {
   const [downloading, setDownloading] = useState(false);
   const ats = version.atsCheck;
   // Stored as "NW — Needs Work"; only the plain-English half is ever shown.
@@ -180,7 +218,7 @@ function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete }:
         className="dm-link flex min-w-0 cursor-pointer flex-col gap-[2px] text-left"
       >
         <div className="flex items-center gap-[6px]">
-          <TagDot color={accent} onPick={(color) => upsertVersion({ ...version, color, updatedAt: Date.now() })} />
+          <TagDot color={accent} onPick={(color) => upsertVersion({ ...version, color, updatedAt: Date.now() })} nudge={tagNudge} />
           <span className="truncate text-[15.5px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{version.name}</span>
         </div>
         {version.targetPosition ? (
@@ -274,6 +312,7 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const { toast } = useResumeToast();
   const [confirmDelete, setConfirmDelete] = useState<ResumeVersion | null>(null);
+  const tagColorNudge = useTagColorNudge();
 
   const startBuilding = () => {
     startFreshFromStudentProfile();
@@ -349,7 +388,7 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
          (ProfileExperience.tsx's own Top Three/My Plan/Career Report
          row), reusing this app's own spacing token rather than a new one. */}
       <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
-        {versions.map((v) => (
+        {versions.map((v, i) => (
           <VersionCard
             key={v.id}
             resume={resume}
@@ -361,6 +400,7 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
               upsertVersion({ ...v, id: makeId(), name: `${v.name} (Copy)`, createdAt: now, updatedAt: now, atsCheck: null });
             }}
             onDelete={() => setConfirmDelete(v)}
+            tagNudge={i === 0 && tagColorNudge}
           />
         ))}
       </div>

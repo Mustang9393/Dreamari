@@ -12328,3 +12328,31 @@ component files total) -- resume at Build/Explore/Profile/Play/Connect/
 Colleges/Resume Builder's own sub-components not yet individually
 audited, or continue wherever directed next. Not pushed -- awaiting
 go-ahead.
+
+### 2026-09-22 Resume Builder: sparkle nudge on the tag-color dot (discoverability, not a states fix)
+
+Direct instruction: "give the sparkle nudge to the colored dots for resume
+builder too. so the user know they can click it and set a color." The
+14px `TagDot` next to each saved resume's name (`ResumeExperience.tsx`)
+is the only way to tag a resume with a color, but a bare circle gives no
+hint it's interactive — same discoverability problem the "For you" tab
+had before its own nudge.
+
+Reused the exact established pattern (`dm-nudge-spark`, `app.css`) rather
+than inventing a new treatment: a small sparkle pulses near the dot every
+~5s until the color picker is opened once, then a `localStorage` flag
+(`dreamari:nudge:resume-tag-color`) keeps it gone for good — same
+lifecycle as Explore's "For you" nudge. Shown on the first saved-resume
+card only, not every card in the grid, matching the "not too much that
+they ignore it" restraint from that same feature's own direct feedback.
+Local `dismissed` state in `TagDot` also clears the spark the instant
+it's clicked (not just on next page load), since the localStorage read
+only happens once on mount.
+
+Verified live: spark renders on the first card's dot pre-click (DOM-
+confirmed, animation running), disappears immediately on click, and the
+`localStorage` flag persists so it won't reappear on reload.
+`tsc`/`eslint` clean.
+
+Not pushed yet -- this landed after the 9-area sweep was already pushed;
+awaiting go-ahead for this one too.
