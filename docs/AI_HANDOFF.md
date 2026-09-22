@@ -12782,4 +12782,23 @@ had real bugs, not just gaps:
   CORRECT senior-compliance number was computed separately and only used in
   the footer sentence -- so the tile and the sentence below it showed two
   different numbers under the same claim, and the sentence hardcoded
-  "meets the district 87
+  "meets the district 87% target" regardless of the real computed rate
+  (reference's district target is 80%, and the claim should flip to "is
+  below" when the real rate doesn't clear it -- now it does).
+- The header was missing its 4th stat entirely (Question Response Rate).
+- Postsecondary Plans by Pathway was missing Military as a category and
+  the "X of Y students (Z%) have a declared path" summary line.
+- Caseload Progress by Grade didn't show student counts ("27/30 on
+  track"), only the percentage.
+- The Milestones tiles were missing their "X of Y students" subtitles
+  (reference shows one on every tile, this build only had it on the first).
+
+Rebuilt every section using real roster-computed numbers (not the
+reference's literal values, which are a different-sized demo cohort)
+against the reference's exact structure/copy templates -- same principle
+as every other screen in this pass. Reused Counselor Connect's own
+`QUESTIONS`/`ANNOUNCEMENTS` data (now exported) for Question Response Rate
+and Announcements Sent instead of inventing a second, disconnected number
+for the same underlying activity.
+
+`tsc`/`eslint` clean. Verified live: desktop (all 9 sections) and mobile.
