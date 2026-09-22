@@ -13477,3 +13477,47 @@ three.
 `tsc`/`eslint` clean across every touched file (5 total: ProProfile.tsx,
 resume/ui.tsx, CareerExploration.tsx, ConnectExperience.tsx,
 ProfileExperience.tsx).
+
+### 2026-09-23 Report tab: Asset Management had no report at all -- the only gap in the whole Top 3 pool
+
+Direct report: My Profile's Report tab showed "No report yet for Asset
+Management" -- CareerReportView's real fallback state, correctly built,
+just never meant to be reachable for a career already sitting in a
+student's Top 3. Direct instruction: "this should not happen if they
+already have a top 3... if it's a data problem, please mockup data
+referencing the other 2 reports."
+
+It was a data problem: `CAREER_REPORTS_V2` (report-data.ts) simply had no
+`"asset-management"` entry -- `reportV2()` returned `undefined`, which is
+also why Top Three's own cards were already showing "Coming soon" for
+Asset Management's pay/education (same root cause, different symptom,
+both traced to this one missing entry). Checked every career actually
+reachable through Top 3 (the pool in profile/data.ts: investment-banking,
+airline-pilot, private-equity, software-engineer, registered-nurse,
+asset-management, food-scientist, data-scientist, fashion-buyer,
+game-designer) against `CAREER_REPORTS_V2` -- Asset Management was the
+only gap; nothing else needs this fix.
+
+Built the missing entry in the same voice and shape as investment-banking
+and private-equity (its fellow Business & Finance reports, and literally
+the other 2 reports this student's own Top 3 already has) rather than
+inventing facts: median pay ($156,100), the career ladder (Investment
+Analyst ~$85K through Portfolio Manager $200K), and employer/skill framing
+all pulled from this career's own existing data elsewhere in the app
+(profiles.generated.ts, data.ts's ladder, gradePlanData.ts's
+IB_RECIPE-based framing), so the new report agrees with what Explore and
+Top Three already say about this same career rather than introducing a
+second, conflicting set of numbers. Reused investment-banking/
+private-equity's own college list (same NY-area finance schools, a
+genuinely appropriate path for this career too), and kept the comparison
+block's `evidence` honestly at "Just saved" rather than fabricating a
+specific behavioral claim like the other two entries have (their claims
+are tied to actual tracked engagement -- simulation replays, re-reads --
+that doesn't exist for this career yet).
+
+Verified live: switched the Report tab to Asset Management, got the full
+report (overview, classes, colleges, sourcing, reflection) instead of the
+empty state; Top Three's card also lost its "Coming soon" placeholders,
+showing $156,100 and the real education line like its two siblings.
+
+`tsc`/`eslint` clean.

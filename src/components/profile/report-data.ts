@@ -377,6 +377,95 @@ export const CAREER_REPORTS_V2: Record<string, CareerReportV2> = {
     ],
   },
 
+  // Was missing entirely -- a Top 3 career with no CAREER_REPORTS_V2 entry
+  // fell through to CareerReportView's "No report yet" empty state, which
+  // shouldn't be reachable for a career a student has already saved (direct
+  // feedback, 23 Sept 2026: "this should not happen if they already have a
+  // top 3... mockup data referencing the other 2 reports"). Built from this
+  // career's own real figures already used elsewhere in the app --
+  // profiles.generated.ts's median pay ($156,100) and career ladder
+  // (Investment Analyst ~$85K through Portfolio Manager $200K),
+  // gradePlanData.ts's IB_RECIPE-based employer/skill framing -- in the
+  // same voice and shape as investment-banking and private-equity, its
+  // fellow Business & Finance reports and the two other real reports this
+  // student's Top 3 already has.
+  "asset-management": {
+    glance: {
+      simple: "Asset managers invest other people's money -- retirement funds, endowments, personal savings -- to grow it over time.",
+      example: "A retirement fund hands your firm $2 billion. Every morning the market opens, and your calls on what to buy, hold or sell are what pays out for retirees decades from now.",
+      whatYouDo: "Research companies and markets, then decide what a portfolio buys, holds, or sells.",
+      responsibilities: [
+        "Research companies, industries, and markets",
+        "Build financial models to value what a company is worth",
+        "Pitch investment ideas to a portfolio manager",
+        "Track how existing holdings are performing",
+        "Meet with company executives to ask hard questions",
+        "Write memos explaining why a trade makes sense",
+      ],
+      environment: "Office based, usually in a major financial city. Smaller teams than a bank, more ownership of the ideas you bring.",
+      schedule: "The trading day sets the clock. Long hours early on, less unpredictable than banking once you're past the analyst years.",
+      skills: ["Reading financial statements", "Working with numbers", "Staying calm under pressure", "Explaining a decision clearly"],
+      industries: ["Asset managers", "Mutual funds", "Pension funds", "Hedge funds"],
+      employers: ["BlackRock", "Vanguard", "Fidelity", "T. Rowe Price"],
+      education: "Bachelor's degree in finance, economics, or business.",
+      alternatives: ["Start in banking, then move to the buy side", "Two-year college, then transfer", "A CFA charter alongside any finance-adjacent major"],
+    },
+    salary: {
+      median: "$156,100",
+      entry: "$75,000 to $95,000 in your first analyst years",
+      experienced: "$200,000 to $300,000+ as a portfolio manager",
+      geography: "New York pays well above the national number; Delaware and New Jersey are the next highest.",
+      variablePay: "Bonus tied to fund performance is a real part of pay, and it moves with the market.",
+      outlook: "Faster than average",
+      outlookDetail: "Employment of financial managers is projected to grow faster than the average for all occupations.",
+      source: bls("Financial manager pay and outlook; median from the Dreamari brief", "May 2024", "https://www.bls.gov/ooh/management/financial-managers.htm"),
+    },
+    education: [
+      { name: "Bachelor's: Finance, Economics, or Business", kind: "Degree", time: "4 years", prerequisites: "High school diploma, strong math", licensure: null, common: true, note: "A CFA charter, earned after graduating, is what separates candidates later -- not the major itself." },
+      { name: "Two-year college, then transfer", kind: "Degree", time: "2 + 2 years", prerequisites: "High school diploma", licensure: null, common: false, note: "Much cheaper start. Check the transfer agreement early." },
+    ],
+    majors: [
+      { name: "Finance", teaches: "How to value a business and read what a set of financial statements is really saying.", connection: "The most direct line into a research or analyst seat.", alternatives: ["Economics", "Accounting"] },
+      { name: "Economics", teaches: "Why markets and companies behave the way they do, with heavy data work.", connection: "Asset managers hire economics grads for the same analytical instincts banking does.", alternatives: ["Statistics", "Finance"] },
+      { name: "Accounting", teaches: "How to read and build financial statements properly.", connection: "Every research pitch starts with the numbers in a 10-K.", alternatives: ["Finance", "Business analytics"] },
+    ],
+    colleges: [
+      { name: "Columbia University", location: "New York, NY", control: "Private", length: "4-year", program: "BA Economics, financial economics track", cost: "About $69K a year tuition before aid", outcome: "95% graduate within 6 years", requirements: "Among the most competitive in the country", why: "Wall Street recruiting on campus, in the city where the jobs are.", status: "Reach" },
+      { name: "New York University (Stern)", location: "New York, NY", control: "Private", length: "4-year", program: "BS Business, Finance concentration", cost: "About $62K a year tuition before aid", outcome: "87% graduate within 6 years", requirements: "Very competitive, check requirements and aid before assuming cost", why: "Strongest finance recruiting on this list, at the highest sticker price.", status: "Reach" },
+      { name: "Seton Hall University (Stillman)", location: "South Orange, NJ", control: "Private", length: "4-year", program: "BS Finance", cost: "About $51K a year tuition before aid, strong merit aid", outcome: "71% graduate within 6 years", requirements: "Check Stillman's admission and merit scholarship criteria", why: "In state and a direct train to Manhattan, with real merit aid.", status: "Target" },
+      { name: "Rutgers University", location: "New Brunswick, NJ", control: "Public", length: "4-year", program: "BS Finance", cost: "About $17K a year in-state tuition and fees", outcome: "84% graduate within 6 years", requirements: "Check the business school's separate admission step", why: "In-state tuition with a large alumni network across New York finance.", status: "Target" },
+      { name: "Bergen Community College", location: "Paramus, NJ", control: "Public", length: "2-year", program: "AS Business Administration, then transfer to a 4-year", cost: "About $6K a year in-district tuition and fees", outcome: null, requirements: "Open enrollment", why: "The lowest-cost start, with guaranteed transfer paths into Rutgers and Seton Hall.", status: "Safety" },
+      { name: "Baruch College (CUNY)", location: "New York, NY", control: "Public", length: "4-year", program: "BBA Finance", cost: "About $7K a year in-state tuition and fees", outcome: "72% graduate within 6 years", requirements: "Check the GPA and course requirements on the CUNY site", why: "Public tuition in Manhattan, so internships are a subway ride away.", status: "Safety" },
+    ],
+    comparison: {
+      careerId: "asset-management",
+      work: "Research companies and markets, then decide what a portfolio buys, holds, or sells.",
+      setting: "Office, small research teams",
+      education: "Bachelor's degree, usually finance or economics",
+      timeToEnter: "About 4 years",
+      costBand: "Medium",
+      costNote: "Low if in-state or transfer, high at a private school",
+      salaryRange: "$75K to $95K starting",
+      outlook: "Faster than average",
+      majors: ["Finance", "Economics", "Accounting"],
+      tradeoff: "Calmer hours than banking once you're past the analyst years, with pay that leans on fund performance.",
+      whySaved: "You added it to your Top 3 to compare against your other finance picks.",
+      evidence: "Just saved",
+      investigate: "How a CFA charter changes your path compared to an MBA.",
+    },
+    actions: [
+      { id: "am-a1", label: "Compare this against your other saved finance careers", reason: "Asset management, banking, and private equity share a first degree but split after that.", due: null, href: "#report", destination: "Top 3 comparison" },
+      { id: "am-a2", label: "Look up what the CFA program actually involves", reason: "It's the credential that matters most once you're a few years in.", due: null, href: "/match-lab", destination: "Glossary" },
+      { id: "am-a3", label: "Find a school with a student-run investment fund", reason: "It's the closest thing to this job you can do before college.", due: null, href: "/colleges", destination: "College lookup" },
+      { id: "am-a4", label: "Bring this report to your next counselor meeting", reason: "You have three finance careers saved and no meeting booked yet.", due: null, href: "#report", destination: "Career Report" },
+    ],
+    sources: [
+      bls("Financial manager pay and outlook", "May 2024", "https://www.bls.gov/ooh/management/financial-managers.htm"),
+      { label: "College cost, size and graduation rates", org: "U.S. Dept. of Education, College Scorecard", year: "2024-25", verified: "Aug 2026", url: "https://collegescorecard.ed.gov/" },
+      { label: "Occupation tasks and skills", org: "O*NET OnLine", year: "2025", verified: "Aug 2026", url: "https://www.onetonline.org/" },
+    ],
+  },
+
   "software-engineer": {
     glance: {
       simple: "Software engineers build and improve the apps and systems people use every day.",
