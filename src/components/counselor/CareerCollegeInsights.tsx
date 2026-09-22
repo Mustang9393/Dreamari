@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Briefcase, Lightbulb } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { getRoster } from "@/lib/counselorRoster";
+import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 
 import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 
@@ -14,6 +14,16 @@ const RECOMMENDATIONS = [
   { emoji: "🏥", stat: "29% of students are exploring Nursing & Healthcare careers", actions: ["Partner with a local hospital or clinic for a job shadow or career fair", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
 ];
 
+const TOP_SAVED_CAREERS = [
+  { name: "Investment Banker", count: 52 }, { name: "Software Engineer", count: 47 }, { name: "Entrepreneur / Business Owner", count: 38 },
+  { name: "Registered Nurse", count: 35 }, { name: "Psychologist", count: 31 }, { name: "Marketing Manager", count: 24 },
+  { name: "Physician / Doctor", count: 22 }, { name: "Graphic Designer", count: 19 }, { name: "Electrician / Skilled Trade", count: 17 }, { name: "Teacher / Educator", count: 15 },
+];
+const TOP_SIMULATIONS = [
+  { name: "Software Engineer", count: 89 }, { name: "Nurse / Nursing", count: 76 }, { name: "Entrepreneur", count: 68 },
+  { name: "Criminal Justice / Law", count: 55 }, { name: "Graphic Designer", count: 52 }, { name: "Teacher / Educator", count: 48 },
+  { name: "Investment Banker", count: 45 }, { name: "Physician / Doctor", count: 43 }, { name: "Social Worker", count: 41 }, { name: "Marketing Manager", count: 39 },
+];
 const TOP_MAJORS = [
   { name: "Computer Science", count: 41 }, { name: "Business Administration", count: 36 }, { name: "Nursing / Health Sciences", count: 33 },
   { name: "Psychology", count: 29 }, { name: "Criminal Justice", count: 24 }, { name: "Communications / Media", count: 22 },
@@ -67,20 +77,6 @@ function TrackChart({ title, lede, items }: { title: string; lede: string; items
 }
 
 export function CareerCollegeInsights() {
-  const roster = useMemo(() => getRoster(), []);
-
-  const savedCareers = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const s of roster) for (const m of s.topMatches.slice(0, 2)) counts.set(m.title, (counts.get(m.title) ?? 0) + 1);
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, count]) => ({ name, count }));
-  }, [roster]);
-
-  const simulations = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const s of roster) counts.set(s.careerTrack, (counts.get(s.careerTrack) ?? 0) + s.engagement.simulations);
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, count]) => ({ name, count }));
-  }, [roster]);
-
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, var(--card)), color-mix(in srgb, #7C5CFA 24%, var(--card)))" }}>
@@ -101,8 +97,8 @@ export function CareerCollegeInsights() {
       </div>
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <TrackChart title="Top 10 Saved Careers" lede="Careers most frequently saved to student profiles" items={savedCareers} />
-        <TrackChart title="Top 10 Careers Explored via Simulations" lede="Careers students engaged with through interactive career simulations" items={simulations} />
+        <TrackChart title="Top 10 Saved Careers" lede="Careers most frequently saved to student profiles" items={TOP_SAVED_CAREERS} />
+        <TrackChart title="Top 10 Careers Explored via Simulations" lede="Careers students engaged with through interactive career simulations" items={TOP_SIMULATIONS} />
         <TrackChart title="Top Saved Majors" lede="Most popular college majors saved by students" items={TOP_MAJORS} />
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
@@ -124,7 +120,7 @@ export function CareerCollegeInsights() {
             <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Career Fair Planning Opportunity</h2>
           </span>
           <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--foreground)" }}>
-            Based on this semester&apos;s data, your top student career interest clusters point toward Technology, Entrepreneurship, and Healthcare. Consider organizing a career fair or job-shadow program that brings professionals from these fields directly to your school — connecting students to real-world mentors aligned with their aspirations.
+            Based on this semester&apos;s data, your top 3 student career interest clusters are Technology, Entrepreneurship, and Healthcare. Consider organizing a career fair or job-shadow program that brings professionals from these fields directly to {DEMO_SCHOOL} — connecting students to real-world mentors aligned with their aspirations.
           </p>
           <span className="flex flex-wrap gap-[8px]">
             {["Technology & Engineering", "Business & Entrepreneurship", "Healthcare & Nursing", "Law & Criminal Justice"].map((t) => (

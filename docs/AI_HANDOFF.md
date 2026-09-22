@@ -12724,3 +12724,21 @@ verbatim.
 `tsc`/`eslint` clean. Verified live: all 15 questions render with correct
 status badges and detail-panel fields, all 10 communities render, mobile
 layout intact.
+
+### 2026-09-22 Counselor Dashboard: Career + College Insights two charts matched to reference content
+
+AI Recommendations, Top Saved Majors, Top Saved Colleges, and Career Fair
+Planning already matched the reference verbatim. Two charts didn't: "Top 10
+Saved Careers" and "Top 10 Careers Explored via Simulations" were being
+computed live from the seeded roster's own top-matches/careerTrack fields --
+which produced a completely different list (our roster's own random seed,
+and for simulations, our INTEREST_WORLDS track names like "Counseling &
+Social Work" instead of the reference's specific job titles like "Software
+Engineer"). Replaced both with the reference's exact static lists/values
+(same pattern already used for Top Saved Majors/Colleges on this same
+screen). Also fixed the Career Fair Planning paragraph's wording drift
+("top student...point toward" -> "top 3 student...are", "your school" ->
+the actual DEMO_SCHOOL constant, matching the reference's literal mention
+of the school by name).
+
+`tsc`/`eslint` clean. Verified live -- all values match.
