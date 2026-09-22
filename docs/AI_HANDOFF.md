@@ -12802,3 +12802,27 @@ and Announcements Sent instead of inventing a second, disconnected number
 for the same underlying activity.
 
 `tsc`/`eslint` clean. Verified live: desktop (all 9 sections) and mobile.
+
+### 2026-09-22 Counselor Dashboard: Settings rebuilt -- a 4th role tier and 3 missing sections
+
+The original plan doc for this product said "the three roles are already
+spec'd in the reference's own Settings page" -- that research undercounted:
+the reference actually has four role tiers (School Counselor, Lead
+Counselor, School Administrator, District Administrator), and this build
+only had three. Added District Administrator to CounselorRole/
+COUNSELOR_ROLES (counselorAccount.ts) and its own permission list, and
+corrected School Administrator's permissions -- this build had folded the
+reference's District Administrator-level permissions ("view all schools",
+"generate district-wide reports") into School Administrator, since there
+was no 4th tier to hold them.
+
+Also missing three entire sections below Role Permissions: Notification
+Preferences (5 toggles -- built a small local Toggle component, matching
+this dashboard's own visual language since no shared switch component
+exists yet), Caseload (3 roster-computed stats + a real link to Students),
+and Academic Year Settings (3 fields). None of these three have a backing
+store in this prototype (no persistence layer for notification prefs or
+academic-year config), so they're local component state / uncontrolled
+inputs -- same honesty precedent as Auth.tsx's cosmetic password field.
+
+`tsc`/`eslint` clean. Verified live: desktop (all 5 sections) and mobile.

@@ -9,9 +9,9 @@
 
 export const COUNSELOR_ACCOUNT_KEY = "dreamari-counselor-account";
 
-export type CounselorRole = "School Counselor" | "Lead Counselor" | "School Administrator";
+export type CounselorRole = "School Counselor" | "Lead Counselor" | "School Administrator" | "District Administrator";
 
-export const COUNSELOR_ROLES: CounselorRole[] = ["School Counselor", "Lead Counselor", "School Administrator"];
+export const COUNSELOR_ROLES: CounselorRole[] = ["School Counselor", "Lead Counselor", "School Administrator", "District Administrator"];
 
 export type CounselorAccount = {
   name: string;
