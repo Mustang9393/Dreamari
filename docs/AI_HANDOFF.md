@@ -12843,4 +12843,38 @@ table).
 `tsc`/`eslint` clean. Verified live: all columns render, row click still
 opens the drill-down correctly, mobile scrolls horizontally as expected.
 
+### 2026-09-22 Counselor Dashboard: Productivity Suite copy matched to reference, 1:1 pass complete
+
+Last screen in the full reference re-check. Recommendation Letter's
+description already matched verbatim; the other 4 tools had wording drift
+(clicked through each one live to confirm): Student Meeting Brief, Parent
+Meeting Brief, and Student Success Plan each had a paraphrased description
+instead of the reference's own copy -- Student Success Plan's version was
+also missing real content (the reference explicitly mentions "recommended
+Dreamari activities, career simulations, suggested professional
+connections", none of which this build's description referenced). Students
+Needing Attention had a different description, a different "Configure &
+Generate" panel structure (missing the section header and the "no student
+selection needed" note that every other tool's panel has), and a
+different button label ("Generate Prioritized List" instead of the
+reference's "Generate Draft"). Fixed all five to match verbatim.
+
+This closes out the full screen-by-screen 1:1 alignment pass across all 11
+Counselor Dashboard sections + Students/drill-down, following the "align
+to the reference 1:1 first, then improve screen by screen" instruction.
+Real gaps found and fixed this pass, screen by screen: Overview's card
+composition, Milestone Tracker's entire content model (wrong milestone
+taxonomy), an app-wide unfilled-button bug (11 buttons across 7 files),
+Student Progress's chart shapes (wrong for all 9 report types), Counselor
+Connect's Student Questions/Group Discussions (missing ~60% of real
+content), Career + College Insights' two charts (computed from the wrong
+data source), Platform Engagement (entirely formula-derived, including a
+real bug always showing "3.00"), My Impact (missing ~half the reference
+page), Settings (missing a 4th role tier + 3 sections), Students table
+(missing 5 of 13 columns), and this screen's copy. `tsc`/`eslint` clean on
+every file touched.
+
+Next step: the creative screen-by-screen refinement pass the user asked
+for once 1:1 alignment was confirmed done.
+
 `tsc`/`eslint` clean. Verified live: desktop (all 5 sections) and mobile.

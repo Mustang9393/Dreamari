@@ -11,10 +11,10 @@ type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "succ
 
 const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignature; desc: string }[] = [
   { id: "recommendation-letter", label: "Recommendation Letter", sub: "College · Scholarship · Internship · Employment", icon: FileSignature, desc: "Generate a personalized recommendation letter using each student's career report, resume, assessments, reflections, milestones, activities, and counselor notes. Tailored to the application type and audience." },
-  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText, desc: "Generate a one-page brief before a student meeting — current status, recent activity, open milestones, and suggested talking points, pulled from their own career report and plan." },
-  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2, desc: "Generate family-conference talking points that translate a student's plan and progress into language a parent or guardian can follow, with clear next steps." },
-  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo, desc: "Generate a personalized intervention plan for a student who's falling behind — concrete next milestones, a realistic timeline, and suggested check-in cadence." },
-  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle, desc: "Auto-prioritize your caseload by urgency — overdue milestones, approaching deadlines, and disengagement signals — so you know who to reach out to first." },
+  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText, desc: "Generate a one-page overview before a student meeting — covering career interests, milestone progress, missing requirements, suggested discussion topics, and recommended next steps." },
+  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2, desc: "Generate talking points before a parent-teacher or parent-counselor conference — summarizing student progress, career readiness, academic planning, areas needing attention, and recommended action steps." },
+  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo, desc: "Generate a personalized intervention plan for students who are behind — including missing milestones, recommended Dreamari activities, career simulations, suggested professional connections, and counselor follow-up recommendations." },
+  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle, desc: "Automatically identify and prioritize students requiring counselor follow-up based on engagement, milestone completion, missing plans, and other risk indicators. No student selection needed — Dreamari does the analysis." },
 ];
 
 const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
@@ -116,9 +116,14 @@ export function ProductivitySuite() {
               </div>
             )}
             {toolId === "attention" && (
-              <button type="button" onClick={generate} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold">
-                <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate Prioritized List
-              </button>
+              <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Configure &amp; Generate</span>
+                <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>This tool analyzes your entire caseload automatically — no student selection needed.</p>
+                <button type="button" onClick={generate} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold">
+                  <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate Draft
+                </button>
+                <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Dreamari will generate a first draft using available student data. You review, edit, and approve — your professional judgment is what matters.</p>
+              </div>
             )}
 
             {draft && (
