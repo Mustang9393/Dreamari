@@ -8,7 +8,8 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronDown, ChevronUp, Eye, GraduationCap, Heart, Play, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { useDiscoveryNudge } from "@/lib/nudge";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
@@ -69,41 +70,50 @@ export function useForYouNudge(tab: "foryou" | "browse"): boolean {
 
 export function ForYouBrowseToggle({ tab, onTab, nudge = false }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void; /** text sweep on For you until first opened */ nudge?: boolean }) {
   return (
-    <div
-      className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border p-[var(--space-1)]"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
-    >
+    // Boxed pill only from `lg:` on -- this same component also renders on
+    // top of the reel's photo at every width below that (mobile AND
+    // tablet), where the pill/border read as extra chrome over the image.
+    // Restored to Instagram's own convention there: plain text, weight and
+    // brightness carrying the selected state, a text-shadow for legibility
+    // instead of a surface (direct instruction, 23 Sept 2026: "restored to
+    // what it was for mobile before... just text like instagram with a
+    // subtle scrim and shadows"). `lg:` still gets the bordered glass pill,
+    // since that version sits in a normal page header, not over a photo.
+    <div className="flex items-center gap-[var(--space-4)] lg:gap-[var(--space-1)] lg:rounded-[var(--radius-lg)] lg:border lg:border-[color:var(--glass-border)] lg:bg-[color:var(--glass-surface-1)] lg:p-[var(--space-1)]">
       {(
         [
           { key: "foryou", label: "For you" },
           { key: "browse", label: "Browse All" },
         ] as const
-      ).map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          aria-pressed={tab === item.key}
-          onClick={() => onTab(item.key)}
-          className="dm-quiet cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[6px] text-[13px] leading-[18px] font-bold whitespace-nowrap uppercase"
-          style={{
-            fontFamily: "var(--font-body)",
-            background: tab === item.key ? "var(--primary)" : "transparent",
-            // the unselected label is muted so the nudge's white sweep has
-            // something to travel over (direct feedback, 19 Sept 2026)
-            color: tab === item.key ? "var(--primary-foreground)" : "var(--muted-foreground)",
-          }}
-        >
-          <span className={`relative ${item.key === "foryou" && nudge ? "dm-text-nudge" : ""}`}>
-            {item.label}
-            {/* a small sparkle twinkles at the corner in step with the sweep */}
-            {item.key === "foryou" && nudge && (
-              <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
-                <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
-              </svg>
-            )}
-          </span>
-        </button>
-      ))}
+      ).map((item) => {
+        const on = tab === item.key;
+        return (
+          <button
+            key={item.key}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onTab(item.key)}
+            className={`dm-quiet cursor-pointer rounded-[var(--radius-md)] text-[15px] leading-[20px] font-bold whitespace-nowrap uppercase [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] lg:px-[var(--space-4)] lg:py-[6px] lg:text-[13px] lg:leading-[18px] lg:[text-shadow:none] ${
+              on
+                ? "text-white lg:bg-[color:var(--primary)] lg:text-[color:var(--primary-foreground)]"
+                // the unselected label is muted so the nudge's white sweep has
+                // something to travel over (direct feedback, 19 Sept 2026)
+                : "text-white/65 lg:bg-transparent lg:text-[color:var(--muted-foreground)]"
+            }`}
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            <span className={`relative ${item.key === "foryou" && nudge ? "dm-text-nudge" : ""}`}>
+              {item.label}
+              {/* a small sparkle twinkles at the corner in step with the sweep */}
+              {item.key === "foryou" && nudge && (
+                <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                  <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+                </svg>
+              )}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -424,10 +434,21 @@ const REEL_PHOTO_FOCUS: Record<string, string> = {};
 // wall or window behind the panel's least-blurred (top) edge washes out
 // even white text. A dark drop shadow is background-independent: it reads
 // against light AND dark photo content, unlike picking a single text color.
-const LEGIBLE_TEXT_SHADOW = "0 1px 2px rgba(0,0,0,0.85), 0 1px 8px rgba(0,0,0,0.45)";
+// Lightened to one soft layer, not two stacked ones -- ProgressiveBlur's own
+// dark tint (below) now carries more of this job, so the shadow doesn't have
+// to (direct instruction, 23 Sept 2026: "don't make it look like we
+// overindexed on shadows").
+const LEGIBLE_TEXT_SHADOW = "0 1px 3px rgba(0,0,0,0.55)";
 
 function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   const [face, setFace] = useState<"Summary" | "Details">("Summary");
+  // Tracks a genuine manual flip (tap, swipe, or chevron), separate from an
+  // autoplay-driven one -- only a manual one marks the discovery nudge seen
+  // (direct instruction, 23 Sept 2026: someone who's never touched a card
+  // yet should still see the nudge even if autoplay has already flipped it
+  // for them once).
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const nudge = useDiscoveryNudge("dreamari:foryou-flip-nudge", hasInteracted);
   const router = useRouter();
   const slug = careerSlug(career.title);
   // Confirmed live bug (engineer feedback, 20 Sept 2026): this button had no
@@ -435,6 +456,62 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   // careers with no simulation built -- only the career detail page's own
   // Play button was gated on this. Same hasSimulation check as that page.
   const hasSimulation = !!simulationFor(slug);
+
+  // Auto-advance Summary -> Details once the card has been sitting on
+  // Summary for a few seconds -- direct instruction, 23 Sept 2026: "if they
+  // auto play the slide thats even better... realistically only though,
+  // people need time to read first dont be too fast." 6s is enough to read
+  // the two-line description before it moves; only ever advances FORWARD
+  // once (the `face !== "Summary"` guard stops it from also auto-reversing
+  // or looping), and only while the card is the one actually on screen.
+  useEffect(() => {
+    if (!active || face !== "Summary") return;
+    const t = setTimeout(() => setFace("Details"), 6000);
+    return () => clearTimeout(t);
+  }, [active, face]);
+
+  // Real swipe, not just tap -- direct instruction, 23 Sept 2026. Lives on
+  // the same panel the tap-to-flip button already covers, so "swipe or tap
+  // anywhere" is genuinely anywhere on the text, not just the small chevron
+  // row. `touchAction: pan-y` on the element lets the reel's own vertical
+  // swipe-between-cards keep working underneath this -- only a drag whose
+  // horizontal movement dominates counts as a face-swipe.
+  const dragStart = useRef<{ x: number; y: number } | null>(null);
+  const dragged = useRef(false);
+  const onPanelPointerDown = useCallback((e: React.PointerEvent) => {
+    dragStart.current = { x: e.clientX, y: e.clientY };
+    dragged.current = false;
+  }, []);
+  const onPanelPointerMove = useCallback((e: React.PointerEvent) => {
+    const start = dragStart.current;
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) dragged.current = true;
+  }, []);
+  const onPanelPointerUp = useCallback((e: React.PointerEvent) => {
+    const start = dragStart.current;
+    dragStart.current = null;
+    if (!start || !dragged.current) return;
+    setHasInteracted(true);
+    setFace(e.clientX - start.x < 0 ? "Details" : "Summary");
+  }, []);
+  const flipFace = useCallback(() => {
+    if (dragged.current) {
+      // a real drag already set the face on pointer-up -- the click that
+      // follows it shouldn't also toggle it back
+      dragged.current = false;
+      return;
+    }
+    setHasInteracted(true);
+    setFace((current) => (current === "Summary" ? "Details" : "Summary"));
+  }, []);
+  const jumpTo = useCallback((next: "Summary" | "Details") => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setHasInteracted(true);
+    setFace(next);
+  }, []);
+
   return (
     <article
       className="relative flex h-full w-full flex-col justify-end gap-[var(--space-6)] overflow-hidden border p-[var(--space-4)] md:rounded-[var(--radius-lg)]"
@@ -496,29 +573,127 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
           <div className="relative z-[1] flex w-full flex-col gap-[var(--space-3)] p-[var(--space-4)]">
             {/* The tap-to-flip Summary <-> Details interaction wraps only the
                text -- Figma's own mockup nests it inside the same panel as
-               the CTA buttons below, but a <button> cannot contain other
-               buttons, so this stays its own element, just sharing the
-               panel's single backdrop and padding rather than owning a
-               separate one. Gap to the CTA row below tightened from
+               the CTA buttons below, so this stays its own element, just
+               sharing the panel's single backdrop and padding rather than
+               owning a separate one. Gap to the CTA row below tightened from
                space-4 to space-2 -- the two read as one connected block in
-               Figma, not a title card with buttons stapled on well below it. */}
-            <button
-              type="button"
+               Figma, not a title card with buttons stapled on well below it.
+               A `<div role="button">`, not a real `<button>`, now that the
+               chevrons below are real buttons of their own -- a `<button>`
+               can't contain another `<button>` (direct instruction, 23 Sept
+               2026: real swipe AND click-able chevrons, not just tap). */}
+            <div
+              role="button"
+              tabIndex={0}
               aria-label={face === "Summary" ? "Show more info" : "Show summary"}
-              onClick={() => setFace((current) => (current === "Summary" ? "Details" : "Summary"))}
-              className="dm-tap flex w-full cursor-pointer flex-col gap-[var(--space-2)] text-left"
-              style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
+              onClick={flipFace}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipFace(); } }}
+              onPointerDown={onPanelPointerDown}
+              onPointerMove={onPanelPointerMove}
+              onPointerUp={onPanelPointerUp}
+              // Plain, not dm-tap -- dm-tap's hover lift + drop shadow
+              // (translateY + box-shadow) is meant for a discrete card or
+              // button, not a full text panel sitting over a photo (direct
+              // correction, 23 Sept 2026: "should not hover/lift and drop
+              // shadow... just a layer there, no other hover effects").
+              // Kept the focus-visible ring by hand so keyboard users still
+              // get one.
+              className="flex w-full cursor-pointer flex-col gap-[var(--space-2)] text-left focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{ textShadow: LEGIBLE_TEXT_SHADOW, touchAction: "pan-y", outlineColor: "var(--accent-subtle)" }}
             >
               <div className="face-swap flex w-full flex-col gap-[var(--space-2)] md:w-[326px]">
-                <div className="flex items-start justify-between gap-[var(--space-2)]">
-                  <span className="text-[10px] leading-[14px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.92)" }}>
-                    {face === "Summary" ? career.matchLabel : "MORE INFO"}
+                {/* Swipe/autoplay row: a short, fixed-width progress track
+                   (not a full-width bar -- that reads as a page-level
+                   control) with quiet chevrons grouped tight around it, all
+                   pinned to the FAR LEFT -- as far as the panel allows from
+                   Like / Not for me / Save, which live in their own row
+                   above this whole panel, untouched (direct instruction, 23
+                   Sept 2026: keep the action buttons exactly where they are;
+                   chevrons must sit "farthest away" from them). Replaces the
+                   old two-dot pair with the same information plus motion:
+                   the fill animates while on Summary (see the `active`
+                   effect above), so it visibly counts down to the
+                   auto-advance instead of just marking a static position.
+                   The chevrons are their own real buttons (stopPropagation
+                   so a click doesn't also bubble into the flip above) --
+                   mostly a desktop/mouse affordance; swipe and tap are the
+                   primary gestures on touch. */}
+                <div className="relative flex items-center gap-[7px]">
+                  <button
+                    type="button"
+                    aria-label="Previous: summary"
+                    onClick={jumpTo("Summary")}
+                    className="dm-quiet flex size-4 flex-none cursor-pointer items-center justify-center rounded-full"
+                    style={{ color: face === "Summary" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
+                  >
+                    <ChevronLeft className="h-3 w-3" aria-hidden />
+                  </button>
+                  <span aria-hidden className="flex w-[34px] gap-[3px]">
+                    <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
+                      <span className="block h-full w-full rounded-full bg-white" />
+                    </span>
+                    <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
+                      <span className="block h-full rounded-full bg-white transition-[width] duration-300" style={{ width: face === "Details" ? "100%" : "0%" }} />
+                    </span>
                   </span>
-                  <span aria-hidden className="flex items-center">
-                    <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Summary" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
-                    <span className="mx-[2px] h-[5px] w-[5px] rounded-full" style={face === "Details" ? { background: "var(--foreground)" } : { border: "1px solid var(--muted-foreground)" }} />
-                  </span>
+                  <button
+                    type="button"
+                    aria-label="Next: more info"
+                    onClick={jumpTo("Details")}
+                    className="dm-quiet flex size-4 flex-none cursor-pointer items-center justify-center rounded-full"
+                    style={{ color: face === "Details" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
+                  >
+                    <ChevronRight className="h-3 w-3" aria-hidden />
+                  </button>
                 </div>
+                {/* Heading > subheading > body BY SIZE, strictly top-down --
+                   this kicker and the field labels below are subheadings,
+                   so they're sized BETWEEN the h2 title and the body copy,
+                   not smaller than the body they introduce (direct
+                   correction, 23 Sept 2026: "heading>subheading>body...
+                   eyebrow... [was] smaller than the info" -- sizing a label
+                   down because it felt less important inverted the actual
+                   rank). Brightness does the OTHER job: kept muted here
+                   even though it's now the larger of the two, so the eye
+                   still lands on the body value first, not on the label.
+                   Always career.matchLabel, on BOTH faces -- an earlier
+                   pass swapped it to "MORE INFO" on Details, then hid that
+                   text (keeping the line's height so nothing below jumped)
+                   once "MORE INFO" turned out redundant with the
+                   chevron/progress row. Showing "Strong match" constantly
+                   instead solves the same redundancy AND reads as a steady
+                   anchor while the content around it changes (direct
+                   instruction, 23 Sept 2026: "what if we have strong match
+                   on both slides... have [it] have my sparkle shimmer
+                   nudge thing") -- carries the same dm-text-nudge sweep +
+                   dm-nudge-spark twinkle ForYouBrowseToggle's "For you"
+                   label uses. Brighter white, not a color -- first tried
+                   the app's own green "GOOD" token (MentorshipTab.tsx),
+                   then a direct follow-up asked for plain white instead,
+                   just brighter than Major/Main Skills below it rather
+                   than a new hue on the card: "maybe it can [be] white but
+                   just slightly brighter than what major and main skills
+                   are." 0.88 vs their 0.62. */}
+                <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ fontFamily: "var(--font-body)", color: "rgba(255,255,255,0.88)" }}>
+                  {/* textShadow: none -- dm-text-nudge clips its background
+                     to the glyph shapes and makes the actual text fill
+                     transparent (`-webkit-text-fill-color`), so the
+                     panel's inherited drop-shadow was painting underneath
+                     that transparent fill instead of behind solid text,
+                     reading as a dark smudge over the green rather than a
+                     clean shadow (direct report, 23 Sept 2026: "the
+                     sparkle shimmer... also add[s] a dark overlay on the
+                     text"). The sweep gradient already carries its own
+                     contrast; it doesn't need the shadow too. */}
+                  <span className={`relative ${nudge ? "dm-text-nudge" : ""}`} style={nudge ? { textShadow: "none" } : undefined}>
+                    {career.matchLabel}
+                    {nudge && (
+                      <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                        <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+                      </svg>
+                    )}
+                  </span>
+                </span>
                 {/* Both faces stay mounted, stacked in the same grid cell, so
                    the panel's height is always the taller of the two -- it
                    never shrinks when Details' shorter content shows, which
@@ -542,28 +717,43 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                     <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
                       {career.description}
                     </p>
-                    <div className="flex gap-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
-                      <span style={{ color: "rgba(255,255,255,0.92)" }}>MEDIAN SALARY</span>
-                      <span style={{ color: "var(--foreground)" }}>{career.salary}</span>
+                    {/* Eyebrow (dim, small, uppercase) over the actual value
+                       (the brighter, body-sized line) -- title > subtitle >
+                       body by size AND brightness, not two same-weight
+                       labels sitting side by side (direct instruction, 23
+                       Sept 2026: "everything read like one hierarchy...
+                       use brightness too"). */}
+                    <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
+                      <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Median salary</span>
+                      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.salary}</span>
                     </div>
                   </div>
+                  {/* justify-center: Details has less content than Summary
+                     (no title/description of its own), but the grid cell is
+                     always sized to Summary, the taller sibling -- top-
+                     aligned by default, that left a dead gap below Main
+                     Skills before the CTA row (direct instruction, 23 Sept
+                     2026: "keep the height constant... align the text in
+                     slide 2 so it doesn't look like it has awkward empty
+                     space"). Centering distributes that same gap evenly
+                     above and below instead of dumping it all at the
+                     bottom. */}
                   <div
                     aria-hidden={face !== "Details"}
-                    className={`col-start-1 row-start-1 flex flex-col gap-[var(--space-2)] text-[13px] leading-[18px] font-semibold transition-opacity duration-150 ${face === "Details" ? "opacity-100" : "pointer-events-none opacity-0"}`}
-                    style={{ fontFamily: "var(--font-body)" }}
+                    className={`col-start-1 row-start-1 flex flex-col justify-center gap-[var(--space-3)] transition-opacity duration-150 ${face === "Details" ? "opacity-100" : "pointer-events-none opacity-0"}`}
                   >
-                    <div className="flex flex-col gap-[var(--space-1)]">
-                      <span style={{ color: "rgba(255,255,255,0.92)" }}>MAJOR</span>
-                      <span style={{ color: "var(--foreground)" }}>{career.major}</span>
+                    <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
+                      <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Major</span>
+                      <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.major}</span>
                     </div>
-                    <div className="flex flex-col gap-[var(--space-1)]">
-                      <span style={{ color: "rgba(255,255,255,0.92)" }}>MAIN SKILLS</span>
-                      <span className="line-clamp-2" style={{ color: "var(--foreground)" }}>{career.mainSkills}</span>
+                    <div className="flex flex-col gap-[1px]" style={{ fontFamily: "var(--font-body)" }}>
+                      <span className="text-[14px] leading-[18px] font-bold tracking-[0.02em] uppercase" style={{ color: "rgba(255,255,255,0.62)" }}>Main skills</span>
+                      <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.mainSkills}</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </button>
+            </div>
 
             <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
               {hasSimulation && (
@@ -575,10 +765,9 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                      disappeared against the photos (founder feedback) */
                   style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
                 >
-                  <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
+                  <span className="text-[17px] leading-[23px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
                     Play Game
                   </span>
-                  <Play aria-hidden className="h-4 w-4" style={{ color: "#F4F7FF" }} />
                 </button>
               )}
               <button
@@ -587,10 +776,9 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                 className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
                 style={{ background: "var(--foreground)" }}
               >
-                <span className="text-[16px] leading-[22px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--background)" }}>
+                <span className="text-[17px] leading-[23px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--background)" }}>
                   More Info
                 </span>
-                <Eye aria-hidden className="h-4 w-4" style={{ color: "var(--background)" }} />
               </button>
             </div>
           </div>
@@ -607,16 +795,38 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
  *  in via a soft-edged mask band. Later layers (higher blur) render on top
  *  and start their band further down, so the very top of the panel reads
  *  almost photo-sharp and the bottom (behind the CTA row) is fully blurred,
- *  with a smooth ramp in between rather than a hard seam. */
-const PROGRESSIVE_BLUR_STOPS = [2, 8, 15, 22, 29, 35];
+ *  with a smooth ramp in between rather than a hard seam.
+ *
+ *  EXTEND above the panel it's masking, not `inset-0` to it -- gives the
+ *  ramp room to build in the photo above the text, clipped by the card's
+ *  own overflow-hidden if it runs past the top. Measured live: the real gap
+ *  between Save (the lowest action button) and the panel's own top is
+ *  ~32px on a phone -- 130px (a first pass) ran way past that and softened
+ *  Save's icon (direct correction: "shouldn't be blurring the action
+ *  buttons... start from under save"). 24px stays inside that gap.
+ *
+ *  bandStart is `(index+1)/total`, not `index/total` -- with the old
+ *  index/total formula band 0 ALWAYS started at literal 0% of whatever box
+ *  it's in, so `Math.max(0, bandStart - feather)` always clamped to 0 too:
+ *  a zero-width, instant transition no amount of `reach` alone could fix,
+ *  just relocate higher up (direct report, after the reach fix: "still
+ *  read as a sharp line ever so slightly"). Shifting every band's target
+ *  one step later gives band 0 a REAL feather window the same width as
+ *  every other band's, so the whole ramp is genuinely continuous instead
+ *  of one instant layer plus five real ones. Blur stops themselves toned
+ *  down (35 -> 30 max) and the extra dark tint lightened (0.22 -> 0.16),
+ *  same ask: "the blur can be toned down ever so slightly too... but
+ *  everything's still visible". */
+const PROGRESSIVE_BLUR_STOPS = [2, 7, 12, 18, 24, 30];
+const PROGRESSIVE_BLUR_REACH = 24;
 
 function ProgressiveBlur() {
   const total = PROGRESSIVE_BLUR_STOPS.length;
+  const feather = 100 / total;
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 overflow-hidden" style={{ top: -PROGRESSIVE_BLUR_REACH }}>
       {PROGRESSIVE_BLUR_STOPS.map((blur, index) => {
-        const bandStart = (index / total) * 100;
-        const feather = 100 / total + 6;
+        const bandStart = ((index + 1) / total) * 100;
         const mask = `linear-gradient(to bottom, transparent ${Math.max(0, bandStart - feather).toFixed(1)}%, black ${bandStart.toFixed(1)}%, black 100%)`;
         return (
           <div
@@ -626,6 +836,14 @@ function ProgressiveBlur() {
           />
         );
       })}
+      {/* A little more dark tint under the text, subtly -- carries more of
+         the legibility job so text-shadow doesn't have to (direct
+         instruction, 23 Sept 2026: "don't make it look like we overindexed
+         on shadows... if the progressive blur needs a little more dark
+         tint that's okay, subtly"). Own soft-edged band, same feather
+         logic as the blur layers, so it ramps in with them rather than
+         adding a second seam. */}
+      <div className="absolute inset-0" style={{ background: "rgba(4,6,12,0.16)", maskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)`, WebkitMaskImage: `linear-gradient(to bottom, transparent 0%, black 55%, black 100%)` }} />
     </div>
   );
 }
@@ -737,7 +955,17 @@ function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: 
           color: "var(--foreground)",
         }}
       >
-        <Icon className="h-6 w-6" />
+        {/* `bare` is the reel's own floating column, straight over the
+           photo with no surface behind it -- a plain icon can wash out
+           against a light window or shirt the same way text would (direct
+           instruction, 23 Sept 2026: "make sure the action buttons... are
+           legible too... refer what instagram and tiktok do"). Same fix
+           they use: a drop-shadow on the icon itself, background-
+           independent, not a background chip (which would cover the photo
+           behind every icon and read heavier than either app's own
+           treatment). The non-bare version already sits on a real glass
+           surface, so it doesn't need this. */}
+        <Icon className="h-6 w-6" style={bare ? { filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 1px 5px rgba(0,0,0,0.35))" } : undefined} />
       </button>
     </IconTip>
   );
