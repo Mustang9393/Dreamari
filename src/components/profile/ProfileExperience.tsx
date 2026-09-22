@@ -1159,8 +1159,15 @@ function Top3Tab({
          no minimum -- a fixed md:grid-cols-3 left a lopsided 1/3 or 2/3
          empty row for a student who's only saved 1 or 2 so far. Same
          dead-space-grid class already fixed for Match's deck and Career
-         Detail's facts strip; column count now matches the real count. */}
-      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${top3.length === 1 ? "md:grid-cols-1" : top3.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+         Detail's facts strip; column count now matches the real count.
+         Corrected same day: the count has to include the "Add a career"
+         tile below (rendered whenever top3.length < 3), not just the real
+         cards -- the first version keyed columns off top3.length alone, so
+         at 2 selected the grid was forced to 2 columns while 3 things
+         (2 cards + Add) actually rendered, and the Add tile wrapped to its
+         own row below instead of sitting beside them as an equal-height
+         third column (direct report + screenshot). */}
+      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${(top3.length >= 3 ? 3 : top3.length + 1) === 1 ? "md:grid-cols-1" : (top3.length >= 3 ? 3 : top3.length + 1) === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
       {/* The primary career takes the first card (Joshua, 11 Sept 2026). */}
       {[...top3].sort((a, b) => Number(b === focusId) - Number(a === focusId)).map((id) => {
         const career = careerById(id)!;

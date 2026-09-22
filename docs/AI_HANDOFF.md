@@ -13069,3 +13069,22 @@ source citation, renders with room to spare at the same 693px-tall window
 that used to clip it.
 
 `tsc`/`eslint` clean on every file.
+
+### 2026-09-22 Profile: fixed a same-day regression in Top Three's "Add a career" tile
+
+Direct report: with 2 careers saved, the "Add a career" tile wrapped to its
+own row below the two cards instead of sitting beside them as a proportional
+third column. Traced to an edit made earlier today (own comment timestamped
+2026-09-22): a fix for empty dead-space columns keyed the grid's column
+count off `top3.length` alone (1 saved -> 1 column, 2 saved -> 2 columns),
+but forgot that the "Add a career" tile ALSO renders as a grid item
+whenever `top3.length < 3` -- so at 2 saved, 3 things actually render (2
+cards + Add) into a grid forced to 2 columns, and the third wrapped.
+Changed the column-count formula to count the Add tile too
+(`top3.length >= 3 ? 3 : top3.length + 1`), which also fixes the same bug
+at 1 saved (was forced to 1 column, same wrap). Verified live at 2 saved:
+the Add tile now sits in the third column, `items-stretch` correctly
+matches it to the cards' full height, and it's still a real button (always
+was -- the wrap was almost certainly what read as "not pressable").
+
+`tsc`/`eslint` clean.
