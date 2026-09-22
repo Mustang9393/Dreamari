@@ -53,29 +53,18 @@ import "./app.css";
 // as a pill deliberately (9 Sept 2026) once Careers/Schools became a text
 // tab strip of its own -- reserving the pill shape for this local, same-page
 // toggle keeps it visually distinct from that page-level section switch.
-// Until the student has opened For you once, the label nudges them there:
-// a light sweep across the words "For you" every few seconds, on the text
-// only, no tint or beam on the pill (direct feedback, 19 Sept 2026: "only
-// on the text", "not too much that they ignore Browse All"). Browse is the
-// landing view, so without this For you would sit unnoticed. One visit ends
-// it for good; the flag lives in localStorage so it never comes back.
-const FOR_YOU_SEEN_KEY = "dreamari:nudge:foryou";
-function readForYouSeen(): boolean {
-  try { return window.localStorage.getItem(FOR_YOU_SEEN_KEY) === "1"; } catch { return false; }
-}
-export function markForYouSeen(): void {
-  try { window.localStorage.setItem(FOR_YOU_SEEN_KEY, "1"); } catch { /* no storage */ }
-}
-/** true while the nudge should show: on Browse, For you never opened. */
+// The label nudges the student toward For You the whole time they're on
+// Browse: a light sweep across the words "For you" every few seconds, on
+// the text only, no tint or beam on the pill (direct feedback, 19 Sept
+// 2026: "only on the text", "not too much that they ignore Browse All").
+// Browse is the landing view, so without this For you would sit unnoticed.
+// Originally a one-visit-and-done nudge (a localStorage flag retired it for
+// good after the first trip to For You), but the flag meant returning
+// students who'd already visited once stopped seeing it at all -- changed
+// to run constantly while on Browse, every visit (direct feedback, 22 Sept
+// 2026: "especially when I'm in browse all this should show constantly").
 export function useForYouNudge(tab: "foryou" | "browse"): boolean {
-  const [seen, setSeen] = useState(true); // assume seen until the client checks, so SSR never flashes the sweep
-  useEffect(() => {
-    if (tab === "foryou") markForYouSeen();
-    // deliberate: syncing a client-only store into state after mount
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSeen(tab === "foryou" ? true : readForYouSeen());
-  }, [tab]);
-  return tab === "browse" && !seen;
+  return tab === "browse";
 }
 
 export function ForYouBrowseToggle({ tab, onTab, nudge = false }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void; /** text sweep on For you until first opened */ nudge?: boolean }) {
@@ -888,12 +877,109 @@ function ForYouFace() {
   );
 }
 
+/** SSR-safe (defaults false, same convention as useForYouNudge above, so
+ *  the server and first client paint agree): true once a >=lg (1024px)
+ *  viewport is confirmed client-side. For You needs this as a real JS
+ *  gate, not just a CSS `hidden lg:flex` -- its active card's <video>
+ *  autoplays with sound, and a `display:none` video keeps playing audio,
+ *  so the mobile/tablet and desktop layouts can't both mount ForYouFace
+ *  at once the way DesktopNavigation/MobileNav (no media) safely do. */
+function useIsDesktop(): boolean {
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktop(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  return isDesktop;
+}
+
+/** The search box + For you/Browse All toggle, shared by Browse's header
+ *  row and For You's desktop row (identical control, two different
+ *  layout contexts) so the two never drift out of sync. */
+function DesktopSearchToggle({
+  tab, switchTab, nudge, searchOpen, setSearchOpen, query, setQuery,
+}: {
+  tab: "foryou" | "browse";
+  switchTab: (next: "foryou" | "browse") => void;
+  nudge: boolean;
+  searchOpen: boolean;
+  setSearchOpen: (updater: boolean | ((value: boolean) => boolean)) => void;
+  query: string;
+  setQuery: (value: string) => void;
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-[var(--space-6)]">
+      {/* Search grows from icon to input; the toggle folds away while
+         it is open. Perfectly circular collapsed (a fixed 40x40 with
+         rounded-lg read as a rounded square, not a circle -- direct
+         feedback, 8 Sept 2026); once it grows into a text field it
+         needs the normal rounded-rect shape back. */}
+      {/* active is tied to searchOpen, not hover -- this box morphs shape
+         (circle collapsed, rounded-rect open), so borderRadius is pinned
+         explicitly rather than left to BorderBeam's own auto-detect (which
+         only reads the child's radius once, at mount, and would otherwise
+         keep whatever shape this box happened to be in on first paint). */}
+      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={searchOpen} borderRadius={16}>
+      <div
+        className="flex h-10 min-w-0 items-center gap-[var(--space-3)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{
+          width: searchOpen ? "min(480px, 44vw)" : 40,
+          borderRadius: searchOpen ? "var(--radius-lg)" : 9999,
+          background: searchOpen ? "var(--glass-surface-1)" : "var(--glass-surface-2)",
+          borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",
+        }}
+      >
+        <IconTip label="Search">
+          <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="dm-link flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
+            <Search className="h-4 w-4" />
+          </button>
+        </IconTip>
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onFocus={() => setSearchOpen(true)}
+          placeholder="Search careers, skills, worlds..."
+          aria-hidden={!searchOpen}
+          tabIndex={searchOpen ? 0 : -1}
+          className="dm-beam-input min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none transition-opacity duration-200 placeholder:text-[color:var(--muted-foreground)]"
+          style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", opacity: searchOpen ? 1 : 0, pointerEvents: searchOpen ? "auto" : "none" }}
+        />
+        {searchOpen && (
+          <IconTip label="Close search">
+            <button
+              type="button"
+              aria-label="Close search"
+              onClick={() => (query ? setQuery("") : setSearchOpen(false))}
+              className="dm-quiet flex h-7 flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
+              style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </IconTip>
+        )}
+      </div>
+      </BorderBeam>
+      {/* Toggle collapses while search is open. */}
+      <div
+        className="flex-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
+      >
+        <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudge} />
+      </div>
+    </div>
+  );
+}
+
 export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTab: "foryou" | "browse"; initialQuery?: string }) {
   const router = useRouter();
   const [tab, setTab] = useState<"foryou" | "browse">(initialTab);
   // ?q= from the sitewide search lands here with the box already open
   const [searchOpen, setSearchOpen] = useState(initialQuery.length > 0);
   const [query, setQuery] = useState(initialQuery);
+  const isDesktop = useIsDesktop();
   const nudgeForYou = useForYouNudge(tab);
   // The nudge's CSS animation is `infinite` from the moment its class is
   // applied, but the first-visit splash covers the toggle for as long as
@@ -992,7 +1078,11 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             </IconTip>
           </div>
         </div>
-        {/* Explore Header (desktop) */}
+        {/* Explore Header (desktop) -- Browse only. For You gets its own
+           row below: the title block, the reel and the search+toggle all
+           share one row there instead of the reel sitting in a second row
+           beneath a full-width header. */}
+        {tab === "browse" && (
         <div className="hidden w-full flex-col gap-[var(--space-6)] lg:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
             <div className="flex flex-col gap-[var(--space-2)]">
@@ -1001,67 +1091,42 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
               </h1>
               <ExploreSectionTabs active="careers" />
             </div>
-            <div className="flex min-w-0 items-center gap-[var(--space-6)]">
-              {/* Search grows from icon to input; the toggle folds away while
-                 it is open. Perfectly circular collapsed (a fixed 40x40 with
-                 rounded-lg read as a rounded square, not a circle -- direct
-                 feedback, 8 Sept 2026); once it grows into a text field it
-                 needs the normal rounded-rect shape back. */}
-              {/* active is tied to searchOpen, not hover -- this box morphs shape
-                 (circle collapsed, rounded-rect open), so borderRadius is pinned
-                 explicitly rather than left to BorderBeam's own auto-detect (which
-                 only reads the child's radius once, at mount, and would otherwise
-                 keep whatever shape this box happened to be in on first paint). */}
-              <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} active={searchOpen} borderRadius={16}>
-              <div
-                className="flex h-10 min-w-0 items-center gap-[var(--space-3)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                style={{
-                  width: searchOpen ? "min(480px, 44vw)" : 40,
-                  borderRadius: searchOpen ? "var(--radius-lg)" : 9999,
-                  background: searchOpen ? "var(--glass-surface-1)" : "var(--glass-surface-2)",
-                  borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",
-                }}
-              >
-                <IconTip label="Search">
-                  <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="dm-link flex flex-none cursor-pointer items-center" style={{ color: searchOpen ? "var(--muted-foreground)" : "var(--foreground)" }}>
-                    <Search className="h-4 w-4" />
-                  </button>
-                </IconTip>
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  onFocus={() => setSearchOpen(true)}
-                  placeholder="Search careers, skills, worlds..."
-                  aria-hidden={!searchOpen}
-                  tabIndex={searchOpen ? 0 : -1}
-                  className="dm-beam-input min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none transition-opacity duration-200 placeholder:text-[color:var(--muted-foreground)]"
-                  style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", opacity: searchOpen ? 1 : 0, pointerEvents: searchOpen ? "auto" : "none" }}
-                />
-                {searchOpen && (
-                  <IconTip label="Close search">
-                    <button
-                      type="button"
-                      aria-label="Close search"
-                      onClick={() => (query ? setQuery("") : setSearchOpen(false))}
-                      className="dm-quiet flex h-7 flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
-                      style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </IconTip>
-                )}
-              </div>
-              </BorderBeam>
-              {/* Toggle collapses while search is open. */}
-              <div
-                className="flex-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
-              >
-                <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} />
-              </div>
-            </div>
+            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
           </div>
         </div>
+        )}
+
+        {/* For You (desktop, >=1024px): title/tabs, the reel and
+           search+toggle in one row, all top-aligned -- the reel's top
+           edge lands flush with the toggle's top edge instead of being
+           centered independently (direct feedback, 22 Sept 2026, citing
+           dreamonna's own For You layout: "align with the for you/browse
+           all top chip border for better spacing"). flex-1 min-h-0 lets
+           this row fill whatever height `main` has left (main itself is
+           capped at 100dvh-86px with overflow hidden -- see its own
+           className -- so nothing here can force page-level scroll); the
+           middle column is NOT vertically centered, so any extra height
+           beyond the card's own max-h-[672px] shows up as bottom margin,
+           not a symmetric gap top and bottom (direct feedback: "sufficient
+           padding and margins at the bottom"). ForYouFace only mounts
+           here once isDesktop (JS) agrees with this lg: breakpoint --
+           see useIsDesktop's own comment for why. */}
+        {tab === "foryou" && (
+        <div className="hidden w-full flex-1 min-h-0 items-start justify-between gap-[var(--space-6)] lg:flex">
+          <div className="flex flex-none flex-col gap-[var(--space-2)] self-start">
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
+              Explore
+            </h1>
+            <ExploreSectionTabs active="careers" />
+          </div>
+          <div className="flex h-full min-w-0 flex-1 flex-col items-start">
+            {isDesktop && <ForYouFace />}
+          </div>
+          <div className="flex-none self-start">
+            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
+          </div>
+        </div>
+        )}
 
         {/* Mobile search input (the desktop header is hidden below md) */}
         {tab === "browse" && searchOpen && (
@@ -1093,7 +1158,11 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
           </BorderBeam>
         )}
 
-        {tab === "browse" ? <BrowseFace query={query} filtersOpen={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} /> : <ForYouFace />}
+        {tab === "browse" ? (
+          <BrowseFace query={query} filtersOpen={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} />
+        ) : (
+          !isDesktop && <ForYouFace />
+        )}
       </main>
 
       <MobileNav active="Explore" />

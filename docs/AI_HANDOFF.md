@@ -13143,3 +13143,49 @@ Season QA toggle (cycles fall/winter/spring art) stays, no longer gated on
 anywhere, Season QA toggle still renders on its own.
 
 `tsc`/`eslint` clean.
+
+### 2026-09-22 Explore: For You desktop layout -- top-aligned to the chip, no page scroll; nudge now fires every Browse visit
+
+Direct report + screenshot (wide external monitor): the For You reel sat
+well below the search/toggle row instead of beside it, ran off the bottom
+of the viewport, and the whole PAGE scrolled to reach the cut-off part --
+not just the reel's own internal snap-scroll. Root cause: desktop's
+"Explore Header" was one full-width row (title+tabs, search+toggle) sitting
+*above* a second, separate row holding the reel -- two stacked rows could
+easily add up to more than `main`'s available height. Referencing
+dreamonna's own For You layout (direct feedback, citing it: "align with
+the for you/browse all top chip border for better spacing"), restructured
+so at >=1024px the title/tabs, the reel, and search+toggle are three
+columns of ONE row (`items-start`), so the reel's top edge lands exactly on
+the chip's top edge (measured live: both at 126px), and any leftover
+vertical space becomes bottom margin instead of forcing the page to scroll
+past `main`'s own `overflow: hidden` (measured: `document.documentElement.
+scrollHeight` === `window.innerHeight` exactly, so no page-level scroll is
+even possible). Browse's own header row is untouched -- only For You moved.
+
+The reel's active card autoplays its video WITH sound, so simply CSS-hiding
+one of two layout positions (`hidden`/`lg:flex`) wasn't safe -- a
+`display:none` video keeps playing audio in the background. Added
+`useIsDesktop()` (matchMedia, SSR-safe default false, same convention as
+this file's own `useForYouNudge`) so exactly one of the two ForYouFace call
+sites actually mounts at a time. Caught this failure live before shipping
+it: the first pass forgot to gate the ORIGINAL (mobile/tablet) call site
+too, so at desktop width both mounted simultaneously -- visible on screen
+as two reel cards stacked, and confirmed via `document.querySelectorAll(
+'.foryou-snap').length === 2`. Fixed, then reverified `=== 1` at both
+1600px (desktop) and 820px (tablet, the untouched code path).
+
+Extracted the search box + toggle markup (previously duplicated) into one
+`DesktopSearchToggle` component shared by Browse's header row and For
+You's new row, so the two controls can't drift out of sync.
+
+Separately: "I still don't see the for you sparkle nudge... especially in
+browse all it should show constantly." The nudge (`useForYouNudge`) was
+built 19 Sept 2026 as a one-visit-and-done thing -- a localStorage flag
+retired it for good the first time a student opened For You, so anyone
+who'd already visited once (which, after a day of testing, is everyone)
+stopped seeing it at all. Direct instruction now overrides that: removed
+the localStorage gate entirely, so the sweep runs every time the student is
+on Browse, not just before their first For You visit.
+
+`tsc`/`eslint` clean.
