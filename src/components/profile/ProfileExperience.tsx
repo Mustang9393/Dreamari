@@ -848,7 +848,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         )}
         {tab === "plan" && (
           <div role="tabpanel" id="profile-panel-plan" aria-labelledby="profile-tab-plan">
-            <MyPlanTab focus={focus} onGoRoutes={() => setTab("routes")} variant={overviewVersion} />
+            {/* V2 approved, 22 Sept 2026 ("v2 is approved for my plan...
+               no more toggle") -- hard-coded "v2" rather than reading
+               overviewVersion, so this tab no longer moves with the
+               Overview demo chip below. Overview itself is untouched --
+               only My Plan was approved, not the whole toggle. */}
+            <MyPlanTab focus={focus} onGoRoutes={() => setTab("routes")} variant="v2" />
           </div>
         )}
         {tab === "report" && focus && (
