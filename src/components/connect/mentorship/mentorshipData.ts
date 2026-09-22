@@ -283,29 +283,52 @@ export const PROGRAMS: ProgramStat[] = [
   { id: "cn", name: "China", via: "China Youth Development Foundation", students: 1000, mentors: 18, mentorLabel: "Employee Contributors", hours: 7700, cadence: "Quarterly regional events", window: "1-year scholarship, no 1:1 matching", monthly: [560, 640, 720, 790, 850, 920, 980, 1060, 1180] },
 ];
 
-// `quarter`/`deltaQuarter` added 20 Sept 2026 (Josh's Replit pass, Annual /
-// Quarterly / Monthly on the Enterprise Overview) -- a hand-authored
-// midpoint between `month` and `year`, same curated-demo-data spirit as the
-// rest of this file, not a formula. "Students" relabeled "Scholars" to
-// match Coach's own language, already used everywhere else here
-// (PROGRAM.counts' "450 Scholars").
-export type Kpi = { key: "hours" | "students" | "mentors" | "meetings" | "messages"; label: string; year: number; quarter: number; month: number; deltaYear: number; deltaQuarter: number; deltaMonth: number; spark: number[] };
+// `quarters`/`months` added 23 Sept 2026 (direct report against the DCE
+// reference, community-boards mentorship dashboard: "when i click quarterly
+// i can pick a quarter, monthly lets me pick a month" -- Annual/Quarterly/
+// Monthly previously only switched which single aggregate showed, with no
+// way to choose WHICH quarter or month). Four/twelve hand-authored figures
+// per KPI, same curated-demo-data spirit as `spark` below (realistic,
+// monotonic where the metric is a running headcount, not a formula) --
+// intentionally not required to sum to `year`, matching this file's own
+// existing spark-vs-year rounding (messages' 9-month spark already doesn't
+// sum to its year total either). "Students" relabeled "Scholars" to match
+// Coach's own language, already used everywhere else here (PROGRAM.counts'
+// "450 Scholars").
+export type Kpi = {
+  key: "hours" | "students" | "mentors" | "meetings" | "messages";
+  label: string;
+  year: number;
+  deltaYear: number;
+  /** Q1-Q4 */
+  quarters: [number, number, number, number];
+  deltaQuarters: [number, number, number, number];
+  /** Jan-Dec */
+  months: [number, number, number, number, number, number, number, number, number, number, number, number];
+  deltaMonths: [number, number, number, number, number, number, number, number, number, number, number, number];
+  spark: number[];
+};
 export const KPIS: Kpi[] = [
-  { key: "hours", label: "Volunteer hours", year: 18400, quarter: 5200, month: 2200, deltaYear: 14, deltaQuarter: 11, deltaMonth: 9, spark: [1350, 1535, 1735, 1905, 2025, 2230, 2280, 2510, 2830] },
-  { key: "students", label: "Scholars", year: 1518, quarter: 1380, month: 1180, deltaYear: 9, deltaQuarter: 6, deltaMonth: 4, spark: [1290, 1310, 1350, 1380, 1400, 1420, 1440, 1470, 1518] },
-  { key: "mentors", label: "Mentors", year: 536, quarter: 505, month: 418, deltaYear: 7, deltaQuarter: 9, deltaMonth: 12, spark: [470, 476, 482, 488, 490, 494, 500, 512, 536] },
-  { key: "meetings", label: "Mentor meetings", year: 3240, quarter: 850, month: 386, deltaYear: 18, deltaQuarter: 19, deltaMonth: 21, spark: [280, 300, 330, 350, 360, 380, 390, 410, 440] },
-  { key: "messages", label: "Messages exchanged", year: 22800, quarter: 6100, month: 2850, deltaYear: 16, deltaQuarter: 14, deltaMonth: 13, spark: [1650, 1780, 1920, 2050, 2150, 2320, 2400, 2600, 2850] },
+  { key: "hours", label: "Volunteer hours", year: 18400, deltaYear: 14, quarters: [4620, 6160, 7620, 9280], deltaQuarters: [8, 10, 11, 13], months: [1350, 1535, 1735, 1905, 2025, 2230, 2280, 2510, 2830, 2960, 3080, 3240], deltaMonths: [6, 7, 8, 8, 9, 10, 9, 11, 12, 12, 13, 14], spark: [1350, 1535, 1735, 1905, 2025, 2230, 2280, 2510, 2830] },
+  { key: "students", label: "Scholars", year: 1518, deltaYear: 9, quarters: [1350, 1420, 1518, 1590], deltaQuarters: [3, 5, 6, 5], months: [1290, 1310, 1350, 1380, 1400, 1420, 1440, 1470, 1518, 1540, 1565, 1590], deltaMonths: [2, 2, 3, 2, 1, 1, 1, 2, 3, 1, 2, 2], spark: [1290, 1310, 1350, 1380, 1400, 1420, 1440, 1470, 1518] },
+  { key: "mentors", label: "Mentors", year: 536, deltaYear: 7, quarters: [482, 494, 536, 560], deltaQuarters: [2, 2, 9, 4], months: [470, 476, 482, 488, 490, 494, 500, 512, 536, 545, 552, 560], deltaMonths: [1, 1, 1, 1, 0, 1, 1, 2, 5, 2, 1, 1], spark: [470, 476, 482, 488, 490, 494, 500, 512, 536] },
+  { key: "meetings", label: "Mentor meetings", year: 3240, deltaYear: 18, quarters: [910, 1090, 1240, 1450], deltaQuarters: [15, 17, 19, 21], months: [280, 300, 330, 350, 360, 380, 390, 410, 440, 460, 480, 510], deltaMonths: [10, 11, 12, 13, 13, 14, 13, 15, 18, 16, 17, 19], spark: [280, 300, 330, 350, 360, 380, 390, 410, 440] },
+  { key: "messages", label: "Messages exchanged", year: 22800, deltaYear: 16, quarters: [5350, 6520, 7850, 9450], deltaQuarters: [12, 14, 15, 17], months: [1650, 1780, 1920, 2050, 2150, 2320, 2400, 2600, 2850, 3000, 3150, 3300], deltaMonths: [9, 10, 11, 12, 12, 13, 12, 14, 16, 15, 16, 18], spark: [1650, 1780, 1920, 2050, 2150, 2320, 2400, 2600, 2850] },
 ];
 
+export const QUARTER_LABELS = ["Q1", "Q2", "Q3", "Q4"] as const;
+export const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
 /** The Enterprise Overview's Annual / Quarterly / Monthly toggle (Josh's
- *  Replit pass, 20 Sept 2026): which KPIS field and section-title word each
- *  period reads from. */
+ *  Replit pass, 20 Sept 2026): which section-title word each period reads.
+ *  Quarterly/monthly also show a QUARTER_LABELS/MONTH_LABELS sub-picker
+ *  (added 23 Sept 2026) so a specific quarter or month can be chosen, not
+ *  just the aggregation level. */
 export type EngagementPeriod = "annual" | "quarterly" | "monthly";
-export const ENGAGEMENT_PERIODS: { key: EngagementPeriod; label: string; field: "year" | "quarter" | "month"; deltaField: "deltaYear" | "deltaQuarter" | "deltaMonth"; sectionWord: string }[] = [
-  { key: "annual", label: "Annual", field: "year", deltaField: "deltaYear", sectionWord: "This Year" },
-  { key: "quarterly", label: "Quarterly", field: "quarter", deltaField: "deltaQuarter", sectionWord: "This Quarter" },
-  { key: "monthly", label: "Monthly", field: "month", deltaField: "deltaMonth", sectionWord: "This Month" },
+export const ENGAGEMENT_PERIODS: { key: EngagementPeriod; label: string; sectionWord: string }[] = [
+  { key: "annual", label: "Annual", sectionWord: "This Year" },
+  { key: "quarterly", label: "Quarterly", sectionWord: "This Quarter" },
+  { key: "monthly", label: "Monthly", sectionWord: "This Month" },
 ];
 
 /** This fiscal year's own volunteer-hours target -- the number partners

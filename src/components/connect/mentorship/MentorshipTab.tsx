@@ -17,6 +17,7 @@ import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { studentAvatarSrc } from "@/lib/avatar";
 import { DEFAULT_RESUME_TEMPLATE } from "@/components/resume/data";
 import { resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
+import { Listbox } from "@/components/app/Listbox";
 import { Avatar, CompanyMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
 import { ProProfileView, SubTabs, type Follows } from "../ProProfile";
 import type { Pro } from "../data";
@@ -1462,6 +1463,14 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
   const setTab = (t: "overview" | "settings") => setSub(t);
   const [program, setProgram] = useState<D.ProgramId>("all");
   const [ePeriod, setEPeriod] = useState<D.EngagementPeriod>("annual");
+  // Which specific quarter/month is showing -- added 23 Sept 2026 so
+  // Quarterly/Monthly aren't just a different aggregation of the SAME
+  // period, the way Annual always was. Index-based (0 = Q1/Jan) rather than
+  // a "current" default, matching the reference dashboard's own behavior
+  // (switching to Quarterly/Monthly there always lands on Q1/Jan, not
+  // "whatever quarter it is now").
+  const [quarterIdx, setQuarterIdx] = useState(0);
+  const [monthIdx, setMonthIdx] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [sheet, setSheet] = useState<{ kind: "kpi"; key: D.Kpi["key"]; def: D.EngagementPeriod } | null>(null);
   const [toast, onToast] = useToast();
@@ -1470,11 +1479,13 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
   // for a given KPI -- reused by Program-at-a-glance/Engagement and by the
   // drill-down sheet's by-program breakdown
   const shareOf = (k: D.Kpi, of: { hours: number; students: number; mentors: number } | null) => (of ? (k.key === "hours" ? of.hours : k.key === "students" ? of.students : k.key === "mentors" ? of.mentors : Math.round(of.hours * (k.key === "messages" ? 1.24 : 0.18))) : null);
-  const kpiValue = (k: D.Kpi, field: "year" | "quarter" | "month", of = selected) => {
+  const kpiValue = (k: D.Kpi, period: D.EngagementPeriod, of = selected) => {
     const share = shareOf(k, of);
     const ratio = share !== null ? share / k.year : 1;
-    return share !== null ? (field === "year" ? share : Math.round(k[field] * ratio)) : k[field];
+    const raw = period === "annual" ? k.year : period === "quarterly" ? k.quarters[quarterIdx] : k.months[monthIdx];
+    return Math.round(raw * ratio);
   };
+  const kpiDelta = (k: D.Kpi, period: D.EngagementPeriod) => (period === "annual" ? k.deltaYear : period === "quarterly" ? k.deltaQuarters[quarterIdx] : k.deltaMonths[monthIdx]);
   const eDef = D.ENGAGEMENT_PERIODS.find((p) => p.key === ePeriod)!;
   const kpiOf = (key: D.Kpi["key"]) => D.KPIS.find((k) => k.key === key)!;
   // the drill-down sheet's own trend chart, region-scaled the same way the
@@ -1486,11 +1497,11 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
     const ratio = share !== null ? share / k.year : 1;
     return k.spark.map((v) => Math.round(v * ratio));
   };
-  const mentorsNow = kpiValue(kpiOf("mentors"), "year");
-  const scholarsNow = kpiValue(kpiOf("students"), "year");
-  const hoursNow = kpiValue(kpiOf("hours"), eDef.field);
-  const meetingsNow = kpiValue(kpiOf("meetings"), eDef.field);
-  const messagesNow = kpiValue(kpiOf("messages"), eDef.field);
+  const mentorsNow = kpiValue(kpiOf("mentors"), ePeriod);
+  const scholarsNow = kpiValue(kpiOf("students"), ePeriod);
+  const hoursNow = kpiValue(kpiOf("hours"), ePeriod);
+  const meetingsNow = kpiValue(kpiOf("meetings"), ePeriod);
+  const messagesNow = kpiValue(kpiOf("messages"), ePeriod);
   const goalPct = Math.min(100, Math.round((D.YEAR_HOURS_GOAL.logged / D.YEAR_HOURS_GOAL.target) * 100));
 
   return (
@@ -1515,8 +1526,37 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
           {/* A different interaction than the Segmented tab bar above, on
              purpose (direct feedback, 20 Sept 2026: stacked pill rows
              clash) -- underlined sub-tabs, the same fix already used for
-             Answers | Posts on a volunteer's own profile. */}
-          <SubTabs ariaLabel="Time period" value={ePeriod} onChange={setEPeriod} options={D.ENGAGEMENT_PERIODS.map((p) => ({ key: p.key, label: p.label }))} />
+             Answers | Posts on a volunteer's own profile. Quarterly/Monthly
+             add a second, small control on the SAME row (not a stacked row
+             of its own, for the same reason) so a specific quarter or month
+             can be picked -- direct report against the reference dashboard,
+             23 Sept 2026: "when i click quarterly i can pick a quarter,
+             monthly lets me pick a month." Quarter reuses the pill-style
+             Segmented (matches the reference's own Q1-Q4 pills); Month uses
+             Listbox rather than a native &lt;select&gt; per the cross-browser
+             guardrail against restyling native selects. */}
+          <div className="flex flex-wrap items-center gap-[var(--space-4)]">
+            <SubTabs ariaLabel="Time period" value={ePeriod} onChange={setEPeriod} options={D.ENGAGEMENT_PERIODS.map((p) => ({ key: p.key, label: p.label }))} />
+            {ePeriod === "quarterly" && (
+              <label className="flex items-center gap-[8px]">
+                <span className="text-[11px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Quarter</span>
+                <Segmented ariaLabel="Quarter" value={String(quarterIdx)} onChange={(v) => setQuarterIdx(Number(v))} options={D.QUARTER_LABELS.map((label, i) => ({ key: String(i), label }))} />
+              </label>
+            )}
+            {ePeriod === "monthly" && (
+              <label className="flex items-center gap-[8px]">
+                <span className="text-[11px] leading-[14px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Month</span>
+                <Listbox
+                  ariaLabel="Month"
+                  value={String(monthIdx)}
+                  onChange={(v) => setMonthIdx(Number(v))}
+                  options={D.MONTH_LABELS.map((label, i) => ({ value: String(i), label }))}
+                  className="dm-quiet h-[42px] min-w-[104px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-bold"
+                  style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--foreground)" }}
+                />
+              </label>
+            )}
+          </div>
 
           <div className="flex flex-col gap-[var(--space-3)]">
             <Title>Program at a glance</Title>
@@ -1528,10 +1568,10 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
               ].map(({ key, value }, i) => {
                 const k = kpiOf(key);
                 return (
-                  <button key={key} type="button" onClick={() => setSheet({ kind: "kpi", key, def: "annual" })} className={`dm-quiet group flex cursor-pointer flex-col gap-[10px] p-[var(--space-5)] text-left ${i === 1 ? "border-l" : ""}`} style={{ borderColor: RULE }}>
+                  <button key={key} type="button" onClick={() => setSheet({ kind: "kpi", key, def: ePeriod })} className={`dm-quiet group flex cursor-pointer flex-col gap-[10px] p-[var(--space-5)] text-left ${i === 1 ? "border-l" : ""}`} style={{ borderColor: RULE }}>
                     <span className="flex items-center justify-between gap-[8px]">
-                      <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{k.label}</span>
-                      <DeltaBadge value={k.deltaYear} />
+                      <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{ePeriod === "annual" ? k.label : `Active ${k.label}`}</span>
+                      <DeltaBadge value={kpiDelta(k, ePeriod)} />
                     </span>
                     <span className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(value)}</span>
                   </button>
@@ -1553,7 +1593,7 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
                   <button key={row.key} type="button" onClick={() => setSheet({ kind: "kpi", key: row.key, def: ePeriod })} className={`dm-quiet group flex cursor-pointer flex-col gap-[10px] text-left ${ruledCell(i, 3)}`} style={{ borderColor: RULE }}>
                     <span className="flex items-center justify-between gap-[8px]">
                       <span className="text-[12px] leading-[16px] font-bold tracking-[0.02em] uppercase" style={{ color: "var(--muted-foreground)" }}>{k.label}</span>
-                      <DeltaBadge value={k[eDef.deltaField]} />
+                      <DeltaBadge value={kpiDelta(k, ePeriod)} />
                     </span>
                     <span className="text-[26px] leading-[30px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(row.value)}</span>
                     {row.sub && <Muted className="text-[12px] leading-[16px]">{row.sub}</Muted>}
@@ -1586,12 +1626,13 @@ function EnterpriseView({ sub, setSub }: { sub: string; setSub: (s: string) => v
       {sheet?.kind === "kpi" && (() => {
         const k = kpiOf(sheet.key);
         const def = D.ENGAGEMENT_PERIODS.find((p) => p.key === sheet.def)!;
-        const per = D.PROGRAMS.map((p) => ({ label: p.name, value: kpiValue(k, def.field, p) }));
+        const per = D.PROGRAMS.map((p) => ({ label: p.name, value: kpiValue(k, sheet.def, p) }));
+        const periodSuffix = sheet.def === "quarterly" ? ` · ${D.QUARTER_LABELS[quarterIdx]}` : sheet.def === "monthly" ? ` · ${D.MONTH_LABELS[monthIdx]}` : "";
         return (
-          <Sheet title={k.label} label={`By program, ${def.sectionWord.toLowerCase()}`} onClose={() => setSheet(null)}>
+          <Sheet title={k.label} label={`By program, ${def.sectionWord.toLowerCase()}${periodSuffix}`} onClose={() => setSheet(null)}>
             <span className="flex items-center gap-[10px]">
-              <span className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(kpiValue(k, def.field, null))}</span>
-              <DeltaBadge value={k[def.deltaField]} />
+              <span className="text-[30px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{compact(kpiValue(k, sheet.def, null))}</span>
+              <DeltaBadge value={kpiDelta(k, sheet.def)} />
             </span>
             <BarChart values={sparkOf(k)} labels={SPARK_MONTHS} accent={accent} highlight={SPARK_MONTHS.length - 1} height={150} ariaLabel={`${k.label} by month`} />
             <ShareBar parts={per} accent={accent} />
