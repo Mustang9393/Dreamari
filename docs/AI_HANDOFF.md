@@ -12742,3 +12742,28 @@ the actual DEMO_SCHOOL constant, matching the reference's literal mention
 of the school by name).
 
 `tsc`/`eslint` clean. Verified live -- all values match.
+
+### 2026-09-22 Counselor Dashboard: Platform Engagement rebuilt on exact reference content
+
+Everything on this screen was a live formula off the seeded roster (demoSeries
+seed + roster.length math) rather than the reference's own fixed numbers --
+including a real formula bug: "Avg Logins / Student" was total/unique where
+total was *always* defined as unique*3, so every single month showed
+exactly "3.00" regardless of the underlying data. Also missing entirely:
+the "Students Needing Intervention by Grade" section (a per-grade bar chart
++ "Total of N students recommended for check-in") that exists on the
+reference below the login table.
+
+Replaced with the reference's exact values throughout: the 4 header stats
+(71/42/18/3.01), all 6 months of the login table (matched chronologically,
+relabeled onto this app's own Apr-Sep 2026 window the same way Milestone
+Tracker's dates were shifted), and the intervention bars (3/2/4/3 by grade,
+totaling 12, matching the reference's own number). Also matched two
+composition details: the reference's chart plots two lines (Total Logins +
+Unique Student Logins, not one), and its table sorts most-recent-month-first
+-- both were single-series/chronological before. Built a small local
+dual-line chart scoped to this file rather than extending the shared
+AreaChart primitive, which 4 other screens (AdminDashboard, ProDashboard,
+both AttCommunityView variants) depend on for its single-series shape.
+
+`tsc`/`eslint` clean. Verified live: desktop and mobile.
