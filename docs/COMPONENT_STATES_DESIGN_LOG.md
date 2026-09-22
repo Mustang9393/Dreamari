@@ -901,9 +901,116 @@ Investment Banking lesson's intro screen after the change; not
 force-broken separately since the mechanism is identical to and already
 verified via `CoverPhoto` above. `tsc`/`eslint` clean.
 
-## 7. Connect
+## 7. Connect (`src/components/connect/`)
 
-Status: not started
+Status: **Done** -- the real gaps found via a full audit.
+
+| Component / state | Status | Notes |
+|---|---|---|
+| Unvalidated id-driven views (`?pro=`, `?board=`, `?insight=`, `?event=`, `?thread=`) render a genuinely empty page, no way back | **Done, 22 Sept** | New `ConnectNotFound`, see below. |
+| Shared `Avatar` primitive: missing/failed photo | **Done, 22 Sept** | New `AvatarImage` -- ProBadge, CommentRow, every pro headshot. |
+| `InsightThreadView` missing a "no comments yet" state | **Done, 22 Sept** | Ported from `ThreadView`'s existing pattern. |
+| `ProfileHeaderCard` cover photo: missing/failed | **Done, 22 Sept** | New `CoverImage`, same class as Career Detail's `HeroPhoto`. |
+| `CommunityCard`/`CompactCommunityRow`: missing/failed cover | **Done, 22 Sept** | New `CommunityCover`/`CommunityThumb`. |
+| `PeopleTab`'s search/filter grid: dead space with 1-2 results | **Done, 22 Sept** | Column count now matches the real count. |
+
+### Unvalidated id-driven views: a genuine dead end -- Done, 22 Sept 2026
+
+**Why this matters**: `queryToView` builds a `View` straight from
+`?pro=`/`?board=`/`?insight=`/`?event=`/`?thread=` URL params with no
+validation, and every render site resolved its id with a plain
+`if (!x) return null;`. Doesn't crash (unlike Profile's old `?picks=`
+bug), but the header's own back-nav is itself gated on
+`view.kind === "home" || role !== "student"` -- false for a student on a
+bad view -- so a stale bookmark, a renamed/removed pro or community, or a
+hand-edited share link rendered a completely empty `<main>`: no message,
+no back button, nothing. Worse than the playbook's own "dense panel, one
+muted line" tier, since there wasn't even a line.
+
+**Design**: new `ConnectNotFound({ onBack, backLabel })` -- tier-4
+treatment (nothing to build the page around, same family as every other
+whole-route empty state this session), with the one thing these views
+actually need that the others don't: a real way back, since the header's
+own back button isn't present for this state. Swapped in at all 5
+`return null;` sites (pro, board/community, insight, event, thread).
+`ProDashboardView` was checked separately and already falls back
+gracefully (`given ?? PROS.find("pro-okafor") ?? PROS[0]`) -- no change
+needed there.
+
+**Verified live**: `/connect?pro=totally-bogus-pro-id` and
+`/connect?board=totally-bogus-board-id` both render "We couldn't find
+that" with a working "Back to Connect" button instead of a blank page
+(screenshotted); clicking it correctly returns to the Communities home.
+
+### Shared `Avatar` primitive: missing or failed photo -- Done, 22 Sept 2026
+
+**Why this matters**: `Avatar` (`primitives.tsx`) is the single most-
+reused image in Connect -- `ProBadge`, `CommentRow`, every pro headshot
+including `ProProfile`'s own hero all go through it. Neither branch (a
+pro's real portrait or a generated student avatar) had `onError`
+handling.
+
+**Design**: new `AvatarImage`, keyed by the resolved src (same
+remount-on-key idiom as Build's `QuestionSprite`/Profile's
+`StudentAvatarImage`) -- falls back to a generic `UserRound` glyph on a
+muted circle.
+
+**Verified live**: Trevor Johnson's profile (headshot + `ProBadge`
+instances throughout the People grid) all render correctly post-change.
+
+### `InsightThreadView`: missing "no comments yet" -- Done, 22 Sept 2026
+
+**Why this matters**: `ThreadView` already has this exact fallback ("No
+answer yet.", a `Card`) for its own zero-response case -- the sibling
+Insight page went straight from the "Comments (0)" heading to the reply
+composer with nothing in between when an insight has no comments yet,
+missing the same treatment its sibling already established.
+
+**Design**: ported the identical pattern ("No comments yet." / "Be the
+first to weigh in."), gated on `insight.replies.length + posted.length
+=== 0`.
+
+### `ProfileHeaderCard` / `CommunityCard` cover photos -- Done, 22 Sept 2026
+
+**Why this matters**: `ProfileHeaderCard`'s cover is the full-bleed hero
+of every pro's profile page; `CommunityCard`'s cover is the primary
+Connect landing grid, every community tile. Neither had `onError`
+handling.
+
+**Design**: both sit on a solid dark base (`#0e0c20`) with their own
+gradient scrim as a separate sibling element -- same structural case as
+Career Detail's `HeroPhoto`, so both new components (`CoverImage`,
+`CommunityCover`) simply render `null` on failure rather than needing a
+new placeholder graphic. `CompactCommunityRow`'s small 52px thumbnail has
+no such backdrop to fall back on, so it gets a real placeholder instead
+(`CommunityThumb`, world-tinted `ImageOff`).
+
+**Verified live**: real covers and thumbnails confirmed rendering
+correctly across the Communities grid and Trevor Johnson's profile after
+the change.
+
+### `PeopleTab` grid: dead space with 1-2 results -- Done, 22 Sept 2026
+
+**Why this matters**: `Grid`'s fixed `sm:grid-cols-2 lg:grid-cols-3`
+against 40 total `PROS` across many worlds/companies means a niche
+company or career search plausibly returns 1-2 results, leaving a
+lopsided row -- same dead-space-grid class already fixed 4x this session
+(`FollowCarousel`, a few lines above this same file, was already fixed
+for it; `Grid` itself was missed).
+
+**Design**: column count now matches the real result count, same literal-
+ternary approach as Profile's Top3 grid fix.
+
+### Found during the audit, deliberately NOT fixed here (lower priority)
+
+- Several more `Image` call sites with the same missing-`onError` gap
+  (`CommunityCard`'s `brandMark` logo, scattered covers in
+  `ConnectExperience.tsx` and `MentorshipTab.tsx`) -- lower traffic/lower
+  visual impact than the ones fixed above (a small partner logo, or
+  covers reachable only a few clicks deep). Flag if they become real.
+- `proById(reply.proId!)`-style assertions on app-authored data (not user
+  input) -- lower risk than the URL-param case since this data doesn't
+  change at runtime, left alone per "trust internal invariants."
 
 ## 8. Colleges
 

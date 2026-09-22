@@ -288,8 +288,16 @@ export function PersonCard({ pro, following, onFollow, badge, quote }: { pro: Pr
 }
 
 function Grid({ pros, follows, onFollow }: { pros: Pro[]; follows: Follows; onFollow: (id: string) => void }) {
+  // Custom-designed edge case, 22 Sept 2026: fixed sm:grid-cols-2
+  // lg:grid-cols-3 regardless of result count -- a niche company/career
+  // search or world filter against the 40-person PROS list plausibly
+  // returns 1-2 results, leaving a lopsided row with obviously dead
+  // columns. Same dead-space-grid class already fixed for Match's deck,
+  // Career Detail's facts strip, Explore's world filter, and Profile's
+  // Top3 grid -- column count now matches the real result count.
+  const cols = pros.length === 1 ? "sm:grid-cols-1 lg:grid-cols-1" : pros.length === 2 ? "sm:grid-cols-2 lg:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3";
   return (
-    <ul className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3">
+    <ul className={`grid grid-cols-1 gap-[var(--space-4)] ${cols}`}>
       {pros.map((pro) => <PersonCard key={pro.id} pro={pro} following={!!follows[pro.id]} onFollow={() => onFollow(pro.id)} />)}
     </ul>
   );

@@ -644,6 +644,20 @@ export function SubTabs<K extends string>({ options, value, onChange, ariaLabel 
   );
 }
 
+// Custom-designed edge case, 22 Sept 2026: no onError handling -- this is
+// the full-bleed hero background of every pro's profile page. Same
+// structural fix as Career Detail's HeroPhoto: the section this sits in
+// already has a solid dark base (`#0e0c20`) with its own gradient scrim
+// as a separate sibling element, so a failed cover doesn't need a new
+// placeholder graphic, it just needs to stop trying to paint a broken
+// image over an already-complete backdrop. Keyed by `src` so switching
+// covers (pickCover) always starts with a fresh failed-load state.
+function CoverImage({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return <Image src={src} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%" }} priority onError={() => setFailed(true)} />;
+}
+
 export function ProfileHeaderCard({ pro, following = false, showCoverControls = false }: { pro: Pro; following?: boolean; showCoverControls?: boolean }) {
   const tier = volunteerTier(pro);
   const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
@@ -672,7 +686,7 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
   return (
     <section aria-label="Profile" className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "#0e0c20", color: ink, boxShadow: "0 18px 40px -28px rgba(0,0,0,0.6)" }}>
       <div className="absolute inset-0" aria-hidden>
-        <Image src={cover} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%" }} priority />
+        <CoverImage key={cover} src={cover} />
         <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.82) 40%, rgba(12,16,35,0.3) 78%, rgba(12,16,35,0.08) 100%)" }} />
       </div>
       {/* the professional's own control; students see no controls here */}

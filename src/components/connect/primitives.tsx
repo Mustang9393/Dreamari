@@ -7,7 +7,7 @@
 
 import Image from "next/image";
 import { createContext, useContext, useState, type ReactNode } from "react";
-import { ChevronRight, CheckCircle2, Clock } from "lucide-react";
+import { ChevronRight, CheckCircle2, Clock, UserRound } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { useStudentAvatarSrc } from "@/lib/avatar";
@@ -170,6 +170,25 @@ const AVATAR_PHOTO: Record<string, string> = {
 // Sept 2026: "just like Instagram and Twitter, not on the pfp but after the
 // name" -- moved to VerifiedBadge below, rendered by each caller next to the
 // person's name text instead. Avatar itself no longer knows about verification.
+// Custom-designed edge case, 22 Sept 2026: neither branch (a pro's real
+// portrait or a generated student avatar) handled a failed load -- and
+// this is the single most-reused image in Connect (ProBadge, CommentRow,
+// every pro headshot, ProProfile's own hero headshot all go through it).
+// Keyed by the resolved src so a fresh person always gets a fresh
+// failed-load state (same remount-on-key idiom used for Build's
+// QuestionSprite and Profile's StudentAvatarImage).
+function AvatarImage({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <span className="flex h-full w-full items-center justify-center rounded-full" style={{ background: "var(--secondary)" }}>
+        <UserRound className="h-1/2 w-1/2" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      </span>
+    );
+  }
+  return <Image src={src} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} onError={() => setFailed(true)} />;
+}
+
 export function Avatar({ name, size = 34, photo: explicitPhoto, ring }: { name: string; size?: number; /** a portrait for a professional who is not in PROS (a partner board's own people); generated avatars are for students only */ photo?: string; /** an accent ring around the avatar (e.g. an identity card); sized to `size` on this same box so it can never render oval */ ring?: string }) {
   // Professionals always wear their portrait; students stay behind the flag
   // (Jordan included -- their pin lives in studentAvatarSrc, the fallback
@@ -187,11 +206,7 @@ export function Avatar({ name, size = 34, photo: explicitPhoto, ring }: { name: 
       className="relative inline-flex flex-none rounded-full"
       style={{ width: size, height: size, boxShadow: ring ? `0 0 0 2px ${ring}` : undefined }}
     >
-      {photo ? (
-        <Image src={photo} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
-      ) : (
-        <Image src={avatarSrc} alt="" width={128} height={128} className="h-full w-full rounded-full object-cover" style={{ background: "var(--secondary)" }} />
-      )}
+      <AvatarImage key={photo ?? avatarSrc} src={photo ?? avatarSrc} />
     </span>
   );
 }

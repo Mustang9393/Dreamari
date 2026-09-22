@@ -12192,3 +12192,43 @@ same keyed-remount idiom.
 
 Next step: continue to Connect (`src/components/connect/`), next in
 priority order. Not pushed -- awaiting go-ahead.
+
+### 2026-09-22 Connect: closed 6 real gaps, including a genuine dead-end on bad URL params
+
+Continuing the design-log priority order after Match/Career Detail/Build/
+Explore/Profile/Play. Audited `src/components/connect/` in full.
+
+**Real dead end, not a crash**: every id-driven view (`?pro=`, `?board=`,
+`?insight=`, `?event=`, `?thread=`) resolved its id with a plain
+`if (!x) return null;`, and the header's own back-nav is gated on
+`view.kind === "home" || role !== "student"` -- false for a student on a
+bad view. A stale bookmark or a hand-edited share link rendered a
+genuinely empty page: no message, no way back. New `ConnectNotFound`
+(tier-4 empty state + a real back button, since the header's own isn't
+present here) swapped in at all 5 `return null;` sites. Verified live:
+`?pro=totally-bogus-pro-id` and `?board=totally-bogus-board-id` both now
+show "We couldn't find that" with a working way back.
+
+**Five more real gaps closed**:
+- Shared `Avatar` primitive (`primitives.tsx`) -- the single most-reused
+  image in Connect (ProBadge, CommentRow, every pro headshot) -- had no
+  `onError`. New `AvatarImage`, keyed by resolved src.
+- `InsightThreadView` was missing the "no comments yet" empty state its
+  sibling `ThreadView` already has for the identical zero-response case.
+  Ported the same pattern.
+- `ProfileHeaderCard`'s and `CommunityCard`'s cover photos had no
+  `onError` -- both sit on a solid dark base with a separate gradient
+  scrim (same structural case as Career Detail's `HeroPhoto`), so both
+  fixes simply render `null` on failure. `CompactCommunityRow`'s small
+  thumbnail has no such backdrop, so it gets a real world-tinted
+  placeholder instead.
+- `PeopleTab`'s search/filter grid had the same fixed-column dead-space
+  bug already fixed 4x this session (its own `FollowCarousel` a few
+  lines above was already fixed for it, `Grid` itself was missed).
+
+`npx tsc --noEmit -p .` clean; `npx eslint` clean (10 pre-existing
+unrelated warnings in `ConnectExperience.tsx`, confirmed identical count
+before this session's changes via `git stash`).
+
+Next step: continue to Colleges (`src/components/colleges/`), next in
+priority order. Not pushed -- awaiting go-ahead.

@@ -170,6 +170,35 @@ function proById(id: string) {
   return PROS.find((p) => p.id === id)!;
 }
 
+// Custom-designed edge case, 22 Sept 2026: every id-driven view (pro,
+// board/community, insight, event, thread) resolved its id with a plain
+// `if (!x) return null;` -- and the header's own back-nav (just above
+// where every one of these renders) is itself gated on
+// `view.kind === "home" || role !== "student"`, false for a student on a
+// bad view, so a stale bookmark, a renamed/removed pro or community, or a
+// hand-edited share link (`?pro=`, `?board=`, `?insight=`, `?event=`,
+// `?thread=`) rendered a genuinely empty <main> with no message and no
+// way back -- worse than the playbook's own "dense panel, one muted line"
+// tier, since there wasn't even a line. Tier-4 treatment (nothing to
+// build the page around), same family as every other whole-route empty
+// state this session, with the one thing those id-driven views actually
+// need: a real way back, since the header's own back button isn't there.
+function ConnectNotFound({ onBack, backLabel = "Back" }: { onBack: () => void; backLabel?: string }) {
+  return (
+    <>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
+      </button>
+      <div className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
+        <Sparkles className="h-8 w-8" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+        <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>We couldn&apos;t find that</p>
+        <p className="max-w-[42ch] text-[15px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>It may have been removed, or the link might be out of date.</p>
+        <button type="button" onClick={onBack} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{backLabel}</button>
+      </div>
+    </>
+  );
+}
+
 // The single line that gives a question row real information scent (direct
 // feedback, 8 Sept 2026: a title alone doesn't say whether it's worth a
 // click -- Stack Overflow/Quora both solve this with a snippet of the top
@@ -1556,7 +1585,7 @@ export function ConnectExperience() {
         {view.kind === "pro" &&
           (() => {
             const pro = PROS.find((p) => p.id === view.id);
-            if (!pro) return null;
+            if (!pro) return <ConnectNotFound onBack={goBack} backLabel={backLabel} />;
             // key={pro.id}: without it, navigating from one pro's profile to
             // a different one reused the same component instance, so its
             // useState(coverFor(pro.id)) never re-ran and every profile kept
@@ -1590,7 +1619,7 @@ export function ConnectExperience() {
               ? <AttCommunityView onBack={goBack} backLabel={backLabel} version={attVersion} onVersion={pickAttVersion} />
               : <AttCommunityViewV1 onBack={goBack} backLabel={backLabel} version={attVersion} onVersion={pickAttVersion} />;
             const community = COMMUNITIES.find((c) => c.id === view.id);
-            if (!community) return null;
+            if (!community) return <ConnectNotFound onBack={goBack} backLabel={backLabel} />;
             return (
           <BoardView
             community={community}
@@ -1610,7 +1639,7 @@ export function ConnectExperience() {
         {view.kind === "insight" &&
           (() => {
             const insight = INSIGHTS.find((i) => i.id === view.id);
-            if (!insight) return null;
+            if (!insight) return <ConnectNotFound onBack={goBack} backLabel={backLabel} />;
             const p = cardProps(insight.id);
             return (
               <InsightThreadView
@@ -1630,7 +1659,7 @@ export function ConnectExperience() {
         {view.kind === "event" &&
           (() => {
             const event = eventById(view.id);
-            if (!event) return null;
+            if (!event) return <ConnectNotFound onBack={goBack} backLabel={backLabel} />;
             if (eventJoined[event.id]) {
               return (
                 <EventView
@@ -1669,7 +1698,7 @@ export function ConnectExperience() {
         {view.kind === "thread" &&
           (() => {
             const thread = ALL_THREADS.find((t) => t.id === view.id);
-            if (!thread) return null;
+            if (!thread) return <ConnectNotFound onBack={goBack} backLabel={backLabel} />;
             return (
           <ThreadView
             thread={thread}
@@ -3850,6 +3879,17 @@ function InsightThreadView({
                 />
               ))}
             </CommentStream>
+            {/* Custom-designed edge case, 22 Sept 2026: ThreadView already
+               has this exact fallback ("No answer yet.") for its own
+               zero-response case -- this page went straight from the
+               heading to the composer with nothing in between when an
+               insight has no comments yet, missing the same treatment. */}
+            {insight.replies.length + posted.length === 0 && (
+              <Card>
+                <p className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>No comments yet.</p>
+                <p className="mt-[4px] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>Be the first to weigh in.</p>
+              </Card>
+            )}
             <ReplyComposer onPost={(text) => setPosted((current) => [...current, { id: `${insight.id}-local-${current.length}`, body: text }])} />
           </div>
         </div>

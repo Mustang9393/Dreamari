@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Star, X } from "lucide-react";
+import { ArrowUpRight, ImageOff, Star, X } from "lucide-react";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -115,13 +115,43 @@ function MoreMarks({ className, missing, names, open, onToggle, onClose }: { cla
 // treatment as the industry tiles they're visually closest to (a thumbnail +
 // title + line, browse-tile shaped), so it reads as consistent rather than
 // arbitrary.
+// Custom-designed edge case, 22 Sept 2026: neither this thumbnail nor the
+// full-bleed card cover below handled a failed load -- this is the
+// primary Connect landing grid, every community tile goes through one or
+// the other. The small tile has no dark base behind it to fall back on
+// (unlike the full card), so it gets a real placeholder: the world-tinted
+// icon treatment already used for career photos elsewhere this session.
+function CommunityThumb({ community }: { community: Community }) {
+  const [failed, setFailed] = useState(false);
+  const accent = communityAccent(community);
+  if (failed) {
+    return (
+      <span className="flex h-full w-full items-center justify-center" style={{ background: `color-mix(in srgb, ${accent} 22%, var(--card))` }}>
+        <ImageOff className="h-5 w-5" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      </span>
+    );
+  }
+  return <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="52px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} onError={() => setFailed(true)} />;
+}
+
+// Same structural fix as Career Detail's HeroPhoto / ProProfile's
+// CoverImage: this card's own root already has a solid dark base
+// (`#0e0c20`) with its gradient scrim as a separate sibling, so a failed
+// cover just needs to stop painting a broken image over an
+// already-complete backdrop.
+function CommunityCover({ community }: { community: Community }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} onError={() => setFailed(true)} />;
+}
+
 function CompactCommunityRow({ community, onOpen }: { community: Community; onOpen: () => void }) {
   const accent = communityAccent(community);
   return (
     <HoverBeam strength={0.8} className="h-full">
       <button type="button" onClick={onOpen} className="dm-quiet group flex h-full w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-3)] text-left" style={{ background: "var(--glass-surface-1)" }}>
         <span className="relative size-[52px] flex-none overflow-hidden rounded-[var(--radius-md)]" style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 45%, transparent)` }}>
-          <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="52px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+          <CommunityThumb community={community} />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] leading-[19px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{community.name.replace(/ Careers$/, "")}</span>
@@ -151,7 +181,7 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
          vignette sits under the tiles and rows, a light top scrim under the
          title, then the accent tint and grain. */}
       <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-        <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="640px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
+        <CommunityCover key={community.id} community={community} />
         {/* Lighter than it was (direct feedback, 17 Sept 2026: "brighten the
            images of the other cards, they look too dim now... make sure
            legibility is not affected"): the photo shows through the upper
