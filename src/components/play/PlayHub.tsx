@@ -561,6 +561,29 @@ function CardDeck<T extends { id: string }>({
  *  to select it INTO, so it renders in full color as a plain,
  *  non-interactive card instead of a button, per direct feedback ("color
  *  but just not pressable"). */
+// Custom-designed edge case, 22 Sept 2026: neither RowCard nor
+// HeroShelfCard handled a failed `cover` load (HeroShelfCard already had
+// a fallback for a MISSING cover -- BookOpen on a tinted circle -- but
+// not for one that's present but 404s). Confirmed PlayHub never imports
+// PosterCard, so the app-wide PosterPhoto fix (Explore, 22 Sept) doesn't
+// reach this file -- it has its own bespoke card components, hit by
+// every single card on the hub (Simulations, Glossary Games, "In the
+// works"). Reuses HeroShelfCard's own existing no-cover visual for a
+// failed one too, rather than introducing a second "missing image" look
+// on the same page.
+function CoverPhoto({ src, world, sizes, className }: { src?: string; world?: string; sizes: string; className: string }) {
+  const [failed, setFailed] = useState(false);
+  const tint = (world && WORLD_COLORS[world]) || "var(--glossary-accent, var(--world-business-money-office))";
+  if (!src || failed) {
+    return (
+      <span aria-hidden className="absolute inset-0 flex items-center justify-center" style={{ background: `color-mix(in srgb, ${tint} 20%, var(--card))` }}>
+        <BookOpen className="h-10 w-10" style={{ color: tint }} aria-hidden />
+      </span>
+    );
+  }
+  return <Image src={src} alt="" fill sizes={sizes} className={className} onError={() => setFailed(true)} />;
+}
+
 function RowCard({
   candidate,
   active = false,
@@ -631,7 +654,7 @@ function RowCard({
   const worldSize = tier === "hero" ? "text-[11px] sm:text-[13px] md:text-[15px]" : tier === "side" ? "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]" : "text-[10.5px] sm:text-[11.5px]";
   const content = (
     <div className="relative h-full w-full">
-      <Image src={cover} alt="" fill sizes={large ? "(min-width: 1024px) 764px, 90vw" : tier === "compact" ? "(min-width: 768px) 347px, 60vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
+      <CoverPhoto src={cover} world={world} sizes={large ? "(min-width: 1024px) 764px, 90vw" : tier === "compact" ? "(min-width: 768px) 347px, 60vw" : "(min-width: 1024px) 304px, 45vw"} className="object-cover" />
       {candidate.kind === "soon" && !large && (
         <span className={`absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold ${tier === "compact" ? "gap-[5px]" : ""}`} style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
           {tier === "compact" && <Lock className="h-[12px] w-[12px]" aria-hidden />}
@@ -908,13 +931,7 @@ function HeroShelfCard({ item, large = false, active = false, onSelect, deck = f
   const subSize = tier === "hero" ? "text-[11px] sm:text-[13px] md:text-[15px]" : tier === "side" ? "text-[11px] sm:text-[10px] md:text-[13px] lg:text-[14px]" : "text-[10.5px] sm:text-[11.5px]";
   const content = (
     <div className="relative h-full w-full">
-      {item.cover ? (
-        <Image src={item.cover} alt="" fill sizes={tier === "hero" ? "(min-width: 1024px) 764px, 90vw" : tier === "side" ? "(min-width: 1024px) 304px, 45vw" : "(min-width: 768px) 347px, 60vw"} className="object-cover" />
-      ) : (
-        <span aria-hidden className="absolute inset-0 flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--glossary-accent, var(--world-business-money-office)) 20%, var(--card))" }}>
-          <BookOpen className="h-10 w-10" style={{ color: "var(--glossary-accent, var(--world-business-money-office))" }} aria-hidden />
-        </span>
-      )}
+      <CoverPhoto src={item.cover} world={item.world} sizes={tier === "hero" ? "(min-width: 1024px) 764px, 90vw" : tier === "side" ? "(min-width: 1024px) 304px, 45vw" : "(min-width: 768px) 347px, 60vw"} className="object-cover" />
       {item.locked && tier !== "hero" && (
         <span className={`absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold ${tier === "compact" ? "gap-[5px]" : ""}`} style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
           {tier === "compact" && <Lock className="h-[12px] w-[12px]" aria-hidden />}

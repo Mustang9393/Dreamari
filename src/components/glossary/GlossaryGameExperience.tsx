@@ -153,7 +153,27 @@ function TermIcon({ icon, className }: { icon: string; className?: string }) {
   return <Icon className={className} aria-hidden />;
 }
 
+// Custom-designed edge case, 22 Sept 2026: no onError handling, and this
+// is the single most-repeated unguarded image in Play -- Intro,
+// DreamyIntro, LessonIntro, Unlock, FeedbackPanel, StreakModal,
+// PowerPlayIntro, MasteryLoading and Complete all render it. Same class
+// as Build's already-fixed DreamySprite/QuestionSprite gap (a bundled
+// static asset, lower real risk than a per-record photo, but the widest
+// blast radius of any image in this feature). Already keyed by `pose`,
+// so a fresh pose gets a fresh failed-load state for free.
 function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | "curious" | "party" | "nervous" | "puzzle" | "heart"; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <span
+        aria-hidden
+        className="flex items-center justify-center rounded-full drop-shadow-[0_10px_22px_rgba(0,0,0,0.35)]"
+        style={{ width: size, height: size, background: "color-mix(in srgb, var(--color-brand-500) 18%, var(--card))" }}
+      >
+        <Sparkles style={{ width: size * 0.5, height: size * 0.5, color: "var(--muted-foreground)" }} />
+      </span>
+    );
+  }
   return (
     <Image
       key={pose}
@@ -163,6 +183,7 @@ function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | 
       height={size * 1.5}
       className="drop-shadow-[0_10px_22px_rgba(0,0,0,0.35)]"
       style={{ width: size, height: size }}
+      onError={() => setFailed(true)}
     />
   );
 }
@@ -1540,7 +1561,12 @@ function CompleteScreen({
   // used to multiply its XP by 100 into a private "Dream Score" (15,000 and
   // up), which is where the 15k figures came from (Chandu, 6 Sept 2026).
   const dreamScore = useDreamScore();
-  const masteryPct = Math.round((masteredCount / lesson.terms.length) * 100);
+  // Custom-designed edge case, 22 Sept 2026: a lesson authored with zero
+  // terms divides by zero here -- NaN, rendered as literal "NaN%" on the
+  // celebratory finish screen. Lessons are added incrementally (this
+  // file's own data.ts), so an in-progress/malformed one reaching this
+  // screen isn't purely theoretical. 0 terms reads as 0% mastered, not NaN.
+  const masteryPct = lesson.terms.length === 0 ? 0 : Math.round((masteredCount / lesson.terms.length) * 100);
   const { theme } = useGlobalTheme();
   // The lesson's finish line had a burst and a party Dreamy but no sound at all.
   // playSweep is this area's own "level-up" sound (Power Play solved uses it), so
@@ -1913,7 +1939,16 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
           (unlockIndex < lesson.terms.length ? (
             <UnlockScreen lesson={lesson} index={unlockIndex} onUnlock={() => setUnlockIndex((i) => i + 1)} />
           ) : (
-            <UnlockCompleteScreen lesson={lesson} onStartPractice={() => setScreen("question")} />
+            // Custom-designed edge case, 22 Sept 2026: a lesson authored
+            // with zero questions (lessons are added incrementally, per
+            // this file's own data.ts) used to send the student to the
+            // "question" screen anyway -- `current` (queue[queueIndex])
+            // comes back undefined, so nothing renders there and the game
+            // is permanently stuck with no button, no error, no way
+            // forward. Skips straight to Power Play (the next real step)
+            // when there's nothing to practice, the same way the "unlock"
+            // branch above already skips ahead once every term is done.
+            <UnlockCompleteScreen lesson={lesson} onStartPractice={() => setScreen(queue.length > 0 ? "question" : "powerPlayIntro")} />
           ))}
         {screen === "question" && current && (
           <>

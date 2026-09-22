@@ -12161,3 +12161,34 @@ existing unrelated warning, not a regression).
 
 Next step: continue to Play (`src/components/play/`), next in priority
 order. Not pushed -- awaiting go-ahead.
+
+### 2026-09-22 Play: closed 4 real gaps (cover-image fallback, NaN mastery, stuck zero-question lesson, DreamyFace fallback)
+
+Continuing the design-log priority order after Match/Career Detail/Build/
+Explore/Profile. Audited `PlayHub.tsx` and `GlossaryGameExperience.tsx`.
+
+**Confirmed `PlayHub.tsx` never imports `PosterCard`** -- it has its own
+bespoke card components (`RowCard`, `HeroShelfCard`), so Explore's
+app-wide `PosterPhoto` fix from earlier today doesn't reach Play at all.
+New shared `CoverPhoto` reuses `HeroShelfCard`'s own existing no-cover
+visual (`BookOpen` on a world-tinted circle) for a failed load too,
+closing the gap for every card on the hub (Simulations, Glossary Games,
+"In the works"). Verified live with a temporarily broken cover path.
+
+Two Glossary bugs fixed: `masteryPct` divided by zero for any lesson
+authored with zero terms (lessons are added incrementally per this
+feature's own data.ts) -- literal "NaN%" on the finish screen, now
+zero-guarded. And a lesson with zero questions left the game permanently
+stuck on a blank "question" screen once every term was unlocked (`current`
+comes back `undefined`, nothing renders, no way forward) -- now skips
+straight to Power Play instead, the same way the unlock step already
+skips ahead once done.
+
+`DreamyFace` (9 screens across Glossary) had no `onError` handling --
+same class as Build's already-fixed `DreamySprite`, ported here with the
+same keyed-remount idiom.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean throughout.
+
+Next step: continue to Connect (`src/components/connect/`), next in
+priority order. Not pushed -- awaiting go-ahead.

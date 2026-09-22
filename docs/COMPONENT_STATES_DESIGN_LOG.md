@@ -825,9 +825,81 @@ mechanism is identical to and already verified via `ProfilePhoto`/
   saved-schools grids) have the same missing-`onError` gap, lower traffic
   than Top3/Locker's own career photos. Flag if it becomes real.
 
-## 6. Play
+## 6. Play (`src/components/play/PlayHub.tsx`, `src/components/glossary/GlossaryGameExperience.tsx`)
 
-Status: not started
+Status: **Done** -- the real gaps found via a full audit.
+
+| Component / state | Status | Notes |
+|---|---|---|
+| RowCard/HeroShelfCard: missing/failed cover image | **Done, 22 Sept** | New shared `CoverPhoto` -- `PosterCard`'s app-wide fix doesn't reach here, Play has its own bespoke cards. |
+| Glossary Complete screen: `NaN%` mastery on a zero-term lesson | **Done, 22 Sept** | Zero-guard. |
+| Glossary: a zero-question lesson gets permanently stuck | **Done, 22 Sept** | Skips to Power Play instead. |
+| `DreamyFace`: missing/failed image, used on 9 screens | **Done, 22 Sept** | Same class as Build's `DreamySprite`, ported here. |
+| `TermIcon` positional/keyed lookup | **Verified, already handled** | Already `?? Sparkles`, no gap. |
+| Locked/coming-soon card treatment | **Verified, already handled** | Consistent `locked` + `CornerBadge` everywhere. |
+
+### RowCard/HeroShelfCard: missing or failed cover image -- Done, 22 Sept 2026
+
+**Why this matters**: confirmed `PlayHub.tsx` never imports `PosterCard`
+-- it has its own bespoke card components (`RowCard`, `HeroShelfCard`), so
+Explore's app-wide `PosterPhoto` fix doesn't reach Play at all. Hits
+every card on the hub: Career Simulations, Glossary Games, "In the
+works." `HeroShelfCard` already had a fallback for a *missing* `cover`
+(`BookOpen` on a tinted circle) but not one that's present and 404s;
+`RowCard` had no fallback at all.
+
+**Design**: new shared `CoverPhoto`, reusing `HeroShelfCard`'s own
+existing no-cover visual for a failed one too (rather than introducing a
+second "missing image" look on the same page) -- `BookOpen` on a
+world-tinted circle (`WORLD_COLORS[world]`, falling back to
+`--glossary-accent` when no world is known, same as the original).
+
+**Verified live**: temporarily broke Investment Banker's cover path,
+confirmed the hero card shows the `BookOpen` fallback in place of a
+broken image (screenshotted). Reverted (`git diff` clean), real covers
+confirmed unaffected. `tsc`/`eslint` clean.
+
+### Glossary Complete screen: `NaN%` mastery -- Done, 22 Sept 2026
+
+**Why this matters**: `masteryPct = Math.round((masteredCount /
+lesson.terms.length) * 100)` divides by zero for any lesson authored with
+no terms -- and lessons are added incrementally per this feature's own
+`data.ts`, so an in-progress one reaching this screen isn't theoretical.
+Would render the literal string "NaN%" on the celebratory finish screen.
+
+**Design**: one-line zero-guard -- 0 terms reads as 0% mastered, not NaN.
+
+### Glossary: a zero-question lesson gets permanently stuck -- Done, 22 Sept 2026
+
+**Why this matters**: once every term was unlocked, `UnlockCompleteScreen`
+always sent the student to the "question" screen. If `lesson.questions`
+is empty, `current` (`queue[queueIndex]`) is `undefined`, so the
+`screen === "question" && current && (...)` guard renders nothing --  not
+a crash, a permanently blank main area with no button and no way forward,
+since only `QuestionScreen`/`FeedbackPanel` (which never mount) can
+advance the game.
+
+**Design**: `onStartPractice` now checks `queue.length` and skips straight
+to `powerPlayIntro` when there's nothing to practice, the same way the
+"unlock" branch already skips ahead once every term is unlocked.
+
+### `DreamyFace`: missing or failed image -- Done, 22 Sept 2026
+
+**Why this matters**: same gap class as Build's already-fixed
+`DreamySprite`/`QuestionSprite` (a bundled static asset, lower real risk
+than a per-record photo) -- but `DreamyFace` is the single most-repeated
+unguarded image in Play, rendered on 9 different screens (Intro,
+DreamyIntro, LessonIntro, Unlock, FeedbackPanel, StreakModal,
+PowerPlayIntro, MasteryLoading, Complete).
+
+**Design**: already keyed by `pose` (remounts cleanly on a pose change,
+same idiom as `QuestionSprite`) -- added local failed-state, falling back
+to a brand-tinted circle with a muted Sparkles glyph at the same size.
+
+**Verified live**: real Dreamy face confirmed rendering normally on the
+Investment Banking lesson's intro screen after the change; not
+force-broken separately since the mechanism is identical to and already
+verified via `CoverPhoto` above. `tsc`/`eslint` clean.
 
 ## 7. Connect
 
