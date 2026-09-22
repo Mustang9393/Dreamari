@@ -313,11 +313,19 @@ function DemoStepControls({ onReload, onStepBack, stepBackDisabled }: { onReload
 
 function TopBar({
   onBack,
+  topBarRef,
 }: {
   onBack: () => void;
+  // Measured by the parent (see topBarSpace) so the height-overflow guard
+  // in --glossary-shell-scale knows exactly how much real vertical space
+  // this bar takes -- its rendered height isn't quite as fixed across
+  // viewport widths as the flat `pt-5` class alone would suggest (measured
+  // 60px at 1440 wide vs 75px at 1920/2000 wide live), so a hardcoded
+  // constant here would have been wrong at one width or the other.
+  topBarRef: React.RefObject<HTMLElement | null>;
 }) {
   return (
-    <header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
+    <header ref={topBarRef} className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
@@ -350,15 +358,22 @@ function DemoControlsDock({
   onReload,
   onStepBack,
   stepBackDisabled,
+  dockRef,
 }: {
   bgVersion: PlayBgVersion;
   onBgVersion: (v: PlayBgVersion) => void;
   onReload: () => void;
   onStepBack: () => void;
   stepBackDisabled: boolean;
+  // Measured by the parent (see --demo-dock-space) so <main>'s own
+  // vertical centering can reserve the same amount of space at the
+  // bottom that this fixed, out-of-flow dock actually occupies --
+  // otherwise <main> centers its content against the full viewport
+  // height as if this dock weren't there, biasing everything low.
+  dockRef: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-5">
+    <div ref={dockRef} className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-5">
       <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-[var(--space-2)]">
         <DemoStepControls onReload={onReload} onStepBack={onStepBack} stepBackDisabled={stepBackDisabled} />
         <PlayVersionChip version={bgVersion} onChange={onBgVersion} />
@@ -386,7 +401,22 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
       <button
         type="button"
         onClick={onNext}
-        className="dm-solid flex w-full max-w-[calc(480px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+        // CTA buttons get their OWN, lower growth ceiling than the card/text
+        // around them (direct correction, 22 Sept 2026: "THE CTA Buttons
+        // dont need to stretch past a respectable amount, just the MODALS
+        // and their internal elements like text, images, buttons, chips etc
+        // need to scale proportionately... not just extending to the side").
+        // min(...) against a flat 560px cap -- not the full shell scale --
+        // is what stops a button from becoming a wide, disproportionate
+        // "stretched pill" at the top of the scale range while the card
+        // around it keeps growing normally. 560px, not something smaller:
+        // it has to clear every screen's own historical CTA base width
+        // (480/520/440/420/380px) so this cap never binds below the
+        // 1440x900 anchor and mobile/tablet CTAs stay exactly as they were.
+        // Same cap reused on every other CTA in this file (Start Learning
+        // Finance, Start Lesson, Unlock, Start Practice, Power Play's
+        // button, Continue) -- see this comment, not repeated at each one.
+        className="dm-solid flex w-full max-w-[min(calc(480px*var(--glossary-shell-scale)),560px)] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Next <ChevronRight className="h-4 w-4" aria-hidden />
@@ -414,7 +444,11 @@ function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
         </span>
         <SpeechBubble>Hi, I&apos;m Dreamy! Let&apos;s get started.</SpeechBubble>
       </div>
-      <div className="flex w-full max-w-[calc(520px*var(--glossary-shell-scale))] flex-col gap-[var(--space-3)]">
+      {/* This wrapper's only child is the CTA button below, so it carries
+         the same 560px CTA cap as every other button in this file (see
+         IntroScreen's "Next" button for the full reasoning) rather than
+         growing with the shell scale the way a real content card would. */}
+      <div className="flex w-full max-w-[min(calc(520px*var(--glossary-shell-scale)),560px)] flex-col gap-[var(--space-3)]">
         <button
           type="button"
           onClick={onStart}
@@ -468,7 +502,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
       <button
         type="button"
         onClick={onStart}
-        className="dm-solid flex w-full max-w-[calc(440px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+        className="dm-solid flex w-full max-w-[min(calc(440px*var(--glossary-shell-scale)),560px)] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Start Lesson {lesson.lessonNumber} <ChevronRight className="h-4 w-4" aria-hidden />
@@ -678,7 +712,7 @@ function UnlockScreen({
         }}
         whileTap={reduced ? undefined : { scale: 0.97 }}
         transition={{ duration: 0.12 }}
-        className="dm-solid flex w-full max-w-[calc(440px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+        className="dm-solid flex w-full max-w-[min(calc(440px*var(--glossary-shell-scale)),560px)] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
       >
         Unlock {term.term} <TermIcon icon={term.icon} className="h-4 w-4" />
@@ -753,7 +787,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLes
         <button
           type="button"
           onClick={onStartPractice}
-          className="dm-solid flex w-full max-w-[calc(420px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+          className="dm-solid flex w-full max-w-[min(calc(420px*var(--glossary-shell-scale)),560px)] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
           style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
         >
           Start Practice <ChevronRight className="h-4 w-4" aria-hidden />
@@ -1441,7 +1475,7 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
       <button
         type="button"
         onClick={onStart}
-        className="dm-solid flex w-full max-w-[calc(420px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+        className="dm-solid flex w-full max-w-[min(calc(420px*var(--glossary-shell-scale)),560px)] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
         style={{ background: "var(--hero-accent-purple)", color: "#fff", fontFamily: "var(--font-display)" }}
       >
         <Zap className="h-4 w-4" fill="currentColor" aria-hidden /> Unlock &amp; Test My Knowledge <ChevronRight className="h-4 w-4" aria-hidden />
@@ -1661,7 +1695,7 @@ function CompleteScreen({
         <button
           type="button"
           onClick={onContinue}
-          className="dm-solid flex w-full max-w-[calc(380px*var(--glossary-shell-scale))] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
+          className="dm-solid flex w-full max-w-[min(calc(380px*var(--glossary-shell-scale)),560px)] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
           style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
         >
           Continue <ChevronRight className="h-4 w-4" aria-hidden />
@@ -1669,6 +1703,39 @@ function CompleteScreen({
       </div>
     </div>
   );
+}
+
+// Watches `ref`'s element with a ResizeObserver and reports one derived
+// number from it (via `extract`) into `setSpace` -- shared by TopBar and
+// DemoControlsDock's own space measurements below, both of which feed the
+// centering/height-overflow-guard math in GlossaryGameExperience's own
+// --glossary-shell-scale and --demo-dock-space. Re-measures on mount, on
+// the element's own resize, and on window resize (covers both "this
+// element's content changed size" and "the viewport changed, so this
+// element's position relative to it changed" -- ResizeObserver alone only
+// catches the former).
+function useMeasuredSpace(ref: React.RefObject<HTMLElement | null>, extract: (el: HTMLElement) => number, setSpace: (n: number) => void) {
+  // `extract` is a fresh function every render by design (it closes over
+  // nothing that changes independently of `ref` itself) -- kept in a ref,
+  // not the effect's own dependency array, so the ResizeObserver below is
+  // set up once per `ref` rather than torn down and rebuilt every render.
+  const extractRef = useRef(extract);
+  useEffect(() => {
+    extractRef.current = extract;
+  });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setSpace(extractRef.current(el));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [ref, setSpace]);
 }
 
 // ---------------------------------------------------------------------------
@@ -1685,6 +1752,32 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
   const [streak, setStreak] = useState(0);
   const [showStreak, setShowStreak] = useState<number | null>(null);
   const [dismissedReview, setDismissedReview] = useState(false);
+  // Direct correction, 22 Sept 2026: "the actual game content and questions
+  // and answers seem like theys it too low... The flipcard/card/surface
+  // should be central." Root cause: DemoControlsDock (above) is
+  // `position: fixed`, so it takes no space in the flex column -- <main>'s
+  // own `justify-center` centers its content against the FULL remaining
+  // viewport height as if the dock weren't there, while the dock visually
+  // covers real pixels at the bottom, biasing every screen's centered
+  // content low by roughly half the dock's own footprint (confirmed live:
+  // at 2000x1100 the question card's true center sat at y=592.5 against a
+  // TopBar-to-dock-top free area centered at y=555.25 -- a 37px low bias).
+  // Measured, not hardcoded, for both this AND the top bar below: neither
+  // one's real rendered height turned out to be as fixed as its own classes
+  // suggest -- the dock measured 36px tall at 1440x900 vs 44.5px at
+  // 2000x1100, and the top bar 60px vs 75px, in live testing -- so a
+  // hardcoded constant for either would have silently drifted out of sync
+  // at some viewport size. `useMeasuredSpace` (below) is the same
+  // ResizeObserver pattern for both.
+  const dockRef = useRef<HTMLDivElement>(null);
+  const [dockSpace, setDockSpace] = useState(0);
+  useMeasuredSpace(dockRef, (el) => Math.max(0, window.innerHeight - el.getBoundingClientRect().top), setDockSpace);
+  // Same idea, for the height-overflow guard in --glossary-shell-scale --
+  // see that variable's own comment for how this and dockSpace both feed
+  // into it.
+  const topBarRef = useRef<HTMLElement>(null);
+  const [topBarSpace, setTopBarSpace] = useState(0);
+  useMeasuredSpace(topBarRef, (el) => el.getBoundingClientRect().height, setTopBarSpace);
   // Demo-only background version toggle (same idea as Connect's AT&T
   // v1/v2.0 chip) -- ?bg=2/3/4 opens straight into that experiment, so a
   // link can be shared to a specific one. v1 (Stars + berry backdrop) is
@@ -1912,8 +2005,65 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         // 2560x1440 desktop monitor (~2.2x, right at the cap) or the
         // required 1440x1600 case (~1.93x, still under it).
         // No @media steps -- continuous, not breakpoint jumps.
+        //
+        // Widened from max(widthGrowth, heightGrowth) to widthGrowth +
+        // heightGrowth (both ADDED, not just the larger one), per further
+        // direct feedback the same day: "can scale vertically a bit more
+        // too... so much space left blank." max() meant a wide-but-not-
+        // very-tall monitor (1920x1080, 2000x1100 -- width clearly past the
+        // anchor, height only modestly so) had its ENTIRE scale driven by
+        // width alone, with height's own (smaller) growth term completely
+        // discarded rather than contributing anything -- e.g. 2000x1100
+        // landed at 1.747x (pure width), when both axes are in fact past
+        // their anchor and both should count. Summing them raises exactly
+        // those width-dominant cases (2000x1100: 1.75x -> 2.01x; 1920x1080:
+        // 1.64x -> 1.88x) while leaving the anchor (both terms 0) and the
+        // pure-height case (1440x1600 -- width term already 0, so the sum
+        // equals what max() gave it, ~1.93x) unchanged. Cap raised
+        // 2.2 -> 2.6 so this genuinely larger range isn't immediately
+        // clipped back down at the sizes that motivated it -- still not
+        // reached by any required test size (2000x1100's ~2.01x has
+        // headroom below it).
+        //
+        // That stronger growth immediately exposed a THIRD term this needed:
+        // a height-overflow guard, the same idea as the existing width one
+        // (100vw/640px) but for the vertical axis. Without it, the bigger
+        // scale from the change above pushed UnlockScreen's own stack
+        // (heading + term-count label + TermFlipCard + Unlock button, the
+        // tallest of any screen's composition) taller than the space
+        // actually available below the top bar and above the demo dock --
+        // caught live at 2000x1100: the Unlock button rendered at
+        // y=1113-1184, past the 1100px viewport bottom entirely, with the
+        // whole PAGE growing to 1365px tall and real vertical scroll
+        // appearing -- exactly the kind of overflow this whole effort was
+        // supposed to prevent, just on the vertical axis instead of the
+        // horizontal one the first version already guarded. `650px` is
+        // UnlockScreen's own measured content height at scale 1 (forced
+        // `--glossary-shell-scale: 1` live and measured heading-top to
+        // button-bottom at ~566px, +32px for the screen's own top/bottom
+        // padding -- rounded up slightly for margin), and `var(--top-bar-space)`
+        // / `var(--demo-dock-space)` are the same live-measured numbers
+        // `<main>`'s own centering compensation already uses (see above) --
+        // so this guard asks the same question the width one does: at this
+        // scale, does the tallest screen's content actually fit in the real
+        // space available, not just the viewport's raw height. Like the
+        // width guard, this is a MIN -- it only pulls scale down when
+        // content would genuinely overflow, never grows it.
         "--glossary-shell-scale":
-          "clamp(1, min(calc(1 + max(calc(max(0px, (100vw - 1440px)) / 750px), calc(max(0px, (100dvh - 900px)) / 750px))), calc(100vw / 640px)), 2.2)",
+          "clamp(1, min(calc(1 + calc(max(0px, (100vw - 1440px)) / 750px) + calc(max(0px, (100dvh - 900px)) / 750px)), calc(100vw / 640px), calc((100dvh - var(--top-bar-space, 0px) - var(--demo-dock-space, 0px) - 32px) / 650px)), 2.6)",
+        // Reserves, at the bottom of <main>'s own centering box, the same
+        // space DemoControlsDock (position: fixed, so invisible to normal
+        // flex-column layout) actually occupies on screen -- see dockSpace
+        // above for the full reasoning; 0px (no-op) before the first
+        // measurement effect runs, or if the ref somehow never resolves.
+        "--demo-dock-space": `${dockSpace}px`,
+        // The top bar IS a normal flex-column sibling (not fixed), so
+        // <main> already starts below it correctly without any help --
+        // this only feeds the height-overflow guard inside
+        // --glossary-shell-scale above, which needs to know how much of
+        // the viewport's own height is already spoken for before asking
+        // "would the tallest screen's content still fit."
+        "--top-bar-space": `${topBarSpace}px`,
         // Play's own background, not AppBackdrop (direct feedback, 21 Sept
         // 2026 -- first pass reused AppBackdrop so the page and the
         // feedback popup weren't flat/boring on plain near-black; a later
@@ -1949,13 +2099,14 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         className="pointer-events-none fixed inset-0 z-0"
         style={{ background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 30%, transparent), transparent 65%)" }}
       />
-      <TopBar onBack={() => router.back()} />
+      <TopBar onBack={() => router.back()} topBarRef={topBarRef} />
       <DemoControlsDock
         bgVersion={bgVersion}
         onBgVersion={pickBgVersion}
         onReload={resetGame}
         onStepBack={stepBack}
         stepBackDisabled={screen === "intro"}
+        dockRef={dockRef}
       />
 
       {screen === "question" && (
@@ -2025,8 +2176,12 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
          horizontally in the space below the progress strip (direct
          feedback 21 Sept 2026: "the question block is still not centred in
          the screen... centred vertically and horizontally" -- supersedes
-         an earlier decision to pin question screens high under the strip). */}
-      <main className="relative z-0 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
+         an earlier decision to pin question screens high under the strip).
+         pb adds --demo-dock-space on TOP of the normal --space-4 (not
+         replacing it) so `justify-center` centers against the same free
+         area a viewer actually sees, not the full viewport height DemoControlsDock
+         quietly eats into from below -- see dockSpace's own comment above. */}
+      <main className="relative z-0 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[calc(var(--space-4)+var(--demo-dock-space,0px))] md:px-8">
 
         {screen === "intro" && <IntroScreen lesson={lesson} onNext={() => setScreen("dreamyIntro")} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => setScreen("lessonIntro")} />}
