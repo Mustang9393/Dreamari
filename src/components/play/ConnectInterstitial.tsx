@@ -315,17 +315,19 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
   if (!host) return null;
 
   return createPortal(
-    // zoom: 1 cancels the ambient "proportional wide-screen scaling"
-    // (globals.css, body { zoom: 1.1/1.25 } above 1441px/1800px). This
-    // overlay is portalled straight to document.body and its flight pills
-    // below position themselves from raw getBoundingClientRect() screen
-    // coordinates (already post-zoom) -- left unreset, those coordinates
-    // get zoomed a second time on render and the pill lands far from the
-    // real xpTarget chip on a wide screen (same bug, same fix, as
-    // xpFlight.ts and the shared profile/CareerReport.tsx Portal). Same
+    // Cancels the ambient "proportional wide-screen scaling" (globals.css,
+    // body { zoom: 1.1/1.25 } above 1441px/1800px). This overlay is
+    // portalled straight to document.body and its flight pills below
+    // position themselves from raw getBoundingClientRect() screen
+    // coordinates (already post-zoom) -- left unreset, those coordinates get
+    // zoomed a second time on render. `zoom: 1` alone is NOT enough -- zoom
+    // compounds down the tree, it doesn't reset to 1; the reciprocal of the
+    // ambient factor does. --vz is the same custom property globals.css
+    // sets alongside body's zoom for exactly this purpose. Same fix as
+    // xpFlight.ts and the shared profile/CareerReport.tsx Portal. Same
     // precedent as `.play-no-zoom` for SimulationPlayer: a full-bleed
     // overlay has no business scaling to the marketing baseline anyway.
-    <div className={`marketing-v2 themeable ${styles.overlay}`} style={{ "--connect-accent": accent, background: "transparent", zoom: 1 } as CSSProperties}>
+    <div className={`marketing-v2 themeable ${styles.overlay}`} style={{ "--connect-accent": accent, background: "transparent", zoom: "calc(1 / var(--vz, 1))" } as CSSProperties}>
       {/* backdrop-filter must be a Tailwind utility, not a hand-authored CSS
          rule -- Lightning CSS silently strips a plain `backdrop-filter`
          declaration from a stylesheet/CSS-module rule (confirmed live, 17

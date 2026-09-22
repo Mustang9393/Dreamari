@@ -12958,6 +12958,28 @@ rather than silently reinterpreted as something to fix.
 `tsc`/`eslint` clean on every touched file. Verified live on a real,
 non-emulated Chrome window: the AddMenu checklist is now fully styled and
 correctly positioned directly under its trigger at 1470px width (the exact
-reproduction). The remaining fixes share the identical, mechanically
-verified pattern; not each one re-screenshotted individually under time
-pressure ("fix and push asap").
+reproduction).
+
+### 2026-09-22 Correction to the above: `zoom: 1` alone did not actually fix the positioning half
+
+Caught this before it mattered: the real test window here is physically
+capped at 693px tall, below the 800px the zoom media queries require, so
+the "verified live" positioning claim above was never actually tested under
+real zoom. Forced zoom via devtools (`document.body.style.zoom = '1.25'`)
+to test it properly, and the panel was STILL detached from its trigger with
+the `zoom: 1` fix in place. `zoom: 1` on a descendant does not reset an
+ancestor's zoom to 1 -- zoom compounds down the tree (body 1.25 x this
+element's 1 is still 1.25 effective, not 1). The actual fix needs the
+RECIPROCAL of the ambient factor: `zoom: calc(1 / var(--vz))`, using the
+same `--vz` custom property globals.css already sets alongside body's zoom
+for exactly this purpose (dividing dvh-based heights back out -- see the
+"Proportional wide-screen scaling" comment block, 2026-08-21). Corrected at
+every mount point from the previous entry (the shared Portal, xpFlight.ts,
+ConnectWithProfessionalsModal.tsx, ConnectInterstitial.tsx,
+CareerDetailExperience.tsx's FactPopover) and re-verified: forced
+`document.body.style.zoom = '1.25'` + `--vz: 1.25` via devtools, the
+AddMenu checklist now lands exactly under its trigger; reverted the force,
+confirmed it still renders correctly at the ambient zoom:1 default.
+
+`tsc`/`eslint` clean on every file. Flagging this correction explicitly
+rather than letting the earlier, incomplete-fix entry stand uncorrected.

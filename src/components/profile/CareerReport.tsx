@@ -59,30 +59,35 @@ export const REPORT_SECTIONS = [
 // Additive and harmless for every other caller, which only ever reads the
 // marketing-v2 tokens.
 //
-// zoom: 1 is load-bearing, not decoration. globals.css applies `body {
-// zoom: 1.1 / 1.25 }` above 1441px/1800px ("proportional wide-screen
-// scaling", 2026-08-21) so the whole app reads at 1440-Figma-frame
-// proportions on a big monitor. Every one of this Portal's callers computes
-// its own position from `triggerEl.getBoundingClientRect()` -- which
-// already returns TRUE, POST-zoom screen pixels -- and writes that straight
-// into `top`/`left` inline styles. Because this host is a descendant of the
-// zoomed <body>, those already-correct pixel values were getting zoomed a
-// SECOND time on render, landing far off from the trigger (a Listbox panel
-// rendered ~150-250px away from its own select field; direct report, 22
-// Sept 2026, reproduced and confirmed on a real wide window, not a testing
-// artifact). Resetting zoom to 1 on this host cancels the ambient scale for
-// everything portaled through it, so a rect measured in real screen pixels
-// renders at exactly those pixels again. Any FUTURE portal/floating-UI
-// primitive that positions itself via getBoundingClientRect() must mount
-// through this same Portal (or replicate this reset) rather than inventing
-// a new document.body.appendChild -- that is exactly how this bug happens.
+// zoom is load-bearing, not decoration. globals.css applies `body { zoom:
+// 1.1 / 1.25 }` above 1441px/1800px ("proportional wide-screen scaling",
+// 2026-08-21) so the whole app reads at 1440-Figma-frame proportions on a
+// big monitor. Every one of this Portal's callers computes its own position
+// from `triggerEl.getBoundingClientRect()` -- which already returns TRUE,
+// POST-zoom screen pixels -- and writes that straight into `top`/`left`
+// inline styles. Because this host is a descendant of the zoomed <body>,
+// those already-correct pixel values were getting zoomed a SECOND time on
+// render, landing far off from the trigger (a Listbox panel rendered
+// ~150-250px away from its own select field; direct report, 22 Sept 2026).
+// `zoom: 1` alone does NOT fix this -- zoom compounds down the DOM tree
+// (body 1.25 x host 1 is still 1.25 effective), it doesn't reset to 1 the
+// way a fresh stacking context would. The actual cancellation needs the
+// RECIPROCAL of the ambient factor: `calc(1 / var(--vz))`, using the same
+// --vz custom property globals.css already sets alongside body's zoom for
+// exactly this purpose (dividing dvh-based heights back out). Confirmed
+// live by forcing zoom via devtools: `zoom: 1` still left the panel
+// detached; `zoom: calc(1 / var(--vz))` puts it exactly back under its
+// trigger. Any FUTURE portal/floating-UI primitive that positions itself
+// via getBoundingClientRect() must mount through this same Portal (or
+// replicate this exact reciprocal) rather than inventing a new
+// document.body.appendChild -- that is exactly how this bug happens.
 function Portal({ children }: { children: React.ReactNode }) {
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const host = useMemo(() => {
     if (typeof document === "undefined") return null;
     const node = document.createElement("div");
     node.className = "marketing-v2 themeable dm-report";
-    node.style.zoom = "1";
+    node.style.zoom = "calc(1 / var(--vz, 1))";
     return node;
   }, []);
   useEffect(() => {
