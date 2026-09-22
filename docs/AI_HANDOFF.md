@@ -12693,3 +12693,34 @@ portals into a document root that also holds this modal at z-120.
 both columns stayed at their original fixed height throughout, confirmed
 the print-only row list is present in the DOM with `display:none` on
 screen.
+
+### 2026-09-22 Counselor Dashboard: Counselor Connect content gaps closed (Student Questions, Group Discussions)
+
+Announcements tab already matched the reference exactly (composition + all
+3 items copy). Two real content gaps found in the other tabs:
+
+**Student Questions** had only 4 of the reference's 15 real questions (the
+first 4 were already verbatim-correct; the rest were just missing), a wrong
+grade on one (Isabella Santos is Grade 11 on the reference, was 12 here),
+and a 3-status model (new/viewed/in-progress) where the reference actually
+has 6 (+ responded/resolved/follow-up). Added all 15 verbatim (clicked
+through 5 detail panels to confirm exact status labels/colors and the
+detail panel's Category/Submitted/Related Milestone fields, which this
+build didn't have at all -- it only showed the question text itself).
+"Related Milestone" is confirmed per-category from those 5 opens; the
+remaining categories map onto this dashboard's own MILESTONE_KEYS naming
+where an obvious match exists (documented in a comment). For
+already-responded/resolved questions the reference shows the counselor's
+past reply text -- not reproduced (would mean inventing specific quoted
+content this session never saw), so those instead show a plain "already
+responded" state instead of a live response form.
+
+**Group Discussions** had 6 of the reference's 10 communities and was
+missing every card's "Last: {date}" line entirely. Added the remaining 4
+(Career Pathways: Technology/Healthcare, Skilled Trades & Technical
+Careers, Summer Opportunities) and the Last-activity date, all copied
+verbatim.
+
+`tsc`/`eslint` clean. Verified live: all 15 questions render with correct
+status badges and detail-panel fields, all 10 communities render, mobile
+layout intact.
