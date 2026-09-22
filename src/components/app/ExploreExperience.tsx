@@ -895,6 +895,16 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   const [searchOpen, setSearchOpen] = useState(initialQuery.length > 0);
   const [query, setQuery] = useState(initialQuery);
   const nudgeForYou = useForYouNudge(tab);
+  // The nudge's CSS animation is `infinite` from the moment its class is
+  // applied, but the first-visit splash covers the toggle for as long as
+  // the student takes to read it -- the animation was ticking the whole
+  // time underneath, so by the time they dismissed it they'd usually land
+  // mid-cycle in the ~3.3s dead zone between sweeps, reading as "it doesn't
+  // fire" (direct feedback, 22 Sept 2026: "it needs to fire immediately
+  // when I land and dismiss the popup"). Gating the class itself behind
+  // splashDone means the animation's own 0.9s starting delay is now
+  // measured from dismissal, not from mount.
+  const [splashDone, setSplashDone] = useState(false);
 
   function switchTab(next: "foryou" | "browse") {
     setTab(next);
@@ -905,7 +915,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
       <AppBackdrop />
-      <FirstVisitSplash surface="explore" />
+      <FirstVisitSplash surface="explore" onOpenChange={(open) => { if (!open) setSplashDone(true); }} />
 
       <DesktopNavigation active="Explore" />
 
@@ -953,7 +963,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* z-20: on phones the For you reel is a fixed layer inside main, so
            this row has to sit above it to stay tappable over the photo */}
         <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
-          <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou} />
+          <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} />
           <div className="flex items-center gap-[10px]">
             {tab === "browse" && (
               <IconTip label="Search">
@@ -1047,7 +1057,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                 className="flex-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
               >
-                <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou} />
+                <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} />
               </div>
             </div>
           </div>

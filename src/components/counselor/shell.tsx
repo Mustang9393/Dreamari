@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
+import { QuickLinksMenu } from "@/components/app/chrome";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, signOutCounselor } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 
@@ -210,11 +211,22 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
               </button>
               <Wordmark />
             </div>
-            <IconTip label="Notifications">
-              <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
-                <Bell className="h-[18px] w-[18px]" aria-hidden />
-              </button>
-            </IconTip>
+            <div className="flex items-center gap-[4px]">
+              <IconTip label="Notifications">
+                <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
+                  <Bell className="h-[18px] w-[18px]" aria-hidden />
+                </button>
+              </IconTip>
+              {/* DEMO-ONLY: the site-wide "quick links" hamburger, same one
+                 the student app uses to reach this dashboard in the first
+                 place -- without it, this shell's own isolation (no shared
+                 chrome, by design) left no way back to Build/Match/Explore/
+                 Play/Connect for a live demo (direct feedback, 22 Sept
+                 2026). Remove/replace once real counselor accounts and org
+                 onboarding exist, same as the entry point itself
+                 (chrome.tsx's COUNSELOR_LINK). */}
+              <QuickLinksMenu align="right" />
+            </div>
           </header>
 
           {/* Desktop topbar -- full filters row, lg and up only. */}
@@ -242,6 +254,9 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
                 </button>
               </IconTip>
+              {/* DEMO-ONLY: see the matching comment on the mobile header
+                 above -- the way back to the rest of the demo. */}
+              <QuickLinksMenu align="right" />
             </div>
           </header>
 

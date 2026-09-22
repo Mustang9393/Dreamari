@@ -12983,3 +12983,38 @@ confirmed it still renders correctly at the ambient zoom:1 default.
 
 `tsc`/`eslint` clean on every file. Flagging this correction explicitly
 rather than letting the earlier, incomplete-fix entry stand uncorrected.
+
+### 2026-09-22 Explore: "For you" nudge now starts from splash dismissal, not page mount
+
+Direct report: "the for you isnt firing at all, it needs to fire
+immediately when i land and dismiss the popup." The nudge's CSS animation
+(`.dm-text-nudge`, 5.2s cycle: ~0.9s delay, ~1.9s visible sweep, ~2.4s dead
+hold) was `infinite` from the moment ExploreExperience mounted -- but
+FirstVisitSplash covers the toggle on a real first visit, and the
+animation kept ticking underneath the whole time it was up. By the time a
+student actually read the splash and dismissed it, the timeline was
+usually already deep in the dead-hold phase, so the "it doesn't fire"
+report was really "it already fired once, invisibly, before you could
+see it." Fixed by gating the `dm-text-nudge`/`dm-nudge-spark` classes
+behind a new `splashDone` state, set via `FirstVisitSplash`'s existing
+`onOpenChange` callback (fires the instant the splash reports itself
+closed -- either after real dismissal, or immediately on a return visit
+where it never shows). The animation's own class -- and so its timeline --
+now only starts applying at that moment, so the first sweep genuinely
+begins ~0.9s after the student can see the page, not up to several
+seconds before.
+
+### 2026-09-22 Counselor Dashboard: restored a way back to the rest of the demo
+
+Direct feedback: "there still needs to be our old hamburger so i can go to
+other flows for the demo." This product's own isolation (no shared
+chrome, direct product decision -- see the plan doc) meant landing on it
+left no way back to Build/Match/Explore/Play/Connect without editing the
+URL by hand. Added the same `QuickLinksMenu` (chrome.tsx) the student app
+uses, next to the bell in both the mobile and desktop counselor headers --
+demo-only, same spirit as the hamburger's own entry point into this
+dashboard in the first place (`COUNSELOR_LINK` in chrome.tsx). Verified
+live: opens the full quick-links panel (every student flow + "Counselor
+Dashboard" itself) on top of the dashboard.
+
+`tsc`/`eslint` clean on both files.
