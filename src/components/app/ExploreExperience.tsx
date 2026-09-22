@@ -814,6 +814,30 @@ function ForYouFace() {
     return () => window.removeEventListener("keydown", onKey);
   }, [step]);
 
+  // Desktop: the reel is a fixed-size card beside the title and the
+  // For you/Browse All chip, not a full-bleed layer the way phone/tablet
+  // are -- so a wheel scroll while the cursor sits over that empty space
+  // (title, toggle, the gap between them) had nothing to catch it and
+  // fell through to the page itself, which is exactly the scroll this
+  // page must never have (direct feedback, 22 Sept 2026: "if I scroll
+  // anywhere on this page it should trigger the reel to scroll, not the
+  // screen itself"). Forwards the wheel delta into the feed's own
+  // scrollTop from anywhere on the page; its existing CSS scroll-snap
+  // then settles on the nearest card exactly as a scroll directly on the
+  // card already does. Skipped when the cursor IS over the feed (or on
+  // phone/tablet, where the feed already covers the whole screen) so
+  // native scrolling there is untouched.
+  useEffect(() => {
+    function onWheel(event: WheelEvent) {
+      const feed = feedRef.current;
+      if (!feed || feed.contains(event.target as Node)) return;
+      event.preventDefault();
+      feed.scrollTop += event.deltaY;
+    }
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, []);
+
   return (
     <div className="relative flex w-full items-center justify-center gap-[10px] lg:min-h-0 lg:flex-1">
       {/* The feed: TikTok/Instagram-style full-bleed vertical snap scroll on

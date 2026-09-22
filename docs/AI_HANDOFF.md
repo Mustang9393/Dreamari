@@ -13332,3 +13332,32 @@ actually needs). Reverified at both 1512x982 (zoom 1.1) and 1920x1200
 100+px of real margin below it instead of zero.
 
 `tsc` clean; this is a CSS-only change so no lint target.
+
+### 2026-09-22 Explore For You: scrolling anywhere on the page now drives the reel, not just scrolling on the card itself
+
+Direct clarification after the layout/sizing reports above were
+confirmed fixed: "if I scroll anywhere on this page it should trigger
+the reel to scroll, not the screen itself." Desktop's reel is a fixed
+390x672 card beside the title and the For you/Browse All chip -- unlike
+phone/tablet, where the reel is a `fixed inset-0` layer covering the
+whole screen already, so every scroll gesture is already over it. On
+desktop, a wheel scroll while the cursor sat over the title, the empty
+space beside it, or the toggle had nothing under it to catch the
+gesture, so it fell through to the page -- exactly the scroll this
+screen must never allow.
+
+Added a `wheel` listener on `window` (mirrors the existing `keydown`
+ArrowUp/ArrowDown handler right above it) that forwards `deltaY` into
+the feed's own `scrollTop` and calls `preventDefault()`, skipped only
+when the event already originated inside the feed (native scrolling
+there is untouched) -- letting the feed's existing CSS scroll-snap settle
+on the nearest card exactly as it already does for a direct scroll.
+Verified with a dispatched `WheelEvent` on the page title (the
+`computer` tool's scroll action doesn't emit a real `wheel` event a page
+listener can observe, confirmed by an instrumented counter staying at 0
+across several tool-driven scrolls -- not a testing shortcut, a real
+limitation of that action): `feed.scrollTop` moved from 0 to 552 and
+`defaultPrevented` was `true`, then confirmed visually -- the card
+advanced from Investment Banking to Registered Nurse.
+
+`tsc`/`eslint` clean.
