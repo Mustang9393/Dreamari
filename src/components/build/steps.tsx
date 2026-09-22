@@ -582,7 +582,26 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       const targetCx = m ? m.left - 10 - chipHalfWidth : window.innerWidth - 120;
       const targetCy = m ? m.top + m.height / 2 : 38;
       clone = el.cloneNode(true) as HTMLElement;
-      Object.assign(clone.style, { position: "fixed", left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px`, margin: "0", zIndex: "70", pointerEvents: "none", animation: "none", visibility: "visible", willChange: "transform, opacity", filter: "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))" });
+      Object.assign(clone.style, {
+        position: "fixed", left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px`, margin: "0", zIndex: "70", pointerEvents: "none", animation: "none", visibility: "visible", willChange: "transform, opacity", filter: "drop-shadow(0 0 18px color-mix(in srgb, var(--primary) 60%, transparent))",
+        // Cancels the ambient "proportional wide-screen scaling" (globals.css,
+        // body { zoom: 1.1/1.25 } above 1441px/1800px). `from` above is
+        // already TRUE post-zoom screen coordinates from
+        // getBoundingClientRect(), so left unreset this clone -- appended
+        // inside .marketing-v2, itself a descendant of the zoomed body --
+        // gets those coordinates zoomed a second time on render and flies
+        // off to nowhere near the real header chip on a wide screen. `zoom:
+        // 1` alone is NOT enough (zoom compounds down the tree); the
+        // reciprocal of the ambient factor is, via the same --vz custom
+        // property globals.css sets alongside body's zoom for exactly this.
+        // Same bug, same fix, as xpFlight.ts / the shared
+        // profile/CareerReport.tsx Portal -- this is a 4th, independent
+        // implementation of the same "+N XP flies to the header" choreography
+        // that neither of those searches caught (it doesn't literally read
+        // "document.body.appendChild", it conditionally appends into the
+        // nearest .marketing-v2 ancestor instead).
+        zoom: "calc(1 / var(--vz, 1))",
+      });
       // inside the flow's theme scope (the body has none of its colour
       // variables, so a body-level copy rendered as transparent text)
       (el.closest(".marketing-v2") ?? document.body).appendChild(clone);

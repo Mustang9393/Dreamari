@@ -13018,3 +13018,54 @@ live: opens the full quick-links panel (every student flow + "Counselor
 Dashboard" itself) on top of the dashboard.
 
 `tsc`/`eslint` clean on both files.
+
+### 2026-09-22 Two more real wide-screen bugs, confirmed live this time
+
+Direct, sharp feedback that the earlier zoom-reciprocal fix hadn't actually
+covered everything ("XP... still floating off away somwhere... that's
+0/2") -- correctly so. Found two more real gaps:
+
+**A 4th, independent XP-fly implementation, missed by both earlier
+searches.** `build/steps.tsx`'s own "+N XP flies to the header" animation
+(the Build flow's own completion celebration, separate from `xpFlight.ts`)
+mounts via `(el.closest(".marketing-v2") ?? document.body).appendChild(clone)`
+-- conditional, not a literal `document.body.appendChild(` substring, so
+neither the earlier `grep "document.body.appendChild"` nor the broader
+`createPortal` search caught it. Found this time via `grep` for
+`.appendChild(` combined with `getBoundingClientRect` in the same file
+across the whole codebase, which turned up exactly the 3 real hits (the
+two already-fixed ones, plus this one). Same `zoom: calc(1 / var(--vz, 1))`
+fix applied to the flying clone. Verified live end-to-end this time: forced
+zoom to 1.25, clicked through the entire Build flow (all 8 questions +
+Profile Basics, exercising 3 more Listbox instances along the way, all
+correctly positioned), reached the "+100 XP" celebration screen, and
+watched the clone land exactly on the header's XP chip with the landing
+pulse -- not a "same pattern, trust it" claim this time, an actual
+screenshot of it landing correctly.
+
+**BUILD marketing chapter's card genuinely clipped -- and my first attempt
+at fixing it made it worse.** Investigated further after a second
+screenshot showed the same card's last line ("...Interest Profiler") cut
+off. Measured live: the compact-chapter frame's own maxHeight ceiling
+(`min(calc(100dvh - 290px), 620px)`) computed 403px on a 693px-tall window,
+while the card's real content needs ~554px -- clips regardless of zoom,
+reproduces at zoom:1. First attempt divided the ceiling by `--vz` (the
+same fix pattern as the XP bugs) on the theory that zoom was compounding
+here too -- wrong theory, and measurement proved it: dividing shrank the
+ceiling further (264px), making the gap worse, not better. The two bugs
+are NOT the same shape: the XP-fly bugs are about a `position: fixed`
+element's coordinates getting re-zoomed on top of already-zoomed
+`getBoundingClientRect()` values (needs the reciprocal to cancel the
+double-application); this is a plain "the safety-net ceiling is tighter
+than realistic content" bug that exists with zero zoom involved. Reverted
+the incorrect `--vz` division on `--frame-h`/`--frame-max` (ChapterShell.tsx)
+and on `.mkt-chapter`'s min-height (globals.css, lower confidence, higher
+blast radius across all 6 marketing chapters -- reverted rather than risk
+it without direct evidence it was ever the actual constraint). Fixed by
+directly raising the ceiling and shrinking the reserved offset instead
+(`min(calc(100dvh - 90px), 760px)`), giving BuildDemo's real content
+comfortable margin. Verified live: the card's full content, including the
+source citation, renders with room to spare at the same 693px-tall window
+that used to clip it.
+
+`tsc`/`eslint` clean on every file.

@@ -230,7 +230,19 @@ export function ChapterShell({
             // spill upward into the copy (seen on an iPhone, Get Hired and
             // Connect). The first grid row also never shrinks below the copy,
             // so on a short phone the section grows instead of overlapping.
-            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-[900px]:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_380px),560px)] [--frame-max:none] min-[901px]:[--frame-h:min(calc(100dvh_-_250px),680px)] min-[901px]:[--frame-max:min(calc(100dvh_-_290px),620px)] ${wide ? "mkt-wide" : ""}`}
+            // Measured live, 22 Sept 2026: BuildDemo's own card needs ~554px
+            // to show every line without clipping (title + 3 rows + the "+
+            // more" chip + the two-line source citation), but the old
+            // ceiling (100dvh - 290px, capped 620px) only granted ~403px on
+            // a 693px-tall window -- the card's last line ("...Interest
+            // Profiler") ran past the frame and got clipped at the section's
+            // own overflow-hidden edge (direct report + screenshot). This
+            // reproduces at zoom:1, with no zoom involved at all -- it's
+            // just too tight a ceiling for compact content, not a zoom bug.
+            // Raised the ceiling and shrank the reserved offset so realistic
+            // compact-chapter content (Build, Connect) clears it with real
+            // margin down to a much shorter window than before.
+            className={`mkt-graphic-scale relative z-[1] flex items-center justify-center max-[900px]:min-h-max [--frame-h:clamp(340px,calc(100dvh_-_200px),680px)] [--frame-max:none] min-[901px]:[--frame-h:min(calc(100dvh_-_140px),760px)] min-[901px]:[--frame-max:min(calc(100dvh_-_90px),760px)] ${wide ? "mkt-wide" : ""}`}
             style={{
               width: wide ? "min(96cqw, 780px)" : "min(100cqw, 480px)", // fills the 480 rail-to-rail column
               // a centered chapter's frame hugs its content: the fixed
