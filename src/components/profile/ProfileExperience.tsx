@@ -1304,11 +1304,21 @@ function Top3Tab({
                 ))}
               </dl>
 
-              <MoreFactsAccordion facts={moreFacts} />
+              {/* mt-auto on this whole group (not just the button below):
+                 the description/facts above it clamp to different heights
+                 per card ("Coming soon" vs a real report), so anchoring
+                 only the button left the accordion floating at a different
+                 height on every card -- pushing accordion+button down
+                 together keeps the accordion's own position consistent
+                 across all three cards instead of jumping around with
+                 whatever content gap happens to be above it (direct
+                 feedback, 23 Sept 2026: "anchor the employers and school
+                 accordion to the bottom consistently"). */}
+              <div className="mt-auto flex flex-col gap-[var(--space-1)] pt-[var(--space-1)]">
+                <MoreFactsAccordion facts={moreFacts} />
 
-              {/* Get Career Report apart at the foot; no rules anywhere in
-                 the card (direct feedback, 11 Sept 2026). */}
-              <div className="mt-auto pt-[var(--space-1)]">
+                {/* Get Career Report apart at the foot; no rules anywhere in
+                   the card (direct feedback, 11 Sept 2026). */}
                 <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-[var(--radius-md)] border px-[12px] text-[14px] font-bold" style={FROST}>
                   Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
                 </button>

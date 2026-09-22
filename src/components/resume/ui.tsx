@@ -268,16 +268,24 @@ export function ResumeModal({ title, onClose, children, presentation = "overlay"
       <div className="fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={title}>
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
         <div
-          className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
+          className="relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
           style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}
         >
           <ResumeModalHeader title={title} onClose={onClose} />
-          {dreamy && (
-            <div className="flex-none">
-              <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} size="sm" />
-            </div>
-          )}
-          <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
+          {/* Scroll-safety fix, direct feedback 23 Sept 2026: the modal size
+             can stay the same and let users scroll inside -- this has
+             happened throughout the app. Body content here can be as tall
+             as SkillsPicker's suggestion-chip list; keeping the header out
+             of the scroll region keeps Back/Close reachable no matter how
+             tall it gets. */}
+          <div className="dm-scroll flex min-h-0 flex-1 flex-col gap-[var(--space-4)] overflow-y-auto pr-[2px]">
+            {dreamy && (
+              <div className="flex-none">
+                <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} size="sm" />
+              </div>
+            )}
+            <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
+          </div>
         </div>
       </div>
     </Portal>

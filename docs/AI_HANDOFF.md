@@ -13413,3 +13413,67 @@ Explore now reloads on `?tab=foryou` with the For You button correctly
 Browse All correctly pressed.
 
 `tsc`/`eslint` clean.
+
+### 2026-09-23 App-wide modal scroll-safety audit + Top Three's accordion anchor
+
+Direct report (Cover photo picker screenshot from production): "I thought
+we fixed this, this should never happen, the modal size can stay the same
+and let users scroll inside... check every where fix and push." The Cover
+photo and avatar pickers themselves were already correct (verified live:
+max-h-[60vh] + overflow-y-auto, capped at 4 rows visible, not all 21+
+covers) -- but the report was right that the underlying anti-pattern
+(a modal whose content can grow past the viewport, no cap, no scroll) had
+recurred elsewhere. Split a full audit of every `role="dialog"` in the app
+(~40 instances across ~24 files) across three parallel agents, each
+briefed with the two already-correct references (ProfileExperience.tsx's
+cover/avatar pickers, chrome.tsx's QuickLinksMenu) as the pattern to match,
+and clear criteria for what counts as "at risk" (variable-length lists/
+grids/feeds) vs. safely bounded (fixed small content -- a confirm dialog,
+a short form -- that could never realistically overflow).
+
+Found and fixed 4 real instances of the bug, confirmed everything else
+already handles it correctly:
+
+- **src/components/connect/ProProfile.tsx** (pro Cover photo picker) --
+  the unfixed twin of the student cover picker; had no scroll cap at all.
+  Same fix, `dm-scroll grid max-h-[60vh] ... overflow-y-auto`.
+- **src/components/resume/ui.tsx** (`ResumeModal`, shared by Add High
+  School/Add Certification/SkillsPicker/ExperienceModal/
+  ExportChecklistModal) -- had a max-h + overflow-y-auto, but the HEADER
+  (title + Back/Close) was inside the scrolling region along with
+  everything else, so on genuinely tall content (SkillsPicker's
+  suggestion-chip list) the header scrolled out of view with the rest.
+  Pulled the header outside the scroll container; only the body scrolls
+  now.
+- **src/components/profile/CareerExploration.tsx** (`AddYourOwnModal`) --
+  same partial-fix shape: header + the unbounded logged-experience row
+  list shared one scroll region. Pinned the header/Add-menu, scoped the
+  scroll to just the row list.
+- **src/components/connect/ConnectExperience.tsx** (event photo viewer,
+  `EventView`) -- the 16:9 image sizes off the panel's width, not the
+  viewport, so image + thumbnail strip had no height cap; math showed it
+  running past a 700px-tall window. Pinned the header, capped image +
+  thumbnails at `max-h-[calc(100dvh-140px)] overflow-y-auto`.
+
+Everything else (~20+ more dialogs, full list in each agent's own report)
+was already correct -- either genuinely fixed-size content that can't
+overflow, or already implementing the same pinned-header/scrolling-body
+pattern (in some cases via a CSS module rather than Tailwind, same idea).
+
+Separately, in the same conversation: "let's anchor the employers and
+school accordion to the bottom consistently so it doesn't jump around with
+content gaps" -- Top Three's `MoreFactsAccordion` sat in normal flow right
+after the facts list, so a card whose report is still "Coming soon"
+(shorter content above) put the accordion at a different height than a
+card with a full report, even though the cards themselves are stretched
+to equal height via the grid's `items-stretch`. Moved `mt-auto` from just
+the "Get Career Report" button up to wrap the whole
+accordion-plus-button group, so they're pushed to the bottom together and
+land at the same height on every card regardless of what's above them.
+Verified live with 3 real cards (one deliberately still "Coming soon"):
+EMPLOYERS & SCHOOLS and Get Career Report now line up exactly across all
+three.
+
+`tsc`/`eslint` clean across every touched file (5 total: ProProfile.tsx,
+resume/ui.tsx, CareerExploration.tsx, ConnectExperience.tsx,
+ProfileExperience.tsx).

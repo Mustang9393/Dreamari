@@ -3149,28 +3149,37 @@ function EventView({
                     </button>
                   </IconTip>
                 </div>
-                <div className="relative w-full overflow-hidden rounded-[var(--radius-lg)]" style={{ aspectRatio: "16 / 9", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
-                  <Image key={photoOpen} src={event.photos.images[photoOpen % event.photos.images.length]} alt="" fill sizes="1100px" className="object-cover motion-safe:animate-[fade-slide-up_0.35s_ease-out_both]" priority />
-                  <IconTip label="Previous" className="absolute top-1/2 left-3 -translate-y-1/2">
-                    <button type="button" aria-label="Previous photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i - 1 + event.photos!.images.length) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
-                      <ChevronLeft className="h-5 w-5" aria-hidden />
-                    </button>
-                  </IconTip>
-                  <IconTip label="Next" className="absolute top-1/2 right-3 -translate-y-1/2">
-                    <button type="button" aria-label="Next photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i + 1) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
-                      <ChevronRight className="h-5 w-5" aria-hidden />
-                    </button>
-                  </IconTip>
-                </div>
-                <ul className="flex justify-center gap-[6px]">
-                  {event.photos.images.map((src, i) => (
-                    <li key={src}>
-                      <button type="button" aria-label={`Photo ${i + 1}`} onClick={() => setPhotoOpen(i)} className="relative block h-[44px] w-[64px] cursor-pointer overflow-hidden rounded-[6px]" style={{ boxShadow: i === photoOpen ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.15)", opacity: i === photoOpen ? 1 : 0.6 }}>
-                        <Image src={src} alt="" fill sizes="64px" className="object-cover" />
+                {/* Scroll-safety fix, direct feedback 23 Sept 2026: the modal
+                   size can stay the same and let users scroll inside --
+                   this has happened throughout the app. The 16:9 image is
+                   sized off the panel's width, not the viewport, so on a
+                   shorter laptop window it plus the thumbnail row could run
+                   past the screen with nothing to scroll. Header stays
+                   outside; only the image + thumbnails scroll. */}
+                <div className="dm-scroll flex max-h-[calc(100dvh-140px)] flex-col gap-[var(--space-3)] overflow-y-auto">
+                  <div className="relative w-full flex-none overflow-hidden rounded-[var(--radius-lg)]" style={{ aspectRatio: "16 / 9", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
+                    <Image key={photoOpen} src={event.photos.images[photoOpen % event.photos.images.length]} alt="" fill sizes="1100px" className="object-cover motion-safe:animate-[fade-slide-up_0.35s_ease-out_both]" priority />
+                    <IconTip label="Previous" className="absolute top-1/2 left-3 -translate-y-1/2">
+                      <button type="button" aria-label="Previous photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i - 1 + event.photos!.images.length) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
+                        <ChevronLeft className="h-5 w-5" aria-hidden />
                       </button>
-                    </li>
-                  ))}
-                </ul>
+                    </IconTip>
+                    <IconTip label="Next" className="absolute top-1/2 right-3 -translate-y-1/2">
+                      <button type="button" aria-label="Next photo" onClick={() => setPhotoOpen((i) => (i === null ? 0 : (i + 1) % event.photos!.images.length))} className="dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(9,10,20,0.6)", color: "#FFFFFF" }}>
+                        <ChevronRight className="h-5 w-5" aria-hidden />
+                      </button>
+                    </IconTip>
+                  </div>
+                  <ul className="flex flex-none justify-center gap-[6px]">
+                    {event.photos.images.map((src, i) => (
+                      <li key={src}>
+                        <button type="button" aria-label={`Photo ${i + 1}`} onClick={() => setPhotoOpen(i)} className="relative block h-[44px] w-[64px] cursor-pointer overflow-hidden rounded-[6px]" style={{ boxShadow: i === photoOpen ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.15)", opacity: i === photoOpen ? 1 : 0.6 }}>
+                          <Image src={src} alt="" fill sizes="64px" className="object-cover" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>,
             document.body,

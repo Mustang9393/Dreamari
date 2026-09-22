@@ -158,7 +158,7 @@ function AddYourOwnModal({ idPrefix, items, editing, onEdit, onDone, menuOpen, o
       <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label="Add your own">
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(20,16,8,0.5)", backdropFilter: "blur(20px)" }} />
         <div
-          className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[480px] flex-col gap-[14px] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[18px] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
+          className="relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[480px] flex-col gap-[14px] rounded-t-[var(--radius-xl)] border p-[18px] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
           style={{ background: "var(--paper-raised)", borderColor: "var(--rule)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.5)" }}
         >
           <div className="flex items-center justify-between gap-[8px]">
@@ -166,15 +166,22 @@ function AddYourOwnModal({ idPrefix, items, editing, onEdit, onDone, menuOpen, o
             <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--ink-faint)" }}><X className="h-4 w-4" aria-hidden /></button>
           </div>
           <AddMenu open={menuOpen} onToggle={onToggleMenu} onAdd={onAddTypes} idPrefix={idPrefix} />
-          {items.length === 0 ? (
-            <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>Pick one or more above; each becomes a row you can fill in.</p>
-          ) : (
-            <ul className="flex list-none flex-col gap-[8px] p-0">
-              {items.map((e) => (
-                <ExperienceRow key={e.id} e={e} editing={editing === e.id} onEdit={() => onEdit(e.id)} onDone={onDone} />
-              ))}
-            </ul>
-          )}
+          {/* Scroll-safety fix, direct feedback 23 Sept 2026: the modal size
+             can stay the same and let users scroll inside -- this has
+             happened throughout the app. Rows grow with every logged
+             experience, so only this region scrolls; title and Close stay
+             in view. */}
+          <div className="dm-scroll flex min-h-0 flex-1 flex-col gap-[8px] overflow-y-auto pr-[2px]">
+            {items.length === 0 ? (
+              <p className="text-[12.5px] leading-[18px]" style={{ color: "var(--ink-faint)" }}>Pick one or more above; each becomes a row you can fill in.</p>
+            ) : (
+              <ul className="flex list-none flex-col gap-[8px] p-0">
+                {items.map((e) => (
+                  <ExperienceRow key={e.id} e={e} editing={editing === e.id} onEdit={() => onEdit(e.id)} onDone={onDone} />
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </Portal>
