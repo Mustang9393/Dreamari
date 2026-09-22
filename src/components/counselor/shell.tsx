@@ -138,7 +138,12 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("All Grades");
   const [search, setSearch] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { title, subtitle } = VIEW_TITLES[active];
+  const { title, subtitle: subtitleRaw } = VIEW_TITLES[active];
+  // Matches the reference's own copy exactly ("Welcome back, Sarah...") --
+  // the counselor's first name, not a generic greeting. Falls back to the
+  // unpersonalized line before an account name is set.
+  const firstName = account.name.trim().split(/\s+/)[0];
+  const subtitle = active === "overview" && firstName ? `Welcome back, ${firstName}. Here's your caseload at a glance.` : subtitleRaw;
 
   const doSignOut = () => {
     signOutCounselor();

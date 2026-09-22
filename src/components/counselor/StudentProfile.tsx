@@ -1,16 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Bell, MessageSquare, StickyNote, Target, Compass, GraduationCap,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle,
 } from "lucide-react";
-import { MetricTile } from "@/components/connect/viz";
+import { MetricTile, Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { getStudentById, MILESTONE_KEYS } from "@/lib/counselorRoster";
+import { getStudentById, MILESTONE_KEYS, type MilestoneKey } from "@/lib/counselorRoster";
 import { readNotes, addNote } from "@/lib/counselorNotes";
 import { StatusChip, MilestoneChip, Avatar } from "./chips";
+
+// The reference's own Plan Progress task names are more specific than the
+// Milestone Status grid's labels above them ("Applications" the milestone
+// vs. "College Application Essays" the task) -- same vocabulary the
+// reference itself used (Emma Rodriguez's plan: College Application
+// Essays / FAFSA Submission / Recommendation Letter Request / Transcript
+// Submission), generalized to whichever milestones aren't approved yet.
+const PLAN_TASK_NAMES: Partial<Record<MilestoneKey, string>> = {
+  Applications: "College Application Essays",
+  "Financial Aid": "FAFSA Submission",
+  "Recommendation Letter": "Recommendation Letter Request",
+  "Transcript Submission": "Transcript Submission",
+  "Career Report": "Career Report Draft",
+  "Academic Plan": "Academic Plan Review",
+  "College List": "College List Finalization",
+  "College Exploration": "College Exploration Checklist",
+  Resume: "Resume Draft",
+  "Career Pathway": "Career Pathway Selection",
+  "Career Assessment": "Career Assessment Retake",
+};
+
+type PlanBucket = "3mo" | "6mo" | "12mo";
+const PLAN_TABS: { key: PlanBucket; label: string }[] = [
+  { key: "3mo", label: "Next 3 Months" },
+  { key: "6mo", label: "Next 6 Months" },
+  { key: "12mo", label: "Next 12 Months" },
+];
+
+function seededOffset(seed: string, min: number, max: number): number {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+  h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
+  return min + (h % (max - min + 1));
+}
 
 import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 
@@ -40,6 +74,26 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [planTab, setPlanTab] = useState<PlanBucket>("3mo");
+  // Read once via a lazy initializer, not inside the memo below --
+  // Date.now() is an impure call and isn't allowed directly in a
+  // render-time computation or ref access.
+  const [now] = useState(() => Date.now());
+
+  // Every unapproved milestone becomes a plan task, bucketed by how soon
+  // it's due -- deterministic per student+key so the same task always
+  // lands in the same bucket with the same due date across renders.
+  const planTasks = useMemo(() => {
+    if (!student) return [];
+    const notApprovedKeys = MILESTONE_KEYS.filter((k) => student.milestones[k] !== "Approved");
+    return notApprovedKeys.map((key, i) => {
+      const bucket: PlanBucket = i === 0 ? "3mo" : i <= 2 ? "6mo" : "12mo";
+      const dayOffset = seededOffset(`${student.id}-${key}`, 5, bucket === "3mo" ? 45 : bucket === "6mo" ? 120 : 300);
+      const due = new Date(now + dayOffset * 86400000).toISOString().slice(0, 10);
+      const status: "In Progress" | "Not Started" = student.milestones[key] === "In Progress" || student.milestones[key] === "Pending Review" ? "In Progress" : "Not Started";
+      return { key, label: PLAN_TASK_NAMES[key] ?? key, due, status, bucket };
+    });
+  }, [student, now]);
 
   if (!student) {
     return (
@@ -56,7 +110,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   };
 
   const approvedCount = MILESTONE_KEYS.filter((k) => student.milestones[k] === "Approved").length;
-  const notApproved = MILESTONE_KEYS.filter((k) => student.milestones[k] !== "Approved");
 
   const engagement = [
     { icon: Sparkles, value: String(student.engagement.dreamScore), label: "Dream Score", accent: "#7C5CFA" },
@@ -160,18 +213,44 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         </div>
       </HoverBeam>
 
-      {notApproved.length > 0 && (
+      {planTasks.length > 0 && (
         <HoverBeam strength={0.6} className="h-full">
-          <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <CardHead icon={Sunrise} title="Plan Progress — Next Steps" accent="#F5A623" />
-            <ul className="flex flex-col gap-[8px]">
-              {notApproved.slice(0, 4).map((key) => (
-                <li key={key} className="flex items-center justify-between rounded-[var(--radius-md)] border px-[14px] py-[10px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                  <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{key}</span>
-                  <MilestoneChip status={student.milestones[key]} />
-                </li>
-              ))}
-            </ul>
+          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+            <span className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+              <CardHead icon={Sunrise} title="Plan Progress" accent="#F5A623" />
+              <Segmented ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
+            </span>
+            {(() => {
+              const rows = planTasks.filter((t) => t.bucket === planTab);
+              if (rows.length === 0) return <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Nothing due in this window.</p>;
+              // Row treatment borrowed from the student's own My Plan tab
+              // (Profile > My Plan): a status dot standing in for that
+              // view's checkbox -- a counselor doesn't complete these
+              // tasks, the student does, so a tickable box would be
+              // misleading here, but the same "small status mark, task
+              // name, meta line" rhythm keeps the two screens legible as
+              // the same product seen from different sides.
+              return (
+                <ul className="flex flex-col gap-[6px]">
+                  {rows.map((t) => (
+                    <li key={t.key} className="flex items-center gap-[12px] rounded-[var(--radius-md)] border px-[14px] py-[11px] transition-colors" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                      <span
+                        aria-hidden
+                        className="flex size-[20px] flex-none items-center justify-center rounded-full border-2"
+                        style={{ borderColor: t.status === "In Progress" ? "#5B6CF9" : "var(--glass-border)", background: t.status === "In Progress" ? "color-mix(in srgb, #5B6CF9 22%, transparent)" : "transparent" }}
+                      >
+                        {t.status === "In Progress" && <span className="size-[8px] rounded-full" style={{ background: "#5B6CF9" }} />}
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                        <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.label}</span>
+                        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Due: {t.due}</span>
+                      </span>
+                      <MilestoneChip status={t.status} />
+                    </li>
+                  ))}
+                </ul>
+              );
+            })()}
           </div>
         </HoverBeam>
       )}
