@@ -1040,7 +1040,16 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   function switchTab(next: "foryou" | "browse") {
     setTab(next);
     setSearchOpen(false);
-    router.replace(next === "browse" ? "/explore?tab=browse" : "/explore", { scroll: false });
+    // Browse is the server's default for a bare `/explore` (page.tsx:
+    // "Browse is the default view"), so refreshing there already lands
+    // back on Browse correctly -- but writing FOR YOU as bare `/explore`
+    // meant a refresh on For You read as no `?tab=`, which page.tsx
+    // reads as Browse: refreshing (or reopening a shared/bookmarked
+    // link) on For You silently bounced back to Browse every time
+    // (direct feedback, 22 Sept 2026: "if I refresh on a certain tab...
+    // I should land back on that tab, not take me back to Explore
+    // careers"). Inverted: For You now writes its own explicit `?tab=`.
+    router.replace(next === "foryou" ? "/explore?tab=foryou" : "/explore", { scroll: false });
   }
 
   return (
@@ -1048,14 +1057,21 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
       <AppBackdrop />
       <FirstVisitSplash surface="explore" onOpenChange={(open) => { if (!open) setSplashDone(true); }} />
 
-      <DesktopNavigation active="Explore" />
+      {/* forceBlur on For You: that tab's `main` owns its own internal
+         scroll (the reel) and never lets the page itself scroll, so the
+         scroll-triggered frost this bar normally waits for would never
+         fire -- it would sit permanently transparent over a career photo
+         (direct feedback, 22 Sept 2026: "the navbar... doesn't have any
+         blur"). Browse still frosts only once actually scrolled, same as
+         every other page. */}
+      <DesktopNavigation active="Explore" forceBlur={tab === "foryou"} />
 
       {/* Phones and tablets: the same header shell as every other page
          (logo, search on Browse, streak | XP, bell, hamburger). The For you |
          Browse All pill and the Schools button sit on their own row at the
          top of main, so nothing overlaps the icon cluster at 375px (the old
          absolute tab row collided with it, 19 Sept 2026). */}
-      <MobileHeaderShell>
+      <MobileHeaderShell forceBlur={tab === "foryou"}>
         <Wordmark />
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>

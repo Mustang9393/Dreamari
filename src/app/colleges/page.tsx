@@ -11,15 +11,18 @@ export const metadata: Metadata = {
 // College lookup. Reached from a career page's "Where you would study it",
 // the Career Report's Colleges section, the Profile plan routes, and the
 // quick-links menu. ?q= prefills the search, ?type= (trade | 2-year | 4-year)
-// and ?school= (a college name from the report) preselect.
+// and ?school= (a college name from the report) preselect. ?view= (foryou |
+// browse) restores the For you/Browse all toggle across a refresh -- see
+// CollegesExperience's own comment on why this needs to be explicit.
 export default async function CollegesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const pick = (k: string) => (Array.isArray(params[k]) ? (params[k] as string[])[0] : (params[k] as string | undefined)) ?? "";
+  const view = pick("view");
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <CollegesExperience initialQuery={pick("school") || pick("q")} initialType={pick("type")} />
+      <CollegesExperience initialQuery={pick("school") || pick("q")} initialType={pick("type")} initialView={view === "foryou" || view === "browse" ? view : undefined} />
     </>
   );
 }

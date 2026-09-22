@@ -13361,3 +13361,55 @@ limitation of that action): `feed.scrollTop` moved from 0 to 552 and
 advanced from Investment Banking to Registered Nurse.
 
 `tsc`/`eslint` clean.
+
+### 2026-09-22 Navbar blur missing on Explore For You; refresh on a non-default tab silently bounced back
+
+Two direct reports. First: "the navbar in the explore/school/browse all
+doesn't have any blur." Audited every page using `DesktopNavigation`/
+`MobileHeaderShell` for the pattern -- Explore's For You tab was the
+only one where it applied (Home/Play/Profile/Colleges/Connect all scroll
+the real page normally). Root cause: both bars frost in via
+`useScrolled()`, which watches `window.scrollY` -- but For You's `main`
+deliberately owns its own internal scroll (the reel) and never lets the
+page itself scroll (by design, per today's earlier fixes), so
+`window.scrollY` never moves and the frost condition can never fire; the
+bar sat permanently transparent over a career photo. Added an optional
+`forceBlur` prop to both bars (`scrolled = forceBlur || autoScrolled`,
+the hook is still always called so it's a legal conditional per React's
+rules), passed `true` only from Explore's own For You tab. Browse still
+frosts only once actually scrolled, same as every other page. Verified
+live: the frosted pill border is visible on load, before any scroll.
+
+Second: "if I refresh on a certain tab in a certain page I should land
+back on that tab... not take me back to Explore careers if I'm in
+school/browse all." Two separate, real bugs, one per surface:
+
+- Explore Careers' own `switchTab` had the URL-writing direction
+  backwards: page.tsx hardcodes Browse as the server default for any
+  request without `?tab=foryou`, but `switchTab` wrote the *opposite* --
+  Browse got the explicit `?tab=browse`, For You got a bare `/explore`.
+  Since a bare `/explore` reads as "no tab requested" server-side, that
+  bare URL always resolved back to Browse -- so landing on For You
+  (whether by clicking the toggle or following a link) looked fine right
+  up until the next refresh, which silently bounced back to Browse every
+  time. Inverted it: For You now writes `?tab=foryou`; Browse stays bare
+  (matching the server default, so nothing needs to change there).
+- Colleges/Schools' own `view` state was never URL-synced at all -- a
+  plain `useState` lazy-initializer that recomputes a For you/Browse all
+  guess from scratch (search/type present, or whether the student's
+  saved pathway has one) on every mount, with zero memory of which tab
+  the student had actually clicked. Unlike Explore, this page's default
+  isn't one hardcoded value, so both directions needed an explicit
+  `?view=foryou|browse` (not just one, the way Explore only needed
+  `?tab=foryou`) -- added `initialView` to `colleges/page.tsx` and a
+  `switchView` wrapper that writes it on every toggle click, replacing
+  the three raw `setView` call sites (the toggle in both its mobile and
+  desktop position, plus `ForYouSchools`' own "view saved" shortcut).
+
+Verified both with a real `location.reload()` (not just a client-side
+tab switch, which would trivially "work" even with the bug present):
+Explore now reloads on `?tab=foryou` with the For You button correctly
+`aria-pressed="true"`; Colleges now reloads on `?view=browse` with
+Browse All correctly pressed.
+
+`tsc`/`eslint` clean.

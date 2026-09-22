@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeftRight, Briefcase, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
@@ -78,17 +79,38 @@ function matches(c: College, f: Filters, q: string, saved: Set<string>): boolean
   return true;
 }
 
-export function CollegesExperience({ initialQuery = "", initialType = "" }: { initialQuery?: string; initialType?: string }) {
+export function CollegesExperience({ initialQuery = "", initialType = "", initialView }: { initialQuery?: string; initialType?: string; initialView?: "foryou" | "browse" }) {
+  const router = useRouter();
   // For you (the student's pathway) vs Browse all (search + filters), the
   // same split Explore Careers has (Joshua Pierce, Slack, 10 Sept 2026).
   // A search or type handoff lands on Browse all; otherwise For you, when
-  // the focus career has a pathway (the demo Top 3 always does).
+  // the focus career has a pathway (the demo Top 3 always does). An
+  // explicit `initialView` (set only when the URL itself carries `?view=`,
+  // written by `switchView` below) wins over that heuristic -- without it,
+  // switching to Browse all and refreshing silently bounced back to For
+  // you, since this heuristic re-ran from scratch and had no memory of
+  // which tab the student had actually picked (direct feedback, 22 Sept
+  // 2026: "if I refresh on a certain tab... I should land back on that
+  // tab, not take me back to Explore careers if I'm in school/browse
+  // all" -- the same bug Explore Careers' own For you/Browse toggle had).
   const [view, setView] = useState<"foryou" | "browse">(() => {
+    if (initialView) return initialView;
     if (initialQuery || initialType) return "browse";
     if (typeof window === "undefined") return "foryou";
     const picks = readPicks();
     return pathwayFor(picks.focus ?? picks.ids[0] ?? "investment-banking") ? "foryou" : "browse";
   });
+  // Unlike Explore Careers' own `switchTab` (whose bare `/explore` has one
+  // hardcoded server default, "browse"), this page's own default is a
+  // heuristic that can resolve either way depending on the student's saved
+  // picks -- so unlike that one, BOTH directions need an explicit `?view=`
+  // here, or picking Browse all while the heuristic would've said For you
+  // (or vice versa) survives right up until the next refresh, then quietly
+  // reverts.
+  function switchView(next: "foryou" | "browse") {
+    setView(next);
+    router.replace(`/colleges?view=${next}`, { scroll: false });
+  }
   const [query, setQuery] = useState(initialQuery);
   // Pinned to real focus, not HoverBeam's default hover-or-focus, so a
   // pointer merely passing over this always-visible box doesn't light it up
@@ -177,7 +199,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
          HomeExperience.tsx's own comment for the full reasoning. */}
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[140px] sm:px-[var(--space-14)] md:pt-8">
         <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
-          <ForYouBrowseToggle tab={view} onTab={setView} />
+          <ForYouBrowseToggle tab={view} onTab={switchView} />
           <IconTip label="Careers">
             <Link
               href="/explore"
@@ -200,10 +222,10 @@ export function CollegesExperience({ initialQuery = "", initialType = "" }: { in
             <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
             <ExploreSectionTabs active="colleges" />
           </div>
-          <ForYouBrowseToggle tab={view} onTab={setView} />
+          <ForYouBrowseToggle tab={view} onTab={switchView} />
         </div>
 
-        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => { set({ savedOnly: true }); setView("browse"); }} />}
+        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => { set({ savedOnly: true }); switchView("browse"); }} />}
         {view === "browse" && (<>
         {/* the search: one box, results change as you type, and the door to
            every filter fixed beside it (never off the edge of a scroll row) */}

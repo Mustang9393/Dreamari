@@ -352,9 +352,23 @@ export function useScrolled(threshold = 12) {
   return scrolled;
 }
 
-export function DesktopNavigation({ active, extraClassName }: { active: "Home" | "Explore" | "Play" | "Connect" | "Profile"; extraClassName?: string }) {
+export function DesktopNavigation({
+  active, extraClassName, forceBlur = false,
+}: {
+  active: "Home" | "Explore" | "Play" | "Connect" | "Profile";
+  extraClassName?: string;
+  /** For a screen whose main content never lets the page itself scroll
+   *  (Explore's For You reel, which owns its own internal scroll so
+   *  `window.scrollY` never moves -- direct feedback, 22 Sept 2026: "the
+   *  navbar in the explore/school/browse all doesn't have any blur"):
+   *  the scroll-triggered frost this bar otherwise waits for would never
+   *  fire. Forces the frosted state on regardless of real scroll
+   *  position. */
+  forceBlur?: boolean;
+}) {
   const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
-  const scrolled = useScrolled();
+  const autoScrolled = useScrolled();
+  const scrolled = forceBlur || autoScrolled;
   return (
     // Outer host stays `sticky` and keeps reserving its own layout height
     // exactly as before (direct feedback, 15 Sept 2026: floating nav like
@@ -460,8 +474,18 @@ export function DesktopNavigation({ active, extraClassName }: { active: "Home" |
 // still differs -- some carry a back chevron, some don't) drops straight
 // in unchanged as `children`. `extraClassName` exists only so
 // `no-print`-carrying pages (Profile, Career Detail) can keep that.
-export function MobileHeaderShell({ children, extraClassName }: { children: React.ReactNode; extraClassName?: string }) {
-  const scrolled = useScrolled();
+export function MobileHeaderShell({
+  children, extraClassName, forceBlur = false,
+}: {
+  children: React.ReactNode;
+  extraClassName?: string;
+  /** Same reasoning as DesktopNavigation's own `forceBlur` -- a screen
+   *  whose reel owns its own internal scroll never moves `window.scrollY`,
+   *  so the scroll-triggered frost never fires on its own. */
+  forceBlur?: boolean;
+}) {
+  const autoScrolled = useScrolled();
+  const scrolled = forceBlur || autoScrolled;
   return (
     <div className={`sticky top-0 z-50 lg:hidden ${extraClassName ?? ""}`}>
       <div className="px-3 pt-3">
