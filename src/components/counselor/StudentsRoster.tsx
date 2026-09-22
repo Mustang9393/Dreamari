@@ -74,16 +74,22 @@ export function StudentsRoster() {
          a genuine blank-render bug on mobile (direct report: "the student
          screen has absolutely nothing"), so this fixes both at once. */}
       <div className="overflow-x-auto rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 4%, var(--card))" }}>
-        <table className="w-full min-w-[880px] border-collapse">
+        <table className="w-full min-w-[1440px] border-collapse">
           <thead>
             <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
               <HeaderCell label="Student" sortable keyName="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <HeaderCell label="Grade" sortable keyName="grade" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <HeaderCell label="School" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <HeaderCell label="Career Track" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <HeaderCell label="Roadmap" sortable keyName="roadmapPct" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <HeaderCell label="Status" sortable keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <HeaderCell label="Career Report" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <HeaderCell label="Resume" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <HeaderCell label="Applications" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <HeaderCell label="Rec. Letter" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <HeaderCell label="Transcript" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <HeaderCell label="Postsecondary Plan" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+              <HeaderCell label="Last Active" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
               <th className="px-[var(--space-4)] py-[var(--space-3)]" aria-hidden />
             </tr>
           </thead>
@@ -98,13 +104,11 @@ export function StudentsRoster() {
                 <td className="px-[var(--space-4)] py-[var(--space-3)]">
                   <span className="flex items-center gap-[10px]">
                     <Avatar name={s.name} />
-                    <span className="flex flex-col leading-tight">
-                      <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}{s.isReal && <span className="ml-[6px] rounded-full px-[6px] py-[1px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--primary)" }}>You</span>}</span>
-                      <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{s.school}</span>
-                    </span>
+                    <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}{s.isReal && <span className="ml-[6px] rounded-full px-[6px] py-[1px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--primary)" }}>You</span>}</span>
                   </span>
                 </td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold tabular-nums" style={{ color: "var(--foreground)" }}>{s.grade}</td>
+                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.school}</td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.careerTrack}</td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)]">
                   <Meter value={s.roadmapPct} max={100} accent="#2F6BF2" />
@@ -112,6 +116,11 @@ export function StudentsRoster() {
                 <td className="px-[var(--space-4)] py-[var(--space-3)]"><StatusChip status={s.status} /></td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)]"><MilestoneChip status={s.milestones["Career Report"]} /></td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)]"><MilestoneChip status={s.milestones["Resume"]} /></td>
+                <td className="px-[var(--space-4)] py-[var(--space-3)]"><MilestoneChip status={s.milestones["Applications"]} /></td>
+                <td className="px-[var(--space-4)] py-[var(--space-3)]"><MilestoneChip status={s.milestones["Recommendation Letter"]} /></td>
+                <td className="px-[var(--space-4)] py-[var(--space-3)]"><MilestoneChip status={s.milestones["Transcript Submission"]} /></td>
+                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.postsecondaryIntent}</td>
+                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{s.lastActive}</td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)]"><ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /></td>
               </tr>
             ))}

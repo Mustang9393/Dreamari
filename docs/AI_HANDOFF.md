@@ -12825,4 +12825,22 @@ store in this prototype (no persistence layer for notification prefs or
 academic-year config), so they're local component state / uncontrolled
 inputs -- same honesty precedent as Auth.tsx's cosmetic password field.
 
+### 2026-09-22 Counselor Dashboard: Students roster table gains 5 missing columns
+
+Reference table has 13 columns; this build had 8 (Student/Grade/Career
+Track/Roadmap/Status/Career Report/Resume, with School folded under the
+student name instead of its own column). Added School as its own column
+and the 4 missing milestone columns -- Applications, Rec. Letter,
+Transcript, Postsecondary Plan -- plus Last Active. No new data needed:
+every field already existed on `CounselorStudent`
+(`milestones.Applications/RecommendationLetter/TranscriptSubmission`,
+`postsecondaryIntent`, `lastActive`), this was purely a missing-columns
+gap, not a missing-data one. Table's `min-w` bumped from 880px to 1440px
+to fit; the existing `overflow-x-auto` wrapper handles the rest (same
+horizontal-scroll pattern already used for Student Progress's own wide
+table).
+
+`tsc`/`eslint` clean. Verified live: all columns render, row click still
+opens the drill-down correctly, mobile scrolls horizontally as expected.
+
 `tsc`/`eslint` clean. Verified live: desktop (all 5 sections) and mobile.
