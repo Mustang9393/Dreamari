@@ -588,9 +588,120 @@ behavior change) are product calls, not unilateral fixes to make mid-sweep.
   `onSkip` unconditionally despite the code's own comment calling it
   demo-only chrome.
 
-## 4. Explore
+## 4. Explore (`src/components/app/ExploreExperience.tsx`, `PosterCard.tsx`)
 
-Status: not started
+Status: **Done** -- the real gaps found via a full audit, same rigor as
+Match/Career Detail/Build. Note the actual file is
+`src/components/app/ExploreExperience.tsx`; `src/components/marketing/
+chapters/Explore.tsx` is a separate, static landing-page teaser with
+hardcoded data, not in scope here.
+
+| Component / state | Status | Notes |
+|---|---|---|
+| `PosterCard`/`RankedPosterCard`: missing/failed cover photo | **Done, 22 Sept** | New shared `PosterPhoto`, see below -- fixes this app-wide (7+ importers), not just Explore. |
+| World filter with 1-2 results leaves dead grid tracks | **Done, 22 Sept** | `auto-fill` -> `auto-fit`, see below. |
+| Trending rail's rank badges desync from the Sort control | **Done, 22 Sept** | Trending no longer takes the sort, see below. |
+| `EnvCard`'s description/mainSkills can overflow a fixed-height card | **Done, 22 Sept** | `line-clamp-2` on both. |
+
+### `PosterCard` / `RankedPosterCard`: missing or failed cover photo -- Done, 22 Sept 2026
+
+**Why this matters**: neither card had `onError` handling on its
+`next/image` -- and unlike Match/Career Detail's photo fixes, which only
+touched their own single file, `PosterCard` is imported by **7 other
+files** (`CareerDetailExperience.tsx`, `HomeExperience.tsx`,
+`ExploreExperience.tsx`, `colleges/shared.tsx`, `motion-lab/
+DailyDropDemo.tsx`, `MatchGrid.tsx`, `ReportChooser.tsx`, `PlayHub.tsx`),
+so a bad photo asset broke silently across every rail, world grid, and
+search result app-wide, not just one screen.
+
+**Design**: new shared `PosterPhoto` in `PosterCard.tsx` -- same
+world-tinted-gradient-plus-muted-`ImageOff` pattern as Match's
+`CareerPhoto` and Career Detail's `HeroPhoto`, using `WORLD_COLORS`
+(already imported here) for the tint. Required promoting `PosterCard.tsx`
+to a Client Component (`"use client"`) to hold the failure state -- safe,
+since every current importer already renders inside a client tree.
+
+**Verified live**: temporarily broke the Trending rail's #1 card
+(Software Engineer) photo path, confirmed the DOM shows the gradient +
+`ImageOff` fallback in place of a broken image (inspected directly).
+Reverted (`git diff` clean), re-verified the real trending rail renders
+normally. `tsc`/`eslint` clean.
+
+### World filter with 1-2 results: dead grid tracks -- Done, 22 Sept 2026
+
+**Why this matters**: `SearchResults`'s grid (shared by both real search
+and world-filter views) uses `grid-cols-[repeat(auto-fill,minmax(...,1fr))]`
+-- `auto-fill` reserves a full row of equal-width tracks even when the
+grid has almost nothing to put in them. Three worlds hit this for real:
+Food & Cooking and Teaching & Education have exactly 1 career each,
+Science & Research has 2 -- all three directly reachable from the visible
+filter pill row, not a contrived edge case.
+
+**Design**: `auto-fill` -> `auto-fit`. This is the standard CSS fix for
+exactly this failure mode (collapses tracks with no content instead of
+reserving their width) and, in this specific grid, it's also consistent
+with the row's own already-stated design intent ("a grid that fills the
+width... cards stretching to share the row" -- 19 Sept 2026 feedback):
+a 1-result row now correctly stretches that one card to fill the row,
+the same behavior already applied to a partially-filled last row of a
+larger result set.
+
+**Verified live**: Food & Cooking filter (1 result) now renders one
+card stretched edge-to-edge at both narrow and 1100px-wide viewports, no
+dead tracks (screenshotted both). Multi-item rails/grids re-checked
+unaffected. `tsc`/`eslint` clean.
+
+### Trending rail: rank badges desync from the Sort control -- Done, 22 Sept 2026
+
+**Why this matters**: the Trending rail's cards were piped through the
+same `view()` helper as every other rail, which applies the page's
+Sort control (A-Z / Salary). But Trending's whole point is
+`BROWSE_TRENDING`'s own curated order, shown with #1-#5 rank badges under
+a "Top 5 Trending" heading -- switching Sort re-ordered the cards while
+the heading and badges kept claiming "#1 trending" for whatever the sort
+happened to put first. A real, one-tap-away semantic bug, not theoretical.
+
+**Design**: Trending now calls `applyCatalogView(BROWSE_TRENDING,
+effectiveWorld, "", "Recommended")` directly -- the world filter still
+applies (trending within a world is a reasonable question), but sort
+never does, since the rank badges are the entire premise of the rail.
+
+**Verified live**: captured Trending's order (Software Engineer,
+Emergency Medicine Doctor, Nurse Anesthetist, Lawyer, Airline Pilot,
+Therapist), switched Sort to A-Z, confirmed Trending's order was
+byte-identical while a different rail ("Careers You Might Not Know")
+correctly re-sorted alphabetically in the same view. `tsc`/`eslint` clean.
+
+### `EnvCard` description/mainSkills overflow -- Done, 22 Sept 2026
+
+**Why this matters**: `EnvCard`'s root `<article>` is `h-full` +
+`overflow-hidden` (a fixed-footprint reel card, no scroll), but its
+description `<p>` and "Main Skills" value `<span>` had no cap -- a longer
+future string can grow the stacked, bottom-anchored content past the
+card's own bounds, clipping something else in it.
+
+**Design**: `line-clamp-2` on both, matching this app's own established
+truncation convention rather than a bespoke treatment.
+
+**Verified**: `tsc`/`eslint` clean; not screenshotted with a forced
+long string since no current real record is long enough to trigger it --
+same call as Match's `BulletList` empty-fallback earlier, a one-line
+defensive cap already covered by the same pattern used elsewhere.
+
+### Found during the audit, deliberately NOT fixed here (lower priority / consistency-only)
+
+- `CompanyVideoCards.tsx`'s `<video>` elements have no `onError` fallback
+  either (a silent black box if a clip 404s) -- same gap class as the
+  photo fixes above, lower traffic than the poster rails. Flag if it
+  becomes real.
+- `COMPANY_VIDEOS` rail renders unconditionally with no `.length > 0`
+  guard, unlike every other rail in `BrowseFace` -- currently safe (the
+  array is static and non-empty), just inconsistent with the rest of the
+  file's pattern. Not a live bug.
+- Explore's own "no results" copy (`ExploreExperience.tsx`) and
+  `GlobalSearch.tsx`'s "no results" copy have diverged wording for what's
+  functionally the same moment. A copy-consistency nit, not a functional
+  gap -- left alone rather than unifying voice without being asked.
 
 ## 5. Profile
 

@@ -1,7 +1,33 @@
+"use client";
+
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { ChevronRight, ImageOff } from "lucide-react";
 import type { CatalogCareer } from "./catalog";
 import { posterTitleFont, WORLD_COLORS } from "./worlds";
+
+// Custom-designed edge case, 22 Sept 2026: neither PosterCard nor
+// RankedPosterCard handled a failed/missing career.photo -- next/image has
+// no built-in fallback, and every Explore rail, world grid, and search
+// result renders through one of these two, so one bad asset breaks
+// silently across the whole page. Same shared pattern as Match's
+// CareerPhoto and Career Detail's HeroPhoto: a world-tinted gradient with
+// a muted ImageOff icon instead of a broken-image glyph.
+function PosterPhoto({ career, sizes, className }: { career: CatalogCareer; sizes: string; className: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    const worldColor = WORLD_COLORS[career.world] ?? "var(--muted-foreground)";
+    return (
+      <div
+        className={`absolute inset-0 flex items-center justify-center ${className}`}
+        style={{ background: `linear-gradient(155deg, color-mix(in srgb, ${worldColor} 30%, var(--card)) 0%, var(--card) 100%)` }}
+      >
+        <ImageOff className="h-6 w-6" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      </div>
+    );
+  }
+  return <Image src={career.photo} alt="" fill sizes={sizes} className={className} draggable={false} onError={() => setFailed(true)} />;
+}
 
 // Career Poster Card, ported 1:1 from the Figma component (210×297, radius-xl,
 // glass border, gradient/text-scrim, per-world title face at 24/28, world
@@ -108,7 +134,7 @@ export function PosterCard({ career, className = "", onClick, fill = false }: { 
       className={`dm-tap poster-card relative flex ${fill ? "aspect-[210/297] w-full" : "h-[297px] w-[210px] flex-none"} cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${className}`}
       style={{ borderColor: "var(--glass-border)" }}
     >
-      <Image src={career.photo} alt="" fill sizes={fill ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px" : "210px"} className="poster-photo rounded-[var(--radius-lg)] object-cover" draggable={false} />
+      <PosterPhoto career={career} sizes={fill ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px" : "210px"} className="poster-photo rounded-[var(--radius-lg)] object-cover" />
       <OpenCue />
       {career.salary && (
         /* dark glass chip (approved) + large gradient figure — legible on
@@ -188,7 +214,7 @@ export function RankedPosterCard({ career, rank, onClick }: { career: CatalogCar
         onClick={onClick}
         className="dm-tap poster-card absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] text-center uppercase"
       >
-        <Image src={career.photo} alt="" fill sizes="175px" className="poster-photo rounded-[var(--radius-lg)] object-cover" draggable={false} />
+        <PosterPhoto career={career} sizes="175px" className="poster-photo rounded-[var(--radius-lg)] object-cover" />
         <OpenCue />
         <span
           className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"

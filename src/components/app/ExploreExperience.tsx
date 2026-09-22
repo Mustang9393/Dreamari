@@ -215,8 +215,18 @@ function SearchResults({ query, hits, onQuery, heading }: { query: string; hits:
           </h2>
           {/* a grid that fills the width: as many columns as fit, cards
              stretching to share the row, instead of fixed 210px posters
-             clustering at the left (direct feedback, 19 Sept 2026) */}
-          <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
+             clustering at the left (direct feedback, 19 Sept 2026).
+             Custom-designed edge case, 22 Sept 2026: `auto-fill` reserves
+             a full row of equal-width tracks even when only 1-2 results
+             exist (Food & Cooking, Teaching & Education: 1 career each;
+             Science & Research: 2) -- a small card pinned left with dead,
+             unexplained empty tracks stretching the rest of the row.
+             `auto-fit` collapses tracks with no content, so the real
+             card(s) get the freed space instead -- same "stretch to
+             share the row" behavior already requested above, just
+             correctly extended to a row that only has 1-2 cards to
+             share it. */}
+          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
             {hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />)}
           </div>
         </>
@@ -261,7 +271,15 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
   const view = (careers: CatalogCareer[]) => applyCatalogView(careers, effectiveWorld, "", effectiveSort);
   const becauseLiked = view(BROWSE_BECAUSE_LIKED);
   const trades = view(BROWSE_TRADES);
-  const trending = view(BROWSE_TRENDING);
+  // Custom-designed edge case, 22 Sept 2026: the Sort control (A-Z/Salary)
+  // was applied here through `view()` same as every other rail, but this
+  // one carries rank badges (#1..#5) tied to BROWSE_TRENDING's own curated
+  // order -- picking a sort re-ordered the cards while the heading and
+  // badges kept claiming "#1 trending", mislabeling whatever the sort put
+  // first. World filter still applies (trending WITHIN a world is a
+  // reasonable question); sort never does, since the rank badges are the
+  // whole point of this rail.
+  const trending = applyCatalogView(BROWSE_TRENDING, effectiveWorld, "", "Recommended");
   const worldRail = view(BROWSE_WORLD_RAIL);
   const mightNotKnow = view(BROWSE_MIGHT_NOT_KNOW);
   const typicalPay = view(BROWSE_TYPICAL_PAY);
@@ -512,7 +530,14 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                     <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
                       {career.title}
                     </h2>
-                    <p className="text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
+                    {/* Custom-designed edge case, 22 Sept 2026: this sits in a
+                       fixed-height, overflow-hidden card (`h-full` +
+                       `overflow-hidden` on EnvCard's own <article>) with no
+                       scroll -- unclamped, a longer description can grow the
+                       stacked content past the card's bounds and clip
+                       something else in it. line-clamp caps it defensively,
+                       matching this app's own truncation convention. */}
+                    <p className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)", color: "var(--primary-foreground)" }}>
                       {career.description}
                     </p>
                     <div className="flex gap-[var(--space-4)] text-[13px] leading-[18px] font-semibold" style={{ fontFamily: "var(--font-body)" }}>
@@ -531,7 +556,7 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
                     </div>
                     <div className="flex flex-col gap-[var(--space-1)]">
                       <span style={{ color: "rgba(255,255,255,0.92)" }}>MAIN SKILLS</span>
-                      <span style={{ color: "var(--foreground)" }}>{career.mainSkills}</span>
+                      <span className="line-clamp-2" style={{ color: "var(--foreground)" }}>{career.mainSkills}</span>
                     </div>
                   </div>
                 </div>

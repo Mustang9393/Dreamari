@@ -12077,3 +12077,46 @@ confirmation for every real user, not just demos.
 Next step: continue to Explore (`src/components/marketing/
 ExploreExperience.tsx` and friends), next in priority order. Not pushed --
 awaiting go-ahead.
+
+### 2026-09-22 Explore: closed four real gaps, including an app-wide PosterCard photo-fallback fix
+
+Continuing the design-log priority order after Match/Career Detail/Build.
+Audited Explore (`src/components/app/ExploreExperience.tsx` -- confirmed
+the real implementation; `marketing/chapters/Explore.tsx` is a separate
+static landing teaser, not in scope).
+
+**Four real gaps closed**:
+1. `PosterCard`/`RankedPosterCard` had no `onError` handling on their
+   `next/image`. Unlike Match/Career Detail's single-file fixes,
+   `PosterCard` is imported by 7 other files app-wide (CareerDetail, Home,
+   Explore, Colleges, Motion Lab, Match, ReportChooser, PlayHub), so this
+   fix (new shared `PosterPhoto`, world-tinted gradient + muted
+   `ImageOff`) closes the gap everywhere at once, not just in Explore.
+   Required promoting `PosterCard.tsx` to a Client Component.
+2. World filters with 1-2 results (Food & Cooking, Teaching & Education,
+   Science & Research) left dead empty grid tracks next to a small card --
+   `auto-fill` -> `auto-fit` on `SearchResults`'s grid, which turns out to
+   also match the row's own already-stated "stretch to fill" design
+   intent from 19 Sept feedback.
+3. The Trending rail's #1-#5 rank badges desynced from the Sort control --
+   picking A-Z/Salary re-ordered the cards while the badges kept claiming
+   the old rank order. Trending's `view()` call now pins sort to
+   "Recommended" (its own curated order), keeping only the world filter.
+4. `EnvCard`'s description/mainSkills had no line-clamp in a fixed-height,
+   overflow-hidden card -- capped at `line-clamp-2`, matching the app's
+   own convention.
+
+All four verified live (screenshotted the dead-space fix at two
+viewports, DOM-inspected the photo fallback via a temporarily broken
+Trending photo, captured Trending's exact order before/after an A-Z sort
+switch). `npx tsc --noEmit -p .` and `npx eslint` clean.
+
+**Three more findings logged but not fixed** (lower-priority/consistency-
+only, see the design log's own note): `CompanyVideoCards.tsx`'s videos
+have the same missing-`onError` gap at lower traffic; `COMPANY_VIDEOS`
+renders without the `.length > 0` guard every other rail uses (currently
+safe, static non-empty array); Explore's and GlobalSearch's "no results"
+copy have diverged wording (a copy nit, not a functional gap).
+
+Next step: continue to Profile (`src/components/profile/`), next in
+priority order. Not pushed -- awaiting go-ahead.
