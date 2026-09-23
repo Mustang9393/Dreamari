@@ -326,22 +326,22 @@ export function Coachmark({
           >
             <defs>
               <filter id={`${spotlightId}-feather`} x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="12" />
+                <feGaussianBlur stdDeviation="18" />
               </filter>
               <mask id={`${spotlightId}-mask`} maskUnits="userSpaceOnUse" x="0" y="0" width={viewport.width} height={viewport.height} style={{ maskType: "luminance" }}>
                 <rect width={viewport.width} height={viewport.height} fill="white" />
                 <rect
-                  x={targetRect.left - 18}
-                  y={targetRect.top - 18}
-                  width={targetRect.width + 36}
-                  height={targetRect.height + 36}
-                  rx="22"
+                  x={targetRect.left - 14}
+                  y={targetRect.top - 14}
+                  width={targetRect.width + 28}
+                  height={targetRect.height + 28}
+                  rx="20"
                   fill="black"
                   filter={`url(#${spotlightId}-feather)`}
                 />
               </mask>
             </defs>
-            <rect width={viewport.width} height={viewport.height} fill="rgba(3, 7, 18, 0.62)" mask={`url(#${spotlightId}-mask)`} />
+            <rect width={viewport.width} height={viewport.height} fill="rgba(2, 5, 12, 0.7)" mask={`url(#${spotlightId}-mask)`} />
           </svg>
           <span
             aria-hidden
@@ -349,13 +349,13 @@ export function Coachmark({
             className="pointer-events-none fixed z-[9998] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
             style={{
               zoom: overlayZoom,
-              left: targetRect.left - 24,
-              top: targetRect.top - 24,
-              width: targetRect.width + 48,
-              height: targetRect.height + 48,
-              borderRadius: 28,
-              background: "radial-gradient(ellipse at center, rgba(255,255,255,0.22) 0%, rgba(90,160,255,0.14) 46%, rgba(124,92,250,0.06) 62%, transparent 76%)",
-              boxShadow: "0 0 34px 14px rgba(56,148,255,0.22), 0 0 68px 26px rgba(124,92,250,0.12)",
+              left: targetRect.left - 22,
+              top: targetRect.top - 22,
+              width: targetRect.width + 44,
+              height: targetRect.height + 44,
+              borderRadius: 26,
+              background: "radial-gradient(ellipse at 50% 44%, rgba(255,255,255,0.2) 0%, rgba(255,250,238,0.1) 48%, rgba(255,250,238,0.035) 64%, transparent 78%)",
+              boxShadow: "0 0 42px 18px rgba(255,250,238,0.12), 0 0 82px 34px rgba(255,255,255,0.045)",
             }}
           />
         </>
