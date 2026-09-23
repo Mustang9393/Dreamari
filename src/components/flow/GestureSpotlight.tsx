@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { GestureHint } from "./GestureHint";
 
@@ -8,20 +8,21 @@ import { GestureHint } from "./GestureHint";
 // mechanic is genuinely non-obvious the first time, but re-showing it on
 // every visit would be the "entire modal with written instructions" problem
 // this is meant to replace, just moved to every mount instead of the first.
-export function useFirstUseHint(key: string): [boolean, () => void] {
+export function useFirstUseHint(key: string, { repeatOnReload = false }: { repeatOnReload?: boolean } = {}): [boolean, () => void] {
   const storageKey = `dreamari:hint-seen:${key}`;
   const [show, setShow] = useState(false);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
-        if (!window.localStorage.getItem(storageKey)) setShow(true);
+        const navigation = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+        if ((repeatOnReload && navigation?.type === "reload") || !window.localStorage.getItem(storageKey)) setShow(true);
       } catch {
         // Storage blocked (private mode, etc.) -- fall back to not nagging
         // rather than showing the hint every single mount.
       }
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [storageKey]);
+  }, [repeatOnReload, storageKey]);
   const dismiss = () => {
     setShow(false);
     try {
@@ -198,11 +199,8 @@ export function Coachmark({
       "they should happen in succession"). Defaults to "Got it" for a
       standalone or final-step coachmark. */
   cta?: string;
-  /** A bright glow ring drawn directly around the target (direct feedback,
-      24 Sept 2026: "dim the screen... like a spotlight", later "the
-      spotlighted area should be even brighter"). Off by default so every
-      existing coachmark (the icon rows) keeps its current plain look; opt
-      in per call site. */
+  /** A feathered screen dimmer and soft light bloom around the target.
+      Off by default so callers opt in deliberately. */
   spotlight?: boolean;
   /** Preferred side of the target. The coachmark flips when that side does
       not have enough viewport room. Defaults to "top". */
@@ -216,6 +214,7 @@ export function Coachmark({
 }) {
   const targetRef = useRef<HTMLSpanElement | null>(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
+  const spotlightId = useId().replaceAll(":", "");
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
@@ -311,22 +310,59 @@ export function Coachmark({
   const overlay = active && typeof document !== "undefined" ? createPortal(
     <>
       {spotlight && targetInViewport && targetRect && (
-        <span
-          aria-hidden
-          className="pointer-events-none fixed z-[9998] rounded-[16px] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
-          style={{
-            zoom: overlayZoom,
-            left: targetRect.left - 12,
-            top: targetRect.top - 12,
-            width: targetRect.width + 24,
-            height: targetRect.height + 24,
-            boxShadow: "0 0 0 3px rgba(56,148,255,0.6), 0 0 28px 8px rgba(56,148,255,0.5), 0 0 50px 16px rgba(124,92,250,0.3)",
-            background: "radial-gradient(circle, rgba(255,255,255,0.22), transparent 65%)",
-          }}
-        />
+        <>
+          {/* The scrim is its own layer below both the target bloom and the
+              coachmark (9997 < 9998 < 9999). An SVG luminance mask gives
+              the opening a genuinely feathered edge in Chromium, WebKit,
+              and Firefox without relying on browser-specific CSS masks. */}
+          <svg
+            aria-hidden
+            data-coachmark-scrim
+            className="pointer-events-none fixed left-0 top-0 z-[9997] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
+            width={viewport.width}
+            height={viewport.height}
+            viewBox={`0 0 ${viewport.width} ${viewport.height}`}
+            style={{ zoom: overlayZoom }}
+          >
+            <defs>
+              <filter id={`${spotlightId}-feather`} x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="12" />
+              </filter>
+              <mask id={`${spotlightId}-mask`} maskUnits="userSpaceOnUse" x="0" y="0" width={viewport.width} height={viewport.height} style={{ maskType: "luminance" }}>
+                <rect width={viewport.width} height={viewport.height} fill="white" />
+                <rect
+                  x={targetRect.left - 18}
+                  y={targetRect.top - 18}
+                  width={targetRect.width + 36}
+                  height={targetRect.height + 36}
+                  rx="22"
+                  fill="black"
+                  filter={`url(#${spotlightId}-feather)`}
+                />
+              </mask>
+            </defs>
+            <rect width={viewport.width} height={viewport.height} fill="rgba(3, 7, 18, 0.62)" mask={`url(#${spotlightId}-mask)`} />
+          </svg>
+          <span
+            aria-hidden
+            data-coachmark-halo
+            className="pointer-events-none fixed z-[9998] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
+            style={{
+              zoom: overlayZoom,
+              left: targetRect.left - 24,
+              top: targetRect.top - 24,
+              width: targetRect.width + 48,
+              height: targetRect.height + 48,
+              borderRadius: 28,
+              background: "radial-gradient(ellipse at center, rgba(255,255,255,0.22) 0%, rgba(90,160,255,0.14) 46%, rgba(124,92,250,0.06) 62%, transparent 76%)",
+              boxShadow: "0 0 34px 14px rgba(56,148,255,0.22), 0 0 68px 26px rgba(124,92,250,0.12)",
+            }}
+          />
+        </>
       )}
       <div
         ref={bubbleRef}
+        data-coachmark-bubble
         className="fixed z-[9999] flex w-[272px] max-w-[calc(100vw-32px)] flex-col items-start gap-3 px-4 text-left backdrop-blur-[16px] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
         style={{
           zoom: overlayZoom,

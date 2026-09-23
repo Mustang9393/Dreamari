@@ -510,7 +510,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
-  const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons");
+  const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons", { repeatOnReload: true });
 
   if (!career) {
     return (

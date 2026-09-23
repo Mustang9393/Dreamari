@@ -1357,7 +1357,7 @@ function ForYouFace({ showActionsCoachmark }: { showActionsCoachmark: boolean })
   // One coachmark, shown once per device, shared with Career Detail's own
   // (same "action-icons" key) -- whichever surface a student reaches first
   // is the only one that ever explains these icons.
-  const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons");
+  const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons", { repeatOnReload: true });
 
   // Active-card tracking (drives the Ken Burns restart + paging state).
   useEffect(() => {
@@ -1806,7 +1806,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   // -- ForYouBrowseToggle's own tab === "browse" gate already gets that for
   // free. Step 2 (Schools) follows once step 1 is dismissed, whether by its
   // own "Next" or by the student just tapping For You directly.
-  const [tourNotSeen, dismissTour] = useFirstUseHint("explore-tour");
+  const [tourNotSeen, dismissTour] = useFirstUseHint("explore-tour", { repeatOnReload: true });
   const [tourStep, setTourStep] = useState<"foryou" | "schools">("foryou");
   const advanceTour = () => setTourStep("schools");
   const showForYouTutorial = tourNotSeen && splashDone && tab === "browse" && tourStep === "foryou";
