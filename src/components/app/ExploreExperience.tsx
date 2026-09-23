@@ -778,6 +778,7 @@ function EnvCard({
           targetRef={actionsRef}
           label="Like, save, or add a career to your Top 3 — right from here."
           onDismiss={onDismissActionsHint}
+          spotlight
         />
 
         {/* Career Details Panel: the whole block, text through the CTA row,
@@ -1664,6 +1665,7 @@ function DesktopPreferenceRail({
         targetRef={actionsRef}
         label="Like, save, or add a career to your Top 3 — right from here."
         onDismiss={dismissActionsHint}
+        spotlight
       />
     </div>
   );

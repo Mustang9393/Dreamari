@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
-import { BorderBeam } from "border-beam";
+import { createPortal } from "react-dom";
 import { GestureHint } from "./GestureHint";
 
 // Persists per-device, not per-session -- a drag-to-reorder or drag-to-blank
@@ -136,6 +136,54 @@ export function GestureSpotlight({
 // hide other elements").
 const VIEWPORT_MARGIN = 16;
 const TARGET_GAP = 12;
+// The pointer triangle's own size, how far its base tucks up under the
+// card (hides the seam where the two shapes meet -- 2px wasn't enough to
+// fully hide it, direct feedback, 24 Sept 2026: "badly done"), and how far
+// its clamp keeps it from a corner so it never sits astride the card's own
+// border-radius curve.
+const ARROW_W = 16;
+const ARROW_H = 9;
+const ARROW_CORNER_CLEARANCE = 22;
+const CARD_RADIUS = 12;
+
+/** One continuous outline -- rounded rect with the pointer triangle cut
+ * INTO one edge (top or bottom) rather than stitched on as a second shape
+ * (direct feedback, 24 Sept 2026: "one congruent structure", "not an
+ * assembly of a rectangle and a triangle"). `w`/`h` are the card's own box;
+ * the triangle adds `arrowH` of extra room above (side "bottom", pointer
+ * hangs up off the card's top edge) or below (side "top") -- the caller
+ * sizes its box to `h + arrowH` and offsets the card content accordingly.
+ * Used for BOTH the clip-path that shapes the actual glass surface and the
+ * SVG stroke traced on top of it, so the beam and the fill are always
+ * exactly the same shape by construction, never two things kept in sync by
+ * hand. */
+function tooltipOutlinePath(w: number, h: number, side: "top" | "bottom", arrowCenter: number): string {
+  const r = CARD_RADIUS;
+  const cardTop = side === "bottom" ? ARROW_H : 0;
+  const cardBottom = cardTop + h;
+  const aLeft = Math.max(r, arrowCenter - ARROW_W / 2);
+  const aRight = Math.min(w - r, arrowCenter + ARROW_W / 2);
+  const topSeg =
+    side === "bottom"
+      ? `L ${aLeft} ${cardTop} L ${arrowCenter} 0 L ${aRight} ${cardTop} L ${w - r} ${cardTop}`
+      : `L ${w - r} ${cardTop}`;
+  const bottomSeg =
+    side === "top"
+      ? `L ${aRight} ${cardBottom} L ${arrowCenter} ${cardBottom + ARROW_H} L ${aLeft} ${cardBottom} L ${r} ${cardBottom}`
+      : `L ${r} ${cardBottom}`;
+  return [
+    `M ${r} ${cardTop}`,
+    topSeg,
+    `A ${r} ${r} 0 0 1 ${w} ${cardTop + r}`,
+    `L ${w} ${cardBottom - r}`,
+    `A ${r} ${r} 0 0 1 ${w - r} ${cardBottom}`,
+    bottomSeg,
+    `A ${r} ${r} 0 0 1 0 ${cardBottom - r}`,
+    `L 0 ${cardTop + r}`,
+    `A ${r} ${r} 0 0 1 ${r} ${cardTop}`,
+    "Z",
+  ].join(" ");
+}
 
 export function Coachmark({
   active,
@@ -168,8 +216,8 @@ export function Coachmark({
 }) {
   const maskId = useId();
   const [rect, setRect] = useState<DOMRect | null>(null);
-  const bubbleRef = useRef<HTMLDivElement | null>(null);
-  const [placement, setPlacement] = useState<{ top: number; left: number; height: number; side: "top" | "bottom"; arrowLeft: number } | null>(null);
+  const bubbleRef = useRef<HTMLButtonElement | null>(null);
+  const [placement, setPlacement] = useState<{ top: number; left: number; width: number; height: number; side: "top" | "bottom"; arrowLeft: number } | null>(null);
 
   useEffect(() => {
     if (!active) {
@@ -229,34 +277,67 @@ export function Coachmark({
 
     // The arrow stays aimed at the target's real center even when the
     // bubble itself had to shift over to stay on screen -- clamped inside
-    // the bubble's own edges so it never pokes out past a rounded corner.
+    // the bubble's own edges so it never pokes out past a rounded corner
+    // (ARROW_CORNER_CLEARANCE below, not just half its own 16px width).
     const targetCenter = rect.left + rect.width / 2;
-    const arrowLeft = Math.min(Math.max(targetCenter - left, 16), Math.max(16, bubble.width - 16));
+    const arrowLeft = Math.min(Math.max(targetCenter - left, ARROW_CORNER_CLEARANCE), Math.max(ARROW_CORNER_CLEARANCE, bubble.width - ARROW_CORNER_CLEARANCE));
 
-    setPlacement({ top, left, height: bubble.height, side, arrowLeft });
+    setPlacement({ top, left, width: bubble.width, height: bubble.height, side, arrowLeft });
   }, [rect]);
 
   if (!active || !rect) return null;
 
-  // Dark and nearly opaque, not a light/bright glass -- legibility over the
-  // busy photos this sits on beats the glassy look (direct feedback, 24
-  // Sept 2026: "the color now is too bright... make it dark so its
-  // contrasting"). Still carries backdrop-blur for the sliver that isn't
-  // opaque. z-[9999] matches IconTip's own tooltip layer, the highest in
-  // the app -- a coachmark explaining a control must never end up UNDER
-  // that control's own hover tooltip, a modal, or anything else.
-  const bubbleBg = "rgba(6,7,12,0.96)";
-  // The arrow renders OUTSIDE BorderBeam on purpose -- BorderBeam clips its
-  // own contents to contain the rotating beam, so a caret nested inside it
-  // and positioned past its edge (poking out to "point" at the target) was
-  // being silently clipped away (direct feedback, 24 Sept 2026: "the
-  // pointything... is not properly triggering, they are inside the tooltip
-  // and not visible"). As its own sibling in the unclipped outer layer, sized
-  // and positioned from the same `placement` math, it always renders.
-  const arrowTop = placement ? (placement.side === "top" ? placement.top + placement.height - 5.5 : placement.top - 5.5) : -9999;
-  const arrowLeftAbs = placement ? placement.left + placement.arrowLeft - 5.5 : -9999;
+  // The Counselor Dashboard's own "premium glass" recipe (surfaces.ts:
+  // GLASS_CARD) -- a dark floor with a subtle brand-tinted gradient and an
+  // inset highlight, instead of one flat color. Recreated here rather than
+  // imported -- that module belongs to the Counselor Dashboard's own
+  // isolated product (AGENTS.md), this is just borrowing its look. Lightened
+  // a step past that recipe's own floor specifically because THIS surface
+  // sits on top of the spotlight's own dark dimming layer, not a plain page
+  // background -- the two dark-on-dark layers were reading as one blob
+  // (direct feedback, 24 Sept 2026: "the surface needs to stand out, its
+  // blending too much with the dark dimming + page").
+  // Hardcoded hex, not var(--primary) -- this button is portaled straight
+  // onto <body> (below), OUTSIDE the `.themeable` wrapper that actually
+  // defines the app's CSS custom properties. var(--primary) resolves to
+  // nothing out there, which doesn't just fall back to a default -- it
+  // makes the WHOLE gradient value invalid, so the browser drops
+  // `background` entirely and the surface goes fully transparent (direct
+  // report, 24 Sept 2026, live during a demo: "the surface blends too much
+  // and i cant even see it at all" -- confirmed via computed style: an
+  // inline background that read back as `none`). #2F6BF2 is --primary's own
+  // dark-theme value (tokens.css); hardcoding it here is deliberate, not a
+  // temporary shortcut -- this component can never safely depend on
+  // inherited custom properties.
+  const bubbleBg = "linear-gradient(155deg, color-mix(in srgb, #2F6BF2 24%, rgba(24,24,36,0.97)) 0%, rgba(26,26,38,0.96) 55%, color-mix(in srgb, #7C5CFA 20%, rgba(24,24,36,0.97)) 100%)";
+  const bubbleShadow = "0 22px 50px -24px rgba(0,0,0,0.8), inset 0 1px 0 0 rgba(255,255,255,0.14)";
 
-  return (
+  // Card + pointer, ONE outline (direct feedback, 24 Sept 2026: "one
+  // congruent structure... not an assembly of a rectangle and a triangle
+  // thing"). Before `placement` resolves, the extra ARROW_H goes on the
+  // bottom arbitrarily -- it doesn't matter which side yet, only that the
+  // TOTAL measured height already includes it, so the box doesn't jump in
+  // size the moment `placement.side` becomes known.
+  const side = placement?.side ?? "top";
+  const topExtra = side === "bottom" ? ARROW_H : 0;
+  const bottomExtra = side === "top" ? ARROW_H : 0;
+  const outlineD = placement ? tooltipOutlinePath(placement.width, placement.height - ARROW_H, placement.side, placement.arrowLeft) : "";
+  // A static, single tone -- not the rotating rainbow gradient this had
+  // before (direct feedback, 24 Sept 2026: "i dont like the colors of the
+  // border... no color movement"). Still traced from the exact same
+  // `outlineD` as the clip-path, so it's one congruent outline either way.
+  const outlineStroke = "color-mix(in srgb, #2F6BF2 45%, rgba(255,255,255,0.35))";
+
+  // Portaled straight onto <body> -- `position: fixed` only escapes to the
+  // true viewport when nothing between here and <body> establishes its own
+  // containing block, and this app has plenty of ancestors that do
+  // (backdrop-filter, transform, etc. on cards and the parallax reel). One
+  // of those was trapping this z-[9999] layer inside a lower stacking
+  // context than the sticky header, so the header rendered ON TOP of the
+  // coachmark instead of the other way around (direct feedback, 24 Sept
+  // 2026: "the tooltip is going under the dreamari logo"). A portal sidesteps
+  // the whole class of bug instead of chasing down which ancestor did it.
+  return createPortal(
     <div className="pointer-events-none fixed inset-0 z-[9999]">
       {spotlight && rect && (
         <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full motion-safe:animate-[fade-slide-up_0.28s_ease]">
@@ -293,66 +374,69 @@ export function Coachmark({
          `spotlight` opts a specific call site into the SVG-mask cutout above
          instead, which doesn't share that old box-shadow technique's Safari
          bug. Tapping the bubble itself dismisses it; so does the caller's own
-         first real interaction with whatever it's explaining. Flips above/below and
-         slides along the X axis to stay clear of every viewport edge --
-         never centered blindly on the target. BorderBeam's border-radius
-         auto-detects off the button below, so it doesn't need its own.
-         Positioning lives on THIS plain div, not on BorderBeam itself --
-         BorderBeam's own stylesheet stamps `position: relative` on whatever
-         element it wraps, which (being injected after Tailwind's own
-         sheet) wins the cascade over an `absolute` class applied to that
-         same element. The result was exactly what got reported: the beam
-         box read as `position: relative` instead, so it sat at its normal
-         full-width flow position instead of the intended fixed coordinate,
-         with the 272px button inside it left-aligned within that -- "border
-         beam running the full width but its surface only in the left
-         part" (24 Sept 2026). Putting BorderBeam one level further in, as a
-         plain un-positioned child, lets it keep the `position: relative` it
-         actually wants for its own internal glow layers, while this wrapper
-         (never touched by BorderBeam's CSS) is the one actually pinned to
-         `top`/`left` and measured for the clamping math above. */}
-      <div
+         first real interaction with whatever it's explaining. Flips above/below
+         and slides along the X axis to stay clear of every viewport edge --
+         never centered blindly on the target.
+
+         The button itself IS the clipped shape (card + pointer cut from one
+         `tooltipOutlinePath`, via `clip-path: path(...)`) -- not a rectangle
+         with a second triangle element glued beside it. `bubbleRef` always
+         measures this same node; before `placement` resolves there's no
+         clip-path yet (nothing to clip to), but the padding already reserves
+         ARROW_H of extra height either way, so the measured size never
+         changes shape between the two passes. BorderBeam (a 3rd-party lib)
+         can only ever trace a plain rounded rect, not an arbitrary
+         rect+triangle outline, so the beam here is a hand-built SVG <path>
+         stroke sharing the EXACT same `outlineD` string as the clip-path --
+         the fill and the beam are the same shape by construction, not two
+         things kept in sync by hand (direct feedback, 24 Sept 2026: "the
+         border beam follows the whole outline including the arrow"). */}
+      <button
         ref={bubbleRef}
-        className={`pointer-events-auto absolute ${placement ? "motion-safe:animate-[fade-slide-up_0.28s_ease]" : ""}`}
+        type="button"
+        onClick={onDismiss}
+        // NOT dm-quiet -- its :hover background is !important and was
+        // clobbering this bubble's own dark background the moment a mouse
+        // hovered it, flashing to a lighter glass tone (direct feedback, 24
+        // Sept 2026: "when i hover its weird"). A plain brightness lift
+        // gives the same "this is pressable" feedback without a color swap.
+        className={`pointer-events-auto absolute flex w-[272px] max-w-[calc(100vw-32px)] cursor-pointer flex-col items-start gap-3 text-left backdrop-blur-[16px] transition-[filter] duration-150 hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#3894FF] ${
+          placement ? "motion-safe:animate-[fade-slide-up_0.28s_ease]" : ""
+        }`}
         style={{
           top: placement?.top ?? -9999,
           left: placement?.left ?? -9999,
           visibility: placement ? "visible" : "hidden",
+          background: bubbleBg,
+          boxShadow: bubbleShadow,
+          clipPath: placement ? `path('${outlineD}')` : undefined,
+          paddingLeft: 16,
+          paddingRight: 16,
+          paddingTop: topExtra + 14,
+          paddingBottom: bottomExtra + 14,
         }}
       >
-        <BorderBeam size="sm" colorVariant="colorful" theme="dark" duration={3} strength={0.7} active={placement !== null}>
-          <button
-            type="button"
-            onClick={onDismiss}
-            // NOT dm-quiet -- its :hover background is !important and was
-            // clobbering this bubble's own dark background the moment a
-            // mouse hovered it, flashing to a lighter glass tone (direct
-            // feedback, 24 Sept 2026: "when i hover its weird"). A plain
-            // brightness lift gives the same "this is pressable" feedback
-            // without a color swap.
-            className="flex w-[272px] max-w-[calc(100vw-32px)] cursor-pointer flex-col items-start gap-3 rounded-[var(--radius-md)] px-4 py-3.5 text-left shadow-lg backdrop-blur-[16px] transition-[filter] duration-150 hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-subtle)]"
-            style={{ background: bubbleBg }}
+        {placement && (
+          <svg
+            aria-hidden
+            className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+            viewBox={`0 0 ${placement.width} ${placement.height}`}
+            preserveAspectRatio="none"
           >
-            <span className="text-[13.5px] leading-[19px] font-bold text-white">{label}</span>
-            {/* Its own secondary-styled pill, not the primary blue -- this
-               is a dismiss, not the call to action (direct feedback, 24
-               Sept 2026). */}
-            <span
-              className="inline-flex items-center self-start rounded-[var(--radius-sm)] border px-3 py-1.5 text-[10px] font-bold tracking-[0.5px] text-white uppercase"
-              style={{ background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.3)" }}
-            >
-              {cta}
-            </span>
-          </button>
-        </BorderBeam>
-      </div>
-      {placement && (
+            <path d={outlineD} fill="none" stroke={outlineStroke} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+          </svg>
+        )}
+        <span className="relative text-[13.5px] leading-[19px] font-bold text-white">{label}</span>
+        {/* Its own secondary-styled pill, not the primary blue -- this is a
+           dismiss, not the call to action (direct feedback, 24 Sept 2026). */}
         <span
-          aria-hidden
-          className="pointer-events-none absolute h-[11px] w-[11px] rotate-45"
-          style={{ top: arrowTop, left: arrowLeftAbs, background: bubbleBg }}
-        />
-      )}
-    </div>
+          className="relative inline-flex items-center self-start rounded-[8px] border px-3 py-1.5 text-[10px] font-bold tracking-[0.5px] text-white uppercase"
+          style={{ background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.3)" }}
+        >
+          {cta}
+        </span>
+      </button>
+    </div>,
+    document.body,
   );
 }

@@ -990,6 +990,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         targetRef={actionsRef}
         label="Like, save, or add a career to your Top 3 — right from here."
         onDismiss={dismissActionsHint}
+        spotlight
       />
 
       <MobileNav active="Explore" />
