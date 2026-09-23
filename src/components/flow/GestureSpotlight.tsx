@@ -326,16 +326,15 @@ export function Coachmark({
           >
             <defs>
               <filter id={`${spotlightId}-feather`} x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="18" />
+                <feGaussianBlur stdDeviation="26" />
               </filter>
               <mask id={`${spotlightId}-mask`} maskUnits="userSpaceOnUse" x="0" y="0" width={viewport.width} height={viewport.height} style={{ maskType: "luminance" }}>
                 <rect width={viewport.width} height={viewport.height} fill="white" />
-                <rect
-                  x={targetRect.left - 14}
-                  y={targetRect.top - 14}
-                  width={targetRect.width + 28}
-                  height={targetRect.height + 28}
-                  rx="20"
+                <ellipse
+                  cx={targetRect.left + targetRect.width / 2}
+                  cy={targetRect.top + targetRect.height / 2}
+                  rx={targetRect.width / 2 + 34}
+                  ry={targetRect.height / 2 + 30}
                   fill="black"
                   filter={`url(#${spotlightId}-feather)`}
                 />
@@ -353,9 +352,8 @@ export function Coachmark({
               top: targetRect.top - 22,
               width: targetRect.width + 44,
               height: targetRect.height + 44,
-              borderRadius: 26,
-              background: "radial-gradient(ellipse at 50% 44%, rgba(255,255,255,0.2) 0%, rgba(255,250,238,0.1) 48%, rgba(255,250,238,0.035) 64%, transparent 78%)",
-              boxShadow: "0 0 42px 18px rgba(255,250,238,0.12), 0 0 82px 34px rgba(255,255,255,0.045)",
+              borderRadius: 999,
+              background: "radial-gradient(ellipse at 50% 44%, rgba(255,255,255,0.18) 0%, rgba(255,250,238,0.085) 42%, rgba(255,250,238,0.025) 62%, transparent 82%)",
             }}
           />
         </>
@@ -376,11 +374,6 @@ export function Coachmark({
           paddingBottom: (placementSide === "top" ? ARROW_H : 0) + 14,
         }}
       >
-        {size && (
-          <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
-            <path d={outlineD} fill="none" stroke="color-mix(in srgb, #2F6BF2 45%, rgba(255,255,255,0.35))" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
-          </svg>
-        )}
         <button
           type="button"
           onClick={onDismiss}
