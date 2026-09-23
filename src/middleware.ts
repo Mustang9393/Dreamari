@@ -6,7 +6,11 @@ import { NextResponse, type NextRequest } from "next/server";
 // one shared PIN that unlocks a cookie for anyone who knows it. That's the
 // right amount of protection for "stop a stranger with the link from
 // browsing the prototype," not "protect sensitive data."
-const GATE_COOKIE = "dm_gate";
+// Cookie name bumped (dm_gate -> dm_gate_2) alongside the PIN rotation in
+// src/app/api/gate/route.ts, 23 Sept 2026 -- this is what actually revokes
+// every existing session, not the new PIN by itself. See that file's
+// comment for the full reasoning.
+const GATE_COOKIE = "dm_gate_2";
 const GATE_TOKEN = "granted";
 
 export function middleware(request: NextRequest) {
