@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { CaseloadStatus, MilestoneStatus } from "@/lib/counselorRoster";
+import { MILESTONE_KEYS, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
 import { useStudentAvatarSrc } from "@/lib/avatar";
 
 // Shared status pills -- the same caseload-status and milestone-review
@@ -39,6 +39,29 @@ export function StatusChip({ status }: { status: CaseloadStatus }) {
 
 export function MilestoneChip({ status }: { status: MilestoneStatus }) {
   return <Chip label={status} color={MILESTONE_COLORS[status]} />;
+}
+
+// One compact cell standing in for what used to be 5 separate pill
+// columns (Career Report/Resume/Applications/Rec. Letter/Transcript) --
+// each pill repeated the same "Approved" (green) label on most rows, pure
+// visual noise across 120 rows, and the 5 shown were an arbitrary subset
+// that silently left out the other 6 milestones a student actually has.
+// This shows all 11 -- a real count plus a small segmented strip, same
+// segmented-mark language the Overview charts already use, so a
+// counselor can see completion AND spot exactly which stage is stuck
+// (each segment is titled on hover) without opening the student.
+export function MilestonesMini({ milestones }: { milestones: Record<MilestoneKey, MilestoneStatus> }) {
+  const approved = MILESTONE_KEYS.filter((k) => milestones[k] === "Approved").length;
+  return (
+    <span className="flex flex-col gap-[4px]">
+      <span className="text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: "var(--foreground)" }}>{approved}/{MILESTONE_KEYS.length} approved</span>
+      <span className="flex gap-[2px]">
+        {MILESTONE_KEYS.map((k) => (
+          <span key={k} title={`${k}: ${milestones[k]}`} aria-hidden className="h-[5px] w-[8px] flex-none rounded-[1.5px]" style={{ background: MILESTONE_COLORS[milestones[k]] }} />
+        ))}
+      </span>
+    </span>
+  );
 }
 
 export function initials(name: string): string {

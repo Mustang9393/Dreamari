@@ -469,11 +469,17 @@ export function Ring({ pct, size = 84, stroke = 8, accent, children }: { pct: nu
  *  Plans, Career Pathways, ...) -- a single green arc next to a 3-color
  *  legend was misleading: only one of the three values was ever drawn. */
 export function SegmentedRing({ segments, size = 92, stroke = 10, children }: { segments: { value: number; color: string }[]; size?: number; stroke?: number; children?: React.ReactNode }) {
-  const id = useId().replace(/:/g, "");
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const total = Math.max(1, segments.reduce((sum, s) => sum + Math.max(0, s.value), 0));
-  const gapDeg = segments.filter((s) => s.value > 0).length > 1 ? 2.5 : 0;
+  // Widened from 2.5deg -- each arc's own glow blurs 5px outward, which at
+  // the old gap (~2-3px on these ring sizes) was WIDER than the gap
+  // itself, so two adjacent segments' glows always overlapped and blended
+  // into a muddy, hard-to-place color at every seam (direct report: "the
+  // overlapping colors are being too transparent so that causes
+  // confusion"). The gap now clears the glow's own reach instead of
+  // fighting it.
+  const gapDeg = segments.filter((s) => s.value > 0).length > 1 ? 4.5 : 0;
   const arcs = segments
     .filter((s) => s.value > 0)
     .reduce<{ color: string; value: number; key: string; arcLen: number; offset: number; cursorDeg: number }[]>((acc, s, i) => {
@@ -490,28 +496,41 @@ export function SegmentedRing({ segments, size = 92, stroke = 10, children }: { 
         <span aria-hidden className="absolute inset-[-14%] rounded-full opacity-60 blur-[16px]" style={{ background: `radial-gradient(circle, color-mix(in srgb, ${arcs[0].color} 45%, transparent), transparent 70%)` }} />
       )}
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 -rotate-90 overflow-visible">
-        <defs>
-          {arcs.map((a, i) => (
-            <linearGradient key={a.key} id={`seg-grad-${id}-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={a.color} stopOpacity="0.7" />
-              <stop offset="100%" stopColor={a.color} stopOpacity="1" />
-            </linearGradient>
-          ))}
-        </defs>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
-        {arcs.map((a, i) => (
+        {arcs.map((a) => (
           <circle
             key={a.key}
             cx={size / 2}
             cy={size / 2}
             r={r}
             fill="none"
-            stroke={`url(#seg-grad-${id}-${i})`}
+            // Flat color, not the linear gradient this used to route
+            // through -- a `linearGradient` is a flat diagonal projected
+            // onto a ROTATED, CURVED stroke, so its opacity/color at any
+            // point on the arc depended on that point's x/y position
+            // relative to the diagonal, not on where it sits along the
+            // arc. That's what was actually producing the pale patches
+            // (direct report, with a screenshot: "this is transparency"),
+            // not just the glow bleed already fixed above. A flat color
+            // has no such geometry-dependent variation.
+            stroke={a.color}
             strokeWidth={stroke}
-            strokeLinecap="round"
+            // Round caps + this filter's blur wash out disproportionately
+            // on a small rounded tip vs. the arc's long straight body --
+            // the same pale-blob artifact, worse once the gap widened
+            // enough to show it in open space rather than tucked against
+            // a neighbor. Flat (butt) caps at segment boundaries are the
+            // standard treatment for a multi-category ring anyway (GitHub's
+            // contribution ring, Apple's activity rings both do this) --
+            // rounded pill-ends belong on a single unbroken arc (see
+            // Ring, above), not between distinct categories.
+            strokeLinecap="butt"
             strokeDasharray={`${a.arcLen} ${c}`}
             strokeDashoffset={a.offset}
-            style={{ filter: `drop-shadow(0 0 5px color-mix(in srgb, ${a.color} 65%, transparent))` }}
+            // Tighter and fainter than before (5px @ 65% -> 3px @ 45%) so
+            // the glow's own reach stays inside the now-wider gap instead
+            // of bridging it into the next segment's color.
+            style={{ filter: `drop-shadow(0 0 3px color-mix(in srgb, ${a.color} 45%, transparent))` }}
           />
         ))}
       </svg>
