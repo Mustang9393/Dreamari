@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import { motion } from "framer-motion";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
@@ -138,7 +138,16 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
   const total = points.reduce((a, b) => a + b, 0);
   return (
     <figure className="m-0 flex flex-col gap-[6px]">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${total.toLocaleString("en-US")} students reached; peak ${max} in one day`} className="h-auto w-full overflow-visible" preserveAspectRatio="none" style={{ height }}>
+      {/* preserveAspectRatio="none" on a FIXED 600:H viewBox, rendered at a
+         fluid w-full but a separately fixed pixel `height`, stretched the
+         coordinate system non-uniformly on every render whose real aspect
+         ratio didn't happen to match 600:H -- bars, the line, dots and text
+         all skewed by different amounts on each axis (direct report: "the
+         numbers, dots, lines etc seem squished or skewed"). Dropping the
+         override (back to the SVG default, which preserves aspect ratio)
+         and sizing the box with `aspect-ratio` instead of a fixed height
+         keeps the whole chart scaling as ONE uniform shape at any width. */}
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${total.toLocaleString("en-US")} students reached; peak ${max} in one day`} className="h-auto w-full overflow-visible" style={{ aspectRatio: `${W} / ${H}` }}>
         <defs>
           <linearGradient id={`fill-${id}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={accent} stopOpacity="0.5" />
@@ -157,7 +166,26 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
         <path d={line} fill="none" stroke={`url(#line-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 60%, transparent))` }} />
         <circle cx={x(last)} cy={y(points[last])} r="9" fill={accent} opacity="0.25" />
         <circle cx={x(last)} cy={y(points[last])} r="5" fill={accent} stroke="#0e0c20" strokeWidth="2" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 5px ${accent})` }} />
-        <text x={Math.min(W - 40, Math.max(28, x(peak)))} y={Math.max(12, y(max) - 8)} textAnchor="middle" style={{ fontSize: 12, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>{max}</text>
+        {/* Peak called out with a pinned label on a leader line down to a
+           dot on the curve, not a bare number floating over the line --
+           same device the Orbit reference uses for its own peak markers. */}
+        {(() => {
+          const px = x(peak);
+          const py = y(max);
+          const cx = Math.min(W - 44, Math.max(44, px));
+          const boxY = Math.max(2, py - 28);
+          return (
+            <g>
+              <line x1={px} x2={px} y1={boxY + 18} y2={py - 6} stroke={accent} strokeWidth="1.5" strokeDasharray="2 3" opacity="0.7" />
+              {/* peak already has its own dot when it's also the latest
+                 point (the end-dot above); a distinct in-between peak gets
+                 one of its own, on the leader line down to the curve. */}
+              {peak !== last && <circle cx={px} cy={py} r="4" fill={accent} stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 4px ${accent})` }} />}
+              <rect x={cx - 22} y={boxY} width="44" height="18" rx="5" fill="#0e0c20" stroke="rgba(255,255,255,0.14)" />
+              <text x={cx} y={boxY + 12.5} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>{max}</text>
+            </g>
+          );
+        })()}
       </svg>
       <figcaption className="flex justify-between text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <span>{labels[0]}</span><span>{labels[1]}</span><span>{labels[2]}</span>
@@ -173,63 +201,156 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
  *  count charts pass their own ceiling). A missing/zero value in a series
  *  just draws no bar for that slot -- matches the reference's own "Gr. 9"
  *  columns with nothing plotted yet. */
-export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%", barColors }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string; barColors?: string[] }) {
-  const id = useId().replace(/:/g, "");
+export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%", barColors, targetLine }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string; barColors?: string[]; /** a soft, gradient-shaded "target zone" from this value to the top of the chart, with a dashed reference line -- e.g. a district benchmark */ targetLine?: { value: number; label: string; color?: string } }) {
   const W = 600;
   const H = height;
-  const padX = 16;
+  // Left margin wide enough for real y-axis tick labels (0/25/50/75/100%) --
+  // the chart had no value axis at all before, just bare gridlines, which
+  // read as unfinished (direct feedback: "why aren't you trying any changes
+  // to... layout"). Right margin stays tighter since nothing anchors there.
+  const padLeft = 34;
+  const padRight = 12;
   const padTop = 22;
   const padBottom = 24;
   const plotH = H - padTop - padBottom;
-  const groupW = (W - padX * 2) / Math.max(1, groups.length);
+  const plotW = W - padLeft - padRight;
+  const groupW = plotW / Math.max(1, groups.length);
   const barGap = 4;
   // barColors: one full-width, distinctly colored bar per group instead of
   // series.length bars -- for a single-series chart where each category
   // (not each series) carries its own meaning/color, e.g. a status
   // breakdown (approved/pending/overdue). Only meaningful with one series.
   const perGroupColor = barColors && series.length === 1;
-  const barW = perGroupColor ? Math.max(4, groupW - barGap * 2) : Math.max(4, (groupW - barGap * (series.length + 1)) / Math.max(1, series.length));
+  // Capped, not stretched to fill the group's own slot -- bars were reading
+  // as thick, wall-to-wall blocks with no air between groups (dataviz spec:
+  // "cap it -- never fill the slot; let the band's leftover be air"). The
+  // (now narrower) cluster is centered in the group instead of left-packed,
+  // so the extra room becomes breathing space on both sides, not a gap on
+  // one side only.
+  const MAX_BAR_W = 34;
+  const idealClusterW = perGroupColor ? groupW - barGap * 2 : groupW - barGap * (series.length + 1);
+  const barCount = perGroupColor ? 1 : series.length;
+  const barW = Math.max(4, Math.min(MAX_BAR_W, idealClusterW / barCount));
+  const clusterW = barCount * barW + barGap * (barCount - 1);
+  const clusterOffset = Math.max(barGap, (groupW - clusterW) / 2);
   const y = (v: number) => padTop + (1 - Math.max(0, Math.min(max, v)) / max) * plotH;
+  const targetY = targetLine ? y(targetLine.value) : null;
+  const targetColor = targetLine?.color ?? "var(--muted-foreground)";
+  // Hover/focus layer -- a bar chart is interactive by default (dataviz
+  // spec: "ship a per-mark hover tooltip on bar/dot/cell"), and the two
+  // reference dashboards this was benchmarked against (Northline, Orbit)
+  // both use exactly this: the active bar reads clearly against its
+  // neighbours and a small tooltip states the precise value instead of
+  // making the reader eyeball the axis. `si` is always 0 in perGroupColor
+  // mode (one bar per group, not one per series).
+  const [hover, setHover] = useState<{ gi: number; si: number } | null>(null);
+  const hoveredBar = hover
+    ? perGroupColor
+      ? { value: series[0].values[hover.gi] ?? 0, color: barColors![hover.gi], groupLabel: groups[hover.gi], seriesLabel: null as string | null }
+      : { value: series[hover.si].values[hover.gi] ?? 0, color: series[hover.si].accent, groupLabel: groups[hover.gi], seriesLabel: series.length > 1 ? series[hover.si].label : null }
+    : null;
+  const baseline = H - padBottom;
+  // Segmented/equalizer bars, not a single solid rectangle -- pulled
+  // directly from the reference dashboards (Crextio's mini progress
+  // chart, Relatelwise's gradient task bar): a stack of small rounded
+  // pill segments reads as a considered, textured mark instead of a flat
+  // block, and it does the "brighter up top, fading down, never to zero"
+  // request (direct feedback) as a real structural property of the bar
+  // rather than a single CSS gradient. Unfilled segments above the value
+  // stay lit at a faint tint of the same color -- a "track" showing the
+  // bar's full possible range, same device Crextio uses.
+  const SEG_H = 5;
+  const SEG_GAP = 3;
+  const SEG_PITCH = SEG_H + SEG_GAP;
+  const segCount = Math.max(1, Math.floor(plotH / SEG_PITCH));
+  // A plain function that RETURNS an element, called inline -- not a
+  // `<SegmentedBar/>` used as a JSX component. Defining a component
+  // function inside another component's body gives it a fresh identity on
+  // every render, and React treats a fresh identity as a different
+  // component TYPE -- so every hover-state change (which re-renders
+  // BarChart) would unmount and remount every single bar's DOM, including
+  // the hit-target rect currently under the cursor, breaking hover before
+  // it could ever visually register. Calling this as a plain function
+  // avoids that: React never sees it as its own component boundary.
+  function renderSegmentedBar({ barX, barValueY, color, dim, onEnter, onLeave, ariaLabel }: { barX: number; barValueY: number; color: string; dim: boolean; onEnter: () => void; onLeave: () => void; ariaLabel: string }) {
+    const filled: number[] = [];
+    for (let i = 0; i < segCount; i++) {
+      const segBottom = baseline - i * SEG_PITCH;
+      const segTop = segBottom - SEG_H;
+      if (segTop >= barValueY - 0.5) filled.push(i);
+    }
+    return (
+      <g style={{ opacity: dim ? 0.4 : 1, transition: "opacity 120ms ease" }}>
+        {Array.from({ length: segCount }, (_, i) => {
+          const segBottom = baseline - i * SEG_PITCH;
+          const segTop = segBottom - SEG_H;
+          const isFilled = filled.includes(i);
+          const t = filled.length > 1 ? filled.indexOf(i) / (filled.length - 1) : 1;
+          const opacity = isFilled ? 0.28 + t * 0.72 : 0.12;
+          return <rect key={i} x={barX} y={segTop} width={barW} height={SEG_H} rx={2.5} fill={color} opacity={opacity} />;
+        })}
+        <rect
+          x={barX} y={padTop} width={barW} height={plotH}
+          fill="transparent" style={{ cursor: "pointer" }}
+          tabIndex={0} role="button" aria-label={ariaLabel}
+          onMouseEnter={onEnter} onMouseLeave={onLeave} onFocus={onEnter} onBlur={onLeave}
+        />
+      </g>
+    );
+  }
   return (
     <figure className="m-0 flex flex-col gap-[10px]">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Bar chart: ${series.map((s) => s.label).join(", ")} by ${groups.join(", ")}`} className="h-auto w-full overflow-visible" preserveAspectRatio="none" style={{ height }}>
-        <defs>
-          {perGroupColor
-            ? groups.map((label, gi) => (
-                <linearGradient key={label} id={`bar-grad-${id}-g${gi}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={barColors[gi]} stopOpacity="1" />
-                  <stop offset="100%" stopColor={barColors[gi]} stopOpacity="0.55" />
-                </linearGradient>
-              ))
-            : series.map((s, si) => (
-                <linearGradient key={s.label} id={`bar-grad-${id}-${si}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={s.accent} stopOpacity="1" />
-                  <stop offset="100%" stopColor={s.accent} stopOpacity="0.55" />
-                </linearGradient>
-              ))}
-        </defs>
+      {/* Same preserveAspectRatio="none" distortion as AreaChart -- fixed
+         here the same way, by aspect-ratio sizing instead of forcing a
+         non-uniform stretch on every axis (direct report: "squished or
+         skewed"). */}
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Bar chart: ${series.map((s) => s.label).join(", ")} by ${groups.join(", ")}${targetLine ? `; target ${targetLine.value}${valueSuffix}` : ""}`} className="h-auto w-full overflow-visible" style={{ aspectRatio: `${W} / ${H}` }}>
+        {/* Y-axis: gridlines now carry their own value, not just faint
+           unlabeled hairlines -- a chart with no axis reads as unfinished. */}
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * plotH} y2={padTop + t * plotH} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+          <g key={t}>
+            <line x1={padLeft} x2={W - padRight} y1={padTop + t * plotH} y2={padTop + t * plotH} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+            <text x={padLeft - 8} y={padTop + t * plotH + 3.5} textAnchor="end" style={{ fontSize: 10, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
+              {Math.round(max * (1 - t))}{valueSuffix}
+            </text>
+          </g>
         ))}
+        {/* Just the dashed reference line, named in the legend below --
+           the gradient wash tried above it (twice) never sat right: an
+           SVG rect can't be pinned to an HTML header's own border, and
+           anchoring it inside the plot instead boxed in whatever bar
+           label happened to be near the target value (direct reports:
+           "getting clipped", then "the frame starts where the 100% number
+           is", then "it looks really bad, maybe it should be removed").
+           A precise line has no such alignment problem. */}
+        {targetLine && targetY !== null && (
+          <line x1={padLeft} x2={W - padRight} y1={targetY} y2={targetY} stroke={targetColor} strokeWidth="2" strokeDasharray="6 4" opacity="1" vectorEffect="non-scaling-stroke" />
+        )}
         {groups.map((label, gi) => {
-          const groupX = padX + gi * groupW;
+          const rawGroupX = padLeft + gi * groupW;
+          const groupX = rawGroupX + clusterOffset;
+          const labelCenterX = rawGroupX + groupW / 2;
           if (perGroupColor) {
             const v = series[0].values[gi] ?? 0;
             const color = barColors[gi];
             const barX = groupX + barGap;
             const barY = y(v);
+            const dim = hover !== null && hover.gi !== gi;
             return (
               <g key={label}>
                 {v > 0 && (
-                  <g>
-                    <rect x={barX} y={barY} width={barW} height={H - padBottom - barY} fill={`url(#bar-grad-${id}-g${gi})`} rx={5} style={{ filter: `drop-shadow(0 0 8px color-mix(in srgb, ${color} 55%, transparent))` }} />
-                    <rect x={barX} y={barY} width={barW} height={Math.min(3, H - padBottom - barY)} fill={color} rx={1.5} opacity={0.9} />
+                  <>
+                    {renderSegmentedBar({
+                      barX, barValueY: barY, color, dim,
+                      ariaLabel: `${label}: ${Math.round(v)}${valueSuffix}`,
+                      onEnter: () => setHover({ gi, si: 0 }), onLeave: () => setHover(null),
+                    })}
                     <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>
                       {Math.round(v)}{valueSuffix}
                     </text>
-                  </g>
+                  </>
                 )}
-                <text x={groupX + groupW / 2} y={H - 6} textAnchor="middle" style={{ fontSize: 11.5, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
+                <text x={labelCenterX} y={H - 6} textAnchor="middle" style={{ fontSize: 11.5, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
                   {label}
                 </text>
               </g>
@@ -242,31 +363,63 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
                 if (v <= 0) return null;
                 const barX = groupX + barGap + si * (barW + barGap);
                 const barY = y(v);
+                const dim = hover !== null && (hover.gi !== gi || hover.si !== si);
                 return (
                   <g key={s.label}>
-                    <rect x={barX} y={barY} width={barW} height={H - padBottom - barY} fill={`url(#bar-grad-${id}-${si})`} rx={5} style={{ filter: `drop-shadow(0 0 8px color-mix(in srgb, ${s.accent} 55%, transparent))` }} />
-                    <rect x={barX} y={barY} width={barW} height={Math.min(3, H - padBottom - barY)} fill={s.accent} rx={1.5} opacity={0.9} />
+                    {renderSegmentedBar({
+                      barX, barValueY: barY, color: s.accent, dim,
+                      ariaLabel: `${label}, ${s.label}: ${Math.round(v)}${valueSuffix}`,
+                      onEnter: () => setHover({ gi, si }), onLeave: () => setHover(null),
+                    })}
                     <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>
                       {Math.round(v)}{valueSuffix}
                     </text>
                   </g>
                 );
               })}
-              <text x={groupX + groupW / 2} y={H - 6} textAnchor="middle" style={{ fontSize: 11.5, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
+              <text x={labelCenterX} y={H - 6} textAnchor="middle" style={{ fontSize: 11.5, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
                 {label}
               </text>
             </g>
           );
         })}
+        {/* Pinned callout above the hovered/focused bar -- same device as
+           the Orbit reference's "$120K" peak label: a small rounded box on
+           a leader line, naming exactly what's under the cursor instead of
+           making the reader trace back to the axis. */}
+        {hover && hoveredBar && (() => {
+          const gX = padLeft + hover.gi * groupW + clusterOffset;
+          const bX = perGroupColor ? gX + barGap : gX + barGap + hover.si * (barW + barGap);
+          const bY = y(hoveredBar.value);
+          const cx = Math.min(W - padRight - 62, Math.max(padLeft + 62, bX + barW / 2));
+          const boxY = Math.max(2, bY - 34);
+          const text = hoveredBar.seriesLabel ? `${hoveredBar.groupLabel} · ${hoveredBar.seriesLabel}` : hoveredBar.groupLabel;
+          return (
+            <g style={{ pointerEvents: "none" }}>
+              <line x1={bX + barW / 2} x2={bX + barW / 2} y1={boxY + 20} y2={bY} stroke={hoveredBar.color} strokeWidth="1.5" strokeDasharray="2 3" opacity="0.7" />
+              <circle cx={bX + barW / 2} cy={bY} r="3" fill={hoveredBar.color} stroke="#0e0c20" strokeWidth="1.5" />
+              <rect x={cx - 60} y={boxY} width="120" height="20" rx="6" fill="#0e0c20" stroke="rgba(255,255,255,0.14)" />
+              <text x={cx} y={boxY + 13.5} textAnchor="middle" style={{ fontSize: 10.5, fontWeight: 700, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+                {text}: {Math.round(hoveredBar.value)}{valueSuffix}
+              </text>
+            </g>
+          );
+        })()}
       </svg>
-      {series.length > 1 && (
+      {(series.length > 1 || targetLine) && (
         <div className="flex flex-wrap gap-x-[16px] gap-y-[4px]">
-          {series.map((s) => (
+          {series.length > 1 && series.map((s) => (
             <span key={s.label} className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               <span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: s.accent }} />
               {s.label}
             </span>
           ))}
+          {targetLine && (
+            <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: targetColor }}>
+              <span aria-hidden className="h-0 w-[14px] flex-none border-t-2" style={{ borderColor: targetColor, borderStyle: "dashed" }} />
+              {targetLine.label}: {targetLine.value}{valueSuffix}
+            </span>
+          )}
         </div>
       )}
     </figure>

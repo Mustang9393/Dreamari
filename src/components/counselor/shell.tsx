@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
-import { QuickLinksMenu } from "@/components/app/chrome";
+import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, signOutCounselor } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 
@@ -54,8 +54,27 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
 export type GradeFilter = "All Grades" | 9 | 10 | 11 | 12;
 const GRADE_OPTIONS: GradeFilter[] = ["All Grades", 9, 10, 11, 12];
 
-type FiltersState = { gradeFilter: GradeFilter; setGradeFilter: (g: GradeFilter) => void; search: string; setSearch: (s: string) => void };
-const CounselorFiltersContext = createContext<FiltersState>({ gradeFilter: "All Grades", setGradeFilter: () => {}, search: "", setSearch: () => {} });
+// Set by clicking a donut segment on Overview, read by the Students roster
+// -- lets a click-through land on a pre-filtered caseload instead of just
+// the view itself (direct instruction: donut segments should navigate to a
+// filtered Roster). Lives in this same shared context, not the URL, since
+// the whole dashboard is one client-side view switch, not a real route
+// change, and every other cross-view filter here already works this way.
+export type StatusRosterFilter = "All" | "On Track" | "Needs Attention" | "At Risk";
+export type PlanRosterFilter = "All" | "With Plan" | "Undecided";
+
+type FiltersState = {
+  gradeFilter: GradeFilter; setGradeFilter: (g: GradeFilter) => void;
+  search: string; setSearch: (s: string) => void;
+  statusFilter: StatusRosterFilter; setStatusFilter: (s: StatusRosterFilter) => void;
+  planFilter: PlanRosterFilter; setPlanFilter: (p: PlanRosterFilter) => void;
+};
+const CounselorFiltersContext = createContext<FiltersState>({
+  gradeFilter: "All Grades", setGradeFilter: () => {},
+  search: "", setSearch: () => {},
+  statusFilter: "All", setStatusFilter: () => {},
+  planFilter: "All", setPlanFilter: () => {},
+});
 export function useCounselorFilters(): FiltersState {
   return useContext(CounselorFiltersContext);
 }
@@ -103,15 +122,18 @@ function SidebarAccount({ account, onSignOut }: { account: { name: string; schoo
   );
 }
 
+// The real app wordmark (same logo-mark.svg + "DREAMARI" set every student
+// page uses), not a hand-drawn "D" square -- this dashboard is a Dreamari
+// product, not a differently-branded tool (direct feedback: "use the
+// dreamari brandmark and logo from the other app here"). "Command Center"
+// stays as a caption under it so the two products are still visually
+// distinct at a glance.
 function Wordmark() {
   return (
-    <Link href="/counselor?view=overview" className="dm-link flex items-center gap-[10px]">
-      <span className="flex size-[34px] flex-none items-center justify-center rounded-[var(--radius-md)] text-[15px] font-extrabold" style={{ background: "var(--primary)", color: "#FFFFFF", fontFamily: "var(--font-display)" }}>D</span>
-      <span className="flex flex-col leading-tight">
-        <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Dreamari</span>
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Command Center</span>
-      </span>
-    </Link>
+    <span className="flex flex-col gap-[2px]">
+      <AppWordmark href="/counselor?view=overview" />
+      <span className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Command Center</span>
+    </span>
   );
 }
 
@@ -138,6 +160,8 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("All Grades");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusRosterFilter>("All");
+  const [planFilter, setPlanFilter] = useState<PlanRosterFilter>("All");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { title, subtitle: subtitleRaw } = VIEW_TITLES[active];
   // Matches the reference's own copy exactly ("Welcome back, Sarah...") --
@@ -152,7 +176,7 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
   };
 
   return (
-    <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch }}>
+    <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter }}>
       {/* marketing-v2 defines --primary, --card, --foreground, and every
          other token used across this dashboard (see marketing/tokens.css,
          scoped to .marketing-v2, not root). This wrapper only had

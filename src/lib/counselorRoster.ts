@@ -269,3 +269,47 @@ export function getStudentById(id: string): CounselorStudent | undefined {
   if (id === "real-student") return realStudentEntry();
   return getRoster().find((s) => s.id === id);
 }
+
+/** A short, specific reason a student is flagged, derived straight from
+ *  their own milestone data -- not a canned "needs attention" label. A
+ *  counselor scanning the Overview strip should see WHY, not just WHO
+ *  (direct instruction: "show a signal that shows why the students need
+ *  attention"). Checked worst-first: an actual rejection is more urgent
+ *  than something merely not started yet, which is more urgent than a low
+ *  roadmap percentage with no specific stalled milestone. */
+export type AttentionSeverity = "Critical" | "High" | "Medium";
+const SEVERITY_RANK: Record<AttentionSeverity, number> = { Critical: 3, High: 2, Medium: 1 };
+
+// Reason and severity computed together, from the same read of the
+// student's milestones, so the two can never disagree with each other --
+// an active rejection sitting unaddressed (Changes Requested) outranks a
+// milestone that's merely not started yet, which outranks a generically
+// low roadmap percentage (direct instruction: "rate by severity so
+// counselor knows what to give attention first"). Milestone name leads,
+// flag word trails in the reason text -- shorter and more scannable than
+// a "Changes requested: X" label prefix, and reads the same direction as
+// the milestone chips everywhere else in this dashboard.
+function attentionSignal(s: CounselorStudent): { reason: string; severity: AttentionSeverity } {
+  const changesRequested = MILESTONE_KEYS.filter((k) => s.milestones[k] === "Changes Requested");
+  if (changesRequested.length > 0) return { reason: `${changesRequested[0]} needs changes`, severity: "Critical" };
+  const notStarted = MILESTONE_KEYS.filter((k) => s.milestones[k] === "Not Started");
+  if (notStarted.length >= 3) return { reason: `${notStarted.length} milestones not started`, severity: "High" };
+  if (notStarted.length === 1) return { reason: `${notStarted[0]} not started`, severity: "Medium" };
+  if (notStarted.length > 1) return { reason: `${notStarted[0]} +${notStarted.length - 1} more`, severity: "Medium" };
+  if (s.roadmapPct < 30) return { reason: `Roadmap ${s.roadmapPct}% complete`, severity: "Medium" };
+  return { reason: "Behind pace for grade", severity: "Medium" };
+}
+
+export function attentionReason(s: CounselorStudent): string {
+  return attentionSignal(s).reason;
+}
+export function attentionSeverity(s: CounselorStudent): AttentionSeverity {
+  return attentionSignal(s).severity;
+}
+/** Highest first. Ties (e.g. two "Medium"s) fall back to whichever
+ *  student has completed less of their roadmap -- the more behind one
+ *  surfaces first within the same tier. */
+export function attentionRank(a: CounselorStudent, b: CounselorStudent): number {
+  const bySeverity = SEVERITY_RANK[attentionSeverity(b)] - SEVERITY_RANK[attentionSeverity(a)];
+  return bySeverity !== 0 ? bySeverity : a.roadmapPct - b.roadmapPct;
+}

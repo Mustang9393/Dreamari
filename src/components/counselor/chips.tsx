@@ -1,4 +1,9 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 import type { CaseloadStatus, MilestoneStatus } from "@/lib/counselorRoster";
+import { useStudentAvatarSrc } from "@/lib/avatar";
 
 // Shared status pills -- the same caseload-status and milestone-review
 // vocabulary shows up on Students, the student drill-down, Milestone
@@ -40,13 +45,44 @@ export function initials(name: string): string {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }
 
+// The same illustrated black/white portrait set every student wears
+// app-wide (src/lib/avatar.ts), not a separate initials-only style just
+// for this dashboard (direct instruction: "use the avatars from our
+// collections... make sure there is diversity and variety and they make
+// sense for the names"). That module already does the real work: 18
+// common first names are pinned to a gender/ethnicity-matched portrait
+// from a deliberately diverse 48-portrait set, and every other name
+// (most of this roster's synthetic first names) draws a stable, varied
+// portrait from that same diverse set via a deterministic hash -- so this
+// component only has to point at it, not re-solve diversity itself.
+// First name only, so "Jordan Rivera" (roster row) and "Jordan" (handle
+// elsewhere in the app) draw the identical face for the one real student.
+// Falls back to initials (this dashboard's original treatment) only if
+// the image itself ever fails to load.
 export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  const seed = name.split(" ")[0] || name;
+  const src = useStudentAvatarSrc(seed);
+  if (failed) {
+    return (
+      <span
+        className="flex flex-none items-center justify-center rounded-full text-[12.5px] font-extrabold"
+        style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}
+      >
+        {initials(name)}
+      </span>
+    );
+  }
   return (
-    <span
-      className="flex flex-none items-center justify-center rounded-full text-[12.5px] font-extrabold"
-      style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}
-    >
-      {initials(name)}
-    </span>
+    <Image
+      key={src}
+      src={src}
+      alt=""
+      width={128}
+      height={128}
+      className="flex-none rounded-full object-cover"
+      style={{ width: size, height: size, background: "var(--secondary)" }}
+      onError={() => setFailed(true)}
+    />
   );
 }

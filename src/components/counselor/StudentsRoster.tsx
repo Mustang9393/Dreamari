@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Filter, ChevronRight, ChevronLeft } from "lucide-react";
+import { Filter, ChevronRight, ChevronLeft, ChevronUp, ChevronDown } from "lucide-react";
 import { Meter } from "@/components/connect/viz";
 import { getRoster } from "@/lib/counselorRoster";
 import { useCounselorFilters } from "./shell";
@@ -16,7 +16,7 @@ function HeaderCell({ label, sortable, keyName, sortKey, sortDir, onSort }: { la
       {sortable && keyName ? (
         <button type="button" onClick={() => onSort(keyName)} className="dm-quiet flex cursor-pointer items-center gap-[4px]" style={{ color: sortKey === keyName ? "var(--foreground)" : "var(--muted-foreground)" }}>
           {label}
-          {sortKey === keyName && <span aria-hidden>{sortDir === "asc" ? "↑" : "↓"}</span>}
+          {sortKey === keyName && (sortDir === "asc" ? <ChevronUp className="h-[13px] w-[13px]" aria-hidden /> : <ChevronDown className="h-[13px] w-[13px]" aria-hidden />)}
         </button>
       ) : label}
     </th>
@@ -27,7 +27,7 @@ const PAGE_SIZE = 20;
 
 export function StudentsRoster() {
   const router = useRouter();
-  const { gradeFilter, search } = useCounselorFilters();
+  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter } = useCounselorFilters();
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
@@ -35,6 +35,9 @@ export function StudentsRoster() {
   const roster = useMemo(() => {
     let list = getRoster();
     if (gradeFilter !== "All Grades") list = list.filter((s) => s.grade === gradeFilter);
+    if (statusFilter !== "All") list = list.filter((s) => s.status === statusFilter);
+    if (planFilter === "With Plan") list = list.filter((s) => s.postsecondaryIntent !== "Undecided");
+    if (planFilter === "Undecided") list = list.filter((s) => s.postsecondaryIntent === "Undecided");
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((s) => s.name.toLowerCase().includes(q) || s.careerTrack.toLowerCase().includes(q));
     const dir = sortDir === "asc" ? 1 : -1;
@@ -44,7 +47,7 @@ export function StudentsRoster() {
       if (sortKey === "roadmapPct") return (a.roadmapPct - b.roadmapPct) * dir;
       return a.status.localeCompare(b.status) * dir;
     });
-  }, [gradeFilter, search, sortKey, sortDir]);
+  }, [gradeFilter, search, statusFilter, planFilter, sortKey, sortDir]);
 
   const pageCount = Math.max(1, Math.ceil(roster.length / PAGE_SIZE));
   // Clamped at read time, not reset via an effect: if a filter shrinks the
@@ -60,12 +63,27 @@ export function StudentsRoster() {
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-[10px]">
         <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Showing {pageRows.length ? effectivePage * PAGE_SIZE + 1 : 0}–{effectivePage * PAGE_SIZE + pageRows.length} of {roster.length} student{roster.length === 1 ? "" : "s"}</span>
-        <span className="dm-quiet flex h-9 cursor-default items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-          <Filter className="h-[14px] w-[14px]" aria-hidden />
-          Filters
-        </span>
+        <div className="flex flex-wrap items-center gap-[8px]">
+          {/* Set by clicking a donut segment on Overview -- shown here as a
+             removable chip so it's obvious the list is narrowed and how to
+             get back, not just a table that quietly came up short. */}
+          {statusFilter !== "All" && (
+            <button type="button" onClick={() => setStatusFilter("All")} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--foreground)" }}>
+              {statusFilter} <span aria-hidden style={{ color: "var(--muted-foreground)" }}>✕</span>
+            </button>
+          )}
+          {planFilter !== "All" && (
+            <button type="button" onClick={() => setPlanFilter("All")} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--foreground)" }}>
+              {planFilter} <span aria-hidden style={{ color: "var(--muted-foreground)" }}>✕</span>
+            </button>
+          )}
+          <span className="dm-quiet flex h-9 cursor-default items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+            <Filter className="h-[14px] w-[14px]" aria-hidden />
+            Filters
+          </span>
+        </div>
       </div>
 
       {/* Unpaginated, this table rendered all 120 rows in one pass -- a

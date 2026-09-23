@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, Bell, MessageSquare, StickyNote, Target, Compass, GraduationCap,
+  ChevronLeft, Bell, MessageSquare, StickyNote, Target, Compass, GraduationCap,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle,
 } from "lucide-react";
 import { MetricTile, Segmented } from "@/components/connect/viz";
@@ -126,7 +126,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={() => router.push("/counselor?view=students")} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Back to Students
+          <ChevronLeft className="h-4 w-4" aria-hidden /> Back to Students
         </button>
         <div className="flex flex-wrap items-center gap-[8px]">
           <ActionButton icon={Bell} label="Send Reminder" onClick={() => flash(`Reminder sent to ${student.name}.`)} />
