@@ -261,9 +261,28 @@ export function Coachmark({
       {spotlight && rect && (
         <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full motion-safe:animate-[fade-slide-up_0.28s_ease]">
           <defs>
+            {/* Blurring the cutout shape itself (not the dim layer) turns a
+               crisp rounded-rect hole into a soft vignette -- the mask goes
+               from black (fully clear) to white (fully dimmed) over the
+               blur radius instead of snapping at one pixel (direct
+               feedback, 24 Sept 2026: "a more organic fade style border").
+               Extra padding (18px vs. a tight fit) keeps the actual target
+               fully clear in the center once the blur eats into it from
+               every edge. */}
+            <filter id={`${maskId}-soft`} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="14" />
+            </filter>
             <mask id={maskId}>
               <rect width="100%" height="100%" fill="white" />
-              <rect x={rect.left - 8} y={rect.top - 8} width={rect.width + 16} height={rect.height + 16} rx={12} fill="black" />
+              <rect
+                x={rect.left - 18}
+                y={rect.top - 18}
+                width={rect.width + 36}
+                height={rect.height + 36}
+                rx={16}
+                fill="black"
+                filter={`url(#${maskId}-soft)`}
+              />
             </mask>
           </defs>
           <rect width="100%" height="100%" fill="rgba(4,4,9,0.6)" mask={`url(#${maskId})`} />
