@@ -118,7 +118,7 @@ export function ExploreSectionTabs({
       <Coachmark
         active={showTutorial}
         targetRef={schoolsRef}
-        label="Schools have a tab too! Tap in for your college matches."
+        label="Schools have a tab too! Look up any school, or see the ones picked for you."
         onDismiss={() => onDismissTutorial?.()}
         spotlight
       />

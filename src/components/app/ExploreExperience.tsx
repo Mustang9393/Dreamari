@@ -1917,7 +1917,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             <Coachmark
               active={showSchoolsTutorial}
               targetRef={schoolsIconRef}
-              label="Schools have a tab too! Tap in for your college matches."
+              label="Schools have a tab too! Look up any school, or see the ones picked for you."
               onDismiss={dismissTour}
               spotlight
             />
