@@ -38,6 +38,14 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Coachmarks: viewport-safe portal positioning and progressive sequencing
+
+The Explore guided tour and Career Detail action hint are now positioned from the live target rectangle in viewport coordinates and rendered through `document.body`. The tooltip is clamped to a 16px viewport gutter, flips above/below when its preferred side has no room, and keeps its pointer aimed at the target after horizontal clamping. The overlay also cancels the app's wide-screen `body` zoom so its measured and rendered dimensions stay in the same coordinate system at 1920px and 2560px widths. Resize, nested scroll, and `visualViewport` changes all trigger a fresh measurement; tooltips hide while their target is offscreen and reappear when it returns.
+
+Cold loads previously deadlocked because the portal was gated on `targetRect`, while the measurement effect required the portal's bubble element to exist. The active portal now mounts invisibly for its first measurement. Explore also suppresses the For You action-icon hint until the two-step For You -> Schools tour is complete, preventing two coachmarks from overlapping on the reel.
+
+Verified the complete first-visit flow in a clean browser session, including splash dismissal, For You navigation, Schools completion, localStorage persistence, Career Detail dismissal, and hide/reappear behavior during scroll. Placement was checked at 320x568, 390x844, 768x1024, 1280x720, 1920x1080, and 2560x1440; visible tooltips remained inside the viewport, including with the 1.25 wide-screen body zoom. TypeScript, targeted ESLint, token validation, and the production build pass.
+
 ### 2026-09-23 For You card swipe: fixed a real "gets stuck" bug -- imperative spring-back instead of a declarative `animate` prop
 
 Direct report: "i can swipe left on the first slide and it goes and gets stuck, they should snap back to their original state if i swipe the wrong way." (Landed right after the tablet width-cap fix above, same session, same carousel.)

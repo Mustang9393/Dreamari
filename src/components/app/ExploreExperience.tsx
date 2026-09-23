@@ -1323,7 +1323,7 @@ function PreferenceButton({
 
 const REEL_SOUND_KEY = "dreamari:reel-sound-on";
 
-function ForYouFace() {
+function ForYouFace({ showActionsCoachmark }: { showActionsCoachmark: boolean }) {
   const total = FOR_YOU_FEED.length;
   const [active, setActive] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
@@ -1497,7 +1497,7 @@ function ForYouFace() {
                 disliked={itemPrefs?.disliked ?? false}
                 onSetLiked={(next) => itemSlug && setLiked(itemSlug, next)}
                 onSetDisliked={(next) => itemSlug && setDisliked(itemSlug, next)}
-                showActionsHint={showActionsHint && index === active}
+                showActionsHint={showActionsCoachmark && showActionsHint && index === active}
                 onDismissActionsHint={dismissActionsHint}
               />
             </div>
@@ -1517,7 +1517,7 @@ function ForYouFace() {
         prefs={prefs}
         setLiked={setLiked}
         setDisliked={setDisliked}
-        showActionsHint={showActionsHint}
+        showActionsHint={showActionsCoachmark && showActionsHint}
         dismissActionsHint={dismissActionsHint}
       />
 
@@ -1985,7 +1985,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             <ExploreSectionTabs active="careers" showTutorial={showSchoolsTutorial} onDismissTutorial={dismissTour} />
           </div>
           <div className="flex h-full min-w-0 flex-1 flex-col items-start">
-            {isDesktop && <ForYouFace />}
+            {isDesktop && <ForYouFace showActionsCoachmark={!tourNotSeen} />}
           </div>
           <div className="flex-none self-start">
             <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
@@ -2026,7 +2026,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {tab === "browse" ? (
           <BrowseFace query={query} filtersOpen={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} />
         ) : (
-          !isDesktop && <ForYouFace />
+          !isDesktop && <ForYouFace showActionsCoachmark={!tourNotSeen} />
         )}
       </main>
 

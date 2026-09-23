@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import { GestureHint } from "./GestureHint";
 
 // Persists per-device, not per-session -- a drag-to-reorder or drag-to-blank
@@ -133,10 +134,8 @@ export function GestureSpotlight({
 // never flush against it (direct feedback, 24 Sept 2026: "more padding...
 // do not overlap or hide other elements").
 const TARGET_GAP = 12;
-// The pointer triangle's own size. Always centered on the card now (the
-// card itself is centered on the target via CSS, see Coachmark below), so
-// no corner-clearance clamping is needed the way a computed, potentially
-// off-center position used to require.
+// The pointer triangle's own size. Its center follows the real target even
+// when the card itself has to clamp against a viewport edge.
 const ARROW_W = 16;
 const ARROW_H = 9;
 const CARD_RADIUS = 12;
@@ -205,176 +204,166 @@ export function Coachmark({
       existing coachmark (the icon rows) keeps its current plain look; opt
       in per call site. */
   spotlight?: boolean;
-  /** Which side of the target the card (and its pointer) sits on. No
-      auto-detection -- see the file-level comment on why measuring
-      available space was dropped; the caller already knows whether its
-      target sits near the top of the screen (pick "bottom") or the bottom
-      of a card (pick "top"). Defaults to "top". */
+  /** Preferred side of the target. The coachmark flips when that side does
+      not have enough viewport room. Defaults to "top". */
   side?: "top" | "bottom";
-  /** Horizontal anchor. "center" (default) centers the card on the target,
-      which can push it past the viewport edge on a narrow screen if the
-      target itself sits near that edge (confirmed live at 320px: "Prefer
-      scrolling?" started mid-word, cut off on the left). "start"/"end" pin
-      one edge of the card to the matching edge of the target instead, so it
-      only ever grows AWAY from the edge the caller knows the target is
-      close to -- e.g. a target near the left of the screen picks "start"
-      (grows rightward), one near the right picks "end" (grows leftward). No
-      measurement either way, same as `side`: the caller's own knowledge of
-      roughly where its target sits, not a runtime check. */
+  /** Preferred horizontal anchor. The final position is always clamped to
+      the viewport, and the pointer shifts back toward the real target. */
   align?: "start" | "center" | "end";
-  /** The real element this coachmark explains -- rendered as-is, wrapped in
-      a `position: relative` box so the card and glow can anchor to it with
-      plain CSS (`top: 100%` / `bottom: 100%`, both centered). */
+  /** The real element this coachmark explains. Its wrapper supplies the live
+      target rectangle used to position the portaled card and glow. */
   children: React.ReactNode;
 }) {
+  const targetRef = useRef<HTMLSpanElement | null>(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
-  // Still measured -- but ONLY this element's own box (offsetWidth/Height,
-  // never getBoundingClientRect, see the file-level comment), purely to
-  // build the clip-path outline at the right size for however long `label`
-  // happens to be. Nothing here depends on the target's position, the
-  // viewport's size, zoom, or DPI -- CSS anchoring (below) handles all of
-  // that natively, the one thing no amount of `getBoundingClientRect` math
-  // can ever be as reliable as.
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+
   useLayoutEffect(() => {
-    if (!active || !bubbleRef.current) {
-      setSize(null);
-      return;
-    }
-    const el = bubbleRef.current;
-    const sync = () => setSize({ width: el.offsetWidth, height: el.offsetHeight });
+    if (!active) return;
+
+    const target = targetRef.current;
+    const bubble = bubbleRef.current;
+    if (!target || !bubble) return;
+
+    // Keep position and size as two separate measurements. The target's
+    // viewport rect may legitimately be scaled by the app's responsive
+    // zoom; it is used only as an anchor. The tooltip's unscaled layout box
+    // builds its own outline. Mixing those coordinate spaces was what made
+    // the earlier implementation drift and deform on wide displays.
+    const sync = () => {
+      const nextRect = target.getBoundingClientRect();
+      // Explore renders separate phone and desktop controls and hides one
+      // with responsive CSS. Portals escape that hidden ancestor, so a
+      // zero-sized hidden target must not emit its own duplicate coachmark.
+      setTargetRect(target.getClientRects().length && nextRect.width > 0 && nextRect.height > 0 ? nextRect : null);
+      setSize({ width: bubble.offsetWidth, height: bubble.offsetHeight });
+    };
     sync();
-    // Font load, a locale making `label` render wider, etc. can all change
-    // the natural size after first paint -- ResizeObserver (not a resize
-    // listener; this box's size has nothing to do with the window's) keeps
-    // the outline in sync with whatever actually rendered.
     const ro = new ResizeObserver(sync);
-    ro.observe(el);
-    return () => ro.disconnect();
+    ro.observe(target);
+    ro.observe(bubble);
+    window.addEventListener("resize", sync);
+    window.addEventListener("scroll", sync, true);
+    window.visualViewport?.addEventListener("resize", sync);
+    window.visualViewport?.addEventListener("scroll", sync);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("scroll", sync, true);
+      window.visualViewport?.removeEventListener("resize", sync);
+      window.visualViewport?.removeEventListener("scroll", sync);
+    };
   }, [active, label]);
 
-  // Where the pointer sits along the card's own width -- centered for
-  // align="center" (the card is centered on the target, so its center IS
-  // the target's center); a fixed offset from whichever edge is PINNED to
-  // the target for "start"/"end", since the target's own exact width isn't
-  // measured. Approximate, not pixel-perfect, but always in the target's
-  // general direction rather than potentially aimed off the card entirely.
-  const EDGE_ARROW_OFFSET = 28;
-  const arrowCenter = size ? (align === "start" ? EDGE_ARROW_OFFSET : align === "end" ? size.width - EDGE_ARROW_OFFSET : size.width / 2) : 0;
-  const outlineD = size ? tooltipOutlinePath(size.width, size.height - ARROW_H, side, arrowCenter) : "";
+  const viewport = typeof window === "undefined"
+    ? { width: 0, height: 0 }
+    : { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight };
+  // The app intentionally zooms <body> on very wide screens. A portal into
+  // body inherits that zoom even though targetRect is already expressed in
+  // real viewport pixels, so cancel it on the overlay itself. Without this,
+  // a 272px coachmark becomes 340px and its fixed left/top are multiplied a
+  // second time at 1920/2560px.
+  const bodyZoom = typeof window === "undefined" ? 1 : Number.parseFloat(window.getComputedStyle(document.body).zoom) || 1;
+  const overlayZoom = 1 / bodyZoom;
+  const margin = 16;
+  const targetInViewport = !!targetRect
+    && targetRect.bottom > 0
+    && targetRect.top < viewport.height
+    && targetRect.right > 0
+    && targetRect.left < viewport.width;
+  let placementSide = side;
+  let left = -9999;
+  let top = -9999;
+  let arrowCenter = size ? size.width / 2 : 0;
 
-  return (
-    // The ONE piece of positioning logic this component still needs:
-    // establish a containing block for the card/glow right where the real
-    // target already is. No coordinates computed anywhere -- `top: 100%` /
-    // `bottom: 100%` and centering are the browser's own layout math against
-    // THIS element's box, which is by definition always exactly where the
-    // target is, on any screen size, zoom level, or DPI (direct feedback,
-    // 24 Sept 2026, after several rounds of getBoundingClientRect-based
-    // positioning breaking in real conditions -- confirmed on a real 15"/16"
-    // MacBook Pro, not just an emulated viewport: "track the exact element
-    // its meant to highlight... instead of computing distances from screen
-    // sizes"). inline-block/inline-flex so wrapping a target doesn't change
-    // how it sits in its own parent's flex row.
-    <span className="relative inline-flex">
-      {children}
-      {spotlight && active && (
-        // A bright ring directly on the target, not a page-wide dimming
-        // layer with a computed cutout -- that cutout was the other half of
-        // the same measuring-against-the-viewport problem this whole
-        // rewrite drops. `-inset-3`/`rounded` scale with the target's own
-        // box via plain CSS, same as the card below.
+  if (size && targetRect && viewport.width && viewport.height) {
+    const targetCenter = targetRect.left + targetRect.width / 2;
+    const idealLeft = align === "start"
+      ? targetRect.left
+      : align === "end"
+        ? targetRect.right - size.width
+        : targetCenter - size.width / 2;
+    left = Math.min(Math.max(idealLeft, margin), Math.max(margin, viewport.width - size.width - margin));
+
+    const below = targetRect.bottom + TARGET_GAP;
+    const above = targetRect.top - TARGET_GAP - size.height;
+    const fitsBelow = below + size.height <= viewport.height - margin;
+    const fitsAbove = above >= margin;
+    if (side === "bottom" && !fitsBelow && fitsAbove) placementSide = "top";
+    if (side === "top" && !fitsAbove && fitsBelow) placementSide = "bottom";
+    top = placementSide === "bottom" ? below : above;
+    top = Math.min(Math.max(top, margin), Math.max(margin, viewport.height - size.height - margin));
+
+    // The card may be clamped away from the target at a screen edge. Aim
+    // the pointer back at the actual target while keeping it clear of the
+    // rounded corners.
+    arrowCenter = Math.min(Math.max(targetCenter - left, CARD_RADIUS + ARROW_W), size.width - CARD_RADIUS - ARROW_W);
+  }
+
+  const outlineD = size ? tooltipOutlinePath(size.width, size.height - ARROW_H, placementSide, arrowCenter) : "";
+
+  // Mount the bubble as soon as the coachmark becomes active, even before
+  // the target has been measured. Its hidden first frame gives the layout
+  // effect a real bubble node to observe; gating the portal on
+  // targetInViewport created a deadlock on cold page loads because neither
+  // targetRect nor size could ever be populated.
+  const overlay = active && typeof document !== "undefined" ? createPortal(
+    <>
+      {spotlight && targetInViewport && targetRect && (
         <span
           aria-hidden
-          className="pointer-events-none absolute -inset-3 rounded-[16px] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
+          className="pointer-events-none fixed z-[9998] rounded-[16px] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
           style={{
+            zoom: overlayZoom,
+            left: targetRect.left - 12,
+            top: targetRect.top - 12,
+            width: targetRect.width + 24,
+            height: targetRect.height + 24,
             boxShadow: "0 0 0 3px rgba(56,148,255,0.6), 0 0 28px 8px rgba(56,148,255,0.5), 0 0 50px 16px rgba(124,92,250,0.3)",
             background: "radial-gradient(circle, rgba(255,255,255,0.22), transparent 65%)",
           }}
         />
       )}
-      {active && (
-        <div
-          ref={bubbleRef}
-          // NOT `motion-safe:animate-[fade-slide-up...]` -- that keyframe's
-          // own `transform: translateY(...)` REPLACES the element's whole
-          // `transform` property for the animation's duration, wiping out
-          // the `translateX(-50%)` centering below entirely (a CSS
-          // animation owns the properties it animates outright, it doesn't
-          // compose with a separately-set base value) -- confirmed live:
-          // computed `transform` read back as `none` and the card rendered
-          // off-center. A plain opacity-only keyframe can't touch transform
-          // in the first place.
-          className="absolute z-[60] flex w-[272px] max-w-[min(272px,calc(100vw-32px))] flex-col items-start gap-3 px-4 text-left backdrop-blur-[16px] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
-          style={{
-            [side === "top" ? "bottom" : "top"]: "100%",
-            ...(align === "start" ? { left: 0 } : align === "end" ? { right: 0 } : { left: "50%", transform: "translateX(-50%)" }),
-            [side === "top" ? "marginBottom" : "marginTop"]: TARGET_GAP,
-            // The Counselor Dashboard's own "premium glass" recipe
-            // (surfaces.ts: GLASS_CARD) -- a dark, nearly-opaque floor with
-            // a subtle brand-tinted gradient and an inset highlight, not one
-            // flat color. Recreated here (not imported -- that module
-            // belongs to the Counselor Dashboard's own isolated product,
-            // AGENTS.md) with hardcoded hex, not var(--primary): this used
-            // to be portaled onto <body>, outside the .themeable wrapper
-            // that defines the app's custom properties, which silently
-            // invalidated the whole gradient and dropped the background
-            // entirely (confirmed via computed style reading back `none`).
-            // No longer portaled, but kept hardcoded since it costs nothing
-            // and removes the dependency for good.
-            background: "linear-gradient(155deg, color-mix(in srgb, #2F6BF2 24%, rgba(24,24,36,0.97)) 0%, rgba(26,26,38,0.96) 55%, color-mix(in srgb, #7C5CFA 20%, rgba(24,24,36,0.97)) 100%)",
-            boxShadow: "0 22px 50px -24px rgba(0,0,0,0.8), inset 0 1px 0 0 rgba(255,255,255,0.14)",
-            clipPath: size ? `path('${outlineD}')` : undefined,
-            paddingTop: (side === "bottom" ? ARROW_H : 0) + 14,
-            paddingBottom: (side === "top" ? ARROW_H : 0) + 14,
-          }}
+      <div
+        ref={bubbleRef}
+        className="fixed z-[9999] flex w-[272px] max-w-[calc(100vw-32px)] flex-col items-start gap-3 px-4 text-left backdrop-blur-[16px] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
+        style={{
+          zoom: overlayZoom,
+          left,
+          top,
+          visibility: targetInViewport && size && targetRect ? "visible" : "hidden",
+          background: "linear-gradient(155deg, color-mix(in srgb, #2F6BF2 24%, rgba(24,24,36,0.97)) 0%, rgba(26,26,38,0.96) 55%, color-mix(in srgb, #7C5CFA 20%, rgba(24,24,36,0.97)) 100%)",
+          boxShadow: "0 22px 50px -24px rgba(0,0,0,0.8), inset 0 1px 0 0 rgba(255,255,255,0.14)",
+          clipPath: size ? `path('${outlineD}')` : undefined,
+          paddingTop: (placementSide === "bottom" ? ARROW_H : 0) + 14,
+          paddingBottom: (placementSide === "top" ? ARROW_H : 0) + 14,
+        }}
+      >
+        {size && (
+          <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
+            <path d={outlineD} fill="none" stroke="color-mix(in srgb, #2F6BF2 45%, rgba(255,255,255,0.35))" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+          </svg>
+        )}
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="relative flex w-full cursor-pointer flex-col items-start gap-3 bg-transparent text-left transition-[filter] duration-150 hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#3894FF]"
         >
-          {size && (
-            <svg
-              aria-hidden
-              className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
-              viewBox={`0 0 ${size.width} ${size.height}`}
-              preserveAspectRatio="none"
-            >
-              {/* One congruent outline -- card + pointer cut from the SAME
-                 `tooltipOutlinePath` as the clip-path above, so the stroke
-                 and the fill can never drift into two different shapes
-                 (direct feedback, 24 Sept 2026: "one congruent structure",
-                 "the border beam follows the whole outline including the
-                 arrow"). A static single tone, not a rotating rainbow
-                 gradient (direct feedback: "no color movement"). */}
-              <path
-                d={outlineD}
-                fill="none"
-                stroke="color-mix(in srgb, #2F6BF2 45%, rgba(255,255,255,0.35))"
-                strokeWidth={1.5}
-                vectorEffect="non-scaling-stroke"
-              />
-            </svg>
-          )}
-          <button
-            type="button"
-            onClick={onDismiss}
-            // NOT dm-quiet -- its :hover background is !important and was
-            // clobbering this bubble's own dark background the moment a
-            // mouse hovered it (direct feedback, 24 Sept 2026: "when i
-            // hover its weird"). A plain brightness lift gives the same
-            // "this is pressable" feedback without a color swap.
-            className="relative flex w-full cursor-pointer flex-col items-start gap-3 bg-transparent text-left transition-[filter] duration-150 hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#3894FF]"
-          >
-            <span className="text-[13.5px] leading-[19px] font-bold text-white">{label}</span>
-            {/* Its own secondary-styled pill, not the primary blue -- this
-               is a dismiss, not the call to action (direct feedback, 24
-               Sept 2026). */}
-            <span
-              className="inline-flex items-center self-start rounded-[8px] border px-3 py-1.5 text-[10px] font-bold tracking-[0.5px] text-white uppercase"
-              style={{ background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.3)" }}
-            >
-              {cta}
-            </span>
-          </button>
-        </div>
-      )}
+          <span className="text-[13.5px] leading-[19px] font-bold text-white">{label}</span>
+          <span className="inline-flex items-center self-start rounded-[8px] border px-3 py-1.5 text-[10px] font-bold tracking-[0.5px] text-white uppercase" style={{ background: "rgba(255,255,255,0.14)", borderColor: "rgba(255,255,255,0.3)" }}>
+            {cta}
+          </span>
+        </button>
+      </div>
+    </>,
+    document.body,
+  ) : null;
+
+  return (
+    <span ref={targetRef} className="relative inline-flex">
+      {children}
+      {overlay}
     </span>
   );
 }
