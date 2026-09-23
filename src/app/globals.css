@@ -494,6 +494,16 @@ body {
   0% { opacity: 0; transform: translateY(6px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+/* Pure opacity, no transform -- for an element that already sets its OWN
+   static transform (e.g. Coachmark's translateX(-50%) centering). A
+   keyframe animating `transform` takes over that whole property for its
+   duration and doesn't compose with a separately-set base value, which
+   silently broke that centering (GestureSpotlight.tsx's own comment has
+   the full story). */
+@keyframes coachmark-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
 /* Resume builder's left-anchored form drawer (ResumeModal, resume/ui.tsx):
    slides in from its own edge rather than fading in place, so it reads as
    a panel opening beside the live preview, not a dialog popping up. */

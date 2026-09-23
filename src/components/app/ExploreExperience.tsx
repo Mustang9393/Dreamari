@@ -93,7 +93,6 @@ export function ForYouBrowseToggle({
   showTutorial?: boolean;
   onDismissTutorial?: () => void;
 }) {
-  const forYouRef = useRef<HTMLButtonElement | null>(null);
   return (
     <>
     {/* Boxed pill only from `lg:` on -- this same component also renders on
@@ -113,10 +112,9 @@ export function ForYouBrowseToggle({
         ] as const
       ).map((item) => {
         const on = tab === item.key;
-        return (
+        const button = (
           <button
-            key={item.key}
-            ref={item.key === "foryou" ? forYouRef : undefined}
+            key={item.key === "foryou" ? undefined : item.key}
             type="button"
             aria-pressed={on}
             onClick={() => {
@@ -152,18 +150,26 @@ export function ForYouBrowseToggle({
             </span>
           </button>
         );
+        // Only "For you" ever gets the tour coachmark -- wrapping it here
+        // (rather than a separate targetRef elsewhere) is what actually
+        // anchors the card to THIS exact button via plain CSS.
+        if (item.key !== "foryou") return button;
+        return (
+          <Coachmark
+            key="foryou"
+            active={showTutorial && tab === "browse"}
+            label="Prefer scrolling? Check out For You! It's basically your own career reel, picked just for you."
+            onDismiss={() => onDismissTutorial?.()}
+            cta="Next"
+            side="bottom"
+            align="start"
+            spotlight
+          >
+            {button}
+          </Coachmark>
+        );
       })}
     </div>
-    {tab === "browse" && (
-      <Coachmark
-        active={showTutorial}
-        targetRef={forYouRef}
-        label="Prefer scrolling? Check out For You! It's basically your own career reel, picked just for you."
-        onDismiss={() => onDismissTutorial?.()}
-        cta="Next"
-        spotlight
-      />
-    )}
     </>
   );
 }
@@ -572,7 +578,6 @@ function EnvCard({
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
-  const actionsRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-advance Summary -> Details once the card has been sitting on
   // Summary for a few seconds -- direct instruction, 23 Sept 2026: "if they
@@ -690,7 +695,14 @@ function EnvCard({
          bottom-anchored as a pair) -- NOT pinned to the top of the card,
          which was a misreading of that flex layout the first time around. */}
       <div className="relative -mx-[var(--space-4)] -mb-[var(--space-4)] flex flex-col">
-        <div ref={actionsRef} className="flex flex-col items-end gap-[var(--space-4)] px-[var(--space-4)] pb-[var(--space-4)] lg:hidden">
+        <Coachmark
+          active={showActionsHint}
+          label="Like, save, or add a career to your Top 3 — right from here."
+          onDismiss={onDismissActionsHint}
+          align="end"
+          spotlight
+        >
+        <div className="flex flex-col items-end gap-[var(--space-4)] px-[var(--space-4)] pb-[var(--space-4)] lg:hidden">
           <PreferenceButton
             label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
             Icon={inTop3 ? Minus : Plus}
@@ -756,6 +768,7 @@ function EnvCard({
             }}
           />
         </div>
+        </Coachmark>
         {swapCandidate && (
           <Top3SwapModal
             incomingId={swapCandidate}
@@ -773,13 +786,6 @@ function EnvCard({
           <UndoToast message="Removed from your Top 3" onUndo={() => restore(undoRemove)} onClose={() => setUndoRemove(null)} />
         )}
         {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-        <Coachmark
-          active={showActionsHint}
-          targetRef={actionsRef}
-          label="Like, save, or add a career to your Top 3 — right from here."
-          onDismiss={onDismissActionsHint}
-          spotlight
-        />
 
         {/* Career Details Panel: the whole block, text through the CTA row,
            sits on ONE continuous backdrop -- not a blurred text panel with
@@ -1566,7 +1572,6 @@ function DesktopPreferenceRail({
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
-  const actionsRef = useRef<HTMLDivElement | null>(null);
 
   if (!activeItem || isVideoReel(activeItem)) {
     // Still rendered (empty) rather than unmounted -- keeps the row's own
@@ -1582,7 +1587,14 @@ function DesktopPreferenceRail({
   const disliked = prefs[slug]?.disliked ?? false;
 
   return (
-    <div ref={actionsRef} className="hidden flex-col items-center gap-[var(--space-6)] lg:flex">
+    <Coachmark
+      active={showActionsHint}
+      label="Like, save, or add a career to your Top 3 — right from here."
+      onDismiss={dismissActionsHint}
+      align="end"
+      spotlight
+    >
+    <div className="hidden flex-col items-center gap-[var(--space-6)] lg:flex">
       <PreferenceButton
         label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
         Icon={inTop3 ? Minus : Plus}
@@ -1660,14 +1672,8 @@ function DesktopPreferenceRail({
         <UndoToast message="Removed from your Top 3" onUndo={() => restore(undoRemove)} onClose={() => setUndoRemove(null)} />
       )}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-      <Coachmark
-        active={showActionsHint}
-        targetRef={actionsRef}
-        label="Like, save, or add a career to your Top 3 — right from here."
-        onDismiss={dismissActionsHint}
-        spotlight
-      />
     </div>
+    </Coachmark>
   );
 }
 
@@ -1758,9 +1764,15 @@ function DesktopSearchToggle({
         )}
       </div>
       </BorderBeam>
-      {/* Toggle collapses while search is open. */}
+      {/* Toggle collapses while search is open. No `overflow: hidden` --
+         that was clipping the coachmark card below it, which is now a
+         normal DOM child of the toggle (CSS-anchored, not portaled to
+         <body> anymore) and taller than this wrapper's own collapsed
+         width. Safe to drop: `opacity` fades to 0 in lockstep with
+         `maxWidth`, so whatever isn't clipped away by the shrinking width
+         is invisible anyway by the time it would otherwise poke out. */}
       <div
-        className="flex-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        className="flex-none transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
       >
         <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudge} showTutorial={showTutorial} onDismissTutorial={onDismissTutorial} />
@@ -1802,7 +1814,6 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   // Mobile/tablet's own Schools entry point is the graduation-cap icon below
   // -- desktop shows ExploreSectionTabs' text tabs instead, wired the same
   // way further down.
-  const schoolsIconRef = useRef<HTMLButtonElement | null>(null);
 
   function switchTab(next: "foryou" | "browse") {
     setTab(next);
@@ -1904,25 +1915,26 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
                 </button>
               </IconTip>
             )}
-            <IconTip label="Schools">
-              <button
-                ref={schoolsIconRef}
-                type="button"
-                aria-label="Find a college"
-                onClick={() => { dismissTour(); router.push("/colleges"); }}
-                className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-                style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                <GraduationCap className="h-4 w-4" />
-              </button>
-            </IconTip>
             <Coachmark
               active={showSchoolsTutorial}
-              targetRef={schoolsIconRef}
               label="Schools have a tab too! Look up any school, or see the ones picked for you."
               onDismiss={dismissTour}
+              side="bottom"
+              align="end"
               spotlight
-            />
+            >
+              <IconTip label="Schools">
+                <button
+                  type="button"
+                  aria-label="Find a college"
+                  onClick={() => { dismissTour(); router.push("/colleges"); }}
+                  className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+                  style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+                >
+                  <GraduationCap className="h-4 w-4" />
+                </button>
+              </IconTip>
+            </Coachmark>
           </div>
         </div>
         {/* Explore Header (desktop) -- Browse only. For You gets its own

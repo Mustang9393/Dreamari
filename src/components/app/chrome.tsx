@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Sun, Users, X } from "lucide-react";
 import { NotificationsButton } from "./Inbox";
@@ -71,59 +71,62 @@ export function ExploreSectionTabs({
 }) {
   const router = useRouter();
   const [pulsePlayed, setPulsePlayed] = useState(false);
-  const schoolsRef = useRef<HTMLButtonElement | null>(null);
   return (
-    <>
     <div role="tablist" aria-label="Explore section" className="flex items-center gap-[var(--space-4)]">
       {EXPLORE_SECTIONS.map((section, i) => {
         const isActive = section.key === active;
         const pulsing = showTutorial && !pulsePlayed && section.key === "colleges" && !isActive;
+        const button = (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            aria-current={isActive ? "page" : undefined}
+            onClick={() => { onDismissTutorial?.(); if (!isActive) router.push(section.href); }}
+            onAnimationEnd={() => { if (pulsing) setPulsePlayed(true); }}
+            className={`relative -mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
+            style={{
+              fontFamily: "var(--font-body)",
+              color: isActive ? "var(--foreground)" : "var(--muted-foreground)",
+            }}
+          >
+            {section.label}
+            {/* Underline slides between Careers/Colleges via a shared
+               layoutId instead of just snapping into place (direct
+               feedback: "have whatever highlight we end up keeping for
+               tabs... animate and slide over when we switch"). */}
+            {isActive && (
+              <motion.span
+                layoutId="explore-section-tab-underline"
+                aria-hidden
+                className="absolute inset-x-0 -bottom-[5px] h-[2px]"
+                style={{ background: "var(--accent)" }}
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              />
+            )}
+          </button>
+        );
         return (
           <span key={section.key} className="flex items-center gap-[var(--space-4)]">
             {i > 0 && <span aria-hidden style={{ color: "var(--glass-border)" }}>|</span>}
-            <button
-              ref={section.key === "colleges" ? schoolsRef : undefined}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              aria-current={isActive ? "page" : undefined}
-              onClick={() => { onDismissTutorial?.(); if (!isActive) router.push(section.href); }}
-              onAnimationEnd={() => { if (pulsing) setPulsePlayed(true); }}
-              className={`relative -mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
-              style={{
-                fontFamily: "var(--font-body)",
-                color: isActive ? "var(--foreground)" : "var(--muted-foreground)",
-              }}
-            >
-              {section.label}
-              {/* Underline slides between Careers/Colleges via a shared
-                 layoutId instead of just snapping into place (direct
-                 feedback: "have whatever highlight we end up keeping for
-                 tabs... animate and slide over when we switch"). */}
-              {isActive && (
-                <motion.span
-                  layoutId="explore-section-tab-underline"
-                  aria-hidden
-                  className="absolute inset-x-0 -bottom-[5px] h-[2px]"
-                  style={{ background: "var(--accent)" }}
-                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                />
-              )}
-            </button>
+            {section.key === "colleges" && active === "careers" ? (
+              <Coachmark
+                active={showTutorial}
+                label="Schools have a tab too! Look up any school, or see the ones picked for you."
+                onDismiss={() => onDismissTutorial?.()}
+                side="bottom"
+                align="end"
+                spotlight
+              >
+                {button}
+              </Coachmark>
+            ) : (
+              button
+            )}
           </span>
         );
       })}
     </div>
-    {active === "careers" && (
-      <Coachmark
-        active={showTutorial}
-        targetRef={schoolsRef}
-        label="Schools have a tab too! Look up any school, or see the ones picked for you."
-        onDismiss={() => onDismissTutorial?.()}
-        spotlight
-      />
-    )}
-    </>
   );
 }
 

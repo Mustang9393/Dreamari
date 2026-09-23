@@ -5,7 +5,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Minus, Plus, Sparkles, ThumbsDown, Users, X } from "lucide-react";
@@ -510,7 +510,6 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
-  const actionsRef = useRef<HTMLDivElement | null>(null);
   const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons");
 
   if (!career) {
@@ -646,7 +645,14 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   <Users className="h-4 w-4" aria-hidden /> Connect
                 </button>
               )}
-              <div ref={actionsRef} className="flex items-center gap-[var(--space-2)]">
+              <Coachmark
+                active={showActionsHint}
+                label="Like, save, or add a career to your Top 3 — right from here."
+                onDismiss={dismissActionsHint}
+                align="end"
+                spotlight
+              >
+              <div className="flex items-center gap-[var(--space-2)]">
                 <IconButton
                   label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
                   active={inTop3}
@@ -704,6 +710,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
               </div>
+              </Coachmark>
               </div>
             </div>
           </div>
@@ -985,13 +992,6 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         />
       )}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-      <Coachmark
-        active={showActionsHint}
-        targetRef={actionsRef}
-        label="Like, save, or add a career to your Top 3 — right from here."
-        onDismiss={dismissActionsHint}
-        spotlight
-      />
 
       <MobileNav active="Explore" />
     </div>
