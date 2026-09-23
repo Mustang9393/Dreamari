@@ -759,6 +759,22 @@ body {
   }
 }
 
+/* The chip an auto-swap just bumped back to unselected -- a quick dip so
+   losing its selected state reads as a deliberate swap, not a glitch. */
+@keyframes chip-swap-out {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.94);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @keyframes confirm-shimmer-sweep {
   0% {
     transform: translateX(-120%) skewX(-18deg);

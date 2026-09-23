@@ -448,15 +448,31 @@ export function ChipGrid({
   // One shared glow window for the whole grid (not per-chip -- hooks can't live inside
   // .map()) applied to whichever options are currently selected when it fires.
   const confirming = useConfirmGlow(selected.length > 0);
+  // Briefly marks whichever chip just got bumped by an auto-swap (below) so it
+  // gets its own little "this one left" animation instead of just silently
+  // losing its selected style -- direct feedback, 24 Sept 2026: picking a new
+  // chip at the cap required manually deselecting one first, which "creates
+  // friction."
+  const [justSwapped, setJustSwapped] = useState<string | null>(null);
 
   function toggle(option: string, e: React.MouseEvent) {
     if (selected.includes(option)) {
       onChange(selected.filter((item) => item !== option));
       return;
     }
-    // Hard cap: at the max, new picks are locked out until one is deselected —
-    // no silent oldest-swap.
-    if (atMax) return;
+    // At the cap, the OLDEST pick (selected[0] -- insertion order) is bumped
+    // for the new one instead of locking new picks out entirely. Cheap to
+    // undo (tap the bumped option again) since this is a max-2/3 list, not a
+    // long one, so the FIFO guess is rarely the wrong one.
+    if (atMax) {
+      const [outgoing, ...rest] = selected;
+      setJustSwapped(outgoing);
+      window.setTimeout(() => setJustSwapped((current) => (current === outgoing ? null : current)), 320);
+      dispatchAuroraPulse("select", e);
+      onPick?.();
+      onChange([...rest, option]);
+      return;
+    }
     dispatchAuroraPulse("select", e);
     onPick?.();
     onChange([...selected, option]);
@@ -467,22 +483,21 @@ export function ChipGrid({
       <div ref={gridRef} className={`grid auto-rows-fr gap-1.5 ${columns}`}>
         {visibleOptions.map((option, index) => {
         const isSelected = selected.includes(option);
-        const isLocked = atMax && !isSelected;
         const accent = accents?.[option] ?? "var(--color-brand-400)";
         const glowing = isSelected && confirming;
+        const swappedOut = option === justSwapped;
         return (
           <button
             key={option}
             type="button"
             aria-pressed={isSelected}
-            aria-disabled={isLocked}
             onClick={(e) => toggle(option, e)}
             // No per-chip backdrop-filter: a dozen stacked backdrop-blur layers
             // is a WebKit compositing bomb on phones; the token surface reads
             // fine without it.
-            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] ${
-              isLocked ? "cursor-not-allowed opacity-40" : "dm-tap"
-            } ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
+            className={`relative flex h-full min-h-[44px] items-center gap-2.5 rounded-[var(--radius-md)] border px-3 py-2 text-left text-[13.5px] leading-snug font-semibold transition-all duration-150 sm:text-[14px] dm-tap ${
+              glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : swappedOut ? "motion-safe:animate-[chip-swap-out_0.32s_ease-out]" : ""
+            }`}
             style={{
               background: isSelected ? `color-mix(in srgb, ${accent} 16%, var(--color-glass-surface-raised))` : "var(--color-glass-surface-raised)",
               borderColor: isSelected ? accent : GLASS_PANEL_BORDER,

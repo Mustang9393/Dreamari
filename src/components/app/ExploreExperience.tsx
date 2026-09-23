@@ -9,8 +9,15 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Minus, Plus, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
+import { useSavedCareers } from "@/lib/savedCareers";
+import { useTop3 } from "@/lib/useTop3";
+import type { Picks } from "@/lib/picks";
+import { Top3SwapModal } from "@/components/career/Top3SwapModal";
+import { Toast } from "@/components/app/Toast";
+import { UndoToast } from "@/components/app/UndoToast";
+import { useFirstUseHint, Coachmark } from "@/components/flow/GestureSpotlight";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
@@ -69,17 +76,35 @@ export function useForYouNudge(tab: "foryou" | "browse"): boolean {
   return tab === "browse";
 }
 
-export function ForYouBrowseToggle({ tab, onTab, nudge = false }: { tab: "foryou" | "browse"; onTab: (tab: "foryou" | "browse") => void; /** text sweep on For you until first opened */ nudge?: boolean }) {
+export function ForYouBrowseToggle({
+  tab,
+  onTab,
+  nudge = false,
+  showTutorial = false,
+  onDismissTutorial,
+}: {
+  tab: "foryou" | "browse";
+  onTab: (tab: "foryou" | "browse") => void;
+  /** text sweep on For you until first opened */
+  nudge?: boolean;
+  /** One-time "try the reel" coachmark, pointed at the For you label. Only
+      ever true while landing on Browse All -- see ExploreExperience's own
+      showForYouTutorial. */
+  showTutorial?: boolean;
+  onDismissTutorial?: () => void;
+}) {
+  const forYouRef = useRef<HTMLButtonElement | null>(null);
   return (
-    // Boxed pill only from `lg:` on -- this same component also renders on
-    // top of the reel's photo at every width below that (mobile AND
-    // tablet), where the pill/border read as extra chrome over the image.
-    // Restored to Instagram's own convention there: plain text, weight and
-    // brightness carrying the selected state, a text-shadow for legibility
-    // instead of a surface (direct instruction, 23 Sept 2026: "restored to
-    // what it was for mobile before... just text like instagram with a
-    // subtle scrim and shadows"). `lg:` still gets the bordered glass pill,
-    // since that version sits in a normal page header, not over a photo.
+    <>
+    {/* Boxed pill only from `lg:` on -- this same component also renders on
+       top of the reel's photo at every width below that (mobile AND
+       tablet), where the pill/border read as extra chrome over the image.
+       Restored to Instagram's own convention there: plain text, weight and
+       brightness carrying the selected state, a text-shadow for legibility
+       instead of a surface (direct instruction, 23 Sept 2026: "restored to
+       what it was for mobile before... just text like instagram with a
+       subtle scrim and shadows"). `lg:` still gets the bordered glass pill,
+       since that version sits in a normal page header, not over a photo. */}
     <div className="flex items-center gap-[var(--space-4)] lg:gap-[var(--space-1)] lg:rounded-[var(--radius-lg)] lg:border lg:border-[color:var(--glass-border)] lg:bg-[color:var(--glass-surface-1)] lg:p-[var(--space-1)]">
       {(
         [
@@ -91,9 +116,13 @@ export function ForYouBrowseToggle({ tab, onTab, nudge = false }: { tab: "foryou
         return (
           <button
             key={item.key}
+            ref={item.key === "foryou" ? forYouRef : undefined}
             type="button"
             aria-pressed={on}
-            onClick={() => onTab(item.key)}
+            onClick={() => {
+              if (item.key === "foryou") onDismissTutorial?.();
+              onTab(item.key);
+            }}
             className={`dm-quiet cursor-pointer rounded-[var(--radius-md)] text-[15px] leading-[20px] font-bold whitespace-nowrap uppercase [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] lg:px-[var(--space-4)] lg:py-[6px] lg:text-[13px] lg:leading-[18px] lg:[text-shadow:none] ${
               on
                 ? "text-white lg:bg-[color:var(--primary)] lg:text-[color:var(--primary-foreground)]"
@@ -105,17 +134,37 @@ export function ForYouBrowseToggle({ tab, onTab, nudge = false }: { tab: "foryou
           >
             <span className={`relative ${item.key === "foryou" && nudge ? "dm-text-nudge" : ""}`}>
               {item.label}
-              {/* a small sparkle twinkles at the corner in step with the sweep */}
+              {/* Two sparkles, not one -- a matched pair bookending the
+                 sweep (direct feedback, 24 Sept 2026: "so its not just one
+                 sparkle shape") reads livelier than a single corner twinkle.
+                 The smaller one at the start is offset later in the loop so
+                 they don't blink in lockstep. */}
               {item.key === "foryou" && nudge && (
+                <>
                 <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
                   <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
                 </svg>
+                <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[5px] -left-[7px] h-[6px] w-[6px]" style={{ animationDelay: "1.4s" }}>
+                  <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+                </svg>
+                </>
               )}
             </span>
           </button>
         );
       })}
     </div>
+    {tab === "browse" && (
+      <Coachmark
+        active={showTutorial}
+        targetRef={forYouRef}
+        label="Prefer scrolling? Check out For You! It's basically your own career reel, picked just for you."
+        onDismiss={() => onDismissTutorial?.()}
+        cta="Next"
+        spotlight
+      />
+    )}
+    </>
   );
 }
 
@@ -445,7 +494,54 @@ const LEGIBLE_TEXT_SHADOW = "0 1px 3px rgba(0,0,0,0.55)";
 // duration below, so the two can never drift apart.
 const AUTOPLAY_MS = 6000;
 
-function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
+// Same literal keys as CareerDetailExperience.tsx's own LIKE_TIP_KEY /
+// DISLIKE_TIP_KEY / TOP3_TIP_KEY -- whichever surface (this reel or Career
+// Detail) a student explains an action on first is the only one that ever
+// shows the explanatory copy again. Small helpers duplicated per file
+// rather than shared, matching this codebase's existing convention for
+// this exact pattern.
+const LIKE_TIP_KEY = "dreamari-seen-like-tip";
+const DISLIKE_TIP_KEY = "dreamari-seen-dislike-tip";
+const TOP3_TIP_KEY = "dreamari-seen-top3-tip";
+function tipSeen(key: string): boolean {
+  try {
+    return window.localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+function markTipSeen(key: string) {
+  try {
+    window.localStorage.setItem(key, "1");
+  } catch {
+    /* private mode */
+  }
+}
+function top3AddedToast(): string {
+  if (tipSeen(TOP3_TIP_KEY)) return "Added to your Top 3";
+  markTipSeen(TOP3_TIP_KEY);
+  return "Added to your Top 3. You can swap or remove picks anytime.";
+}
+
+function EnvCard({
+  career,
+  active,
+  liked,
+  disliked,
+  onSetLiked,
+  onSetDisliked,
+  showActionsHint,
+  onDismissActionsHint,
+}: {
+  career: ReelCareer;
+  active: boolean;
+  liked: boolean;
+  disliked: boolean;
+  onSetLiked: (next: boolean) => void;
+  onSetDisliked: (next: boolean) => void;
+  showActionsHint: boolean;
+  onDismissActionsHint: () => void;
+}) {
   const [face, setFace] = useState<"Summary" | "Details">("Summary");
   // Tracks a genuine manual flip (tap, swipe, or chevron), separate from an
   // autoplay-driven one -- only a manual one marks the discovery nudge seen
@@ -461,6 +557,22 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
   // careers with no simulation built -- only the career detail page's own
   // Play button was gated on this. Same hasSimulation check as that page.
   const hasSimulation = !!simulationFor(slug);
+
+  // Wires the same 4 actions Career Detail already has (survey feedback, 23
+  // Sept 2026: "is there a way I can 'unsave' careers within the 'For
+  // you'?", "I was not clear if I could... add to my Top 3, but then I
+  // didn't know what to do"). Save and Top 3 read/write the app's real
+  // global stores, so they're already in sync with Saved and Career Detail;
+  // Like/Not for me mirror Career Detail's own convention of local,
+  // per-visit state (never persisted there either).
+  const [savedCareers, toggleSavedCareer] = useSavedCareers();
+  const saved = savedCareers.has(slug);
+  const { ids: top3Ids, addToTop3, confirmSwap, removeFromTop3, restore } = useTop3();
+  const inTop3 = top3Ids.includes(slug);
+  const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
+  const actionsRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-advance Summary -> Details once the card has been sitting on
   // Summary for a few seconds -- direct instruction, 23 Sept 2026: "if they
@@ -578,11 +690,95 @@ function EnvCard({ career, active }: { career: ReelCareer; active: boolean }) {
          bottom-anchored as a pair) -- NOT pinned to the top of the card,
          which was a misreading of that flex layout the first time around. */}
       <div className="relative -mx-[var(--space-4)] -mb-[var(--space-4)] flex flex-col">
-        <div className="flex flex-col items-end gap-[var(--space-4)] px-[var(--space-4)] pb-[var(--space-4)] lg:hidden">
-          <PreferenceButton label="Like this career" Icon={Heart} bare />
-          <PreferenceButton label="Not for me" Icon={ThumbsDown} bare />
-          <PreferenceButton label="Save for later" Icon={Bookmark} bare />
+        <div ref={actionsRef} className="flex flex-col items-end gap-[var(--space-4)] px-[var(--space-4)] pb-[var(--space-4)] lg:hidden">
+          <PreferenceButton
+            label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
+            Icon={inTop3 ? Minus : Plus}
+            bare
+            active={inTop3}
+            onClick={() => {
+              onDismissActionsHint();
+              if (inTop3) {
+                setToast(null);
+                const before = removeFromTop3(slug);
+                setUndoRemove(before);
+                return;
+              }
+              setUndoRemove(null);
+              const result = addToTop3(slug);
+              if (result === "added") setToast(top3AddedToast());
+              else if (result === "full") setSwapCandidate(slug);
+            }}
+          />
+          <PreferenceButton
+            label="Like this career"
+            Icon={Heart}
+            bare
+            active={liked}
+            filled={liked}
+            onClick={() => {
+              onDismissActionsHint();
+              const next = !liked;
+              onSetLiked(next);
+              if (next && !tipSeen(LIKE_TIP_KEY)) {
+                setUndoRemove(null);
+                setToast("Saved to what you like. This helps tailor your matches.");
+                markTipSeen(LIKE_TIP_KEY);
+              }
+            }}
+          />
+          <PreferenceButton
+            label="Not for me"
+            Icon={ThumbsDown}
+            bare
+            active={disliked}
+            filled={disliked}
+            onClick={() => {
+              onDismissActionsHint();
+              const next = !disliked;
+              onSetDisliked(next);
+              if (next && !tipSeen(DISLIKE_TIP_KEY)) {
+                setUndoRemove(null);
+                setToast("Noted, we'll show you less like this.");
+                markTipSeen(DISLIKE_TIP_KEY);
+              }
+            }}
+          />
+          <PreferenceButton
+            label={saved ? "Saved" : "Save for later"}
+            Icon={Bookmark}
+            bare
+            active={saved}
+            filled={saved}
+            onClick={() => {
+              onDismissActionsHint();
+              toggleSavedCareer(slug);
+            }}
+          />
         </div>
+        {swapCandidate && (
+          <Top3SwapModal
+            incomingId={swapCandidate}
+            currentIds={top3Ids}
+            onConfirm={(outgoingId) => {
+              confirmSwap(outgoingId, swapCandidate);
+              setSwapCandidate(null);
+              setUndoRemove(null);
+              setToast(top3AddedToast());
+            }}
+            onCancel={() => setSwapCandidate(null)}
+          />
+        )}
+        {undoRemove && (
+          <UndoToast message="Removed from your Top 3" onUndo={() => restore(undoRemove)} onClose={() => setUndoRemove(null)} />
+        )}
+        {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+        <Coachmark
+          active={showActionsHint}
+          targetRef={actionsRef}
+          label="Like, save, or add a career to your Top 3 — right from here."
+          onDismiss={onDismissActionsHint}
+        />
 
         {/* Career Details Panel: the whole block, text through the CTA row,
            sits on ONE continuous backdrop -- not a blurred text panel with
@@ -1031,22 +1227,75 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
 }
 
 /** One reel slide, either kind. */
-function ForYouCard({ item, active, soundOn, onSoundChange }: { item: ReelItem; active: boolean; soundOn: boolean; onSoundChange: (next: boolean) => void }) {
+function ForYouCard({
+  item,
+  active,
+  soundOn,
+  onSoundChange,
+  liked,
+  disliked,
+  onSetLiked,
+  onSetDisliked,
+  showActionsHint,
+  onDismissActionsHint,
+}: {
+  item: ReelItem;
+  active: boolean;
+  soundOn: boolean;
+  onSoundChange: (next: boolean) => void;
+  liked: boolean;
+  disliked: boolean;
+  onSetLiked: (next: boolean) => void;
+  onSetDisliked: (next: boolean) => void;
+  showActionsHint: boolean;
+  onDismissActionsHint: () => void;
+}) {
   if (isVideoReel(item)) return <VideoCard item={item} active={active} soundOn={soundOn} onSoundChange={onSoundChange} />;
-  return <EnvCard career={item} active={active} />;
+  return (
+    <EnvCard
+      career={item}
+      active={active}
+      liked={liked}
+      disliked={disliked}
+      onSetLiked={onSetLiked}
+      onSetDisliked={onSetDisliked}
+      showActionsHint={showActionsHint}
+      onDismissActionsHint={onDismissActionsHint}
+    />
+  );
 }
 
-function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: typeof Heart; bare?: boolean }) {
+function PreferenceButton({
+  label,
+  Icon,
+  bare = false,
+  active = false,
+  filled = false,
+  onClick,
+}: {
+  label: string;
+  Icon: typeof Heart;
+  bare?: boolean;
+  /** Selected/on state -- e.g. already saved, already in your Top 3. */
+  active?: boolean;
+  /** Fill the icon glyph itself (Like/Not for me/Save all fill on select,
+      matching Career Detail's exact convention); Top 3's Plus/Minus swap
+      icon instead, so it stays false there. */
+  filled?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <IconTip label={label}>
       <button
         type="button"
         aria-label={label}
+        aria-pressed={onClick ? active : undefined}
+        onClick={onClick}
         className="dm-quiet flex size-11 cursor-pointer items-center justify-center rounded-[999px] border transition-transform duration-150 hover:-translate-y-px active:scale-95"
         style={{
-          background: bare ? "transparent" : "var(--glass-surface-1)",
-          borderColor: bare ? "transparent" : "var(--glass-border)",
-          color: "var(--foreground)",
+          background: bare ? "transparent" : active ? "var(--primary)" : "var(--glass-surface-1)",
+          borderColor: bare ? "transparent" : active ? "var(--primary)" : "var(--glass-border)",
+          color: bare ? (active ? "var(--accent-subtle)" : "var(--foreground)") : active ? "var(--primary-foreground)" : "var(--foreground)",
         }}
       >
         {/* `bare` is the reel's own floating column, straight over the
@@ -1059,7 +1308,7 @@ function PreferenceButton({ label, Icon, bare = false }: { label: string; Icon: 
            behind every icon and read heavier than either app's own
            treatment). The non-bare version already sits on a real glass
            surface, so it doesn't need this. */}
-        <Icon className="h-6 w-6" style={bare ? { filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 1px 5px rgba(0,0,0,0.35))" } : undefined} />
+        <Icon className="h-6 w-6" fill={filled ? "currentColor" : "none"} style={bare ? { filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 1px 5px rgba(0,0,0,0.35))" } : undefined} />
       </button>
     </IconTip>
   );
@@ -1085,6 +1334,23 @@ function ForYouFace() {
     setSoundOn(next);
     window.localStorage.setItem(REEL_SOUND_KEY, String(next));
   }, []);
+
+  // Like/Not for me for the whole reel, keyed by career slug -- lifted up
+  // here (rather than kept local to each EnvCard) so the mobile in-card
+  // buttons and the desktop rail below both read/write the SAME state for
+  // whichever career is currently active, instead of silently drifting
+  // apart the way two independent useState calls would.
+  const [prefs, setPrefs] = useState<Record<string, { liked: boolean; disliked: boolean }>>({});
+  const setLiked = useCallback((slug: string, next: boolean) => {
+    setPrefs((p) => ({ ...p, [slug]: { liked: next, disliked: next ? false : (p[slug]?.disliked ?? false) } }));
+  }, []);
+  const setDisliked = useCallback((slug: string, next: boolean) => {
+    setPrefs((p) => ({ ...p, [slug]: { disliked: next, liked: next ? false : (p[slug]?.liked ?? false) } }));
+  }, []);
+  // One coachmark, shown once per device, shared with Career Detail's own
+  // (same "action-icons" key) -- whichever surface a student reaches first
+  // is the only one that ever explains these icons.
+  const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons");
 
   // Active-card tracking (drives the Ken Burns restart + paging state).
   useEffect(() => {
@@ -1210,21 +1476,43 @@ function ForYouFace() {
         // exists below it.
         className="foryou-snap fixed inset-0 z-0 overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:h-full lg:max-h-[672px] lg:w-[390px] lg:self-start lg:overflow-y-auto lg:rounded-[var(--radius-lg)]"
       >
-        {FOR_YOU_FEED.map((item, index) => (
-          <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
-            <ForYouCard item={item} active={index === active} soundOn={soundOn} onSoundChange={updateSoundOn} />
-          </div>
-        ))}
+        {FOR_YOU_FEED.map((item, index) => {
+          const itemSlug = isVideoReel(item) ? null : careerSlug(item.title);
+          const itemPrefs = itemSlug ? prefs[itemSlug] : undefined;
+          return (
+            <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
+              <ForYouCard
+                item={item}
+                active={index === active}
+                soundOn={soundOn}
+                onSoundChange={updateSoundOn}
+                liked={itemPrefs?.liked ?? false}
+                disliked={itemPrefs?.disliked ?? false}
+                onSetLiked={(next) => itemSlug && setLiked(itemSlug, next)}
+                onSetDisliked={(next) => itemSlug && setDisliked(itemSlug, next)}
+                showActionsHint={showActionsHint && index === active}
+                onDismissActionsHint={dismissActionsHint}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Desktop Career Preference Rail — "Place immediately to the right of
          an Env Card. Phone AND tablet keep these controls inside the card
-         instead (see EnvCard's own lg:hidden buttons)." */}
-      <div className="hidden flex-col items-center gap-[var(--space-6)] lg:flex">
-        <PreferenceButton label="Like this career" Icon={Heart} />
-        <PreferenceButton label="Not for me" Icon={ThumbsDown} />
-        <PreferenceButton label="Save for later" Icon={Bookmark} />
-      </div>
+         instead (see EnvCard's own lg:hidden buttons)." Acts on whichever
+         career is currently active in the feed; hidden entirely when that's
+         a video card (Videos Inside Leading Companies has no like/save/Top
+         3 of its own -- same as the mobile card, which renders VideoCard
+         instead of EnvCard for those). */}
+      <DesktopPreferenceRail
+        activeItem={FOR_YOU_FEED[active]}
+        prefs={prefs}
+        setLiked={setLiked}
+        setDisliked={setDisliked}
+        showActionsHint={showActionsHint}
+        dismissActionsHint={dismissActionsHint}
+      />
 
       {/* Previous / Next paging */}
       <div className="absolute right-0 hidden flex-col gap-[10px] lg:flex">
@@ -1257,6 +1545,130 @@ function ForYouFace() {
   );
 }
 
+function DesktopPreferenceRail({
+  activeItem,
+  prefs,
+  setLiked,
+  setDisliked,
+  showActionsHint,
+  dismissActionsHint,
+}: {
+  activeItem: ReelItem | undefined;
+  prefs: Record<string, { liked: boolean; disliked: boolean }>;
+  setLiked: (slug: string, next: boolean) => void;
+  setDisliked: (slug: string, next: boolean) => void;
+  showActionsHint: boolean;
+  dismissActionsHint: () => void;
+}) {
+  const [savedCareers, toggleSavedCareer] = useSavedCareers();
+  const { ids: top3Ids, addToTop3, confirmSwap, removeFromTop3, restore } = useTop3();
+  const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
+  const actionsRef = useRef<HTMLDivElement | null>(null);
+
+  if (!activeItem || isVideoReel(activeItem)) {
+    // Still rendered (empty) rather than unmounted -- keeps the row's own
+    // gap/paging column layout stable instead of the paging arrows beside
+    // it jumping left every time a video card becomes active.
+    return <div className="hidden flex-col items-center gap-[var(--space-6)] lg:flex" />;
+  }
+
+  const slug = careerSlug(activeItem.title);
+  const saved = savedCareers.has(slug);
+  const inTop3 = top3Ids.includes(slug);
+  const liked = prefs[slug]?.liked ?? false;
+  const disliked = prefs[slug]?.disliked ?? false;
+
+  return (
+    <div ref={actionsRef} className="hidden flex-col items-center gap-[var(--space-6)] lg:flex">
+      <PreferenceButton
+        label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
+        Icon={inTop3 ? Minus : Plus}
+        active={inTop3}
+        onClick={() => {
+          dismissActionsHint();
+          if (inTop3) {
+            setToast(null);
+            const before = removeFromTop3(slug);
+            setUndoRemove(before);
+            return;
+          }
+          setUndoRemove(null);
+          const result = addToTop3(slug);
+          if (result === "added") setToast(top3AddedToast());
+          else if (result === "full") setSwapCandidate(slug);
+        }}
+      />
+      <PreferenceButton
+        label="Like this career"
+        Icon={Heart}
+        active={liked}
+        filled={liked}
+        onClick={() => {
+          dismissActionsHint();
+          const next = !liked;
+          setLiked(slug, next);
+          if (next && !tipSeen(LIKE_TIP_KEY)) {
+            setUndoRemove(null);
+            setToast("Saved to what you like. This helps tailor your matches.");
+            markTipSeen(LIKE_TIP_KEY);
+          }
+        }}
+      />
+      <PreferenceButton
+        label="Not for me"
+        Icon={ThumbsDown}
+        active={disliked}
+        filled={disliked}
+        onClick={() => {
+          dismissActionsHint();
+          const next = !disliked;
+          setDisliked(slug, next);
+          if (next && !tipSeen(DISLIKE_TIP_KEY)) {
+            setUndoRemove(null);
+            setToast("Noted, we'll show you less like this.");
+            markTipSeen(DISLIKE_TIP_KEY);
+          }
+        }}
+      />
+      <PreferenceButton
+        label={saved ? "Saved" : "Save for later"}
+        Icon={Bookmark}
+        active={saved}
+        filled={saved}
+        onClick={() => {
+          dismissActionsHint();
+          toggleSavedCareer(slug);
+        }}
+      />
+      {swapCandidate && (
+        <Top3SwapModal
+          incomingId={swapCandidate}
+          currentIds={top3Ids}
+          onConfirm={(outgoingId) => {
+            confirmSwap(outgoingId, swapCandidate);
+            setSwapCandidate(null);
+            setUndoRemove(null);
+            setToast(top3AddedToast());
+          }}
+          onCancel={() => setSwapCandidate(null)}
+        />
+      )}
+      {undoRemove && (
+        <UndoToast message="Removed from your Top 3" onUndo={() => restore(undoRemove)} onClose={() => setUndoRemove(null)} />
+      )}
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      <Coachmark
+        active={showActionsHint}
+        targetRef={actionsRef}
+        label="Like, save, or add a career to your Top 3 — right from here."
+        onDismiss={dismissActionsHint}
+      />
+    </div>
+  );
+}
+
 /** SSR-safe (defaults false, same convention as useForYouNudge above, so
  *  the server and first client paint agree): true once a >=lg (1024px)
  *  viewport is confirmed client-side. For You needs this as a real JS
@@ -1280,11 +1692,13 @@ function useIsDesktop(): boolean {
  *  row and For You's desktop row (identical control, two different
  *  layout contexts) so the two never drift out of sync. */
 function DesktopSearchToggle({
-  tab, switchTab, nudge, searchOpen, setSearchOpen, query, setQuery,
+  tab, switchTab, nudge, showTutorial, onDismissTutorial, searchOpen, setSearchOpen, query, setQuery,
 }: {
   tab: "foryou" | "browse";
   switchTab: (next: "foryou" | "browse") => void;
   nudge: boolean;
+  showTutorial: boolean;
+  onDismissTutorial: () => void;
   searchOpen: boolean;
   setSearchOpen: (updater: boolean | ((value: boolean) => boolean)) => void;
   query: string;
@@ -1347,7 +1761,7 @@ function DesktopSearchToggle({
         className="flex-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{ maxWidth: searchOpen ? 0 : 320, opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? "none" : "auto" }}
       >
-        <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudge} />
+        <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudge} showTutorial={showTutorial} onDismissTutorial={onDismissTutorial} />
       </div>
     </div>
   );
@@ -1371,6 +1785,22 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
   // splashDone means the animation's own 0.9s starting delay is now
   // measured from dismissal, not from mount.
   const [splashDone, setSplashDone] = useState(false);
+  // A 2-step guided tour, not two hints racing each other (direct feedback,
+  // 24 Sept 2026: "they should happen in succession"). One shared "seen"
+  // flag for the whole tour; `tourStep` decides which half is currently
+  // showing. Step 1 (For You) only makes sense while landing on Browse All
+  // -- ForYouBrowseToggle's own tab === "browse" gate already gets that for
+  // free. Step 2 (Schools) follows once step 1 is dismissed, whether by its
+  // own "Next" or by the student just tapping For You directly.
+  const [tourNotSeen, dismissTour] = useFirstUseHint("explore-tour");
+  const [tourStep, setTourStep] = useState<"foryou" | "schools">("foryou");
+  const advanceTour = () => setTourStep("schools");
+  const showForYouTutorial = tourNotSeen && splashDone && tab === "browse" && tourStep === "foryou";
+  const showSchoolsTutorial = tourNotSeen && splashDone && tourStep === "schools";
+  // Mobile/tablet's own Schools entry point is the graduation-cap icon below
+  // -- desktop shows ExploreSectionTabs' text tabs instead, wired the same
+  // way further down.
+  const schoolsIconRef = useRef<HTMLButtonElement | null>(null);
 
   function switchTab(next: "foryou" | "browse") {
     setTab(next);
@@ -1456,7 +1886,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {/* z-20: on phones the For you reel is a fixed layer inside main, so
            this row has to sit above it to stay tappable over the photo */}
         <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
-          <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} />
+          <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
           <div className="flex items-center gap-[10px]">
             {tab === "browse" && (
               <IconTip label="Search">
@@ -1474,15 +1904,23 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             )}
             <IconTip label="Schools">
               <button
+                ref={schoolsIconRef}
                 type="button"
                 aria-label="Find a college"
-                onClick={() => router.push("/colleges")}
+                onClick={() => { dismissTour(); router.push("/colleges"); }}
                 className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
                 style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
               >
                 <GraduationCap className="h-4 w-4" />
               </button>
             </IconTip>
+            <Coachmark
+              active={showSchoolsTutorial}
+              targetRef={schoolsIconRef}
+              label="Schools have a tab too! Tap in for your college matches."
+              onDismiss={dismissTour}
+              spotlight
+            />
           </div>
         </div>
         {/* Explore Header (desktop) -- Browse only. For You gets its own
@@ -1502,9 +1940,9 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
               <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
                 Explore
               </h1>
-              <ExploreSectionTabs active="careers" />
+              <ExploreSectionTabs active="careers" showTutorial={showSchoolsTutorial} onDismissTutorial={dismissTour} />
             </div>
-            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
+            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
           </div>
         </div>
         )}
@@ -1530,13 +1968,13 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
               Explore
             </h1>
-            <ExploreSectionTabs active="careers" />
+            <ExploreSectionTabs active="careers" showTutorial={showSchoolsTutorial} onDismissTutorial={dismissTour} />
           </div>
           <div className="flex h-full min-w-0 flex-1 flex-col items-start">
             {isDesktop && <ForYouFace />}
           </div>
           <div className="flex-none self-start">
-            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
+            <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
           </div>
         </div>
         )}

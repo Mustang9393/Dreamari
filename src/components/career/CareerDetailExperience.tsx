@@ -5,7 +5,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Minus, Plus, Sparkles, ThumbsDown, Users, X } from "lucide-react";
@@ -15,6 +15,7 @@ import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChro
 import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "./ConnectWithProfessionalsModal";
 import { Top3SwapModal } from "./Top3SwapModal";
+import { useFirstUseHint, Coachmark } from "@/components/flow/GestureSpotlight";
 import { PROS } from "@/components/connect/data";
 import { useSavedCareers } from "@/lib/savedCareers";
 import { useTop3 } from "@/lib/useTop3";
@@ -105,6 +106,11 @@ function HeroPhoto({ photo, sizes, className, objectPosition }: { photo: string;
 // silent, unexplained icon flip on the first try).
 const LIKE_TIP_KEY = "dreamari-seen-like-tip";
 const DISLIKE_TIP_KEY = "dreamari-seen-dislike-tip";
+// Shared with the For You reel's own Top 3 button (ExploreExperience.tsx) --
+// same literal key, so whichever surface a student hits first is the only
+// one that ever explains it (survey feedback, 23 Sept 2026: "I added to my
+// Top 3, but then I didn't know what to do").
+const TOP3_TIP_KEY = "dreamari-seen-top3-tip";
 function tipSeen(key: string): boolean {
   try {
     return window.localStorage.getItem(key) === "1";
@@ -118,6 +124,14 @@ function markTipSeen(key: string) {
   } catch {
     /* private mode */
   }
+}
+// First add ever (from here or the For You reel) explains that a Top 3 pick
+// isn't final; every add after that just confirms, same "explain once, then
+// trust the icon" rule as Like/Not for me above.
+function top3AddedToast(): string {
+  if (tipSeen(TOP3_TIP_KEY)) return "Added to your Top 3";
+  markTipSeen(TOP3_TIP_KEY);
+  return "Added to your Top 3. You can swap or remove picks anytime.";
 }
 
 function IconButton({ label, active = false, onClick, children }: { label: string; active?: boolean; onClick?: () => void; children: React.ReactNode }) {
@@ -496,6 +510,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
+  const actionsRef = useRef<HTMLDivElement | null>(null);
+  const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons");
 
   if (!career) {
     return (
@@ -630,11 +646,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   <Users className="h-4 w-4" aria-hidden /> Connect
                 </button>
               )}
-              <div className="flex items-center gap-[var(--space-2)]">
+              <div ref={actionsRef} className="flex items-center gap-[var(--space-2)]">
                 <IconButton
                   label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
                   active={inTop3}
                   onClick={() => {
+                    dismissActionsHint();
                     if (inTop3) {
                       setToast(null);
                       const before = removeFromTop3(career.slug);
@@ -643,7 +660,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                     }
                     setUndoRemove(null);
                     const result = addToTop3(career.slug);
-                    if (result === "added") setToast("Added to your Top 3");
+                    if (result === "added") setToast(top3AddedToast());
                     else if (result === "full") setSwapCandidate(career.slug);
                   }}
                 >
@@ -653,6 +670,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   label="Like this career"
                   active={liked}
                   onClick={() => {
+                    dismissActionsHint();
                     const next = !liked;
                     setLiked(next);
                     if (next) setDisliked(false);
@@ -669,6 +687,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   label="Not for me"
                   active={disliked}
                   onClick={() => {
+                    dismissActionsHint();
                     const next = !disliked;
                     setDisliked(next);
                     if (next) setLiked(false);
@@ -681,7 +700,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 >
                   <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
-                <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => toggleSavedCareer(career.slug)}>
+                <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => { dismissActionsHint(); toggleSavedCareer(career.slug); }}>
                   <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
               </div>
@@ -953,7 +972,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
             confirmSwap(outgoingId, swapCandidate);
             setSwapCandidate(null);
             setUndoRemove(null);
-            setToast("Added to your Top 3");
+            setToast(top3AddedToast());
           }}
           onCancel={() => setSwapCandidate(null)}
         />
@@ -966,6 +985,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         />
       )}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      <Coachmark
+        active={showActionsHint}
+        targetRef={actionsRef}
+        label="Like, save, or add a career to your Top 3 — right from here."
+        onDismiss={dismissActionsHint}
+      />
 
       <MobileNav active="Explore" />
     </div>
