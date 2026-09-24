@@ -508,44 +508,47 @@ screen genuinely valuable? Next-Year Course Plan: the components are
 overlapping"). Everything below this block describes the earlier v2 pass;
 kept as history.
 
-- **Data is the roster, not the reference's static table.** The reference
-  (and v1, and the first v2 pass) drew from `milestoneReadiness.ts`, a
-  verbatim copy of the reference's fixed 30-students-per-grade counts under
-  its own grade-specific milestone names (Next-Year Course Plan, Career
-  Goals...). That table never agreed with the roster the rest of the
-  dashboard uses, ignored the caseload scope and never moved when a review
-  was approved. v2 now tallies, per grade, the milestones the roster tracks
-  at that grade (`milestonesForGrade`: 3 / 5 / 6 / 11, the same set the
-  Student Profile's grid shows) over the students the role may see. Cost:
-  the reference's grade-specific milestone vocabulary is gone from this
-  screen (it lives on in v1 and in `milestoneReadiness.ts`). Alternative:
-  keep the reference names and map them onto roster milestones. There is
-  no honest mapping (Grade 9 has seven reference items and three roster
-  milestones), so it would have been the static table wearing new numbers.
-- **Five states, honest colors:** done (Approved or Completed, brand blue),
-  awaiting your review (Pending Review, light blue), in progress (lightest
-  blue), not started (neutral gray, because a freshman who has not started
-  a plan is expected, not alarming), blocked (Overdue or Changes Requested,
-  the reserved red). Replaces "needs attention or haven't started" in
-  amber, which alarmed on the normal case.
-- **One hero and a list, not one ring per milestone.** The hero is the
-  milestone furthest behind (blocked weighs double, then not started): a
-  header row (what it is, the way in), then one body row with the ring and,
-  directly beside it, the verdict and its breakdown. Corrected once more
-  in-session after "the positions of the information are scattered and not
-  really congruent": the first cut pinned the ring to the far right and the
-  legend to the bottom left. The other milestones are a worst-first list:
-  name, one line of what is outstanding ("1 blocked · 10 awaiting your
-  review"), % done, a bar. Replaces up to eleven ring cards with legends and
-  buttons each. Alternative: keep the ring cards but smaller. Eleven rings
-  is eleven things to read; the question is "which milestone first".
+- **Data: the reference's grade curriculum, scaled to the cohort the role
+  sees.** Decided for the demo (direct instruction: "do what's best for the
+  demo"). The reference's tracker (`milestoneReadiness.ts`) defines seven
+  to eight named milestones per grade with fixed counts for 30 students;
+  the roster's own template tracks only three at Grade 9 (the Student
+  Profile grid). The roster version was built and rejected: it made Grade
+  9 look like three items ("are grade 9 milestones genuinely only these
+  3?"). Neither set is Dreamari's real curriculum, a product question for
+  the team. v2 keeps the reference's curriculum names and status
+  proportions and scales every card to the number of students the signed-
+  in role actually has in that grade (largest-remainder rounding so the
+  four states sum exactly), so a School Counselor's Grade 9 reads 12
+  students, the Lead's 30, and the totals agree with Students. Caveat,
+  stated in code: proportions are the reference's, so an approval on the
+  Review Queue moves Students and the Overview, not this screen.
+- **Four states, one color code:** done (brand blue), in progress (light
+  blue), not started (neutral slice: expected for a freshman, not
+  alarming), needs attention (the reserved amber, because that is what the
+  word means everywhere else on the dashboard). "Not applicable" is not
+  drawn.
+- **One ring, then bars; worst first** (direct feedback: "I like the one
+  ring and the others in bars", and the standing rule "always display what
+  needs attention first"). The hero is the milestone furthest behind (needs
+  attention weighs double, then not started): a header row (eyebrow with
+  the reference's review type, the name, the way in), then the ring with
+  its four counts directly beside it; the ring says how far along, the
+  rows say how many in each state, nothing said twice. The other
+  milestones are one card, worst first, each a row on the raised inset
+  surface: name, its outstanding counts in one muted line (amber only when
+  someone needs attention), % done, and a four-segment status bar with 2px
+  gaps and per-segment titles. Rows open the grade roster. Replaces the
+  reference's one ring card per milestone (up to eight, each with a legend
+  and a button), and two intermediate v2 shapes the same day (a hero ring
+  with a percent-only list, which dropped each milestone's breakdown; and
+  a single card of bars with no ring, which lost the "look here first").
 - **Summary is four stats in the header row** (students, milestones, %
-  done, awaiting review), replacing the grade card with its "Focus"
+  done, need attention), replacing the grade card with its "Focus"
   sentence and three stats. The Focus copy was the reference's grade
   description; it explained the grade, not the state of it.
-- **Scoped and live.** A School Counselor sees their caseload's grade; the
-  Lead sees the school's; an Approve on the Review Queue moves a student
-  from awaiting to done here.
+- **Scoped.** A School Counselor sees their caseload's grade cohort; the
+  Lead and School Administrator see the school's.
 
 - **"View Details & Student Breakdown" is now a working control.** In the
   reference and the original port it rendered with no `onClick` at all

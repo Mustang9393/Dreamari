@@ -1,72 +1,105 @@
 "use client";
 
-// DEMO-ONLY v2 Milestone Tracker, rebuilt 25 Sept 2026 on the roster
-// instead of the reference's static 30-per-grade table (direct questions:
-// "are we getting the proper data, have we done the proper hierarchy of
-// information, is it all readable, understandable, do things align?").
+// DEMO-ONLY v2 Milestone Tracker (final shape, 25 Sept 2026).
 //
-// Data: for the chosen grade, each milestone the roster tracks at that
-// grade (milestonesForGrade: 3 / 5 / 6 / 11, the same set the Student
-// Profile's grid shows) is tallied over the students this role may see, so
-// the tracker agrees with Students, the Review Queue and the Overview, and
-// moves when a review is approved or the caseload changes. Five states:
-// done (Approved or Completed), awaiting your review (Pending Review),
-// in progress, not started, blocked (Overdue or Changes Requested). "Not
-// started" is neutral gray, not a status color: a freshman who has not
-// started a plan is expected, not alarming. Blocked is the reserved red.
+// Goal of the screen: for one grade, which required milestone is the cohort
+// behind on, and how. Students answers "which student"; this answers
+// "which milestone".
 //
-// Shape: grade tabs, one summary line, one hero (the milestone with the
-// largest stuck share) and a worst-first list. Seven ring cards became one
-// ring and a list because a counselor's question is "which milestone
-// first", not "show me every ring".
+// Data, decided for the demo (direct instruction: "do what's best for the
+// demo"): the reference's grade curriculum (src/lib/milestoneReadiness.ts,
+// seven to eight named milestones per grade with its own status
+// proportions) SCALED to the students the signed-in role actually sees in
+// that grade, so totals agree with Students and the caseload (a School
+// Counselor's Grade 9 of 9 students reads 9, not the reference's fixed 30)
+// while the curriculum stays rich. The roster's own three-per-grade
+// milestone template was tried first and made Grade 9 look like three
+// items; neither set is Dreamari's real curriculum, which is a product
+// question. Caveat: proportions are the reference's, so a Review Queue
+// approval moves Students and the Overview, not this screen.
+//
+// Shape (direct feedback: "I like the one ring and the others in bars"):
+// grade tabs and four stats; one hero card for the milestone furthest
+// behind (header row, then the ring with its breakdown directly beside it,
+// nothing repeated); one card listing every other milestone as a row with
+// a four-segment status bar. One color code for the whole screen.
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { SegmentedRing, Segmented } from "@/components/connect/viz";
+import { Segmented, SegmentedRing } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
+import { GRADE_READINESS, type MilestoneCard } from "@/lib/milestoneReadiness";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { CardLink, StatRow, STATUS_COLORS } from "../chips";
 import { useCounselorFilters } from "../shell";
-import { GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
+import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
-import { OverviewCard, RankBar, Stat, Verdict } from "./overviewShared";
+import { OverviewCard, Stat } from "./overviewShared";
 
 type Grade = 9 | 10 | 11 | 12;
-type Tally = { key: MilestoneKey; total: number; done: number; awaiting: number; inProgress: number; notStarted: number; blocked: number; donePct: number; behindShare: number };
+type StateKey = "done" | "inProgress" | "notStarted" | "needsAttention";
+type Row = { name: string; subtitle: string; total: number; counts: Record<StateKey, number>; donePct: number; behindShare: number };
 
-// Done is the brand blue; the two "still moving" states are lighter steps
-// of the same ramp; not started is neutral; blocked is the reserved red.
-const STATE_COLORS = { done: PRIMARY, awaiting: BLUE_3[0], inProgress: "#C9D0FE", notStarted: NEUTRAL_SLICE, blocked: STATUS_COLORS["At Risk"] } as const;
+// Done is the brand blue; in progress a lighter step of the same ramp; not
+// started the neutral slice (expected, not alarming); needs attention the
+// reserved amber, because that is exactly what the word means everywhere
+// else on the dashboard.
+const STATES: { key: StateKey; label: string; color: string }[] = [
+  { key: "done", label: "Done", color: PRIMARY },
+  { key: "inProgress", label: "In progress", color: BLUE_3[0] },
+  { key: "notStarted", label: "Not started", color: NEUTRAL_SLICE },
+  { key: "needsAttention", label: "Needs attention", color: STATUS_COLORS["Needs Attention"] },
+];
+const COLOR = Object.fromEntries(STATES.map((s) => [s.key, s.color])) as Record<StateKey, string>;
 
-function tally(students: CounselorStudent[], key: MilestoneKey): Tally {
-  let done = 0, awaiting = 0, inProgress = 0, notStarted = 0, blocked = 0;
-  for (const s of students) {
-    const v = s.milestones[key];
-    if (v === "Approved" || v === "Completed") done++;
-    else if (v === "Pending Review") awaiting++;
-    else if (v === "In Progress") inProgress++;
-    else if (v === "Not Started") notStarted++;
-    else if (v === "Overdue" || v === "Changes Requested") blocked++;
+/** The reference card's proportions applied to a cohort of `n`, rounded so
+ *  the four states sum to exactly `n` (largest remainder). */
+function scale(card: MilestoneCard, n: number): Row {
+  const src: Record<StateKey, number> = { done: card.completed, inProgress: card.inProgress, notStarted: card.notStarted, needsAttention: card.needsAttention };
+  const base = Math.max(1, card.completed + card.inProgress + card.notStarted + card.needsAttention);
+  const raw = (Object.keys(src) as StateKey[]).map((k) => ({ k, exact: (src[k] / base) * n }));
+  const counts = Object.fromEntries(raw.map((r) => [r.k, Math.floor(r.exact)])) as Record<StateKey, number>;
+  let left = n - Object.values(counts).reduce((a, b) => a + b, 0);
+  for (const r of raw.slice().sort((a, b) => (b.exact - Math.floor(b.exact)) - (a.exact - Math.floor(a.exact)))) {
+    if (left <= 0) break;
+    counts[r.k]++;
+    left--;
   }
-  const total = done + awaiting + inProgress + notStarted + blocked;
-  // Ranking: blocked students weigh most, then not started; a milestone
-  // everyone is still working on is not "behind".
-  const behindShare = total ? (blocked * 2 + notStarted) / total : 0;
-  return { key, total, done, awaiting, inProgress, notStarted, blocked, donePct: total ? Math.round((done / total) * 100) : 0, behindShare };
+  return { name: card.name, subtitle: card.subtitle, total: n, counts, donePct: n ? Math.round((counts.done / n) * 100) : 0, behindShare: n ? (counts.needsAttention * 2 + counts.notStarted) / n : 0 };
 }
 
-function bandFor(t: Tally): "met" | "near" | "missed" {
-  return t.blocked > 0 ? "missed" : t.notStarted / Math.max(1, t.total) >= 0.5 ? "near" : "met";
-}
-
-function verdictFor(t: Tally): string {
+/** "2 need attention · 3 not started": the non-zero states that need
+ *  something, in the order a counselor acts on them. */
+function outstanding(r: Row): string {
   const parts: string[] = [];
-  if (t.blocked > 0) parts.push(`${t.blocked} blocked`);
-  if (t.notStarted > 0) parts.push(`${t.notStarted} not started`);
-  if (t.awaiting > 0) parts.push(`${t.awaiting} awaiting your review`);
-  if (parts.length === 0) return t.done === t.total ? "Everyone is done" : "Everyone is on it";
-  return parts.join(" · ");
+  if (r.counts.needsAttention) parts.push(`${r.counts.needsAttention} need${r.counts.needsAttention === 1 ? "s" : ""} attention`);
+  if (r.counts.notStarted) parts.push(`${r.counts.notStarted} not started`);
+  if (r.counts.inProgress) parts.push(`${r.counts.inProgress} in progress`);
+  return parts.length ? parts.join(" · ") : "Everyone is done";
+}
+
+function StatusBar({ r }: { r: Row }) {
+  return (
+    <span className="flex h-[10px] w-full gap-[2px] overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} aria-hidden>
+      {STATES.map((s) => {
+        const n = r.counts[s.key];
+        if (!n) return null;
+        return <span key={s.key} title={`${s.label}: ${n}`} className="h-full flex-none first:rounded-l-full last:rounded-r-full" style={{ width: `${(n / Math.max(1, r.total)) * 100}%`, background: s.color }} />;
+      })}
+    </span>
+  );
+}
+
+function Legend() {
+  return (
+    <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
+      {STATES.map((s) => (
+        <span key={s.key} className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span aria-hidden className="size-[8px] rounded-full" style={{ background: s.color }} />{s.label}
+        </span>
+      ))}
+    </span>
+  );
 }
 
 export function MilestoneTracker() {
@@ -74,12 +107,12 @@ export function MilestoneTracker() {
   const { gradeFilter, setGradeFilter } = useCounselorFilters();
   const [grade, setGrade] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
   const roster = useReviewedRoster();
-  const students = useMemo(() => roster.filter((s) => s.grade === grade), [roster, grade]);
-  const tallies = useMemo(() => milestonesForGrade(grade).map((key) => tally(students, key)).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct), [students, grade]);
-  const hero = tallies[0];
-  const rest = tallies.slice(1);
-  const overallDone = tallies.length ? Math.round(tallies.reduce((a, t) => a + t.donePct, 0) / tallies.length) : 0;
-  const totalAwaiting = tallies.reduce((a, t) => a + t.awaiting, 0);
+  const n = useMemo(() => roster.filter((s) => s.grade === grade).length, [roster, grade]);
+  const rows = useMemo(() => GRADE_READINESS[grade].cards.map((c) => scale(c, n)).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct), [grade, n]);
+  const hero = rows[0];
+  const rest = rows.slice(1);
+  const overallDone = rows.length ? Math.round(rows.reduce((a, r) => a + r.donePct, 0) / rows.length) : 0;
+  const totalAttention = rows.reduce((a, r) => a + r.counts.needsAttention, 0);
 
   const openStudents = () => {
     setGradeFilter(grade);
@@ -91,60 +124,41 @@ export function MilestoneTracker() {
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
         <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
         <div className="flex gap-[var(--space-6)]">
-          <Stat value={String(students.length)} label="students" />
-          <Stat value={String(tallies.length)} label="milestones" />
+          <Stat value={String(n)} label="students" />
+          <Stat value={String(rows.length)} label="milestones" />
           <Stat value={`${overallDone}%`} label="done" />
-          <Stat value={String(totalAwaiting)} label="awaiting review" color={totalAwaiting > 0 ? PRIMARY : undefined} />
+          <Stat value={String(totalAttention)} label="need attention" color={totalAttention > 0 ? COLOR.needsAttention : undefined} />
         </div>
       </div>
 
-      {students.length === 0 || !hero ? (
+      {n === 0 || !hero ? (
         <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No Grade {grade} students on this caseload.</p>
       ) : (
         <>
-          {/* The hero: the milestone furthest behind. One header row (what it
-             is, the way in), then one body row: the ring, and directly
-             beside it the verdict and the breakdown it draws. Everything
-             sits left and reads left to right; nothing is pinned to a far
-             corner (direct feedback, 25 Sept 2026: "the positions of the
-             information are scattered and not really congruent"). */}
+          {/* Hero: header row (what it is, the way in), then the ring with
+             its breakdown beside it. The ring says how far along; the rows
+             beside it say how many are in each state; nothing is said
+             twice. */}
           <HoverBeam strength={0.7} className="h-full">
             <div className="group relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
-              <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.26) }} />
+              <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
               <div className="relative flex flex-col gap-[var(--space-5)]">
-                <div className="flex items-start justify-between gap-[8px]">
+                <div className="flex flex-wrap items-start justify-between gap-[8px]">
                   <span className="flex flex-col gap-[2px]">
-                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Furthest behind</span>
-                    <h2 className="text-[17px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{hero.key}</h2>
+                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Furthest behind · {hero.subtitle}</span>
+                    <h2 className="text-[17px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{hero.name}</h2>
                   </span>
                   <CardLink onClick={openStudents}>Students</CardLink>
                 </div>
                 <div className="flex flex-col items-start gap-[var(--space-5)] sm:flex-row sm:items-center sm:gap-[var(--space-7)]">
-                  <SegmentedRing
-                    segments={[
-                      { value: hero.done, color: STATE_COLORS.done },
-                      { value: hero.awaiting, color: STATE_COLORS.awaiting },
-                      { value: hero.inProgress, color: STATE_COLORS.inProgress },
-                      { value: hero.notStarted, color: STATE_COLORS.notStarted },
-                      { value: hero.blocked, color: STATE_COLORS.blocked },
-                    ].filter((s) => s.value > 0)}
-                    size={152}
-                    stroke={17}
-                  >
+                  <SegmentedRing segments={STATES.map((s) => ({ value: hero.counts[s.key], color: s.color })).filter((s) => s.value > 0)} size={152} stroke={17}>
                     <span className="flex flex-col items-center gap-[2px]">
                       <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{hero.donePct}%</span>
-                      <span className="text-[11px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{hero.done} of {hero.total} done</span>
+                      <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
                     </span>
                   </SegmentedRing>
-                  <div className="flex w-full max-w-[340px] flex-col gap-[var(--space-3)]">
-                    <Verdict band={bandFor(hero)}>{verdictFor(hero)}</Verdict>
-                    <div className="flex flex-col gap-[4px]">
-                      <StatRow label="Done" value={hero.done} color={STATE_COLORS.done} />
-                      <StatRow label="Awaiting your review" value={hero.awaiting} color={STATE_COLORS.awaiting} />
-                      <StatRow label="In progress" value={hero.inProgress} color={STATE_COLORS.inProgress} />
-                      <StatRow label="Not started" value={hero.notStarted} color={STATE_COLORS.notStarted} />
-                      {hero.blocked > 0 && <StatRow label="Blocked" value={hero.blocked} color={STATE_COLORS.blocked} />}
-                    </div>
+                  <div className="flex w-full max-w-[320px] flex-col gap-[4px]">
+                    {STATES.map((s) => <StatRow key={s.key} label={s.label} value={hero.counts[s.key]} color={s.color} />)}
                   </div>
                 </div>
               </div>
@@ -152,18 +166,21 @@ export function MilestoneTracker() {
           </HoverBeam>
 
           {rest.length > 0 && (
-            <OverviewCard title={`All Grade ${grade} milestones`} unit="% done, worst first" aside={<CardLink onClick={openStudents}>Students</CardLink>}>
-              <ul className="flex flex-col gap-[10px]">
-                {rest.map((t) => (
-                  <li key={t.key} className="flex flex-col gap-[6px]">
-                    <span className="flex items-baseline justify-between gap-[10px]">
-                      <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
-                        <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{t.key}</span>
-                        <span className="text-[11.5px] font-semibold" style={{ color: t.blocked > 0 ? STATE_COLORS.blocked : "var(--muted-foreground)" }}>{verdictFor(t)}</span>
+            <OverviewCard title="All milestones" unit="worst first" aside={<CardLink onClick={openStudents}>Students</CardLink>}>
+              <Legend />
+              <ul className="flex flex-col gap-[8px]">
+                {rest.map((r) => (
+                  <li key={r.name}>
+                    <button type="button" onClick={openStudents} className="dm-quiet flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[14px] py-[10px] text-left" style={GLASS_INSET}>
+                      <span className="flex flex-wrap items-baseline justify-between gap-x-[10px] gap-y-[2px]">
+                        <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
+                          <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.name}</span>
+                          <span className="text-[11.5px] font-semibold" style={{ color: r.counts.needsAttention > 0 ? COLOR.needsAttention : "var(--muted-foreground)" }}>{outstanding(r)}</span>
+                        </span>
+                        <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{r.donePct}% <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span></span>
                       </span>
-                      <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{t.donePct}%</span>
-                    </span>
-                    <RankBar value={t.donePct} />
+                      <StatusBar r={r} />
+                    </button>
                   </li>
                 ))}
               </ul>
