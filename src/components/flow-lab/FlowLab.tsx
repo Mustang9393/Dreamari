@@ -9,7 +9,7 @@
 // team's counter-proposal. The chip and Restart sit in every screen's
 // bottom bar (LabDockContext) so they never cover a card.
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { RotateCcw, ArrowLeft } from "lucide-react";
 import { QuickLinksMenu, Wordmark } from "@/components/app/chrome";
@@ -20,7 +20,7 @@ import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { LAB_VERSION_KEY, clearLabState, type LabVersion } from "./lab";
-import { LabDockContext } from "./shared";
+import { LabDockContext, LabInfoContext, type ScreenNote } from "./shared";
 import { V2Flow } from "./V2Flow";
 import { V3Flow } from "./V3Flow";
 
@@ -36,6 +36,9 @@ export function FlowLab({ initialVersion }: { initialVersion?: LabVersion }) {
   const [version, setVersionState] = useState<LabVersion>(initialVersion ?? "v2");
   const [resetKey, setResetKey] = useState(0);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [screenNote, setScreenNoteState] = useState<ScreenNote | null>(null);
+  // Screens re-register on every render; only a real change re-renders us.
+  const setScreenNote = useCallback((n: ScreenNote | null) => setScreenNoteState((prev) => (JSON.stringify(prev) === JSON.stringify(n) ? prev : n)), []);
 
   useEffect(() => {
     if (initialVersion) {
@@ -111,11 +114,13 @@ export function FlowLab({ initialVersion }: { initialVersion?: LabVersion }) {
             <QuickLinksMenu />
           </div>
         </header>
-        <InfoSheet version={version} open={infoOpen} onClose={() => setInfoOpen(false)} />
+        <InfoSheet version={version} screen={screenNote} open={infoOpen} onClose={() => setInfoOpen(false)} />
         <LabDockContext.Provider value={dock}>
-          <div style={{ color: "var(--foreground)" }}>
-            {version === "v2" ? <V2Flow key={`v2-${resetKey}`} onRestart={restart} /> : <V3Flow key={`v3-${resetKey}`} onRestart={restart} />}
-          </div>
+          <LabInfoContext.Provider value={setScreenNote}>
+            <div style={{ color: "var(--foreground)" }}>
+              {version === "v2" ? <V2Flow key={`v2-${resetKey}`} onRestart={restart} /> : <V3Flow key={`v3-${resetKey}`} onRestart={restart} />}
+            </div>
+          </LabInfoContext.Provider>
         </LabDockContext.Provider>
       </div>
     </ThemeProvider>

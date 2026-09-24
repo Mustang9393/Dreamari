@@ -21,6 +21,31 @@ const EMPTY: State = { step: "interests", worlds: [], subs: {}, page: 0, picks: 
 const MAX_WORLDS = 3;
 const MAX_PICKS = 3;
 
+const NOTES = {
+  build: { heading: "Build add-on, part 1", bullets: [
+    "Up to 3 worlds. Your Build worlds are already selected when this browser has them.",
+    "A third world widens the six without scattering it.",
+  ] },
+  subs: { heading: "Build add-on, part 2: which parts?", bullets: [
+    "One quick follow-up per world. This is what makes the six specific instead of a whole world.",
+    "Pick as many parts as fit; at least one per world to continue.",
+  ] },
+  match: { heading: "Match", bullets: [
+    "Six careers built from your worlds and the parts you picked, shared out across the worlds.",
+    "The chip on each card is the reason it is here: the part it fits, or Stretch pick for the one from a nearby world.",
+    "Tap a card for the same detail Match shows. Tap + to pick; three picks are your Top 3. No separate save or rank.",
+    "Six more generates the next set; the arrow goes back. Change answers returns to the parts.",
+    "Confirm Top 3 with three picks, or Continue with fewer.",
+  ] },
+  top3: { heading: "My Top 3 and what happens next", bullets: [
+    "Next step: one recommended action for #1 (the Career Report). Start opens the real report page.",
+    "The ladder under it is the same order of milestones the counselor dashboard tracks: Career Report, Pathway, Play a day, Colleges. In the product the recommendation moves to the first rung not yet done.",
+    "The four icons under each card open the real pages for that career: Report, Pathway, Play, Colleges.",
+    "Replace swaps a pick for any career you have seen in Match; Remove clears the slot.",
+    "Explore more and Matches go back to Match to keep editing. Play again restarts the whole flow.",
+  ] },
+};
+
 type Match = { career: LabCareer; reason: string; stretch: boolean };
 
 /** A world's careers: sub-interest hits first, then the rest; within each
@@ -117,7 +142,7 @@ export function V3Flow({ onRestart }: { onRestart: () => void }) {
   if (state.step === "interests") {
     return (
       <>
-        <LabScreen title="Build">
+        <LabScreen title="Build" note={NOTES.build}>
           <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-1 pt-2">
             <Field label="Worlds · up to 3"><InterestPicker value={state.worlds} max={MAX_WORLDS} onChange={(worlds) => setState((s) => ({ ...s, worlds }))} /></Field>
           </div>
@@ -132,7 +157,7 @@ export function V3Flow({ onRestart }: { onRestart: () => void }) {
     const answered = state.worlds.every((w) => (state.subs[w] ?? []).length > 0);
     return (
       <>
-        <LabScreen title="Which parts?">
+        <LabScreen title="Which parts?" note={NOTES.subs}>
           <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-1 pt-2">
             {state.worlds.map((world) => (
               <Field key={world} label={world}>
@@ -153,6 +178,7 @@ export function V3Flow({ onRestart }: { onRestart: () => void }) {
     return (
       <>
         <LabScreen
+          note={NOTES.match}
           title="Match"
           status={`${state.picks.length} of ${MAX_PICKS}`}
           hint="Tap a card for details. Tap + to pick it."
@@ -197,7 +223,7 @@ export function V3Flow({ onRestart }: { onRestart: () => void }) {
   // ---- My Profile: the same Top 3 screen as v2 ----
   return (
     <>
-      <LabScreen title="My Top 3">
+      <LabScreen title="My Top 3" note={NOTES.top3}>
         <TopThreeScreen
           top3={top3}
           pool={pool}

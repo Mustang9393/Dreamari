@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Info, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import type { LabVersion } from "./lab";
+import type { ScreenNote } from "./shared";
 
 type Note = { title: string; kicker: string; sections: { heading: string; bullets: string[] }[] };
 
@@ -94,7 +95,7 @@ export function InfoButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-export function InfoSheet({ version, open, onClose }: { version: LabVersion; open: boolean; onClose: () => void }) {
+export function InfoSheet({ version, screen, open, onClose }: { version: LabVersion; screen: ScreenNote | null; open: boolean; onClose: () => void }) {
   const note = FLOW_NOTES[version];
   useEffect(() => {
     if (!open) return;
@@ -118,6 +119,20 @@ export function InfoSheet({ version, open, onClose }: { version: LabVersion; ope
               </IconTip>
             </div>
             <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-4">
+              {screen && (
+                <section className="rounded-[var(--radius-md)] border p-3" style={{ borderColor: "color-mix(in srgb, var(--primary) 45%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 8%, transparent)" }}>
+                  <p className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--primary)" }}>This screen</p>
+                  <h3 className="text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>{screen.heading}</h3>
+                  <ul className="mt-1.5 flex flex-col gap-1.5">
+                    {screen.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-2 text-[13px] leading-[1.5] font-medium" style={{ color: "var(--muted-foreground)" }}>
+                        <span aria-hidden className="mt-[8px] size-1 flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
               {note.sections.map((s) => (
                 <section key={s.heading}>
                   <h3 className="text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>{s.heading}</h3>

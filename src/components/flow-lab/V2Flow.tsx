@@ -31,6 +31,35 @@ type State = {
 };
 const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", page: {}, saved: [], rank: [] };
 const FOR_YOU = "For you";
+
+const NOTES = {
+  build: { heading: "Build, standing in", bullets: [
+    "Only shown when this browser has no Build answers. In the product these come from Build itself.",
+    "Worlds are required; subjects and the college or trades answer sharpen the list.",
+  ] },
+  explore: { heading: "Mini Explore", bullets: [
+    "For you: careers from your chosen worlds, ranked by your subjects and path together. A chip on each card says which answers put it there.",
+    "A tab per chosen world; Explore more opens nearby worlds.",
+    "Tap a card for the same detail Match shows. Tap the bookmark to save, up to 7.",
+    "Six more slides in the next six; the arrow goes back.",
+    "Continue moves to Saved once you have at least one.",
+  ] },
+  saved: { heading: "Saved", bullets: [
+    "Everything you bookmarked, in one place. Tap the bookmark again to remove.",
+    "Rank my top 3 when you are ready; the back arrow returns to Mini Explore.",
+  ] },
+  rank: { heading: "Rank your top 3", bullets: [
+    "Tap + in the order you want them: first tap is #1. Tap again to undo.",
+    "Confirm Top 3 sets them; you can still change them on the next screen.",
+  ] },
+  top3: { heading: "My Top 3 and what happens next", bullets: [
+    "Next step: one recommended action for #1 (the Career Report). Start opens the real report page.",
+    "The ladder under it is the same order of milestones the counselor dashboard tracks: Career Report, Pathway, Play a day, Colleges.",
+    "The four icons under each card open the real pages for that career: Report, Pathway, Play, Colleges.",
+    "Replace swaps a pick for anything in Saved; Remove clears the slot.",
+    "Explore more and Saved go back to keep editing. Play again restarts the whole flow.",
+  ] },
+};
 const EXPLORE_MORE = "Explore more";
 
 export function V2Flow({ onRestart }: { onRestart: () => void }) {
@@ -88,7 +117,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
   if (state.step === "interests") {
     return (
       <>
-        <LabScreen title="Build">
+        <LabScreen title="Build" note={NOTES.build}>
           <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-1 pt-2">
             <Field label="Worlds · up to 2"><InterestPicker value={state.worlds} max={2} onChange={(worlds) => setState((s) => ({ ...s, worlds, activeTab: FOR_YOU }))} /></Field>
             <Field label="Favourite subjects · up to 2"><ChipRow ariaLabel="Subjects" options={SUBJECTS.map((x) => ({ key: x, label: x }))} value={state.subjects} max={2} onChange={(subjects) => setState((s) => ({ ...s, subjects }))} /></Field>
@@ -123,6 +152,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     return (
       <>
         <LabScreen
+          note={NOTES.explore}
           title="Mini Explore"
           status={`${state.saved.length} of ${MAX_SAVED}`}
           hint="Tap a card for details. Tap the bookmark to save it."
@@ -168,7 +198,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     const openIdx = open ? savedCareers.indexOf(open) : -1;
     return (
       <>
-        <LabScreen title={ranking ? "Rank your top 3" : "Saved"} status={ranking ? `${state.rank.length} of 3` : `${savedCareers.length} of ${MAX_SAVED}`} hint={ranking ? "Tap + in the order you want them." : "Tap a card for details. Tap the bookmark to remove it."}>
+        <LabScreen note={ranking ? NOTES.rank : NOTES.saved} title={ranking ? "Rank your top 3" : "Saved"} status={ranking ? `${state.rank.length} of 3` : `${savedCareers.length} of ${MAX_SAVED}`} hint={ranking ? "Tap + in the order you want them." : "Tap a card for details. Tap the bookmark to remove it."}>
           {savedCareers.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-dashed text-center" style={{ borderColor: "var(--glass-border)" }}>
               <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet</p>
@@ -208,7 +238,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
   // ---- My Profile: Top 3 ----
   return (
     <>
-      <LabScreen title="My Top 3">
+      <LabScreen title="My Top 3" note={NOTES.top3}>
         <TopThreeScreen
           top3={top3}
           pool={savedCareers}

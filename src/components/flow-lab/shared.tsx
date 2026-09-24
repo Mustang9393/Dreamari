@@ -30,11 +30,25 @@ export const LabDockContext = createContext<ReactNode>(null);
 
 export type Hint = { active: boolean; label: string; onDismiss: () => void; cta?: string };
 
+/** What the (i) says about the screen that is open right now: the screen
+ *  registers it, FlowLab shows it above the version note (direct
+ *  instruction, 25 Sept 2026: "make sure the info notes are updated to be
+ *  relevant to each screen and their actions too"). */
+export type ScreenNote = { heading: string; bullets: string[] };
+export const LabInfoContext = createContext<(note: ScreenNote | null) => void>(() => {});
+
 // ---------------------------------------------------------------- layout ----
 
 /** Match's viewport-high section: header row, optional control row, then
  *  whatever fills the rest (`children`), above a fixed bottom bar. */
-export function LabScreen({ title, status, hint, controls, children }: { title: string; status?: string; hint?: string; controls?: ReactNode; children: ReactNode }) {
+export function LabScreen({ title, status, hint, controls, note, children }: { title: string; status?: string; hint?: string; controls?: ReactNode; note?: ScreenNote; children: ReactNode }) {
+  const setNote = useContext(LabInfoContext);
+  const noteKey = JSON.stringify(note ?? null);
+  useEffect(() => {
+    setNote(note ?? null);
+    return () => setNote(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- compared by content; the object is rebuilt every render
+  }, [noteKey, setNote]);
   return (
     // Phones carry the version dock above the bottom bar, so they need the
     // extra bottom room; desktop docks it inside the bar.
