@@ -8,7 +8,12 @@ import { useId } from "react";
 import { LogIn, Users, CalendarDays, TrendingUp } from "lucide-react";
 import { MetricTile } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { useSyncExternalStore } from "react";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { SCHOOL_TARGETS, districtSchools } from "@/lib/counselorOrg";
+import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
@@ -80,8 +85,24 @@ function LoginsChart() {
 }
 
 export function PlatformEngagement() {
+  // The District Administrator's Engagement leads with the schools compared
+  // (seeded siblings, counselorOrg.ts); Lincoln's own month-by-month detail
+  // follows. A school role sees Lincoln only.
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const district = account.role === "District Administrator";
+  const roster = useReviewedRoster();
+  const schools = district ? districtSchools(roster).slice().sort((a, b) => a.activePct - b.activePct) : [];
+  const reach = schools.filter((s) => s.activePct >= SCHOOL_TARGETS.activeStudents).length;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
+      {district && (
+        <OverviewCard title="Schools" unit="% of students active this month" hero>
+          <Verdict band={reach === schools.length ? "met" : reach >= schools.length - 1 ? "near" : "missed"}>{reach} of {schools.length} schools reach {SCHOOL_TARGETS.activeStudents}% · {schools[0]?.short} has the most room to grow</Verdict>
+          <div className="flex flex-col gap-[10px]">
+            {schools.map((s) => <MetricRow key={s.id} label={s.name} note={`${s.activeStudents} of ${s.students} · ${s.avgLogins.toFixed(1)} logins each`} value={s.activePct} target={SCHOOL_TARGETS.activeStudents} />)}
+          </div>
+        </OverviewCard>
+      )}
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
         <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Active this month" accent="#5B6CF9" /></div></HoverBeam>
         <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Active weekly" accent="#5B6CF9" /></div></HoverBeam>

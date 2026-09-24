@@ -6,7 +6,10 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 import { CounselorShell, type CounselorView } from "./shell";
 import { ALL_VIEWS, REFERENCE_VIEWS, roleHasView } from "./roles";
 import { CounselorVersionProvider, useCounselorVersion } from "./version";
-import { ComingSoon } from "./v2/ComingSoon";
+import { Counselors } from "./v2/Counselors";
+import { Schools } from "./v2/Schools";
+import { Readiness } from "./v2/Readiness";
+import { Reports } from "./v2/Reports";
 import { OverviewLead } from "./v2/OverviewLead";
 import { OverviewSchoolAdmin } from "./v2/OverviewSchoolAdmin";
 import { OverviewDistrict } from "./v2/OverviewDistrict";
@@ -62,13 +65,12 @@ function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initia
       case "engagement": return <PlatformEngagementV2 />;
       case "impact": return <MyImpactV2 />;
       case "settings": return <SettingsV2 />;
-      // Role-shell views (roles.ts), placeholders until each gets its pass.
-      case "counselors":
-      case "readiness":
-      case "reports":
-      case "schools":
-      case "school-impact":
-        return <ComingSoon view={view} />;
+      // Role-shell views (roles.ts).
+      case "counselors": return <Counselors />;
+      case "readiness": return <Readiness />;
+      case "reports": return <Reports />;
+      case "schools": return <Schools />;
+      case "school-impact": return <MyImpactV2 scope="school" />;
     }
   }
   // v1 never reaches a role-shell view: RoutedView redirects them to

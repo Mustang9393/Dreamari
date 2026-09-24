@@ -13,6 +13,8 @@
 // sections, and marks target misses with the reserved status color only.
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useCounselorFilters } from "../shell";
 import { Printer, Share2, FileBarChart, Users, TrendingUp, GraduationCap, MessageSquare, ClipboardCheck, Megaphone, Flag, BookOpen, Briefcase, Heart } from "lucide-react";
 import { MetricTile } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -23,7 +25,8 @@ import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 
 import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
 import { STATUS_COLORS } from "../chips";
-import { RankBar } from "./overviewShared";
+import { MetricRow, RankBar } from "./overviewShared";
+import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, counselorFor, readinessMetrics } from "@/lib/counselorOrg";
 const GRADES = [9, 10, 11, 12];
 const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
 
@@ -51,10 +54,17 @@ function SectionCard({ title, sub, children }: { title: string; sub?: string; ch
   );
 }
 
-export function MyImpact() {
+// `scope="school"` is the Lead Counselor's School Impact: the same report
+// for the whole school, headed by the school, with a by-counselor card.
+export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
+  const router = useRouter();
+  const { setGradeFilter, setCounselorFilter } = useCounselorFilters();
   const roster = useReviewedRoster();
   const account = readCounselorAccount();
-  const counselorName = account.name || "Sarah Chen";
+  const counselorName = scope === "school" ? (account.school || DEMO_SCHOOL) : (account.name || "Sarah Chen");
+  const byCounselor = scope === "school"
+    ? SCHOOL_COUNSELORS.map((c) => ({ c, m: readinessMetrics(roster.filter((s) => counselorFor(s).id === c.id)) })).filter((x) => x.m.students > 0).sort((a, b) => a.m.onTrackPct - b.m.onTrackPct)
+    : [];
 
   const total = roster.length || 1;
   const onTrack = roster.filter((s) => s.status === "On Track").length;
@@ -117,7 +127,7 @@ export function MyImpact() {
       <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
         <div className="flex flex-col gap-[2px]">
           <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{counselorName}</h2>
-          <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{account.role || "School Counselor"} · {account.school || DEMO_SCHOOL} · August 2026 to January 2027</span>
+          <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{scope === "school" ? `Prepared by ${account.name || "Sarah Chen"}, ${account.role || "Lead Counselor"}` : `${account.role || "School Counselor"} · ${account.school || DEMO_SCHOOL}`} · August 2026 to January 2027</span>
         </div>
         <div className="flex flex-wrap items-center gap-[8px]">
           <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
@@ -155,17 +165,25 @@ export function MyImpact() {
         <SectionCard title="Progress by grade" sub={`${overallAvg}% average plan completion`}>
           <div className="flex flex-col gap-[12px]">
             {gradeStats.map((g) => (
-              <div key={g.grade} className="flex flex-col gap-[4px]">
-                <div className="flex items-center justify-between text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <button key={g.grade} type="button" onClick={() => { setGradeFilter(g.grade as 9 | 10 | 11 | 12); router.push("/counselor?view=students"); }} className="dm-quiet -mx-[6px] flex w-[calc(100%+12px)] cursor-pointer flex-col gap-[4px] rounded-[var(--radius-sm)] px-[6px] py-[3px] text-left">
+                <div className="flex w-full items-center justify-between text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                   <span style={{ color: "var(--foreground)" }}>Grade {g.grade}</span>
                   <span>{g.onTrackCount} of {g.total} on track · {g.avg}%</span>
                 </div>
                 <RankBar value={g.avg} />
-              </div>
+              </button>
             ))}
           </div>
         </SectionCard>
       </div>
+
+      {scope === "school" && byCounselor.length > 0 && (
+        <SectionCard title="By counselor" sub="On-track rate per caseload, attention first">
+          <div className="flex flex-col gap-[10px]">
+            {byCounselor.map(({ c, m }) => <MetricRow key={c.id} label={c.name} note={`${c.range} · ${m.students} students · ${m.withPlanPct}% with a plan`} value={m.onTrackPct} target={SCHOOL_TARGETS.onTrack} onClick={() => { setCounselorFilter(c.id); router.push("/counselor?view=students"); }} />)}
+          </div>
+        </SectionCard>
+      )}
 
       <SectionCard title="Milestones">
         <div className="grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
@@ -194,7 +212,7 @@ export function MyImpact() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Student engagement on Dreamari" sub="This reporting period, students in your caseload">
+      <SectionCard title="Student engagement on Dreamari" sub={scope === "school" ? "This reporting period, all students" : "This reporting period, students in your caseload"}>
         <div className="grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-5">
           <BigStat value={engagement.drops.toLocaleString("en-US")} label="Daily Career Drops" />
           <BigStat value={engagement.sims.toLocaleString("en-US")} label="Career simulations" />
@@ -243,7 +261,7 @@ export function MyImpact() {
       </div>
 
       <div className="flex flex-wrap items-baseline justify-between gap-[8px] border-t pt-[var(--space-4)] text-[12px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-        <span className="font-bold" style={{ color: "var(--foreground)" }}>{counselorName} · {account.role || "School Counselor"} · {account.school || DEMO_SCHOOL} · 2026-2027</span>
+        <span className="font-bold" style={{ color: "var(--foreground)" }}>{scope === "school" ? `${account.school || DEMO_SCHOOL} · prepared by ${account.name || "Sarah Chen"}` : `${counselorName} · ${account.role || "School Counselor"} · ${account.school || DEMO_SCHOOL}`} · 2026-2027</span>
         <span>Dreamari platform data, August 2026 to January 2027 · aggregated and anonymized · prepared to ASCA National Model (4th edition) accountability standards</span>
       </div>
     </div>

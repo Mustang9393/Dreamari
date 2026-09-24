@@ -41,8 +41,8 @@ export function OverviewDistrict() {
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-8">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-8">
           <OverviewCard title="Schools" unit="% on track" hero tint={BAND_COLORS[heroBand]} aside={<SeeLink onClick={() => router.push("/counselor?view=schools")}>All</SeeLink>}>
             <Verdict band={heroBand}>
               {behind === 0 ? `All ${schools.length} schools meet every target` : `${worst.short} needs the most support · ${behind} of ${schools.length} have a target to reach`}
@@ -54,7 +54,7 @@ export function OverviewDistrict() {
             </div>
           </OverviewCard>
         </div>
-        <div className="lg:col-span-4">
+        <div className="xl:col-span-4">
           <DonutCard
             title="Student Status"
             caption={`${district.students.toLocaleString("en-US")} students · ${schools.length} schools`}
@@ -70,8 +70,8 @@ export function OverviewDistrict() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-7">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-7">
           <OverviewCard title="Platform use" unit="% active this month" aside={<SeeLink onClick={() => router.push("/counselor?view=engagement")}>Engagement</SeeLink>}>
             <Verdict band={useBand}>{reachUse} of {schools.length} schools reach {SCHOOL_TARGETS.activeStudents}%</Verdict>
             <div className="flex flex-col gap-[8px]">
@@ -79,7 +79,7 @@ export function OverviewDistrict() {
             </div>
           </OverviewCard>
         </div>
-        <div className="lg:col-span-5">
+        <div className="xl:col-span-5">
           <OverviewCard title="District targets" aside={<SeeLink onClick={() => router.push("/counselor?view=readiness")}>Readiness</SeeLink>}>
             <div className="flex flex-col gap-[var(--space-4)]">
               {READINESS_TARGETS.map((key) => {

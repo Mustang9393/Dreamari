@@ -14,7 +14,8 @@ import { useState } from "react";
 import { Plus, Send, Check } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "@/components/connect/viz";
-import { Avatar, STATUS_COLORS } from "../chips";
+import { Avatar, DetailPane, STATUS_COLORS, StudentLink } from "../chips";
+import { getRoster } from "@/lib/counselorRoster";
 import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
 import { BLUE_3 } from "../palette";
 import { Stat } from "./overviewShared";
@@ -122,6 +123,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   // Unanswered first, then by date within each state.
   const ordered = [...QUESTIONS].sort((a, b) => STATUS_STYLE[statusOf(a.id)].rank - STATUS_STYLE[statusOf(b.id)].rank || b.date.localeCompare(a.date));
   const [selectedId, setSelectedId] = useState(ordered[0].id);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [response, setResponse] = useState("");
   const selected = QUESTIONS.find((q) => q.id === selectedId)!;
   const selectedStatus = statusOf(selected.id);
@@ -136,7 +138,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
             <button
               key={q.id}
               type="button"
-              onClick={() => { setSelectedId(q.id); setResponse(""); }}
+              onClick={() => { setSelectedId(q.id); setResponse(""); setSheetOpen(true); }}
               aria-pressed={on}
               className="dm-quiet flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left"
               style={{ ...GLASS_INSET, borderColor: on ? "color-mix(in srgb, var(--primary) 60%, var(--glass-border))" : GLASS_INSET.borderColor, background: on ? "color-mix(in srgb, var(--primary) 12%, transparent)" : GLASS_INSET.background }}
@@ -156,16 +158,13 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
           );
         })}
       </div>
+      <DetailPane open={sheetOpen} onClose={() => setSheetOpen(false)}>
       <HoverBeam strength={0.5}>
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
-            <div className="flex min-w-0 items-center gap-[12px]">
-              <Avatar name={selected.name} size={44} />
-              <div className="flex min-w-0 flex-col gap-[2px]">
-                <h2 className="text-[17px] leading-[1.2] font-bold" style={{ color: "var(--foreground)" }}>{selected.name}</h2>
-                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {selected.grade} · {selected.tag} · {fmtDate(selected.date)}{selected.milestone ? ` · ${selected.milestone}` : ""}</span>
-              </div>
-            </div>
+          <div className="flex items-start justify-between gap-[var(--space-3)]">
+            <StudentLink id={getRoster().find((s) => s.name === selected.name)?.id} name={selected.name}>
+              <span className="truncate text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {selected.grade} · {selected.tag} · {fmtDate(selected.date)}{selected.milestone ? ` · ${selected.milestone}` : ""}</span>
+            </StudentLink>
             <StatusPill status={selectedStatus} />
           </div>
           <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] leading-[21px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{selected.question}</p>
@@ -189,12 +188,12 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
                 <button
                   type="button"
                   disabled={response.trim().length === 0}
-                  onClick={() => { setStatus(selected.id, "responded"); setResponse(""); }}
+                  onClick={() => { setStatus(selected.id, "responded"); setResponse(""); setSheetOpen(false); }}
                   className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-[14px] w-[14px]" aria-hidden /> Send reply
                 </button>
-                <button type="button" onClick={() => setStatus(selected.id, "resolved")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                <button type="button" onClick={() => { setStatus(selected.id, "resolved"); setSheetOpen(false); }} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
                   Mark resolved
                 </button>
               </div>
@@ -202,6 +201,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
           )}
         </div>
       </HoverBeam>
+      </DetailPane>
     </div>
   );
 }

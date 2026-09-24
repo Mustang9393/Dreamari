@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { MILESTONE_KEYS, avatarIndexForName, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
 import { studentAvatarByIndex, useStudentAvatarSrc } from "@/lib/avatar";
 
@@ -226,5 +227,50 @@ export function ScrollChips<K extends string>({ options, value, onChange, ariaLa
       {fade("left")}
       {fade("right")}
     </div>
+  );
+}
+
+// The detail half of a master-detail screen (Review Queue, Connect). From
+// lg up it is an ordinary grid child beside the list. Below lg the list
+// gets the whole width and the detail opens as a bottom sheet over it when
+// an item is chosen, with a Close bar, instead of sitting under the list
+// where the counselor had to scroll to act (direct feedback, 25 Sept 2026:
+// layout issues on tablet and mobile).
+export function DetailPane({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <>
+      {open && <button type="button" aria-label="Close" onClick={onClose} className="fixed inset-0 z-30 cursor-default lg:hidden" style={{ background: "rgba(0,0,0,0.6)" }} />}
+      <div className={`${open ? "fixed inset-x-0 bottom-0 z-40 flex max-h-[88dvh] flex-col overflow-y-auto rounded-t-[var(--radius-lg)] border-t" : "hidden"} lg:static lg:z-auto lg:block lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0`} style={open ? { background: "var(--background)", borderColor: "var(--glass-border)" } : undefined}>
+        <div className="flex justify-end px-[var(--space-4)] pt-[10px] lg:hidden">
+          <button type="button" onClick={onClose} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
+            Close <ChevronDown className="h-[14px] w-[14px]" aria-hidden />
+          </button>
+        </div>
+        <div className="p-[var(--space-4)] lg:p-0">{children}</div>
+      </div>
+    </>
+  );
+}
+
+// Avatar plus name that opens the student's profile (app-wide rule: every
+// avatar and name opens the profile). `id` is the roster id; a name with
+// no roster match renders as plain text. Not for use inside another
+// button (a queue card): nested buttons are invalid.
+export function StudentLink({ id, name, index, size = 44, children }: { id?: string; name: string; index?: number; size?: number; /** the line under the name */ children?: React.ReactNode }) {
+  const router = useRouter();
+  const inner = (
+    <>
+      <Avatar name={name} size={size} index={index} />
+      <span className="flex min-w-0 flex-col gap-[2px] text-left">
+        <span className="truncate text-[17px] leading-[1.2] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+        {children}
+      </span>
+    </>
+  );
+  if (!id) return <span className="flex min-w-0 items-center gap-[12px]">{inner}</span>;
+  return (
+    <button type="button" onClick={() => router.push(`/counselor?view=students&studentId=${id}`)} className="dm-quiet group/link flex min-w-0 cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] text-left [&_span:first-of-type]:group-hover/link:underline">
+      {inner}
+    </button>
   );
 }

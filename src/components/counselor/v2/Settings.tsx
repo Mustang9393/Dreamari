@@ -131,11 +131,11 @@ export function Settings() {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Caseload</h2>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{draft.role === "School Counselor" || draft.role === "" ? "Caseload" : draft.role === "District Administrator" ? "District" : "School"}</h2>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <div className="flex flex-col items-center gap-[2px] text-center">
               <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{roster.length}</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Assigned Students</span>
+              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Students</span>
             </div>
             <div className="flex flex-col items-center gap-[2px] text-center">
               <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{avgCompletion}%</span>

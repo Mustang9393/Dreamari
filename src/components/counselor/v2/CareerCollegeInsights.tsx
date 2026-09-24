@@ -53,16 +53,19 @@ const TOP_COLLEGES = [
   { emoji: "💚", name: "Michigan State University", count: 12 }, { emoji: "🦅", name: "Georgia State University", count: 11 },
 ];
 
+// A real horizontal bar chart: the bar spans the row, the label sits on
+// it, the count is pinned right. Ten short bars beside a label column read
+// as decoration; one bar per row reads as the chart it is.
 function RankedList({ items }: { items: { name: string; count: number }[] }) {
   const max = Math.max(...items.map((i) => i.count));
   return (
-    <ol className="flex flex-col gap-[8px]">
+    <ol className="flex flex-col gap-[6px]">
       {items.map((item, i) => (
-        <li key={item.name} className="flex items-center gap-[12px]">
-          <span className="w-[16px] flex-none text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
-          <span className="min-w-0 flex-1 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</span>
-          <span className="relative h-[6px] w-[90px] flex-none rounded-full" style={{ background: "rgba(255,255,255,0.08)" }} aria-hidden>
-            <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${(item.count / max) * 100}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 35%, transparent), var(--primary))" }} />
+        <li key={item.name} className="flex items-center gap-[10px]">
+          <span className="w-[18px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
+          <span className="relative flex h-[28px] min-w-0 flex-1 items-center rounded-[6px]" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <span aria-hidden className="absolute inset-y-0 left-0 rounded-[6px]" style={{ width: `${(item.count / max) * 100}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent), color-mix(in srgb, var(--primary) 85%, transparent))" }} />
+            <span className="relative truncate px-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</span>
           </span>
           <span className="w-[28px] flex-none text-right text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
         </li>
@@ -96,15 +99,13 @@ export function CareerCollegeInsights() {
               <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Recommended this semester
             </h2>
             <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+              {/* One left edge for all three lines (direct feedback: the
+                 number and its text "read like two different anchors"). */}
               {RECOMMENDATION_TILES.map((r) => (
-                <div key={r.subject} className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, #FFFFFF 14%, transparent)", background: "color-mix(in srgb, #FFFFFF 7%, transparent)" }}>
-                  <span className="flex items-baseline gap-[8px]">
-                    <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
-                    <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.subject}</span>
-                  </span>
-                  <span className="flex items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
-                    <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{r.action}
-                  </span>
+                <div key={r.subject} className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, #FFFFFF 14%, transparent)", background: "color-mix(in srgb, #FFFFFF 7%, transparent)" }}>
+                  <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                  <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.subject}</span>
+                  <span className="mt-[6px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.action}</span>
                 </div>
               ))}
             </div>

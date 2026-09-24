@@ -354,8 +354,8 @@ export function Overview() {
          the wide hero, Postsecondary Plans is the compact simple-data
          sidekick, Career Pathways keeps enough room for its 7-row legend
          (direct feedback: "no design experimentation... the same cards"). */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-5">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-5">
           <DonutCard
             title="Student Status"
             centerPct={onTrackPct}
@@ -371,10 +371,10 @@ export function Overview() {
             ]}
           />
         </div>
-        <div className="lg:col-span-4">
+        <div className="xl:col-span-4">
           <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="xl:col-span-3">
           <DonutCard
             title="Postsecondary Plans"
             centerPct={(withPlan / total) * 100}
@@ -389,7 +389,7 @@ export function Overview() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
         <HoverBeam strength={0.6} className="h-full">
           {/* No `aside` here -- an aside sits inline next to the title
              until it doesn't fit, and "Academic Readiness" (longer title,

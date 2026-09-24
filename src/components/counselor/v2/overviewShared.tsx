@@ -83,7 +83,7 @@ export function RankBar({ value, target, height = 6 }: { value: number; target?:
 /** One row: label (and an optional muted note) left, value right, bar under.
  *  The value wears the alert color only when below target. Click-through is
  *  optional; the row looks the same either way. */
-export function MetricRow({ label, note, value, target, leading, onClick }: { label: string; note?: string; value: number | null; target: number; leading?: React.ReactNode; onClick?: () => void }) {
+export function MetricRow({ label, note, value, target, leading, onClick, display }: { label: string; note?: string; value: number | null; target: number; leading?: React.ReactNode; onClick?: () => void; /** what to print instead of "NN%" (the bar still uses value) */ display?: string }) {
   const color = value === null ? "var(--muted-foreground)" : alertColor(value, target) ?? "var(--foreground)";
   const body = (
     <>
@@ -96,7 +96,7 @@ export function MetricRow({ label, note, value, target, leading, onClick }: { la
             <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
             {note && <span className="flex-none text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
           </span>
-          <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color }}>{value === null ? "n/a" : `${value}%`}</span>
+          <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color }}>{display ?? (value === null ? "n/a" : `${value}%`)}</span>
         </span>
         <RankBar value={value ?? 0} target={target} />
       </span>

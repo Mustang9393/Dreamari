@@ -4,7 +4,10 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useCounselorFilters } from "../shell";
+import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, DollarSign, GraduationCap, ClipboardList, AlertTriangle } from "lucide-react";
 import { BarChart } from "@/components/connect/viz";
 import { ScrollChips } from "../chips";
@@ -128,17 +131,23 @@ const PATHWAY_OPTIONS = ["All Pathways", ...CAREER_TRACKS];
 
 export function StudentProgress() {
   const [reportId, setReportId] = useState(REPORT_TYPES[0].id);
-  const [gradeLevel, setGradeLevel] = useState("All Grades");
   const [pathway, setPathway] = useState("All Pathways");
   const report = REPORT_TYPES.find((r) => r.id === reportId)!;
+  // Grade comes from the header filter (the screen had its own grade
+  // picker as well, which asked the same question twice); the Lead
+  // Counselor gets the same counselor picker as Students.
+  const { gradeFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const showCounselor = account.role === "Lead Counselor";
 
   const fullRoster = useReviewedRoster();
   const roster = useMemo(() => {
     let list = fullRoster;
-    if (gradeLevel !== "All Grades") list = list.filter((s) => String(s.grade) === gradeLevel);
+    if (gradeFilter !== "All Grades") list = list.filter((s) => s.grade === gradeFilter);
     if (pathway !== "All Pathways") list = list.filter((s) => s.careerTrack === pathway);
+    if (showCounselor && counselorFilter !== "All") list = list.filter((s) => counselorFor(s).id === counselorFilter);
     return list;
-  }, [fullRoster, gradeLevel, pathway]);
+  }, [fullRoster, gradeFilter, pathway, showCounselor, counselorFilter]);
 
   const byGrade = useCallback((g: number) => roster.filter((s) => s.grade === g), [roster]);
 
@@ -177,16 +186,18 @@ export function StudentProgress() {
          chip peeks past the edge. */}
       <ScrollChips ariaLabel="Report" value={reportId} onChange={setReportId} options={REPORT_TYPES.map((r) => ({ key: r.id, label: r.label }))} />
       <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-          <label className="flex min-w-0 flex-col gap-[4px]">
-            <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Grade Level</span>
-            <Listbox ariaLabel="Grade level" value={gradeLevel} onChange={setGradeLevel} options={[{ value: "All Grades", label: "All Grades" }, ...GRADES.map((g) => ({ value: String(g), label: `Grade ${g}` }))]} className={FIELD} style={fieldStyle} />
-          </label>
+        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:flex lg:items-end lg:[&>label]:min-w-[220px]">
+          {showCounselor && (
+            <label className="flex min-w-0 flex-col gap-[4px]">
+              <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Counselor</span>
+              <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={FIELD} style={fieldStyle} />
+            </label>
+          )}
           <label className="flex min-w-0 flex-col gap-[4px]">
             <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Pathway</span>
             <Listbox ariaLabel="Career pathway" value={pathway} onChange={setPathway} options={PATHWAY_OPTIONS.map((p) => ({ value: p, label: p }))} className={FIELD} style={fieldStyle} />
           </label>
-          <div className="flex items-center gap-[8px] sm:col-span-2 lg:col-span-1">
+          <div className="flex items-center gap-[8px] sm:col-span-2 lg:ml-auto">
             <button type="button" onClick={exportCsv} disabled={!chart} className="dm-quiet flex h-10 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               <Download className="h-[14px] w-[14px]" aria-hidden /> CSV
             </button>

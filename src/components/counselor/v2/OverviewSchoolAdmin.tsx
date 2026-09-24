@@ -56,8 +56,8 @@ export function OverviewSchoolAdmin() {
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-8">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-8">
           <OverviewCard title="Targets" hero tint={BAND_COLORS[heroBand]} aside={<SeeLink onClick={() => router.push("/counselor?view=readiness")}>Readiness</SeeLink>}>
             {worst && (
               <Verdict band={heroBand}>
@@ -69,7 +69,7 @@ export function OverviewSchoolAdmin() {
             </div>
           </OverviewCard>
         </div>
-        <div className="lg:col-span-4">
+        <div className="xl:col-span-4">
           <OverviewCard title="Platform use" aside={<SeeLink onClick={() => router.push("/counselor?view=engagement")}>Engagement</SeeLink>}>
             <MetricRow label="Active this month" note={`target ${SCHOOL_TARGETS.activeStudents}%`} value={school.activePct} target={SCHOOL_TARGETS.activeStudents} />
             <div className="mt-auto flex gap-[var(--space-6)]">
@@ -80,8 +80,8 @@ export function OverviewSchoolAdmin() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-7">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-7">
           <HoverBeam strength={0.6} className="h-full">
             <Panel id="readiness-by-grade" title="Readiness by grade" className="h-full">
               <BarChart barStyle="solid"
@@ -96,7 +96,7 @@ export function OverviewSchoolAdmin() {
             </Panel>
           </HoverBeam>
         </div>
-        <div className="lg:col-span-5">
+        <div className="xl:col-span-5">
           <OverviewCard title="By group" unit="% on track" aside={<Segmented ariaLabel="Cut readiness by" options={[{ key: "pathway", label: "Pathway" }, { key: "plan", label: "Plan" }]} value={cut} onChange={setCut} />}>
             {lowest && (
               <Verdict band={gapBand}>{gapBand === "met" ? "Every group is on target" : `${lowest.k} is lowest`}</Verdict>

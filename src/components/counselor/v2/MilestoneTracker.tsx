@@ -107,7 +107,7 @@ function Legend() {
 
 export function MilestoneTracker() {
   const router = useRouter();
-  const { gradeFilter, setGradeFilter } = useCounselorFilters();
+  const { gradeFilter, setGradeFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
   const [grade, setGrade] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
   const roster = useReviewedRoster();
   // The Lead Counselor can narrow the grade to one counselor's students;
@@ -115,7 +115,6 @@ export function MilestoneTracker() {
   // Lead has on Students and the Review Queue.
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
-  const [counselorFilter, setCounselorFilter] = useState("All");
   const n = useMemo(() => roster.filter((s) => s.grade === grade && (!showCounselor || counselorFilter === "All" || counselorFor(s).id === counselorFilter)).length, [roster, grade, showCounselor, counselorFilter]);
   const rows = useMemo(() => GRADE_READINESS[grade].cards.map((c) => scale(c, n)).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct), [grade, n]);
   const hero = rows[0];

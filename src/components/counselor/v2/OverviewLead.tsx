@@ -46,8 +46,8 @@ export function OverviewLead() {
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-7">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-7">
           <OverviewCard title="Counselors" unit="% on track" hero tint={BAND_COLORS[counselorBand]} aside={<SeeLink onClick={() => router.push("/counselor?view=counselors")}>All</SeeLink>}>
             {worstCounselor && (
               <Verdict band={counselorBand}>
@@ -61,7 +61,7 @@ export function OverviewLead() {
             </div>
           </OverviewCard>
         </div>
-        <div className="lg:col-span-5">
+        <div className="xl:col-span-5">
           <OverviewCard title="Grades" unit="% on track">
             {worstGrade && (
               <Verdict band={gradeBand}>
@@ -77,8 +77,8 @@ export function OverviewLead() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-4">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-4">
           <DonutCard
             title="Student Status"
             caption={`${school.students} students`}
@@ -92,7 +92,7 @@ export function OverviewLead() {
             ]}
           />
         </div>
-        <div className="lg:col-span-4">
+        <div className="xl:col-span-4">
           <OverviewCard title="Review backlog" aside={<SeeLink onClick={() => router.push("/counselor?view=review-queue")}>Queue</SeeLink>}>
             <div className="flex gap-[var(--space-6)]">
               <Stat value={String(school.pendingReviews)} label="pending" />
@@ -105,7 +105,7 @@ export function OverviewLead() {
             </div>
           </OverviewCard>
         </div>
-        <div className="lg:col-span-4">
+        <div className="xl:col-span-4">
           <DonutCard
             title="Postsecondary Plans"
             caption="Students with a declared path"

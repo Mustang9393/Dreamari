@@ -89,12 +89,17 @@ type FiltersState = {
   search: string; setSearch: (s: string) => void;
   statusFilter: StatusRosterFilter; setStatusFilter: (s: StatusRosterFilter) => void;
   planFilter: PlanRosterFilter; setPlanFilter: (p: PlanRosterFilter) => void;
+  /** A seeded counselor id (counselorOrg.ts) or "All"; read by Students,
+   *  Review Queue and Milestone Tracker for the roles that see counselors,
+   *  and set by the Counselors screen's click-through. */
+  counselorFilter: string; setCounselorFilter: (c: string) => void;
 };
 const CounselorFiltersContext = createContext<FiltersState>({
   gradeFilter: "All Grades", setGradeFilter: () => {},
   search: "", setSearch: () => {},
   statusFilter: "All", setStatusFilter: () => {},
   planFilter: "All", setPlanFilter: () => {},
+  counselorFilter: "All", setCounselorFilter: () => {},
 });
 export function useCounselorFilters(): FiltersState {
   return useContext(CounselorFiltersContext);
@@ -198,6 +203,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusRosterFilter>("All");
   const [planFilter, setPlanFilter] = useState<PlanRosterFilter>("All");
+  const [counselorFilter, setCounselorFilter] = useState("All");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { title, subtitle: subtitleRaw } = VIEW_TITLES[active];
   // Matches the reference's own copy exactly ("Welcome back, Sarah...") --
@@ -220,7 +226,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   };
 
   return (
-    <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter }}>
+    <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter }}>
       {/* marketing-v2 defines --primary, --card, --foreground, and every
          other token used across this dashboard (see marketing/tokens.css,
          scoped to .marketing-v2, not root). This wrapper only had

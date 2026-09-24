@@ -24,12 +24,12 @@
 // counselor names for the Lead Counselor.
 
 import { useState, useSyncExternalStore } from "react";
-import { Paperclip, Undo2 } from "lucide-react";
+import { Paperclip, Undo2, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { decideReview, undoReview, useReviewDecisions, useReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
-import { Avatar, MilestoneChip, STATUS_COLORS } from "../chips";
+import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, StudentLink } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
@@ -172,6 +172,51 @@ function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewIt
   );
 }
 
+// The attachment, viewable in place. There is no file store in this
+// prototype, so the preview is a document card built from the student's own
+// data for that milestone (a backend replaces `PreviewBody` with the file's
+// rendered pages or an embedded PDF viewer; the chip, the toggle and the
+// frame stay). Direct feedback, 25 Sept 2026: "I see attachments but I
+// can't view them ... have an option to view them there itself."
+function previewLines(item: ReviewItem): string[] {
+  const s = item.student;
+  switch (item.milestone) {
+    case "Career Report": return [`Top match: ${s.topMatches[0]?.title ?? "Undeclared"} (${s.topMatches[0]?.pct ?? 0}%)`, `Pathway: ${s.careerTrack} · Cluster: ${s.careerCluster}`, `Roadmap ${s.roadmapPct}% complete · Dream Score ${s.engagement.dreamScore}`];
+    case "Resume": return ["Education: " + (s.educationGoals[0] ?? "Lincoln High School"), `Experience: ${s.engagement.challenges} career challenges · ${s.engagement.simulations} simulations`, `Skills drawn from the ${s.careerTrack} pathway`];
+    case "Academic Plan": return [`Four-year plan for Grade ${s.grade}, ${s.careerTrack} pathway`, `Goals: ${s.educationGoals.join(", ") || "not set"}`, `Postsecondary intent: ${s.postsecondaryIntent}`];
+    case "College List": return [`${s.engagement.collegesSaved} colleges saved`, `Intent: ${s.postsecondaryIntent}`, `Pathway: ${s.careerTrack}`];
+    case "Financial Aid": return ["FAFSA worksheet, dependent student", `Intent: ${s.postsecondaryIntent}`, "Awaiting counselor check before submission"];
+    default: return [`${item.milestone} for ${s.name}`, `Grade ${s.grade} · ${s.careerTrack}`, `Submitted ${fmt(item.submitted)}`];
+  }
+}
+
+function AttachmentCard({ item, open, onToggle }: { item: ReviewItem; open: boolean; onToggle: () => void }) {
+  const kb = 40 + seededOffset(`${item.id}:kb`, 380);
+  return (
+    <div className="flex flex-col rounded-[var(--radius-md)] border" style={GLASS_INSET}>
+      <button type="button" onClick={onToggle} aria-expanded={open} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[12px] py-[10px] text-left">
+        <span className="flex size-[32px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
+          <FileText className="h-[16px] w-[16px]" aria-hidden />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col leading-tight">
+          <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{item.attachment}</span>
+          <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>PDF · {kb} KB</span>
+        </span>
+        <span className="flex flex-none items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
+          {open ? "Hide" : "View"} {open ? <ChevronUp className="h-[14px] w-[14px]" aria-hidden /> : <ChevronDown className="h-[14px] w-[14px]" aria-hidden />}
+        </span>
+      </button>
+      {open && (
+        <div className="mx-[12px] mb-[12px] flex flex-col gap-[8px] rounded-[var(--radius-sm)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+          <span className="flex items-center gap-[6px] text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}><Paperclip className="h-[12px] w-[12px]" aria-hidden /> Preview · page 1</span>
+          <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.milestone} · {item.student.name}</span>
+          {previewLines(item).map((l) => <p key={l} className="text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>{l}</p>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ReviewedRow({ decision, roster, onUndo }: { decision: ReviewDecision; roster: CounselorStudent[]; onUndo: () => void }) {
   const student = roster.find((s) => s.id === decision.studentId);
   if (!student) return null;
@@ -194,14 +239,13 @@ function ReviewedRow({ decision, roster, onUndo }: { decision: ReviewDecision; r
 }
 
 export function ReviewQueue() {
-  const { gradeFilter } = useCounselorFilters();
+  const { gradeFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
   const decisions = useReviewDecisions();
   const roster = useReviewedRoster();
   // The Lead Counselor reviews across caseloads and can narrow to one
   // counselor; a School Counselor's queue has no such control.
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
-  const [counselorFilter, setCounselorFilter] = useState("All");
   let scoped = gradeFilter === "All Grades" ? roster : roster.filter((s) => s.grade === gradeFilter);
   if (showCounselor && counselorFilter !== "All") scoped = scoped.filter((s) => counselorFor(s).id === counselorFilter);
   const pending = buildQueue(scoped);
@@ -212,7 +256,9 @@ export function ReviewQueue() {
     .sort((a, b) => b.decidedAt.localeCompare(a.decidedAt));
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
   const selected = pending.find((i) => i.id === selectedId) ?? pending[0] ?? null;
 
   const resolve = (status: ReviewDecision["status"]) => {
@@ -220,6 +266,7 @@ export function ReviewQueue() {
     decideReview(selected.student.id, selected.milestone, status, feedback);
     setFeedback("");
     setSelectedId(null);
+    setSheetOpen(false);
   };
 
   // The pane is the screen's one hero surface, in the brand blue; priority
@@ -253,12 +300,13 @@ export function ReviewQueue() {
           ) : (
             <div className="flex flex-col gap-[8px]">
               {pending.map((item) => (
-                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} onSelect={() => { setSelectedId(item.id); setFeedback(""); }} />
+                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} onSelect={() => { setSelectedId(item.id); setFeedback(""); setPreviewOpen(false); setSheetOpen(true); }} />
               ))}
             </div>
           )}
         </div>
 
+        <DetailPane open={sheetOpen} onClose={() => setSheetOpen(false)}>
         <HoverBeam strength={0.5}>
           <div className="relative flex flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={detailSurface}>
             <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.22) }} />
@@ -266,30 +314,23 @@ export function ReviewQueue() {
               <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select a submission to review.</p>
             ) : (
               <>
-                <div className="relative flex flex-wrap items-start justify-between gap-[var(--space-3)]">
-                  <div className="flex min-w-0 items-center gap-[12px]">
-                    <Avatar name={selected.student.name} size={44} index={selected.student.avatarIndex} />
-                    <div className="flex min-w-0 flex-col gap-[2px]">
-                      <h2 className="text-[17px] leading-[1.2] font-bold" style={{ color: "var(--foreground)" }}>{selected.milestone}</h2>
-                      <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                        {selected.student.name} · Grade {selected.student.grade} · {selected.student.careerTrack}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-[6px]">
-                    <PriorityPill priority={selected.priority} />
-                    <span className="text-[11.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
-                      {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· submitted {fmt(selected.submitted)}</span>
-                    </span>
-                  </div>
+                {/* One header row: student (opens the profile) left, the
+                   pill flex-none on the same line, so nothing wraps under
+                   the name on a phone; the due line is its own line. */}
+                <div className="relative flex items-start justify-between gap-[var(--space-3)]">
+                  <StudentLink id={selected.student.id} name={selected.student.name} index={selected.student.avatarIndex}>
+                    <span className="truncate text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.milestone} · Grade {selected.student.grade} · {selected.student.careerTrack}</span>
+                  </StudentLink>
+                  <PriorityPill priority={selected.priority} />
                 </div>
+                <span className="relative text-[12px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
+                  {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· submitted {fmt(selected.submitted)}</span>
+                </span>
 
                 <div className="relative flex flex-col gap-[6px]">
                   <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>From {selected.student.name.split(" ")[0]}</span>
                   <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] leading-[21px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{selected.message}</p>
-                  <span className="flex w-fit items-center gap-[8px] rounded-full border px-[10px] py-[5px] text-[12px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                    <Paperclip className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--muted-foreground)" }} /> {selected.attachment}
-                  </span>
+                  <AttachmentCard item={selected} open={previewOpen} onToggle={() => setPreviewOpen((o) => !o)} />
                 </div>
 
                 <div className="relative flex flex-col gap-[6px]">
@@ -312,6 +353,7 @@ export function ReviewQueue() {
             )}
           </div>
         </HoverBeam>
+        </DetailPane>
       </div>
 
       {reviewed.length > 0 && (

@@ -102,12 +102,11 @@ const PAGE_SIZE = 20;
 
 export function StudentsRoster() {
   const router = useRouter();
-  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter } = useCounselorFilters();
+  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
   const [intentFilter, setIntentFilter] = useState<PostsecondaryIntent | "All">("All");
-  const [counselorFilter, setCounselorFilter] = useState<string>("All");
   // Roles that oversee counselors see whose caseload each student is on and
   // can narrow to one counselor; a School Counselor sees the school roster
   // as the reference does. Caseloads are seeded (counselorOrg.ts).
