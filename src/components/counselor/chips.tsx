@@ -147,16 +147,25 @@ export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
 }
 
 // Every card on the v2 dashboard opens something, and the way in is this
-// link in the card's header: a word plus a chevron, visible at rest (not a
-// hover-only hint: many counselors and administrators are older and many
-// are on touch screens, where hover never happens). Hovering the card
-// (`group` on the card root) nudges the chevron right as reinforcement,
-// never as the only signal. Direct feedback, 25 Sept 2026: "make all cards
-// clickable, show the obvious chevron ... considering the users might be
-// older".
+// link in the card's header: a word plus a chevron, visible at rest as a
+// small pill (not a hover-only hint: many counselors and administrators
+// are older and many are on touch screens, where hover never happens). Not
+// blue: the brand blue is spent on data marks and the active nav item, and
+// a blue word next to a blue chart reads as part of the chart (direct
+// feedback, 25 Sept 2026: "don't make the CTAs blue"). Hover is obvious and
+// shaped: the pill's own background and border lift and the chevron slides
+// right; the pill has real padding at rest so nothing appears over the text
+// (direct feedback: "the padding that appears on hover is wrong, too tight
+// and overlapping with the text, no shape"). `group-hover` on the card root
+// also fires it when the whole card is hovered.
 export function CardLink({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-none cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] leading-[16px] font-bold transition-[background-color,border-color,transform] duration-150 group-hover:border-[color-mix(in_srgb,var(--foreground)_28%,transparent)] group-hover:bg-[color-mix(in_srgb,var(--foreground)_10%,transparent)] hover:border-[color-mix(in_srgb,var(--foreground)_40%,transparent)] hover:bg-[color-mix(in_srgb,var(--foreground)_14%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+      style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}
+    >
       {children}
       <ChevronRight className="h-[14px] w-[14px] transition-transform duration-150 group-hover:translate-x-[3px]" aria-hidden />
     </button>

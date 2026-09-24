@@ -346,6 +346,22 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
 
 ## Overview
 
+- **Career Pathways bar: color by cluster (25 Sept 2026, third pass).**
+  Direct feedback after the one-hue bar: pathways "need to be multicolor
+  ... but complementary ones not random, have a logic to the colors, they
+  shouldn't read as noise." Seven distinct hues cannot pass the legibility
+  checks once green, amber and red are reserved for status (every seven-
+  hue walk failed the adjacent-pair floors; runs recorded in
+  `palette.ts`). So the logic is meaning: STEM (Technology, Healthcare)
+  in the brand blue; business, law and media (Finance & Business, Law &
+  Government, Arts & Media) purple; hands-on and service (Skilled Trades,
+  Education) teal. Three hues in a cool walk, validated as a set and
+  against each status color; a fourth (rose or magenta for Arts) always
+  landed within 9 to 13 ΔE of the status red or of the purple, so Arts &
+  Media joins the communications-facing cluster rather than get a color a
+  reader could confuse with At Risk. Pathways in one cluster share its hue
+  on purpose, separated by the 2px gap and named in the legend. The
+  earlier passes are below.
 - **Career Pathways bar: one hue, interleaved.** The seven segments draw
   from the 7-step blue ramp, but not in rank order: as a straight light-to-
   dark ramp, neighbouring segments were one step apart and blended (direct
@@ -446,8 +462,14 @@ list below is v1's history):
   counselor picker**; a School Counselor does not (they see only their own
   caseload, see "Who sees which students" above).
 - **Every card has a visible way in** (`CardLink` in chips.tsx: a word
-  plus a chevron in the card header, visible at rest, nudging right on
-  hover). Direct question: "make all cards clickable, show the obvious
+  plus a chevron in a small pill in the card header, visible at rest, in
+  the foreground color, never blue; on hover the pill's background and
+  border lift and the chevron slides right). Two corrections in-session:
+  "don't make the CTAs blue" (blue is spent on data marks and the active
+  nav item, so a blue word beside a blue chart read as chart) and "the
+  padding that appears on hover is wrong, too tight and overlapping with
+  the text, no shape" (the first cut had no padding at rest, so the hover
+  fill hugged the letters). Direct question: "make all cards clickable, show the obvious
   chevron ... or is this a bad approach considering the users might be
   older?" Cards do open something, but the affordance is never hover-only:
   older users and touch screens never see hover. So the link is always
@@ -479,6 +501,52 @@ list below is v1's history):
   already in place before this pass.)
 
 ## Milestone Tracker
+
+**25 Sept 2026, v2 rebuilt on roster data** (direct questions: "are we
+getting the proper data, have we done the proper hierarchy of information,
+is it all readable, understandable, do things align? Is everything on that
+screen genuinely valuable? Next-Year Course Plan: the components are
+overlapping"). Everything below this block describes the earlier v2 pass;
+kept as history.
+
+- **Data is the roster, not the reference's static table.** The reference
+  (and v1, and the first v2 pass) drew from `milestoneReadiness.ts`, a
+  verbatim copy of the reference's fixed 30-students-per-grade counts under
+  its own grade-specific milestone names (Next-Year Course Plan, Career
+  Goals...). That table never agreed with the roster the rest of the
+  dashboard uses, ignored the caseload scope and never moved when a review
+  was approved. v2 now tallies, per grade, the milestones the roster tracks
+  at that grade (`milestonesForGrade`: 3 / 5 / 6 / 11, the same set the
+  Student Profile's grid shows) over the students the role may see. Cost:
+  the reference's grade-specific milestone vocabulary is gone from this
+  screen (it lives on in v1 and in `milestoneReadiness.ts`). Alternative:
+  keep the reference names and map them onto roster milestones. There is
+  no honest mapping (Grade 9 has seven reference items and three roster
+  milestones), so it would have been the static table wearing new numbers.
+- **Five states, honest colors:** done (Approved or Completed, brand blue),
+  awaiting your review (Pending Review, light blue), in progress (lightest
+  blue), not started (neutral gray, because a freshman who has not started
+  a plan is expected, not alarming), blocked (Overdue or Changes Requested,
+  the reserved red). Replaces "needs attention or haven't started" in
+  amber, which alarmed on the normal case.
+- **One hero and a list, not one ring per milestone.** The hero is the
+  milestone furthest behind (blocked weighs double, then not started): a
+  header row (what it is, the way in), then one body row with the ring and,
+  directly beside it, the verdict and its breakdown. Corrected once more
+  in-session after "the positions of the information are scattered and not
+  really congruent": the first cut pinned the ring to the far right and the
+  legend to the bottom left. The other milestones are a worst-first list:
+  name, one line of what is outstanding ("1 blocked · 10 awaiting your
+  review"), % done, a bar. Replaces up to eleven ring cards with legends and
+  buttons each. Alternative: keep the ring cards but smaller. Eleven rings
+  is eleven things to read; the question is "which milestone first".
+- **Summary is four stats in the header row** (students, milestones, %
+  done, awaiting review), replacing the grade card with its "Focus"
+  sentence and three stats. The Focus copy was the reference's grade
+  description; it explained the grade, not the state of it.
+- **Scoped and live.** A School Counselor sees their caseload's grade; the
+  Lead sees the school's; an Approve on the Review Queue moves a student
+  from awaiting to done here.
 
 - **"View Details & Student Breakdown" is now a working control.** In the
   reference and the original port it rendered with no `onClick` at all

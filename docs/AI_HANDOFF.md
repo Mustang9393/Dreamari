@@ -38,6 +38,18 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: Milestone Tracker on roster data, pathway clusters, card-link pills
+
+Direct feedback in sequence: overhaul the Milestone Tracker ("are we getting the proper data ... proper hierarchy ... readable ... understandable ... do things align ... Next-Year Course Plan: the components are overlapping"); pathways should be multicolor "but complementary, not random, have a logic"; "don't make the CTAs blue and make sure they highlight or animate a little more obviously when hovered"; "the padding that appears on hover is wrong, too tight and overlapping"; "milestone tracker hero is confusing me, the positions of the information are scattered".
+
+**Milestone Tracker** (`v2/MilestoneTracker.tsx`, rewritten): tallies the roster's grade-scoped milestones over the role's students (five states: done, awaiting your review, in progress, not started, blocked), one hero for the milestone furthest behind (header row, then ring beside verdict and breakdown), a worst-first list for the rest, four header stats. No longer reads `milestoneReadiness.ts` (v1 still does). Reasoning and the cost (reference vocabulary gone from this screen): deviations file, "Milestone Tracker".
+
+**Pathways:** `pathwayColor()` in `palette.ts`, color by cluster (STEM blue; business, law and media purple; hands-on and service teal), after every seven-hue and four-hue walk failed the validator's adjacent-pair floors with status colors reserved; the runs are summarized in the palette comment.
+
+**CardLink:** a resting pill (border, padding, foreground text), hover lifts background and border and slides the chevron; also fires on card hover via `group`.
+
+**Verified live** (headless captures at 1440 and 375): tracker Grade 9 as Lead (Academic Plan hero, 19 not started, list of two), Overview with cluster colors and pill links. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
 ### 2026-09-25 Counselor Dashboard v2: roster scoped by role, Students worst-first with reasons, every card has a way in
 
 Direct feedback and questions, same session: "Make sure in the student table, things needing attention is surfaced first, based on severity." "Is lead counsellor only seeing Sarah Chen's caseload? Is the number 121 supposed to be same for school counsellor and lead?" "Make all cards clickable, show the obvious chevron ... or is this a bad approach? Considering the users might be older?"

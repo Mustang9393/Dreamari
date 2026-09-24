@@ -14,7 +14,7 @@ import { Avatar, CardLink, StatRow } from "../chips";
 import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { BLUE_3, BLUE_7, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "../palette";
+import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE, pathwayColor } from "../palette";
 import { GLASS_INSET } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
@@ -313,14 +313,13 @@ export function Overview() {
   const pathwayCounts = new Map<string, number>();
   for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
   const topPathways = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
-  // One hue, seven steps (palette.ts), INTERLEAVED light/dark rather than in
-  // rank order: as a straight ramp, neighbouring segments were one step
-  // apart and blended (direct feedback, 25 Sept 2026: "education and skilled
-  // trades are blending together"). Alternating ends of the ramp puts at
-  // least three steps between any two adjacent segments; the legend dots
-  // use the same mapping, so a segment and its row always match. The
-  // earlier seven-hue set had reused the status green and amber.
-  const pathwayColors = [0, 4, 1, 5, 2, 6, 3].map((i) => BLUE_7[i]);
+  // Color by cluster (palette.ts: STEM blue, business purple, hands-on
+  // teal, arts rose), so the colors carry meaning instead of rank. History:
+  // a seven-hue set reused status colors; a single-hue ramp blended
+  // neighbours ("education and skilled trades are blending together"); the
+  // brief then asked for multicolor "with a logic". Passed per label, so a
+  // segment and its legend row always match.
+  const pathwayColors = topPathways.map(([label]) => pathwayColor(label));
 
   const grades = [9, 10, 11, 12];
   const gradeStudents = (g: number) => roster.filter((s) => s.grade === g);
