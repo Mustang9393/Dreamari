@@ -32,7 +32,7 @@ function rankWorld(world: string, subs: string[]): Match[] {
   for (const r of rankForStudent(world, buildSignals())) {
     const sub = subInterestFor(r.career.title, subs);
     if (sub) hit.push({ career: r.career, reason: sub, stretch: false });
-    else miss.push({ career: r.career, reason: r.reason ? `Fits ${r.reason}` : world, stretch: false });
+    else miss.push({ career: r.career, reason: r.reason ?? world, stretch: false });
   }
   return [...hit, ...miss];
 }

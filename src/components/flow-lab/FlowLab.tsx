@@ -12,8 +12,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { RotateCcw, ArrowLeft } from "lucide-react";
-import { Wordmark } from "@/components/app/chrome";
+import { QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { IconTip } from "@/components/app/IconTip";
+import { InfoButton, InfoSheet } from "./notes";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
 import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
@@ -34,6 +35,7 @@ function clearLabHints() {
 export function FlowLab({ initialVersion }: { initialVersion?: LabVersion }) {
   const [version, setVersionState] = useState<LabVersion>(initialVersion ?? "v2");
   const [resetKey, setResetKey] = useState(0);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   useEffect(() => {
     if (initialVersion) {
@@ -90,8 +92,10 @@ export function FlowLab({ initialVersion }: { initialVersion?: LabVersion }) {
         <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
         <BackgroundSpace />
         <AuroraBackground accent="#2f6bf2" visitedAccents={[]} finale={false} lightning={false} />
-        {/* Fixed header, like FlowChrome on Match: wordmark left, the lab
-            label right, nothing else. */}
+        {/* Fixed header, like FlowChrome on Match: wordmark left; right, the
+            lab label, the (i) note for this flow, and the app's own
+            hamburger so the quick links (the other flows, the demo) are one
+            tap away (direct instruction, 25 Sept 2026). */}
         <header className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-center justify-between px-4 py-3 sm:px-6">
           <div className="pointer-events-auto flex items-center gap-3">
             <IconTip label="Back to the app">
@@ -101,8 +105,13 @@ export function FlowLab({ initialVersion }: { initialVersion?: LabVersion }) {
             </IconTip>
             <Wordmark href="/home" />
           </div>
-          <span className="pointer-events-auto text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--primary)" }}>Flow lab · not the demo</span>
+          <div className="pointer-events-auto flex items-center gap-2">
+            <span className="hidden text-[10.5px] font-bold tracking-[0.1em] uppercase sm:block" style={{ color: "var(--primary)" }}>Flow lab · not the demo</span>
+            <InfoButton onClick={() => setInfoOpen(true)} />
+            <QuickLinksMenu />
+          </div>
         </header>
+        <InfoSheet version={version} open={infoOpen} onClose={() => setInfoOpen(false)} />
         <LabDockContext.Provider value={dock}>
           <div style={{ color: "var(--foreground)" }}>
             {version === "v2" ? <V2Flow key={`v2-${resetKey}`} onRestart={restart} /> : <V3Flow key={`v3-${resetKey}`} onRestart={restart} />}

@@ -134,7 +134,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
                 fill
                 control="save"
                 selected={state.saved.includes(r.career.id)}
-                reason={r.reason ? `Fits ${r.reason}` : null}
+                reason={r.reason}
                 onToggle={() => toggleSave(r.career.id)}
                 onOpen={() => setOpenId(r.career.id)}
                 hint={i === 0 ? { active: showSave && !openId && state.saved.length === 0, label: "Tap to save it. Save up to 7, then rank your top 3.", cta: "Next", onDismiss: dismissSave } : undefined}

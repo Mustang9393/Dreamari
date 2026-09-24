@@ -8,6 +8,11 @@
 import { ALL_CATALOG_CAREERS, type CatalogCareer } from "@/components/app/catalog";
 import { INTEREST_WORLDS } from "@/components/build/types";
 import { readStudentProfile } from "@/lib/studentProfile";
+import { DECK } from "@/components/match-lab/data";
+import { careerProfile } from "@/components/career/profiles";
+import { reportV2 } from "@/components/profile/report-data";
+import { resolveCareer } from "@/components/career/data";
+import { careerSlug } from "@/components/career/slug";
 
 export type LabVersion = "v2" | "v3";
 export const LAB_VERSION_KEY = "dreamari:flowlab:version";
@@ -69,13 +74,13 @@ export function buildSignals(): BuildSignals {
 // actually shows relevant options based on what I choose"). Hand-authored
 // for the lab; production would come from the taxonomy.
 export const SUBJECT_KEYWORDS: Record<string, string[]> = {
-  Mathematics: ["analyst", "actuar", "account", "engineer", "statistic", "mathemat", "financ", "data", "economist", "architect", "surveyor"],
-  Science: ["scientist", "biolog", "chemist", "lab", "nurse", "physician", "medic", "environment", "geolog", "pharmac", "vet", "research", "technolog"],
+  Mathematics: ["analyst", "actuar", "accountant", "statistic", "mathemat", "economist", "data scientist", "quant", "surveyor", "financial"],
+  Science: ["scientist", "biolog", "chemist", "lab", "nurse", "physician", "medic", "environment", "geolog", "pharmac", "vet", "research"],
   "English/Literature": ["writer", "editor", "journal", "author", "copywrit", "librar", "communicat", "public relations", "reporter"],
   History: ["histor", "museum", "archiv", "curator", "lawyer", "attorney", "policy", "diplomat", "paralegal", "teacher"],
   Art: ["design", "illustrat", "artist", "animat", "photograph", "fashion", "architect", "stylist", "tattoo", "florist"],
   Music: ["music", "audio", "sound", "dj", "composer", "producer"],
-  "Computer Science": ["software", "developer", "programmer", "data", "cyber", "security", "web", "ai ", "robot", "game", "it ", "network", "cloud", "ux"],
+  "Computer Science": ["software", "developer", "programmer", "data", "cyber", "security", "web", "ai ", "robot", "game", "it ", "network", "cloud", "ux", "database", "systems", "computer"],
   "Foreign Languages": ["translat", "interpret", "diplomat", "flight attendant", "travel", "tour", "international", "customs"],
   Business: ["manager", "marketing", "sales", "entrepreneur", "account", "real estate", "consultant", "executive", "owner", "human resources", "recruit", "banker"],
   Psychology: ["psycholog", "counselor", "therapist", "social worker", "mental", "human resources", "behavior", "case manager"],
@@ -87,29 +92,41 @@ export type Ranked = { career: LabCareer; reason: string | null; score: number }
 
 /** Order one world's careers by how well they fit the student's Build
  *  answers: each matching subject scores, the college/trades answer nudges,
- *  and ties keep catalog order. `reason` is the one label a card can show. */
+ *  and ties keep catalog order. `reason` is the one label a card can show:
+ *  the subject or path the student chose that this career fits. Subject
+ *  keyword lists are kept narrow so a broad one cannot tag a whole world
+ *  (the first cut had "engineer" and "architect" under Mathematics and
+ *  every Tech card read "Fits Mathematics"; direct feedback, 25 Sept 2026). */
 export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
   const path = signals.path;
   return careersForWorld(world)
     .map((career, index) => {
       const t = career.title.toLowerCase();
       let score = 0;
-      let reason: string | null = null;
+      let subjectHit: string | null = null;
       for (const subject of signals.subjects) {
         if ((SUBJECT_KEYWORDS[subject] ?? []).some((k) => t.includes(k))) {
           score += 2;
-          reason ??= subject;
+          subjectHit ??= subject;
         }
       }
+      // A trade word wins when both match ("Civil Engineering Technician"
+      // is a technician, not an engineer).
       const trades = TRADES_KEYWORDS.some((k) => t.includes(k));
-      const college = COLLEGE_KEYWORDS.some((k) => t.includes(k));
+      const college = !trades && COLLEGE_KEYWORDS.some((k) => t.includes(k));
+      let pathHit: string | null = null;
       if (path === "trades") {
-        if (trades) { score += 1; reason ??= "Trades path"; }
+        if (trades) { score += 1; pathHit = "Trades path"; }
         if (college && !trades) score -= 1;
       } else if (path === "college") {
-        if (college) { score += 1; reason ??= "College path"; }
+        if (college) { score += 1; pathHit = "College path"; }
         if (trades && !college) score -= 1;
       }
+      // The chip is the student's OWN choice this card matched (a subject
+      // or the path), never something inferred from the title (direct
+      // feedback, 25 Sept 2026: "the chips should be relevant to the
+      // recommendations, not random"). No match, no chip.
+      const reason = subjectHit ? `Fits ${subjectHit}` : pathHit;
       return { career, reason, score, index };
     })
     .sort((a, b) => b.score - a.score || a.index - b.index)
@@ -246,6 +263,45 @@ export const WORLD_NEIGHBORS: Record<string, string[]> = {
   "Teaching & Education": ["Counseling & Social Work", "Arts, Media & Sport", "Science & Research"],
   "Tech & Engineering": ["Science & Research", "Business & Finance", "Arts, Media & Sport"],
 };
+
+// ---- the detail modal's content, in the live Match modal's exact shape ----
+// Match's DetailModal shows employers, salary, and three bullet sections
+// ("What You'd Do", "Good Fit If You Like", "School & Path"). Its six deck
+// careers are hand-authored; the lab covers the whole catalog, so for every
+// other career the same three sections are filled from what the app already
+// knows (the Career Report, the career profile, the resolved detail), in
+// that order of trust, and the section reads "Details coming soon." only
+// when none of those exist (direct feedback, 25 Sept 2026: "we're not
+// showing all the information that was there on the opened card").
+export type MatchDetail = { employers: string | null; salary: string | null; whatYouDo: string[]; goodFitIf: string[]; schoolPath: string[] };
+
+const NOT = (s: string | undefined | null): s is string => !!s && s !== "Coming soon";
+
+export function matchDetail(career: LabCareer): MatchDetail {
+  const slug = careerSlug(career.title);
+  const deck = DECK.find((d) => d.id === slug || d.title === career.title);
+  if (deck) return { employers: deck.employers, salary: deck.salary, whatYouDo: deck.whatYouDo, goodFitIf: deck.goodFitIf, schoolPath: deck.schoolPath };
+  const report = reportV2(slug);
+  const profile = careerProfile(slug);
+  const resolved = resolveCareer(slug);
+  const fact = (label: string) => profile?.facts.find((f) => f.label === label)?.value;
+  const parts = (SUB_INTERESTS[career.world] ?? []).filter((sub) => (SUB_KEYWORDS[sub] ?? []).some((k) => career.title.toLowerCase().includes(k)));
+
+  const whatYouDo = report
+    ? [report.glance.whatYouDo, ...report.glance.responsibilities.slice(0, 2)].filter(NOT)
+    : profile
+      ? [profile.summary, profile.scenario].filter(NOT)
+      : [resolved?.whatTheyActuallyDo, resolved?.description].filter(NOT).slice(0, 1);
+  const goodFitIf = profile?.goodAt?.length ? profile.goodAt.slice(0, 3) : [...parts, career.world].slice(0, 3);
+  const schoolPath = report
+    ? [report.education.find((e) => e.common)?.name, report.majors.length ? report.majors.map((m) => m.name).slice(0, 3).join(", ") : undefined].filter(NOT)
+    : profile
+      ? [fact("Typical degree"), ...profile.education.studies.slice(0, 2).map((s) => s.name)].filter(NOT)
+      : [resolved?.degreeRequired, resolved?.commonMajors].filter(NOT);
+  const salary = [report?.salary.median, fact("Typical pay"), resolved?.medianSalary, career.salary].find(NOT) ?? null;
+  const employers = report?.glance.employers?.length ? report.glance.employers.slice(0, 2).join(" · ") : null;
+  return { employers, salary, whatYouDo, goodFitIf, schoolPath };
+}
 
 export function readLabState<T>(v: LabVersion, fallback: T): T {
   if (typeof window === "undefined") return fallback;
