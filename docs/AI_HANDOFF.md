@@ -13740,3 +13740,9 @@ User rejected the tiny framed school glyph and empty composition. Removed the fr
 User authorized repository push and Vercel deployment. Added 800 × 1050 PNG exports alongside SVGs, a shareable ZIP containing all variants and README, and handoff instructions for Usman. Existing photo records are preserved. TypeScript, targeted ESLint and token checks passed before upstream synchronization. Release validation continues after integrating latest main.
 
 Release follow-up: rebased onto current main, preserving the newer photo onError and MarkBadge error handling. All three photo surfaces now use branded art on failed loads as well as missing/unverified/rejected photos. Added a dedicated Usman handoff at docs/handoff/specs/college-image-fallbacks.md and linked it from HANDOFF_INDEX.md. Post-rebase TypeScript, targeted ESLint, tokens:check and production build all passed. User authorized pushing to main and production Git deployment.
+
+## 2026-09-24 · Match and My Profile guided tour
+
+Match now teaches the + action after its welcome splash: students may choose up to three careers, continue with one, and change or swap picks later. My Profile's first-use tour starts on the Overview My Plan card, then explains Career Report and Resume, then opens Top Three and points to a non-primary career's options menu for making any pick #1 or removing it. The one-pick copy explains that additional picks are optional. The tour uses the shared feathered Coachmark spotlight, scrolls each target into view, and keeps the real control usable. Overview labels no longer imply three choices or three reports are required. The first-use tour is remembered per device and repeats on reload for demo QA.
+
+Verified the one-pick Match continuation, one- and three-pick Profile tours, 390px phone, 1280px desktop and 1920px zoomed desktop in the browser. TypeScript, targeted ESLint and production build passed.

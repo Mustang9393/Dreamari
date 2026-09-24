@@ -8,6 +8,7 @@ import { BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, In
 import { BorderBeam } from "border-beam";
 import { BackButton } from "@/components/app/chrome";
 import { FlowChrome } from "@/components/app/FlowChrome";
+import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { IconTip } from "@/components/app/IconTip";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { announce } from "@/components/app/LiveRegion";
@@ -47,6 +48,7 @@ export function MatchGrid() {
   // this screen, however a student got here, re-teaches the +/Learn more
   // interaction rather than showing it once per session.
   const [showIntro, setShowIntro] = useState(true);
+  const [showAddHint, dismissAddHint] = useFirstUseHint("match-add-top3", { repeatOnReload: true });
 
   useEffect(() => {
     if (!toast) return;
@@ -109,7 +111,7 @@ export function MatchGrid() {
             <div className="mb-1 flex flex-none items-center justify-between gap-3 px-1">
               <span className="flex flex-none items-center gap-2">
                 <BackButton fallback="/flow" />
-                <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Find your Top 3</h1>
+                <h1 className={`${bricolage.className} text-[17px] font-extrabold whitespace-nowrap uppercase text-[var(--color-night-foreground)] sm:text-[19px]`}>Choose up to 3</h1>
               </span>
               <span className="flex flex-none items-center gap-2">
                 {/* A little more prominent than a muted status chip (direct
@@ -171,13 +173,15 @@ export function MatchGrid() {
                recommend more careers"), rather than looking like a layout
                bug. ---- */}
             <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2.5 sm:grid-cols-3 sm:grid-rows-2 sm:gap-4">
-              {DECK.map((career) => (
+              {DECK.map((career, index) => (
                 <GridCard
                   key={career.id}
                   career={career}
                   rank={selected.indexOf(career.id) + 1}
                   onOpen={() => setOpenId(career.id)}
-                  onToggle={(origin) => toggle(career.id, origin)}
+                  onToggle={(origin) => { dismissAddHint(); toggle(career.id, origin); }}
+                  showAddHint={index === 0 && showAddHint && !showIntro && !openId && selected.length === 0}
+                  onDismissAddHint={dismissAddHint}
                 />
               ))}
               {Array.from({ length: Math.max(0, 6 - DECK.length) }).map((_, i) => (
@@ -327,7 +331,7 @@ function CareerPhoto({ career, className, sizes, priority }: { career: Career; c
   );
 }
 
-function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: number; onOpen: () => void; onToggle: (origin?: { clientX: number; clientY: number }) => void }) {
+function GridCard({ career, rank, onOpen, onToggle, showAddHint = false, onDismissAddHint }: { career: Career; rank: number; onOpen: () => void; onToggle: (origin?: { clientX: number; clientY: number }) => void; showAddHint?: boolean; onDismissAddHint: () => void }) {
   const isSelected = rank > 0;
   // career.color for warm hues (amber/business-money-office, orange/
   // building-construction) is a --color-world-* token deliberately DARKENED
@@ -478,6 +482,7 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
       </span>
       {/* select control */}
       <IconTip label={isSelected ? "Remove from Top 3" : "Add to Top 3"} className="absolute top-2 right-2 z-[2]">
+        <Coachmark active={showAddHint} label="Tap + to add this career. Choose up to 3, and change or swap them anytime." onDismiss={onDismissAddHint} spotlight side="bottom" align="end">
         <button
           type="button"
           aria-pressed={isSelected}
@@ -494,6 +499,7 @@ function GridCard({ career, rank, onOpen, onToggle }: { career: Career; rank: nu
         >
           {isSelected ? <span className="text-[13px] font-extrabold text-white">{rank}</span> : <Plus className="h-4 w-4 text-white" strokeWidth={2.75} aria-hidden />}
         </button>
+        </Coachmark>
       </IconTip>
     </motion.div>
   );

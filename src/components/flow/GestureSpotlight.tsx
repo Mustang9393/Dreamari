@@ -188,6 +188,8 @@ export function Coachmark({
   spotlight = false,
   side = "top",
   align = "center",
+  wrapperClassName = "relative inline-flex",
+  anchorId,
   children,
 }: {
   active: boolean;
@@ -208,6 +210,10 @@ export function Coachmark({
   /** Preferred horizontal anchor. The final position is always clamped to
       the viewport, and the pointer shifts back toward the real target. */
   align?: "start" | "center" | "end";
+  /** Preserve the caller's grid or flex sizing when a whole card is targeted. */
+  wrapperClassName?: string;
+  /** Optional stable target for guided tours to scroll into view. */
+  anchorId?: string;
   /** The real element this coachmark explains. Its wrapper supplies the live
       target rectangle used to position the portaled card and glow. */
   children: React.ReactNode;
@@ -390,7 +396,7 @@ export function Coachmark({
   ) : null;
 
   return (
-    <span ref={targetRef} className="relative inline-flex">
+    <span ref={targetRef} id={anchorId} className={wrapperClassName}>
       {children}
       {overlay}
     </span>

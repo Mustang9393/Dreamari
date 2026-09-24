@@ -10,6 +10,7 @@ import { IconTip } from "@/components/app/IconTip";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
+import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { AnimatePresence, motion } from "framer-motion";
@@ -117,6 +118,9 @@ const COVER_CAREER = "career";
 
 const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "settings"];
 export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
+  const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
+  const [profileTourReady, setProfileTourReady] = useState(false);
+  const [profileTourStep, setProfileTourStep] = useState<"plan" | "report" | "resume" | "top3">("plan");
   // Arriving from Match (?welcome=1): the page is assembled in front of the
   // student — title, then the identity card, then the tab card — with one
   // welcome line, instead of everything simply being there. Only for that
@@ -138,6 +142,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   }, [initialWelcome]);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
+    if (showProfileTour) {
+      setTab("overview");
+      setProfileTourReady(true);
+    }
     markDemoSeenThisSession("dreamari:welcome:profile");
     // so a refresh doesn't replay the introduction
     try {
@@ -151,7 +159,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // 2026): the popup sat over the header, so on Continue the tabs and the
     // three cards scroll up to sit just under the fixed nav. Only on a real
     // arrival from Match; a plain visit stays where it is.
-    if (!initialWelcome) return;
+    if (!initialWelcome || showProfileTour) return;
     window.requestAnimationFrame(() => {
       const tabs = tablistRef.current;
       if (!tabs) return;
@@ -165,6 +173,27 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
   const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
+  useEffect(() => {
+    if (initialWelcome || (DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
+    const timer = window.setTimeout(() => {
+      if (showProfileTour) setTab("overview");
+      setProfileTourReady(true);
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [initialWelcome, showProfileTour]);
+  useEffect(() => {
+    if (!showProfileTour || !profileTourReady || welcomeOpen) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById(`profile-tour-${profileTourStep}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [showProfileTour, profileTourReady, profileTourStep, welcomeOpen, tab]);
+  const advanceProfileTour = () => {
+    if (profileTourStep === "plan") setProfileTourStep("report");
+    else if (profileTourStep === "report") setProfileTourStep("resume");
+    else if (profileTourStep === "resume") { setProfileTourStep("top3"); setTab("top3"); }
+    else dismissProfileTour();
+  };
   // QA-only: overrides currentPlanWindowId()'s real-date result so the
   // season art can be checked without waiting for the calendar (direct
   // instruction, 20 Sept 2026: "a toggle... where i can cycle through
@@ -833,6 +862,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               <OverviewTabV2
                 focus={focus}
                 top3Careers={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
+                tourStep={showProfileTour && profileTourReady && !welcomeOpen && tab === "overview" ? profileTourStep : null}
+                onTourNext={advanceProfileTour}
                 onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
                 onGoResume={() => setTab("resume")}
                 onGoLocker={() => setTab("locker")}
@@ -844,6 +875,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           <div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3">
             <Top3Tab
               top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
+              showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
+              onTourDone={dismissProfileTour}
               onAdd={() => setAddOpen(true)} onRemove={(id) => setConfirmRemove(id)}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
             />
@@ -1077,7 +1110,7 @@ function MoreFactsAccordion({ facts }: { facts: { label: string; value: string }
 }
 
 function Top3Tab({
-  top3, focusId, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onOpenCompare, onGoReport,
+  top3, focusId, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onOpenCompare, onGoReport, showTour, onTourDone,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1089,8 +1122,11 @@ function Top3Tab({
   onRemove: (id: string) => void;
   onOpenCompare: () => void;
   onGoReport: () => void;
+  showTour: boolean;
+  onTourDone: () => void;
 }) {
   const [menuFor, setMenuFor] = useState<string | null>(null);
+  const tourCareerId = top3.find((id) => id !== focusId) ?? top3[0];
 
   if (top3.length === 0) {
     return (
@@ -1204,18 +1240,28 @@ function Top3Tab({
                 </span>
               )}
               <div className="absolute top-[6px] right-[6px] z-[3]">
+                <Coachmark
+                  active={showTour && id === tourCareerId}
+                  anchorId={id === tourCareerId ? "profile-tour-top3" : undefined}
+                  label={top3.length === 1 ? "Keep one career or add up to 3. Use this menu to remove it. With more picks, choose any as #1." : "Use this menu to make any career your #1 or remove it. You can add or swap picks anytime."}
+                  onDismiss={onTourDone}
+                  spotlight
+                  side="bottom"
+                  align="end"
+                >
                 <IconTip label="More options">
                 <button
                   type="button"
                   aria-label={`More options for ${career.title}`}
                   aria-expanded={menuFor === id}
-                  onClick={() => setMenuFor(menuFor === id ? null : id)}
+                  onClick={() => { if (showTour && id === tourCareerId) onTourDone(); setMenuFor(menuFor === id ? null : id); }}
                   className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full"
                   style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)", backdropFilter: "blur(6px)", color: "var(--foreground)" }}
                 >
                   <MoreVertical className="h-4 w-4" />
                 </button>
                 </IconTip>
+                </Coachmark>
                 {menuFor === id && (
                   <>
                     <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setMenuFor(null)} />
@@ -1511,7 +1557,7 @@ function currentPlanWindowId(): "fall" | "winter" | "spring" {
 }
 
 function OverviewTabV2({
-  focus, top3Careers, onGoTop3, onGoPlan, onGoReport, onGoResume, onGoLocker, seasonOverride,
+  focus, top3Careers, onGoTop3, onGoPlan, onGoReport, onGoResume, onGoLocker, seasonOverride, tourStep, onTourNext,
 }: {
   focus: ProfileCareer | null;
   top3Careers: ProfileCareer[];
@@ -1521,6 +1567,8 @@ function OverviewTabV2({
   onGoResume: () => void;
   onGoLocker: () => void;
   seasonOverride: "fall" | "winter" | "spring" | null;
+  tourStep: "plan" | "report" | "resume" | "top3" | null;
+  onTourNext: () => void;
 }) {
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const stage = useStage();
@@ -1591,7 +1639,7 @@ function OverviewTabV2({
             <span className="flex flex-col gap-[8px]">
               <span className="flex items-baseline gap-[6px]">
                 <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{top3Careers.length}</span>
-                <span className="text-[13.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>of 3 chosen</span>
+                <span className="text-[13.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>chosen (up to 3)</span>
               </span>
               <SparkBar percent={(top3Careers.length / 3) * 100} min={8} height={6} track="color-mix(in srgb, var(--foreground) 10%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
             </span>
@@ -1604,7 +1652,7 @@ function OverviewTabV2({
                 >
                   <Plus className="h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
                   <span className="min-w-0 truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }}>
-                    Choose {3 - top3Careers.length} more
+                    Add more (optional)
                   </span>
                 </Link>
               ) : (
@@ -1624,6 +1672,7 @@ function OverviewTabV2({
            (SeasonScene) -- v2-only, so it never leaks into v1. Term
            position is a real ratio (SparkBar), same family as Top Three's
            ring above it. */}
+        <Coachmark active={tourStep === "plan"} anchorId="profile-tour-plan" wrapperClassName="relative block min-w-0" label="My Plan gives you steps for each school term, in the app and beyond, for your #1 career. You can change #1 anytime." onDismiss={onTourNext} cta="Next" spotlight side="bottom">
         <HoverBeam strength={0.6} className="min-w-0">
           {/* A real div, not a button, now that "Next: ..." is its own
              link straight to that step (direct feedback, 20 Sept) -- a
@@ -1652,6 +1701,7 @@ function OverviewTabV2({
             </span>
           </div>
         </HoverBeam>
+        </Coachmark>
       </section>
 
       {/* Report + Resume: neither is a ratio (both are complete-or-not,
@@ -1667,6 +1717,7 @@ function OverviewTabV2({
            feedback, 20 Sept: "2 is inside the ring so it feels
            disconnected"). Still the identical real ratio (reports ready /
            3 picks), just written as one sentence instead. */}
+        <Coachmark active={tourStep === "report"} anchorId="profile-tour-report" wrapperClassName="relative flex min-w-0 flex-1" label="Your Career Report is made from what you explore and choose here. Share it with your counselor." onDismiss={onTourNext} cta="Next" spotlight side="bottom">
         <button type="button" onClick={onGoReport} className="dm-tap group relative flex flex-1 min-w-0 cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex min-w-0 items-center gap-[var(--space-3)]">
             <span className="flex size-[36px] flex-none items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-[1.08]" style={{ background: "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" }}>
@@ -1676,18 +1727,20 @@ function OverviewTabV2({
               <span className="text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Report</span>
               <span className="flex items-baseline gap-[6px]">
                 <span className="text-[22px] leading-[26px] font-extrabold tabular-nums transition-colors duration-150 group-hover:text-[var(--accent-subtle)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{top3Careers.length}</span>
-                <span className="text-[13.5px] font-bold" style={{ color: top3Careers.length < 3 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>of 3 reports ready</span>
+                <span className="text-[13.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>career report{top3Careers.length === 1 ? "" : "s"} ready</span>
               </span>
             </span>
           </span>
           <DashHoverChevron />
         </button>
+        </Coachmark>
 
         {/* Resume: dropped the version count entirely (direct feedback, 21
            Sept 2026: "simplify to Not started or Start your resume") --
            complete-or-not is the only fact this tile needs to give in a
            snapshot; how many versions exist is real detail for the Resume
            tab itself, not the Overview. */}
+        <Coachmark active={tourStep === "resume"} anchorId="profile-tour-resume" wrapperClassName="relative flex min-w-0 flex-1" label="Build a resume from your skills and experiences. Update it as you grow." onDismiss={onTourNext} cta="Next" spotlight side="bottom">
         <button type="button" onClick={onGoResume} className="dm-tap group relative flex flex-1 min-w-0 cursor-pointer items-center justify-between gap-[var(--space-3)] p-[var(--space-4)] text-left sm:p-[var(--space-5)]">
           <span className="flex min-w-0 items-center gap-[var(--space-3)]">
             <span className="flex size-[36px] flex-none items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-[1.08]" style={{ background: resumeCount > 0 ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : "color-mix(in srgb, var(--accent-subtle) 8%, transparent)" }}>
@@ -1702,6 +1755,7 @@ function OverviewTabV2({
           </span>
           <DashHoverChevron />
         </button>
+        </Coachmark>
       </div>
     </div>
   );
