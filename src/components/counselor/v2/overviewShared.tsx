@@ -94,8 +94,10 @@ export function MetricRow({ label, note, value, target, leading, onClick }: { la
       {leading}
       <span className="flex min-w-0 flex-1 flex-col gap-[6px]">
         <span className="flex items-baseline justify-between gap-[10px]">
-          <span className="flex min-w-0 items-baseline gap-[6px]">
-            <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
+          {/* Wraps so a long school name keeps its note under it on a phone
+             instead of truncating to "Washington High S...". */}
+          <span className="flex min-w-0 flex-wrap items-baseline gap-x-[6px]">
+            <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
             {note && <span className="flex-none text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
           </span>
           <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color }}>{value === null ? "n/a" : `${value}%`}</span>
