@@ -346,22 +346,21 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
 
 ## Overview
 
-- **Career Pathways bar: color by cluster (25 Sept 2026, third pass).**
-  Direct feedback after the one-hue bar: pathways "need to be multicolor
-  ... but complementary ones not random, have a logic to the colors, they
-  shouldn't read as noise." Seven distinct hues cannot pass the legibility
-  checks once green, amber and red are reserved for status (every seven-
-  hue walk failed the adjacent-pair floors; runs recorded in
-  `palette.ts`). So the logic is meaning: STEM (Technology, Healthcare)
-  in the brand blue; business, law and media (Finance & Business, Law &
-  Government, Arts & Media) purple; hands-on and service (Skilled Trades,
-  Education) teal. Three hues in a cool walk, validated as a set and
-  against each status color; a fourth (rose or magenta for Arts) always
-  landed within 9 to 13 ΔE of the status red or of the purple, so Arts &
-  Media joins the communications-facing cluster rather than get a color a
-  reader could confuse with At Risk. Pathways in one cluster share its hue
-  on purpose, separated by the 2px gap and named in the legend. The
-  earlier passes are below.
+- **Career Pathways bar: seven distinct hues in spectral order (25 Sept
+  2026, fourth and final pass).** Direct feedback after a three-cluster
+  attempt repeated colors: "Each thing in that legend has to be different
+  but stick to a known sequence like a rainbow style ... instead of these
+  random colors with things repeating." So: blue, cyan, green, yellow,
+  orange, pink, violet (the spectrum starting on the brand blue and
+  wrapping), assigned in rank order, so the legend reads as one
+  spectrum top to bottom and no two pathways share a hue. This is the one
+  deliberate exception to the one-hue rule, and the green, yellow and
+  orange steps sit near the status hues; accepted because a pathway
+  segment never appears beside a status chip. What it replaced, in order:
+  a seven-hue set that reused the exact status green and amber; a
+  single-hue blue ramp whose neighbours blended; three cluster hues that
+  repeated. The validator's adjacent-pair result for the final sequence is
+  recorded in `palette.ts`.
 - **Career Pathways bar: one hue, interleaved.** The seven segments draw
   from the 7-step blue ramp, but not in rank order: as a straight light-to-
   dark ramp, neighbouring segments were one step apart and blended (direct

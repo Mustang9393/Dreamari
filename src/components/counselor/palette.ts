@@ -29,35 +29,16 @@ export const TARGET_LINE = "rgba(255,255,255,0.6)";
 /** The one neutral for an "undecided" or "not started" slice. */
 export const NEUTRAL_SLICE = "#5B6470";
 
-/** Career pathway colors, by CLUSTER, not by rank: STEM in the brand blue;
- *  business, law and media in purple; hands-on and service in teal. Three
- *  hues, a cool walk, validated as a categorical set on the dark surface
- *  and each checked against the reserved status colors (teal #1A98B8 vs
- *  On Track green ΔE 17.2; purple vs amber 35.7; blue vs teal 17.0; blue vs
- *  purple 15.2 with a CVD warn, covered by the 2px segment gaps and the
- *  legend). Why clusters, and why three: direct feedback that pathways
- *  should be multicolor but "complementary, not random, have a logic";
- *  every seven-hue and every four-hue walk failed the validator's
- *  adjacent-pair floors once green, amber and red are reserved (a rose or
- *  magenta for Arts sat within 9 to 13 ΔE of either the status red or the
- *  purple), so the logic is meaning and Arts & Media joins the
- *  communications-facing cluster. Two or three pathways in one cluster
- *  share its hue on purpose. */
-export const PATHWAY_CLUSTER_COLORS = {
-  stem: "#5B6CF9",
-  business: "#B04FD0",
-  handsOn: "#1A98B8",
-} as const;
-const PATHWAY_CLUSTER: Record<string, keyof typeof PATHWAY_CLUSTER_COLORS> = {
-  Technology: "stem",
-  Healthcare: "stem",
-  "Finance & Business": "business",
-  "Law & Government": "business",
-  "Arts & Media": "business",
-  "Skilled Trades": "handsOn",
-  Education: "handsOn",
-};
-export function pathwayColor(track: string): string {
-  const cluster = PATHWAY_CLUSTER[track];
-  return cluster ? PATHWAY_CLUSTER_COLORS[cluster] : NEUTRAL_SLICE;
-}
+/** Career pathway colors: seven DISTINCT hues in one recognisable order,
+ *  a spectrum that starts on the brand blue and wraps (blue, cyan, green,
+ *  yellow, orange, pink, violet), assigned in rank order so the legend
+ *  reads like a rainbow top to bottom (direct feedback, 25 Sept 2026:
+ *  "each thing in that legend has to be different but stick to a known
+ *  sequence like a rainbow style ... instead of random colors with things
+ *  repeating"). This is the one place the dashboard uses more than its
+ *  blue plus the status colors, by explicit decision. Validator (dark,
+ *  categorical): contrast and chroma pass; three steps sit above the
+ *  lightness band; adjacent CVD separation passes (worst 12.7); the
+ *  cyan/green pair is 13.5 on the normal-vision floor (15), which the 2px
+ *  segment gaps and the ordered legend are relied on to cover. */
+export const PATHWAY_SEQUENCE = ["#5B6CF9", "#22A0D0", "#22B58C", "#E6C93A", "#EA6A2A", "#E25B9E", "#9F4FE6"] as const;

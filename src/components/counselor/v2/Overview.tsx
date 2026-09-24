@@ -14,7 +14,7 @@ import { Avatar, CardLink, StatRow } from "../chips";
 import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE, pathwayColor } from "../palette";
+import { BLUE_3, NEUTRAL_SLICE, PATHWAY_SEQUENCE, PRIMARY, TARGET_LINE } from "../palette";
 import { GLASS_INSET } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
@@ -313,13 +313,12 @@ export function Overview() {
   const pathwayCounts = new Map<string, number>();
   for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
   const topPathways = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
-  // Color by cluster (palette.ts: STEM blue, business purple, hands-on
-  // teal, arts rose), so the colors carry meaning instead of rank. History:
-  // a seven-hue set reused status colors; a single-hue ramp blended
-  // neighbours ("education and skilled trades are blending together"); the
-  // brief then asked for multicolor "with a logic". Passed per label, so a
-  // segment and its legend row always match.
-  const pathwayColors = topPathways.map(([label]) => pathwayColor(label));
+  // Seven distinct hues in spectral order, assigned by rank (palette.ts).
+  // History: a seven-hue set that reused status colors; a single-hue ramp
+  // that blended neighbours; three cluster hues that repeated ("please
+  // don't do this ... each thing in that legend has to be different but
+  // stick to a known sequence").
+  const pathwayColors = topPathways.map((_, i) => PATHWAY_SEQUENCE[i % PATHWAY_SEQUENCE.length]);
 
   const grades = [9, 10, 11, 12];
   const gradeStudents = (g: number) => roster.filter((s) => s.grade === g);

@@ -44,7 +44,7 @@ Direct feedback in sequence: overhaul the Milestone Tracker ("are we getting the
 
 **Milestone Tracker** (`v2/MilestoneTracker.tsx`, rewritten): tallies the roster's grade-scoped milestones over the role's students (five states: done, awaiting your review, in progress, not started, blocked), one hero for the milestone furthest behind (header row, then ring beside verdict and breakdown), a worst-first list for the rest, four header stats. No longer reads `milestoneReadiness.ts` (v1 still does). Reasoning and the cost (reference vocabulary gone from this screen): deviations file, "Milestone Tracker".
 
-**Pathways:** `pathwayColor()` in `palette.ts`, color by cluster (STEM blue; business, law and media purple; hands-on and service teal), after every seven-hue and four-hue walk failed the validator's adjacent-pair floors with status colors reserved; the runs are summarized in the palette comment.
+**Pathways:** `PATHWAY_SEQUENCE` in `palette.ts`: seven distinct hues in spectral order assigned by rank, after direct feedback that clustered (repeated) colors were not acceptable: "each thing in that legend has to be different but stick to a known sequence like a rainbow". The one deliberate exception to the one-hue rule.
 
 **CardLink:** a resting pill (border, padding, foreground text), hover lifts background and border and slides the chevron; also fires on card hover via `group`.
 
