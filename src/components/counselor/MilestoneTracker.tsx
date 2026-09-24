@@ -113,15 +113,15 @@ export function MilestoneTracker() {
         <div className="flex items-center gap-[var(--space-6)]">
           <span className="flex flex-col items-center">
             <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{grade.students}</span>
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students</span>
+            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Students</span>
           </span>
           <span className="flex flex-col items-center">
             <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{grade.cards.length}</span>
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>milestones</span>
+            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Milestones</span>
           </span>
           <span className="flex flex-col items-center">
             <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{grade.avgDone}%</span>
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>avg. done</span>
+            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Avg. Done</span>
           </span>
         </div>
       </div>

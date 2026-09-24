@@ -10,7 +10,7 @@
 // live. Used by the v2 fork of the dashboard (see counselor/version.tsx).
 
 import { useSyncExternalStore } from "react";
-import { getRoster, getStudentById, MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "./counselorRoster";
+import { getRosterWithLive, getStudentById, MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "./counselorRoster";
 
 const KEY = "dreamari:counselor-reviews";
 
@@ -107,12 +107,12 @@ export function applyDecisions(student: CounselorStudent, decisions: Decisions =
 
 let rosterCache: { decisions: Decisions; roster: CounselorStudent[] } | null = null;
 
-/** getRoster() with decisions applied. Memoized per decisions snapshot so
+/** getRosterWithLive() with decisions applied. Memoized per decisions snapshot so
  *  repeated calls in one render return the same array. */
 export function getReviewedRoster(): CounselorStudent[] {
   const decisions = readAll();
   if (rosterCache && rosterCache.decisions === decisions) return rosterCache.roster;
-  const roster = getRoster().map((s) => applyDecisions(s, decisions));
+  const roster = getRosterWithLive().map((s) => applyDecisions(s, decisions));
   rosterCache = { decisions, roster };
   return roster;
 }

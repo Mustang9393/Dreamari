@@ -28,6 +28,7 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 | Volunteer headshots | `public/images/connect/avatars/pro-*.jpg` (mapped in `src/components/connect/primitives.tsx`) |
 | Event gallery photos (licensed, attributions) | `public/images/connect/events/`, `ATTRIBUTION.md` |
 | Play simulations and glossary content | `src/components/play/games.ts`, `src/components/play/ib-level-*.ts`, `src/components/glossary/data.ts` |
+| Counselor Dashboard caseload (the reference's 120 students, verbatim: roster table + every drill-down) | `src/lib/counselorRosterData.ts`, `src/lib/counselorProfileData.ts`, assembled by `src/lib/counselorRoster.ts` |
 
 ## Routes
 

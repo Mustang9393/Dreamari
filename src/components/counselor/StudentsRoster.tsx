@@ -3,12 +3,13 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Filter, ChevronRight, ChevronLeft } from "lucide-react";
-import { Meter } from "@/components/connect/viz";
 import { getRoster } from "@/lib/counselorRoster";
 import { useCounselorFilters } from "./shell";
 import { StatusChip, MilestoneChip, Avatar } from "./chips";
 
-type SortKey = "name" | "grade" | "roadmapPct" | "status";
+// "none" = the reference's own row order (its data order, Emma Rodriguez
+// first), which is what the table shows until a header is clicked.
+type SortKey = "none" | "name" | "grade" | "roadmapPct" | "status";
 
 function HeaderCell({ label, sortable, keyName, sortKey, sortDir, onSort }: { label: string; sortable?: boolean; keyName?: SortKey; sortKey: SortKey; sortDir: "asc" | "desc"; onSort: (k: SortKey) => void }) {
   return (
@@ -28,7 +29,7 @@ const PAGE_SIZE = 20;
 export function StudentsRoster() {
   const router = useRouter();
   const { gradeFilter, search } = useCounselorFilters();
-  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortKey, setSortKey] = useState<SortKey>("none");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
 
@@ -37,6 +38,7 @@ export function StudentsRoster() {
     if (gradeFilter !== "All Grades") list = list.filter((s) => s.grade === gradeFilter);
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((s) => s.name.toLowerCase().includes(q) || s.careerTrack.toLowerCase().includes(q));
+    if (sortKey === "none") return list;
     const dir = sortDir === "asc" ? 1 : -1;
     return [...list].sort((a, b) => {
       if (sortKey === "name") return a.name.localeCompare(b.name) * dir;
@@ -108,10 +110,18 @@ export function StudentsRoster() {
                   </span>
                 </td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold tabular-nums" style={{ color: "var(--foreground)" }}>{s.grade}</td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.school}</td>
+                {/* The reference's table abbreviates the school ("Lincoln")
+                   and prints the roadmap as a bar with "92%" under it, not
+                   "92/100" beside it -- matched 1:1. */}
+                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.school.replace(/ High School$/, "")}</td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.careerTrack}</td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)]">
-                  <Meter value={s.roadmapPct} max={100} accent="#2F6BF2" />
+                  <span className="flex flex-col gap-[4px]" aria-label={`Roadmap ${s.roadmapPct}%`}>
+                    <span className="relative block h-[7px] w-[72px] overflow-hidden rounded-[4px]" style={{ background: "rgba(255,255,255,0.1)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)" }} aria-hidden>
+                      <span className="absolute inset-y-0 left-0 rounded-[4px]" style={{ width: `${s.roadmapPct}%`, background: "linear-gradient(90deg, color-mix(in srgb, #2F6BF2 70%, transparent), #2F6BF2)", boxShadow: "0 0 8px color-mix(in srgb, #2F6BF2 65%, transparent)" }} />
+                    </span>
+                    <span className="text-[11.5px] leading-[14px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{s.roadmapPct}%</span>
+                  </span>
                 </td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)]"><StatusChip status={s.status} /></td>
                 <td className="px-[var(--space-4)] py-[var(--space-3)]"><MilestoneChip status={s.milestones["Career Report"]} /></td>

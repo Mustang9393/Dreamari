@@ -19,17 +19,48 @@ was the optimal way to solve it, not just a way** -> **what it replaced**.
 "Why" alone isn't enough -- a change is justified against the alternatives
 that were available, not just against doing nothing.
 
-**24 Sept 2026: v1 reset to 1:1, every deviation now lives in v2.** Direct
-instruction: "make sure everything new is in v2.0. Let's reset v1.0 to match
-the Replit 1:1 except for design language and visuals." So
-`src/components/counselor/` (v1) is back to the state at the end of the 1:1
-alignment pass (commit `6f7a7e95`) for Overview, Students and Milestone
-Tracker -- three equal donut cards, the 13-column roster, equal milestone
-cards with the (i) icon and "View Details & Student Breakdown" link -- and
-keeps only the visual rules that came later: the shared glass surfaces and
-avatars, the validated single-hue readiness ramp, amber for "Needs
-Attention", the muted-foreground gray for "Not Started", the responsive
-shell. Every content/data/structure entry below describes
+**24 Sept 2026: v1 reset to 1:1 in structure AND content; every deviation
+now lives in v2.** Direct instructions: "make sure everything new is in
+v2.0. Let's reset v1.0 to match the Replit 1:1 except for design language
+and visuals", then "make sure the contents of cards etc match the replit
+1:1 in v1... Always compare 1:1 visually, and on desktop screen size
+first." So `src/components/counselor/` (v1) is the reference, screen by
+screen, compared live against it at 1440px:
+
+- **Data is the reference's own, verbatim.** The 120-row Students table
+  (`src/lib/counselorRosterData.ts`) and every student's drill-down
+  (`src/lib/counselorProfileData.ts`: DOB, grade-scoped milestone statuses,
+  engagement counts, support-flag reason) were captured off the live
+  reference, so Overview's 86% / 103 / 11 / 6, "79 have a plan", the seven
+  pathways at 24 / 21 / 18 / 16 / 15 / 14 / 12, the readiness charts, the
+  Summary-by-Grade table, My Impact's 7,293 / 852 / 1,101 / 1,246 / 410 and
+  every profile are the reference's numbers, not a seeded approximation.
+  The roster's vocabulary is the reference's too: seven pathways
+  (Technology, Healthcare, Finance & Business, Skilled Trades, Education,
+  Arts & Media, Law & Government), "Trade/Technical School", and three
+  milestone states the first port lacked (Completed, Overdue, Not
+  Applicable, the reference's dash).
+- **Content the reference fixes, v1 fixes.** Review Queue is its 15
+  submissions (messages and attachments included); Settings' caseload is
+  40 / 68% / 7; My Impact's "15 plans reviewed · 0 approved · 10 pending"
+  and "10 announcements"; Connect's 10 announcements; all dates are the
+  reference's (2023-2024 academic year, January 2024 activity), no longer
+  relabelled to 2026.
+- **Composition the reference has, v1 has.** Overview's donut on top with
+  the legend beneath, the Postsecondary center as a count, the readiness
+  subtitle under the title; the roster in the reference's own row order
+  with "Lincoln" and "92%" cells; the Student Profile's "← Student Profile"
+  header, hero card with student number, DOB and "Reports Done" ring,
+  About the Student, grade-scoped milestone grid (3 / 5 / 6 / 11), Pending
+  Counselor Action, the fixed Plan Progress list.
+- **What stays ours:** the glass surfaces and avatars, the validated
+  single-hue readiness ramp, amber "Needs Attention", the muted-foreground
+  "Not Started", the responsive shell, pagination on the roster (the
+  reference's unpaginated 120-row table is a confirmed blank-render bug
+  on phones), and the shell's flex-column shrink guard (a visual bug, not
+  content).
+
+Every content/data/structure entry below describes
 `src/components/counselor/v2/`, switched live by the bottom-center version
 chip (`counselor/version.tsx`, `?v=2`). v1 entries that were reverted are
 left in place as the record of why v2 made each change.

@@ -6,11 +6,11 @@ import { MetricTile } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { getRoster, DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { readCounselorAccount } from "@/lib/counselorAccount";
-import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
+import { QUESTIONS } from "./CounselorConnect";
 
 import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 const GRADES = [9, 10, 11, 12];
-const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade / Technical School", "Military", "Workforce", "Undecided"];
+const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
 
 function BigStat({ value, label, sub, color }: { value: string; label: string; sub?: string; color: string }) {
   return (
@@ -64,21 +64,29 @@ export function MyImpact() {
     const avg = gr.length ? Math.round(gr.reduce((sum, s) => sum + s.roadmapPct, 0) / gr.length) : 0;
     return { grade: g, onTrackCount, total: gr.length, avg };
   });
-  const overallAvg = Math.round(gradeStats.reduce((a, g) => a + g.avg, 0) / gradeStats.length);
+  const overallAvg = Math.round(roster.reduce((sum, s) => sum + s.roadmapPct, 0) / total);
 
   const careerReportApproved = roster.filter((s) => s.milestones["Career Report"] === "Approved").length;
   const academicPlanApproved = roster.filter((s) => s.milestones["Academic Plan"] === "Approved").length;
   const gr10Plus = roster.filter((s) => s.grade >= 10);
   const resumeApproved = gr10Plus.filter((s) => s.milestones.Resume === "Approved").length;
   const seniors = byGrade(12);
-  const seniorsCompliant = seniors.filter((s) => s.milestones.Applications === "Approved" || s.milestones["Financial Aid"] === "Approved" || s.milestones.Applications === "Pending Review").length;
-  const seniorCompliancePct = seniors.length ? Math.round((seniorsCompliant / seniors.length) * 100) : 0;
+  // The reference counts a senior as compliant when applications are underway or submitted.
+  const seniorsCompliant = seniors.filter((s) => ["In Progress", "Completed", "Approved", "Pending Review"].includes(s.milestones.Applications)).length;
+  // The reference's percentage is seniors with a declared postsecondary
+  // plan (26 of 30 = 87%); its sentence counts applications underway (27).
+  const seniorsWithPlan = seniors.filter((s) => s.postsecondaryIntent !== "Undecided").length;
+  const seniorCompliancePct = seniors.length ? Math.round((seniorsWithPlan / seniors.length) * 100) : 0;
   const meetsSeniorTarget = seniorCompliancePct >= 80;
 
-  const reviewableKeys = ["Career Report", "Academic Plan", "Resume"] as const;
-  const plansApproved = roster.reduce((sum, s) => sum + reviewableKeys.filter((k) => s.milestones[k] === "Approved").length, 0);
-  const plansPending = roster.reduce((sum, s) => sum + reviewableKeys.filter((k) => s.milestones[k] === "Changes Requested").length, 0);
-  const monitored = roster.filter((s) => s.status !== "On Track").length;
+  // The reference's activity tile is its review queue (15 items, 10 of
+  // them pending, none approved yet) and its announcement count (10) --
+  // fixed there, fixed here. v2 computes these from the review store.
+  const plansReviewed = 15;
+  const plansApproved = 0;
+  const plansPending = 10;
+  const announcementsSent = 10;
+  const monitored = roster.filter((s) => s.supportFlagReason).length;
   const monitoredPct = Math.round((monitored / total) * 100);
 
   const engagement = { drops: 0, sims: 0, careers: 0, colleges: 0, posts: 0 };
@@ -90,19 +98,18 @@ export function MyImpact() {
     engagement.posts += s.engagement.communityPosts;
   }
 
-  const careerPathwayDeclaredPct = Math.round((roster.filter((s) => s.careerTrack).length / total) * 100);
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-col gap-[var(--space-4)]">
         <span className="flex items-center gap-[6px] text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-          <Award className="h-[13px] w-[13px]" aria-hidden /> My Impact · Academic Year 2026-2027
+          <Award className="h-[13px] w-[13px]" aria-hidden /> My Impact · Academic Year 2023–2024
         </span>
         <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <div className="flex flex-col gap-[2px]">
             <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{counselorName}</h2>
             <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{account.role || "School Counselor"} · {account.school || DEMO_SCHOOL}</span>
-            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Reporting Period: August 2026 – January 2027</span>
+            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Reporting Period: August 2023 – January 2024</span>
           </div>
           <div className="flex items-center gap-[8px]">
             <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
@@ -175,7 +182,7 @@ export function MyImpact() {
         <div className="grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
           <div className="flex flex-col items-center gap-[4px] text-center">
             <ClipboardCheck className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />
-            <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{plansApproved + plansPending}</span>
+            <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{plansReviewed}</span>
             <span className="text-[12px] font-bold" style={{ color: "var(--foreground)" }}>Plans Reviewed</span>
             <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{plansApproved} approved · {plansPending} pending</span>
           </div>
@@ -187,7 +194,7 @@ export function MyImpact() {
           </div>
           <div className="flex flex-col items-center gap-[4px] text-center">
             <Megaphone className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />
-            <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{ANNOUNCEMENTS.length}</span>
+            <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{announcementsSent}</span>
             <span className="text-[12px] font-bold" style={{ color: "var(--foreground)" }}>Announcements Sent</span>
             <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>school-wide communications</span>
           </div>
@@ -227,7 +234,7 @@ export function MyImpact() {
           ] },
           { icon: Briefcase, color: "#7C5CFA", title: "Career Development", items: [
             `${Math.round((careerReportApproved / total) * 100)}% career report completion rate across caseload`,
-            `Career pathway declared for ${careerPathwayDeclaredPct}% of students`,
+            `Career pathway declared for ${withPlanPct}% of students`,
             "Career simulations and assessments facilitated via Dreamari",
           ] },
           { icon: Heart, color: "#EC5FA6", title: "Social-Emotional Development", items: [
@@ -255,16 +262,17 @@ export function MyImpact() {
         ))}
       </div>
 
-      <SectionCard title="Notable Achievements — Fall Semester 2026">
+      <SectionCard title="Notable Achievements — Fall Semester 2023">
         <ul className="flex flex-col gap-[8px]">
           {[
             `Senior postsecondary plan rate of ${seniorCompliancePct}% ${meetsSeniorTarget ? "meets" : "falls short of"} the district-mandated 80% benchmark${meetsSeniorTarget ? " ahead of the spring deadline" : ""}.`,
-            `Maintained a ${Math.round((onTrack / total) * 100)}% on-track rate across a caseload of ${total} students.`,
+            `Maintained a ${Math.round((onTrack / total) * 100)}% on-track rate across a caseload of ${total} students — well above the school average of 71%.`,
             "Delivered all plan reviews at an average of 2.1 days, meeting the district's 5-day turnaround standard with room to spare.",
             `${seniorsCompliant} of ${seniors.length} seniors have active college or postsecondary applications underway, positioning ${DEMO_SCHOOL} for strong college-going outcomes.`,
             `Achieved a ${responseRatePct}% Counselor Connect question-response rate, ensuring every student inquiry received a timely, professional reply.`,
             `${monitored} students proactively identified for additional support — early identification reduces at-risk escalation and supports equitable outcomes.`,
             `Over ${engagement.drops.toLocaleString("en-US")} career-exploration activities completed by students on the Dreamari platform, driven by counselor-assigned prompts and deadlines.`,
+            `Career simulations, pathway selections, and college-saving activity contributed to ${(engagement.sims + engagement.careers + engagement.colleges).toLocaleString("en-US")} total student engagement touchpoints this semester.`,
           ].map((a) => (
             <li key={a} className="flex items-start gap-[8px] text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>
               <Star className="mt-[3px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "#F5A623" }} />
@@ -283,8 +291,8 @@ export function MyImpact() {
       </SectionCard>
 
       <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)] text-[12px]" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-        <span className="font-bold" style={{ color: "var(--foreground)" }}>{counselorName} · {account.role || "School Counselor"} · {account.school || DEMO_SCHOOL} · Academic Year 2026-2027</span>
-        <p>This report reflects Dreamari platform data and counselor activity from August 2026 through January 2027. All student metrics are aggregated and anonymized in distribution. Prepared for administrative review in accordance with ASCA National Model (4th Edition) program accountability standards.</p>
+        <span className="font-bold" style={{ color: "var(--foreground)" }}>{counselorName} · {account.role || "School Counselor"} · {account.school || DEMO_SCHOOL} · Academic Year 2023–2024</span>
+        <p>This report reflects Dreamari platform data and counselor activity from August 2023 through January 2024. All student metrics are aggregated and anonymized in distribution. Prepared for administrative review in accordance with ASCA National Model (4th Edition) program accountability standards.</p>
         <span className="font-bold tracking-[0.04em] uppercase">Generated via Dreamari Counselor Dashboard · Confidential — for authorized personnel only</span>
       </div>
     </div>

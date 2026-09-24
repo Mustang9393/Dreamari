@@ -38,6 +38,18 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Counselor Dashboard v1: content matched to the reference 1:1, screen by screen at 1440
+
+Direct instruction after the structural reset below: "make sure the contents of cards etc match the replit 1:1 in v1. For example the overview cards don't. Always compare 1:1 visually, and on desktop screen size first." Compared every v1 screen against the live reference (web-app-prototype-maishak.replit.app) at 1440px, text and screenshots.
+
+**Root cause of the mismatch:** the roster was a seeded random generator over the student app's 15 interest worlds, so nothing derived from it (Overview cards, readiness charts, Summary by Grade, My Impact, every profile) could match a reference whose numbers come from its own fixed 120 students and 7 pathways. Fix: seed v1 from the reference's data itself. Captured its Students table (all 120 rows: `src/lib/counselorRosterData.ts`) and every drill-down (`src/lib/counselorProfileData.ts`, via same-origin iframes since the reference is a bundled SPA with no API; its Top 5 / cluster / plan-progress tables read straight out of its JS bundle). `counselorRoster.ts` now builds from those; `getRoster()` is exactly the reference's 120, and the live Dreamari student is only added by `getRosterWithLive()` (v2's review store reads that), so v1's totals stay 1:1 while v2 keeps the "draws from the student app" row.
+
+**Also found and matched:** Overview composition (ring on top, legend below; Postsecondary center is the count "79"; readiness subtitle under the title); roster default order (the reference's data order, not name-sorted), "Lincoln" and "92%" cells; Student Profile rebuilt on the reference's composition (header row, hero with `#ER-00001` tag, DOB from the reference's own formula, "Reports Done" ring, About the Student, grade-scoped milestone grid, Pending Counselor Action rules read off its bundle, the fixed Plan Progress list with placeholder 6/12-month tabs); Review Queue's 15 fixed submissions; Settings' fixed caseload (40 / 68% / 7) and academic-year values; Student Progress' 7-pathway filter and 3-category Career Report chart; My Impact's arithmetic (senior compliance = seniors with a declared plan, 87%; fixed activity tile; the two achievement lines the port had dropped); Platform Engagement's month labels; Connect's 10 announcements and the reference's dates throughout (2023-2024 year, January 2024). Milestone Tracker labels capitalised like the reference. Three milestone states the port lacked (Completed, Overdue, Not Applicable) added to the shared type and chips.
+
+**Visual bug fixed in both versions** (direct report: the Career + College Insights banner "cropping its own content in a tiny short card surface"): the banner was the only card on that page with `overflow-hidden`, so its `min-height` resolved to 0 and it absorbed the whole shortfall when the shell's flex column was shorter than its content (128px rendered over 345px). `[&>*]:shrink-0` on the shell's content column stops any page card being squeezed; `shrink-0` on the banner too.
+
+Verified live at 1440 against the reference: Overview, Students (order, cells), Student Profile (Emma Rodriguez and Charlotte Davis, field for field), Review Queue, Milestone Tracker, Student Progress, Connect, Insights, Engagement, My Impact, Settings. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
 ### 2026-09-24 Counselor Dashboard: v1 reset to the 1:1 port; Review Queue rebuilt in v2 on a shared review store
 
 Direct instruction: "go ahead, but make sure everything new is in v2.0. Let's reset v1.0 to match the Replit 1:1 except for design language and visuals."

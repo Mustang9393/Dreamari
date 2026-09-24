@@ -4,8 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, DollarSign, GraduationCap, ClipboardList, AlertTriangle } from "lucide-react";
 import { BarChart } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { getRoster, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
-import { INTEREST_WORLDS } from "@/components/build/types";
+import { getRoster, CAREER_TRACKS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 
 import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 
@@ -40,8 +39,11 @@ const REPORT_TYPES: ReportType[] = [
   {
     id: "career-report", label: "Career Report Completion", icon: FileText,
     chart: (roster) => {
-      const categories = ["approved", "pending review", "in progress", "overdue"];
-      const tally = countByStatus(roster, "Career Report", { Approved: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Changes Requested": "overdue", "Not Started": "overdue" });
+      // The reference's chart has three categories here (approved / in
+      // progress / overdue); a pending review is still "in progress" from
+      // the student's side.
+      const categories = ["approved", "in progress", "overdue"];
+      const tally = countByStatus(roster, "Career Report", { Approved: "approved", Completed: "approved", "Pending Review": "in progress", "In Progress": "in progress", Overdue: "overdue", "Changes Requested": "overdue", "Not Started": "overdue" });
       return { title: "Career Report Completion", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
     },
   },
@@ -49,7 +51,7 @@ const REPORT_TYPES: ReportType[] = [
     id: "academic-plan", label: "Academic Plan Completion", icon: ClipboardCheck,
     chart: (roster) => {
       const categories = ["approved", "pending review", "in progress", "not started", "overdue"];
-      const tally = countByStatus(roster, "Academic Plan", { Approved: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Not Started": "not started", "Changes Requested": "overdue" });
+      const tally = countByStatus(roster, "Academic Plan", { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Not Started": "not started", Overdue: "overdue", "Changes Requested": "overdue" });
       return { title: "Academic Plan Completion", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
     },
   },
@@ -57,7 +59,7 @@ const REPORT_TYPES: ReportType[] = [
     id: "resume", label: "Resume Completion", icon: FileBadge, gradeMin: 10,
     chart: (roster) => {
       const categories = ["approved", "pending review", "in progress", "not started"];
-      const tally = countByStatus(roster, "Resume", { Approved: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Changes Requested": "in progress", "Not Started": "not started" });
+      const tally = countByStatus(roster, "Resume", { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" });
       return { title: "Resume Completion (Grade 10+)", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
     },
   },
@@ -65,7 +67,7 @@ const REPORT_TYPES: ReportType[] = [
     id: "college-list", label: "College List Progress", icon: School, gradeMin: 11,
     chart: (roster) => {
       const categories = ["approved", "in progress", "not started"];
-      const tally = countByStatus(roster, "College List", { Approved: "approved", "Pending Review": "in progress", "In Progress": "in progress", "Changes Requested": "in progress", "Not Started": "not started" });
+      const tally = countByStatus(roster, "College List", { Approved: "approved", Completed: "approved", "Pending Review": "in progress", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" });
       return { title: "College List (Grade 11+)", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
     },
   },
@@ -77,7 +79,7 @@ const REPORT_TYPES: ReportType[] = [
       const categories = ["4-Year College", "Undecided", "Trade/Technical School", "2-Year College"];
       const counts = new Map<string, number>();
       for (const s of roster) {
-        const bucket = s.postsecondaryIntent === "Trade / Technical School" ? "Trade/Technical School"
+        const bucket = s.postsecondaryIntent === "Trade/Technical School" ? "Trade/Technical School"
           : s.postsecondaryIntent === "Workforce" || s.postsecondaryIntent === "Military" ? "Undecided"
           : s.postsecondaryIntent;
         counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
@@ -113,7 +115,7 @@ const REPORT_TYPES: ReportType[] = [
 
 const GRADES = [9, 10, 11, 12];
 
-const PATHWAY_OPTIONS = ["All Pathways", ...INTEREST_WORLDS.map((w) => w.label)];
+const PATHWAY_OPTIONS = ["All Pathways", ...CAREER_TRACKS];
 
 export function StudentProgress() {
   const [reportId, setReportId] = useState(REPORT_TYPES[0].id);

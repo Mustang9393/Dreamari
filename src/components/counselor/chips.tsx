@@ -22,6 +22,13 @@ export const MILESTONE_COLORS: Record<MilestoneStatus, string> = {
   "Changes Requested": "#E0453C",
   "In Progress": "#F5A623",
   "Not Started": "rgba(255,255,255,0.35)",
+  // The reference's own extra states: student-completed reads as done
+  // (same green as Approved), overdue is the one red the dashboard
+  // reserves for "act now", and a dash-in-the-reference "not applicable"
+  // is the quietest gray of all.
+  Completed: "#33C78C",
+  Overdue: "#E0453C",
+  "Not Applicable": "rgba(255,255,255,0.18)",
 };
 
 function Chip({ label, color }: { label: string; color: string }) {

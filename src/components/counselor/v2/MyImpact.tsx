@@ -15,7 +15,7 @@ import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 const GRADES = [9, 10, 11, 12];
-const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade / Technical School", "Military", "Workforce", "Undecided"];
+const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
 
 function BigStat({ value, label, sub, color }: { value: string; label: string; sub?: string; color: string }) {
   return (

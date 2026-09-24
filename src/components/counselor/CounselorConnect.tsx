@@ -8,9 +8,17 @@ import { Segmented } from "@/components/connect/viz";
 import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 
 export const ANNOUNCEMENTS = [
-  { id: "a1", title: "FAFSA Deadline Approaching", to: "Grade 12 · Sent: 2026-09-10", read: 87, body: "Reminder: the priority deadline for fall admission is February 1st. All seniors should have their FAFSA submitted by this date to maximize financial aid opportunities.", tags: ["Related: Financial Aid Status", "Read Receipt Required", "Acknowledgment Required"] },
-  { id: "a2", title: "Career Fair Next Week", to: "All Students · Sent: 2026-09-08", read: 72, body: "Annual Career Exploration Fair will be held on January 22nd in the gymnasium. Over 40 local employers and college representatives will be present. All students encouraged to attend.", tags: [] },
-  { id: "a3", title: "Resume Workshop This Friday", to: "Grades 11-12 · Sent: 2026-09-12", read: 64, body: "Join us for a resume writing workshop this Friday after school in the library. We'll cover formatting, content, and how to highlight your achievements. Pizza will be served!", tags: ["Related: Resume"] },
+  // All 10, verbatim off the reference (24 Sept 2026), dates included.
+  { id: "a1", title: "FAFSA Deadline Approaching", to: "Grade 12 • Sent: 2024-01-10", read: 87, body: "Reminder: The priority FAFSA deadline for fall admission is February 1st. All seniors should have their FAFSA submitted by this date to maximize financial aid opportunities.", tags: ["Related: Financial Aid Status", "Read Receipt Required", "Acknowledgment Required"] },
+  { id: "a2", title: "Career Fair Next Week", to: "All Students • Sent: 2024-01-08", read: 72, body: "Annual Career Exploration Fair will be held on January 22nd in the gymnasium. Over 40 local employers and college representatives will be present. All students encouraged to attend!", tags: [] },
+  { id: "a3", title: "Resume Workshop This Friday", to: "Grades 11-12 • Sent: 2024-01-12", read: 64, body: "Join us for a resume writing workshop this Friday after school in the library. We'll cover formatting, content, and how to highlight your achievements. Pizza will be served!", tags: ["Related: Resume"] },
+  { id: "a4", title: "College Application Deadlines", to: "Grade 12 • Sent: 2024-01-05", read: 91, body: "Many regular decision college applications are due January 15th - February 1st. Make sure you've submitted all required materials and checked your portal for each school.", tags: ["Related: Application Progress", "Read Receipt Required"] },
+  { id: "a5", title: "Grade 9 Academic Planning Session", to: "Grade 9 • Sent: 2024-01-07", read: 68, body: "All freshmen should complete their initial four-year academic plan by the end of this month. Schedule a meeting with your counselor if you need assistance.", tags: ["Related: Academic Plan"] },
+  { id: "a6", title: "Scholarship Opportunities Available", to: "Grades 11-12 • Sent: 2024-01-11", read: 79, body: "New local scholarships have been posted in Dreamari. Check the Scholarships tab to see opportunities you qualify for. Many have deadlines in February.", tags: ["Related: Financial Aid Status"] },
+  { id: "a7", title: "Career Pathway Selection Reminder", to: "Grade 10 • Sent: 2024-01-09", read: 71, body: "All sophomores should finalize their career pathway selection by the end of January. This helps us align your coursework with your post-secondary goals.", tags: ["Related: Career Pathway Selection", "Acknowledgment Required"] },
+  { id: "a8", title: "Junior Year College Planning Timeline", to: "Grade 11 • Sent: 2024-01-13", read: 58, body: "Juniors: Now is the time to start your college search! Complete your initial college list in Dreamari and schedule campus visits during spring break.", tags: ["Related: College List"] },
+  { id: "a9", title: "Trade School Information Session", to: "All Students • Sent: 2024-01-14", read: 45, body: "Representatives from local technical colleges will present on January 25th during lunch periods. Learn about skilled trades programs and apprenticeship opportunities.", tags: [] },
+  { id: "a10", title: "Senior Exit Survey", to: "Grade 12 • Sent: 2024-01-06", read: 82, body: "All seniors must complete the Senior Exit Survey by May 1st. This survey captures your final post-secondary plans and helps us support your transition.", tags: ["Related: Senior Exit Survey", "Acknowledgment Required"] },
 ];
 
 type QuestionStatus = "new" | "viewed" | "in-progress" | "responded" | "resolved" | "follow-up";
@@ -24,21 +32,21 @@ type QuestionStatus = "new" | "viewed" | "in-progress" | "responded" | "resolved
 // dashboard's own MILESTONE_KEYS naming where an obvious match exists,
 // left blank where it doesn't (Graduation has no MILESTONE_KEYS analog).
 export const QUESTIONS: { id: string; name: string; grade: number; question: string; tag: string; date: string; status: QuestionStatus; milestone?: string }[] = [
-  { id: "q1", name: "Olivia Chen", grade: 11, question: "I'm interested in both graphic design and animation. How do I decide which career pathway to choose? Can I explore both?", tag: "Career Exploration", date: "2026-09-14", status: "new", milestone: "Career Pathway Selection" },
-  { id: "q2", name: "Charlotte Davis", grade: 12, question: "I missed the early action deadline for my top choice. Should I still apply regular decision or is it too late?", tag: "Applications", date: "2026-09-13", status: "new", milestone: "Application Progress" },
-  { id: "q3", name: "Jackson Thomas", grade: 11, question: "Should I take AP Economics or AP Psychology next year? Which would be better for a business major?", tag: "Academic Planning", date: "2026-09-12", status: "viewed", milestone: "Academic Plan" },
-  { id: "q4", name: "Isabella Santos", grade: 11, question: "How many colleges should I have on my list? I currently have 15 but I'm not sure if that's too many.", tag: "College Search", date: "2026-09-11", status: "in-progress", milestone: "College List" },
-  { id: "q5", name: "Sebastian Wilson", grade: 11, question: "Are there any local internships for high school students interested in film production?", tag: "Career Exploration", date: "2026-09-10", status: "responded", milestone: "Career Pathway Selection" },
-  { id: "q6", name: "Elizabeth Wilson", grade: 12, question: "My parents don't have all their tax documents ready yet. Can I still submit my FAFSA or should I wait?", tag: "Financial Aid", date: "2026-09-09", status: "responded", milestone: "Financial Aid" },
-  { id: "q7", name: "Lucas Miller", grade: 9, question: "What electives should I take next year if I want to pursue graphic design?", tag: "Course Selection", date: "2026-09-15", status: "new", milestone: "Academic Plan" },
-  { id: "q8", name: "Marcus Thompson", grade: 11, question: "Should I include my job at the grocery store on my resume even though it's not related to healthcare?", tag: "Resume", date: "2026-09-14", status: "viewed", milestone: "Resume" },
-  { id: "q9", name: "Emma Rodriguez", grade: 12, question: "One of my teachers hasn't submitted my recommendation letter yet and the deadline is next week. What should I do?", tag: "Recommendations", date: "2026-09-13", status: "in-progress", milestone: "Recommendation Letter" },
-  { id: "q10", name: "Sophia Kim", grade: 12, question: "I'm feeling really stressed about college decisions. Do you have time to talk this week?", tag: "Personal Support", date: "2026-09-12", status: "responded" },
-  { id: "q11", name: "Joseph Hernandez", grade: 10, question: "How can I find out more about careers in video game design?", tag: "Career Exploration", date: "2026-09-11", status: "follow-up", milestone: "Career Pathway Selection" },
-  { id: "q12", name: "Ethan Garcia", grade: 11, question: "What's the difference between business administration and business management majors?", tag: "College Search", date: "2026-09-10", status: "resolved", milestone: "College List" },
-  { id: "q13", name: "Daniel Thomas", grade: 10, question: "Do I need to take physics if I want to be a nurse?", tag: "Academic Planning", date: "2026-09-15", status: "new", milestone: "Academic Plan" },
-  { id: "q14", name: "Diego Martinez", grade: 12, question: "The trade school application asks for a personal statement. Is this the same as a college essay?", tag: "Applications", date: "2026-09-14", status: "viewed", milestone: "Application Progress" },
-  { id: "q15", name: "Mia Johnson", grade: 12, question: "I want to confirm I'm on track to graduate. Can we review my transcript together?", tag: "Graduation", date: "2026-09-13", status: "responded" },
+  { id: "q1", name: "Olivia Chen", grade: 11, question: "I'm interested in both graphic design and animation. How do I decide which career pathway to choose? Can I explore both?", tag: "Career Exploration", date: "2024-01-14", status: "new", milestone: "Career Pathway Selection" },
+  { id: "q2", name: "Charlotte Davis", grade: 12, question: "I missed the early action deadline for my top choice school. Should I still apply regular decision or is it too late?", tag: "Applications", date: "2024-01-13", status: "new", milestone: "Application Progress" },
+  { id: "q3", name: "Jackson Thomas", grade: 11, question: "Should I take AP Economics or AP Psychology next year? Which would be better for a business major?", tag: "Academic Planning", date: "2024-01-12", status: "viewed", milestone: "Academic Plan" },
+  { id: "q4", name: "Isabella Santos", grade: 11, question: "How many colleges should I have on my list? I currently have 15 but I'm not sure if that's too many.", tag: "College Search", date: "2024-01-11", status: "in-progress", milestone: "College List" },
+  { id: "q5", name: "Sebastian Wilson", grade: 11, question: "Are there any local internships for high school students interested in film production?", tag: "Career Exploration", date: "2024-01-10", status: "responded", milestone: "Career Pathway Selection" },
+  { id: "q6", name: "Elizabeth Wilson", grade: 12, question: "My parents don't have all their tax documents ready yet. Can I still submit my FAFSA or should I wait?", tag: "Financial Aid", date: "2024-01-09", status: "responded", milestone: "Financial Aid" },
+  { id: "q7", name: "Lucas Miller", grade: 9, question: "What electives should I take next year if I want to pursue graphic design?", tag: "Course Selection", date: "2024-01-15", status: "new", milestone: "Academic Plan" },
+  { id: "q8", name: "Marcus Thompson", grade: 11, question: "Should I include my job at the grocery store on my resume even though it's not related to healthcare?", tag: "Resume", date: "2024-01-14", status: "viewed", milestone: "Resume" },
+  { id: "q9", name: "Emma Rodriguez", grade: 12, question: "One of my teachers hasn't submitted my recommendation letter yet and the deadline is next week. What should I do?", tag: "Recommendations", date: "2024-01-13", status: "in-progress", milestone: "Recommendation Letter" },
+  { id: "q10", name: "Sophia Kim", grade: 12, question: "I'm feeling really stressed about college decisions. Do you have time to talk this week?", tag: "Personal Support", date: "2024-01-12", status: "responded" },
+  { id: "q11", name: "Joseph Hernandez", grade: 10, question: "How can I find out more about careers in video game design?", tag: "Career Exploration", date: "2024-01-11", status: "follow-up", milestone: "Career Pathway Selection" },
+  { id: "q12", name: "Ethan Garcia", grade: 11, question: "What's the difference between business administration and business management majors?", tag: "College Search", date: "2024-01-10", status: "resolved", milestone: "College List" },
+  { id: "q13", name: "Daniel Thomas", grade: 10, question: "Do I need to take physics if I want to be a nurse?", tag: "Academic Planning", date: "2024-01-15", status: "new", milestone: "Academic Plan" },
+  { id: "q14", name: "Diego Martinez", grade: 12, question: "The trade school application asks for a personal statement. Is this the same as a college essay?", tag: "Applications", date: "2024-01-14", status: "viewed", milestone: "Application Progress" },
+  { id: "q15", name: "Mia Johnson", grade: 12, question: "I want to confirm I'm on track to graduate. Can we review my transcript together?", tag: "Graduation", date: "2024-01-13", status: "responded" },
 ];
 
 const STATUS_STYLE: Record<QuestionStatus, { label: string; color: string }> = {
@@ -51,16 +59,16 @@ const STATUS_STYLE: Record<QuestionStatus, { label: string; color: string }> = {
 };
 
 const COMMUNITIES = [
-  { name: "Grade 9 Planning", desc: "Academic planning, course selection, and getting started with career exploration", members: 142, posts: 87, last: "2026-09-15" },
-  { name: "Grade 10 Career Exploration", desc: "Discovering career pathways, internships, and summer opportunities", members: 138, posts: 103, last: "2026-09-15" },
-  { name: "Grade 11 College Planning", desc: "College search, standardized testing, campus visits, and building your college list", members: 145, posts: 156, last: "2026-09-14" },
-  { name: "Grade 12 Applications", desc: "Application support, essay writing, deadlines, and decision strategies", members: 134, posts: 198, last: "2026-09-15" },
-  { name: "FAFSA Support", desc: "Financial aid questions, FAFSA help, and scholarship opportunities", members: 267, posts: 142, last: "2026-09-14" },
-  { name: "Scholarship Opportunities", desc: "Sharing scholarship information, tips, and success stories", members: 289, posts: 124, last: "2026-09-13" },
-  { name: "Career Pathways: Technology", desc: "For students exploring careers in software, engineering, IT, and tech", members: 78, posts: 65, last: "2026-09-15" },
-  { name: "Career Pathways: Healthcare", desc: "For students interested in medicine, nursing, healthcare, and life sciences", members: 92, posts: 71, last: "2026-09-14" },
-  { name: "Skilled Trades & Technical Careers", desc: "Apprenticeships, trade schools, and technical career pathways", members: 54, posts: 48, last: "2026-09-13" },
-  { name: "Summer Opportunities", desc: "Summer programs, internships, jobs, and volunteer opportunities", members: 312, posts: 176, last: "2026-09-15" },
+  { name: "Grade 9 Planning", desc: "Academic planning, course selection, and getting started with career exploration", members: 142, posts: 87, last: "2024-01-15" },
+  { name: "Grade 10 Career Exploration", desc: "Discovering career pathways, internships, and summer opportunities", members: 138, posts: 103, last: "2024-01-15" },
+  { name: "Grade 11 College Planning", desc: "College search, standardized testing, campus visits, and building your college list", members: 145, posts: 156, last: "2024-01-14" },
+  { name: "Grade 12 Applications", desc: "Application support, essay writing, deadlines, and decision strategies", members: 134, posts: 198, last: "2024-01-15" },
+  { name: "FAFSA Support", desc: "Financial aid questions, FAFSA help, and scholarship opportunities", members: 267, posts: 142, last: "2024-01-14" },
+  { name: "Scholarship Opportunities", desc: "Sharing scholarship information, tips, and success stories", members: 289, posts: 124, last: "2024-01-13" },
+  { name: "Career Pathways: Technology", desc: "For students exploring careers in software, engineering, IT, and tech", members: 78, posts: 65, last: "2024-01-15" },
+  { name: "Career Pathways: Healthcare", desc: "For students interested in medicine, nursing, healthcare, and life sciences", members: 92, posts: 71, last: "2024-01-14" },
+  { name: "Skilled Trades & Technical Careers", desc: "Apprenticeships, trade schools, and technical career pathways", members: 54, posts: 48, last: "2024-01-13" },
+  { name: "Summer Opportunities", desc: "Summer programs, internships, jobs, and volunteer opportunities", members: 312, posts: 176, last: "2024-01-15" },
 ];
 
 function AnnouncementCard({ a }: { a: (typeof ANNOUNCEMENTS)[number] }) {

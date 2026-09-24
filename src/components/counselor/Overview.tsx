@@ -4,14 +4,21 @@ import { useMemo } from "react";
 import { SegmentedRing, BarChart } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { getRoster, type CounselorStudent } from "@/lib/counselorRoster";
+import { getRoster, CAREER_TRACKS, type CounselorStudent } from "@/lib/counselorRoster";
 import { useCounselorFilters } from "./shell";
+
+// v1: the reference's Overview, 1:1 in content and composition (direct
+// instruction, 24 Sept 2026: "match the replit with that level of detail").
+// Three equal cards, each a large centered donut with its legend stacked
+// underneath; the Postsecondary card's center is the COUNT of students with
+// a plan, not a percentage; Career Pathways lists the reference's seven
+// pathways by size; the two readiness charts carry their subtitle directly
+// under the title. Only the visual language is ours.
 
 // Single-hue ordinal ramp for the readiness bar charts, validated with the
 // dataviz skill's ordinal gate (`validate_palette.js "#9BA8FB,#5B6CF9,#2E3BB8"
 // --ordinal --mode dark`): the earlier multi-hue set measurably collided with
-// this dashboard's own status colors. Visual rule only; the charts' content
-// and composition are the reference's.
+// this dashboard's own status colors. Visual rule only.
 const READINESS_SERIES = ["#9BA8FB", "#5B6CF9", "#2E3BB8"];
 
 const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
@@ -20,9 +27,6 @@ const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "At Risk": "#E0453C",
 };
 
-// A touch of brand-blue tint over the shared PANEL glass, same "CARD" step
-// ProProfile.tsx's own dashboard cards use one level up from a bare panel --
-// keeps these from reading as flat/undifferentiated boxes.
 import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 
 function StatRow({ label, value, color }: { label: string; value: number; color: string }) {
@@ -37,30 +41,24 @@ function StatRow({ label, value, color }: { label: string; value: number; color:
   );
 }
 
-function DonutCard({ title, centerPct, centerLabel, rows }: { title: string; centerPct: number; centerLabel: string; rows: { label: string; value: number; color: string }[] }) {
+// Ring on top, centered, legend below -- the reference's own card
+// composition. `center` is whatever the reference prints in the middle
+// ("86%", "79", "120"), not always a percentage.
+function DonutCard({ title, center, centerLabel, rows }: { title: string; center: string; centerLabel: string; rows: { label: string; value: number; color: string }[] }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
-      <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        {/* Plain text title, no icon badge -- the reference's own card
-           header is just a heading, nothing else (direct instruction:
-           align composition to the reference 1:1). min-height still
-           covers 2 lines so "Postsecondary Plans" wrapping doesn't throw
-           off the ring's vertical position relative to its neighbors. */}
-        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)", minHeight: 38 }}>{title}</h2>
-        <div className="flex items-center gap-[var(--space-5)]">
-          {/* Every category in the legend below gets its own drawn arc here
-             -- not a single accent-colored ring next to an unrelated
-             multi-color legend (direct feedback: "only one color is being
-             represented when there's more colors in the legend"). */}
-          <SegmentedRing segments={rows.map((r) => ({ value: r.value, color: r.color }))} size={92} stroke={11}>
+      <div className="flex h-full flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
+        <div className="flex justify-center">
+          <SegmentedRing segments={rows.map((r) => ({ value: r.value, color: r.color }))} size={150} stroke={16}>
             <span className="flex flex-col items-center">
-              <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{Math.round(centerPct)}%</span>
-              <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{centerLabel}</span>
+              <span className="text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{center}</span>
+              <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{centerLabel}</span>
             </span>
           </SegmentedRing>
-          <div className="flex min-w-0 flex-1 flex-col gap-[6px]">
-            {rows.map((r) => <StatRow key={r.label} {...r} />)}
-          </div>
+        </div>
+        <div className="flex flex-col gap-[8px]">
+          {rows.map((r) => <StatRow key={r.label} {...r} />)}
         </div>
       </div>
     </HoverBeam>
@@ -84,7 +82,7 @@ export function Overview() {
 
   const pathwayCounts = new Map<string, number>();
   for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
-  const topPathways = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
+  const pathways = CAREER_TRACKS.map((t) => [t, pathwayCounts.get(t) ?? 0] as const).sort((a, b) => b[1] - a[1]);
   const pathwayColors = ["#5B6CF9", "#7C5CFA", "#33C78C", "#4AB8D8", "#F5A623", "#EC5FA6", "#33C0C7"];
 
   const grades = [9, 10, 11, 12];
@@ -101,7 +99,7 @@ export function Overview() {
       <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3">
         <DonutCard
           title="Student Status"
-          centerPct={(onTrack / total) * 100}
+          center={`${Math.round((onTrack / total) * 100)}%`}
           centerLabel="on track"
           rows={[
             { label: "On Track", value: onTrack, color: STATUS_COLORS["On Track"] },
@@ -111,36 +109,25 @@ export function Overview() {
         />
         <DonutCard
           title="Postsecondary Plans"
-          centerPct={(withPlan / total) * 100}
+          center={String(withPlan)}
           centerLabel="have a plan"
           rows={[
             { label: "With Plan", value: withPlan, color: "#2F6BF2" },
             { label: "Undecided", value: undecided, color: "#5B6470" },
           ]}
         />
-        <HoverBeam strength={0.7} className="h-full">
-          <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)", minHeight: 38 }}>Career Pathways</h2>
-            <div className="flex items-center gap-[var(--space-5)]">
-              <SegmentedRing segments={topPathways.map(([, value], i) => ({ value, color: pathwayColors[i % pathwayColors.length] }))} size={92} stroke={11}>
-                <span className="flex flex-col items-center">
-                  <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{total}</span>
-                  <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students</span>
-                </span>
-              </SegmentedRing>
-              <div className="flex min-w-0 flex-1 flex-col gap-[6px]">
-                {topPathways.map(([label, value], i) => (
-                  <StatRow key={label} label={label} value={value} color={pathwayColors[i % pathwayColors.length]} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </HoverBeam>
+        <DonutCard
+          title="Career Pathways"
+          center={String(roster.length)}
+          centerLabel="students"
+          rows={pathways.map(([label, value], i) => ({ label, value, color: pathwayColors[i % pathwayColors.length] }))}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
         <HoverBeam strength={0.6} className="h-full">
-          <Panel id="career-readiness" title="Career Readiness" aside={<span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</span>}>
+          <Panel id="career-readiness" title="Career Readiness" className="h-full">
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
             <BarChart
               groups={grades.map((g) => `Gr. ${g}`)}
               series={[
@@ -151,7 +138,8 @@ export function Overview() {
           </Panel>
         </HoverBeam>
         <HoverBeam strength={0.6} className="h-full">
-          <Panel id="academic-readiness" title="Academic Readiness" aside={<span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</span>}>
+          <Panel id="academic-readiness" title="Academic Readiness" className="h-full">
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
             <BarChart
               groups={grades.map((g) => `Gr. ${g}`)}
               series={[

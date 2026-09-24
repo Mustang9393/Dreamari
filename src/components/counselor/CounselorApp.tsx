@@ -92,7 +92,7 @@ export function CounselorApp({ initialView, initialStudentId }: { initialView?: 
 
   return (
     <CounselorVersionProvider>
-      <CounselorShell active={view}>
+      <CounselorShell active={view} showTitle={!(view === "students" && initialStudentId)}>
         <ViewFor view={view} initialStudentId={initialStudentId} />
       </CounselorShell>
     </CounselorVersionProvider>

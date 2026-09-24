@@ -13,7 +13,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useCounselorFilters } from "../shell";
 import { StatusChip, MilestonesMini, Avatar } from "../chips";
 
-const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade / Technical School", "Workforce", "Military", "Undecided"];
+const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 
 type SortKey = "name" | "grade" | "roadmapPct" | "status";
 

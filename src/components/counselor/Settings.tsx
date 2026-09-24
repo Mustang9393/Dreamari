@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { readCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES, type CounselorRole } from "@/lib/counselorAccount";
-import { getRoster } from "@/lib/counselorRoster";
 
 import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 
@@ -50,9 +49,11 @@ export function Settings() {
 
   const [notifications, setNotifications] = useState<Record<string, boolean>>({ submissions: true, overdue: true, questions: true, "low-activity": true, weekly: false });
 
-  const roster = useMemo(() => getRoster(), []);
-  const avgCompletion = roster.length ? Math.round(roster.reduce((sum, s) => sum + s.roadmapPct, 0) / roster.length) : 0;
-  const pendingReviews = roster.filter((s) => Object.values(s.milestones).includes("Pending Review")).length;
+  // The reference's Caseload tiles are fixed values (40 / 68% / 7), not
+  // computed from its 120-row roster -- matched 1:1. v2 computes them.
+  const assignedStudents = 40;
+  const avgCompletion = 68;
+  const pendingReviews = 7;
 
   const save = () => {
     writeCounselorAccount(draft);
@@ -136,7 +137,7 @@ export function Settings() {
           <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Caseload</h2>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <div className="flex flex-col items-center gap-[2px] text-center">
-              <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{roster.length}</span>
+              <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{assignedStudents}</span>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Assigned Students</span>
             </div>
             <div className="flex flex-col items-center gap-[2px] text-center">
@@ -158,15 +159,15 @@ export function Settings() {
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Current Academic Year</span>
-              <input defaultValue="2026-2027" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <input defaultValue="2023-2024" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>School Year Start Date</span>
-              <input type="date" defaultValue="2026-08-11" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <input type="date" defaultValue="2023-08-28" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>School Year End Date</span>
-              <input type="date" defaultValue="2027-06-11" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <input type="date" defaultValue="2024-06-14" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
           </div>
         </div>

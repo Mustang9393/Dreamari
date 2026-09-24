@@ -13,15 +13,15 @@ import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 // screen's numbers are fixed content, not derived from the seeded roster,
 // same as Milestone Tracker's grade data. Month labels shifted to this
 // app's own "today" convention (the rest of the dashboard dates itself in
-// Sep 2026) while keeping the reference's exact values in the same
+// Jan 2026) while keeping the reference's exact values in the same
 // chronological order.
 const MONTHS = [
-  { label: "Apr 2026", total: 298, unique: 91, avg: 3.27 },
-  { label: "May 2026", total: 441, unique: 112, avg: 3.94 },
-  { label: "Jun 2026", total: 193, unique: 74, avg: 2.61 },
-  { label: "Jul 2026", total: 267, unique: 88, avg: 3.03 },
-  { label: "Aug 2026", total: 158, unique: 55, avg: 2.87 },
-  { label: "Sep 2026", total: 214, unique: 71, avg: 3.01 },
+  { label: "Aug 2025", total: 298, unique: 91, avg: 3.27 },
+  { label: "Sep 2025", total: 441, unique: 112, avg: 3.94 },
+  { label: "Oct 2025", total: 193, unique: 74, avg: 2.61 },
+  { label: "Nov 2025", total: 267, unique: 88, avg: 3.03 },
+  { label: "Dec 2025", total: 158, unique: 55, avg: 2.87 },
+  { label: "Jan 2026", total: 214, unique: 71, avg: 3.01 },
 ];
 const LATEST = MONTHS[MONTHS.length - 1];
 const WEEKLY_ACTIVE = 42;
@@ -79,10 +79,10 @@ export function PlatformEngagement() {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Monthly Active Students · unique logins in Sep 2026" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Monthly Active Students · unique logins in Jan 2026" accent="#5B6CF9" /></div></HoverBeam>
         <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Weekly Active Students · avg unique students per week" accent="#33C78C" /></div></HoverBeam>
         <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={CalendarDays} value="18" label="Daily Active Students · avg unique students per day" accent="#F5A623" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Avg Logins / Student · per student in Sep 2026" accent="#EC5FA6" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Avg Logins / Student · per student in Jan 2026" accent="#EC5FA6" /></div></HoverBeam>
       </div>
 
       <HoverBeam strength={0.6} className="h-full">

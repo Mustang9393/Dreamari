@@ -156,7 +156,10 @@ function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gr
   );
 }
 
-export function CounselorShell({ active, children }: { active: CounselorView; children: React.ReactNode }) {
+// `showTitle={false}` drops the page title/subtitle block for a view that
+// renders its own header row (the reference's Student Profile shows
+// "← Student Profile" plus its actions inline instead of the Students title).
+export function CounselorShell({ active, children, showTitle = true }: { active: CounselorView; children: React.ReactNode; showTitle?: boolean }) {
   const router = useRouter();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("All Grades");
@@ -218,7 +221,7 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
                 </button>
               </div>
               <div className="flex flex-col gap-[10px] border-b px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · 2024–2025</span>
+                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · 2023-2024</span>
                 <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
               </div>
               <SidebarNav active={active} onNavigate={() => setDrawerOpen(false)} />
@@ -258,7 +261,7 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
           <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
             <div className="flex flex-wrap items-center gap-[10px]">
               <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{DEMO_SCHOOL}</span>
-              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>2024–2025</span>
+              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>2023-2024</span>
               <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
             </div>
             <div className="flex items-center gap-[10px]">
@@ -301,11 +304,21 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
                above already reads as the page's own header, so a full
                space-6 gap under it before the title even starts read as
                dead space (direct feedback). */}
-            <div className="flex w-full max-w-[1400px] flex-col gap-[var(--space-4)]">
-              <div className="flex flex-col gap-[2px]">
-                <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
-                <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>
-              </div>
+            {/* `[&>*]:shrink-0`: a flex column sizes itself from its items, and
+               any item carrying overflow-hidden gets a min-height of 0, so it
+               silently absorbs the whole shortfall when the column's content
+               is taller than its stretched height -- the Career + College
+               Insights banner rendered 128px tall over 345px of content
+               (direct report, 24 Sept 2026: "cropping its own content in a
+               tiny short card surface"). Items never shrink here; the page
+               scrolls instead. */}
+            <div className="flex w-full max-w-[1400px] flex-col gap-[var(--space-4)] [&>*]:shrink-0">
+              {showTitle && (
+                <div className="flex flex-col gap-[2px]">
+                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
+                  <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>
+                </div>
+              )}
               {children}
             </div>
           </main>
