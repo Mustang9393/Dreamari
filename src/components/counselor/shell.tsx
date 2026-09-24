@@ -5,14 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, LogOut, Menu, X,
+  Search, Bell, LogOut, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, signOutCounselor } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
-import { CounselorVersionChip } from "./version";
+import { CounselorVersionChip, useCounselorVersion } from "./version";
+import { menuForRole, REFERENCE_VIEWS, type CounselorView } from "./roles";
 
 // The isolated shell for the Counselor Dashboard -- a genuinely separate
 // product from the student app's own chrome (direct product decision: not a
@@ -20,23 +21,30 @@ import { CounselorVersionChip } from "./version";
 // src/components/app/chrome.tsx). Its own sidebar, its own topbar, its own
 // visual language on the same design tokens.
 
-export type CounselorView =
-  | "overview" | "students" | "milestones" | "review-queue" | "progress"
-  | "connect" | "insights" | "productivity" | "engagement" | "impact" | "settings";
+// The view union itself lives in ./roles.ts next to the per-role menus that
+// are built from it; re-exported here so every screen keeps importing it
+// from the shell.
+export type { CounselorView } from "./roles";
 
-export const NAV_ITEMS: { view: CounselorView; label: string; icon: typeof LayoutGrid }[] = [
-  { view: "overview", label: "Overview", icon: LayoutGrid },
-  { view: "students", label: "Students", icon: Users },
-  { view: "milestones", label: "Milestone Tracker", icon: Target },
-  { view: "review-queue", label: "Review Queue", icon: ClipboardCheck },
-  { view: "progress", label: "Student Progress", icon: FileText },
-  { view: "connect", label: "Counselor Connect", icon: MessageSquare },
-  { view: "insights", label: "Career + College Insights", icon: Briefcase },
-  { view: "productivity", label: "Productivity Suite", icon: Layers },
-  { view: "engagement", label: "Platform Engagement", icon: Activity },
-  { view: "impact", label: "My Impact", icon: Award },
-  { view: "settings", label: "Settings", icon: SettingsIcon },
-];
+const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
+  overview: LayoutGrid,
+  students: Users,
+  milestones: Target,
+  "review-queue": ClipboardCheck,
+  progress: FileText,
+  connect: MessageSquare,
+  insights: Briefcase,
+  productivity: Layers,
+  engagement: Activity,
+  impact: Award,
+  settings: SettingsIcon,
+  counselors: UserCog,
+  readiness: Gauge,
+  reports: FileBarChart,
+  schools: School,
+  "school-impact": Trophy,
+};
+
 
 export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: string }> = {
   overview: { title: "Overview", subtitle: "Welcome back. Here's your caseload at a glance." },
@@ -50,7 +58,18 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   engagement: { title: "Platform Engagement", subtitle: `Login & activity tracking · ${DEMO_SCHOOL}` },
   impact: { title: "My Impact", subtitle: "Your advocacy, in numbers you can share" },
   settings: { title: "Settings", subtitle: "Manage your profile and preferences" },
+  // Role-shell views (v2 only; see ./roles.ts). Subtitles state the
+  // question each screen exists to answer, so a placeholder still tells a
+  // reviewer what will live here.
+  counselors: { title: "Counselors", subtitle: `Every counselor's caseload at ${DEMO_SCHOOL}, and who is behind` },
+  readiness: { title: "Readiness", subtitle: "Senior plan compliance, FAFSA and milestone readiness against targets" },
+  reports: { title: "Reports", subtitle: "Board, district and state reports built from live readiness data" },
+  schools: { title: "Schools", subtitle: "Every school in the district, and which ones need support" },
+  "school-impact": { title: "School Impact", subtitle: `${DEMO_SCHOOL}'s advocacy, in numbers you can share` },
 };
+
+/** The reference's fixed 11-item menu: what v1 shows for every role. */
+export const NAV_ITEMS: { view: CounselorView; label: string; icon: typeof LayoutGrid }[] = REFERENCE_VIEWS.map((view) => ({ view, label: VIEW_TITLES[view].title, icon: VIEW_ICONS[view] }));
 
 export type GradeFilter = "All Grades" | 9 | 10 | 11 | 12;
 const GRADE_OPTIONS: GradeFilter[] = ["All Grades", 9, 10, 11, 12];
@@ -80,10 +99,22 @@ export function useCounselorFilters(): FiltersState {
   return useContext(CounselorFiltersContext);
 }
 
+/** The menu for this build and role. v1: the reference's fixed 11 items,
+ *  whatever the role. v2: the role's own menu from ./roles.ts (a screen the
+ *  role does not have is simply absent). The version gate is DEMO-ONLY
+ *  plumbing; the role menus themselves are the product. */
+function useNavItems(): { view: CounselorView; label: string; icon: typeof LayoutGrid }[] {
+  const { version } = useCounselorVersion();
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  if (version !== "v2") return NAV_ITEMS;
+  return menuForRole(account.role).map((item) => ({ view: item.view, label: item.label ?? VIEW_TITLES[item.view].title, icon: VIEW_ICONS[item.view] }));
+}
+
 function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?: () => void }) {
+  const items = useNavItems();
   return (
     <nav aria-label="Counselor Dashboard" className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-[var(--space-3)] py-[var(--space-4)]">
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         const on = item.view === active;
         const Icon = item.icon;
         return (

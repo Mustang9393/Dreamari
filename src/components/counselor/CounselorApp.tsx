@@ -2,9 +2,11 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { CounselorShell, type CounselorView, VIEW_TITLES } from "./shell";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, type CounselorRole } from "@/lib/counselorAccount";
+import { CounselorShell, type CounselorView } from "./shell";
+import { ALL_VIEWS, REFERENCE_VIEWS, roleHasView } from "./roles";
 import { CounselorVersionProvider, useCounselorVersion } from "./version";
+import { ComingSoon } from "./v2/ComingSoon";
 import { Overview } from "./Overview";
 import { StudentsRoster } from "./StudentsRoster";
 import { StudentProfileView } from "./StudentProfile";
@@ -30,7 +32,6 @@ import { PlatformEngagement as PlatformEngagementV2 } from "./v2/PlatformEngagem
 import { MyImpact as MyImpactV2 } from "./v2/MyImpact";
 import { Settings as SettingsV2 } from "./v2/Settings";
 
-const VALID_VIEWS = Object.keys(VIEW_TITLES) as CounselorView[];
 
 // DEMO-ONLY: v1 and v2 are separate forks (see ./version.tsx) picked here
 // per view, so the bottom-center chip swaps the whole screen, never
@@ -50,8 +51,17 @@ function ViewFor({ view, initialStudentId }: { view: CounselorView; initialStude
       case "engagement": return <PlatformEngagementV2 />;
       case "impact": return <MyImpactV2 />;
       case "settings": return <SettingsV2 />;
+      // Role-shell views (roles.ts), placeholders until each gets its pass.
+      case "counselors":
+      case "readiness":
+      case "reports":
+      case "schools":
+      case "school-impact":
+        return <ComingSoon view={view} />;
     }
   }
+  // v1 never reaches a role-shell view: RoutedView redirects them to
+  // Overview before this renders.
   switch (view) {
     case "overview": return <Overview />;
     case "students": return initialStudentId ? <StudentProfileView studentId={initialStudentId} /> : <StudentsRoster />;
@@ -64,14 +74,38 @@ function ViewFor({ view, initialStudentId }: { view: CounselorView; initialStude
     case "engagement": return <PlatformEngagement />;
     case "impact": return <MyImpact />;
     case "settings": return <Settings />;
+    default: return <Overview />;
   }
+}
+
+// Which views this build and role may open. v1: the reference's 11, for
+// every role. v2: the role's own menu (roles.ts). Anything else, including
+// a stale link to a screen the role does not have, lands on Overview, which
+// every role has. Waits for the version to be read after mount (see
+// version.tsx's `ready`) so a v2-only link is not bounced on the
+// pre-hydration v1 placeholder.
+function RoutedView({ requestedView, initialStudentId, role }: { requestedView: string | undefined; initialStudentId?: string; role: CounselorRole | "" }) {
+  const router = useRouter();
+  const { version, ready } = useCounselorVersion();
+  const known = ALL_VIEWS.includes(requestedView as CounselorView) ? (requestedView as CounselorView) : "overview";
+  const allowed = version === "v2" ? roleHasView(role, known) : REFERENCE_VIEWS.includes(known);
+  const view: CounselorView = allowed ? known : "overview";
+
+  useEffect(() => {
+    if (ready && !allowed) router.replace("/counselor?view=overview");
+  }, [ready, allowed, router]);
+
+  if (!ready) return null;
+  return (
+    <CounselorShell active={view} showTitle={!(view === "students" && initialStudentId)}>
+      <ViewFor view={view} initialStudentId={view === "students" ? initialStudentId : undefined} />
+    </CounselorShell>
+  );
 }
 
 export function CounselorApp({ initialView, initialStudentId }: { initialView?: string; initialStudentId?: string }) {
   const router = useRouter();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const view: CounselorView = VALID_VIEWS.includes(initialView as CounselorView) ? (initialView as CounselorView) : "overview";
-
   // The server snapshot (and the client's very first, pre-hydration render,
   // which must match it) has no access to localStorage and always reads
   // signed-out -- redirecting on that render would bounce a genuinely
@@ -92,9 +126,7 @@ export function CounselorApp({ initialView, initialStudentId }: { initialView?: 
 
   return (
     <CounselorVersionProvider>
-      <CounselorShell active={view} showTitle={!(view === "students" && initialStudentId)}>
-        <ViewFor view={view} initialStudentId={initialStudentId} />
-      </CounselorShell>
+      <RoutedView requestedView={initialView} initialStudentId={initialStudentId} role={account.role} />
     </CounselorVersionProvider>
   );
 }

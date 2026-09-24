@@ -67,6 +67,69 @@ left in place as the record of why v2 made each change.
 
 ---
 
+## Role shell (v2)
+
+- **The left menu is decided by the role in Settings, 24 Sept 2026.** The
+  reference has one persona (a school counselor) and one fixed 11-item menu;
+  Dreamari sells the dashboard to four (Settings' role dropdown: School
+  Counselor, Lead Counselor, School Administrator, District Administrator),
+  and a district administrator has no Review Queue to work and no caseload
+  to "Connect" with. The four menus live in one file
+  (`src/components/counselor/roles.ts`) and are PROPOSED, built as proposed
+  so they can be reviewed live, pending Joshua's sign-off:
+  - School Counselor: Overview, Students, Milestone Tracker, Review Queue,
+    Student Progress, Counselor Connect, Career + College Insights,
+    Productivity Suite, My Impact, Settings.
+  - Lead Counselor: the above plus Counselors (after Overview), with My
+    Impact becoming School Impact.
+  - School Administrator: Overview, Readiness, Students, Counselors,
+    Platform Engagement, Reports, Settings.
+  - District Administrator: Overview, Schools, Readiness, Engagement,
+    Reports, Settings.
+  Why one file: the menus will move after review, and a per-screen or
+  per-shell hard-coding would mean touching several files per change.
+  Alternative considered: a permissions matrix (view x capability) with the
+  menu derived from it. Richer, but Settings' own "Role Permissions" card
+  is prose, not data, and a matrix invents structure nobody has asked for
+  yet; an ordered list per role is the smallest thing that can be
+  reviewed and changed in one edit.
+- **A screen the role does not have is absent, not greyed or locked.** A
+  locked item advertises something the user can buy or unlock; an
+  administrator is never going to review a resume, so a locked Review
+  Queue would be a permanent dead control. Alternative: greyed with a
+  tooltip explaining why. Rejected for the same reason: it costs a menu
+  row on every visit to explain a screen that is not for this person.
+- **A view the role does not have redirects to that role's Overview.**
+  `CounselorApp` checks the requested view against the role's menu (on v2)
+  or the reference's 11 (on v1) and replaces the URL with Overview, which
+  every role has. A stale bookmark or a role change while on a screen the
+  new role lacks lands somewhere useful. Alternative: render a "not
+  available for your role" page. That page would exist only to be left;
+  Overview is where the person would go next anyway. The check waits for
+  the version to be read after mount (`version.tsx`'s `ready`), because the
+  pre-hydration render always says v1, and bouncing a v2-only link on that
+  placeholder would make every direct link to Counselors or Schools land
+  on Overview.
+- **Platform Engagement leaves the School Counselor's menu.** It is a
+  school-wide login/activity view (its own subtitle is "Login & activity
+  tracking · Lincoln High School"), an administrator's question, not a
+  caseload counselor's. It stays for School Administrator and, as
+  "Engagement", for District Administrator. Alternative: keep all 11 for
+  the counselor for fidelity. The whole point of the role shell is that
+  each role sees its own work; a counselor menu identical to v1 would show
+  nothing had changed.
+- **New screens start as honest "Coming soon" placeholders** (Counselors,
+  Readiness, Reports, Schools, School Impact; `v2/ComingSoon.tsx`), per the
+  playbook's tier 1 + tier 6 default: a bordered card, "Coming soon" tag,
+  a bold line, the screen's own subtitle stating what it will answer, one
+  CTA back to Overview. The menu item is real so the four shells can be
+  reviewed whole; the copy says the screen is not. Alternative: hide the
+  items until each screen is built. Then the menus under review would not
+  be the menus being proposed.
+- **v1 is untouched.** The role-driven menu and the redirect apply on v2
+  only; v1 shows the reference's 11 items for every role, and a v1 link to
+  a v2-only view goes to Overview.
+
 ## Overview
 
 - **Top row restructured from 3 equal cards to an asymmetric hero layout**

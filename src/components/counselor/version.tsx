@@ -22,8 +22,14 @@ export type CounselorVersion = "v1" | "v2";
 
 const STORAGE_KEY = "dreamari:counselor-version";
 
-const CounselorVersionContext = createContext<{ version: CounselorVersion; setVersion: (v: CounselorVersion) => void }>({
+// `ready` flips once the real value has been read after mount. Anything
+// that would redirect based on the version (CounselorApp's role-gated view
+// check) waits for it: the pre-hydration render always says v1, and a
+// v2-only view opened by URL must not be bounced to Overview on that
+// placeholder value.
+const CounselorVersionContext = createContext<{ version: CounselorVersion; ready: boolean; setVersion: (v: CounselorVersion) => void }>({
   version: "v1",
+  ready: false,
   setVersion: () => {},
 });
 
@@ -52,12 +58,14 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
   // client-only), then the real value is read once after mount -- same
   // hydration-safe shape CounselorApp uses for its own signed-in gate.
   const [version, setVersionState] = useState<CounselorVersion>("v1");
+  const [ready, setReady] = useState(false);
   useEffect(() => {
     const param = new URLSearchParams(window.location.search).get("v");
     const fromUrl: CounselorVersion | null = param === "2" ? "v2" : param === "1" ? "v1" : null;
     const next = fromUrl ?? readStored() ?? "v1";
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);
+    setReady(true);
     if (fromUrl) {
       try {
         window.localStorage.setItem(STORAGE_KEY, fromUrl);
@@ -77,7 +85,7 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
     syncUrl(v);
   };
 
-  return <CounselorVersionContext.Provider value={{ version, setVersion }}>{children}</CounselorVersionContext.Provider>;
+  return <CounselorVersionContext.Provider value={{ version, ready, setVersion }}>{children}</CounselorVersionContext.Provider>;
 }
 
 // The chip itself. Fixed, bottom-center, out of the way of every real

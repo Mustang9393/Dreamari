@@ -38,6 +38,18 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Counselor Dashboard v2: role-based shell (step 1 of the role work)
+
+Direct instruction (this session's brief): the left menu changes with the role set in Settings; hidden screens disappear rather than grey out; a view a role does not have redirects to that role's Overview; v1's nav stays the reference's 11 items; the four menus are Joshua's to sign off, so build them as proposed and keep them easy to change in one place; new screens may start as honest "Coming soon" placeholders.
+
+**What landed.** `src/components/counselor/roles.ts` is the one place the four menus live (ordered view lists per role, optional per-role label such as District's "Engagement"), plus `roleHasView` and the `CounselorView` union, which now includes the five role-shell views (counselors, readiness, reports, schools, school-impact). `shell.tsx` builds its nav from `menuForRole(account.role)` when the version chip is on v2 and from the reference's fixed list on v1; titles, subtitles and icons for the new views sit in its `VIEW_TITLES` / `VIEW_ICONS`. `CounselorApp.tsx` gained `RoutedView`, which resolves the requested `?view=` against the role's menu (v2) or the reference's 11 (v1) and `router.replace`s to Overview when it is not allowed. `version.tsx` exposes `ready` so that check never runs on the pre-hydration v1 placeholder. `v2/ComingSoon.tsx` is the playbook-default placeholder (tier 1 + tier 6) the five new views render until their own pass.
+
+**Why this shape, against the alternatives:** in `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md`, "Role shell (v2)" (one file over a permissions matrix, absent over locked, redirect over a "not for your role" page, Platform Engagement moved to the admin menus, placeholders over hidden items).
+
+**Verified live** (fresh tab, `preview_start` dreamari-dev, 1440 then phone): School Counselor v2 shows 10 items with Platform Engagement gone; changing the role to Lead Counselor in Settings and saving re-renders the sidebar in place (Counselors after Overview, School Impact replacing My Impact); Counselors opens the placeholder under its own title; School Administrator and District Administrator menus match the proposal; a District Administrator opening `?view=review-queue` lands on `?view=overview`; v1 with the District role still shows all 11 reference items and the reference Overview; the phone drawer shows the role menu. No console errors. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+**Next:** step 2, Overview per role (School Counselor first, already the improved v2 Overview; then Lead Counselor, School Administrator, District Administrator with 3 to 5 seeded sibling schools), then screen by screen in the order Joshua asks for.
+
 ### 2026-09-24 Counselor Dashboard v1: content matched to the reference 1:1, screen by screen at 1440
 
 Direct instruction after the structural reset below: "make sure the contents of cards etc match the replit 1:1 in v1. For example the overview cards don't. Always compare 1:1 visually, and on desktop screen size first." Compared every v1 screen against the live reference (web-app-prototype-maishak.replit.app) at 1440px, text and screenshots.
