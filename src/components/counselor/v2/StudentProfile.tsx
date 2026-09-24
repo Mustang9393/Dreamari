@@ -2,7 +2,13 @@
 
 // DEMO-ONLY v2 fork of ../StudentProfile.tsx (24 Sept 2026). v1 stays untouched so the
 // two builds can be compared live via the bottom-center version chip
-// (../version.tsx). Changes from the 24 Sept audit land here.
+// (../version.tsx).
+//
+// 25 Sept 2026 pass under the v2 budget: the identity card leads with what
+// needs the counselor (a "Needs you" line built from the student's own
+// milestones), the milestone grid is grade-scoped and ordered attention
+// first, dates read "Jan 8", no "You" badge (this is the counselor's view,
+// not the student's), plain notes copy.
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -12,7 +18,7 @@ import {
 } from "lucide-react";
 import { MetricTile, Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { MILESTONE_KEYS, type MilestoneKey } from "@/lib/counselorRoster";
+import { MILESTONE_KEYS, milestonesForGrade, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
 import { readNotes, addNote } from "@/lib/counselorNotes";
 import { StatusChip, MilestoneChip, Avatar } from "../chips";
@@ -39,10 +45,30 @@ const PLAN_TASK_NAMES: Partial<Record<MilestoneKey, string>> = {
 
 type PlanBucket = "3mo" | "6mo" | "12mo";
 const PLAN_TABS: { key: PlanBucket; label: string }[] = [
-  { key: "3mo", label: "Next 3 Months" },
-  { key: "6mo", label: "Next 6 Months" },
-  { key: "12mo", label: "Next 12 Months" },
+  { key: "3mo", label: "3 months" },
+  { key: "6mo", label: "6 months" },
+  { key: "12mo", label: "12 months" },
 ];
+
+function fmtDate(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+// Attention first: what needs the counselor, then what the student owes,
+// then what is moving, then what is done.
+const STATE_RANK: Record<MilestoneStatus, number> = { Overdue: 0, "Changes Requested": 1, "Pending Review": 2, "Not Started": 3, "In Progress": 4, Approved: 5, Completed: 5, "Not Applicable": 6 };
+
+/** What this student needs from the counselor, from their own milestones. */
+function needsYou(m: Record<MilestoneKey, MilestoneStatus>, keys: MilestoneKey[]): string[] {
+  const out: string[] = [];
+  for (const k of keys) {
+    if (m[k] === "Pending Review") out.push(`Review ${k}`);
+    else if (m[k] === "Overdue") out.push(`${k} overdue`);
+    else if (m[k] === "Changes Requested") out.push(`${k} awaiting resubmission`);
+  }
+  return out;
+}
 
 function seededOffset(seed: string, min: number, max: number): number {
   let h = 2166136261;
@@ -115,29 +141,32 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
     window.setTimeout(() => setToast(null), 2200);
   };
 
-  const approvedCount = MILESTONE_KEYS.filter((k) => student.milestones[k] === "Approved").length;
+  const gradeKeys = milestonesForGrade(student.grade);
+  const orderedKeys = [...gradeKeys].sort((a, b) => STATE_RANK[student.milestones[a]] - STATE_RANK[student.milestones[b]]);
+  const approvedCount = gradeKeys.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed").length;
+  const actions = needsYou(student.milestones, gradeKeys);
 
   const engagement = [
-    { icon: Sparkles, value: String(student.engagement.dreamScore), label: "Dream Score", accent: "#7C5CFA" },
-    { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops Completed", accent: "#F5A623" },
-    { icon: Gamepad2, value: String(student.engagement.simulations), label: "Career Simulations", accent: "#5B6CF9" },
-    { icon: Bookmark, value: String(student.engagement.careersSaved), label: "Careers Saved", accent: "#33C78C" },
-    { icon: Landmark, value: String(student.engagement.collegesSaved), label: "Colleges Saved", accent: "#4AB8D8" },
-    { icon: Trophy, value: String(student.engagement.challenges), label: "Career Challenges", accent: "#EC5FA6" },
-    { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions Submitted", accent: "#8FE3D9" },
-    { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community Posts", accent: "#F5A623" },
+    { icon: Sparkles, value: String(student.engagement.dreamScore), label: "Dream Score", accent: "#5B6CF9" },
+    { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops", accent: "#5B6CF9" },
+    { icon: Gamepad2, value: String(student.engagement.simulations), label: "Simulations", accent: "#5B6CF9" },
+    { icon: Bookmark, value: String(student.engagement.careersSaved), label: "Careers Saved", accent: "#5B6CF9" },
+    { icon: Landmark, value: String(student.engagement.collegesSaved), label: "Colleges Saved", accent: "#5B6CF9" },
+    { icon: Trophy, value: String(student.engagement.challenges), label: "Challenges", accent: "#5B6CF9" },
+    { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions asked", accent: "#5B6CF9" },
+    { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community Posts", accent: "#5B6CF9" },
   ];
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={() => router.push("/counselor?view=students")} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
-          <ChevronLeft className="h-4 w-4" aria-hidden /> Back to Students
+          <ChevronLeft className="h-4 w-4" aria-hidden /> Students
         </button>
         <div className="flex flex-wrap items-center gap-[8px]">
-          <ActionButton icon={Bell} label="Send Reminder" onClick={() => flash(`Reminder sent to ${student.name}.`)} />
-          <ActionButton icon={MessageSquare} label="Message Student" onClick={() => flash(`Message thread opened with ${student.name}.`)} />
-          <ActionButton icon={StickyNote} label="Add Note" onClick={() => document.getElementById("counselor-note-input")?.focus()} />
+          <ActionButton icon={Bell} label="Remind" onClick={() => flash(`Reminder sent to ${student.name}.`)} />
+          <ActionButton icon={MessageSquare} label="Message" onClick={() => flash(`Message thread opened with ${student.name}.`)} />
+          <ActionButton icon={StickyNote} label="Note" onClick={() => document.getElementById("counselor-note-input")?.focus()} />
         </div>
       </div>
 
@@ -147,32 +176,36 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[340px_1fr]">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[340px_minmax(0,1fr)]">
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <div className="flex items-start gap-[14px]">
-              <Avatar name={student.name} size={56} />
+              <Avatar name={student.name} size={56} index={student.avatarIndex} />
               <div className="flex min-w-0 flex-col gap-[2px]">
-                <span className="flex items-center gap-[8px] text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                  {student.name}
-                  {student.isReal && <span className="rounded-full px-[8px] py-[2px] text-[10.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--primary)" }}>You</span>}
-                </span>
-                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.school}</span>
-                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Last active: {student.lastActive}</span>
+                <span className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</span>
+                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack} · active {fmtDate(student.lastActive)}</span>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-[8px]">
-              <StatusChip status={student.status} />
-              <span className="rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{student.careerTrack}</span>
-            </div>
-            <div className="flex flex-col gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="flex"><StatusChip status={student.status} /></span>
+            {/* The one thing to read first: what this student needs from the
+               counselor, derived from their own milestones. */}
+            {actions.length > 0 && (
+              <ul className="flex flex-col gap-[4px]">
+                {actions.map((a) => (
+                  <li key={a} className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: a.startsWith("Review") ? "var(--primary)" : "#E0453C", boxShadow: `0 0 6px ${a.startsWith("Review") ? "var(--primary)" : "#E0453C"}` }} />{a}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-auto flex flex-col gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
               <span className="flex items-center gap-[10px] text-[13px]" style={{ color: "var(--foreground)" }}>
                 <GraduationCap className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-                Postsecondary intention: <b>{student.postsecondaryIntent}</b>
+                {student.postsecondaryIntent === "Undecided" ? "No postsecondary plan yet" : student.postsecondaryIntent}
               </span>
               <span className="flex items-center gap-[10px] text-[13px]" style={{ color: "var(--foreground)" }}>
                 <Compass className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-                Roadmap progress: <b>{student.roadmapPct}%</b>
+                Roadmap {student.roadmapPct}% · {approvedCount} of {gradeKeys.length} milestones approved
               </span>
             </div>
           </div>
@@ -180,7 +213,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <CardHead icon={Target} title="Top 5 Career Matches" accent="#7C5CFA" />
+            <CardHead icon={Target} title="Top 5 Career Matches" accent="#5B6CF9" />
             <div className="flex flex-col gap-[10px]">
               {student.topMatches.map((m, i) => (
                 <div key={m.title} className="flex items-center gap-[12px]">
@@ -190,8 +223,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                       <span style={{ color: "var(--foreground)" }}>{m.title}</span>
                       <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>{m.pct}%</span>
                     </span>
-                    <span className="relative block h-[6px] overflow-hidden rounded-[3px]" style={{ background: "rgba(255,255,255,0.12)" }}>
-                      <span className="absolute inset-y-0 left-0 rounded-[3px]" style={{ width: `${m.pct}%`, background: "var(--primary)" }} />
+                    <span className="relative block h-[6px] overflow-hidden rounded-[3px]" style={{ background: "var(--inset-border)" }}>
+                      <span className="absolute inset-y-0 left-0 rounded-[3px]" style={{ width: `${m.pct}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 35%, transparent), var(--primary))" }} />
                     </span>
                   </span>
                 </div>
@@ -205,11 +238,11 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex flex-wrap items-center justify-between gap-[8px]">
-            <CardHead icon={Target} title="Milestone Status" accent="#33C78C" />
-            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{approvedCount} of {MILESTONE_KEYS.length} milestones approved</span>
+            <CardHead icon={Target} title="Milestones" accent="#5B6CF9" />
+            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{gradeKeys.length} required in Grade {student.grade} · {approvedCount} approved</span>
           </span>
           <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-3">
-            {MILESTONE_KEYS.map((key) => (
+            {orderedKeys.map((key) => (
               <span key={key} className="flex items-center justify-between rounded-[var(--radius-md)] border px-[14px] py-[10px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                 <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{key}</span>
                 <MilestoneChip status={student.milestones[key]} />
@@ -223,7 +256,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <span className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-              <CardHead icon={Sunrise} title="Plan Progress" accent="#F5A623" />
+              <CardHead icon={Sunrise} title="Plan" accent="#5B6CF9" />
               <Segmented ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
             </span>
             {(() => {
@@ -249,7 +282,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                       </span>
                       <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
                         <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.label}</span>
-                        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Due: {t.due}</span>
+                        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Due {fmtDate(t.due)}</span>
                       </span>
                       <MilestoneChip status={t.status} />
                     </li>
@@ -263,7 +296,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <CardHead icon={Sparkles} title="Platform Engagement" accent="#7C5CFA" />
+          <CardHead icon={Sparkles} title="On Dreamari" accent="#5B6CF9" />
           <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
             {engagement.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} accent={e.accent} />)}
           </div>
@@ -271,13 +304,13 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       </HoverBeam>
 
       <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <CardHead icon={StickyNote} title="Counselor Notes" accent="#EC5FA6" />
+        <CardHead icon={StickyNote} title="Notes" accent="#5B6CF9" />
         <div className="flex flex-col gap-[8px]">
           <textarea
             id="counselor-note-input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Add a note about this student..."
+            placeholder="A note about this student"
             rows={2}
             className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
@@ -291,11 +324,11 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             }}
             className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 w-fit cursor-pointer items-center justify-center self-end rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {notes.length === 0 ? "Add First Note" : "Add Note"}
+            Add note
           </button>
         </div>
         {notes.length === 0 ? (
-          <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>No notes have been added for this student yet.</p>
+          <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>No notes yet.</p>
         ) : (
           <ul className="flex flex-col gap-[8px]">
             {notes.map((n) => (

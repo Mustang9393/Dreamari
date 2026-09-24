@@ -4,12 +4,26 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
+// 25 Sept 2026 pass under the v2 budget: the five tools are a row of tabs
+// (the side list spent a 300px column on five names, the same problem
+// Student Progress had), the "you are always in control" banner and the
+// repeated helper paragraph are one muted line under the button, the
+// pickers are the app's Listbox and the student picker lists the whole
+// roster. Draft copy is the reference's.
+
 import { useState } from "react";
-import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, ShieldCheck, Sparkles } from "lucide-react";
+import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles } from "lucide-react";
+import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-
+import { useRouter } from "next/navigation";
+import { Copy, Download, Save, PenLine } from "lucide-react";
+import { MILESTONE_KEYS, attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
+import { addNote } from "@/lib/counselorNotes";
+import { Avatar, StatusChip } from "../chips";
+import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
+import { ScrollChips } from "../chips";
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention";
 
@@ -23,20 +37,32 @@ const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignatur
 
 const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
 
-function buildDraft(toolId: ToolId, studentName: string, extra: string): string {
+// Drafts are built from the student's own roster data (milestones,
+// matches, plan), not a canned paragraph, so two students never get the
+// same letter. A backend replaces this with a model call; the shape (a
+// text the counselor edits, copies, downloads or saves to notes) stays.
+function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra: string): string {
+  const name = student?.name ?? "your student";
+  const first = name.split(" ")[0];
+  const top = student?.topMatches[0]?.title ?? "their chosen pathway";
+  const approved = student ? MILESTONE_KEYS.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed") : [];
+  const open = student ? MILESTONE_KEYS.filter((k) => ["Not Started", "Overdue", "Changes Requested", "In Progress", "Pending Review"].includes(student.milestones[k])).slice(0, 3) : [];
   switch (toolId) {
     case "recommendation-letter":
-      return `To the Admissions Committee,\n\nIt is my privilege to recommend ${studentName} for ${extra || "this opportunity"}. Over the course of our work together, I've watched ${studentName.split(" ")[0]} take real ownership of their own path — completing every milestone on their plan, engaging thoughtfully with career exploration, and building a resume that reflects genuine initiative.\n\n[Draft continues — review, personalize with specific examples, and edit before sending.]`;
+      return `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"},\n\nIt is my privilege to recommend ${name} for ${extra ? `this ${extra.toLowerCase()} opportunity` : "this opportunity"}. ${first} is a Grade ${student?.grade ?? ""} student on the ${student?.careerTrack ?? "career"} pathway whose top career match is ${top}. ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required milestones this year${approved.length ? `, including ${approved.slice(0, 2).join(" and ")}` : ""}, and is working toward ${student?.postsecondaryIntent === "Undecided" || !student ? "a postsecondary plan" : student.postsecondaryIntent}.\n\n[Add one specific example, then sign.]`;
     case "student-brief":
-      return `Meeting Brief — ${studentName}\n\nCurrent status: on pace, milestones largely on track.\nRecent activity: engaged with career exploration and saved matches this month.\nOpen items: review any pending milestones together and confirm next steps.\nSuggested talking points: celebrate recent progress, confirm postsecondary intention, set one concrete next action before the next check-in.`;
+      return `Meeting brief: ${name}\n\nStatus: ${student?.status ?? "unknown"} · roadmap ${student?.roadmapPct ?? 0}% · ${approved.length} of ${student?.milestoneCount ?? 11} milestones done.\nPathway: ${student?.careerTrack ?? "undeclared"} · top match ${top}.\nOpen items: ${open.length ? open.join(", ") : "none"}.\nTalking points: what went well, the one milestone to finish next, confirm the postsecondary plan (${student?.postsecondaryIntent ?? "not set"}).`;
     case "parent-brief":
-      return `Family Conference Notes — ${studentName}\n\n${studentName.split(" ")[0]} is actively working through their postsecondary plan. In plain terms: they've explored several career paths, saved a shortlist of strong matches, and are making steady progress on their academic and career milestones.\n\nSuggested talking points: what's going well, what needs a decision soon, and how the family can support the next step.`;
+      return `Family conference: ${name}\n\n${first} is a Grade ${student?.grade ?? ""} student exploring ${student?.careerTrack ?? "careers"}, with ${top} as a top match. Progress this year: ${approved.length} of ${student?.milestoneCount ?? 11} required milestones complete.\nWhat is next: ${open.length ? open.join(", ") : "keeping pace"}.\nHow the family can help: a regular time each week for ${first} to work on the plan, and a conversation about ${student?.postsecondaryIntent === "Undecided" || !student ? "postsecondary options" : student.postsecondaryIntent}.`;
     case "success-plan":
-      return `Success Plan — ${studentName}\n\nGoal: get back on pace over the next 4–6 weeks.\nNext milestones: complete the next 2 outstanding items on their plan.\nCheck-in cadence: weekly, 10 minutes, focused on one action item at a time.\nSupport: connect to relevant resources (tutoring, application help, financial aid guidance) as needed.`;
+      return `Success plan: ${name}\n\nGoal: back on pace in 4 to 6 weeks.\nFinish first: ${open[0] ?? "the next milestone"}.\nThen: ${open.slice(1).join(", ") || "review the roadmap"}.\nCheck-in: weekly, 10 minutes, one action each time.\nSupport: ${student?.careerTrack ?? "pathway"} resources on Dreamari, and financial aid guidance if applicable.`;
     case "attention":
-      return `Prioritized list generated from your current caseload — students sorted by overdue milestones, approaching deadlines, and drop in recent activity. Review the list, then use Student Meeting Brief for anyone you want to follow up with directly.`;
+      return "";
   }
 }
+
+const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
+const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 
 export function ProductivitySuite() {
   const roster = useReviewedRoster();
@@ -44,101 +70,116 @@ export function ProductivitySuite() {
   const [studentId, setStudentId] = useState("");
   const [letterType, setLetterType] = useState("");
   const [draft, setDraft] = useState<string | null>(null);
+  const [savedTo, setSavedTo] = useState<string | null>(null);
+  const router = useRouter();
   const tool = TOOLS.find((t) => t.id === toolId)!;
+  const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
+  const student = roster.find((s) => s.id === studentId);
+  // The attention tool is a real list, not a paragraph: the roster ranked
+  // the same way the Overview ranks it, each row opening the profile.
+  const attention = [...roster].filter((s) => s.status !== "On Track").sort(attentionRank).slice(0, 10);
 
   const generate = () => {
-    const student = roster.find((s) => s.id === studentId);
-    setDraft(buildDraft(toolId, student?.name ?? "your student", letterType));
+    setSavedTo(null);
+    setDraft(buildDraft(toolId, student, letterType));
+  };
+  // A blank start with only the headings, for a counselor who would rather
+  // write than edit a generated draft (direct instruction, 25 Sept 2026:
+  // "make sure a manual option exists everywhere we have AI generated
+  // things"). Same editor, same Copy / Download / Save to notes.
+  const writeOwn = () => {
+    setSavedTo(null);
+    const name = student?.name ?? "";
+    const skeleton: Record<ToolId, string> = {
+      "recommendation-letter": `To whom it may concern,\n\n${name ? `I am writing to recommend ${name}` : "I am writing to recommend "}${letterType ? ` for a ${letterType.toLowerCase()} opportunity` : ""}.\n\n\n\nSincerely,\n`,
+      "student-brief": `Meeting brief${name ? `: ${name}` : ""}\n\nStatus:\nRecent activity:\nOpen items:\nTalking points:\n`,
+      "parent-brief": `Family conference${name ? `: ${name}` : ""}\n\nProgress this year:\nWhat is next:\nHow the family can help:\n`,
+      "success-plan": `Success plan${name ? `: ${name}` : ""}\n\nGoal:\nFinish first:\nThen:\nCheck-in:\nSupport:\n`,
+      attention: "",
+    };
+    setDraft(skeleton[toolId]);
+  };
+  const download = () => {
+    if (!draft) return;
+    const url = URL.createObjectURL(new Blob([draft], { type: "text/plain" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${toolId}-${(student?.name ?? "draft").toLowerCase().replace(/\s+/g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="flex items-start gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 10%, var(--card))" }}>
-        <ShieldCheck className="mt-[2px] h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />
-        <p className="text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>
-          <b>You are always in control.</b> Every document generated here is a draft — designed to save you time, not replace your judgment. Review, edit, and approve every document before sharing or acting on it.
-        </p>
-      </div>
+      <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={TOOLS.map((t) => ({ key: t.id, label: t.label }))} />
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[300px_1fr]">
-        <div className="flex flex-col gap-[6px]">
-          <span className="px-[4px] text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Choose a Tool</span>
-          {TOOLS.map((t) => {
-            const Icon = t.icon;
-            const on = t.id === toolId;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => { setToolId(t.id); setDraft(null); }}
-                className="dm-quiet flex cursor-pointer items-start gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-left"
-                style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent" }}
-              >
-                <Icon className="mt-[1px] h-[15px] w-[15px] flex-none" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
-                <span className="flex flex-col gap-[1px]">
-                  <span className="text-[13px] font-bold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{t.label}</span>
-                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.sub}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <HoverBeam strength={0.6} className="h-full">
-          <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <span className="flex items-center gap-[10px]">
-              <span className="flex size-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
-                <tool.icon className="h-[15px] w-[15px]" aria-hidden />
-              </span>
-              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{tool.label}</h2>
-            </span>
-            <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{tool.desc}</p>
-
-            {toolId !== "attention" && (
-              <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Configure &amp; Generate</span>
-                <label className="flex flex-col gap-[4px]">
-                  <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>Select Student</span>
-                  <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className="h-10 cursor-pointer rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                    <option value="" style={{ color: "#000" }}>Choose a student...</option>
-                    {roster.slice(0, 30).map((s) => <option key={s.id} value={s.id} style={{ color: "#000" }}>{s.name} (Grade {s.grade})</option>)}
-                  </select>
-                </label>
-                {toolId === "recommendation-letter" && (
-                  <label className="flex flex-col gap-[4px]">
-                    <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>Letter Type</span>
-                    <select value={letterType} onChange={(e) => setLetterType(e.target.value)} className="h-10 cursor-pointer rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                      <option value="" style={{ color: "#000" }}>Select letter type...</option>
-                      {LETTER_TYPES.map((t) => <option key={t} value={t} style={{ color: "#000" }}>{t}</option>)}
-                    </select>
-                  </label>
-                )}
-                <button type="button" onClick={generate} disabled={!studentId} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
-                  <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate Draft
-                </button>
-                <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Dreamari will generate a first draft using available student data. You review, edit, and approve — your professional judgment is what matters.</p>
-              </div>
-            )}
-            {toolId === "attention" && (
-              <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Configure &amp; Generate</span>
-                <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>This tool analyzes your entire caseload automatically — no student selection needed.</p>
-                <button type="button" onClick={generate} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold">
-                  <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate Draft
-                </button>
-                <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Dreamari will generate a first draft using available student data. You review, edit, and approve — your professional judgment is what matters.</p>
-              </div>
-            )}
-
-            {draft && (
-              <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--primary)" }}>Draft</span>
-                <p className="text-[13px] leading-[20px] whitespace-pre-line" style={{ color: "var(--foreground)" }}>{draft}</p>
-              </div>
-            )}
+      <HoverBeam strength={0.6} className="h-full">
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <div className="flex flex-col gap-[4px]">
+            <h2 className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[2px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+              <span className="flex items-center gap-[8px]"><tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}</span>
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tool.sub}</span>
+            </h2>
+            <p className="max-w-[72ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{tool.desc.split(/(?<=\.)\s/)[0]}</p>
           </div>
-        </HoverBeam>
-      </div>
+
+          {toolId === "attention" ? (
+            <ul className="flex flex-col gap-[6px]">
+              {attention.map((s) => (
+                <li key={s.id}>
+                  <button type="button" onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)} className="dm-quiet flex w-full cursor-pointer flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px] text-left" style={GLASS_INSET}>
+                    <Avatar name={s.name} size={32} index={s.avatarIndex} />
+                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                      <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
+                      <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {attentionReason(s)}</span>
+                    </span>
+                    <StatusChip status={s.status} />
+                  </button>
+                </li>
+              ))}
+              {attention.length === 0 && <li className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Everyone is on track.</li>}
+            </ul>
+          ) : (
+          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:items-end lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+            {(
+              <label className="flex min-w-0 flex-col gap-[4px]">
+                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Student</span>
+                <Listbox ariaLabel="Student" value={studentId} onChange={setStudentId} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
+              </label>
+            )}
+            {toolId === "recommendation-letter" && (
+              <label className="flex min-w-0 flex-col gap-[4px]">
+                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Letter type</span>
+                <Listbox ariaLabel="Letter type" value={letterType} onChange={setLetterType} placeholder="Choose a type" options={LETTER_TYPES.map((t) => ({ value: t, label: t }))} className={FIELD} style={fieldStyle} />
+              </label>
+            )}
+            <div className="flex gap-[8px]">
+              <button type="button" onClick={generate} disabled={!studentId} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
+                <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate draft
+              </button>
+              <button type="button" onClick={writeOwn} className="dm-quiet flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                <PenLine className="h-[14px] w-[14px]" aria-hidden /> Write my own
+              </button>
+            </div>
+          </div>
+          )}
+          {toolId !== "attention" && <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Generate a first draft from the student&apos;s Dreamari data, or write your own. Either way, edit here, then copy, download or save to the student&apos;s notes.</p>}
+
+          {draft !== null && toolId !== "attention" && (
+            <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: GLASS_INSET.background }}>
+              <div className="flex flex-wrap items-center justify-between gap-[8px]">
+                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Draft{student ? ` · ${student.name}` : ""}</span>
+                <span className="flex flex-wrap gap-[6px]">
+                  <button type="button" onClick={() => { void navigator.clipboard?.writeText(draft); }} className="dm-quiet flex h-8 cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Copy className="h-[13px] w-[13px]" aria-hidden /> Copy</button>
+                  <button type="button" onClick={download} className="dm-quiet flex h-8 cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Download className="h-[13px] w-[13px]" aria-hidden /> Download</button>
+                  {student && <button type="button" onClick={() => { addNote(student.id, `${tool.label}:\n${draft}`); setSavedTo(student.name); }} className="dm-quiet flex h-8 cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Save className="h-[13px] w-[13px]" aria-hidden /> {savedTo ? "Saved to notes" : "Save to notes"}</button>}
+                </span>
+              </div>
+              <textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={9} aria-label="Draft" className="w-full resize-y rounded-[var(--radius-sm)] border px-[12px] py-[10px] text-[13px] leading-[20px] outline-none" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+            </div>
+          )}
+        </div>
+      </HoverBeam>
     </div>
   );
 }

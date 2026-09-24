@@ -224,18 +224,22 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
           <span className="rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md" style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{career.salary}</span>
         )}
       </div>
-      <IconTip label={tip} className="absolute top-2 right-2 z-[2]">
-        {hint ? (
-          /* The coachmark portals its bubble from inside this card, and React
-             bubbles the bubble's clicks through the tree, so "Next" would
-             also open the card's modal. Stop it here. */
-          <span className="contents" onClick={(e) => e.stopPropagation()}>
-            <Coachmark demoForce active={hint.active} label={hint.label} cta={hint.cta} onDismiss={hint.onDismiss} spotlight side="bottom" align="end">
-              {controlEl}
-            </Coachmark>
-          </span>
-        ) : controlEl}
-      </IconTip>
+      {hint ? (
+        /* The coachmark sits OUTSIDE the IconTip on purpose. Its bubble is a
+           portal that still belongs to this subtree in React's tree, so if
+           it lived inside the tooltip wrapper, the bubble's "Next" would
+           focus a button inside the tooltip's focus scope (tooltip shows),
+           then unmount without a blur (tooltip never hides). The same
+           subtree bubbling would also hand the click to the card's open
+           handler, so propagation stops here too. */
+        <span className="absolute top-2 right-2 z-[2]" onClick={(e) => e.stopPropagation()}>
+          <Coachmark demoForce active={hint.active} label={hint.label} cta={hint.cta} onDismiss={hint.onDismiss} spotlight side="bottom" align="end">
+            <IconTip label={tip}>{controlEl}</IconTip>
+          </Coachmark>
+        </span>
+      ) : (
+        <IconTip label={tip} className="absolute top-2 right-2 z-[2]">{controlEl}</IconTip>
+      )}
     </div>
   );
 }

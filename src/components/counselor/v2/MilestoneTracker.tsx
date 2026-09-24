@@ -1,228 +1,211 @@
 "use client";
 
-// DEMO-ONLY v2 fork of ../MilestoneTracker.tsx (24 Sept 2026). v1 stays untouched so the
-// two builds can be compared live via the bottom-center version chip
-// (../version.tsx). Changes from the 24 Sept audit land here.
+// DEMO-ONLY v2 Milestone Tracker (final shape, 25 Sept 2026).
+//
+// Goal of the screen: for one grade, which required milestone is the cohort
+// behind on, and how. Students answers "which student"; this answers
+// "which milestone".
+//
+// Data, decided for the demo (direct instruction: "do what's best for the
+// demo"): the reference's grade curriculum (src/lib/milestoneReadiness.ts,
+// seven to eight named milestones per grade with its own status
+// proportions) SCALED to the students the signed-in role actually sees in
+// that grade, so totals agree with Students and the caseload (a School
+// Counselor's Grade 9 of 9 students reads 9, not the reference's fixed 30)
+// while the curriculum stays rich. The roster's own three-per-grade
+// milestone template was tried first and made Grade 9 look like three
+// items; neither set is Dreamari's real curriculum, which is a product
+// question. Caveat: proportions are the reference's, so a Review Queue
+// approval moves Students and the Overview, not this screen.
+//
+// Shape (direct feedback: "I like the one ring and the others in bars"):
+// grade tabs and four stats; one hero card for the milestone furthest
+// behind (header row, then the ring with its breakdown directly beside it,
+// nothing repeated); one card listing every other milestone as a row with
+// a four-segment status bar. One color code for the whole screen.
 
-import { useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
-import { SegmentedRing } from "@/components/connect/viz";
+import { Listbox } from "@/components/app/Listbox";
+import { Segmented, SegmentedRing } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { GRADE_READINESS, type MilestoneCard } from "@/lib/milestoneReadiness";
-import { StatRow } from "../chips";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { CardLink, StatRow, STATUS_COLORS } from "../chips";
 import { useCounselorFilters } from "../shell";
+import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
+import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
+import { OverviewCard, Stat } from "./overviewShared";
 
-import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
+type Grade = 9 | 10 | 11 | 12;
+type StateKey = "done" | "inProgress" | "notStarted" | "needsAttention";
+type Row = { name: string; subtitle: string; total: number; counts: Record<StateKey, number>; donePct: number; behindShare: number };
 
-// "needsAttention" was colored the same red as this dashboard's "At Risk"
-// status everywhere else, while the label it actually renders is "Needs
-// Attention" -- the phrase Overview and Students both reserve for amber,
-// one tier below At Risk. Same words, different color across screens is
-// exactly the inconsistency called out earlier this pass ("be uniform and
-// consistent"); this taxonomy has no separate critical/at-risk bucket of
-// its own, so amber is the correct match for the one word it does use.
-// "critical" below is new -- a card-level severity tint, distinct from any
-// one milestone's own status color (see heroTint in MilestoneTracker).
-const STATUS_COLORS = {
-  completed: "#33C78C",
-  inProgress: "#5B6CF9",
-  needsAttention: "#F5A623",
-  // First lightened to a hand-picked #7A8296 (still only just past the
-  // 3:1 floor), then asked directly: "should the grey be brighter/more
-  // white?" Yes -- switched to this dashboard's own `--muted-foreground`
-  // token (white at 62% opacity, ~#A6A7AE composited over this card's
-  // surface, comfortably >3:1) instead of a bespoke hex: it's the exact
-  // gray every other piece of secondary text on this whole dashboard
-  // already uses, so "not started" now reads as the same neutral the eye
-  // is already calibrated to, not a third, screen-local shade of gray.
-  notStarted: "var(--muted-foreground)",
-  notApplicable: "rgba(255,255,255,0.18)",
-  critical: "#E0453C",
-} as const;
+// Done is the brand blue; in progress a lighter step of the same ramp; not
+// started the neutral slice (expected, not alarming); needs attention the
+// reserved amber, because that is exactly what the word means everywhere
+// else on the dashboard.
+const STATES: { key: StateKey; label: string; color: string }[] = [
+  { key: "done", label: "Done", color: PRIMARY },
+  { key: "inProgress", label: "In progress", color: BLUE_3[0] },
+  { key: "notStarted", label: "Not started", color: NEUTRAL_SLICE },
+  { key: "needsAttention", label: "Needs attention", color: STATUS_COLORS["Needs Attention"] },
+];
+const COLOR = Object.fromEntries(STATES.map((s) => [s.key, s.color])) as Record<StateKey, string>;
 
-// `hero` spends the same one saturated, glowing surface Overview
-// established -- the four cards used to be visually identical regardless
-// of standing, which read as "passes distinguishability but not design
-// checks" (direct feedback). The single worst-completing milestone for
-// this grade gets the hero treatment (bigger ring, a glow tinted to its
-// own severity), everything else recedes to the plain glass.
-//
-// Composition follows Overview's DonutCard so the two screens read as one
-// system: title anchored to the left edge, the ring centered as the
-// card's one headline graphic, legend rows spanning the full width so every
-// value lands in a single right-hand column, one control anchored left at
-// the bottom. Each number is said once: the ring carries "% / n of total",
-// the tinted verdict line carries the one fact the glow color encodes, the
-// legend carries the per-state breakdown. The hero alone is allowed a
-// second arrangement -- on a wide enough card (container query, so it
-// works whether the hero spans the full row or two thirds of it) the same
-// five parts spread into title+verdict+control | ring | legend, which is
-// what a full-width card needs instead of one narrow centered column with
-// dead space either side.
-function MilestoneCardView({ card, hero, tint, onViewDetails, className = "" }: { card: MilestoneCard; hero?: boolean; tint: string; onViewDetails: () => void; className?: string }) {
-  const stats: { label: string; value: number; color: string }[] = [
-    { label: "Completed", value: card.completed, color: STATUS_COLORS.completed },
-    { label: "In Progress", value: card.inProgress, color: STATUS_COLORS.inProgress },
-    { label: "Needs Attention", value: card.needsAttention, color: STATUS_COLORS.needsAttention },
-    { label: "Not Started", value: card.notStarted, color: STATUS_COLORS.notStarted },
-  ];
-  if (card.notApplicable) stats.push({ label: "Not Applicable", value: card.notApplicable, color: STATUS_COLORS.notApplicable });
-  const stuck = card.needsAttention + card.notStarted;
-  const verdictColor = stuck > 0 ? tint : STATUS_COLORS.completed;
-  const surface = hero ? { ...GLASS_CARD_HERO, borderColor: `color-mix(in srgb, ${tint} 38%, var(--glass-border))` } : GLASS_CARD;
-  const wide = hero
-    ? "@[640px]:grid-cols-[minmax(0,1fr)_auto_minmax(220px,0.7fr)] @[640px]:grid-rows-[auto_1fr_auto] @[640px]:items-center @[640px]:gap-x-[var(--space-7)] @[640px]:[grid-template-areas:'head_ring_legend'_'verdict_ring_legend'_'cta_ring_legend']"
-    : "";
+/** The reference card's proportions applied to a cohort of `n`, rounded so
+ *  the four states sum to exactly `n` (largest remainder). */
+function scale(card: MilestoneCard, n: number): Row {
+  const src: Record<StateKey, number> = { done: card.completed, inProgress: card.inProgress, notStarted: card.notStarted, needsAttention: card.needsAttention };
+  const base = Math.max(1, card.completed + card.inProgress + card.notStarted + card.needsAttention);
+  const raw = (Object.keys(src) as StateKey[]).map((k) => ({ k, exact: (src[k] / base) * n }));
+  const counts = Object.fromEntries(raw.map((r) => [r.k, Math.floor(r.exact)])) as Record<StateKey, number>;
+  let left = n - Object.values(counts).reduce((a, b) => a + b, 0);
+  for (const r of raw.slice().sort((a, b) => (b.exact - Math.floor(b.exact)) - (a.exact - Math.floor(a.exact)))) {
+    if (left <= 0) break;
+    counts[r.k]++;
+    left--;
+  }
+  return { name: card.name, subtitle: card.subtitle, total: n, counts, donePct: n ? Math.round((counts.done / n) * 100) : 0, behindShare: n ? (counts.needsAttention * 2 + counts.notStarted) / n : 0 };
+}
 
+/** "2 need attention · 3 not started": the non-zero states that need
+ *  something, in the order a counselor acts on them. */
+function outstanding(r: Row): string {
+  const parts: string[] = [];
+  if (r.counts.needsAttention) parts.push(`${r.counts.needsAttention} need${r.counts.needsAttention === 1 ? "s" : ""} attention`);
+  if (r.counts.notStarted) parts.push(`${r.counts.notStarted} not started`);
+  if (r.counts.inProgress) parts.push(`${r.counts.inProgress} in progress`);
+  return parts.length ? parts.join(" · ") : "Everyone is done";
+}
+
+function StatusBar({ r }: { r: Row }) {
   return (
-    <HoverBeam strength={0.6} className={`h-full ${className}`}>
-      <div className="@container relative h-full overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
-        {/* Every card's glow is tinted to ITS OWN severity, not just the
-           hero's -- a quiet sidekick with stuck students was showing the
-           same default green glow as a genuinely healthy one. */}
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(tint, hero ? 0.3 : 0.12) }} />
-        <div className={`relative grid h-full grid-rows-[auto_1fr_auto_auto_auto] gap-[var(--space-4)] [grid-template-areas:'head'_'ring'_'verdict'_'legend'_'cta'] ${wide}`}>
-          <div className={`flex flex-col gap-[3px] [grid-area:head] ${hero ? "@[640px]:self-start" : ""}`}>
-            <h3 className="text-[14.5px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{card.name}</h3>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{card.subtitle}</span>
-          </div>
+    <span className="flex h-[10px] w-full gap-[2px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
+      {STATES.map((s) => {
+        const n = r.counts[s.key];
+        if (!n) return null;
+        return <span key={s.key} title={`${s.label}: ${n}`} className="h-full flex-none first:rounded-l-full last:rounded-r-full" style={{ width: `${(n / Math.max(1, r.total)) * 100}%`, background: s.color }} />;
+      })}
+    </span>
+  );
+}
 
-          <div className="flex items-center justify-center self-center [grid-area:ring]">
-            <SegmentedRing
-              segments={stats.filter((s) => s.value > 0).map((s) => ({ value: s.value, color: s.color }))}
-              size={hero ? 168 : 104}
-              stroke={hero ? 18 : 12}
-            >
-              <span className="flex flex-col items-center gap-[2px]">
-                <span className={`${hero ? "text-[34px]" : "text-[24px]"} leading-[1] font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{card.pct}%</span>
-                <span className="text-[10.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{card.completed} of {card.total}</span>
-              </span>
-            </SegmentedRing>
-          </div>
-
-          {/* States in words what the card's own glow color means, since
-             the ring's biggest wedge is almost always green (direct
-             feedback: "I dont understand whats deciding the card glow").
-             This is the card's one verdict, so it's the only line under
-             the ring -- the completed count now lives inside the ring. */}
-          <span
-            className={`flex items-center justify-center gap-[7px] text-center text-[12.5px] leading-[1.3] font-bold [grid-area:verdict] ${hero ? "@[640px]:justify-start @[640px]:text-left @[640px]:text-[14px]" : ""}`}
-            style={{ color: verdictColor }}
-          >
-            <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: verdictColor }} />
-            {stuck > 0 ? `${stuck} of ${card.total} need attention or haven’t started` : "Nobody stuck, just finishing up"}
-          </span>
-
-          <div className="flex w-full flex-col gap-[4px] [grid-area:legend]">
-            {stats.map((s) => <StatRow key={s.label} {...s} />)}
-          </div>
-
-          {/* Navigates to the same grade's roster (this dashboard's
-             milestone taxonomy and the roster's were never reconciled, so
-             it can't yet filter to this exact milestone -- see
-             docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md). The label
-             says exactly that much and no more. Same pill affordance as
-             "See all" on Overview. */}
-          <button
-            type="button"
-            onClick={onViewDetails}
-            className={`dm-quiet flex w-fit cursor-pointer items-center gap-[4px] justify-self-start rounded-full border px-[12px] py-[6px] text-left text-[12.5px] font-bold [grid-area:cta] ${hero ? "@[640px]:self-end" : ""}`}
-            style={{ color: "var(--primary)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)" }}
-          >
-            See students
-            <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
-          </button>
-        </div>
-      </div>
-    </HoverBeam>
+function Legend() {
+  return (
+    <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
+      {STATES.map((s) => (
+        <span key={s.key} className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span aria-hidden className="size-[8px] rounded-full" style={{ background: s.color }} />{s.label}
+        </span>
+      ))}
+    </span>
   );
 }
 
 export function MilestoneTracker() {
   const router = useRouter();
-  const { gradeFilter, setGradeFilter } = useCounselorFilters();
-  const [tab, setTab] = useState<9 | 10 | 11 | 12>(gradeFilter === "All Grades" ? 9 : gradeFilter);
-  const grade = GRADE_READINESS[tab];
-  const goToGradeRoster = () => {
-    setGradeFilter(tab);
+  const { gradeFilter, setGradeFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
+  const [grade, setGrade] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
+  const roster = useReviewedRoster();
+  // The Lead Counselor can narrow the grade to one counselor's students;
+  // the curriculum proportions then scale to that cohort. Same control the
+  // Lead has on Students and the Review Queue.
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const showCounselor = account.role === "Lead Counselor";
+  const n = useMemo(() => roster.filter((s) => s.grade === grade && (!showCounselor || counselorFilter === "All" || counselorFor(s).id === counselorFilter)).length, [roster, grade, showCounselor, counselorFilter]);
+  const rows = useMemo(() => GRADE_READINESS[grade].cards.map((c) => scale(c, n)).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct), [grade, n]);
+  const hero = rows[0];
+  const rest = rows.slice(1);
+  const overallDone = rows.length ? Math.round(rows.reduce((a, r) => a + r.donePct, 0) / rows.length) : 0;
+  const totalAttention = rows.reduce((a, r) => a + r.counts.needsAttention, 0);
+
+  const openStudents = () => {
+    setGradeFilter(grade);
     router.push("/counselor?view=students");
   };
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div role="tablist" aria-label="Grade level" className="flex w-fit gap-[2px] rounded-[var(--radius-md)] border p-[3px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-        {([9, 10, 11, 12] as const).map((g) => (
-          <button
-            key={g}
-            type="button"
-            role="tab"
-            aria-selected={tab === g}
-            onClick={() => setTab(g)}
-            className="dm-quiet flex h-9 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold"
-            style={{ background: tab === g ? "var(--primary)" : "transparent", color: tab === g ? "#FFFFFF" : "var(--muted-foreground)" }}
-          >
-            Grade {g}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-        <div className="flex max-w-[520px] flex-col gap-[4px]">
-          <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>Grade {tab} students are required to complete {grade.cards.length} milestones</span>
-          <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Focus: {grade.focus}</span>
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
+        <div className="flex flex-wrap items-center gap-[10px]">
+          <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
+          {showCounselor && (
+            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+          )}
         </div>
-        <div className="flex items-center gap-[var(--space-6)]">
-          <span className="flex flex-col items-center">
-            <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{grade.students}</span>
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students</span>
-          </span>
-          <span className="flex flex-col items-center">
-            <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{grade.cards.length}</span>
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>milestones</span>
-          </span>
-          <span className="flex flex-col items-center">
-            <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{grade.avgDone}%</span>
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>avg. done</span>
-          </span>
+        <div className="flex gap-[var(--space-6)]">
+          <Stat value={String(n)} label="students" />
+          <Stat value={String(rows.length)} label="milestones" />
+          <Stat value={`${overallDone}%`} label="done" />
+          <Stat value={String(totalAttention)} label="need attention" color={totalAttention > 0 ? COLOR.needsAttention : undefined} />
         </div>
       </div>
 
-      {/* One hero, three sidekicks -- not four identical cards (direct
-         feedback: "passes distinguishability checks but not design
-         checks... everything needs to be re-designed").
-         Picking the hero (and tinting every card's glow) by raw `pct`
-         alone was wrong -- caught by direct feedback ("the colors dont
-         actually match the dominant progress"): `pct` is just
-         completed/total, so a card with 7 of 9 remaining students
-         actively "In Progress" and ZERO "Needs Attention" scored lower
-         than a card with real stuck students, because completion counts
-         "still working on it" and "actually stuck" as the same gap.
-         `stuckShare` below counts only needsAttention + notStarted --
-         the two states that are actually a problem -- so the hero and
-         every glow tint now track the same thing the ring's own amber/
-         gray wedges are showing, not an unrelated completion threshold. */}
-      {(() => {
-        const stuckShare = (c: MilestoneCard) => (c.needsAttention + c.notStarted) / Math.max(1, c.total);
-        const tintFor = (c: MilestoneCard) => {
-          const s = stuckShare(c);
-          return s >= 0.12 ? STATUS_COLORS.critical : s >= 0.05 ? STATUS_COLORS.needsAttention : STATUS_COLORS.completed;
-        };
-        const heroCard = grade.cards.reduce((worst, c) => (stuckShare(c) > stuckShare(worst) ? c : worst), grade.cards[0]);
-        const rest = grade.cards.filter((c) => c !== heroCard);
-        // Grade 10 has 8 milestones: a full-width hero plus 7 sidekicks in
-        // three columns strands one card alone on the last row. When the
-        // remainder would orphan, the hero gives up a column and the first
-        // sidekick sits beside it -- every row full, the hero still the
-        // biggest thing on the page.
-        const shareRow = rest.length % 3 === 1;
-        return (
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
-            <MilestoneCardView card={heroCard} hero tint={tintFor(heroCard)} onViewDetails={goToGradeRoster} className={shareRow ? "sm:col-span-2" : "sm:col-span-3"} />
-            {rest.map((card) => <MilestoneCardView key={card.name} card={card} tint={tintFor(card)} onViewDetails={goToGradeRoster} />)}
-          </div>
-        );
-      })()}
+      {n === 0 || !hero ? (
+        <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No Grade {grade} students{showCounselor && counselorFilter !== "All" ? " on this counselor's caseload" : ""}.</p>
+      ) : (
+        <>
+          {/* Hero: header row (what it is, the way in), then the ring with
+             its breakdown beside it. The ring says how far along; the rows
+             beside it say how many are in each state; nothing is said
+             twice. */}
+          <HoverBeam strength={0.7} className="h-full">
+            <div className="group relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
+              <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
+              <div className="relative flex flex-col gap-[var(--space-5)]">
+                <div className="flex flex-wrap items-start justify-between gap-[8px]">
+                  <span className="flex flex-col gap-[2px]">
+                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Focus first · {hero.subtitle}</span>
+                    <h2 className="text-[17px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{hero.name}</h2>
+                  </span>
+                  <CardLink onClick={openStudents}>Students</CardLink>
+                </div>
+                {/* The ring's glow reaches past its box, so the gap to the
+                   legend is generous; the legend column is narrow so each
+                   value sits beside its label (direct feedback, 25 Sept
+                   2026: "give it some space between the graph and the
+                   legend ... bring the values closer to their labels"). */}
+                <div className="flex flex-col items-start gap-[var(--space-5)] sm:flex-row sm:items-center sm:gap-[56px]">
+                  <SegmentedRing segments={STATES.map((s) => ({ value: hero.counts[s.key], color: s.color })).filter((s) => s.value > 0)} size={152} stroke={17}>
+                    <span className="flex flex-col items-center gap-[2px]">
+                      <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{hero.donePct}%</span>
+                      <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
+                    </span>
+                  </SegmentedRing>
+                  <div className="flex w-full max-w-[230px] flex-col gap-[6px]">
+                    {STATES.map((s) => <StatRow key={s.key} label={s.label} value={hero.counts[s.key]} color={s.color} />)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </HoverBeam>
+
+          {rest.length > 0 && (
+            <OverviewCard title="All milestones" unit="biggest opportunity first" aside={<CardLink onClick={openStudents}>Students</CardLink>}>
+              <Legend />
+              <ul className="flex flex-col gap-[8px]">
+                {rest.map((r) => (
+                  <li key={r.name}>
+                    <button type="button" onClick={openStudents} className="dm-quiet flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[14px] py-[10px] text-left" style={GLASS_INSET}>
+                      <span className="flex flex-wrap items-baseline justify-between gap-x-[10px] gap-y-[2px]">
+                        <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
+                          <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.name}</span>
+                          <span className="text-[11.5px] font-semibold" style={{ color: r.counts.needsAttention > 0 ? COLOR.needsAttention : "var(--muted-foreground)" }}>{outstanding(r)}</span>
+                        </span>
+                        <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{r.donePct}% <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span></span>
+                      </span>
+                      <StatusBar r={r} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </OverviewCard>
+          )}
+        </>
+      )}
     </div>
   );
 }

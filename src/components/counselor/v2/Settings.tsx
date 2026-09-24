@@ -7,6 +7,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { Listbox } from "@/components/app/Listbox";
 import { readCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES, type CounselorRole } from "@/lib/counselorAccount";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 
@@ -85,9 +86,7 @@ export function Settings() {
             </label>
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Role</span>
-              <select value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value as CounselorRole })} className="h-10 cursor-pointer rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()}>
-                {COUNSELOR_ROLES.map((r) => <option key={r} value={r} style={{ color: "#000" }}>{r}</option>)}
-              </select>
+              <Listbox ariaLabel="Role" value={draft.role} onChange={(v) => setDraft({ ...draft, role: v as CounselorRole })} options={COUNSELOR_ROLES.map((r) => ({ value: r, label: r }))} className="flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={fieldStyle()} />
             </label>
           </div>
           <div className="flex items-center justify-end gap-[10px]">
@@ -100,21 +99,16 @@ export function Settings() {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Role Permissions</h2>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3">
-            {PERMISSIONS.map((p) => (
-              <div key={p.role} className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: p.role === draft.role ? "var(--primary)" : "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{p.role}</span>
-                <ul className="flex flex-col gap-[4px]">
-                  {p.items.map((item) => (
-                    <li key={item} className="flex gap-[6px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
-                      <span aria-hidden style={{ color: "var(--primary)" }}>•</span>{item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          {/* Only the chosen role's permissions: the reference listed all
+             four roles' lists at once, three of which are not the reader's. */}
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>What {draft.role || "this role"} can do</h2>
+          <ul className="flex flex-col gap-[6px]">
+            {(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).map((item) => (
+              <li key={item} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
+                <span aria-hidden className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{item}
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </HoverBeam>
 
@@ -137,11 +131,11 @@ export function Settings() {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Caseload</h2>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{draft.role === "School Counselor" || draft.role === "" ? "Caseload" : draft.role === "District Administrator" ? "District" : "School"}</h2>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <div className="flex flex-col items-center gap-[2px] text-center">
               <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{roster.length}</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Assigned Students</span>
+              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Students</span>
             </div>
             <div className="flex flex-col items-center gap-[2px] text-center">
               <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{avgCompletion}%</span>

@@ -136,6 +136,18 @@ export function studentAvatarSrc(seed: string): string {
   return `/images/avatars/students/student-${String(index + 1).padStart(2, "0")}.png`;
 }
 
+/** The n-th free portrait (the illustrated set minus the pinned cast and
+ *  the old cluster), wrapping. For a seeded roster with more names than
+ *  portraits, assigning by roster position spreads repeats as far apart as
+ *  the set allows, where hashing first names put every "Aisha" on one face
+ *  (direct feedback, 25 Sept 2026: "student avatars are repeating in many
+ *  screens"). */
+const FREE_INDICES = Array.from({ length: ILLUSTRATED_COUNT }, (_, i) => i).filter((i) => !EXCLUDED_INDICES.has(i));
+export function studentAvatarByIndex(n: number): string {
+  const index = FREE_INDICES[((n % FREE_INDICES.length) + FREE_INDICES.length) % FREE_INDICES.length];
+  return `/images/avatars/students/student-${String(index + 1).padStart(2, "0")}.png`;
+}
+
 // ---- The student's own picked avatar (14 Sept 2026, direct feedback: "an
 // Instagram-style edit button next to Jordan's picture so we can switch to
 // whichever we want") -- the ONE avatar in the app a student can change.

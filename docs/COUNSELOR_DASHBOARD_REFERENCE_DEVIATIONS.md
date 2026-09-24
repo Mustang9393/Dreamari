@@ -67,8 +67,386 @@ left in place as the record of why v2 made each change.
 
 ---
 
+## v2 design rules (25 Sept 2026, apply to every v2 screen)
+
+Direct feedback that set these: "Let's lose the red glow on needs your
+attention and let's have better contrast for the nested cards everywhere.
+Let's not use so many different colors. Choose a hue and stick to that.
+Blue is best. Lose the glow from anything that isn't a hero card.
+Milestone tracker: don't tint cards. Review queue: do not tint cards."
+Then: "Lose the equalizer style graphs too, just do a blueish tinted one
+with gradient running brighter to top and more transparent towards
+bottom."
+
+- **One hue.** Every magnitude, series and category mark draws from the
+  blue ramps in `src/components/counselor/palette.ts` (3, 5 and 7 steps,
+  each validated as an ordinal ramp on the dark surface). The only other
+  colors are the three reserved status colors, and they mean state (On
+  Track, Needs Attention, At Risk; met, close, behind), never identity.
+  Replaced: seven-hue pathway bar (reused status green and amber), pink /
+  amber / purple / teal tile accents on My Impact, Platform Engagement and
+  the Student Profile, a bronze target line (now a neutral dashed line).
+  Alternative: a validated eight-hue categorical palette. Passes the
+  validator, fails the brief; a dashboard a counselor scans daily does not
+  need series identity by hue when a legend and rank order carry it.
+- **Glow is hero-only.** One card per screen carries the saturated
+  surface and glow; everything else is the plain glass. Removed: the
+  quiet per-card glows on Overview's donut and pathway cards and the
+  attention strip, Milestone Tracker's severity tints, Review Queue's
+  priority glows and tinted detail pane, the role Overviews' sidekick
+  glows. Severity now lives in one dot or one word on the card, not its
+  surface.
+- **Nested surfaces contrast.** `GLASS_INSET` (surfaces.ts) is white at
+  7% with a 14% border, up from 4% / 8%, and every nested row (attention
+  strip, role Overview rows, phone student cards) uses it.
+- **Bars are one gradient.** The shared `BarChart` gained
+  `barStyle="solid"`: one rounded bar, the series color at the top fading
+  toward the baseline, no track behind it. Every counselor v2 chart passes
+  it; Connect keeps the segmented style it was designed with. Alternative:
+  change the shared default. Connect's charts were reviewed and approved
+  in the equalizer style, so the counselor dashboard opts in instead.
+
+## Who sees which students (v2, 25 Sept 2026)
+
+- **Reversed the same day: everyone sees the whole school.** After the
+  scoping below shipped, a School Counselor's Milestone Tracker read "12
+  students" for Grade 9 against the school's 30, and the direct call was
+  "our numbers need to make sense, this is a school counsellor's dashboard
+  of a whole school". So `SCOPE_COUNSELOR_TO_CASELOAD` (counselorOrg.ts)
+  is off: every role reads the same 121 students, as the reference does,
+  and roles differ by what their screens show (the Lead's counselor
+  comparison and Counselor column, the administrators' targets and
+  schools), not by hiding students. The seeded caseload split stays as the
+  Counselor column and picker for the Lead and School Administrator, and
+  as the Lead Overview's comparison. The mechanism below is kept behind the
+  flag for when real counselor assignments exist.
+- **(Superseded) The roster is scoped by role.** Direct question: "is the lead
+  counsellor only seeing Sarah Chen's caseload? Is the number 121 supposed
+  to be the same for school counsellor and lead?" It was, and it should not
+  be. `useReviewedRoster()` (the one hook every v2 screen reads through)
+  now returns `scopeRosterForRole()`: a School Counselor sees their own
+  caseload (the seeded last-name split, matched to the account name, so
+  "Sarah Chen" carries A-H, 45 students, plus the one live demo student who
+  is always theirs); Lead Counselor and School Administrator see the whole
+  school (121). So a counselor's Overview, Students, Review Queue,
+  Progress, Settings' caseload and My Impact all read their caseload, and
+  the oversight roles' read the school, from one rule. The Lead's Overview
+  ranks all three caseloads through `useSchoolReviewedRoster()`.
+  Alternative: scope only the Students screen. Then a counselor's Overview
+  would say 121 while their roster said 45. Alternative: keep everyone on
+  121 as the reference does. The reference has one persona; with four
+  roles the same number for a counselor and their lead is a contradiction
+  the demo viewer notices first. Known limit: an account whose name is not
+  one of the three seeded counselors falls back to the A-H caseload, and
+  the Students toolbar says whose caseload is showing.
+
+## Cross-cutting, 25 Sept 2026 (late)
+
+- **A manual option beside every AI-generated thing** (direct instruction,
+  25 Sept 2026): Productivity Suite has "Write my own" next to "Generate
+  draft" (a blank with the tool's headings, same editor, same Copy /
+  Download / Save to notes; no student needed to start writing);
+  Insights' recommendations have "Add your own" (what you noticed, what to
+  do), shown as "Your note" tiles beside Dreamari's three. Nothing else in
+  v2 is generated.
+- **The (i) note also states each screen's ordering and why** ("What
+  comes first, and why"), by direct instruction: the attention strip's
+  Critical / High / Medium ranking, the roster's priority sort, the
+  tracker's focus score, the queue's due-date order, and so on.
+- **Every v2 screen has an (i) at the top right that opens the screen's
+  change note as an overlay** (`v2/changeNotes.ts`: what changed, why,
+  what makes it better), by direct instruction. First placed beside the
+  title with the note expanding under it; moved the same day ("put it in
+  the top right corner ... display as an overlay thing that can be closed
+  so it doesn't confuse the layout"): the panel now floats over the page,
+  closed by its X, the backdrop or Escape, and the layout beneath never
+  moves. The note is the short form of this file.
+- **Every screen has loading, error and whole-screen empty states**
+  (`v2/states.tsx`, previewed with `?state=`), catalogued with in-screen
+  states and edge cases in `docs/COUNSELOR_V2_STATES.md`, so the backend
+  has one contract per screen even though the demo never reaches them.
+- **Devices.** Twelve-column heroes and chart pairs go side by side only
+  from 1280px (at 1024 they were cramped and chart labels shrank);
+  master-detail panes (Review Queue, Connect) become a bottom sheet with a
+  Close bar below 1024 instead of sitting under the list; grid tracks are
+  `minmax(0,1fr)` so a long meta line can never push a pane past the right
+  edge; chip rows (`ScrollChips`) bleed into the gutter and peek instead
+  of clipping.
+- **Light mode.** Hardcoded whites became `--foreground` mixes so tracks,
+  legends and dots flip; nested rows use `--inset-bg / --inset-border /
+  --inset-shadow` (app.css) so a row is lighter than its card in both
+  modes, a white lift in dark and white with a soft shadow in light
+  (standing rule: layers get lighter with elevation, never darker); chart
+  gridlines, value labels and tooltips use tokens.
+- **Drilldowns.** Avatars and names in the review and reply panes open
+  the profile; Counselors, Impact by-counselor and by-grade rows open
+  Students with the shared counselor or grade filter; announcement cards
+  open to their recipients; groups open to their feed. Insights rows do
+  not drill down yet (no career id in the roster).
+- **Counselor Connect works end to end:** New announcement is an inline
+  composer; cards expand to read receipts and recipients; groups open to
+  a seeded feed with a composer; New group is an inline form. The
+  reference's buttons did nothing.
+- **Productivity Suite drafts are built from the student's own data**
+  (milestones, matches, plan), are editable, and can be copied,
+  downloaded or saved to the student's notes; Students Needing Attention
+  is a ranked list that opens profiles. The reference produced one
+  paragraph for every student.
+- **My Impact and School Impact rebuilt as a scorecard** (see "My Impact
+  (v2)" below): outcomes against targets as the hero, one row of activity,
+  one of engagement, grades as bars, ASCA as three short columns.
+
+## Role shell (v2)
+
+- **The left menu is decided by the role in Settings, 24 Sept 2026.** The
+  reference has one persona (a school counselor) and one fixed 11-item menu;
+  Dreamari sells the dashboard to four (Settings' role dropdown: School
+  Counselor, Lead Counselor, School Administrator, District Administrator),
+  and a district administrator has no Review Queue to work and no caseload
+  to "Connect" with. The four menus live in one file
+  (`src/components/counselor/roles.ts`) and are PROPOSED, built as proposed
+  so they can be reviewed live, pending Joshua's sign-off:
+  - School Counselor: Overview, Students, Milestone Tracker, Review Queue,
+    Student Progress, Counselor Connect, Career + College Insights,
+    Productivity Suite, My Impact, Settings.
+  - Lead Counselor: the above plus Counselors (after Overview), with My
+    Impact becoming School Impact.
+  - School Administrator: Overview, Readiness, Students, Counselors,
+    Platform Engagement, Reports, Settings.
+  - District Administrator: Overview, Schools, Readiness, Engagement,
+    Reports, Settings.
+  Why one file: the menus will move after review, and a per-screen or
+  per-shell hard-coding would mean touching several files per change.
+  Alternative considered: a permissions matrix (view x capability) with the
+  menu derived from it. Richer, but Settings' own "Role Permissions" card
+  is prose, not data, and a matrix invents structure nobody has asked for
+  yet; an ordered list per role is the smallest thing that can be
+  reviewed and changed in one edit.
+- **A screen the role does not have is absent, not greyed or locked.** A
+  locked item advertises something the user can buy or unlock; an
+  administrator is never going to review a resume, so a locked Review
+  Queue would be a permanent dead control. Alternative: greyed with a
+  tooltip explaining why. Rejected for the same reason: it costs a menu
+  row on every visit to explain a screen that is not for this person.
+- **A view the role does not have redirects to that role's Overview.**
+  `CounselorApp` checks the requested view against the role's menu (on v2)
+  or the reference's 11 (on v1) and replaces the URL with Overview, which
+  every role has. A stale bookmark or a role change while on a screen the
+  new role lacks lands somewhere useful. Alternative: render a "not
+  available for your role" page. That page would exist only to be left;
+  Overview is where the person would go next anyway. The check waits for
+  the version to be read after mount (`version.tsx`'s `ready`), because the
+  pre-hydration render always says v1, and bouncing a v2-only link on that
+  placeholder would make every direct link to Counselors or Schools land
+  on Overview.
+- **Platform Engagement leaves the School Counselor's menu.** It is a
+  school-wide login/activity view (its own subtitle is "Login & activity
+  tracking · Lincoln High School"), an administrator's question, not a
+  caseload counselor's. It stays for School Administrator and, as
+  "Engagement", for District Administrator. Alternative: keep all 11 for
+  the counselor for fidelity. The whole point of the role shell is that
+  each role sees its own work; a counselor menu identical to v1 would show
+  nothing had changed.
+- **New screens start as honest "Coming soon" placeholders** (Counselors,
+  Readiness, Reports, Schools, School Impact; `v2/ComingSoon.tsx`), per the
+  playbook's tier 1 + tier 6 default: a bordered card, "Coming soon" tag,
+  a bold line, the screen's own subtitle stating what it will answer, one
+  CTA back to Overview. The menu item is real so the four shells can be
+  reviewed whole; the copy says the screen is not. Alternative: hide the
+  items until each screen is built. Then the menus under review would not
+  be the menus being proposed.
+- **v1 is untouched.** The role-driven menu and the redirect apply on v2
+  only; v1 shows the reference's 11 items for every role, and a v1 link to
+  a v2-only view goes to Overview.
+
+## Overview per role (v2)
+
+The reference has one Overview for one persona. In v2 each role's Overview
+answers that role's own question, on the same rules the counselor Overview
+was redesigned under (one hero surface, sidekicks in plain glass, reserved
+status colors for state, single-hue bars for magnitude, validated ramps,
+every card opens something). School Counselor keeps the improved v2 Overview
+logged under "Overview" below. The three new ones, 24 Sept 2026:
+
+- **Rebuilt same day under a hard copy and color budget** (direct
+  feedback: "SO MUCH COPY AND RED ... everything looks super overwhelming.
+  V2 is the design layer, it needs to be super intuitive, skimmable,
+  glanceable, actionable, beautifully composed"). What the first cut did
+  wrong: every card had a subtitle, a verdict sentence in red or amber, a
+  footnote explaining the tick, and every row carried a chip ("ON TARGET",
+  "BEHIND"), a big number and a metadata line, so a healthy row shouted as
+  loudly as a failing one. The budget now:
+  - **One verdict per card, a phrase** ("Renee Alvarez is furthest
+    behind", "2 of 4 met · FAFSA completion furthest behind"). Text in the
+    foreground color; only a leading dot carries the status color.
+  - **One line per row:** name, one short muted note (students, targets
+    met, logins), the value, a bar with the target tick. No chips, no
+    distance sentences, no footnotes.
+  - **Color means "below target."** A row that meets its target is quiet
+    (primary-blue bar, white value). Amber within 10 points, red further.
+    Green is never painted on rows; the absence of alarm is the signal, so
+    a page with one problem shows one colored row.
+  - **Card titles are nouns** ("Counselors", "Grades", "Targets",
+    "Schools", "Platform use") with an optional unit ("% on track") instead
+    of question sentences; the question is what the page is for and the
+    verdict answers it.
+  Alternative considered: keep the sentences but shrink them. A smaller
+  sentence is still a sentence to read on every card; the point of the
+  screen is to not read.
+- **Glow only on the hero.** A first cut tinted every card's glow and
+  border by its own worst band; corrected same day (direct feedback: "the
+  different glows per card is not required everywhere ... only have it
+  genuinely where it needs to be"). Now the single hero card per Overview
+  carries the status tint and every sidekick is the plain glass with the
+  quiet primary glow the rest of the dashboard uses. The verdict line and
+  band chips still state each card's reading; the glow no longer repeats
+  it. The counselor Overview (below) and Milestone Tracker keep their
+  existing, separately justified tints.
+- **One "vs target" language for all three** (`v2/overviewShared.tsx`,
+  `targetBand` in `src/lib/counselorOrg.ts`): met = On Track green, within
+  10 points = Needs Attention amber, further = At Risk red, always icon +
+  word ("On target" / "Close" / "Behind"), never color alone. Each card's
+  glow and border take the worst band on the card, and each card leads with
+  one verdict sentence ("Grade 11 is behind: 74% on track, 8 students need
+  attention"). Alternative: a numeric score per card. A number needs a
+  legend; a sentence in the status color needs nothing. Alternative: reuse
+  the attention strip's Critical/High/Medium. Those rank students within
+  "At Risk"; distance from a target is a different scale and reusing the
+  chips would have made one badge mean two things.
+- **Targets** (`SCHOOL_TARGETS`): 80% for on-track, plans on file and senior
+  plans is the "district target" the reference's own My Impact quotes; FAFSA
+  65% and students-active 60% are seeded (no target exists in the
+  reference). Marked seeded in code. Alternative: one 80% for everything.
+  A FAFSA target of 80% would make every school read "Behind" on a measure
+  where 60% is a strong real-world result, so the card would cry wolf.
+- **Senior plan compliance keeps the reference's definition** (seniors with
+  a declared postsecondary plan, 87%), and FAFSA is the separate, stricter
+  measure (seniors with Financial Aid approved or completed, 40%). A first
+  cut used the milestone check for both and read 40% for senior plans,
+  which contradicted v1 My Impact's 87%; corrected before commit.
+
+### Lead Counselor
+
+- **Hero: "Which counselor is behind."** Three caseloads ranked worst first
+  by on-track rate (tiebreak: overdue + changes requested), each row a
+  status distribution bar (the same three-segment mark Career Pathways
+  uses), the on-track % and its band chip, and "pending · overdue" counts;
+  rows open Counselors. Caseloads are SEEDED by last-name range (A-H / I-R /
+  S-Z, `SCHOOL_COUNSELORS` in `counselorOrg.ts`): the reference has one
+  counselor and no counselor field per student. Why last-name ranges: it is
+  how many schools really assign, it is deterministic, and it is uneven
+  (45 / 47 / 28), which is what makes the question answerable (Renee
+  Alvarez, S-Z: 75% on track, 54% with a plan). Alternatives tried on the
+  real roster before choosing: every third student (three caseloads within
+  five points of each other, no story) and three contiguous blocks of 40
+  (caseloads segregated by grade, which would have confounded the grade
+  card beside it).
+- **Sidekick: "Which grade is behind."** On-track rate per grade with the
+  80% tick, worst first; selecting a grade sets the shared grade filter and
+  opens Students, the same cross-view filter mechanism the donuts use.
+- **Second row: school status donut, review backlog, postsecondary donut.**
+  The two donuts are the counselor Overview's `DonutCard` with a caption
+  instead of a trend delta (no hand-authored "+2 pts" here: the counselor
+  card's deltas are already flagged as fixed demo numbers, and a lead's
+  school-wide figures should not add more). Review backlog reads the same
+  review store as the queue (pending, overdue, awaiting the student, per
+  counselor) and opens the Review Queue. Not included: the counselor
+  Overview's attention strip and readiness charts; a lead's first job is
+  the people and grades, not individual students, and two rows is the
+  density budget.
+
+### School Administrator
+
+- **Hero: "Is the school on target."** Four `TargetRow`s (senior plan
+  compliance, FAFSA completion, postsecondary plans on file, on-track rate):
+  value, bar with the target tick, distance from target in words, band chip.
+  Verdict counts targets met and names the one furthest behind. A seniors-
+  only measure under a non-senior grade filter reads "n/a · Not measurable
+  under this filter" rather than 0%. Alternative: four stat tiles with a
+  delta arrow. A delta against last month is a trend; the administrator's
+  question is distance from a target, and the tick on the bar shows it
+  without a second number.
+- **Sidekick: "Is the platform used."** Students active this month against
+  the 60% target (Lincoln's 71 of 120 from Platform Engagement, kept as a
+  share so the grade filter scales it), weekly active and logins per
+  student; opens Platform Engagement.
+- **"Readiness by grade" bar chart** on the validated single-hue ramp with
+  the bronze target line, three series: on track, Career Report approved,
+  Academic Plan approved. Whole school, not the filtered roster, since the
+  chart exists to compare grades.
+- **"Equity cuts": on-track rate by pathway or by postsecondary plan
+  (Segmented toggle), lowest first, verdict is the gap between the highest
+  and lowest group.** The roster has no demographic fields, so cuts by free
+  or reduced lunch, English learner and IEP status are named as coming with
+  SIS data (playbook tier 6), not fabricated onto 120 named students.
+  Alternative: seed subgroup flags deterministically. Rejected: invented
+  demographics on named students would be indistinguishable from real ones
+  in a demo, which is exactly the kind of fabricated signal this dashboard
+  avoids elsewhere (see the salary-threshold rule).
+
+### District Administrator
+
+- **Hero: "Which schools are behind."** Five schools ranked by readiness
+  targets met (tiebreak: on-track rate), each row: enrollment, plans %,
+  senior plans %, FAFSA %, on-track bar with the 80% tick and an "N/4 met"
+  chip; rows open Schools. Lincoln is live; the other four are SEEDED
+  (`SIBLING_SCHOOLS` in `counselorOrg.ts`, `seeded: true`): each is Lincoln
+  scaled by an enrollment factor plus fixed per-metric offsets, so they
+  move with the grade filter and with review decisions exactly as Lincoln
+  does and always sit in the same relation to it (Jefferson ahead,
+  Washington behind on readiness and usage, Roosevelt large and behind on
+  FAFSA and usage, Kennedy close). Alternative: four independent seeded
+  rosters. Four more 120-row datasets would be more to maintain, would not
+  react to the demo's own actions, and would imply real per-student data
+  the prototype does not have.
+- **Sidekick: district student status donut**, counts summed across the
+  five schools, rates recomputed from the sums (`districtRollup`).
+- **"Is the platform used": students active this month per school against
+  the 60% target, lowest first**, with active count and logins per student;
+  verdict is how many schools reach the target. Opens Engagement.
+- **"District against targets": the four readiness `TargetRow`s for the
+  rollup**, compact. The same component as the school administrator's hero
+  so the two roles read the same numbers the same way.
+- **Shell:** the topbar org chip and the account line read the district
+  (`DISTRICT_NAME`, short form in the account line) for this role on v2.
+  The grade filter and student search stay; the search still targets
+  Lincoln's roster, which is the only real one.
+
 ## Overview
 
+- **Career Pathways bar: seven distinct hues in spectral order (25 Sept
+  2026, fourth and final pass).** Direct feedback after a three-cluster
+  attempt repeated colors: "Each thing in that legend has to be different
+  but stick to a known sequence like a rainbow style ... instead of these
+  random colors with things repeating." So: blue, cyan, green, yellow,
+  orange, pink, violet (the spectrum starting on the brand blue and
+  wrapping), assigned in rank order, so the legend reads as one
+  spectrum top to bottom and no two pathways share a hue. This is the one
+  deliberate exception to the one-hue rule, and the green, yellow and
+  orange steps sit near the status hues; accepted because a pathway
+  segment never appears beside a status chip. What it replaced, in order:
+  a seven-hue set that reused the exact status green and amber; a
+  single-hue blue ramp whose neighbours blended; three cluster hues that
+  repeated. The validator's adjacent-pair result for the final sequence is
+  recorded in `palette.ts`.
+- **Career Pathways bar: one hue, interleaved.** The seven segments draw
+  from the 7-step blue ramp, but not in rank order: as a straight light-to-
+  dark ramp, neighbouring segments were one step apart and blended (direct
+  feedback: "education and skilled trades are blending together").
+  Alternating ends of the ramp puts three or more steps between any two
+  adjacent segments, a 2px surface gap separates them (dataviz mark spec),
+  and the legend dots use the same mapping. Alternative: seven distinct
+  hues. Passes distinguishability, breaks the one-hue rule set the same
+  day.
+- **Attention strip rebuilt quiet, 25 Sept 2026** (direct feedback: "lose
+  the red glow on needs your attention" and, the day before, the standing
+  budget). No glow, no filled red reason blocks, no three-column grid: one
+  row per student on the raised inset surface, name and grade left, the
+  reason in plain text and the severity as one colored word on the right,
+  three rows then "See all". What it replaced: three equal chips each with
+  a colored severity badge and a color-filled reason pill, which put six
+  red surfaces on a healthy page. The severity word and the sort order
+  keep the "which first" answer.
 - **Top row restructured from 3 equal cards to an asymmetric hero layout**
   (Student Status wide + tinted to its own reading, Career Pathways
   medium, Postsecondary Plans compact) instead of 3 equal-width boxes.
@@ -108,6 +486,64 @@ left in place as the record of why v2 made each change.
 
 ## Students (roster)
 
+**25 Sept 2026, v2 rebuilt on the budget above** (the first pass in the
+list below is v1's history):
+
+- **Six columns, not eight.** Grade and Career Track fold into the
+  student cell as one muted line under the name ("Grade 12 · Healthcare"),
+  which is how every other row on the dashboard already names a student.
+  Alternative: keep them sortable as columns. Grade is already a topbar
+  filter, and a pathway sort was never asked for.
+- **Status sorts by severity** (At Risk, Needs Attention, On Track; ties by
+  roadmap), not alphabetically, so one click puts the students to act on
+  first. Last active is sortable too.
+- **Two pickers replace the "Filters" popover.** Status and Plan sit in
+  the toolbar as `Listbox`es (guardrails: never a native select), showing
+  the current value, "Any status" / "Any plan" to clear. The Overview's
+  "With Plan / Undecided" click-through and this screen's own intent
+  filter are the same question at two grains, so one picker shows either.
+  Removed: the removable chips that repeated the same state next to a
+  button that hid the control.
+- **Phone and tablet get a card list, not a sideways table.** Below the
+  desktop breakpoint each row is a card: student, status, roadmap,
+  milestones. Alternative: the 1100px table with horizontal scroll. The
+  roster is the one screen a counselor most plausibly opens on a phone
+  between meetings; a table that needs two-axis scrolling is not usable
+  there (and the guardrails flag paired-scrollbar CSS as a known
+  Windows/Chromebook trap).
+- **Roadmap is a plain blue bar with the percent beside it**, replacing
+  the shared `Meter`'s "92/100" reading.
+- **Dates read "Jan 15"** instead of ISO.
+- **Empty result is one line** (playbook tier 5).
+- **Worst first by default** (direct feedback: "things needing attention
+  surfaced first, based on severity"): At Risk, then Needs Attention, then
+  On Track; within a status the Overview's own severity ranking (overdue
+  and rejected work before merely not-started), then the least-complete
+  roadmap. Alternative: alphabetical with a status filter. That makes the
+  counselor do the sort every visit.
+- **A flagged row says why.** Under the status chip, anyone not On Track
+  shows the one-line reason from their own milestones ("Career Report
+  overdue"), the same wording as the Overview's attention strip, so the
+  row is actionable without opening the profile.
+- **Lead Counselor and School Administrator see a Counselor column and a
+  counselor picker**; a School Counselor does not (they see only their own
+  caseload, see "Who sees which students" above).
+- **Every card has a visible way in** (`CardLink` in chips.tsx: a word
+  plus a chevron in a small pill in the card header, visible at rest, in
+  the foreground color, never blue; on hover the pill's background and
+  border lift and the chevron slides right). Two corrections in-session:
+  "don't make the CTAs blue" (blue is spent on data marks and the active
+  nav item, so a blue word beside a blue chart read as chart) and "the
+  padding that appears on hover is wrong, too tight and overlapping with
+  the text, no shape" (the first cut had no padding at rest, so the hover
+  fill hugged the letters). Direct question: "make all cards clickable, show the obvious
+  chevron ... or is this a bad approach considering the users might be
+  older?" Cards do open something, but the affordance is never hover-only:
+  older users and touch screens never see hover. So the link is always
+  there, and hover (the card beam, the chevron nudge) only reinforces it.
+  Rows inside a card stay their own targets, so the card is not itself one
+  big button (nested buttons are invalid and confuse screen readers).
+
 - **Table collapsed from 13 columns to 8.** The "School" column is
   removed entirely -- every row said "Lincoln High School" (a one-school
   demo, already shown in the topbar), so the column carried zero
@@ -132,6 +568,64 @@ left in place as the record of why v2 made each change.
   already in place before this pass.)
 
 ## Milestone Tracker
+
+**25 Sept 2026, v2 rebuilt on roster data** (direct questions: "are we
+getting the proper data, have we done the proper hierarchy of information,
+is it all readable, understandable, do things align? Is everything on that
+screen genuinely valuable? Next-Year Course Plan: the components are
+overlapping"). Everything below this block describes the earlier v2 pass;
+kept as history.
+
+- **Data: the reference's grade curriculum, scaled to the cohort the role
+  sees.** Decided for the demo (direct instruction: "do what's best for the
+  demo"). The reference's tracker (`milestoneReadiness.ts`) defines seven
+  to eight named milestones per grade with fixed counts for 30 students;
+  the roster's own template tracks only three at Grade 9 (the Student
+  Profile grid). The roster version was built and rejected: it made Grade
+  9 look like three items ("are grade 9 milestones genuinely only these
+  3?"). Neither set is Dreamari's real curriculum, a product question for
+  the team. v2 keeps the reference's curriculum names and status
+  proportions and scales every card to the number of students the signed-
+  in role actually has in that grade (largest-remainder rounding so the
+  four states sum exactly), so a School Counselor's Grade 9 reads 12
+  students, the Lead's 30, and the totals agree with Students. Caveat,
+  stated in code: proportions are the reference's, so an approval on the
+  Review Queue moves Students and the Overview, not this screen.
+- **Four states, one color code:** done (brand blue), in progress (light
+  blue), not started (neutral slice: expected for a freshman, not
+  alarming), needs attention (the reserved amber, because that is what the
+  word means everywhere else on the dashboard). "Not applicable" is not
+  drawn.
+- **One ring, then bars; worst first** (direct feedback: "I like the one
+  ring and the others in bars", and the standing rule "always display what
+  needs attention first"). The hero is the milestone furthest behind (needs
+  attention weighs double, then not started): a header row (eyebrow with
+  the reference's review type, the name, the way in), then the ring with
+  its four counts directly beside it; the ring says how far along, the
+  rows say how many in each state, nothing said twice. The other
+  milestones are one card, worst first, each a row on the raised inset
+  surface: name, its outstanding counts in one muted line (amber only when
+  someone needs attention), % done, and a four-segment status bar with 2px
+  gaps and per-segment titles. Rows open the grade roster. Replaces the
+  reference's one ring card per milestone (up to eight, each with a legend
+  and a button), and two intermediate v2 shapes the same day (a hero ring
+  with a percent-only list, which dropped each milestone's breakdown; and
+  a single card of bars with no ring, which lost the "look here first").
+- **Summary is four stats in the header row** (students, milestones, %
+  done, need attention), replacing the grade card with its "Focus"
+  sentence and three stats. The Focus copy was the reference's grade
+  description; it explained the grade, not the state of it.
+- **Whole school for every role; the Lead Counselor can narrow to one
+  counselor.** After the scoping revert (see "Who sees which students")
+  the tracker reads the school's grade cohort for everyone. The Lead gets
+  the same Counselor picker as on Students and the Review Queue (direct
+  question: "Milestone tracker for lead and school counsellor are the
+  same?"); picking a counselor scales the curriculum proportions to that
+  counselor's students in the grade.
+- **Picker aggregates say "All", not "Any"** ("All counselors", "All
+  statuses", "All plans"), across Students, the Review Queue and the
+  tracker. Direct question: "should it be any or all counselors?" "All"
+  describes what is shown; "Any" reads as a search condition.
 
 - **"View Details & Student Breakdown" is now a working control.** In the
   reference and the original port it rendered with no `onClick` at all
@@ -337,9 +831,173 @@ left in place as the record of why v2 made each change.
   milestones instead of 5), which remain demo copy until Dreamari has a
   student-to-counselor share action (report history's "Shared with
   counselor" label is the natural source).
+- **25 Sept 2026 pass under the v2 budget.** Header stats (pending,
+  overdue, due in 2 days) in the same header language as the Milestone
+  Tracker, replacing the "Pending (16)" caption. Queue cards are two lines
+  on the raised inset surface (name; milestone · grade; the due line with
+  a colored dot and neutral text), the priority pill the only colored
+  element; "submitted" moved to the detail pane, where the meta line is
+  now "Overdue by 3 days · submitted Sep 21" instead of three dates. The
+  list is bounded and scrolls beside the pane. The Lead Counselor gets a
+  Counselor picker and the counselor's name on each card (a School
+  Counselor's queue has no such control). Reviewed rows use the inset
+  surface. Alternative: keep the earlier three-line cards. Sixteen cards
+  each with a red due line read as a wall of alarm; one pill per card
+  says the same.
 
 ---
 
-_Sections for the remaining screens (Student Progress,
-Counselor Connect, Career + College Insights, Productivity Suite, Platform
+## Student Progress (v2)
+
+- **The report-type side list is gone; the report is the first control in
+  the filter row.** The reference (and v1) pin a 300px column of nine
+  report names beside the content for the whole visit, so the chart and the
+  Summary by Grade table fit in what is left (direct feedback, 24 Sept 2026:
+  "a submenu is taking up space inside its container. Why?"). A report is
+  chosen once per visit, then read; it belongs with the other two filters,
+  not as a second navigation. The chart and the table now take the full
+  width, and the chosen report's icon sits in the chart title so the choice
+  stays visible. Alternative offered in the same feedback: take over the
+  left nav with a back button. Rejected for this screen: the nine reports
+  are not destinations, they are one parameter of one screen, and a nav
+  takeover would make "Student Progress" a mode the counselor has to leave.
+  Alternative: a row of nine pills. Nine labels of 20 to 30 characters wrap
+  to two rows at 1440 and four on a phone, which is the same space problem
+  laid sideways.
+- **All three pickers are the app's `Listbox`, not native selects**, per
+  the cross-browser guardrails (a native select popup renders in the OS's
+  own chrome, which reads as a foreign control on Windows and Chromebooks).
+- **A report with no chart says so.** Application Progress and Financial
+  Aid Progress render table-only in the reference; v2 adds one muted line
+  naming that, so the missing chart reads as "not this report" rather than
+  "broken".
+- **25 Sept 2026 pass under the v2 budget.** The chart is capped at 720px
+  (its SVG text scales with width; full-bleed at 1100px it read as a
+  poster with 18px axis labels) and a verdict column sits beside it: the
+  leading category as a big percent ("72% Approved · 87 of 121") and, only
+  when non-zero, the trailing category that needs something ("5 Overdue")
+  in its own color. Axis rounds to the next 10 above the tallest bar, not
+  the roster size (ticks read 121 / 91 / 61 before). Category labels are
+  capitalised. Bug fixed: the Career Pathway filter listed the student
+  app's 15 interest worlds, none of which is a roster pathway, so every
+  choice emptied the report; it now lists the roster's seven pathways.
+- Not changed: the nine report taxonomies, the CSV/PDF exports, the Summary
+  by Grade table.
+
+## Counselor Connect (v2)
+
+25 Sept 2026 pass under the v2 budget. Data (three announcements, fifteen
+questions, ten groups) is the reference's, verbatim.
+
+- **Opens on Questions, with the open count on the tab.** The reference
+  opens on Announcements; the tab with work in it is Questions (standing
+  rule: what needs attention first). Tabs read "Questions · Announcements
+  · Groups"; three header stats say need a reply / in progress /
+  answered.
+- **Questions sorted to act in:** new and follow-up, then viewed and in
+  progress, then answered; by date within each. Cards are two lines on
+  the inset surface (avatar, name, "Grade 11 · Career Exploration · Sep
+  14", the status pill, two lines of the question). Color only where the
+  counselor owes something: new and follow-up amber, viewed and in
+  progress light blue, answered neutral. Replaced: red "New" on every
+  fresh question, green on every answered one, and cards in reference
+  order.
+- **Detail pane leads with the student, one meta line**, the question,
+  the reply box, "Send reply" and "Mark resolved". Replaced the four-row
+  metadata grid (Student / Category / Submitted / Related Milestone) that
+  restated the card.
+- **Announcements:** "Grade 12 · Sep 10" on the title line, "87% read" in
+  the foreground color, tag chips without the "Related:" prefix.
+- **Groups are one card of rows, most active first** (name, "142 members
+  · 87 posts · active Sep 15"). The reference's ten description cards
+  restated each group's name in a sentence; dropped. Alternative: keep the
+  cards and shorten the descriptions. Ten cards for ten names is the
+  wrong form when a name is the whole content.
+
+## Career + College Insights (v2)
+
+25 Sept 2026 pass under the v2 budget. Data is the reference's, verbatim.
+
+- **Recommendations are the hero: one stat, one action each.** The
+  reference gave each of the three stats three bullet actions and an
+  emoji, twelve lines of advice on every visit; v2 keeps the stat and the
+  first action. The other two actions stay in data for a later "more"
+  affordance. Alternative: keep all three and collapse. A collapsed list
+  on a screen meant to be glanced is a list nobody opens.
+- **The four ranked lists are always bars.** The reference's Chart / List
+  toggle only hid the bar; removed. The lede under each title ("Careers
+  most frequently saved to student profiles") restated the title;
+  replaced by a "top 10" unit. Titles shortened to nouns ("Saved
+  careers", "Saved majors"). The colleges list drops its decorative emoji.
+- **Career-fair note is one line plus its chips.** The reference's
+  paragraph named the same three clusters the chips already name.
+
+## Productivity Suite (v2)
+
+25 Sept 2026 pass under the v2 budget. Draft copy is the reference's.
+
+- **Tools are a row of tabs, not a side column.** Same fix as Student
+  Progress: five names do not need a permanent 300px column beside the
+  form. The card takes the full width.
+- **One sentence per tool**, the first of the reference's description
+  (which ran to three sentences each), with the tool's sub-line beside
+  the title.
+- **Student and letter type are `Listbox`es in one row with the button;**
+  the student picker lists the whole roster by name, not the first 30.
+  The "You are always in control" banner and the repeated helper
+  paragraph are one muted line under the button: "A first draft from the
+  student's Dreamari data. Review and edit before you use it."
+
+## Platform Engagement (v2)
+
+25 Sept 2026 copy pass only; the reference's numbers are unchanged. Tile
+labels are two words ("Active this month", "Logins per student") instead
+of a label plus a clause; card titles carry their qualifier as a muted
+unit ("Logins by month · Lincoln High School, this academic year"); the
+intervention card is "Students to check in with" with one closing count.
+The second line series is a light step of the blue ramp, not green.
+
+## My Impact (v2)
+
+**Rebuilt later the same day** after "My Impact etc are especially
+cluttered ... a huge overload of information at once with so much copy":
+the report answers one question (did this period move the numbers?), so
+the hero is the four outcomes against their targets with one verdict, then
+one row of the counselor's activity, one of student engagement, grades as
+bars that open the roster, and ASCA as three columns of two short lines.
+Dropped: the pathway bar list (the Overview donut shows it), the milestone
+stat tiles (folded into the scorecard), and the two sections that
+restated the page. School Impact is the same report headed by the school
+with a by-counselor card. The earlier pass, below, is history.
+
+25 Sept 2026 pass. This is the printable report a counselor hands a
+principal, so it keeps its sections; what changed is that every number is
+said once.
+
+- **Removed "Notable Achievements" and "District Compliance Summary".**
+  Both restated numbers already on the page (the achievements list was
+  seven sentences, each wrapping a stat shown above; the compliance tiles
+  repeated the milestones card). Alternative: keep them for a printout.
+  A principal reading the printout reads the same figure three times.
+- **Senior plan compliance uses the reference's definition** (seniors
+  with a declared plan), the same figure the School Administrator
+  Overview shows; the earlier fork computed it from application
+  milestones and read 40% against the reference's 87%.
+- **One color rule:** blue tiles and bars; a number wears amber only when
+  it misses its target. The reference painted every tile a different hue
+  and every target a green or red.
+- **Sentences under cards became the card's sub-line** ("Plan reviews
+  average 2.1 days against the district's 5-day standard"), the
+  engagement disclaimer is gone, the footer is one line.
+- ASCA cards kept as the report's substance, on the inset surface, with
+  shorter bullets.
+
+## Settings (v2)
+
+25 Sept 2026 pass. Role is the app's `Listbox` (guardrails: never a
+native select). "Role Permissions" shows only the chosen role's list,
+titled "What School Counselor can do", instead of all four roles' lists
+at once; three of the four were never the reader's.
+
+_Sections for the remaining screens ( Career + College Insights, Productivity Suite, Platform
 Engagement, My Impact, Settings) get added here as each is worked on._

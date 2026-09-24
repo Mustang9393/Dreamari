@@ -7,9 +7,9 @@
 // and every screen picks it up.
 
 export const GLASS_CARD = {
-  background: "linear-gradient(155deg, color-mix(in srgb, var(--primary) 10%, var(--glass-surface-2)) 0%, color-mix(in srgb, var(--card) 92%, transparent) 55%, color-mix(in srgb, #7C5CFA 7%, var(--card)) 100%)",
+  background: "linear-gradient(155deg, color-mix(in srgb, var(--primary) 10%, var(--glass-surface-2)) 0%, color-mix(in srgb, var(--card) 92%, transparent) 55%, color-mix(in srgb, var(--primary) 7%, var(--card)) 100%)",
   borderColor: "color-mix(in srgb, var(--primary) 22%, var(--glass-border))",
-  boxShadow: "0 24px 60px -30px rgba(0,0,0,0.7), inset 0 1px 0 0 color-mix(in srgb, #FFFFFF 8%, transparent)",
+  boxShadow: "0 24px 60px -30px rgba(0,0,0,0.7), inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 8%, transparent)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
 } as const;
@@ -19,15 +19,20 @@ export const GLASS_CARD = {
  *  tint and a visible glow so it reads as the room's centerpiece. */
 export const GLASS_CARD_HERO = {
   ...GLASS_CARD,
-  background: "linear-gradient(155deg, color-mix(in srgb, var(--primary) 16%, var(--glass-surface-2)) 0%, color-mix(in srgb, var(--card) 90%, transparent) 55%, color-mix(in srgb, #7C5CFA 12%, var(--card)) 100%)",
-  boxShadow: "0 28px 70px -28px color-mix(in srgb, var(--primary) 35%, rgba(0,0,0,0.7)), inset 0 1px 0 0 color-mix(in srgb, #FFFFFF 10%, transparent)",
+  background: "linear-gradient(155deg, color-mix(in srgb, var(--primary) 16%, var(--glass-surface-2)) 0%, color-mix(in srgb, var(--card) 90%, transparent) 55%, color-mix(in srgb, var(--primary) 12%, var(--card)) 100%)",
+  boxShadow: "0 28px 70px -28px color-mix(in srgb, var(--primary) 35%, rgba(0,0,0,0.7)), inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent)",
 } as const;
 
-/** A quieter inset row inside a glass card -- list rows, table rows, chip
- *  rows -- one step down from the card itself so nesting stays legible. */
+/** A nested row inside a glass card -- list rows, student rows, chip rows.
+ *  One clear step UP from the card so nesting reads at a glance (direct
+ *  feedback, 25 Sept 2026: "better contrast for the nested cards
+ *  everywhere"); the earlier 4% / 8% pair sank into the card. Mixed from
+ *  --foreground, not white, so the same step reads darker-on-light in
+ *  light mode instead of vanishing. */
 export const GLASS_INSET = {
-  background: "color-mix(in srgb, #FFFFFF 4%, transparent)",
-  borderColor: "color-mix(in srgb, #FFFFFF 8%, transparent)",
+  background: "var(--inset-bg)",
+  borderColor: "var(--inset-border)",
+  boxShadow: "var(--inset-shadow)",
 } as const;
 
 /** A radial glow anchored behind a headline stat -- drop this as an

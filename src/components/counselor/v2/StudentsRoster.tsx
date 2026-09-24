@@ -1,32 +1,100 @@
 "use client";
 
-// DEMO-ONLY v2 fork of ../StudentsRoster.tsx (24 Sept 2026). v1 stays untouched so the
-// two builds can be compared live via the bottom-center version chip
-// (../version.tsx). Changes from the 24 Sept audit land here.
+// DEMO-ONLY v2 fork of ../StudentsRoster.tsx. Rebuilt 25 Sept 2026 under the
+// v2 budget (skimmable, one hue, color only for state): the student cell
+// carries name, grade and pathway so the table is six columns instead of
+// eight; Status sorts by severity, not alphabet; the two filters are
+// pickers in the toolbar instead of a popover behind a "Filters" button;
+// the default order is worst first; a flagged student's row says why; the
+// Lead Counselor and School Administrator see (and filter by) counselor;
+// and below the desktop breakpoint the same rows render as a card list
+// instead of a sideways-scrolling 1100px table.
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { Filter, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, X } from "lucide-react";
-import { Meter } from "@/components/connect/viz";
-import { type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown } from "lucide-react";
+import { Listbox } from "@/components/app/Listbox";
+import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { useCounselorFilters } from "../shell";
+import { SCHOOL_COUNSELORS, SCOPE_COUNSELOR_TO_CASELOAD, counselorFor, myCounselor } from "@/lib/counselorOrg";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar } from "../chips";
+import { GLASS_CARD, GLASS_INSET } from "../surfaces";
+import { PRIMARY } from "../palette";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
+const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
+// Worst first is the DEFAULT order (direct feedback, 25 Sept 2026: "things
+// needing attention surfaced first, based on severity"): At Risk before
+// Needs Attention before On Track, then the same severity ranking the
+// Overview's attention strip uses (overdue and rejected work outranks
+// merely not-started), then the least-complete roadmap. Name, roadmap and
+// last-active sorts are still one click away on their headers.
+const STATUS_RANK: Record<CaseloadStatus, number> = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 };
+function priorityRank(a: CounselorStudent, b: CounselorStudent): number {
+  return STATUS_RANK[a.status] - STATUS_RANK[b.status] || attentionRank(a, b) || a.roadmapPct - b.roadmapPct;
+}
 
-type SortKey = "name" | "grade" | "roadmapPct" | "status";
+type SortKey = "name" | "roadmapPct" | "status" | "lastActive";
 
-function HeaderCell({ label, sortable, keyName, sortKey, sortDir, onSort }: { label: string; sortable?: boolean; keyName?: SortKey; sortKey: SortKey; sortDir: "asc" | "desc"; onSort: (k: SortKey) => void }) {
+const PICKER = "flex h-9 min-w-[150px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
+const pickerStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+
+function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }: { label: string; keyName?: SortKey; sortKey: SortKey; sortDir: "asc" | "desc"; onSort: (k: SortKey) => void; className?: string }) {
+  const on = keyName !== undefined && sortKey === keyName;
   return (
-    <th className="px-[var(--space-4)] py-[var(--space-3)] text-left text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-      {sortable && keyName ? (
-        <button type="button" onClick={() => onSort(keyName)} className="dm-quiet flex cursor-pointer items-center gap-[4px]" style={{ color: sortKey === keyName ? "var(--foreground)" : "var(--muted-foreground)" }}>
+    <th className={`px-[var(--space-4)] py-[var(--space-3)] text-left text-[11.5px] font-bold tracking-[0.04em] uppercase ${className}`} style={{ color: "var(--muted-foreground)" }}>
+      {keyName ? (
+        <button type="button" onClick={() => onSort(keyName)} className="dm-quiet flex cursor-pointer items-center gap-[4px] text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
           {label}
-          {sortKey === keyName && (sortDir === "asc" ? <ChevronUp className="h-[13px] w-[13px]" aria-hidden /> : <ChevronDown className="h-[13px] w-[13px]" aria-hidden />)}
+          {on && (sortDir === "asc" ? <ChevronUp className="h-[13px] w-[13px]" aria-hidden /> : <ChevronDown className="h-[13px] w-[13px]" aria-hidden />)}
         </button>
       ) : label}
     </th>
+  );
+}
+
+/** The one blue, sized to the value, the number beside it. */
+function Roadmap({ pct }: { pct: number }) {
+  return (
+    <span className="flex items-center gap-[8px]">
+      <span className="relative block h-[6px] w-[64px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
+        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${PRIMARY} 35%, transparent), ${PRIMARY})` }} />
+      </span>
+      <span className="text-[12.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{pct}%</span>
+    </span>
+  );
+}
+
+/** The chip, and for anyone not On Track the one-line reason from the
+ *  student's own milestones (the Overview's attention strip's wording), so
+ *  the row says what to do without opening the profile. */
+function StatusCell({ s }: { s: CounselorStudent }) {
+  return (
+    <span className="flex flex-col items-start gap-[4px]">
+      <StatusChip status={s.status} />
+      {s.status !== "On Track" && <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{attentionReason(s)}</span>}
+    </span>
+  );
+}
+
+function fmtDate(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function StudentCell({ s }: { s: CounselorStudent }) {
+  return (
+    <span className="flex min-w-0 items-center gap-[10px]">
+      <Avatar name={s.name} index={s.avatarIndex} />
+      <span className="flex min-w-0 flex-col leading-tight">
+        <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>
+          {s.name}
+        </span>
+        <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.careerTrack}</span>
+      </span>
+    </span>
   );
 }
 
@@ -34,17 +102,16 @@ const PAGE_SIZE = 20;
 
 export function StudentsRoster() {
   const router = useRouter();
-  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter } = useCounselorFilters();
-  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
+  const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
-  // Local to this table, not the shared cross-view context (setStatusFilter/
-  // setPlanFilter above) -- this is the only place a counselor can narrow by
-  // postsecondary intent, so nothing outside this screen needs to read or
-  // set it. Previously the "Filters" button did nothing at all when clicked
-  // (direct feedback, earlier audit: a dead control); this is what it opens.
   const [intentFilter, setIntentFilter] = useState<PostsecondaryIntent | "All">("All");
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  // Roles that oversee counselors see whose caseload each student is on and
+  // can narrow to one counselor; a School Counselor sees the school roster
+  // as the reference does. Caseloads are seeded (counselorOrg.ts).
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const showCounselor = account.role === "Lead Counselor" || account.role === "School Administrator";
 
   const reviewed = useReviewedRoster();
   const roster = useMemo(() => {
@@ -54,21 +121,19 @@ export function StudentsRoster() {
     if (planFilter === "With Plan") list = list.filter((s) => s.postsecondaryIntent !== "Undecided");
     if (planFilter === "Undecided") list = list.filter((s) => s.postsecondaryIntent === "Undecided");
     if (intentFilter !== "All") list = list.filter((s) => s.postsecondaryIntent === intentFilter);
+    if (showCounselor && counselorFilter !== "All") list = list.filter((s) => counselorFor(s).id === counselorFilter);
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((s) => s.name.toLowerCase().includes(q) || s.careerTrack.toLowerCase().includes(q));
     const dir = sortDir === "asc" ? 1 : -1;
     return [...list].sort((a, b) => {
       if (sortKey === "name") return a.name.localeCompare(b.name) * dir;
-      if (sortKey === "grade") return (a.grade - b.grade) * dir;
       if (sortKey === "roadmapPct") return (a.roadmapPct - b.roadmapPct) * dir;
-      return a.status.localeCompare(b.status) * dir;
+      if (sortKey === "lastActive") return a.lastActive.localeCompare(b.lastActive) * dir;
+      return priorityRank(a, b) * dir;
     });
-  }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, sortKey, sortDir]);
+  }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, sortKey, sortDir]);
 
   const pageCount = Math.max(1, Math.ceil(roster.length / PAGE_SIZE));
-  // Clamped at read time, not reset via an effect: if a filter shrinks the
-  // list below the current page, this falls back to the last real page
-  // instead of a blank one -- no extra state, no effect needed.
   const effectivePage = Math.min(page, pageCount - 1);
   const pageRows = roster.slice(effectivePage * PAGE_SIZE, effectivePage * PAGE_SIZE + PAGE_SIZE);
 
@@ -76,152 +141,110 @@ export function StudentsRoster() {
     if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else { setSortKey(key); setSortDir("asc"); }
   };
+  const open = (s: CounselorStudent) => router.push(`/counselor?view=students&studentId=${s.id}`);
+
+  // The Overview's "With Plan / Undecided" click-through and this screen's
+  // own intent picker are the same question at two grains; the picker
+  // shows whichever is set, and choosing here clears the coarse one.
+  const planValue = intentFilter !== "All" ? intentFilter : planFilter === "Undecided" ? "Undecided" : planFilter === "With Plan" ? "With Plan" : "All";
+  const setPlan = (v: string) => {
+    if (v === "All") { setIntentFilter("All"); setPlanFilter("All"); return; }
+    if (v === "With Plan") { setIntentFilter("All"); setPlanFilter("With Plan"); return; }
+    setPlanFilter("All");
+    setIntentFilter(v as PostsecondaryIntent);
+  };
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
-        <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Showing {pageRows.length ? effectivePage * PAGE_SIZE + 1 : 0}–{effectivePage * PAGE_SIZE + pageRows.length} of {roster.length} student{roster.length === 1 ? "" : "s"}</span>
+        <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}{pageCount > 1 ? ` · showing ${effectivePage * PAGE_SIZE + 1} to ${effectivePage * PAGE_SIZE + pageRows.length}` : ""}
+        </span>
         <div className="flex flex-wrap items-center gap-[8px]">
-          {/* Set by clicking a donut segment on Overview -- shown here as a
-             removable chip so it's obvious the list is narrowed and how to
-             get back, not just a table that quietly came up short. */}
-          {statusFilter !== "All" && (
-            <button type="button" onClick={() => setStatusFilter("All")} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--foreground)" }}>
-              {statusFilter} <span aria-hidden style={{ color: "var(--muted-foreground)" }}>✕</span>
-            </button>
+          {showCounselor && (
+            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={PICKER} style={pickerStyle} />
           )}
-          {planFilter !== "All" && (
-            <button type="button" onClick={() => setPlanFilter("All")} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--foreground)" }}>
-              {planFilter} <span aria-hidden style={{ color: "var(--muted-foreground)" }}>✕</span>
-            </button>
-          )}
-          {intentFilter !== "All" && (
-            <button type="button" onClick={() => setIntentFilter("All")} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--foreground)" }}>
-              {intentFilter} <span aria-hidden style={{ color: "var(--muted-foreground)" }}>✕</span>
-            </button>
-          )}
-          {/* Used to be a plain decorative span -- clicking it did nothing
-             at all (direct feedback from the earlier audit: a dead
-             control). Opens a real filter, postsecondary intent, that
-             wasn't reachable any other way on this screen. */}
-          <div className="relative">
-            <button
-              type="button" onClick={() => setFiltersOpen((o) => !o)}
-              className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold"
-              style={{ borderColor: filtersOpen ? "color-mix(in srgb, var(--primary) 35%, var(--glass-border))" : "var(--glass-border)", color: "var(--foreground)" }}
-            >
-              <Filter className="h-[14px] w-[14px]" aria-hidden />
-              Filters
-            </button>
-            {filtersOpen && (
-              <>
-                <button type="button" aria-label="Close filters" onClick={() => setFiltersOpen(false)} className="fixed inset-0 z-10 cursor-default" />
-                <div className="absolute top-[calc(100%+6px)] right-0 z-20 flex w-[240px] flex-col gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-bold" style={{ color: "var(--foreground)" }}>Postsecondary intent</span>
-                    <button type="button" aria-label="Close filters" onClick={() => setFiltersOpen(false)} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                      <X className="h-[13px] w-[13px]" aria-hidden />
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-[4px]">
-                    {INTENT_OPTIONS.map((opt) => (
-                      <button
-                        key={opt} type="button"
-                        onClick={() => { setIntentFilter(opt === intentFilter ? "All" : opt); setFiltersOpen(false); }}
-                        className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left text-[13px] font-semibold"
-                        style={{ background: intentFilter === opt ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: intentFilter === opt ? "var(--foreground)" : "var(--muted-foreground)" }}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          <Listbox ariaLabel="Status" value={statusFilter} onChange={(v) => setStatusFilter(v as StatusRosterFilter)} options={STATUS_OPTIONS.map((o) => ({ value: o, label: o === "All" ? "All statuses" : o }))} className={PICKER} style={pickerStyle} />
+          <Listbox ariaLabel="Postsecondary plan" value={planValue} onChange={setPlan} options={[{ value: "All", label: "All plans" }, { value: "With Plan", label: "Has a plan" }, ...INTENT_OPTIONS.map((o) => ({ value: o, label: o }))]} className={PICKER} style={pickerStyle} />
         </div>
       </div>
 
-      {/* Unpaginated, this table rendered all 120 rows in one pass -- a
-         ~10,000px-tall page. Real UX problem on its own (nobody scrolls
-         that far to find a student), and it's also the confirmed cause of
-         a genuine blank-render bug on mobile (direct report: "the student
-         screen has absolutely nothing"), so this fixes both at once.
-         Bounded to a max height with its own internal scroll (rather than
-         letting even 20 rows stretch the page) so the header can stick
-         within it -- a table this tall with no sticky header meant the
-         column meaning scrolled away with the first few rows. "School" is
-         dropped entirely: every single row said "Lincoln High School" (a
-         one-school demo, already shown in the topbar), so the column was
-         width spent on zero information. The five separate milestone
-         pill columns (Career Report/Resume/Applications/Rec. Letter/
-         Transcript, mostly repeating "Approved") collapse into one
-         Milestones column covering all 11 -- see MilestonesMini in
-         chips.tsx for why that's more complete, not just more compact. */}
-      <div className="max-h-[70vh] overflow-auto rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 4%, var(--card))" }}>
-        <table className="w-full min-w-[1100px] border-collapse">
-          <thead className="sticky top-0 z-10" style={{ background: "var(--card)" }}>
-            <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
-              <HeaderCell label="Student" sortable keyName="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-              <HeaderCell label="Grade" sortable keyName="grade" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-              <HeaderCell label="Career Track" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-              <HeaderCell label="Roadmap" sortable keyName="roadmapPct" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-              <HeaderCell label="Status" sortable keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-              <HeaderCell label="Milestones" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-              <HeaderCell label="Postsecondary Plan" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-              <HeaderCell label="Last Active" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-              <th className="px-[var(--space-4)] py-[var(--space-3)]" aria-hidden />
-            </tr>
-          </thead>
-          <tbody>
+      {roster.length === 0 ? (
+        // Playbook tier 5: a filter returned nothing; one plain line.
+        <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students match these filters.</p>
+      ) : (
+        <>
+          {/* Desktop: the table. Bounded height with its own scroll so the
+             header stays put over 20 rows. */}
+          <div className="hidden max-h-[70vh] overflow-auto rounded-[var(--radius-lg)] border lg:block" style={GLASS_CARD}>
+            <table className="w-full border-collapse">
+              <thead className="sticky top-0 z-10" style={{ background: "var(--card)" }}>
+                <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
+                  <HeaderCell label="Student" keyName="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <HeaderCell label="Roadmap" keyName="roadmapPct" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <HeaderCell label="Status" keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  {showCounselor && <HeaderCell label="Counselor" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />}
+                  <HeaderCell label="Milestones" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <HeaderCell label="Plan" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <HeaderCell label="Last active" keyName="lastActive" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <th className="w-[44px] px-[var(--space-4)] py-[var(--space-3)]" aria-hidden />
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((s) => (
+                  <tr
+                    key={s.id}
+                    onClick={() => open(s)}
+                    className="dm-quiet cursor-pointer border-b transition-colors last:border-b-0 hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]"
+                    style={{ borderColor: "var(--glass-border)" }}
+                  >
+                    <td className="px-[var(--space-4)] py-[10px]"><StudentCell s={s} /></td>
+                    <td className="px-[var(--space-4)] py-[10px]"><Roadmap pct={s.roadmapPct} /></td>
+                    <td className="px-[var(--space-4)] py-[10px]"><StatusCell s={s} /></td>
+                    {showCounselor && <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{counselorFor(s).name}</td>}
+                    <td className="px-[var(--space-4)] py-[10px]"><MilestonesMini milestones={s.milestones} /></td>
+                    <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold" style={{ color: s.postsecondaryIntent === "Undecided" ? "var(--muted-foreground)" : "var(--foreground)" }}>{s.postsecondaryIntent}</td>
+                    <td className="px-[var(--space-4)] py-[10px] text-[12.5px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fmtDate(s.lastActive)}</td>
+                    <td className="px-[var(--space-4)] py-[10px]"><ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Phone and tablet: the same rows as cards, no sideways scroll. */}
+          <ul className="flex flex-col gap-[8px] lg:hidden">
             {pageRows.map((s) => (
-              <tr
-                key={s.id}
-                onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)}
-                className="dm-quiet cursor-pointer border-b transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_5%,transparent)]"
-                style={{ borderColor: "var(--glass-border)" }}
-              >
-                <td className="px-[var(--space-4)] py-[var(--space-3)]">
-                  <span className="flex items-center gap-[10px]">
-                    <Avatar name={s.name} />
-                    <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}{s.isReal && <span className="ml-[6px] rounded-full px-[6px] py-[1px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--primary)" }}>You</span>}</span>
+              <li key={s.id}>
+                <button type="button" onClick={() => open(s)} className="dm-quiet flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px] text-left" style={GLASS_INSET}>
+                  <span className="flex items-center justify-between gap-[10px]">
+                    <StudentCell s={s} />
+                    <StatusChip status={s.status} />
                   </span>
-                </td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold tabular-nums" style={{ color: "var(--foreground)" }}>{s.grade}</td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.careerTrack}</td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)]">
-                  <Meter value={s.roadmapPct} max={100} accent="#2F6BF2" />
-                </td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)]"><StatusChip status={s.status} /></td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)]"><MilestonesMini milestones={s.milestones} /></td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.postsecondaryIntent}</td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)] text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{s.lastActive}</td>
-                <td className="px-[var(--space-4)] py-[var(--space-3)]"><ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /></td>
-              </tr>
+                  {(s.status !== "On Track" || showCounselor) && (
+                    <span className="flex flex-wrap items-center justify-between gap-x-[10px] gap-y-[2px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                      {s.status !== "On Track" && <span>{attentionReason(s)}</span>}
+                      {showCounselor && <span>{counselorFor(s).name}</span>}
+                    </span>
+                  )}
+                  <span className="flex items-center justify-between gap-[10px]">
+                    <Roadmap pct={s.roadmapPct} />
+                    <MilestonesMini milestones={s.milestones} />
+                  </span>
+                </button>
+              </li>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </ul>
+        </>
+      )}
 
       {pageCount > 1 && (
         <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={effectivePage === 0}
-            className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-            style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-          >
+          <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={effectivePage === 0} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <ChevronLeft className="h-[14px] w-[14px]" aria-hidden /> Previous
           </button>
           <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Page {effectivePage + 1} of {pageCount}</span>
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-            disabled={effectivePage >= pageCount - 1}
-            className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-            style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-          >
+          <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={effectivePage >= pageCount - 1} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             Next <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
           </button>
         </div>

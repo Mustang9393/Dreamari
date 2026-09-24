@@ -8,7 +8,12 @@ import { useId } from "react";
 import { LogIn, Users, CalendarDays, TrendingUp } from "lucide-react";
 import { MetricTile } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { useSyncExternalStore } from "react";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { SCHOOL_TARGETS, districtSchools } from "@/lib/counselorOrg";
+import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
@@ -54,17 +59,17 @@ function LoginsChart() {
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Total logins and unique student logins by month" className="h-auto w-full overflow-visible" preserveAspectRatio="none" style={{ height: H }}>
         <defs>
           <linearGradient id={`pe-total-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#5B6CF9" stopOpacity="0.7" /><stop offset="100%" stopColor="#5B6CF9" /></linearGradient>
-          <linearGradient id={`pe-unique-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#33C78C" stopOpacity="0.7" /><stop offset="100%" stopColor="#33C78C" /></linearGradient>
+          <linearGradient id={`pe-unique-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#9BA8FB" stopOpacity="0.7" /><stop offset="100%" stopColor="#9BA8FB" /></linearGradient>
         </defs>
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="color-mix(in srgb, var(--foreground) 12%, transparent)" strokeWidth="1" />
         ))}
         <path d={lineFor("total")} fill="none" stroke={`url(#pe-total-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(91,108,249,0.5))" }} />
-        <path d={lineFor("unique")} fill="none" stroke={`url(#pe-unique-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(51,199,140,0.5))" }} />
+        <path d={lineFor("unique")} fill="none" stroke={`url(#pe-unique-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(155,168,251,0.5))" }} />
         {MONTHS.map((m, i) => (
           <g key={m.label}>
-            <circle cx={x(i)} cy={y(m.total)} r="4.5" fill="#5B6CF9" stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-            <circle cx={x(i)} cy={y(m.unique)} r="4.5" fill="#33C78C" stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+            <circle cx={x(i)} cy={y(m.total)} r="4.5" fill="#5B6CF9" stroke="var(--card)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+            <circle cx={x(i)} cy={y(m.unique)} r="4.5" fill="#9BA8FB" stroke="var(--card)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
           </g>
         ))}
         {MONTHS.map((m, i) => (
@@ -73,27 +78,42 @@ function LoginsChart() {
       </svg>
       <div className="flex flex-wrap gap-x-[16px] gap-y-[4px]">
         <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: "#5B6CF9" }} />Total Logins</span>
-        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: "#33C78C" }} />Unique Student Logins</span>
+        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: "#9BA8FB" }} />Unique Student Logins</span>
       </div>
     </figure>
   );
 }
 
 export function PlatformEngagement() {
+  // The District Administrator's Engagement leads with the schools compared
+  // (seeded siblings, counselorOrg.ts); Lincoln's own month-by-month detail
+  // follows. A school role sees Lincoln only.
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const district = account.role === "District Administrator";
+  const roster = useReviewedRoster();
+  const schools = district ? districtSchools(roster).slice().sort((a, b) => a.activePct - b.activePct) : [];
+  const reach = schools.filter((s) => s.activePct >= SCHOOL_TARGETS.activeStudents).length;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
+      {district && (
+        <OverviewCard title="Schools" unit="% of students active this month" hero>
+          <Verdict band={reach === schools.length ? "met" : reach >= schools.length - 1 ? "near" : "missed"}>{reach} of {schools.length} schools reach {SCHOOL_TARGETS.activeStudents}% · {schools[0]?.short} has the most room to grow</Verdict>
+          <div className="flex flex-col gap-[10px]">
+            {schools.map((s) => <MetricRow key={s.id} label={s.name} note={`${s.activeStudents} of ${s.students} · ${s.avgLogins.toFixed(1)} logins each`} value={s.activePct} target={SCHOOL_TARGETS.activeStudents} />)}
+          </div>
+        </OverviewCard>
+      )}
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Monthly Active Students · unique logins in Sep 2026" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Weekly Active Students · avg unique students per week" accent="#33C78C" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={CalendarDays} value="18" label="Daily Active Students · avg unique students per day" accent="#F5A623" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Avg Logins / Student · per student in Sep 2026" accent="#EC5FA6" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Active this month" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Active weekly" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={CalendarDays} value="18" label="Active daily" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Logins per student" accent="#5B6CF9" /></div></HoverBeam>
       </div>
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Current Academic Year · Logins by Month</h2>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · Current Academic Year</span>
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by month <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL}, this academic year</span></h2>
           </span>
           <LoginsChart />
         </div>
@@ -101,7 +121,7 @@ export function PlatformEngagement() {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Monthly Login Summary</h2>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>By month</h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[480px] border-collapse text-[13px]">
               <thead>
@@ -130,19 +150,18 @@ export function PlatformEngagement() {
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students Needing Intervention by Grade</h2>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>At-risk students or students with low progress who may benefit from a check-in</span>
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students to check in with <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
           </span>
           <div className="grid grid-cols-4 items-end gap-[var(--space-4)] px-[var(--space-2)]" style={{ height: 140 }}>
             {INTERVENTION_BY_GRADE.map((g) => (
               <div key={g.grade} className="flex h-full flex-col items-center justify-end gap-[8px]">
                 <span className="text-[13px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{g.count}</span>
-                <span className="w-full max-w-[64px] rounded-t-[6px]" style={{ height: `${(g.count / 4) * 88}px`, background: "linear-gradient(180deg, #F5A623, color-mix(in srgb, #F5A623 55%, transparent))", boxShadow: "0 0 12px color-mix(in srgb, #F5A623 55%, transparent)" }} />
+                <span className="w-full max-w-[64px] rounded-t-[6px]" style={{ height: `${(g.count / 4) * 88}px`, background: "linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 55%, transparent))" }} />
                 <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {g.grade}</span>
               </div>
             ))}
           </div>
-          <p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Total of {INTERVENTION_BY_GRADE.reduce((a, g) => a + g.count, 0)} students recommended for check-in across all grades</p>
+          <p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{INTERVENTION_BY_GRADE.reduce((a, g) => a + g.count, 0)} students in all</p>
         </div>
       </HoverBeam>
     </div>

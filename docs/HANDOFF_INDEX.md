@@ -15,6 +15,13 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 6a. When a screen needs an empty, loading, error, or edge-case treatment and no locked spec says otherwise, use `docs/COMPONENT_STATES_PLAYBOOK.md`'s default instead of inventing one or waiting on a design pass.
 7. Before treating anything below as still true, grep for it (`DEMO-ONLY` in code, the flag name, the file). This section decays; the code is the source of truth for whether a flag still exists.
 
+## Counselor Dashboard v2 (read these before touching `src/components/counselor/v2/`)
+
+- `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md`: every content, data and structure change from the Replit reference, with the alternative it beat.
+- `docs/COUNSELOR_V2_STATES.md`: every loading, empty, error and edge state per screen, with copy, and the `?state=` preview. This is the backend integration contract.
+- `src/components/counselor/v2/changeNotes.ts`: the per-screen (i) note shown in the UI.
+- `src/lib/counselorOrg.ts`: everything seeded for the role screens (counselors, targets, sibling schools), marked as such.
+
 ## Source of truth for content
 
 | Content | File |
@@ -77,7 +84,7 @@ file.
 ### Demo-only UI, not behind a single flag
 
 - **Counselor Dashboard** (`/counselor`, `/counselor/login`, `/counselor/signup`) -- `src/app/counselor/`, `src/components/counselor/`. A genuinely separate product from the student app (own shell, own sign-up/sign-in, no shared chrome), reachable only from the hamburger's "Counselor Demo" quick link since there's no real counselor-account/org onboarding yet. Reads real data where it exists (one live student, from this browser's own localStorage) inside an otherwise seeded 119-student roster -- see `src/lib/counselorRoster.ts`'s own header comment before treating any one row as real aggregate data, and `docs/AI_HANDOFF.md`, 22 Sept 2026 for the full rationale. Originally a 1:1 port of a Replit reference (structure/copy/vocabulary matched, our own visual execution); it's now being improved screen by screen, and every change to content, data, or structure away from that original port is logged in `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md` -- read that file before assuming this dashboard still matches the reference anywhere.
-- **Counselor Dashboard version chip** (`v1`/`v2`, `?v=2`, remembered in localStorage `dreamari:counselor-version`) -- `src/components/counselor/version.tsx`, switched per view in `CounselorApp.tsx`, docked bottom-center by `shell.tsx`. v1 is the reference port, 1:1 in structure and content (reset to that on 24 Sept 2026), with only our visual language on top; v2 is a fork (`src/components/counselor/v2/`, one file per screen) where every content/structure change lands, so the two can be compared live. `src/lib/counselorReviews.ts` (persisted review decisions) is read by v2 only. Demo-only plumbing; whichever build wins should be collapsed back into one set of files.
+- **Counselor Dashboard version chip and role switcher** (`v1`/`v2`, `?v=2`, remembered in localStorage `dreamari:counselor-version`; on v2 a second pill flips the signed-in role, Counselor / Lead / School admin / District, by writing the same account record Settings' Role dropdown writes) -- `src/components/counselor/version.tsx`, switched per view in `CounselorApp.tsx`, docked bottom-center by `shell.tsx`. Production has one role per account and no role switch. v1 is the reference port, 1:1 in structure and content (reset to that on 24 Sept 2026), with only our visual language on top; v2 is a fork (`src/components/counselor/v2/`, one file per screen) where every content/structure change lands, so the two can be compared live. `src/lib/counselorReviews.ts` (persisted review decisions) is read by v2 only. v2 also carries the role-based shell: the left menu comes from the role in Settings (`src/components/counselor/roles.ts`, one ordered list per role) and a view a role lacks redirects to Overview; the role menus are product, the "v2 only" gate on them is demo plumbing. Two more DEMO-ONLY previews on v2: `?state=loading|empty|error` renders that screen's state (`src/components/counselor/v2/states.tsx`; catalogue in `docs/COUNSELOR_V2_STATES.md`), and the (i) beside every v2 title opens that screen's change note (`src/components/counselor/v2/changeNotes.ts`); both are review aids, not product. Whichever build wins should be collapsed back into one set of files.
 - **Flow Lab** (`/flow-lab`, `?v=2` / `?v=3`, chip remembered in localStorage `dreamari:flowlab:version`) -- `src/app/flow-lab/`, `src/components/flow-lab/`, one quick link in the hamburger under its own "Match flow lab" divider (`LAB_LINKS` in `chrome.tsx`). An isolated, replayable place to play two alternate Build -> Match -> Top 3 flows: v2 is Joshua's proposal (Mini Explore by world, Saved tray capped at 7, Rank #1-#3, a Top 3 with Explore more / Saved / Remove / Replace), v3 the team's counter-proposal (Build add-on with sub-interests, a coherent six with reason chips, pick up to 3). Every screen is the live Match screen's composition (viewport-high six-up grid paged like a carousel, one-line header, sticky bottom bar with the chip docked in it, in-place detail modal), with Match's card rebuilt on catalog data and instructions delivered as lab-only coachmarks (`demoForce`) rather than copy. It reads the catalog and the real Build's answers (worlds, subjects, college/trades) read-only and writes only `dreamari:flowlab:*` keys, so nothing about the live demo's Build, `/match-grid` or `/profile` changes (direct instruction, 24 Sept 2026: "NOTHING SHOULD CHANGE IN THE DEMO"). Remove the route, the folder and `LAB_LINKS` once a flow is chosen and built for real.
 - **Connect role switch** (`Student / Attendee / Volunteer / Partner / Staff`) and the `?as=` URL parameter, plus the volunteer picker row under it -- `src/components/connect/ConnectExperience.tsx` (search `DEMO-ONLY: role switcher`). Production has one role per signed-in user; there is no role-switching UI in production at all.
 - **AT&T board version chip** (`v1`/`v2`, `?v=2`) -- `src/components/connect/att/VersionChip.tsx` and its state in `ConnectExperience.tsx`. v1 is Joshua's Replit reference, faithfully ported; v2.0 is the reach-first rebuild. Both are real, neither is hidden; the chip is demo-only plumbing to compare them live. AT&T-specific changes only ship on explicit instruction naming AT&T.
@@ -121,7 +128,13 @@ This list is a snapshot; `grep -rohE '"dreamari[a-z0-9:_-]*"' src` returns the l
 
 All counts, followers, views, likes, impact numbers, event codes, and the
 notification feed (`src/components/app/notificationsData.ts`, written for a
-fictional "demo student, Jordan") are seeded demo data, not real. **The
+fictional "demo student, Jordan") are seeded demo data, not real.
+`src/lib/counselorOrg.ts` (Counselor Dashboard v2 role Overviews) is seeded
+end to end: three counselors split from the reference roster by last-name
+range, the school targets (FAFSA 65% and active students 60% have no source
+in the reference), and four sibling schools scaled from Lincoln's live
+numbers with `seeded: true`. Never present the sibling schools as real
+aggregate data. **The
 career/school comparison tables' underlying data accuracy is Usman's scope,
 not a UI question** -- confirmed data-mapping work, not yet independently
 verified by this codebase's own agents.

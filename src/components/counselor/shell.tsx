@@ -1,18 +1,21 @@
 "use client";
 
-import { createContext, useContext, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, LogOut, Menu, X,
+  Search, Bell, LogOut, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, signOutCounselor } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
-import { CounselorVersionChip } from "./version";
+import { CounselorVersionChip, useCounselorVersion } from "./version";
+import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, type CounselorView } from "./roles";
+import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
+import { CHANGE_NOTES } from "./v2/changeNotes";
 
 // The isolated shell for the Counselor Dashboard -- a genuinely separate
 // product from the student app's own chrome (direct product decision: not a
@@ -20,23 +23,30 @@ import { CounselorVersionChip } from "./version";
 // src/components/app/chrome.tsx). Its own sidebar, its own topbar, its own
 // visual language on the same design tokens.
 
-export type CounselorView =
-  | "overview" | "students" | "milestones" | "review-queue" | "progress"
-  | "connect" | "insights" | "productivity" | "engagement" | "impact" | "settings";
+// The view union itself lives in ./roles.ts next to the per-role menus that
+// are built from it; re-exported here so every screen keeps importing it
+// from the shell.
+export type { CounselorView } from "./roles";
 
-export const NAV_ITEMS: { view: CounselorView; label: string; icon: typeof LayoutGrid }[] = [
-  { view: "overview", label: "Overview", icon: LayoutGrid },
-  { view: "students", label: "Students", icon: Users },
-  { view: "milestones", label: "Milestone Tracker", icon: Target },
-  { view: "review-queue", label: "Review Queue", icon: ClipboardCheck },
-  { view: "progress", label: "Student Progress", icon: FileText },
-  { view: "connect", label: "Counselor Connect", icon: MessageSquare },
-  { view: "insights", label: "Career + College Insights", icon: Briefcase },
-  { view: "productivity", label: "Productivity Suite", icon: Layers },
-  { view: "engagement", label: "Platform Engagement", icon: Activity },
-  { view: "impact", label: "My Impact", icon: Award },
-  { view: "settings", label: "Settings", icon: SettingsIcon },
-];
+const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
+  overview: LayoutGrid,
+  students: Users,
+  milestones: Target,
+  "review-queue": ClipboardCheck,
+  progress: FileText,
+  connect: MessageSquare,
+  insights: Briefcase,
+  productivity: Layers,
+  engagement: Activity,
+  impact: Award,
+  settings: SettingsIcon,
+  counselors: UserCog,
+  readiness: Gauge,
+  reports: FileBarChart,
+  schools: School,
+  "school-impact": Trophy,
+};
+
 
 export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: string }> = {
   overview: { title: "Overview", subtitle: "Welcome back. Here's your caseload at a glance." },
@@ -50,7 +60,18 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   engagement: { title: "Platform Engagement", subtitle: `Login & activity tracking · ${DEMO_SCHOOL}` },
   impact: { title: "My Impact", subtitle: "Your advocacy, in numbers you can share" },
   settings: { title: "Settings", subtitle: "Manage your profile and preferences" },
+  // Role-shell views (v2 only; see ./roles.ts). Subtitles state the
+  // question each screen exists to answer, so a placeholder still tells a
+  // reviewer what will live here.
+  counselors: { title: "Counselors", subtitle: `Every counselor's caseload at ${DEMO_SCHOOL}, and who needs support` },
+  readiness: { title: "Readiness", subtitle: "Senior plan compliance, FAFSA and milestone readiness against targets" },
+  reports: { title: "Reports", subtitle: "Board, district and state reports built from live readiness data" },
+  schools: { title: "Schools", subtitle: "Every school in the district, and which ones need support" },
+  "school-impact": { title: "School Impact", subtitle: `${DEMO_SCHOOL}'s advocacy, in numbers you can share` },
 };
+
+/** The reference's fixed 11-item menu: what v1 shows for every role. */
+export const NAV_ITEMS: { view: CounselorView; label: string; icon: typeof LayoutGrid }[] = REFERENCE_VIEWS.map((view) => ({ view, label: VIEW_TITLES[view].title, icon: VIEW_ICONS[view] }));
 
 export type GradeFilter = "All Grades" | 9 | 10 | 11 | 12;
 const GRADE_OPTIONS: GradeFilter[] = ["All Grades", 9, 10, 11, 12];
@@ -69,21 +90,38 @@ type FiltersState = {
   search: string; setSearch: (s: string) => void;
   statusFilter: StatusRosterFilter; setStatusFilter: (s: StatusRosterFilter) => void;
   planFilter: PlanRosterFilter; setPlanFilter: (p: PlanRosterFilter) => void;
+  /** A seeded counselor id (counselorOrg.ts) or "All"; read by Students,
+   *  Review Queue and Milestone Tracker for the roles that see counselors,
+   *  and set by the Counselors screen's click-through. */
+  counselorFilter: string; setCounselorFilter: (c: string) => void;
 };
 const CounselorFiltersContext = createContext<FiltersState>({
   gradeFilter: "All Grades", setGradeFilter: () => {},
   search: "", setSearch: () => {},
   statusFilter: "All", setStatusFilter: () => {},
   planFilter: "All", setPlanFilter: () => {},
+  counselorFilter: "All", setCounselorFilter: () => {},
 });
 export function useCounselorFilters(): FiltersState {
   return useContext(CounselorFiltersContext);
 }
 
+/** The menu for this build and role. v1: the reference's fixed 11 items,
+ *  whatever the role. v2: the role's own menu from ./roles.ts (a screen the
+ *  role does not have is simply absent). The version gate is DEMO-ONLY
+ *  plumbing; the role menus themselves are the product. */
+function useNavItems(): { view: CounselorView; label: string; icon: typeof LayoutGrid }[] {
+  const { version } = useCounselorVersion();
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  if (version !== "v2") return NAV_ITEMS;
+  return menuForRole(account.role).map((item) => ({ view: item.view, label: item.label ?? VIEW_TITLES[item.view].title, icon: VIEW_ICONS[item.view] }));
+}
+
 function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?: () => void }) {
+  const items = useNavItems();
   return (
     <nav aria-label="Counselor Dashboard" className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-[var(--space-3)] py-[var(--space-4)]">
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         const on = item.view === active;
         const Icon = item.icon;
         return (
@@ -156,6 +194,60 @@ function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gr
   );
 }
 
+// The (i) at the top right of every v2 screen: what this screen changed
+// from the Replit reference, why, and what makes it better (direct
+// instruction, 25 Sept 2026; moved out of the title block the same day:
+// "put it in the top right corner, and when clicking let it display as an
+// overlay thing that can be closed so it doesn't confuse the layout").
+// Content in ./v2/changeNotes.ts; the icon carries its label as a tooltip
+// (icon-only rule), the click opens a fixed overlay panel over the page,
+// closed by its X, the backdrop or Escape, so the layout beneath never
+// moves.
+function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open: boolean; onToggle: () => void }) {
+  if (!CHANGE_NOTES[view]) return null;
+  return (
+    <IconTip label="What changed and why">
+      <button type="button" aria-label="What changed and why" aria-expanded={open} onClick={onToggle} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: open ? "var(--primary)" : "var(--foreground)" }}>
+        <Info className="h-[18px] w-[18px]" aria-hidden />
+      </button>
+    </IconTip>
+  );
+}
+
+function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () => void }) {
+  const note = CHANGE_NOTES[view];
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-40 flex items-start justify-end p-[var(--space-4)] sm:p-[var(--space-5)]">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(0,0,0,0.45)" }} />
+      <div role="dialog" aria-modal="true" aria-label={`What changed on ${VIEW_TITLES[view].title}`} className="relative mt-[56px] flex max-h-[calc(100dvh-80px)] w-full max-w-[520px] flex-col gap-[var(--space-3)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.6)" }}>
+        <div className="flex items-start justify-between gap-[8px]">
+          <span className="flex flex-col gap-[2px]">
+            <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>What changed from the reference</span>
+            <span className="text-[16px] font-bold" style={{ color: "var(--foreground)" }}>{VIEW_TITLES[view].title}</span>
+          </span>
+          <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[15px] w-[15px]" aria-hidden /></button>
+        </div>
+        <ul className="flex flex-col gap-[6px]">
+          {note.changed.map((c) => (
+            <li key={c} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
+              <span aria-hidden className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{c}
+            </li>
+          ))}
+        </ul>
+        <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Why.</span> {note.why}</p>
+        <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Better because.</span> {note.better}</p>
+        {note.order && <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">What comes first, and why.</span> {note.order}</p>}
+        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Full reasoning and the alternatives each choice beat: docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md</span>
+      </div>
+    </div>
+  );
+}
+
 // `showTitle={false}` drops the page title/subtitle block for a view that
 // renders its own header row (the reference's Student Profile shows
 // "← Student Profile" plus its actions inline instead of the Students title).
@@ -166,13 +258,23 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusRosterFilter>("All");
   const [planFilter, setPlanFilter] = useState<PlanRosterFilter>("All");
+  const [counselorFilter, setCounselorFilter] = useState("All");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
   const { title, subtitle: subtitleRaw } = VIEW_TITLES[active];
   // Matches the reference's own copy exactly ("Welcome back, Sarah...") --
   // the counselor's first name, not a generic greeting. Falls back to the
   // unpersonalized line before an account name is set.
   const firstName = account.name.trim().split(/\s+/)[0];
-  const subtitle = active === "overview" && firstName ? `Welcome back, ${firstName}. Here's your caseload at a glance.` : subtitleRaw;
+  const { version } = useCounselorVersion();
+  // v2: each role's Overview answers its own question and the subtitle
+  // says which (roles.ts). v1 keeps the reference's line.
+  const subtitle = active === "overview"
+    ? version === "v2" ? OVERVIEW_SUBTITLES[roleOrDefault(account.role)](firstName) : firstName ? `Welcome back, ${firstName}. Here's your caseload at a glance.` : subtitleRaw
+    : subtitleRaw;
+  // A district administrator's frame of reference is the district, not one
+  // school: the topbar's org chip and the account line say so (v2 only).
+  const orgLabel = version === "v2" && account.role === "District Administrator" ? DISTRICT_NAME : DEMO_SCHOOL;
 
   const doSignOut = () => {
     signOutCounselor();
@@ -180,7 +282,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   };
 
   return (
-    <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter }}>
+    <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter }}>
       {/* marketing-v2 defines --primary, --card, --foreground, and every
          other token used across this dashboard (see marketing/tokens.css,
          scoped to .marketing-v2, not root). This wrapper only had
@@ -206,7 +308,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             <Wordmark />
           </div>
           <SidebarNav active={active} />
-          <SidebarAccount account={account} onSignOut={doSignOut} />
+          <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} onSignOut={doSignOut} />
         </aside>
 
         {/* Mobile drawer -- backdrop + slide-in panel, lg:hidden context only (never mounted interactive at lg+). */}
@@ -221,11 +323,11 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                 </button>
               </div>
               <div className="flex flex-col gap-[10px] border-b px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · 2023-2024</span>
+                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · 2023-2024</span>
                 <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
               </div>
               <SidebarNav active={active} onNavigate={() => setDrawerOpen(false)} />
-              <SidebarAccount account={account} onSignOut={doSignOut} />
+              <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} onSignOut={doSignOut} />
             </div>
           </div>
         )}
@@ -245,6 +347,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
                 </button>
               </IconTip>
+              {version === "v2" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
               {/* DEMO-ONLY: the site-wide "quick links" hamburger, same one
                  the student app uses to reach this dashboard in the first
                  place -- without it, this shell's own isolation (no shared
@@ -260,7 +363,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
           {/* Desktop topbar -- full filters row, lg and up only. */}
           <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
             <div className="flex flex-wrap items-center gap-[10px]">
-              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{DEMO_SCHOOL}</span>
+              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{orgLabel}</span>
               <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>2023-2024</span>
               <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
             </div>
@@ -282,16 +385,18 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
                 </button>
               </IconTip>
+              {version === "v2" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
               {/* DEMO-ONLY: see the matching comment on the mobile header
                  above -- the way back to the rest of the demo. */}
               <QuickLinksMenu align="right" />
             </div>
           </header>
 
-          {/* Bottom padding also clears the DEMO-ONLY version chip docked
+          {/* Bottom padding also clears the DEMO-ONLY version/role dock at
              bottom-center (./version.tsx), so a page's last row (roster
-             pagination, a card's footer) is never sitting under it. */}
-          <main className="flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-4)] pb-[calc(var(--space-6)+36px)] sm:px-[var(--space-5)] md:px-[var(--space-8)]">
+             pagination, a card's footer) is never sitting under it. On
+             phones the two pills wrap to two rows, hence the taller clear. */}
+          <main className="flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-4)] pb-[calc(var(--space-6)+68px)] sm:px-[var(--space-5)] sm:pb-[calc(var(--space-6)+36px)] md:px-[var(--space-8)]">
             {/* Capped, not full-bleed -- a huge monitor stretching every
                card/table edge-to-edge is what reads as "undesigned
                wireframe" (direct feedback): thin progress bars, cavernous
@@ -323,6 +428,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             </div>
           </main>
         </div>
+        {version === "v2" && noteOpen && <ChangeNotePanel view={active} onClose={() => setNoteOpen(false)} />}
         <CounselorVersionChip />
       </div>
     </CounselorFiltersContext.Provider>

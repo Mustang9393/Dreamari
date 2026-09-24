@@ -44,6 +44,155 @@ tokens above, in both modes).
 
 **What (`shared.tsx`, `NextStep` + `CareerActions`, both flows):** one recommended next step for #1 ("Career Report for Data Scientist", Start), then the student-side ladder in the counselor dashboard's own milestone order (Career Report > Pathway > Play a day > Colleges, from `MILESTONE_KEYS`) so the student's next step is the same thing that moves their roadmap on the counselor's screen, and four icon-only actions under every Top 3 card (tooltips per the icon-only rule) that open the real app pages: `/career-report?picks=<slug>`, `/career/<slug>`, `/play`, `/colleges`. Back returns into the lab. The lab records no progress, so the recommendation is always the first rung; in the product it is the first rung not yet done. No new copy beyond the labels.
 
+**Also fixed (direct report: "these tooltips appear when the coachmark plays and then don't disappear"):** the card's coachmark used to sit inside its IconTip. The bubble is a portal that still belongs to that subtree in React's tree, so pressing "Next" focused a button inside the tooltip's focus scope (tooltip shows) and then the bubble unmounted without a blur (tooltip never hides). The coachmark now wraps the IconTip, not the other way round. Match's `GridCard` nests them the same way as the old lab, so it will show the same symptom once coachmarks are re-enabled.
+
+### 2026-09-25 Counselor Dashboard v2: every screen for every role, states, change notes, devices, light mode
+
+Direct instructions across the afternoon, in order: get everything done (Student Profile and the five role screens); drilldowns wherever valid; all devices and browsers, including wide desktops; every empty, loading, error and edge state verified and documented for Usman; an (i) on every screen with what changed and why; light mode; nested surfaces lighter than their parent; make Connect's announcements and groups work; improve the Productivity Suite; simplify My Impact ("so much copy"); then push live.
+
+**Built.** Counselors, Schools, Readiness, Reports (CSV from live numbers), School Impact; Student Profile pass (needs-you line, grade-scoped ordered milestones); Connect composer, expandable announcements with recipients, group feeds and creation; Productivity drafts from student data with Copy / Download / Save to notes and a real attention list; My Impact and School Impact as a scorecard; Review Queue attachment preview and profile links; scroll chips for Student Progress and Productivity; avatars by roster position (no repeats); the counselor filter in the shared context; a `?state=` preview and `StateGate` for loading / empty / error on every v2 screen; the (i) change note on every v2 screen (top-right icon in the top bar, opening a closable overlay, after "don't make the info thing like it is now").
+
+**Fixed.** Heroes stack below 1280; panes become a bottom sheet below 1024; `minmax(0,1fr)` grid tracks (right-edge overflow); Student Progress used the header grade filter twice; the pathway filter listed non-roster careers; the "You" badge in the counselor's view; light-mode whites and the nested-surface elevation rule.
+
+**Docs.** `docs/COUNSELOR_V2_STATES.md` (new, the backend contract), deviations file ("Cross-cutting, 25 Sept 2026 (late)", per-screen sections), HANDOFF_INDEX (v2 reading list, previews). `npx tsc --noEmit -p .` and `npx eslint` clean; captures at 375, 768, 1024, 1280, 1440 and 2560, dark and light.
+
+**Later the same evening:** "Write my own" beside Generate on the Productivity Suite and "Add your own" on Insights' recommendations (a manual option wherever something is AI generated); every (i) note gained a "What comes first, and why" line explaining the screen's ranking.
+
+**Open, by design or for the backend:** Insights rows have no drilldown (no career id in the roster); Share and Principal report on Impact are not wired (no export service); the trend deltas on the counselor Overview are fixed demo numbers; Milestone Tracker proportions are the reference's, scaled, so approvals do not move it.
+
+### 2026-09-25 Counselor Dashboard v2: My Impact, Platform Engagement and Settings passes
+
+`v2/MyImpact.tsx`: each number once (Notable Achievements and District Compliance Summary removed), senior plan compliance on the reference's definition, blue tiles with amber only on a missed target, card sub-lines instead of sentences, one-line footer. `v2/PlatformEngagement.tsx`: two-word tile labels, qualifiers as units, blue second series. `v2/Settings.tsx`: role as a Listbox, permissions for the chosen role only. `v2/ProductivitySuite.tsx`: tool sub-line wraps under the title on phones. Reasoning: deviations file, "My Impact (v2)", "Platform Engagement (v2)", "Settings (v2)". Verified at 1440; `npx tsc --noEmit -p .` and `npx eslint` clean.
+
+With this, every screen the reference had is passed in v2. Remaining: the five role placeholders (Counselors, School Impact, Readiness, Reports, Schools) and Student Profile.
+
+### 2026-09-25 Counselor Dashboard v2: Career + College Insights and Productivity Suite passes
+
+`v2/CareerCollegeInsights.tsx`: recommendations as the hero with one stat and one action each, four ranked lists always as bars with noun titles and no ledes, career-fair note as one line plus chips. `v2/ProductivitySuite.tsx`: tools as a tab row instead of a side column, one sentence per tool, Listbox pickers in one row with the button, whole roster in the student picker, one muted line replacing the banner and helper paragraph. Reasoning: deviations file, "Career + College Insights (v2)" and "Productivity Suite (v2)". Verified at 1440 (and Productivity at 375); `npx tsc --noEmit -p .` and `npx eslint` clean.
+
+### 2026-09-25 Counselor Dashboard v2: Counselor Connect pass
+
+`v2/CounselorConnect.tsx`: opens on Questions with the open count badged on the tab, questions sorted new and follow-up first with amber only on those, two-line cards on the inset surface, a one-line detail header, announcements with plain dates, groups as one card of rows by activity. Reasoning and what it replaced: deviations file, "Counselor Connect (v2)". `QUESTIONS` and `ANNOUNCEMENTS` exports kept (My Impact reads them). Verified at 1440 and 375; `npx tsc --noEmit -p .` and `npx eslint` clean.
+
+### 2026-09-25 Counselor Dashboard v2: clutter sweep of the finished screens, Student Progress pass
+
+Direct instruction: "verify everything makes sense, no clutter, avoid overwhelming with copy and then onto the next."
+
+**Sweep:** the counselor Overview's Postsecondary Plans title no longer wraps (the card link drops under the title in the narrow column); the School Administrator's "Subgroup cuts arrive with SIS data" footnote is gone (budget: no footnotes); the Review Queue's feedback placeholder is "A note for the student". Checked the District Overview's Student Status card in the browser: plain glass, one hero per screen holds; the green is the ring's own arc glow.
+
+**Student Progress** (`v2/StudentProgress.tsx`): verdict column beside a width-capped chart, nice axis, capitalised categories, and a real bug fixed (pathway filter used the student app's 15 worlds, so any pathway emptied the report; now the roster's seven). Reasoning: deviations file, "Student Progress (v2)".
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+### 2026-09-25 Counselor Dashboard v2: Review Queue pass, per-role check of the finished screens
+
+Direct instruction: "Onto the next. Also verify if these screens are done for each role."
+
+**Review Queue** (`v2/ReviewQueue.tsx`): header stats (pending, overdue, due in 2 days), two-line cards on the inset surface with the priority pill as the only colored element, bounded scrolling list beside the pane, detail meta reduced to one line, Lead Counselor gets a Counselor picker and counselor names. Reasoning: deviations file, "Review Queue (v2)".
+
+**Milestone Tracker for the Lead** gets the Counselor picker (same control as Students and Review Queue); picker aggregates renamed "All counselors / All statuses / All plans" after "should it be any or all counselors?".
+
+**Per-role check** (headless captures at 1440, every finished screen for every role that has it): Overview done for all four roles; Students done for School Counselor, Lead and School Administrator (Counselor column and picker on the last two); Milestone Tracker done for School Counselor and Lead (the only roles that have it), whole-school numbers after the scoping revert; Review Queue for School Counselor and Lead. District Administrator has none of the last three by design. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+### 2026-09-25 Counselor Dashboard v2: caseload scoping turned off, whole school for every role
+
+Direct feedback: "why is it 12 students total? Our numbers need to make sense. This is a school counsellor's dashboard of a whole school right?" The role scoping added earlier today narrowed a School Counselor to the seeded A-H caseload, so her Grade 9 read 12 against the school's 30. `SCOPE_COUNSELOR_TO_CASELOAD = false` in `src/lib/counselorOrg.ts`: every role reads the whole school (121), as the reference does; the Lead and School Administrator keep the Counselor column, picker and comparison. Mechanism kept behind the flag. Logged in the deviations file under "Who sees which students".
+
+### 2026-09-25 Counselor Dashboard v2: Milestone Tracker on roster data, pathway clusters, card-link pills
+
+Direct feedback in sequence: overhaul the Milestone Tracker ("are we getting the proper data ... proper hierarchy ... readable ... understandable ... do things align ... Next-Year Course Plan: the components are overlapping"); pathways should be multicolor "but complementary, not random, have a logic"; "don't make the CTAs blue and make sure they highlight or animate a little more obviously when hovered"; "the padding that appears on hover is wrong, too tight and overlapping"; "milestone tracker hero is confusing me, the positions of the information are scattered".
+
+**Milestone Tracker** (`v2/MilestoneTracker.tsx`, three shapes in one day, final one committed): data is the reference's grade curriculum scaled to the cohort the role sees (decided for the demo after the roster-only version made Grade 9 look like three milestones); one ring for the milestone furthest behind with its four counts beside it, then every other milestone as a stacked four-state bar row, worst first; four header stats. Standing rule recorded from this exchange: "as a rule always display what needs attention first" (now in memory and applied to every v2 list). Reasoning and the two rejected shapes: deviations file, "Milestone Tracker".
+
+**Pathways:** `PATHWAY_SEQUENCE` in `palette.ts`: seven distinct hues in spectral order assigned by rank, after direct feedback that clustered (repeated) colors were not acceptable: "each thing in that legend has to be different but stick to a known sequence like a rainbow". The one deliberate exception to the one-hue rule.
+
+**CardLink:** a resting pill (border, padding, foreground text), hover lifts background and border and slides the chevron; also fires on card hover via `group`.
+
+**Verified live** (headless captures at 1440 and 375): tracker Grade 9 as Lead (Academic Plan hero, 19 not started, list of two), Overview with cluster colors and pill links. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+### 2026-09-25 Counselor Dashboard v2: roster scoped by role, Students worst-first with reasons, every card has a way in
+
+Direct feedback and questions, same session: "Make sure in the student table, things needing attention is surfaced first, based on severity." "Is lead counsellor only seeing Sarah Chen's caseload? Is the number 121 supposed to be same for school counsellor and lead?" "Make all cards clickable, show the obvious chevron ... or is this a bad approach? Considering the users might be older?"
+
+**Scoping.** `scopeRosterForRole()` and `myCounselor()` in `src/lib/counselorOrg.ts`; `useReviewedRoster()` in `counselorReviews.ts` now applies it (School Counselor: own caseload by last-name range matched to the account name, plus the live demo student; Lead and School Administrator: whole school). `useSchoolReviewedRoster()` is the unscoped read for the Lead's counselor ranking. Review Queue switched from `getReviewedRoster()` to the hook so it scopes too. Effect: signed in as Sarah Chen, a School Counselor sees 46 students everywhere; Lead sees 121.
+
+**Students.** Default sort is priority (status, then `attentionRank`, then roadmap); a flagged row shows its reason under the chip; Lead Counselor and School Administrator get a Counselor column and picker; the toolbar names the caseload for a counselor.
+
+**Career Pathways** segments now interleave the 7-step ramp (indices 0,4,1,5,2,6,3) with a 2px gap, after "education and skilled trades are blending together".
+
+**Cards.** `CardLink` (chips.tsx): word + chevron, visible at rest, chevron nudges on card hover (`group`). Added to every Overview card that lacked one (Student Status, Postsecondary Plans, Career Pathways to Insights, attention strip, Lead and District donuts). Reasoning on why not hover-only and why not a whole-card button: deviations file, "Students (roster)".
+
+**Verified live** (headless captures at 1440): Students as School Counselor (46, "your caseload, A-H", worst first, reasons), Students as Lead (121, Counselor column and picker), scoped counselor Overview with card links. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+### 2026-09-25 Counselor Dashboard v2: one hue, hero-only glow, gradient bars, quiet attention strip, Students rebuilt
+
+Direct feedback, in order: "Lets lose the red glow on needs your attention and lets have better contrast for the nested cards everywhere. Lets not use so many different colors. Choose a hue and stick to that. Blue is best. Lose the glow from anything that isnt a hero card. School counselor overview: yes execute your recommendation. Milestone tracker: dont tint cards. Review queue: do not tint cards. etc." Then: "Lose the equalizer style graphs too, just do a blueish tinted one with gradient running brighter to top and more transparent towards bottom." Then: Overview is finalised, next screen is Students.
+
+**Palette.** New `src/components/counselor/palette.ts`: PRIMARY, BLUE_3 / BLUE_5 / BLUE_7 ordinal ramps (each passes `validate_palette.js --ordinal --mode dark --surface "#0b0d14"`), a neutral TARGET_LINE, NEUTRAL_SLICE. Swept every non-status hex in v2 to it: Career Pathways bar (7-step ramp in rank order), Postsecondary "With Plan", My Impact tiles / big stats / ASCA cards / stars, Platform Engagement tiles / second line series / intervention bars, Student Profile tile and card accents, Insights banner, Student Progress category charts, the role Overviews. Status colors (chips.tsx) untouched: they mean state.
+
+**Glow and tint.** Hero-only everywhere: Overview's donut sidekicks, pathways card and attention strip; Milestone Tracker (hero in brand blue, severity in the verdict dot only); Review Queue (priority pill stays, no card glow, detail pane in brand blue, due line neutral with a colored dot); the role Overviews' `OverviewCard`. `GLASS_INSET` raised to 7% / 14% for nested rows.
+
+**Charts.** `src/components/connect/viz.tsx` `BarChart` gained `barStyle="solid"` (one rounded bar, vertical gradient from the series color to near-transparent at the baseline, no track). Counselor v2 charts opt in; Connect's charts are unchanged.
+
+**Attention strip** (my recommendation, approved): one row per student on the inset surface, reason in plain text, severity as one colored word, three rows then "See all".
+
+**Students (v2)** rebuilt: six columns (grade and pathway fold into the student cell), Status sorts by severity, Last active sortable, Status and Plan `Listbox` pickers replace the popover and its chips, roadmap as a plain blue bar with the percent, "Jan 15" dates, a card list below `lg` instead of a 1100px sideways table, one-line empty state. Reasoning against alternatives: deviations file, "Students (roster)" and "v2 design rules".
+
+**Verified live** (headless captures at 1440 and 375): Overview, Milestone Tracker, Review Queue, School Administrator Overview, Students desktop and phone. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+**Next:** Student Profile (the drill-down from Students) on the same rules, then Milestone Tracker copy, Review Queue, and the five placeholder role screens.
+
+### 2026-09-24 Counselor Dashboard v2: role Overviews rebuilt under a copy and color budget
+
+Direct feedback: "There is SO MUCH COPY AND RED and everything looks super overwhelming. V2 is the design layer it needs to be super intuitive, skimmable, glanceable, actionable, beautifully composed, the information delivered with proper hierarchy."
+
+**What changed.** `v2/overviewShared.tsx` rebuilt: `OverviewCard` (noun title + optional unit, no subtitle), `Verdict` (a phrase, neutral text, one colored dot), `MetricRow` (label, short note, value, bar with tick; the value and bar wear amber or red only when below target, otherwise quiet blue and white), `Stat`, `RankBar`, `SeeLink`, `InitialsBadge`. Removed: `TargetRow` with its distance sentence, `BandChip`, `StatusBar`, `worstBand`, every footnote. The three role Overviews (`OverviewLead`, `OverviewSchoolAdmin`, `OverviewDistrict`) were rewritten on those pieces; the same two-row structure and click-throughs remain. Reasoning against the alternative in the deviations file, "Overview per role (v2)".
+
+**Not changed, flagged:** the School Counselor v2 Overview's attention strip still carries three red "Critical" badges and three red reason pills; that treatment came from detailed earlier feedback ("the reason blends in", "rate by severity"), so it was left for a decision rather than reversed silently.
+
+**Verified live** (headless captures at 1440 and 375): one colored row per problem, one verdict per card, no chips. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+### 2026-09-24 Counselor Dashboard v2: role switcher, glows only on heroes, Student Progress without its side list
+
+Direct feedback in chat, all three points: "the different glows per card is not required everywhere, overview makes sense and only have it genuinely where it needs to be"; "How are we toggling user roles for the dashboard v2?"; "In student progress a submenu is taking up space inside its container. Why? ... either make it take over the left bar menu with a back button ... or do something else." Also clarified that no external sign-off gates this work: v2 needs to be better than v1, useful for the four Settings roles, and look good.
+
+**Role switcher.** `version.tsx`'s bottom-center dock gains a second pill on v2 (Counselor / Lead / School admin / District) that calls `writeCounselorAccount({ role })`, the same record Settings' Role dropdown saves, so the sidebar, the Overview and Settings all move from one source. DEMO-ONLY (a real account has one role); registered in `docs/HANDOFF_INDEX.md`. Before this the only path was Settings > Role > Save.
+
+**Glows.** The three role Overviews tinted every card by its worst band; now only each screen's hero carries the status tint and sidekicks are the plain glass with the quiet primary glow (`v2/overviewShared.tsx`, the three `Overview*.tsx`). Reasoning in the deviations file under "Overview per role (v2)".
+
+**Student Progress.** The 300px report-type list is gone; Report is the first `Listbox` in the filter row with Grade Level and Career Pathway (also converted from native selects, per the guardrails), CSV/PDF on the same row, chart and table full width, report icon in the chart title, and a one-line note for the two table-only reports. Why this over a nav takeover: in the deviations file, "Student Progress (v2)". Same pattern still exists on Productivity Suite (a 5-tool list); Connect, Review Queue and Student Profile are master-detail layouts, which is a different thing.
+
+**Also fixed:** the four-role pill was wider than a phone and clipped at the left edge (a centered flex child wider than its container overflows both sides); it now scrolls, and the shell's bottom clearance grows on phones where the two pills wrap.
+
+**Verified live** (headless captures at 1440 and 375 plus the in-app browser): the role pill switches the sidebar and Overview in place with no console errors; Student Progress at both widths; Lead and School Administrator Overviews with plain sidekicks. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+### 2026-09-24 Counselor Dashboard v2: Overview per role (step 2 of the role work)
+
+Direct instruction (this session's brief): after the role shell, an Overview per role, School Counselor first (already the improved v2 Overview), then Lead Counselor ("which counselor and which grade is behind"), School Administrator ("is the school on target: senior plan compliance, FAFSA, readiness vs targets, equity cuts"), District Administrator ("which schools are behind, is the platform used; 3 to 5 seeded sibling schools scaled deterministically from the reference roster and clearly marked seeded in code"), on the same design rules as the existing v2 Overview.
+
+**What landed.** `src/lib/counselorOrg.ts` (all seeded, header says so): three counselors by last-name range, the school targets, `readinessMetrics()` over any roster slice, `targetBand()` (met / near / missed), Lincoln's engagement share, four sibling schools scaled from Lincoln, `districtRollup()`. `v2/overviewShared.tsx`: `OverviewCard` (same glass, glow and title block as the counselor cards), `TargetRow`, `RankBar`, `StatusBar`, `BandChip`, `Verdict`, `SeeLink`, `InitialsBadge`. `v2/OverviewLead.tsx`, `v2/OverviewSchoolAdmin.tsx`, `v2/OverviewDistrict.tsx`, picked per role in `CounselorApp`'s v2 switch. `v2/Overview.tsx` now exports `DonutCard` (with an optional caption), `STATUS_COLORS`, `READINESS_SERIES` and `TARGET_LINE_COLOR` for reuse. `roles.ts` holds the per-role Overview subtitle; `shell.tsx` shows it on v2 and swaps the org chip and account line to the district for District Administrator.
+
+**Design rules applied.** One hero per screen (counselor comparison / targets scorecard / school ranking), sidekicks in plain glass, glow tinted by the worst band on the card, reserved status colors only for state (met / close / behind, always icon + word), the validated single-hue primary ramp and bronze target line for the readiness chart (`validate_palette.js "#9BA8FB,#5B6CF9,#2E3BB8" --ordinal --mode dark --surface "#0b0d14"` passes; `"#5B6CF9,#A67C2E"` passes), single-hue bars for magnitude, every card opens a screen (Counselors, Schools, Readiness, Engagement, Review Queue, Students with the grade filter set). Density kept to two rows per Overview.
+
+**Why each choice, against alternatives:** `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md`, "Overview per role (v2)" (the vs-target language over a numeric score, last-name caseloads over every-third or contiguous blocks, seeded targets for FAFSA and usage, the reference's senior-plan definition kept, honest "coming soon" for demographic equity cuts over seeded subgroups, scaled siblings over four independent rosters).
+
+**Corrected before commit:** senior plan compliance first used a milestone check and read 40%, contradicting v1 My Impact's 87% (seniors with a declared plan); switched to the reference's definition. Phone width truncated counselor and school names and clipped the Equity cuts toggle; row headers and card headers now wrap.
+
+**Verified live** (headless Chrome captures at 1440 and 375, plus the in-app browser): Lead Counselor (Renee Alvarez S-Z furthest behind at 75%, Grade 11 at 74%), School Administrator (2 of 4 targets met, FAFSA 25 pts under), District Administrator (Washington 0 of 4, 2 of 5 schools reach 60% active, district chip in the topbar); School Counselor v2 Overview unchanged; v1 under an admin role still the reference's 11 items and Overview. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+**Next:** step 3, screen by screen per role in the order Joshua asks for (Counselors, Readiness, Reports, Schools, School Impact are placeholders), stopping to report after each screen. Open question for Joshua: the four menus and the seeded targets (FAFSA 65%, active students 60%).
+
+### 2026-09-24 Counselor Dashboard v2: role-based shell (step 1 of the role work)
+
+Direct instruction (this session's brief): the left menu changes with the role set in Settings; hidden screens disappear rather than grey out; a view a role does not have redirects to that role's Overview; v1's nav stays the reference's 11 items; the four menus are Joshua's to sign off, so build them as proposed and keep them easy to change in one place; new screens may start as honest "Coming soon" placeholders.
+
+**What landed.** `src/components/counselor/roles.ts` is the one place the four menus live (ordered view lists per role, optional per-role label such as District's "Engagement"), plus `roleHasView` and the `CounselorView` union, which now includes the five role-shell views (counselors, readiness, reports, schools, school-impact). `shell.tsx` builds its nav from `menuForRole(account.role)` when the version chip is on v2 and from the reference's fixed list on v1; titles, subtitles and icons for the new views sit in its `VIEW_TITLES` / `VIEW_ICONS`. `CounselorApp.tsx` gained `RoutedView`, which resolves the requested `?view=` against the role's menu (v2) or the reference's 11 (v1) and `router.replace`s to Overview when it is not allowed. `version.tsx` exposes `ready` so that check never runs on the pre-hydration v1 placeholder. `v2/ComingSoon.tsx` is the playbook-default placeholder (tier 1 + tier 6) the five new views render until their own pass.
+
+**Why this shape, against the alternatives:** in `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md`, "Role shell (v2)" (one file over a permissions matrix, absent over locked, redirect over a "not for your role" page, Platform Engagement moved to the admin menus, placeholders over hidden items).
+
+**Verified live** (fresh tab, `preview_start` dreamari-dev, 1440 then phone): School Counselor v2 shows 10 items with Platform Engagement gone; changing the role to Lead Counselor in Settings and saving re-renders the sidebar in place (Counselors after Overview, School Impact replacing My Impact); Counselors opens the placeholder under its own title; School Administrator and District Administrator menus match the proposal; a District Administrator opening `?view=review-queue` lands on `?view=overview`; v1 with the District role still shows all 11 reference items and the reference Overview; the phone drawer shows the role menu. No console errors. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+**Next:** step 2, Overview per role (School Counselor first, already the improved v2 Overview; then Lead Counselor, School Administrator, District Administrator with 3 to 5 seeded sibling schools), then screen by screen in the order Joshua asks for.
 ### 2026-09-25 Flow Lab: every screen on Match's composition, a six-card carousel, in-place detail modal, coachmarks scoped to the lab
 
 **Why (direct feedback, 25 Sept 2026):** "follow the design language, the tap to learn more should be similar to the earlier version... six cards on screen, show six more, all 6 scroll out of the screen, new 6 loads, I can keep moving between these like a carousel. The pagination breadcrumb thing shouldn't be there. Stick to earlier layouts, kill all redundant copy. NO long text explainers on screen. If you must have it, wire up the coachmark stuff... to fire on these screens ONLY, with sensible copy, concise, no em dashes." The previous pass had the right card but the wrong page around it: a step strip, a big title with a helper paragraph, an "Ordered for you by..." line, chips under every card, and Learn more that left the lab for the Career Detail page.

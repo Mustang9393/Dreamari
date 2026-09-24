@@ -6,16 +6,18 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingDown, TrendingUp, ChevronRight, AlertTriangle } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { SegmentedRing, BarChart } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { Avatar, StatRow } from "../chips";
+import { Avatar, CardLink, StatRow } from "../chips";
 import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
+import { BLUE_3, NEUTRAL_SLICE, PATHWAY_SEQUENCE, PRIMARY, TARGET_LINE } from "../palette";
+import { GLASS_INSET } from "../surfaces";
 
-const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
+export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "#33C78C",
   "Needs Attention": "#F5A623",
   "At Risk": "#E0453C",
@@ -50,13 +52,13 @@ const SEVERITY_COLORS: Record<AttentionSeverity, string> = {
 // `validate_palette.js "#9BA8FB,#5B6CF9,#2E3BB8" --ordinal --mode dark` ->
 // all checks pass. "Series 1" and "series 2" still mean the same shade on
 // every readiness chart.
-const READINESS_SERIES = ["#9BA8FB", "#5B6CF9", "#2E3BB8"];
+export const READINESS_SERIES = [...BLUE_3];
 // The target/benchmark line needs to read as "not one of the bars" against
 // an all-blue ramp, and "not the status amber" against the rest of the
 // page -- a warm bronze does both: validated clear of "Needs Attention"
 // (`validate_palette.js "#F5A623,#A67C2E" --mode dark` -> ΔE 17.9, passes)
 // and it's warm/cool-contrasting against every blue bar it sits over.
-const TARGET_LINE_COLOR = "#A67C2E";
+export const TARGET_LINE_COLOR = TARGET_LINE;
 
 // Two surfaces, spent by role, not one surface repeated three times --
 // "dominance over equality": one card should carry the visual weight,
@@ -102,7 +104,7 @@ function DeltaChip({ pts }: { pts: number }) {
 // matches what it's actually reporting rather than just being "the loud
 // one." Every other donut stays the plain glass and a smaller ring, so
 // there's exactly one thing the eye lands on first.
-function DonutCard({ title, centerPct, centerLabel, deltaPts, rows, hero, heroTint }: { title: string; centerPct: number; centerLabel: string; deltaPts?: number; rows: { label: string; value: number; color: string; onClick?: () => void }[]; hero?: boolean; heroTint?: string }) {
+export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, rows, hero, heroTint, aside }: { title: string; /** one muted line under the title, for a reading that has no trend delta */ caption?: string; centerPct: number; centerLabel: string; deltaPts?: number; rows: { label: string; value: number; color: string; onClick?: () => void }[]; hero?: boolean; heroTint?: string; /** the card's way in, a CardLink, visible at rest */ aside?: React.ReactNode }) {
   const surface = hero ? { ...GLASS_CARD_HERO, borderColor: heroTint ? `color-mix(in srgb, ${heroTint} 38%, var(--glass-border))` : GLASS_CARD_HERO.borderColor } : GLASS_CARD;
   const ringSize = hero ? 152 : 108;
   const ringStroke = hero ? 17 : 13;
@@ -113,15 +115,22 @@ function DonutCard({ title, centerPct, centerLabel, deltaPts, rows, hero, heroTi
   const glowColor = heroTint ?? rows[0]?.color ?? "var(--primary)";
   return (
     <HoverBeam strength={0.7} className="h-full">
-      <div className="relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(glowColor, hero ? 0.3 : 0.14) }} />
+      <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
+        {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(glowColor, 0.3) }} />}
         <div className="relative flex flex-col gap-[2px]">
-          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
+          {/* Wraps: in the narrow third-column card the link drops under
+             the title instead of forcing "Postsecondary Plans" onto two
+             lines. */}
+          <span className="flex flex-wrap items-start justify-between gap-[8px]">
+            <h2 className="text-[15px] leading-[1.3] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{title}</h2>
+            {aside}
+          </span>
           {/* Hand-authored, deterministic vs. last month -- same "seeded
              demo data" convention the roster itself already uses, not a
              live computation (there's no historical snapshot to compute
              it from). Direct instruction: trend deltas on the donut cards. */}
           {typeof deltaPts === "number" && <DeltaChip pts={deltaPts} />}
+          {caption && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{caption}</span>}
         </div>
         {/* flex-1 + justify-center: when the row-stretch that keeps every
            card the same height (direct instruction) leaves a shorter card
@@ -165,13 +174,13 @@ function DonutCard({ title, centerPct, centerLabel, deltaPts, rows, hero, heroTi
 // click-throughs, which land on the Roster). The stacked bar's own
 // segments are the click targets too, not just the legend rows, since
 // they're already visually "the thing you'd click."
-function PathwaysCard({ total, topPathways, colors, activePathway, onToggle }: { total: number; topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void }) {
+function PathwaysCard({ total, topPathways, colors, activePathway, onToggle, onOpen }: { total: number; topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
-      <div className="relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(colors[0], 0.14) }} />
+      <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
         <div className="relative flex items-center justify-between gap-[8px]">
           <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways</h2>
+          {!activePathway && <CardLink onClick={onOpen}>Insights</CardLink>}
           {activePathway && (
             <button type="button" onClick={() => onToggle(activePathway)} className="dm-quiet flex cursor-pointer items-center gap-[4px] rounded-full border px-[8px] py-[2px] text-[11px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", color: "var(--foreground)" }}>
               {activePathway} <span aria-hidden style={{ color: "var(--muted-foreground)" }}>✕</span>
@@ -179,7 +188,7 @@ function PathwaysCard({ total, topPathways, colors, activePathway, onToggle }: {
           )}
         </div>
         <div className="relative flex flex-1 flex-col justify-center gap-[var(--space-5)]">
-          <span className="flex h-[18px] w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", boxShadow: "0 6px 16px -6px rgba(0,0,0,0.5)" }}>
+          <span className="flex h-[18px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)", boxShadow: "0 6px 16px -6px rgba(0,0,0,0.5)" }}>
             {topPathways.map(([label, value], i) => {
               const pct = total > 0 ? (value / total) * 100 : 0;
               if (pct <= 0) return null;
@@ -188,7 +197,7 @@ function PathwaysCard({ total, topPathways, colors, activePathway, onToggle }: {
                 <button
                   key={label} type="button" onClick={() => onToggle(label)} title={`${label}: ${value}`}
                   aria-pressed={activePathway === label}
-                  className="h-full flex-none cursor-pointer first:rounded-l-full last:rounded-r-full"
+                  className="h-full flex-none cursor-pointer first:rounded-l-full last:rounded-r-full [&:not(:last-child)]:shadow-[inset_-2px_0_0_var(--card)]"
                   style={{ width: `${pct}%`, background: colors[i % colors.length], opacity: dim ? 0.35 : 1, transition: "opacity 120ms ease" }}
                 />
               );
@@ -224,92 +233,50 @@ function PathwaysCard({ total, topPathways, colors, activePathway, onToggle }: {
 // own heading six times over without adding information, pure clutter.
 // Bigger avatars and real padding instead, so six names read as a
 // considered row, not a cram of chips.
+// Rebuilt 25 Sept 2026 (direct feedback: "lose the red glow on needs your
+// attention", and the standing budget: skimmable, one line per item, color
+// only where it means something). No glow, no filled red blocks: one row
+// per student on the raised inset surface, the reason in plain text, and
+// the severity as one colored word. Three rows, then "See all".
 function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; onSeeAll: () => void }) {
   const router = useRouter();
-  // One row's worth at the new, wider card size -- two full rows of these
-  // bigger cards was a lot of vertical space for an at-a-glance strip
-  // (direct feedback: "stick to showing only [a few] students... click on
-  // see all to see more").
   const shown = students.slice(0, 3);
   const rest = students.length - shown.length;
   return (
-    <div className="relative flex flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-      {/* Same quiet-glow treatment as every card below it, tied to the
-         status color this whole strip is actually about -- uniform
-         material across the page, not one glowing card and ten flat ones. */}
-      <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(STATUS_COLORS["At Risk"], 0.12) }} />
-      <div className="relative flex items-center justify-between gap-[8px]">
-        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs your attention this week</h2>
-        {rest > 0 && (
-          <button type="button" onClick={onSeeAll} className="dm-quiet flex cursor-pointer items-center gap-[2px] text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>
-            See all {students.length} <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
-          </button>
-        )}
+    <div className="group flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
+      <div className="flex items-center justify-between gap-[8px]">
+        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs your attention</h2>
+        <CardLink onClick={onSeeAll}>{rest > 0 ? `See all ${students.length}` : "Students"}</CardLink>
       </div>
-      {/* A grid, not a free-wrap flex row -- every chip's width was its own
-         text length before ("Gr. 10 · Factories & Making Things" vs "Gr. 12
-         · Arts, Media & Sport"), so the row read as ragged (direct
-         feedback: "should NOT be varying widths, heights"). Fixed column
-         widths plus a truncated subtitle give every chip the same
-         footprint regardless of name or pathway length. */}
       {students.length === 0 ? (
-        <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing needs attention this week under the current filters.</p>
+        <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing needs attention under the current filters.</p>
       ) : (
-        // 3 columns, not 6 -- cramming six equal chips per row (a fixed
-        // 1/6th of the card's width each) left no room for "Changes
-        // requested: Transcript Submission" without truncating it away,
-        // which defeated the whole point of adding a reason (direct
-        // report: "things are truncating... the reason blends in and it
-        // isn't very intuitive"). Half as many columns roughly doubles
-        // each card's width.
-        <div className="relative grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="flex flex-col gap-[6px]">
           {shown.map((s) => {
             const severity = attentionSeverity(s);
             const color = SEVERITY_COLORS[severity];
             return (
-            <button
-              key={s.id} type="button"
-              onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)}
-              className="dm-quiet flex min-w-0 cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border p-[12px] text-left"
-              style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, #FFFFFF 4%, transparent)" }}
-            >
-              <span className="flex min-w-0 items-center justify-between gap-[10px]">
-                <span className="flex min-w-0 items-center gap-[10px]">
-                  <Avatar name={s.name} size={36} />
-                  <span className="flex min-w-0 flex-col items-start text-left leading-tight">
-                    <span className="w-full truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
-                    <span className="w-full truncate text-left text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.careerTrack}</span>
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)}
+                  className="dm-quiet flex w-full cursor-pointer flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px] text-left"
+                  style={GLASS_INSET}
+                >
+                  <Avatar name={s.name} size={32} index={s.avatarIndex} />
+                  <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                    <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
+                    <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.careerTrack}</span>
                   </span>
-                </span>
-                {/* Sorted worst-first below, and labeled here too -- a
-                   counselor with limited time should be able to tell which
-                   of several open cards to act on without reading every
-                   reason (direct instruction: "rate by severity so
-                   counselor knows what to give attention first"). */}
-                <span className="flex-none rounded-full px-[8px] py-[2px] text-[10px] font-extrabold tracking-[0.02em] uppercase" style={{ color, background: `color-mix(in srgb, ${color} 18%, transparent)` }}>{severity}</span>
-              </span>
-              {/* The reason lives in its own tinted, iconed pill below the
-                 name -- direct feedback: run inline with the grade, "the
-                 reason blends in." Its own row, its own color, its own
-                 icon reads as a flag, not more metadata on the same line;
-                 allowed to wrap to 2 lines (clamped, not truncated) since
-                 the reason is the one piece of information here that
-                 actually shouldn't get cut off. */}
-              {/* `w-full` plus a fixed `min-h` (2 lines' worth) -- a 1-line
-                 reason and a 2-line reason otherwise made pills of visibly
-                 different sizes across the same row (direct feedback:
-                 "keep the red surfaces uniform in width, heights"). Every
-                 pill now occupies the same footprint regardless of how
-                 much its own text wraps. Colored by severity, same as the
-                 badge above -- not always red regardless of how urgent. */}
-              <span className="flex w-full min-h-[42px] items-start gap-[6px] rounded-[var(--radius-sm)] px-[8px] py-[6px]" style={{ background: `color-mix(in srgb, ${color} 14%, transparent)` }}>
-                <AlertTriangle className="mt-[1px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color }} />
-                <span className="line-clamp-2 text-[11.5px] leading-[15px] font-bold" style={{ color }}>{attentionReason(s)}</span>
-              </span>
-            </button>
+                  <span className="flex flex-none items-center gap-[10px] text-[12.5px] font-semibold">
+                    <span style={{ color: "var(--foreground)" }}>{attentionReason(s)}</span>
+                    <span className="text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={{ color }}>{severity}</span>
+                  </span>
+                </button>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
     </div>
   );
@@ -349,7 +316,12 @@ export function Overview() {
   const pathwayCounts = new Map<string, number>();
   for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
   const topPathways = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
-  const pathwayColors = ["#5B6CF9", "#7C5CFA", "#33C78C", "#4AB8D8", "#F5A623", "#EC5FA6", "#33C0C7"];
+  // Seven distinct hues in spectral order, assigned by rank (palette.ts).
+  // History: a seven-hue set that reused status colors; a single-hue ramp
+  // that blended neighbours; three cluster hues that repeated ("please
+  // don't do this ... each thing in that legend has to be different but
+  // stick to a known sequence").
+  const pathwayColors = topPathways.map((_, i) => PATHWAY_SEQUENCE[i % PATHWAY_SEQUENCE.length]);
 
   const grades = [9, 10, 11, 12];
   const gradeStudents = (g: number) => roster.filter((s) => s.grade === g);
@@ -382,8 +354,8 @@ export function Overview() {
          the wide hero, Postsecondary Plans is the compact simple-data
          sidekick, Career Pathways keeps enough room for its 7-row legend
          (direct feedback: "no design experimentation... the same cards"). */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-5">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-5">
           <DonutCard
             title="Student Status"
             centerPct={onTrackPct}
@@ -391,6 +363,7 @@ export function Overview() {
             deltaPts={2}
             hero
             heroTint={heroTint}
+            aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
             rows={[
               { label: "On Track", value: onTrack, color: STATUS_COLORS["On Track"], onClick: () => goToStudents("On Track") },
               { label: "Needs Attention", value: needsAttention, color: STATUS_COLORS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
@@ -398,24 +371,25 @@ export function Overview() {
             ]}
           />
         </div>
-        <div className="lg:col-span-4">
-          <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} />
+        <div className="xl:col-span-4">
+          <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="xl:col-span-3">
           <DonutCard
             title="Postsecondary Plans"
             centerPct={(withPlan / total) * 100}
             centerLabel="have a plan"
             deltaPts={4}
+            aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
             rows={[
-              { label: "With Plan", value: withPlan, color: "#2F6BF2", onClick: () => goToStudents(undefined, "With Plan") },
-              { label: "Undecided", value: undecided, color: "#5B6470", onClick: () => goToStudents(undefined, "Undecided") },
+              { label: "With Plan", value: withPlan, color: PRIMARY, onClick: () => goToStudents(undefined, "With Plan") },
+              { label: "Undecided", value: undecided, color: NEUTRAL_SLICE, onClick: () => goToStudents(undefined, "Undecided") },
             ]}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
         <HoverBeam strength={0.6} className="h-full">
           {/* No `aside` here -- an aside sits inline next to the title
              until it doesn't fit, and "Academic Readiness" (longer title,
@@ -427,7 +401,7 @@ export function Overview() {
              regardless of title or subtitle length. */}
           <Panel id="career-readiness" title="Career Readiness" className="h-full">
             <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
-            <BarChart
+            <BarChart barStyle="solid"
               groups={grades.map((g) => `Gr. ${g}`)}
               series={[
                 { label: "Career Report", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Career Report")) },
@@ -440,7 +414,7 @@ export function Overview() {
         <HoverBeam strength={0.6} className="h-full">
           <Panel id="academic-readiness" title="Academic Readiness" className="h-full">
             <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
-            <BarChart
+            <BarChart barStyle="solid"
               groups={grades.map((g) => `Gr. ${g}`)}
               series={[
                 { label: "Academic Plan", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Academic Plan")) },
