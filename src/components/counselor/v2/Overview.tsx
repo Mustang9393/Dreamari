@@ -118,8 +118,11 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
       <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
         {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(glowColor, 0.3) }} />}
         <div className="relative flex flex-col gap-[2px]">
-          <span className="flex items-start justify-between gap-[8px]">
-            <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
+          {/* Wraps: in the narrow third-column card the link drops under
+             the title instead of forcing "Postsecondary Plans" onto two
+             lines. */}
+          <span className="flex flex-wrap items-start justify-between gap-[8px]">
+            <h2 className="text-[15px] leading-[1.3] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{title}</h2>
             {aside}
           </span>
           {/* Hand-authored, deterministic vs. last month -- same "seeded

@@ -104,8 +104,6 @@ export function OverviewSchoolAdmin() {
             <div className="flex flex-col gap-[8px]">
               {groups.map(({ k, m }) => <MetricRow key={k} label={k} note={String(m.students)} value={m.onTrackPct} target={SCHOOL_TARGETS.onTrack} />)}
             </div>
-            {/* Playbook tier 6: a cut that should exist but has no data yet is named, briefly. */}
-            <span className="mt-auto text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Subgroup cuts arrive with SIS data.</span>
           </OverviewCard>
         </div>
       </div>

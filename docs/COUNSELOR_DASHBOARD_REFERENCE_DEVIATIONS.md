@@ -815,6 +815,16 @@ kept as history.
   Aid Progress render table-only in the reference; v2 adds one muted line
   naming that, so the missing chart reads as "not this report" rather than
   "broken".
+- **25 Sept 2026 pass under the v2 budget.** The chart is capped at 720px
+  (its SVG text scales with width; full-bleed at 1100px it read as a
+  poster with 18px axis labels) and a verdict column sits beside it: the
+  leading category as a big percent ("72% Approved · 87 of 121") and, only
+  when non-zero, the trailing category that needs something ("5 Overdue")
+  in its own color. Axis rounds to the next 10 above the tallest bar, not
+  the roster size (ticks read 121 / 91 / 61 before). Category labels are
+  capitalised. Bug fixed: the Career Pathway filter listed the student
+  app's 15 interest worlds, none of which is a roster pathway, so every
+  choice emptied the report; it now lists the roster's seven pathways.
 - Not changed: the nine report taxonomies, the CSV/PDF exports, the Summary
   by Grade table.
 

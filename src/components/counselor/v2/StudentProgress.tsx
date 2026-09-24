@@ -9,9 +9,10 @@ import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, 
 import { BarChart } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Listbox } from "@/components/app/Listbox";
+import { Stat } from "./overviewShared";
 import { type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { INTEREST_WORLDS } from "@/components/build/types";
+import { CAREER_TRACKS } from "@/lib/counselorRoster";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
@@ -119,7 +120,10 @@ const REPORT_TYPES: ReportType[] = [
 
 const GRADES = [9, 10, 11, 12];
 
-const PATHWAY_OPTIONS = ["All Pathways", ...INTEREST_WORLDS.map((w) => w.label)];
+// The roster's own seven pathways. The earlier list was the student app's
+// 15 interest worlds, none of which match a roster careerTrack, so every
+// pathway choice returned an empty report.
+const PATHWAY_OPTIONS = ["All Pathways", ...CAREER_TRACKS];
 
 export function StudentProgress() {
   const [reportId, setReportId] = useState(REPORT_TYPES[0].id);
@@ -203,17 +207,39 @@ export function StudentProgress() {
         {!chart && (
           <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{report.label} has no chart; the grade summary below is the report.</p>
         )}
-        {chart && (
-          <HoverBeam strength={0.6} className="h-full">
-            <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-              <div className="flex flex-col gap-[2px]">
-                <h2 className="flex items-center gap-[8px] text-[16px] font-bold" style={{ color: "var(--foreground)" }}><ReportIcon className="h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{chart.title}</h2>
-                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{reportRoster.length} students shown</span>
+        {chart && (() => {
+          const shown = reportRoster.length || 1;
+          const lead = chartValues[0] ?? 0;
+          const leadPct = Math.round((lead / shown) * 100);
+          // The last category is the one that needs something (overdue, not
+          // started); name it only when it is non-zero.
+          const tailIdx = chart.categories.length - 1;
+          const tail = chartValues[tailIdx] ?? 0;
+          // A readable axis: the largest bar rounded up to the next 10, not
+          // the roster size (which gave ticks like 121 / 91 / 61).
+          const niceMax = Math.max(10, Math.ceil(Math.max(...chartValues, 1) / 10) * 10);
+          const cap = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
+          return (
+            <HoverBeam strength={0.6} className="h-full">
+              <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+                <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}><ReportIcon className="h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{chart.title}<span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{reportRoster.length} students</span></h2>
+                {/* The verdict beside the chart, not above it: the chart is
+                   capped at a readable width (its SVG text scales with
+                   width, and full-bleed at 1100px it read as a poster), so
+                   the leading number takes the space that freed. */}
+                <div className="flex flex-col gap-[var(--space-5)] lg:flex-row lg:items-center lg:gap-[var(--space-8)]">
+                  <div className="flex flex-none flex-col gap-[var(--space-3)] lg:w-[200px]">
+                    <Stat value={`${leadPct}%`} label={`${cap(chart.categories[0])} · ${lead} of ${reportRoster.length}`} />
+                    {tail > 0 && tailIdx > 0 && <Stat value={String(tail)} label={cap(chart.categories[tailIdx])} color={chart.colors[tailIdx]} />}
+                  </div>
+                  <div className="w-full max-w-[720px] flex-1">
+                    <BarChart barStyle="solid" height={200} groups={chart.categories.map(cap)} series={[{ label: report.label, accent: chart.colors[0], values: chartValues }]} barColors={chart.colors} max={niceMax} valueSuffix="" />
+                  </div>
+                </div>
               </div>
-              <BarChart barStyle="solid" groups={chart.categories} series={[{ label: report.label, accent: chart.colors[0], values: chartValues }]} barColors={chart.colors} max={chart.max} valueSuffix="" />
-            </div>
-          </HoverBeam>
-        )}
+            </HoverBeam>
+          );
+        })()}
 
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>

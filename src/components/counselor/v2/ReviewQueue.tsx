@@ -295,7 +295,7 @@ export function ReviewQueue() {
                     id="review-feedback"
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    placeholder="Kept with the decision so you can see later what you told the student."
+                    placeholder="A note for the student"
                     rows={3}
                     className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
                     style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}

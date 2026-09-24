@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: clutter sweep of the finished screens, Student Progress pass
+
+Direct instruction: "verify everything makes sense, no clutter, avoid overwhelming with copy and then onto the next."
+
+**Sweep:** the counselor Overview's Postsecondary Plans title no longer wraps (the card link drops under the title in the narrow column); the School Administrator's "Subgroup cuts arrive with SIS data" footnote is gone (budget: no footnotes); the Review Queue's feedback placeholder is "A note for the student". Checked the District Overview's Student Status card in the browser: plain glass, one hero per screen holds; the green is the ring's own arc glow.
+
+**Student Progress** (`v2/StudentProgress.tsx`): verdict column beside a width-capped chart, nice axis, capitalised categories, and a real bug fixed (pathway filter used the student app's 15 worlds, so any pathway emptied the report; now the roster's seven). Reasoning: deviations file, "Student Progress (v2)".
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
 ### 2026-09-25 Counselor Dashboard v2: Review Queue pass, per-role check of the finished screens
 
 Direct instruction: "Onto the next. Also verify if these screens are done for each role."
