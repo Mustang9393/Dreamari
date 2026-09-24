@@ -559,8 +559,17 @@ kept as history.
   done, need attention), replacing the grade card with its "Focus"
   sentence and three stats. The Focus copy was the reference's grade
   description; it explained the grade, not the state of it.
-- **Scoped.** A School Counselor sees their caseload's grade cohort; the
-  Lead and School Administrator see the school's.
+- **Whole school for every role; the Lead Counselor can narrow to one
+  counselor.** After the scoping revert (see "Who sees which students")
+  the tracker reads the school's grade cohort for everyone. The Lead gets
+  the same Counselor picker as on Students and the Review Queue (direct
+  question: "Milestone tracker for lead and school counsellor are the
+  same?"); picking a counselor scales the curriculum proportions to that
+  counselor's students in the grade.
+- **Picker aggregates say "All", not "Any"** ("All counselors", "All
+  statuses", "All plans"), across Students, the Review Queue and the
+  tracker. Direct question: "should it be any or all counselors?" "All"
+  describes what is shown; "Any" reads as a search condition.
 
 - **"View Details & Student Breakdown" is now a working control.** In the
   reference and the original port it rendered with no `onClick` at all

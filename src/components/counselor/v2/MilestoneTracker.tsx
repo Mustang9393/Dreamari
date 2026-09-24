@@ -24,12 +24,15 @@
 // nothing repeated); one card listing every other milestone as a row with
 // a four-segment status bar. One color code for the whole screen.
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
+import { Listbox } from "@/components/app/Listbox";
 import { Segmented, SegmentedRing } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { GRADE_READINESS, type MilestoneCard } from "@/lib/milestoneReadiness";
 import { useReviewedRoster } from "@/lib/counselorReviews";
+import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { CardLink, StatRow, STATUS_COLORS } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
@@ -107,7 +110,13 @@ export function MilestoneTracker() {
   const { gradeFilter, setGradeFilter } = useCounselorFilters();
   const [grade, setGrade] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
   const roster = useReviewedRoster();
-  const n = useMemo(() => roster.filter((s) => s.grade === grade).length, [roster, grade]);
+  // The Lead Counselor can narrow the grade to one counselor's students;
+  // the curriculum proportions then scale to that cohort. Same control the
+  // Lead has on Students and the Review Queue.
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const showCounselor = account.role === "Lead Counselor";
+  const [counselorFilter, setCounselorFilter] = useState("All");
+  const n = useMemo(() => roster.filter((s) => s.grade === grade && (!showCounselor || counselorFilter === "All" || counselorFor(s).id === counselorFilter)).length, [roster, grade, showCounselor, counselorFilter]);
   const rows = useMemo(() => GRADE_READINESS[grade].cards.map((c) => scale(c, n)).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct), [grade, n]);
   const hero = rows[0];
   const rest = rows.slice(1);
@@ -122,7 +131,12 @@ export function MilestoneTracker() {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-        <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
+        <div className="flex flex-wrap items-center gap-[10px]">
+          <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
+          {showCounselor && (
+            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+          )}
+        </div>
         <div className="flex gap-[var(--space-6)]">
           <Stat value={String(n)} label="students" />
           <Stat value={String(rows.length)} label="milestones" />
@@ -132,7 +146,7 @@ export function MilestoneTracker() {
       </div>
 
       {n === 0 || !hero ? (
-        <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No Grade {grade} students on this caseload.</p>
+        <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No Grade {grade} students{showCounselor && counselorFilter !== "All" ? " on this counselor's caseload" : ""}.</p>
       ) : (
         <>
           {/* Hero: header row (what it is, the way in), then the ring with

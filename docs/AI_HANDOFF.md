@@ -44,7 +44,9 @@ Direct instruction: "Onto the next. Also verify if these screens are done for ea
 
 **Review Queue** (`v2/ReviewQueue.tsx`): header stats (pending, overdue, due in 2 days), two-line cards on the inset surface with the priority pill as the only colored element, bounded scrolling list beside the pane, detail meta reduced to one line, Lead Counselor gets a Counselor picker and counselor names. Reasoning: deviations file, "Review Queue (v2)".
 
-**Per-role check** (headless captures at 1440): Overview done for all four roles; Students done for School Counselor, Lead and School Administrator (Counselor column and picker on the last two); Milestone Tracker done for School Counselor and Lead (the only roles that have it), whole-school numbers after the scoping revert; Review Queue for School Counselor and Lead. District Administrator has none of the last three by design. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+**Milestone Tracker for the Lead** gets the Counselor picker (same control as Students and Review Queue); picker aggregates renamed "All counselors / All statuses / All plans" after "should it be any or all counselors?".
+
+**Per-role check** (headless captures at 1440, every finished screen for every role that has it): Overview done for all four roles; Students done for School Counselor, Lead and School Administrator (Counselor column and picker on the last two); Milestone Tracker done for School Counselor and Lead (the only roles that have it), whole-school numbers after the scoping revert; Review Queue for School Counselor and Lead. District Administrator has none of the last three by design. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
 
 ### 2026-09-25 Counselor Dashboard v2: caseload scoping turned off, whole school for every role
 

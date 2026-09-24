@@ -164,10 +164,10 @@ export function StudentsRoster() {
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
           {showCounselor && (
-            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "Any counselor" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={PICKER} style={pickerStyle} />
+            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={PICKER} style={pickerStyle} />
           )}
-          <Listbox ariaLabel="Status" value={statusFilter} onChange={(v) => setStatusFilter(v as StatusRosterFilter)} options={STATUS_OPTIONS.map((o) => ({ value: o, label: o === "All" ? "Any status" : o }))} className={PICKER} style={pickerStyle} />
-          <Listbox ariaLabel="Postsecondary plan" value={planValue} onChange={setPlan} options={[{ value: "All", label: "Any plan" }, { value: "With Plan", label: "Has a plan" }, ...INTENT_OPTIONS.map((o) => ({ value: o, label: o }))]} className={PICKER} style={pickerStyle} />
+          <Listbox ariaLabel="Status" value={statusFilter} onChange={(v) => setStatusFilter(v as StatusRosterFilter)} options={STATUS_OPTIONS.map((o) => ({ value: o, label: o === "All" ? "All statuses" : o }))} className={PICKER} style={pickerStyle} />
+          <Listbox ariaLabel="Postsecondary plan" value={planValue} onChange={setPlan} options={[{ value: "All", label: "All plans" }, { value: "With Plan", label: "Has a plan" }, ...INTENT_OPTIONS.map((o) => ({ value: o, label: o }))]} className={PICKER} style={pickerStyle} />
         </div>
       </div>
 
