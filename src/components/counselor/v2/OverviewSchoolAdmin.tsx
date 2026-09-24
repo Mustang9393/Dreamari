@@ -46,7 +46,6 @@ export function OverviewSchoolAdmin() {
   const met = measured.filter((r) => r.band === "met").length;
   const worst = measured.slice().sort((a, b) => (a.value! - a.target) - (b.value! - b.target))[0];
   const heroBand = worstBand(measured.map((r) => r.band!));
-  const activeBand = targetBand(school.activePct, SCHOOL_TARGETS.activeStudents);
 
   // Readiness by grade for the chart: whole school, not the filtered roster,
   // since the chart's job is the comparison across grades.
@@ -87,7 +86,7 @@ export function OverviewSchoolAdmin() {
           </OverviewCard>
         </div>
         <div className="lg:col-span-4">
-          <OverviewCard title="Is the platform used" sub="Students active this month" tint={BAND_COLORS[activeBand]} aside={<SeeLink onClick={() => router.push("/counselor?view=engagement")}>Engagement</SeeLink>}>
+          <OverviewCard title="Is the platform used" sub="Students active this month" aside={<SeeLink onClick={() => router.push("/counselor?view=engagement")}>Engagement</SeeLink>}>
             <TargetRow label={TARGET_LABELS.activeStudents} value={school.activePct} target={SCHOOL_TARGETS.activeStudents} detail={`${school.activeStudents} of ${school.students} students logged in`} />
             <div className="mt-auto grid grid-cols-2 gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
               <span className="flex flex-col gap-[2px]">
@@ -121,7 +120,7 @@ export function OverviewSchoolAdmin() {
           </HoverBeam>
         </div>
         <div className="lg:col-span-5">
-          <OverviewCard title="Equity cuts" sub="On-track rate by group, lowest first" tint={BAND_COLORS[gap >= 20 ? "missed" : gap >= 10 ? "near" : "met"]} aside={<Segmented ariaLabel="Cut readiness by" options={[{ key: "pathway", label: "Pathway" }, { key: "plan", label: "Plan" }]} value={cut} onChange={setCut} />}>
+          <OverviewCard title="Equity cuts" sub="On-track rate by group, lowest first" aside={<Segmented ariaLabel="Cut readiness by" options={[{ key: "pathway", label: "Pathway" }, { key: "plan", label: "Plan" }]} value={cut} onChange={setCut} />}>
             {groups.length > 1 && (
               <Verdict band={gap >= 20 ? "missed" : gap >= 10 ? "near" : "met"}>
                 {gap} pt gap between {groups[groups.length - 1].k} ({groups[groups.length - 1].m.onTrackPct}%) and {groups[0].k} ({groups[0].m.onTrackPct}%).

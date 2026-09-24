@@ -328,10 +328,11 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             </div>
           </header>
 
-          {/* Bottom padding also clears the DEMO-ONLY version chip docked
+          {/* Bottom padding also clears the DEMO-ONLY version/role dock at
              bottom-center (./version.tsx), so a page's last row (roster
-             pagination, a card's footer) is never sitting under it. */}
-          <main className="flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-4)] pb-[calc(var(--space-6)+36px)] sm:px-[var(--space-5)] md:px-[var(--space-8)]">
+             pagination, a card's footer) is never sitting under it. On
+             phones the two pills wrap to two rows, hence the taller clear. */}
+          <main className="flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-4)] pb-[calc(var(--space-6)+68px)] sm:px-[var(--space-5)] sm:pb-[calc(var(--space-6)+36px)] md:px-[var(--space-8)]">
             {/* Capped, not full-bleed -- a huge monitor stretching every
                card/table edge-to-edge is what reads as "undesigned
                wireframe" (direct feedback): thin progress bars, cavernous

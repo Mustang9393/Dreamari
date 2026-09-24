@@ -42,9 +42,13 @@ export function BandChip({ band, label }: { band: TargetBand; label?: string }) 
 }
 
 /** The one card frame every role-Overview card uses. `hero` spends the
- *  page's single saturated surface; `tint` colors the glow and border to
- *  the card's own reading (the worst band on it), the way the counselor
- *  Overview's Student Status hero glows its status color. */
+ *  page's single saturated surface, and only the hero carries a `tint`
+ *  (its glow and border take the card's own reading, the worst band on it,
+ *  the way the counselor Overview's Student Status hero glows its status
+ *  color). Sidekicks stay the plain glass with the quiet primary glow every
+ *  other card on the dashboard has: a status-colored glow on every card
+ *  made the page shout everywhere and so point nowhere (direct feedback,
+ *  24 Sept 2026: "only have it genuinely where it needs to be"). */
 export function OverviewCard({ title, sub, hero, tint, aside, children, className = "" }: { title: string; sub?: string; hero?: boolean; tint?: string; aside?: React.ReactNode; children: React.ReactNode; className?: string }) {
   const base = hero ? GLASS_CARD_HERO : GLASS_CARD;
   const surface = tint ? { ...base, borderColor: `color-mix(in srgb, ${tint} ${hero ? 38 : 26}%, var(--glass-border))` } : base;

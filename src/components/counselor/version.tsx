@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
+import { COUNSELOR_ROLES, counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, writeCounselorAccount, type CounselorRole } from "@/lib/counselorAccount";
+import { roleOrDefault } from "./roles";
 
 // DEMO-ONLY: which build of the Counselor Dashboard is showing. v1 is the
 // screen-by-screen port of the Replit reference plus the three passes
@@ -88,36 +90,68 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
   return <CounselorVersionContext.Provider value={{ version, ready, setVersion }}>{children}</CounselorVersionContext.Provider>;
 }
 
-// The chip itself. Fixed, bottom-center, out of the way of every real
-// control; pointer-events only on the pill so the full-width dock never
-// blocks clicks on the page around it.
+// The pill style both chips share.
+const PILL = { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 72%, transparent)" } as const;
+
+function Pills<K extends string>({ label, options, value, onChange }: { label: string; options: readonly { key: K; label: string }[]; value: K; onChange: (k: K) => void }) {
+  return (
+    // `max-w-full` + horizontal scroll: the four-role pill is wider than a
+    // phone screen, and a centered flex child wider than its container
+    // overflows on BOTH sides, so the leftmost option was clipped off.
+    <div role="tablist" aria-label={label} className="pointer-events-auto flex max-w-full flex-none items-center gap-[2px] overflow-x-auto rounded-full border p-[2px] backdrop-blur-[8px] [scrollbar-width:none]" style={PILL}>
+      {options.map((o) => {
+        const on = o.key === value;
+        return (
+          <button
+            key={o.key}
+            type="button"
+            role="tab"
+            aria-selected={on}
+            onClick={() => onChange(o.key)}
+            className="dm-quiet cursor-pointer rounded-full px-[9px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap"
+            style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", background: on ? "var(--glass-surface-2)" : "transparent" }}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// DEMO-ONLY: short labels for the role switcher pill. The real role names
+// (Settings' dropdown) are long; the pill is a demo control, not the
+// product's vocabulary.
+const ROLE_PILL_LABELS: Record<CounselorRole, string> = {
+  "School Counselor": "Counselor",
+  "Lead Counselor": "Lead",
+  "School Administrator": "School admin",
+  "District Administrator": "District",
+};
+
+// The dock itself. Fixed, bottom-center, out of the way of every real
+// control; pointer-events only on the pills so the full-width dock never
+// blocks clicks on the page around it. On v2 a second pill switches the
+// signed-in role: it writes the same account record Settings' Role dropdown
+// writes (src/lib/counselorAccount.ts), so the two never disagree and the
+// sidebar re-renders from one source. DEMO-ONLY, like the version pill: a
+// real account has one role, and this is how a demo shows all four without
+// four sign-ins (same idea as Connect's role switcher).
 export function CounselorVersionChip() {
   const { version, setVersion } = useCounselorVersion();
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const role = roleOrDefault(account.role);
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-3 z-20 flex justify-center px-4">
-      <div
-        role="tablist"
-        aria-label="Dashboard version"
-        className="pointer-events-auto flex flex-none items-center gap-[2px] rounded-full border p-[2px] backdrop-blur-[8px]"
-        style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 72%, transparent)" }}
-      >
-        {([["v1", "v1"], ["v2", "v2"]] as const).map(([key, label]) => {
-          const on = key === version;
-          return (
-            <button
-              key={key}
-              type="button"
-              role="tab"
-              aria-selected={on}
-              onClick={() => setVersion(key)}
-              className="dm-quiet cursor-pointer rounded-full px-[9px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
-              style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", background: on ? "var(--glass-surface-2)" : "transparent" }}
-            >
-              {label}
-            </button>
-          );
-        })}
-      </div>
+    <div className="pointer-events-none fixed inset-x-0 bottom-3 z-20 flex flex-wrap justify-center gap-[6px] px-4">
+      <Pills label="Dashboard version" options={[{ key: "v1", label: "v1" }, { key: "v2", label: "v2" }] as const} value={version} onChange={setVersion} />
+      {version === "v2" && (
+        <Pills
+          label="Signed-in role"
+          options={COUNSELOR_ROLES.map((r) => ({ key: r, label: ROLE_PILL_LABELS[r] }))}
+          value={role}
+          onChange={(r) => writeCounselorAccount({ role: r })}
+        />
+      )}
     </div>
   );
 }

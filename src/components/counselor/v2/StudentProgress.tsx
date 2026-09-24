@@ -8,6 +8,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, DollarSign, GraduationCap, ClipboardList, AlertTriangle } from "lucide-react";
 import { BarChart } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { Listbox } from "@/components/app/Listbox";
 import { type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { INTEREST_WORLDS } from "@/components/build/types";
@@ -153,65 +154,60 @@ export function StudentProgress() {
     URL.revokeObjectURL(url);
   };
 
+  const ReportIcon = report.icon;
+  const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
+  const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+
   return (
-    <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[300px_1fr]">
-      <div className="flex flex-col gap-[6px]">
-        <span className="px-[4px] text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Report Types</span>
-        {REPORT_TYPES.map((r) => {
-          const Icon = r.icon;
-          const on = r.id === reportId;
-          return (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setReportId(r.id)}
-              className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-left text-[13px] font-semibold"
-              style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
-            >
-              <Icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
-              {r.label}
+    // No side list of report types. The reference (and v1) spend a 300px
+    // column on nine report names, permanently, next to a chart that then
+    // has to fit in what is left; a report is a choice made once per visit,
+    // so it is the first control in the filter row, and the chart and the
+    // table get the full width (direct feedback, 24 Sept 2026: "a submenu
+    // is taking up space inside its container"). Listbox, not a native
+    // select, per docs/CROSS_BROWSER_GUARDRAILS.md.
+    <div className="flex flex-col gap-[var(--space-4)]">
+      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+          <label className="flex min-w-0 flex-col gap-[4px]">
+            <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Report</span>
+            <Listbox
+              ariaLabel="Report type"
+              value={reportId}
+              onChange={setReportId}
+              options={REPORT_TYPES.map((r) => ({ value: r.id, label: r.label }))}
+              className={FIELD}
+              style={fieldStyle}
+            />
+          </label>
+          <label className="flex min-w-0 flex-col gap-[4px]">
+            <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Grade Level</span>
+            <Listbox ariaLabel="Grade level" value={gradeLevel} onChange={setGradeLevel} options={[{ value: "All Grades", label: "All Grades" }, ...GRADES.map((g) => ({ value: String(g), label: `Grade ${g}` }))]} className={FIELD} style={fieldStyle} />
+          </label>
+          <label className="flex min-w-0 flex-col gap-[4px]">
+            <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Pathway</span>
+            <Listbox ariaLabel="Career pathway" value={pathway} onChange={setPathway} options={PATHWAY_OPTIONS.map((p) => ({ value: p, label: p }))} className={FIELD} style={fieldStyle} />
+          </label>
+          <div className="flex items-center gap-[8px] sm:col-span-2 lg:col-span-1">
+            <button type="button" onClick={exportCsv} disabled={!chart} className="dm-quiet flex h-10 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <Download className="h-[14px] w-[14px]" aria-hidden /> CSV
             </button>
-          );
-        })}
+            <button type="button" onClick={() => window.print()} className="dm-quiet flex h-10 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <FileDown className="h-[14px] w-[14px]" aria-hidden /> PDF
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-[var(--space-4)]">
-        <HoverBeam strength={0.6} className="h-full">
-          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
-              <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Report Filters</span>
-              <div className="flex items-center gap-[8px]">
-                <button type="button" onClick={exportCsv} disabled={!chart} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                  <Download className="h-[14px] w-[14px]" aria-hidden /> CSV
-                </button>
-                <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                  <FileDown className="h-[14px] w-[14px]" aria-hidden /> PDF
-                </button>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
-              <label className="flex flex-col gap-[4px]">
-                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Grade Level</span>
-                <select value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} className="h-10 cursor-pointer rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                  <option style={{ color: "#000" }}>All Grades</option>
-                  {GRADES.map((g) => <option key={g} value={String(g)} style={{ color: "#000" }}>Grade {g}</option>)}
-                </select>
-              </label>
-              <label className="flex flex-col gap-[4px]">
-                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Pathway</span>
-                <select value={pathway} onChange={(e) => setPathway(e.target.value)} className="h-10 cursor-pointer rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                  {PATHWAY_OPTIONS.map((p) => <option key={p} value={p} style={{ color: "#000" }}>{p}</option>)}
-                </select>
-              </label>
-            </div>
-          </div>
-        </HoverBeam>
-
+        {!chart && (
+          <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{report.label} has no chart; the grade summary below is the report.</p>
+        )}
         {chart && (
           <HoverBeam strength={0.6} className="h-full">
             <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
               <div className="flex flex-col gap-[2px]">
-                <h2 className="text-[16px] font-bold" style={{ color: "var(--foreground)" }}>{chart.title}</h2>
+                <h2 className="flex items-center gap-[8px] text-[16px] font-bold" style={{ color: "var(--foreground)" }}><ReportIcon className="h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{chart.title}</h2>
                 <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{reportRoster.length} students shown</span>
               </div>
               <BarChart groups={chart.categories} series={[{ label: report.label, accent: chart.colors[0], values: chartValues }]} barColors={chart.colors} max={chart.max} valueSuffix="" />

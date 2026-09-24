@@ -38,6 +38,20 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Counselor Dashboard v2: role switcher, glows only on heroes, Student Progress without its side list
+
+Direct feedback in chat, all three points: "the different glows per card is not required everywhere, overview makes sense and only have it genuinely where it needs to be"; "How are we toggling user roles for the dashboard v2?"; "In student progress a submenu is taking up space inside its container. Why? ... either make it take over the left bar menu with a back button ... or do something else." Also clarified that no external sign-off gates this work: v2 needs to be better than v1, useful for the four Settings roles, and look good.
+
+**Role switcher.** `version.tsx`'s bottom-center dock gains a second pill on v2 (Counselor / Lead / School admin / District) that calls `writeCounselorAccount({ role })`, the same record Settings' Role dropdown saves, so the sidebar, the Overview and Settings all move from one source. DEMO-ONLY (a real account has one role); registered in `docs/HANDOFF_INDEX.md`. Before this the only path was Settings > Role > Save.
+
+**Glows.** The three role Overviews tinted every card by its worst band; now only each screen's hero carries the status tint and sidekicks are the plain glass with the quiet primary glow (`v2/overviewShared.tsx`, the three `Overview*.tsx`). Reasoning in the deviations file under "Overview per role (v2)".
+
+**Student Progress.** The 300px report-type list is gone; Report is the first `Listbox` in the filter row with Grade Level and Career Pathway (also converted from native selects, per the guardrails), CSV/PDF on the same row, chart and table full width, report icon in the chart title, and a one-line note for the two table-only reports. Why this over a nav takeover: in the deviations file, "Student Progress (v2)". Same pattern still exists on Productivity Suite (a 5-tool list); Connect, Review Queue and Student Profile are master-detail layouts, which is a different thing.
+
+**Also fixed:** the four-role pill was wider than a phone and clipped at the left edge (a centered flex child wider than its container overflows both sides); it now scrolls, and the shell's bottom clearance grows on phones where the two pills wrap.
+
+**Verified live** (headless captures at 1440 and 375 plus the in-app browser): the role pill switches the sidebar and Overview in place with no console errors; Student Progress at both widths; Lead and School Administrator Overviews with plain sidekicks. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
 ### 2026-09-24 Counselor Dashboard v2: Overview per role (step 2 of the role work)
 
 Direct instruction (this session's brief): after the role shell, an Overview per role, School Counselor first (already the improved v2 Overview), then Lead Counselor ("which counselor and which grade is behind"), School Administrator ("is the school on target: senior plan compliance, FAFSA, readiness vs targets, equity cuts"), District Administrator ("which schools are behind, is the platform used; 3 to 5 seeded sibling schools scaled deterministically from the reference roster and clearly marked seeded in code"), on the same design rules as the existing v2 Overview.

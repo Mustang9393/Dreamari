@@ -101,7 +101,7 @@ export function OverviewDistrict() {
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
         <div className="lg:col-span-7">
-          <OverviewCard title="Is the platform used" sub={`Students active this month, against the ${SCHOOL_TARGETS.activeStudents}% target`} tint={BAND_COLORS[useBand]} aside={<SeeLink onClick={() => router.push("/counselor?view=engagement")}>Engagement</SeeLink>}>
+          <OverviewCard title="Is the platform used" sub={`Students active this month, against the ${SCHOOL_TARGETS.activeStudents}% target`} aside={<SeeLink onClick={() => router.push("/counselor?view=engagement")}>Engagement</SeeLink>}>
             <Verdict band={useBand}>
               {reachUse} of {schools.length} schools reach {SCHOOL_TARGETS.activeStudents}% active. {byUse[0].name} is lowest at {byUse[0].activePct}%, {byUse[byUse.length - 1].short} highest at {byUse[byUse.length - 1].activePct}%.
             </Verdict>
@@ -122,7 +122,7 @@ export function OverviewDistrict() {
           </OverviewCard>
         </div>
         <div className="lg:col-span-5">
-          <OverviewCard title="District against targets" sub="All schools combined" tint={BAND_COLORS[metBand(targetsMet(district, keys), keys.length)]} aside={<SeeLink onClick={() => router.push("/counselor?view=readiness")}>Readiness</SeeLink>}>
+          <OverviewCard title="District against targets" sub="All schools combined" aside={<SeeLink onClick={() => router.push("/counselor?view=readiness")}>Readiness</SeeLink>}>
             <div className="flex flex-col gap-[var(--space-4)]">
               {READINESS_TARGETS.map((key) => {
                 const seniorsOnly = key === "seniorPlan" || key === "fafsa";

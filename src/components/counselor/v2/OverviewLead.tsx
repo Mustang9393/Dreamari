@@ -14,7 +14,7 @@ import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, counselorFor, readinessMetrics, targetBand } from "@/lib/counselorOrg";
 import { DonutCard, STATUS_COLORS } from "./Overview";
-import { BAND_COLORS, BandChip, InitialsBadge, OverviewCard, RankBar, SeeLink, StatusBar, Verdict, worstBand } from "./overviewShared";
+import { BAND_COLORS, BandChip, InitialsBadge, OverviewCard, RankBar, SeeLink, StatusBar, Verdict } from "./overviewShared";
 
 const GRADES = [9, 10, 11, 12];
 
@@ -93,7 +93,7 @@ export function OverviewLead() {
           </OverviewCard>
         </div>
         <div className="lg:col-span-5">
-          <OverviewCard title="Which grade is behind" sub="On-track rate by grade, all counselors" tint={BAND_COLORS[gradeBand]}>
+          <OverviewCard title="Which grade is behind" sub="On-track rate by grade, all counselors">
             {worstGrade && (
               <Verdict band={gradeBand}>
                 {gradeBand === "met"
@@ -137,7 +137,7 @@ export function OverviewLead() {
           />
         </div>
         <div className="lg:col-span-4">
-          <OverviewCard title="Review backlog" sub="Submissions waiting on a counselor" tint={BAND_COLORS[worstBand([school.overdue > 0 ? "missed" : "met", school.changesRequested > 0 ? "near" : "met"])]} aside={<SeeLink onClick={() => router.push("/counselor?view=review-queue")}>Queue</SeeLink>}>
+          <OverviewCard title="Review backlog" sub="Submissions waiting on a counselor" aside={<SeeLink onClick={() => router.push("/counselor?view=review-queue")}>Queue</SeeLink>}>
             <div className="flex items-baseline gap-[8px]">
               <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{school.pendingReviews}</span>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>pending · {school.overdue} overdue · {school.changesRequested} awaiting the student</span>

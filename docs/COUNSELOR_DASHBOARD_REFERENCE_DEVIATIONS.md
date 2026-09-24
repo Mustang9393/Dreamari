@@ -139,6 +139,15 @@ status colors for state, single-hue bars for magnitude, validated ramps,
 every card opens something). School Counselor keeps the improved v2 Overview
 logged under "Overview" below. The three new ones, 24 Sept 2026:
 
+- **Glow only on the hero.** A first cut tinted every card's glow and
+  border by its own worst band; corrected same day (direct feedback: "the
+  different glows per card is not required everywhere ... only have it
+  genuinely where it needs to be"). Now the single hero card per Overview
+  carries the status tint and every sidekick is the plain glass with the
+  quiet primary glow the rest of the dashboard uses. The verdict line and
+  band chips still state each card's reading; the glow no longer repeats
+  it. The counselor Overview (below) and Milestone Tracker keep their
+  existing, separately justified tints.
 - **One "vs target" language for all three** (`v2/overviewShared.tsx`,
   `targetBand` in `src/lib/counselorOrg.ts`): met = On Track green, within
   10 points = Needs Attention amber, further = At Risk red, always icon +
@@ -522,6 +531,32 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
 
 ---
 
-_Sections for the remaining screens (Student Progress,
-Counselor Connect, Career + College Insights, Productivity Suite, Platform
+## Student Progress (v2)
+
+- **The report-type side list is gone; the report is the first control in
+  the filter row.** The reference (and v1) pin a 300px column of nine
+  report names beside the content for the whole visit, so the chart and the
+  Summary by Grade table fit in what is left (direct feedback, 24 Sept 2026:
+  "a submenu is taking up space inside its container. Why?"). A report is
+  chosen once per visit, then read; it belongs with the other two filters,
+  not as a second navigation. The chart and the table now take the full
+  width, and the chosen report's icon sits in the chart title so the choice
+  stays visible. Alternative offered in the same feedback: take over the
+  left nav with a back button. Rejected for this screen: the nine reports
+  are not destinations, they are one parameter of one screen, and a nav
+  takeover would make "Student Progress" a mode the counselor has to leave.
+  Alternative: a row of nine pills. Nine labels of 20 to 30 characters wrap
+  to two rows at 1440 and four on a phone, which is the same space problem
+  laid sideways.
+- **All three pickers are the app's `Listbox`, not native selects**, per
+  the cross-browser guardrails (a native select popup renders in the OS's
+  own chrome, which reads as a foreign control on Windows and Chromebooks).
+- **A report with no chart says so.** Application Progress and Financial
+  Aid Progress render table-only in the reference; v2 adds one muted line
+  naming that, so the missing chart reads as "not this report" rather than
+  "broken".
+- Not changed: the nine report taxonomies, the CSV/PDF exports, the Summary
+  by Grade table.
+
+_Sections for the remaining screens (Counselor Connect, Career + College Insights, Productivity Suite, Platform
 Engagement, My Impact, Settings) get added here as each is worked on._
