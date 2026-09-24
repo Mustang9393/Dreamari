@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -194,17 +194,21 @@ function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gr
   );
 }
 
-// The (i) beside every v2 title: what this screen changed from the Replit
-// reference, why, and what makes it better (direct instruction, 25 Sept
-// 2026). Content in ./v2/changeNotes.ts; the icon carries its label as a
-// tooltip (icon-only rule), the click opens a panel under the subtitle so
-// it reads in place and never clips at a screen edge.
+// The (i) at the top right of every v2 screen: what this screen changed
+// from the Replit reference, why, and what makes it better (direct
+// instruction, 25 Sept 2026; moved out of the title block the same day:
+// "put it in the top right corner, and when clicking let it display as an
+// overlay thing that can be closed so it doesn't confuse the layout").
+// Content in ./v2/changeNotes.ts; the icon carries its label as a tooltip
+// (icon-only rule), the click opens a fixed overlay panel over the page,
+// closed by its X, the backdrop or Escape, so the layout beneath never
+// moves.
 function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open: boolean; onToggle: () => void }) {
   if (!CHANGE_NOTES[view]) return null;
   return (
     <IconTip label="What changed and why">
-      <button type="button" aria-label="What changed and why" aria-expanded={open} onClick={onToggle} className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: open ? "var(--primary)" : "var(--glass-border)", color: open ? "var(--primary)" : "var(--muted-foreground)", background: open ? "color-mix(in srgb, var(--primary) 12%, transparent)" : "transparent" }}>
-        <Info className="h-[14px] w-[14px]" aria-hidden />
+      <button type="button" aria-label="What changed and why" aria-expanded={open} onClick={onToggle} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: open ? "var(--primary)" : "var(--foreground)" }}>
+        <Info className="h-[18px] w-[18px]" aria-hidden />
       </button>
     </IconTip>
   );
@@ -212,22 +216,33 @@ function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open:
 
 function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () => void }) {
   const note = CHANGE_NOTES[view];
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
   return (
-    <div className="mt-[var(--space-3)] flex max-w-[760px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--inset-bg)", borderColor: "var(--inset-border)", boxShadow: "var(--inset-shadow)" }}>
-      <div className="flex items-start justify-between gap-[8px]">
-        <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>What changed from the reference</span>
-        <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button>
+    <div className="fixed inset-0 z-40 flex items-start justify-end p-[var(--space-4)] sm:p-[var(--space-5)]">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(0,0,0,0.45)" }} />
+      <div role="dialog" aria-modal="true" aria-label={`What changed on ${VIEW_TITLES[view].title}`} className="relative mt-[56px] flex max-h-[calc(100dvh-80px)] w-full max-w-[520px] flex-col gap-[var(--space-3)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.6)" }}>
+        <div className="flex items-start justify-between gap-[8px]">
+          <span className="flex flex-col gap-[2px]">
+            <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>What changed from the reference</span>
+            <span className="text-[16px] font-bold" style={{ color: "var(--foreground)" }}>{VIEW_TITLES[view].title}</span>
+          </span>
+          <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[15px] w-[15px]" aria-hidden /></button>
+        </div>
+        <ul className="flex flex-col gap-[6px]">
+          {note.changed.map((c) => (
+            <li key={c} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
+              <span aria-hidden className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{c}
+            </li>
+          ))}
+        </ul>
+        <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Why.</span> {note.why}</p>
+        <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Better because.</span> {note.better}</p>
+        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Full reasoning and the alternatives each choice beat: docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md</span>
       </div>
-      <ul className="flex flex-col gap-[4px]">
-        {note.changed.map((c) => (
-          <li key={c} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
-            <span aria-hidden className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{c}
-          </li>
-        ))}
-      </ul>
-      <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Why.</span> {note.why}</p>
-      <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Better because.</span> {note.better}</p>
-      <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Full reasoning and the alternatives each choice beat: docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md</span>
     </div>
   );
 }
@@ -331,6 +346,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
                 </button>
               </IconTip>
+              {version === "v2" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
               {/* DEMO-ONLY: the site-wide "quick links" hamburger, same one
                  the student app uses to reach this dashboard in the first
                  place -- without it, this shell's own isolation (no shared
@@ -368,6 +384,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
                 </button>
               </IconTip>
+              {version === "v2" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
               {/* DEMO-ONLY: see the matching comment on the mobile header
                  above -- the way back to the rest of the demo. */}
               <QuickLinksMenu align="right" />
@@ -402,18 +419,15 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             <div className="flex w-full max-w-[1400px] flex-col gap-[var(--space-4)] [&>*]:shrink-0">
               {showTitle && (
                 <div className="flex flex-col gap-[2px]">
-                  <div className="flex items-center gap-[8px]">
-                    <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
-                    {version === "v2" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
-                  </div>
+                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
                   <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>
-                  {version === "v2" && noteOpen && <ChangeNotePanel view={active} onClose={() => setNoteOpen(false)} />}
                 </div>
               )}
               {children}
             </div>
           </main>
         </div>
+        {version === "v2" && noteOpen && <ChangeNotePanel view={active} onClose={() => setNoteOpen(false)} />}
         <CounselorVersionChip />
       </div>
     </CounselorFiltersContext.Provider>

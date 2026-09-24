@@ -142,9 +142,14 @@ bottom."
 
 ## Cross-cutting, 25 Sept 2026 (late)
 
-- **Every v2 title carries an (i) that opens the screen's change note**
-  (`v2/changeNotes.ts`: what changed, why, what makes it better), by
-  direct instruction. The note is the short form of this file.
+- **Every v2 screen has an (i) at the top right that opens the screen's
+  change note as an overlay** (`v2/changeNotes.ts`: what changed, why,
+  what makes it better), by direct instruction. First placed beside the
+  title with the note expanding under it; moved the same day ("put it in
+  the top right corner ... display as an overlay thing that can be closed
+  so it doesn't confuse the layout"): the panel now floats over the page,
+  closed by its X, the backdrop or Escape, and the layout beneath never
+  moves. The note is the short form of this file.
 - **Every screen has loading, error and whole-screen empty states**
   (`v2/states.tsx`, previewed with `?state=`), catalogued with in-screen
   states and edge cases in `docs/COUNSELOR_V2_STATES.md`, so the backend
