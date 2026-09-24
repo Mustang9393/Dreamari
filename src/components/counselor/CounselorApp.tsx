@@ -137,25 +137,19 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
 }
 
 export function CounselorApp({ initialView, initialStudentId }: { initialView?: string; initialStudentId?: string }) {
-  const router = useRouter();
+  // No sign-in gate (direct instruction, 25 Sept 2026: "I don't want a sign
+  // in / sign up flow for the counselor dashboard"). The account record
+  // (name, school, role from Settings) still lives in localStorage and
+  // still shapes the shell; it just no longer decides whether you get in.
+  // Wait one tick for hydration so the role-based menu renders from the
+  // real stored value, not the server's empty snapshot.
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  // The server snapshot (and the client's very first, pre-hydration render,
-  // which must match it) has no access to localStorage and always reads
-  // signed-out -- redirecting on that render would bounce a genuinely
-  // signed-in counselor straight back to login before hydration ever gets
-  // a chance to read the real value. Wait one tick for hydration to settle
-  // before trusting `isSignedIn` enough to redirect on it.
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- the value we're waiting on (localStorage) is client-only, same justification used elsewhere in this codebase for a client-only mount flag
     setHydrated(true);
   }, []);
-
-  useEffect(() => {
-    if (hydrated && !account.isSignedIn) router.replace("/counselor/login");
-  }, [hydrated, account.isSignedIn, router]);
-
-  if (!hydrated || !account.isSignedIn) return null;
+  if (!hydrated) return null;
 
   return (
     <CounselorVersionProvider>
