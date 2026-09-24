@@ -52,6 +52,78 @@ export function interestsFromBuild(): string[] {
   }
 }
 
+/** Everything the real Build knows that can shape a career list: worlds,
+ *  favourite subjects, and the college / trades / both answer. Read-only. */
+export type BuildSignals = { worlds: string[]; subjects: string[]; path: string };
+export function buildSignals(): BuildSignals {
+  try {
+    const p = readStudentProfile();
+    return { worlds: interestsFromBuild(), subjects: p.subjects ?? [], path: p.path ?? "" };
+  } catch {
+    return { worlds: [], subjects: [], path: "" };
+  }
+}
+
+// Title keywords per Build subject, so "Computer Science" can actually
+// reorder a world (direct feedback, 25 Sept 2026: "make it so the v2 build
+// actually shows relevant options based on what I choose"). Hand-authored
+// for the lab; production would come from the taxonomy.
+export const SUBJECT_KEYWORDS: Record<string, string[]> = {
+  Mathematics: ["analyst", "actuar", "account", "engineer", "statistic", "mathemat", "financ", "data", "economist", "architect", "surveyor"],
+  Science: ["scientist", "biolog", "chemist", "lab", "nurse", "physician", "medic", "environment", "geolog", "pharmac", "vet", "research", "technolog"],
+  "English/Literature": ["writer", "editor", "journal", "author", "copywrit", "librar", "communicat", "public relations", "reporter"],
+  History: ["histor", "museum", "archiv", "curator", "lawyer", "attorney", "policy", "diplomat", "paralegal", "teacher"],
+  Art: ["design", "illustrat", "artist", "animat", "photograph", "fashion", "architect", "stylist", "tattoo", "florist"],
+  Music: ["music", "audio", "sound", "dj", "composer", "producer"],
+  "Computer Science": ["software", "developer", "programmer", "data", "cyber", "security", "web", "ai ", "robot", "game", "it ", "network", "cloud", "ux"],
+  "Foreign Languages": ["translat", "interpret", "diplomat", "flight attendant", "travel", "tour", "international", "customs"],
+  Business: ["manager", "marketing", "sales", "entrepreneur", "account", "real estate", "consultant", "executive", "owner", "human resources", "recruit", "banker"],
+  Psychology: ["psycholog", "counselor", "therapist", "social worker", "mental", "human resources", "behavior", "case manager"],
+};
+const TRADES_KEYWORDS = ["technician", "electrician", "plumber", "mechanic", "welder", "carpenter", "hvac", "machinist", "operator", "driver", "chef", "cook", "cosmetolog", "paramedic", "emt", "lineman", "installer", "pipefitter", "roofer", "mason", "apprentice", "trucker", "barber", "esthetic", "firefighter", "ironworker", "millwright"];
+const COLLEGE_KEYWORDS = ["engineer", "scientist", "physician", "surgeon", "lawyer", "attorney", "analyst", "architect", "pharmacist", "professor", "psychologist", "accountant", "therapist", "dentist", "veterinarian", "economist", "researcher", "actuary", "banker", "consultant"];
+
+export type Ranked = { career: LabCareer; reason: string | null; score: number };
+
+/** Order one world's careers by how well they fit the student's Build
+ *  answers: each matching subject scores, the college/trades answer nudges,
+ *  and ties keep catalog order. `reason` is the one label a card can show. */
+export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
+  const path = signals.path;
+  return careersForWorld(world)
+    .map((career, index) => {
+      const t = career.title.toLowerCase();
+      let score = 0;
+      let reason: string | null = null;
+      for (const subject of signals.subjects) {
+        if ((SUBJECT_KEYWORDS[subject] ?? []).some((k) => t.includes(k))) {
+          score += 2;
+          reason ??= subject;
+        }
+      }
+      const trades = TRADES_KEYWORDS.some((k) => t.includes(k));
+      const college = COLLEGE_KEYWORDS.some((k) => t.includes(k));
+      if (path === "trades") {
+        if (trades) { score += 1; reason ??= "Trades path"; }
+        if (college && !trades) score -= 1;
+      } else if (path === "college") {
+        if (college) { score += 1; reason ??= "College path"; }
+        if (trades && !college) score -= 1;
+      }
+      return { career, reason, score, index };
+    })
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map(({ career, reason, score }) => ({ career, reason, score }));
+}
+
+/** Worlds to offer under "Explore more": neighbours of the chosen worlds
+ *  first, so the next tab over is the next-nearest thing, not alphabetical. */
+export function exploreMoreWorlds(chosen: string[]): string[] {
+  const near = chosen.flatMap((w) => WORLD_NEIGHBORS[w] ?? []);
+  const rest = browsableWorlds();
+  return [...new Set([...near, ...rest])].filter((w) => !chosen.includes(w) && rest.includes(w));
+}
+
 // One follow-up per world for v3's Build add-on ("Which parts of Arts, Media
 // & Sport?"), the granularity two Dreamonna testers asked for. Hand-authored
 // for the lab; production would draw these from the taxonomy.

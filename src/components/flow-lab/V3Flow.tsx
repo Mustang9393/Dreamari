@@ -11,7 +11,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRight, Sparkles, RefreshCw } from "lucide-react";
 import {
-  SUB_INTERESTS, WORLD_NEIGHBORS, browsableWorlds, careerById, careersForWorld, interestsFromBuild, readLabState, subInterestFor, writeLabState, type LabCareer,
+  SUB_INTERESTS, WORLD_NEIGHBORS, browsableWorlds, buildSignals, careerById, careersForWorld, interestsFromBuild, rankForStudent, readLabState, subInterestFor, writeLabState, type LabCareer,
 } from "./lab";
 import { CARD, InterestPicker, LabCard, PrimaryButton, QuietButton, StepHeader, TopThreeScreen } from "./shared";
 
@@ -34,13 +34,15 @@ type Match = { career: LabCareer; reasons: string[]; stretch: boolean };
 /** Rank a world's careers: ones that match a chosen sub-interest first,
  *  then the rest, each with its reason. Deterministic, so a page is stable. */
 function rankWorld(world: string, subs: string[]): Match[] {
-  const all = careersForWorld(world);
+  // Sub-interest hits first; within each half, the real Build's subjects
+  // and path (rankForStudent) break ties, so the same signals v2 uses
+  // shape v3 too and the two stay comparable.
   const hit: Match[] = [];
   const miss: Match[] = [];
-  for (const career of all) {
-    const sub = subInterestFor(career.title, subs);
-    if (sub) hit.push({ career, reasons: [sub, world], stretch: false });
-    else miss.push({ career, reasons: [world], stretch: false });
+  for (const r of rankForStudent(world, buildSignals())) {
+    const sub = subInterestFor(r.career.title, subs);
+    if (sub) hit.push({ career: r.career, reasons: [sub, world], stretch: false });
+    else miss.push({ career: r.career, reasons: r.reason ? [`Fits ${r.reason}`, world] : [world], stretch: false });
   }
   return [...hit, ...miss];
 }
@@ -171,7 +173,7 @@ export function V3Flow() {
           {six.map((m) => {
             const pos = state.picks.indexOf(m.career.id);
             return (
-              <LabCard key={m.career.id} career={m.career} selected={pos >= 0} selectLabel="Pick for Top 3" unselectLabel="Unpick" onToggle={() => togglePick(m.career.id)} badge={pos >= 0 ? `#${pos + 1}` : undefined} chips={m.reasons} />
+              <LabCard key={m.career.id} career={m.career} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} onToggle={() => togglePick(m.career.id)} reasons={m.reasons} />
             );
           })}
         </div>

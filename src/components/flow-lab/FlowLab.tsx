@@ -14,6 +14,10 @@ import Link from "next/link";
 import { RotateCcw, ArrowLeft } from "lucide-react";
 import { Wordmark } from "@/components/app/chrome";
 import { IconTip } from "@/components/app/IconTip";
+import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
+import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
+import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
 import { LAB_VERSION_KEY, clearLabState, type LabVersion } from "./lab";
 import { V2Flow } from "./V2Flow";
 import { V3Flow } from "./V3Flow";
@@ -52,8 +56,20 @@ export function FlowLab({ initialVersion }: { initialVersion?: LabVersion }) {
   };
 
   return (
-    <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col" style={{ background: "var(--background)", color: "var(--foreground)" }}>
-      <header className="sticky top-0 z-10 flex items-center justify-between gap-[10px] border-b px-[var(--space-4)] py-[var(--space-3)] backdrop-blur-[10px] sm:px-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
+    <ThemeProvider>
+    {/* Same backdrop as the live Match (starfield + aurora) and the shared
+        poster font stylesheet, so the lab's cards read as the real thing
+        (direct feedback, 25 Sept 2026: "fully designed just like we have
+        match right now with full colors, backgrounds"). */}
+    {/* The token scope wrapper is `contents`, exactly as Match does it: the
+        .themeable class paints its own background, and the aurora canvas
+        sits at z-index -10, so a boxed wrapper would hide it. */}
+    <div className="marketing-v2 themeable contents">
+    <div className="relative flex min-h-dvh w-full flex-col" style={{ color: "var(--foreground)" }}>
+      <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
+      <BackgroundSpace />
+      <AuroraBackground accent="#2f6bf2" visitedAccents={[]} finale={false} lightning={false} />
+      <header className="sticky top-0 z-10 flex items-center justify-between gap-[10px] border-b px-[var(--space-4)] py-[var(--space-3)] backdrop-blur-[10px] sm:px-[var(--space-6)]" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", borderColor: "var(--glass-border)" }}>
         <div className="flex items-center gap-[12px]">
           <IconTip label="Back to the app">
             <Link href="/home" aria-label="Back to the app" className="dm-quiet flex size-9 items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
@@ -68,7 +84,7 @@ export function FlowLab({ initialVersion }: { initialVersion?: LabVersion }) {
         </div>
       </header>
 
-      <main className="flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-6)] pb-[calc(var(--space-6)+72px)] sm:px-[var(--space-6)]">
+      <main className="relative z-[1] flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-6)] pb-[calc(var(--space-6)+72px)] sm:px-[var(--space-6)]">
         <div className="flex w-full max-w-[1100px] flex-col">
           {version === "v2" ? <V2Flow key={`v2-${resetKey}`} /> : <V3Flow key={`v3-${resetKey}`} />}
         </div>
@@ -95,5 +111,7 @@ export function FlowLab({ initialVersion }: { initialVersion?: LabVersion }) {
         </div>
       </div>
     </div>
+    </div>
+    </ThemeProvider>
   );
 }
