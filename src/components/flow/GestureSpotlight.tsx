@@ -199,11 +199,17 @@ export function Coachmark({
   align = "center",
   wrapperClassName = "relative inline-flex",
   anchorId,
+  demoForce = false,
   children,
 }: {
   active: boolean;
   label: string;
   onDismiss: () => void;
+  /** DEMO-ONLY: lets the Flow Lab (/flow-lab) run its coachmarks while
+      COACHMARKS_ENABLED is false everywhere else (direct instruction, 25
+      Sept 2026: "repurpose it to fire on these screens ONLY"). Nothing in
+      the demo app passes this. Remove with the lab. */
+  demoForce?: boolean;
   /** "Next" for a step that leads into another coachmark, so a 2-part tour
       (For You -> Schools) reads as one guided moment instead of two
       unrelated hints firing separately (direct feedback, 24 Sept 2026:
@@ -227,7 +233,7 @@ export function Coachmark({
       target rectangle used to position the portaled card and glow. */
   children: React.ReactNode;
 }) {
-  const active = COACHMARKS_ENABLED && activeProp;
+  const active = (COACHMARKS_ENABLED || demoForce) && activeProp;
   const targetRef = useRef<HTMLSpanElement | null>(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const spotlightId = useId().replaceAll(":", "");
