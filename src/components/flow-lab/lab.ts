@@ -73,6 +73,88 @@ export const SUB_INTERESTS: Record<string, string[]> = {
   "Tech & Engineering": ["Software & apps", "Data & AI", "Cybersecurity", "Design (UX/UI)", "Hardware & engineering", "Games"],
 };
 
+// Title keywords that tie a catalog career to a sub-interest, so v3 can put
+// a real reason on each card ("Software & apps", not just the world). A
+// career that matches none of the student's chosen sub-interests still
+// shows its world as the reason. Hand-authored for the lab.
+export const SUB_KEYWORDS: Record<string, string[]> = {
+  "Design & illustration": ["design", "illustrat", "graphic", "animator", "artist"],
+  "Film, video & photo": ["film", "video", "photo", "director", "cinemat", "editor", "producer"],
+  "Music & audio": ["music", "audio", "sound", "dj", "composer"],
+  "Writing & journalism": ["writer", "journal", "author", "editor", "reporter", "copywriter"],
+  "Sports & fitness": ["sport", "athlet", "coach", "fitness", "trainer", "referee"],
+  "Fashion": ["fashion", "stylist", "model"],
+  "Architecture & design": ["architect", "drafter", "interior", "landscape"],
+  "Hands-on building": ["carpenter", "mason", "roofer", "construction", "builder", "welder", "ironworker"],
+  "Electrical & plumbing": ["electrician", "plumber", "hvac", "pipefitter"],
+  "Project management": ["manager", "estimator", "inspector", "surveyor"],
+  "Investing & markets": ["invest", "financial", "trader", "analyst", "banker", "wealth"],
+  "Running a business": ["entrepreneur", "founder", "owner", "manager", "executive", "consultant"],
+  "Marketing & sales": ["market", "sales", "brand", "advertis", "account"],
+  "Accounting & numbers": ["account", "auditor", "bookkeep", "actuar", "tax"],
+  "Real estate": ["real estate", "realtor", "property", "appraiser"],
+  "School counseling": ["school counselor", "guidance", "academic advisor"],
+  "Mental health": ["therapist", "psycholog", "counselor", "mental"],
+  "Community programs": ["community", "case manager", "social worker", "nonprofit"],
+  "Youth work": ["youth", "child", "family"],
+  "Flying": ["pilot", "flight", "air traffic", "aviation"],
+  "Logistics & shipping": ["logistic", "supply", "shipping", "freight", "dispatcher", "warehouse"],
+  "Driving & delivery": ["driver", "truck", "delivery", "courier"],
+  "Rail & transit": ["rail", "train", "transit", "conductor", "bus"],
+  "Manufacturing": ["manufactur", "machinist", "assembler", "production", "fabricat"],
+  "Robotics & automation": ["robot", "automation", "cnc", "mechatron"],
+  "Quality & inspection": ["quality", "inspector", "tester"],
+  "Product design": ["industrial design", "product design", "prototype", "toolmaker"],
+  "Animals & vet care": ["vet", "animal", "zoo", "groomer", "wildlife"],
+  "Farming & food production": ["farm", "agricultur", "rancher", "crop", "grower"],
+  "Parks & the outdoors": ["park", "ranger", "forest", "outdoor", "fishing"],
+  "Environment & climate": ["environment", "climate", "conservation", "sustainab", "ecolog"],
+  "Cars & motorcycles": ["auto", "mechanic", "motorcycle", "car", "diesel"],
+  "Aircraft": ["aircraft", "avionics", "aviation"],
+  "Heating & cooling": ["hvac", "refrigerat", "heating"],
+  "Industrial machines": ["industrial", "millwright", "maintenance", "elevator", "machinery"],
+  "Cooking & kitchens": ["chef", "cook", "kitchen", "culinary", "line"],
+  "Baking": ["baker", "pastry", "bak"],
+  "Food science": ["food scien", "nutrition", "dietitian", "flavor"],
+  "Restaurants & hospitality": ["restaurant", "hospitality", "server", "bartender", "sommelier", "caterer"],
+  "Nursing & patient care": ["nurse", "nursing", "aide", "paramedic", "emt", "caregiver"],
+  "Doctors & specialists": ["physician", "doctor", "surgeon", "pediatric", "anesthesi", "cardiolog"],
+  "Therapy & rehab": ["therapist", "physical therap", "occupational", "rehab", "chiropract"],
+  "Labs & research": ["lab", "technologist", "pathol", "research", "biomed"],
+  "Dental & vision": ["dent", "orthodont", "optom", "optic", "vision"],
+  "Law & courts": ["lawyer", "attorney", "paralegal", "judge", "legal", "court"],
+  "Police & investigation": ["police", "detective", "investigat", "forensic", "officer", "sheriff"],
+  "Fire & emergency": ["fire", "emergency", "dispatcher", "rescue"],
+  "Policy & government": ["policy", "government", "legislat", "diplomat", "public", "urban"],
+  "Beauty & wellness": ["cosmetolog", "esthetic", "hair", "nail", "massage", "beauty", "makeup"],
+  "Fitness & coaching": ["fitness", "trainer", "coach", "yoga", "instructor"],
+  "Events": ["event", "wedding", "planner", "concierge"],
+  "Community services": ["community", "recreation", "funeral", "childcare"],
+  "Lab research": ["scientist", "chemist", "biolog", "microbiolog", "lab", "research"],
+  "Space & physics": ["astro", "physic", "space", "aerospace"],
+  "Environment & earth": ["geolog", "environment", "meteorolog", "oceanograph", "earth"],
+  "Data & analysis": ["data", "statistic", "analyst", "mathemat"],
+  "Teaching kids": ["elementary", "preschool", "kindergarten", "early childhood"],
+  "Teaching teens": ["high school", "teacher", "middle school", "secondary"],
+  "Coaching & training": ["coach", "trainer", "tutor", "instructor"],
+  "Curriculum & ed-tech": ["curriculum", "instructional", "education", "librarian", "principal"],
+  "Software & apps": ["software", "developer", "programmer", "web", "mobile", "cloud", "devops"],
+  "Data & AI": ["data", "machine learning", "ai ", "artificial", "analyst"],
+  "Cybersecurity": ["cyber", "security", "network"],
+  "Design (UX/UI)": ["ux", "ui", "design", "product"],
+  "Hardware & engineering": ["hardware", "electrical", "mechanical", "civil", "robot", "engineer"],
+  "Games": ["game"],
+};
+
+export function subInterestFor(title: string, candidates: string[]): string | null {
+  const t = title.toLowerCase();
+  for (const sub of candidates) {
+    const keys = SUB_KEYWORDS[sub] ?? [];
+    if (keys.some((k) => t.includes(k))) return sub;
+  }
+  return null;
+}
+
 // Which worlds sit next to which, for v3's "one stretch pick" and "Show me
 // six more" so the set stays coherent instead of jumping across the map.
 export const WORLD_NEIGHBORS: Record<string, string[]> = {

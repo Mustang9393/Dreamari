@@ -64,13 +64,15 @@ export function LabCard({ career, selected, selectLabel, unselectLabel, onToggle
     <div className="relative flex flex-col gap-[8px]">
       <div className="relative">
         <PosterCard career={career} fill onClick={onOpen ?? onToggle} className={selected ? "ring-2 ring-[var(--primary)]" : ""} />
-        <IconTip label={selected ? unselectLabel : selectLabel}>
+        {/* Positioning lives on IconTip itself: its wrapper is `relative`, so an
+            `absolute` child would sit against the wrapper, not the poster. */}
+        <IconTip label={selected ? unselectLabel : selectLabel} className="absolute top-2 right-2 z-[3]">
           <button
             type="button"
             aria-label={selected ? unselectLabel : selectLabel}
             aria-pressed={selected}
             onClick={onToggle}
-            className="dm-quiet absolute top-2 right-2 z-[3] flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
+            className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
             style={{ background: selected ? "var(--primary)" : "rgba(5,8,20,0.78)", borderColor: selected ? "var(--primary)" : "rgba(255,255,255,0.16)", color: "#FFFFFF" }}
           >
             <Heart className="h-[16px] w-[16px]" aria-hidden fill={selected ? "currentColor" : "none"} />
@@ -124,9 +126,10 @@ export function InterestPicker({ value, max, onChange }: { value: string[]; max:
 /** The lab's Profile > Top 3 screen, shared by v2 and v3: Joshua's asks as
  *  written (prominent Explore more and Saved careers, obvious remove and
  *  replace). `saved` is whatever the version treats as the saved pool. */
-export function TopThreeScreen({ top3, saved, onExploreMore, onOpenSaved, onRemove, onReplace, replacing, setReplacing }: {
+export function TopThreeScreen({ top3, saved, poolLabel = "Saved careers", onExploreMore, onOpenSaved, onRemove, onReplace, replacing, setReplacing }: {
   top3: LabCareer[];
   saved: LabCareer[];
+  poolLabel?: string;
   onExploreMore: () => void;
   onOpenSaved: () => void;
   onRemove: (id: string) => void;
@@ -139,11 +142,11 @@ export function TopThreeScreen({ top3, saved, onExploreMore, onOpenSaved, onRemo
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center gap-[10px]">
         <PrimaryButton onClick={onExploreMore}><Compass className="h-[16px] w-[16px]" aria-hidden /> Explore more</PrimaryButton>
-        <QuietButton onClick={onOpenSaved}><Bookmark className="h-[16px] w-[16px]" aria-hidden /> Saved careers ({saved.length})</QuietButton>
+        <QuietButton onClick={onOpenSaved}><Bookmark className="h-[16px] w-[16px]" aria-hidden /> {poolLabel} ({saved.length})</QuietButton>
       </div>
       {top3.length === 0 ? (
         <div className="rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-6)] text-center" style={CARD}>
-          <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing in your Top 3 yet. Explore more or pull one in from Saved.</p>
+          <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing in your Top 3 yet. Explore more or pull one in from {poolLabel.toLowerCase()}.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
@@ -163,7 +166,7 @@ export function TopThreeScreen({ top3, saved, onExploreMore, onOpenSaved, onRemo
               </div>
               {replacing === c.id && (
                 <div className="flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[10px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                  <span className="text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Swap in from Saved</span>
+                  <span className="text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Swap in from {poolLabel.toLowerCase()}</span>
                   {pool.map((p) => (
                     <button key={p.id} type="button" onClick={() => { onReplace(c.id, p.id); setReplacing(null); }} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
                       {p.title} <ChevronRight className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--muted-foreground)" }} />
