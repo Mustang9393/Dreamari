@@ -142,6 +142,17 @@ bottom."
 
 ## Cross-cutting, 25 Sept 2026 (late)
 
+- **A manual option beside every AI-generated thing** (direct instruction,
+  25 Sept 2026): Productivity Suite has "Write my own" next to "Generate
+  draft" (a blank with the tool's headings, same editor, same Copy /
+  Download / Save to notes; no student needed to start writing);
+  Insights' recommendations have "Add your own" (what you noticed, what to
+  do), shown as "Your note" tiles beside Dreamari's three. Nothing else in
+  v2 is generated.
+- **The (i) note also states each screen's ordering and why** ("What
+  comes first, and why"), by direct instruction: the attention strip's
+  Critical / High / Medium ranking, the roster's priority sort, the
+  tracker's focus score, the queue's due-date order, and so on.
 - **Every v2 screen has an (i) at the top right that opens the screen's
   change note as an overlay** (`v2/changeNotes.ts`: what changed, why,
   what makes it better), by direct instruction. First placed beside the

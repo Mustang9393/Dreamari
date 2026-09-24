@@ -10,7 +10,8 @@
 // decorative emoji; the career-fair note is one line plus its chips. Data
 // is the reference's, verbatim.
 
-import { Lightbulb } from "lucide-react";
+import { useState } from "react";
+import { Lightbulb, PenLine, Plus, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
@@ -85,7 +86,17 @@ function RankCard({ title, items }: { title: string; items: { name: string; coun
   );
 }
 
+type Tile = { pct: number | null; subject: string; action: string; mine?: boolean };
+
 export function CareerCollegeInsights() {
+  // The three tiles are Dreamari's suggestions; a counselor can add their
+  // own (direct instruction, 25 Sept 2026: a manual option wherever
+  // something is AI generated). Session state until a backend stores it.
+  const [tiles, setTiles] = useState<Tile[]>(() => RECOMMENDATION_TILES.map((t) => ({ ...t })));
+  const [adding, setAdding] = useState(false);
+  const [subject, setSubject] = useState("");
+  const [action, setAction] = useState("");
+  const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       {/* The screen's hero: what the data suggests doing. One stat, one
@@ -95,16 +106,40 @@ export function CareerCollegeInsights() {
         <div className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
           <div className="relative flex flex-col gap-[var(--space-4)]">
-            <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-              <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Recommended this semester
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-[8px]">
+              <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Recommended this semester
+              </h2>
+              {!adding && (
+                <button type="button" onClick={() => setAdding(true)} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
+                  <PenLine className="h-[13px] w-[13px]" aria-hidden /> Add your own
+                </button>
+              )}
+            </div>
+            {adding && (
+              <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[12px]" style={{ background: "var(--inset-bg)", borderColor: "var(--inset-border)" }}>
+                <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="What you noticed (e.g. 12 juniors asked about nursing)" aria-label="What you noticed" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
+                <input value={action} onChange={(e) => setAction(e.target.value)} placeholder="What to do about it" aria-label="Action" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
+                <div className="flex justify-end gap-[8px]">
+                  <button type="button" onClick={() => { setAdding(false); setSubject(""); setAction(""); }} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
+                  <button type="button" disabled={!subject.trim() || !action.trim()} onClick={() => { setTiles((t) => [{ pct: null, subject: subject.trim(), action: action.trim(), mine: true }, ...t]); setAdding(false); setSubject(""); setAction(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Plus className="h-[14px] w-[14px]" aria-hidden /> Add</button>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
               {/* One left edge for all three lines (direct feedback: the
                  number and its text "read like two different anchors"). */}
-              {RECOMMENDATION_TILES.map((r) => (
-                <div key={r.subject} className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                  <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
-                  <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.subject}</span>
+              {tiles.map((r) => (
+                <div key={r.subject} className="relative flex flex-col gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                  {r.mine ? (
+                    <>
+                      <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your note</span>
+                      <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[12px] w-[12px]" aria-hidden /></button>
+                    </>
+                  ) : (
+                    <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                  )}
+                  <span className="text-[12.5px] font-semibold" style={{ color: r.mine ? "var(--foreground)" : "var(--muted-foreground)" }}>{r.subject}</span>
                   <span className="mt-[6px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.action}</span>
                 </div>
               ))}

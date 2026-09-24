@@ -17,7 +17,7 @@ import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useRouter } from "next/navigation";
-import { Copy, Download, Save } from "lucide-react";
+import { Copy, Download, Save, PenLine } from "lucide-react";
 import { MILESTONE_KEYS, attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
 import { addNote } from "@/lib/counselorNotes";
 import { Avatar, StatusChip } from "../chips";
@@ -83,6 +83,22 @@ export function ProductivitySuite() {
     setSavedTo(null);
     setDraft(buildDraft(toolId, student, letterType));
   };
+  // A blank start with only the headings, for a counselor who would rather
+  // write than edit a generated draft (direct instruction, 25 Sept 2026:
+  // "make sure a manual option exists everywhere we have AI generated
+  // things"). Same editor, same Copy / Download / Save to notes.
+  const writeOwn = () => {
+    setSavedTo(null);
+    const name = student?.name ?? "";
+    const skeleton: Record<ToolId, string> = {
+      "recommendation-letter": `To whom it may concern,\n\n${name ? `I am writing to recommend ${name}` : "I am writing to recommend "}${letterType ? ` for a ${letterType.toLowerCase()} opportunity` : ""}.\n\n\n\nSincerely,\n`,
+      "student-brief": `Meeting brief${name ? `: ${name}` : ""}\n\nStatus:\nRecent activity:\nOpen items:\nTalking points:\n`,
+      "parent-brief": `Family conference${name ? `: ${name}` : ""}\n\nProgress this year:\nWhat is next:\nHow the family can help:\n`,
+      "success-plan": `Success plan${name ? `: ${name}` : ""}\n\nGoal:\nFinish first:\nThen:\nCheck-in:\nSupport:\n`,
+      attention: "",
+    };
+    setDraft(skeleton[toolId]);
+  };
   const download = () => {
     if (!draft) return;
     const url = URL.createObjectURL(new Blob([draft], { type: "text/plain" }));
@@ -124,7 +140,7 @@ export function ProductivitySuite() {
               {attention.length === 0 && <li className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Everyone is on track.</li>}
             </ul>
           ) : (
-          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
+          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:items-end lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
             {(
               <label className="flex min-w-0 flex-col gap-[4px]">
                 <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Student</span>
@@ -137,12 +153,17 @@ export function ProductivitySuite() {
                 <Listbox ariaLabel="Letter type" value={letterType} onChange={setLetterType} placeholder="Choose a type" options={LETTER_TYPES.map((t) => ({ value: t, label: t }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            <button type="button" onClick={generate} disabled={!studentId} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
-              <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate draft
-            </button>
+            <div className="flex gap-[8px]">
+              <button type="button" onClick={generate} disabled={!studentId} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
+                <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate draft
+              </button>
+              <button type="button" onClick={writeOwn} className="dm-quiet flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                <PenLine className="h-[14px] w-[14px]" aria-hidden /> Write my own
+              </button>
+            </div>
           </div>
           )}
-          {toolId !== "attention" && <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A first draft from the student&apos;s Dreamari data. Edit it here, then copy, download or save it to the student&apos;s notes.</p>}
+          {toolId !== "attention" && <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Generate a first draft from the student&apos;s Dreamari data, or write your own. Either way, edit here, then copy, download or save to the student&apos;s notes.</p>}
 
           {draft !== null && toolId !== "attention" && (
             <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: GLASS_INSET.background }}>

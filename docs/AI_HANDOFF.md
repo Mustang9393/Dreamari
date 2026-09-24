@@ -48,6 +48,8 @@ Direct instructions across the afternoon, in order: get everything done (Student
 
 **Docs.** `docs/COUNSELOR_V2_STATES.md` (new, the backend contract), deviations file ("Cross-cutting, 25 Sept 2026 (late)", per-screen sections), HANDOFF_INDEX (v2 reading list, previews). `npx tsc --noEmit -p .` and `npx eslint` clean; captures at 375, 768, 1024, 1280, 1440 and 2560, dark and light.
 
+**Later the same evening:** "Write my own" beside Generate on the Productivity Suite and "Add your own" on Insights' recommendations (a manual option wherever something is AI generated); every (i) note gained a "What comes first, and why" line explaining the screen's ranking.
+
 **Open, by design or for the backend:** Insights rows have no drilldown (no career id in the roster); Share and Principal report on Impact are not wired (no export service); the trend deltas on the counselor Overview are fixed demo numbers; Milestone Tracker proportions are the reference's, scaled, so approvals do not move it.
 
 ### 2026-09-25 Counselor Dashboard v2: My Impact, Platform Engagement and Settings passes

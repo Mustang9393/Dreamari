@@ -241,6 +241,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
         </ul>
         <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Why.</span> {note.why}</p>
         <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Better because.</span> {note.better}</p>
+        {note.order && <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">What comes first, and why.</span> {note.order}</p>}
         <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Full reasoning and the alternatives each choice beat: docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md</span>
       </div>
     </div>
