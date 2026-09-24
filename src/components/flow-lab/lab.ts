@@ -91,46 +91,48 @@ const COLLEGE_KEYWORDS = ["engineer", "scientist", "physician", "surgeon", "lawy
 export type Ranked = { career: LabCareer; reason: string | null; score: number };
 
 /** Order one world's careers by how well they fit the student's Build
- *  answers: each matching subject scores, the college/trades answer nudges,
- *  and ties keep catalog order. `reason` is the one label a card can show:
- *  the subject or path the student chose that this career fits. Subject
- *  keyword lists are kept narrow so a broad one cannot tag a whole world
- *  (the first cut had "engineer" and "architect" under Mathematics and
- *  every Tech card read "Fits Mathematics"; direct feedback, 25 Sept 2026). */
+ *  answers, combined: each matching subject scores, the college/trades
+ *  answer nudges a fit up and pushes a mismatch down, ties keep catalog
+ *  order. `reason` is the chip: only the subject(s) the student chose that
+ *  this career fits ("Fits Mathematics · Computer Science"). The path is
+ *  never a reason on its own (direct feedback, 25 Sept 2026: "I should get
+ *  something relevant to my interests + college path, not something that's
+ *  there only because of college path"). */
 export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
   const path = signals.path;
   return careersForWorld(world)
     .map((career, index) => {
       const t = career.title.toLowerCase();
       let score = 0;
-      let subjectHit: string | null = null;
+      const hits: string[] = [];
       for (const subject of signals.subjects) {
         if ((SUBJECT_KEYWORDS[subject] ?? []).some((k) => t.includes(k))) {
           score += 2;
-          subjectHit ??= subject;
+          hits.push(subject);
         }
       }
       // A trade word wins when both match ("Civil Engineering Technician"
       // is a technician, not an engineer).
       const trades = TRADES_KEYWORDS.some((k) => t.includes(k));
       const college = !trades && COLLEGE_KEYWORDS.some((k) => t.includes(k));
-      let pathHit: string | null = null;
-      if (path === "trades") {
-        if (trades) { score += 1; pathHit = "Trades path"; }
-        if (college && !trades) score -= 1;
-      } else if (path === "college") {
-        if (college) { score += 1; pathHit = "College path"; }
-        if (trades && !college) score -= 1;
-      }
-      // The chip is the student's OWN choice this card matched (a subject
-      // or the path), never something inferred from the title (direct
-      // feedback, 25 Sept 2026: "the chips should be relevant to the
-      // recommendations, not random"). No match, no chip.
-      const reason = subjectHit ? `Fits ${subjectHit}` : pathHit;
+      if (path === "trades") score += trades ? 1 : college ? -2 : 0;
+      else if (path === "college") score += college ? 1 : trades ? -2 : 0;
+      const reason = hits.length ? `Fits ${hits.join(" · ")}` : null;
       return { career, reason, score, index };
     })
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ career, reason, score }) => ({ career, reason, score }));
+}
+
+/** The "For you" set: every career from the chosen worlds, ranked by the
+ *  combined answers, with path mismatches left out entirely. Worlds are
+ *  interleaved on ties so one world never crowds the other out. */
+export function forYou(signals: BuildSignals): Ranked[] {
+  const perWorld = signals.worlds.map((w) => rankForStudent(w, signals).filter((r) => r.score >= 0));
+  const out: Ranked[] = [];
+  const max = Math.max(0, ...perWorld.map((l) => l.length));
+  for (let i = 0; i < max; i++) for (const list of perWorld) if (list[i]) out.push(list[i]);
+  return out.sort((a, b) => b.score - a.score);
 }
 
 /** Worlds to offer under "Explore more": neighbours of the chosen worlds

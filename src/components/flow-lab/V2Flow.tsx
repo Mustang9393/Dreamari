@@ -13,7 +13,7 @@ import { ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { useFirstUseHint } from "@/components/flow/GestureSpotlight";
-import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
+import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, forYou, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PAGE, Pager, QuietButton, SixGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "explore" | "saved" | "rank" | "top3";
@@ -30,6 +30,7 @@ type State = {
   rank: string[];
 };
 const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", page: {}, saved: [], rank: [] };
+const FOR_YOU = "For you";
 const EXPLORE_MORE = "Explore more";
 
 export function V2Flow({ onRestart }: { onRestart: () => void }) {
@@ -49,7 +50,8 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     const build = buildSignals();
     let next = stored;
     if (stored.worlds.length === 0 && build.worlds.length > 0) next = { ...stored, worlds: build.worlds, subjects: build.subjects, path: build.path, fromBuild: true, step: "explore" };
-    if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_MORE) next = { ...next, activeTab: next.worlds[0] ?? "" };
+    // Land on For you: the six that fit the combination of every Build answer.
+    if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_MORE && next.activeTab !== FOR_YOU) next = { ...next, activeTab: FOR_YOU };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only storage read after mount, same pattern as the counselor version chip
     setState(next);
     setHydrated(true);
@@ -88,7 +90,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
       <>
         <LabScreen title="Build">
           <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-1 pt-2">
-            <Field label="Worlds · up to 2"><InterestPicker value={state.worlds} max={2} onChange={(worlds) => setState((s) => ({ ...s, worlds, activeTab: worlds[0] ?? "" }))} /></Field>
+            <Field label="Worlds · up to 2"><InterestPicker value={state.worlds} max={2} onChange={(worlds) => setState((s) => ({ ...s, worlds, activeTab: FOR_YOU }))} /></Field>
             <Field label="Favourite subjects · up to 2"><ChipRow ariaLabel="Subjects" options={SUBJECTS.map((x) => ({ key: x, label: x }))} value={state.subjects} max={2} onChange={(subjects) => setState((s) => ({ ...s, subjects }))} /></Field>
             <Field label="After high school"><ChipRow ariaLabel="Path" options={PATH_OPTIONS.map((p) => ({ key: p.id, label: p.title }))} value={state.path ? [state.path as "college" | "trades" | "both"] : []} max={1} onChange={([path]) => setState((s) => ({ ...s, path: path ?? "" }))} /></Field>
           </div>
@@ -100,12 +102,13 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
 
   // ---- Mini Explore: six at a time, paged like a carousel ----
   if (state.step === "explore") {
-    const tabs = [...state.worlds.map((w) => ({ key: w, label: w })), { key: EXPLORE_MORE, label: EXPLORE_MORE }];
+    const tabs = [{ key: FOR_YOU, label: FOR_YOU }, ...state.worlds.map((w) => ({ key: w, label: w })), { key: EXPLORE_MORE, label: EXPLORE_MORE }];
     const others = exploreMoreWorlds(state.worlds);
     const isMore = state.activeTab === EXPLORE_MORE;
     const moreWorld = others.includes(state.moreWorld) ? state.moreWorld : others[0];
-    const world = isMore ? moreWorld : state.activeTab;
-    const ranked: Ranked[] = rankForStudent(world, signals);
+    const isForYou = state.activeTab === FOR_YOU;
+    const world = isMore ? moreWorld : isForYou ? FOR_YOU : state.activeTab;
+    const ranked: Ranked[] = isForYou ? forYou(signals) : rankForStudent(world, signals);
     const total = Math.max(1, Math.ceil(ranked.length / PAGE));
     const index = Math.min(state.page[world] ?? 0, total - 1);
     const six = ranked.slice(index * PAGE, index * PAGE + PAGE);

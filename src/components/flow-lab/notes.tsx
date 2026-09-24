@@ -32,7 +32,7 @@ export const FLOW_NOTES: Record<LabVersion, Note> = {
       {
         heading: "What we added without changing the flow",
         bullets: [
-          "The six are ordered by the student's Build answers (worlds, subjects, college or trades), and each card says why it is there.",
+          "A For you tab first: the six that fit the combination of the Build answers (worlds, subjects, college or trades), then a tab per world. A chip names the subject a card fits; the path shapes the set but is never a reason on its own.",
           "The six move like a carousel, forward and back, instead of a growing list.",
           "Tap a card for the same detail Match shows today (what you'd do, good fit if, school and path).",
           "Short coachmarks carry the instructions instead of on-screen copy.",
