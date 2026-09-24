@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor prototype opens without login/signup
+
+User request: "remove the login/signup stuff for counsellor dashboard on main and push." Removed the simulated localStorage sign-in gate and unused auth forms so a fresh browser opens the dashboard directly. Legacy `/counselor/login` and `/counselor/signup` routes redirect to `/counselor`; desktop and mobile sign-out controls are removed. Local profile/role preferences and role-based view routing remain. The shared app access gate remains in place. This is a prototype-only change, documented in HANDOFF_INDEX and the reference deviations log.
+
+Validation: targeted ESLint and tokens:check passed; production build passed, including TypeScript and all routes. A standalone TypeScript run initially encountered pre-existing duplicate generated `.next/types/* 2.ts` files; the production build regenerated that output and passed its TypeScript check. React review: no conditional hooks added, profile subscription retained, removed obsolete hydration effect and navigation handler. No new layout, scrollbar, picker, tooltip or token introduced. Next step: verify the deployed counselor entry after Vercel finishes the main-branch deployment. Linear: CHA-36.
+
 ### 2026-09-25 Flow Lab: Top 3 fits the viewport, the detail modal is Match's, honest reason chips, (i) notes and the hamburger
 
 Four direct reports in one sitting, each fixed at the cause:

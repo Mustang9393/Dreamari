@@ -2,15 +2,14 @@
 
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, LogOut, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info,
+  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
-import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, signOutCounselor } from "@/lib/counselorAccount";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { CounselorVersionChip, useCounselorVersion } from "./version";
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, type CounselorView } from "./roles";
@@ -142,7 +141,7 @@ function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?
   );
 }
 
-function SidebarAccount({ account, onSignOut }: { account: { name: string; school: string }; onSignOut: () => void }) {
+function SidebarAccount({ account }: { account: { name: string; school: string } }) {
   return (
     <div className="flex items-center gap-[10px] border-t px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
       <span className="flex size-[34px] flex-none items-center justify-center rounded-full text-[13px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>
@@ -152,11 +151,6 @@ function SidebarAccount({ account, onSignOut }: { account: { name: string; schoo
         <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{account.name || "Counselor"}</span>
         <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{account.school || DEMO_SCHOOL}</span>
       </span>
-      <IconTip label="Sign out">
-        <button type="button" aria-label="Sign out" onClick={onSignOut} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-          <LogOut className="h-4 w-4" aria-hidden />
-        </button>
-      </IconTip>
     </div>
   );
 }
@@ -252,7 +246,6 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
 // renders its own header row (the reference's Student Profile shows
 // "← Student Profile" plus its actions inline instead of the Students title).
 export function CounselorShell({ active, children, showTitle = true }: { active: CounselorView; children: React.ReactNode; showTitle?: boolean }) {
-  const router = useRouter();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("All Grades");
   const [search, setSearch] = useState("");
@@ -275,11 +268,6 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   // A district administrator's frame of reference is the district, not one
   // school: the topbar's org chip and the account line say so (v2 only).
   const orgLabel = version === "v2" && account.role === "District Administrator" ? DISTRICT_NAME : DEMO_SCHOOL;
-
-  const doSignOut = () => {
-    signOutCounselor();
-    router.push("/counselor/login");
-  };
 
   return (
     <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter }}>
@@ -308,7 +296,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             <Wordmark />
           </div>
           <SidebarNav active={active} />
-          <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} onSignOut={doSignOut} />
+          <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} />
         </aside>
 
         {/* Mobile drawer -- backdrop + slide-in panel, lg:hidden context only (never mounted interactive at lg+). */}
@@ -327,7 +315,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                 <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
               </div>
               <SidebarNav active={active} onNavigate={() => setDrawerOpen(false)} />
-              <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} onSignOut={doSignOut} />
+              <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} />
             </div>
           </div>
         )}
