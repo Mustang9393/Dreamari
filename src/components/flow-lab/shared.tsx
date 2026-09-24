@@ -11,7 +11,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, Info, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, FileText, GraduationCap, ImageOff, Info, Play, Plus, Route, Sparkles, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { IconTip } from "@/components/app/IconTip";
 import { Coachmark } from "@/components/flow/GestureSpotlight";
@@ -392,8 +393,73 @@ function Section({ icon, label, children }: { icon: ReactNode; label: string; ch
 
 // ------------------------------------------------------------------ top 3 ----
 
+// The student-facing ladder after a Top 3, in the counselor dashboard's own
+// milestone order (MILESTONE_KEYS in counselorRoster.ts: Career Report ->
+// Career Pathway -> Resume -> College Exploration -> Applications), so
+// "what's next" for the student is the same thing that moves their roadmap
+// on the counselor's screen. Each step opens the real app page for it.
+const LADDER: { key: string; label: string; icon: ReactNode; href: (slug: string) => string }[] = [
+  { key: "report", label: "Career Report", icon: <FileText className="h-3.5 w-3.5" aria-hidden />, href: (slug) => `/career-report?picks=${slug}` },
+  { key: "path", label: "Pathway", icon: <Route className="h-3.5 w-3.5" aria-hidden />, href: (slug) => `/career/${slug}` },
+  { key: "play", label: "Play a day", icon: <Play className="h-3.5 w-3.5" aria-hidden />, href: () => "/play" },
+  { key: "colleges", label: "Colleges", icon: <GraduationCap className="h-3.5 w-3.5" aria-hidden />, href: () => "/colleges" },
+];
+
+/** One recommended next step for #1, then the ladder. Nothing in the lab
+ *  records progress, so the recommendation is always the first rung; in
+ *  the product it would be the first rung not yet done. */
+function NextStep({ first }: { first: LabCareer }) {
+  const router = useRouter();
+  const slug = careerSlug(first.title);
+  const accent = WORLD_COLORS[first.world] ?? "var(--primary)";
+  return (
+    <div className="flex flex-none flex-col gap-2 rounded-[var(--radius-lg)] border p-3" style={{ ...CARD, borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))` }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 22%, transparent)`, color: accent }}><Sparkles className="h-4 w-4" aria-hidden /></span>
+          <div className="min-w-0">
+            <p className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Next step</p>
+            <p className="truncate text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>Career Report for {first.title}</p>
+          </div>
+        </div>
+        <PrimaryButton onClick={() => router.push(LADDER[0].href(slug))}>Start <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></PrimaryButton>
+      </div>
+      <ol className="flex flex-wrap items-center gap-1.5" aria-label="Your roadmap">
+        {LADDER.map((step, i) => (
+          <li key={step.key} className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold whitespace-nowrap" style={{ borderColor: i === 0 ? accent : "var(--glass-border)", background: i === 0 ? `color-mix(in srgb, ${accent} 18%, transparent)` : "transparent", color: i === 0 ? "var(--foreground)" : "var(--muted-foreground)" }}>
+              {step.icon}{step.label}
+            </span>
+            {i < LADDER.length - 1 && <ChevronRight className="h-3 w-3" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/** Icon-only actions under each Top 3 card, one per rung, each with its
+ *  tooltip (icon-only rule). Opens the real page; Back returns to the lab. */
+function CareerActions({ career }: { career: LabCareer }) {
+  const router = useRouter();
+  const slug = careerSlug(career.title);
+  return (
+    <div className="grid grid-cols-4 gap-1.5">
+      {LADDER.map((step) => (
+        <IconTip key={step.key} label={step.label} className="w-full">
+          <button type="button" aria-label={`${step.label}: ${career.title}`} onClick={() => router.push(step.href(slug))} className="dm-quiet flex h-9 w-full cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            {step.icon}
+          </button>
+        </IconTip>
+      ))}
+    </div>
+  );
+}
+
 /** The lab's My Profile > Top 3, shared by v2 and v3: Joshua's asks as
- *  written (prominent Explore more and Saved, obvious Remove and Replace). */
+ *  written (prominent Explore more and Saved, obvious Remove and Replace),
+ *  plus the answer to "what's next" (direct feedback, 25 Sept 2026): a
+ *  recommended next step for #1, the ladder, and actions on every card. */
 export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPool, onRemove, onReplace, replacing, setReplacing, hint }: {
   top3: LabCareer[];
   pool: LabCareer[];
@@ -418,6 +484,8 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
           <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No picks yet</p>
         </div>
       ) : (
+        <>
+        <NextStep first={top3[0]} />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {top3.map((c, i) => {
             const replaceBtn = (
@@ -428,6 +496,7 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
             return (
               <div key={c.id} className="flex flex-col gap-2 rounded-[var(--radius-lg)] border p-2.5" style={CARD}>
                 <LabCard career={c} control="rank" selected rank={i + 1} />
+                <CareerActions career={c} />
                 <div className="flex gap-2">
                   {i === 0 && hint ? (
                     <Coachmark demoForce active={hint.active} label={hint.label} onDismiss={hint.onDismiss} spotlight side="top" align="start" wrapperClassName="flex flex-1">
@@ -451,6 +520,7 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
             );
           })}
         </div>
+        </>
       )}
     </div>
   );

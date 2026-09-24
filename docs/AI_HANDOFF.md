@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Flow Lab: "what's next" on the shared Top 3 screen
+
+**Why:** in both flows the student landed on My Top 3 and the screen stopped; that was the open question from the survey synthesis ("I added to Top 3 but didn't know what to do next") and the direct ask on 25 Sept 2026 ("how can we answer the whole what's next after I get to my top 3 in my profile?" then "do the first thing and show me").
+
+**What (`shared.tsx`, `NextStep` + `CareerActions`, both flows):** one recommended next step for #1 ("Career Report for Data Scientist", Start), then the student-side ladder in the counselor dashboard's own milestone order (Career Report > Pathway > Play a day > Colleges, from `MILESTONE_KEYS`) so the student's next step is the same thing that moves their roadmap on the counselor's screen, and four icon-only actions under every Top 3 card (tooltips per the icon-only rule) that open the real app pages: `/career-report?picks=<slug>`, `/career/<slug>`, `/play`, `/colleges`. Back returns into the lab. The lab records no progress, so the recommendation is always the first rung; in the product it is the first rung not yet done. No new copy beyond the labels.
+
 ### 2026-09-25 Flow Lab: every screen on Match's composition, a six-card carousel, in-place detail modal, coachmarks scoped to the lab
 
 **Why (direct feedback, 25 Sept 2026):** "follow the design language, the tap to learn more should be similar to the earlier version... six cards on screen, show six more, all 6 scroll out of the screen, new 6 loads, I can keep moving between these like a carousel. The pagination breadcrumb thing shouldn't be there. Stick to earlier layouts, kill all redundant copy. NO long text explainers on screen. If you must have it, wire up the coachmark stuff... to fire on these screens ONLY, with sensible copy, concise, no em dashes." The previous pass had the right card but the wrong page around it: a step strip, a big title with a helper paragraph, an "Ordered for you by..." line, chips under every card, and Learn more that left the lab for the Career Detail page.
