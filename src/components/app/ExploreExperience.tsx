@@ -697,7 +697,7 @@ function EnvCard({
       <div className="relative -mx-[var(--space-4)] -mb-[var(--space-4)] flex flex-col">
         <Coachmark
           active={showActionsHint}
-          label="Like, save, or add a career to your Top 3 — right from here."
+          label="Like, hide, or save this career from here."
           onDismiss={onDismissActionsHint}
           align="end"
           spotlight
@@ -1323,7 +1323,7 @@ function PreferenceButton({
 
 const REEL_SOUND_KEY = "dreamari:reel-sound-on";
 
-function ForYouFace({ showActionsCoachmark }: { showActionsCoachmark: boolean }) {
+function ForYouFace() {
   const total = FOR_YOU_FEED.length;
   const [active, setActive] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
@@ -1354,10 +1354,12 @@ function ForYouFace({ showActionsCoachmark }: { showActionsCoachmark: boolean })
   const setDisliked = useCallback((slug: string, next: boolean) => {
     setPrefs((p) => ({ ...p, [slug]: { disliked: next, liked: next ? false : (p[slug]?.liked ?? false) } }));
   }, []);
-  // One coachmark, shown once per device, shared with Career Detail's own
-  // (same "action-icons" key) -- whichever surface a student reaches first
-  // is the only one that ever explains these icons.
-  const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons", { repeatOnReload: true });
+  // Career action coachmarks belong on Career Detail, where students can
+  // understand each control in the context of the career they are editing.
+  // The reel stays focused on discovery instead of explaining management
+  // actions before the student reaches that screen.
+  const showActionsHint = false;
+  const dismissActionsHint = useCallback(() => undefined, []);
 
   // Active-card tracking (drives the Ken Burns restart + paging state).
   useEffect(() => {
@@ -1497,7 +1499,7 @@ function ForYouFace({ showActionsCoachmark }: { showActionsCoachmark: boolean })
                 disliked={itemPrefs?.disliked ?? false}
                 onSetLiked={(next) => itemSlug && setLiked(itemSlug, next)}
                 onSetDisliked={(next) => itemSlug && setDisliked(itemSlug, next)}
-                showActionsHint={showActionsCoachmark && showActionsHint && index === active}
+                showActionsHint={showActionsHint && index === active}
                 onDismissActionsHint={dismissActionsHint}
               />
             </div>
@@ -1517,7 +1519,7 @@ function ForYouFace({ showActionsCoachmark }: { showActionsCoachmark: boolean })
         prefs={prefs}
         setLiked={setLiked}
         setDisliked={setDisliked}
-        showActionsHint={showActionsCoachmark && showActionsHint}
+        showActionsHint={showActionsHint}
         dismissActionsHint={dismissActionsHint}
       />
 
@@ -1589,7 +1591,7 @@ function DesktopPreferenceRail({
   return (
     <Coachmark
       active={showActionsHint}
-      label="Like, save, or add a career to your Top 3 — right from here."
+      label="Like, hide, or save this career from here."
       onDismiss={dismissActionsHint}
       align="end"
       spotlight
@@ -1985,7 +1987,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             <ExploreSectionTabs active="careers" showTutorial={showSchoolsTutorial} onDismissTutorial={dismissTour} />
           </div>
           <div className="flex h-full min-w-0 flex-1 flex-col items-start">
-            {isDesktop && <ForYouFace showActionsCoachmark={!tourNotSeen} />}
+            {isDesktop && <ForYouFace />}
           </div>
           <div className="flex-none self-start">
             <DesktopSearchToggle tab={tab} switchTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} searchOpen={searchOpen} setSearchOpen={setSearchOpen} query={query} setQuery={setQuery} />
@@ -2026,7 +2028,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
         {tab === "browse" ? (
           <BrowseFace query={query} filtersOpen={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} />
         ) : (
-          !isDesktop && <ForYouFace showActionsCoachmark={!tourNotSeen} />
+          !isDesktop && <ForYouFace />
         )}
       </main>
 

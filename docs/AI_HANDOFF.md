@@ -38,6 +38,10 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Career Detail coachmarks: Top 3 first, supporting actions second
+
+Career management teaching now appears only on Career Detail. The first coachmark targets the Add/Remove Top 3 control alone and changes its copy based on the current state: adding explains that Top 3 choices can be edited or swapped later; removing explains that the career can be replaced from saved careers. Dismissing or using that control advances to a separate coachmark around Like, Not for me, and Save. The For You reel no longer presents these management coachmarks during discovery. Both steps repeat after a browser refresh for demos, and the copy contains no em dashes.
+
 ### 2026-09-24 Counselor Dashboard: Milestone Tracker cards recomposed around one hierarchy
 
 Direct feedback: "Milestone tracker needs better composition and alignment and information hierarchy WITHIN cards." The cards mixed three alignment axes (left header, centered ring cluster, a 2x2 legend whose values floated to each column's far edge), said the same number three ways in three type styles, printed "Counselor Review" twice in a row, carried a dead Info icon, and the full-width hero held one narrow centered column.
@@ -45,7 +49,6 @@ Direct feedback: "Milestone tracker needs better composition and alignment and i
 Rebuilt `MilestoneCardView` on Overview's DonutCard composition so the two screens are one system: title anchored left, ring centered as the one headline graphic (now "73%" over "22 of 30"), a single tinted verdict line under it, the shared single-column `StatRow` legend (moved from Overview into `chips.tsx`, both screens import it), one "See students" pill anchored left. The hero alone gets a second arrangement via a container query (`@container` / `@[640px]:`, Tailwind v4): title + verdict + control | ring | legend, so it fills the width whether it spans the full row or two thirds of it. Grade 10's 8 milestones no longer orphan a card: when the remainder would, the hero spans two columns with the first sidekick beside it. Every content/structure change and the alternative it beat is logged in `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md` (Milestone Tracker, 24 Sept entry).
 
 Verified live at 1440 (Grades 9 and 10), 1024 and 375. `npx tsc --noEmit -p .` and `npx eslint` clean on MilestoneTracker.tsx, Overview.tsx, chips.tsx.
-
 ### 2026-09-24 Coachmarks: viewport-safe portal positioning and progressive sequencing
 
 The Explore guided tour and Career Detail action hint are now positioned from the live target rectangle in viewport coordinates and rendered through `document.body`. The tooltip is clamped to a 16px viewport gutter, flips above/below when its preferred side has no room, and keeps its pointer aimed at the target after horizontal clamping. The overlay also cancels the app's wide-screen `body` zoom so its measured and rendered dimensions stay in the same coordinate system at 1920px and 2560px widths. Resize, nested scroll, and `visualViewport` changes all trigger a fresh measurement; tooltips hide while their target is offscreen and reappear when it returns.

@@ -510,7 +510,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
-  const [showActionsHint, dismissActionsHint] = useFirstUseHint("action-icons", { repeatOnReload: true });
+  const [showTop3Hint, dismissTop3Hint] = useFirstUseHint("top3-action", { repeatOnReload: true });
+  const [showOtherActionsHint, dismissOtherActionsHint] = useFirstUseHint("career-actions", { repeatOnReload: true });
 
   if (!career) {
     return (
@@ -645,19 +646,22 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   <Users className="h-4 w-4" aria-hidden /> Connect
                 </button>
               )}
-              <Coachmark
-                active={showActionsHint}
-                label="Like, save, or add a career to your Top 3 — right from here."
-                onDismiss={dismissActionsHint}
-                align="end"
-                spotlight
-              >
               <div className="flex items-center gap-[var(--space-2)]">
+                <Coachmark
+                  active={showTop3Hint}
+                  label={inTop3
+                    ? "Remove this career from your Top 3. You can replace it with another saved career anytime."
+                    : "Add this career to your Top 3. You can edit or swap your Top 3 choices anytime."}
+                  onDismiss={dismissTop3Hint}
+                  cta="Next"
+                  align="start"
+                  spotlight
+                >
                 <IconButton
                   label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
                   active={inTop3}
                   onClick={() => {
-                    dismissActionsHint();
+                    dismissTop3Hint();
                     if (inTop3) {
                       setToast(null);
                       const before = removeFromTop3(career.slug);
@@ -672,11 +676,20 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 >
                   {inTop3 ? <Minus className="h-5 w-5" aria-hidden /> : <Plus className="h-5 w-5" aria-hidden />}
                 </IconButton>
+                </Coachmark>
+                <Coachmark
+                  active={!showTop3Hint && showOtherActionsHint}
+                  label="Like this career, mark it as not for you, or save it for later."
+                  onDismiss={dismissOtherActionsHint}
+                  align="start"
+                  spotlight
+                >
+                <div className="flex items-center gap-[var(--space-2)]">
                 <IconButton
                   label="Like this career"
                   active={liked}
                   onClick={() => {
-                    dismissActionsHint();
+                    dismissOtherActionsHint();
                     const next = !liked;
                     setLiked(next);
                     if (next) setDisliked(false);
@@ -693,7 +706,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   label="Not for me"
                   active={disliked}
                   onClick={() => {
-                    dismissActionsHint();
+                    dismissOtherActionsHint();
                     const next = !disliked;
                     setDisliked(next);
                     if (next) setLiked(false);
@@ -706,11 +719,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 >
                   <ThumbsDown className="h-5 w-5" fill={disliked ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
-                <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => { dismissActionsHint(); toggleSavedCareer(career.slug); }}>
+                <IconButton label={saved ? "Saved" : "Save for later"} active={saved} onClick={() => { dismissOtherActionsHint(); toggleSavedCareer(career.slug); }}>
                   <Bookmark className="h-5 w-5" fill={saved ? "currentColor" : "none"} aria-hidden />
                 </IconButton>
+                </div>
+                </Coachmark>
               </div>
-              </Coachmark>
               </div>
             </div>
           </div>
