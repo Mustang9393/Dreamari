@@ -766,6 +766,19 @@ kept as history.
   milestones instead of 5), which remain demo copy until Dreamari has a
   student-to-counselor share action (report history's "Shared with
   counselor" label is the natural source).
+- **25 Sept 2026 pass under the v2 budget.** Header stats (pending,
+  overdue, due in 2 days) in the same header language as the Milestone
+  Tracker, replacing the "Pending (16)" caption. Queue cards are two lines
+  on the raised inset surface (name; milestone · grade; the due line with
+  a colored dot and neutral text), the priority pill the only colored
+  element; "submitted" moved to the detail pane, where the meta line is
+  now "Overdue by 3 days · submitted Sep 21" instead of three dates. The
+  list is bounded and scrolls beside the pane. The Lead Counselor gets a
+  Counselor picker and the counselor's name on each card (a School
+  Counselor's queue has no such control). Reviewed rows use the inset
+  surface. Alternative: keep the earlier three-line cards. Sixteen cards
+  each with a red due line read as a wall of alarm; one pill per card
+  says the same.
 
 ---
 

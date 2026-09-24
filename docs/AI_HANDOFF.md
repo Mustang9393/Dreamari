@@ -38,6 +38,14 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: Review Queue pass, per-role check of the finished screens
+
+Direct instruction: "Onto the next. Also verify if these screens are done for each role."
+
+**Review Queue** (`v2/ReviewQueue.tsx`): header stats (pending, overdue, due in 2 days), two-line cards on the inset surface with the priority pill as the only colored element, bounded scrolling list beside the pane, detail meta reduced to one line, Lead Counselor gets a Counselor picker and counselor names. Reasoning: deviations file, "Review Queue (v2)".
+
+**Per-role check** (headless captures at 1440): Overview done for all four roles; Students done for School Counselor, Lead and School Administrator (Counselor column and picker on the last two); Milestone Tracker done for School Counselor and Lead (the only roles that have it), whole-school numbers after the scoping revert; Review Queue for School Counselor and Lead. District Administrator has none of the last three by design. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
 ### 2026-09-25 Counselor Dashboard v2: caseload scoping turned off, whole school for every role
 
 Direct feedback: "why is it 12 students total? Our numbers need to make sense. This is a school counsellor's dashboard of a whole school right?" The role scoping added earlier today narrowed a School Counselor to the seeded A-H caseload, so her Grade 9 read 12 against the school's 30. `SCOPE_COUNSELOR_TO_CASELOAD = false` in `src/lib/counselorOrg.ts`: every role reads the whole school (121), as the reference does; the Lead and School Administrator keep the Counselor column, picker and comparison. Mechanism kept behind the flag. Logged in the deviations file under "Who sees which students".

@@ -17,15 +17,24 @@
 //   student's message and attachment); the always-true "Status: Pending
 //   Review" row is gone.
 // - Honors the topbar grade filter like the other roster-driven screens.
+// 25 Sept 2026 pass under the v2 budget: header stats (pending, overdue,
+// due in 2 days) like the Milestone Tracker, two-line cards on the inset
+// surface with the priority pill as the only colored element, a bounded
+// scrolling list beside a sticky-feeling pane, a Counselor picker and
+// counselor names for the Lead Counselor.
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Paperclip, Undo2 } from "lucide-react";
+import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { decideReview, undoReview, useReviewDecisions, useReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
 import { Avatar, MilestoneChip, STATUS_COLORS } from "../chips";
 import { useCounselorFilters } from "../shell";
-import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
+import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
+import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { Stat } from "./overviewShared";
 
 type Priority = "Normal" | "High" | "Urgent";
 type ReviewItem = {
@@ -131,33 +140,33 @@ function PriorityPill({ priority }: { priority: Priority }) {
   );
 }
 
-function QueueCard({ item, selected, onSelect }: { item: ReviewItem; selected: boolean; onSelect: () => void }) {
+// One card per submission, two lines: who and what, then when. The
+// priority pill is the one colored element (a status: overdue is urgent,
+// due within two days is high); the due line's dot repeats it, its text
+// stays neutral. "Submitted" lives in the detail pane, not here.
+function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewItem; selected: boolean; showCounselor: boolean; onSelect: () => void }) {
+  const color = item.priority === "Normal" ? "var(--muted-foreground)" : PRIORITY_COLORS[item.priority];
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="dm-quiet relative flex w-full cursor-pointer flex-col gap-[8px] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left"
-      style={{
-        ...GLASS_CARD,
-        borderColor: selected ? "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" : GLASS_CARD.borderColor,
-      }}
+      className="dm-quiet flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left"
+      style={{ ...GLASS_INSET, borderColor: selected ? "color-mix(in srgb, var(--primary) 60%, var(--glass-border))" : GLASS_INSET.borderColor, background: selected ? "color-mix(in srgb, var(--primary) 12%, transparent)" : GLASS_INSET.background }}
     >
-      <span className="relative flex items-center justify-between gap-[10px]">
+      <span className="flex items-center justify-between gap-[10px]">
         <span className="flex min-w-0 items-center gap-[10px]">
           <Avatar name={item.student.name} size={32} />
           <span className="flex min-w-0 flex-col leading-tight">
             <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{item.student.name}</span>
-            <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {item.student.grade} · {item.student.careerTrack}</span>
+            <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.milestone} · Grade {item.student.grade}{showCounselor ? ` · ${counselorFor(item.student).name}` : ""}</span>
           </span>
         </span>
         <PriorityPill priority={item.priority} />
       </span>
-      <span className="relative text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.milestone}</span>
-      <span className="relative flex items-center gap-[6px] text-[11.5px] font-bold" style={{ color: "var(--foreground)" }}>
-        <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: item.priority === "Normal" ? "var(--muted-foreground)" : PRIORITY_COLORS[item.priority] }} />
+      <span className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--foreground)" }}>
+        <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: color }} />
         {dueLabel(item.daysToDue)}
-        <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· submitted {fmt(item.submitted)}</span>
       </span>
     </button>
   );
@@ -169,7 +178,7 @@ function ReviewedRow({ decision, roster, onUndo }: { decision: ReviewDecision; r
   const when = new Date(decision.decidedAt);
   const isToday = when.toDateString() === new Date().toDateString();
   return (
-    <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, #FFFFFF 4%, transparent)" }}>
+    <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
       <Avatar name={student.name} size={28} />
       <span className="flex min-w-0 flex-1 flex-col leading-tight">
         <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{student.name} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {decision.milestone}</span></span>
@@ -188,8 +197,16 @@ export function ReviewQueue() {
   const { gradeFilter } = useCounselorFilters();
   const decisions = useReviewDecisions();
   const roster = useReviewedRoster();
-  const scoped = gradeFilter === "All Grades" ? roster : roster.filter((s) => s.grade === gradeFilter);
+  // The Lead Counselor reviews across caseloads and can narrow to one
+  // counselor; a School Counselor's queue has no such control.
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const showCounselor = account.role === "Lead Counselor";
+  const [counselorFilter, setCounselorFilter] = useState("All");
+  let scoped = gradeFilter === "All Grades" ? roster : roster.filter((s) => s.grade === gradeFilter);
+  if (showCounselor && counselorFilter !== "All") scoped = scoped.filter((s) => counselorFor(s).id === counselorFilter);
   const pending = buildQueue(scoped);
+  const overdue = pending.filter((i) => i.daysToDue < 0).length;
+  const dueSoon = pending.filter((i) => i.daysToDue >= 0 && i.daysToDue <= 2).length;
   const reviewed = Object.values(decisions)
     .filter((d) => scoped.some((s) => s.id === d.studentId))
     .sort((a, b) => b.decidedAt.localeCompare(a.decidedAt));
@@ -212,11 +229,20 @@ export function ReviewQueue() {
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[380px_1fr]">
-        <div className="flex flex-col gap-[var(--space-3)]">
-          <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            Pending ({pending.length}){gradeFilter !== "All Grades" ? ` · Grade ${gradeFilter}` : ""}
-          </span>
+      {/* Same header as the Milestone Tracker: the counts that decide the
+         day, and the one control the role needs. */}
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
+        <div className="flex gap-[var(--space-6)]">
+          <Stat value={String(pending.length)} label={`pending${gradeFilter !== "All Grades" ? ` · Grade ${gradeFilter}` : ""}`} />
+          <Stat value={String(overdue)} label="overdue" color={overdue > 0 ? STATUS_COLORS["At Risk"] : undefined} />
+          <Stat value={String(dueSoon)} label="due in 2 days" color={dueSoon > 0 ? STATUS_COLORS["Needs Attention"] : undefined} />
+        </div>
+        {showCounselor && (
+          <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "Any counselor" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+        )}
+      </div>
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[360px_1fr]">
+        <div className="flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
           {pending.length === 0 ? (
             <div className="rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--muted-foreground)" }}>
               Nothing pending review right now.
@@ -224,7 +250,7 @@ export function ReviewQueue() {
           ) : (
             <div className="flex flex-col gap-[8px]">
               {pending.map((item) => (
-                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} onSelect={() => { setSelectedId(item.id); setFeedback(""); }} />
+                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} onSelect={() => { setSelectedId(item.id); setFeedback(""); }} />
               ))}
             </div>
           )}
@@ -250,7 +276,7 @@ export function ReviewQueue() {
                   <div className="flex flex-col items-end gap-[6px]">
                     <PriorityPill priority={selected.priority} />
                     <span className="text-[11.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
-                      {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· due {fmt(selected.due)} · submitted {fmt(selected.submitted)}</span>
+                      {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· submitted {fmt(selected.submitted)}</span>
                     </span>
                   </div>
                 </div>
