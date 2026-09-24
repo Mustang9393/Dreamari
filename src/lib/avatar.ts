@@ -136,16 +136,14 @@ export function studentAvatarSrc(seed: string): string {
   return `/images/avatars/students/student-${String(index + 1).padStart(2, "0")}.png`;
 }
 
-/** The n-th free portrait (the illustrated set minus the pinned cast and
- *  the old cluster), wrapping. For a seeded roster with more names than
- *  portraits, assigning by roster position spreads repeats as far apart as
- *  the set allows, where hashing first names put every "Aisha" on one face
- *  (direct feedback, 25 Sept 2026: "student avatars are repeating in many
- *  screens"). */
-const FREE_INDICES = Array.from({ length: ILLUSTRATED_COUNT }, (_, i) => i).filter((i) => !EXCLUDED_INDICES.has(i));
-export function studentAvatarByIndex(n: number): string {
-  const index = FREE_INDICES[((n % FREE_INDICES.length) + FREE_INDICES.length) % FREE_INDICES.length];
-  return `/images/avatars/students/student-${String(index + 1).padStart(2, "0")}.png`;
+/** A portrait by its file number (student-NN.png). The counselor roster
+ *  hand-matches each seeded student to a portrait whose gender and
+ *  background fit the name (src/lib/counselorRosterPortraits.ts); an
+ *  earlier pass assigned by roster position and put wrong faces on names
+ *  (direct feedback, 25 Sept 2026). */
+export function studentPortraitSrc(fileNumber: number): string {
+  const n = Math.max(1, Math.min(ILLUSTRATED_COUNT, Math.round(fileNumber)));
+  return `/images/avatars/students/student-${String(n).padStart(2, "0")}.png`;
 }
 
 // ---- The student's own picked avatar (14 Sept 2026, direct feedback: "an

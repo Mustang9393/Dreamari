@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { MILESTONE_KEYS, avatarIndexForName, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
-import { studentAvatarByIndex, useStudentAvatarSrc } from "@/lib/avatar";
+import { studentPortraitSrc, useStudentAvatarSrc } from "@/lib/avatar";
 
 // Shared status pills -- the same caseload-status and milestone-review
 // vocabulary shows up on Students, the student drill-down, Milestone
@@ -119,16 +119,15 @@ export function initials(name: string): string {
 // elsewhere in the app) draw the identical face for the one real student.
 // Falls back to initials (this dashboard's original treatment) only if
 // the image itself ever fails to load.
-export function Avatar({ name, size = 34, index }: { name: string; size?: number; /** roster avatarIndex; when absent the name is looked up in the roster */ index?: number }) {
+export function Avatar({ name, size = 34, index }: { name: string; size?: number; /** roster portrait file number; when absent the name is looked up in the roster */ index?: number }) {
   const [failed, setFailed] = useState(false);
-  // Seeded students wear the portrait at their roster position (see
-  // avatar.ts: first-name hashing put every "Aisha" on the same face). The
-  // real student keeps the "Jordan" seed so Jordan's own avatar and any
-  // picked override apply.
+  // Seeded students wear a portrait hand-matched to their name (gender and
+  // background; counselorRosterPortraits.ts). The real student keeps the
+  // "Jordan" seed so Jordan's own avatar and any picked override apply.
   const resolvedIndex = index ?? avatarIndexForName(name);
   const seed = name === "Jordan Rivera" ? "Jordan" : name;
   const named = useStudentAvatarSrc(seed);
-  const src = resolvedIndex !== undefined && resolvedIndex >= 0 ? studentAvatarByIndex(resolvedIndex) : named;
+  const src = resolvedIndex !== undefined && resolvedIndex >= 0 ? studentPortraitSrc(resolvedIndex) : named;
   if (failed) {
     return (
       <span

@@ -50,6 +50,8 @@ Direct instructions across the afternoon, in order: get everything done (Student
 
 **Later the same evening:** "Write my own" beside Generate on the Productivity Suite and "Add your own" on Insights' recommendations (a manual option wherever something is AI generated); every (i) note gained a "What comes first, and why" line explaining the screen's ranking.
 
+**Portraits, later still:** "the student avatars don't match the names, genders are wrong, races are wrong". Every roster name is now hand-matched to a portrait of the right gender and likely background (`src/lib/counselorRosterPortraits.ts`, walked in order within each group); `avatarIndex` is now the portrait file number, `studentPortraitSrc()` in avatar.ts. The honest limit: 120 names over 48 portraits means some faces repeat (at most six times, in the largest group), and more portraits are the real fix.
+
 **Open, by design or for the backend:** Insights rows have no drilldown (no career id in the roster); Share and Principal report on Impact are not wired (no export service); the trend deltas on the counselor Overview are fixed demo numbers; Milestone Tracker proportions are the reference's, scaled, so approvals do not move it.
 
 ### 2026-09-25 Counselor Dashboard v2: My Impact, Platform Engagement and Settings passes

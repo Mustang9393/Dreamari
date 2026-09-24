@@ -153,6 +153,16 @@ bottom."
   comes first, and why"), by direct instruction: the attention strip's
   Critical / High / Medium ranking, the roster's priority sort, the
   tracker's focus score, the queue's due-date order, and so on.
+- **Portraits are hand-matched to names** (`src/lib/counselorRosterPortraits.ts`).
+  First pass hashed first names (every "Aisha" got one face); second pass
+  assigned by roster position (no repeats nearby, but faces no longer
+  matched the names: "genders are wrong, races are wrong"). Now each of the
+  120 names is classed by gender and likely background and drawn from the
+  matching group of the 48-portrait set, walked in order so repeats are as
+  far apart as the set allows (at most six names share a portrait; there
+  are 22 white masculine names and five such portraits). Unmatched names
+  fall back to a deterministic pick. Alternative: generate more portraits;
+  out of scope for this pass and noted as the real fix.
 - **Every v2 screen has an (i) at the top right that opens the screen's
   change note as an overlay** (`v2/changeNotes.ts`: what changed, why,
   what makes it better), by direct instruction. First placed beside the

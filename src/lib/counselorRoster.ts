@@ -23,6 +23,7 @@ import { readReportHistory } from "./reportHistory";
 import { readDreamScore } from "./dreamScore";
 import { REFERENCE_ROSTER } from "./counselorRosterData";
 import { REFERENCE_PROFILES, STATUS_CODES, MILESTONES_FOR_GRADE, CLUSTER_BY_TRACK, TOP5_BY_TRACK, educationGoalsFor } from "./counselorProfileData";
+import { ROSTER_PORTRAITS } from "./counselorRosterPortraits";
 
 export const DEMO_SCHOOL = "Lincoln High School";
 
@@ -88,9 +89,9 @@ export type CounselorStudent = {
   lastActive: string;
   /** true for the one row backed by this browser's real student data. */
   isReal: boolean;
-  /** Which illustrated portrait this seeded student wears (roster position,
-   *  so repeats are as far apart as the set allows). Ignored for the real
-   *  student, who wears Jordan's own avatar. */
+  /** The portrait file number (student-NN.png) this seeded student wears,
+   *  hand-matched to the name (counselorRosterPortraits.ts). -1 for the
+   *  real student, who wears Jordan's own avatar. */
   avatarIndex: number;
 };
 
@@ -170,7 +171,7 @@ function buildReferenceRoster(): CounselorStudent[] {
       engagement: { dreamScore, dailyDropsCompleted: dailyDrops, simulations, careersSaved, collegesSaved, challenges, questionsSubmitted: questions, communityPosts: posts },
       lastActive,
       isReal: false,
-      avatarIndex: i,
+      avatarIndex: ROSTER_PORTRAITS[name] ?? 33 + (i % 48),
     };
   });
 }
