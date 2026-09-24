@@ -139,6 +139,31 @@ status colors for state, single-hue bars for magnitude, validated ramps,
 every card opens something). School Counselor keeps the improved v2 Overview
 logged under "Overview" below. The three new ones, 24 Sept 2026:
 
+- **Rebuilt same day under a hard copy and color budget** (direct
+  feedback: "SO MUCH COPY AND RED ... everything looks super overwhelming.
+  V2 is the design layer, it needs to be super intuitive, skimmable,
+  glanceable, actionable, beautifully composed"). What the first cut did
+  wrong: every card had a subtitle, a verdict sentence in red or amber, a
+  footnote explaining the tick, and every row carried a chip ("ON TARGET",
+  "BEHIND"), a big number and a metadata line, so a healthy row shouted as
+  loudly as a failing one. The budget now:
+  - **One verdict per card, a phrase** ("Renee Alvarez is furthest
+    behind", "2 of 4 met · FAFSA completion furthest behind"). Text in the
+    foreground color; only a leading dot carries the status color.
+  - **One line per row:** name, one short muted note (students, targets
+    met, logins), the value, a bar with the target tick. No chips, no
+    distance sentences, no footnotes.
+  - **Color means "below target."** A row that meets its target is quiet
+    (primary-blue bar, white value). Amber within 10 points, red further.
+    Green is never painted on rows; the absence of alarm is the signal, so
+    a page with one problem shows one colored row.
+  - **Card titles are nouns** ("Counselors", "Grades", "Targets",
+    "Schools", "Platform use") with an optional unit ("% on track") instead
+    of question sentences; the question is what the page is for and the
+    verdict answers it.
+  Alternative considered: keep the sentences but shrink them. A smaller
+  sentence is still a sentence to read on every card; the point of the
+  screen is to not read.
 - **Glow only on the hero.** A first cut tinted every card's glow and
   border by its own worst band; corrected same day (direct feedback: "the
   different glows per card is not required everywhere ... only have it

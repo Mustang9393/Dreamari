@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Counselor Dashboard v2: role Overviews rebuilt under a copy and color budget
+
+Direct feedback: "There is SO MUCH COPY AND RED and everything looks super overwhelming. V2 is the design layer it needs to be super intuitive, skimmable, glanceable, actionable, beautifully composed, the information delivered with proper hierarchy."
+
+**What changed.** `v2/overviewShared.tsx` rebuilt: `OverviewCard` (noun title + optional unit, no subtitle), `Verdict` (a phrase, neutral text, one colored dot), `MetricRow` (label, short note, value, bar with tick; the value and bar wear amber or red only when below target, otherwise quiet blue and white), `Stat`, `RankBar`, `SeeLink`, `InitialsBadge`. Removed: `TargetRow` with its distance sentence, `BandChip`, `StatusBar`, `worstBand`, every footnote. The three role Overviews (`OverviewLead`, `OverviewSchoolAdmin`, `OverviewDistrict`) were rewritten on those pieces; the same two-row structure and click-throughs remain. Reasoning against the alternative in the deviations file, "Overview per role (v2)".
+
+**Not changed, flagged:** the School Counselor v2 Overview's attention strip still carries three red "Critical" badges and three red reason pills; that treatment came from detailed earlier feedback ("the reason blends in", "rate by severity"), so it was left for a decision rather than reversed silently.
+
+**Verified live** (headless captures at 1440 and 375): one colored row per problem, one verdict per card, no chips. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
 ### 2026-09-24 Counselor Dashboard v2: role switcher, glows only on heroes, Student Progress without its side list
 
 Direct feedback in chat, all three points: "the different glows per card is not required everywhere, overview makes sense and only have it genuinely where it needs to be"; "How are we toggling user roles for the dashboard v2?"; "In student progress a submenu is taking up space inside its container. Why? ... either make it take over the left bar menu with a back button ... or do something else." Also clarified that no external sign-off gates this work: v2 needs to be better than v1, useful for the four Settings roles, and look good.

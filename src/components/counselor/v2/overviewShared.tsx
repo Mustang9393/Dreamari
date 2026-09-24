@@ -1,17 +1,22 @@
 "use client";
 
 // Shared pieces for the role Overviews (Lead Counselor, School Administrator,
-// District Administrator; 24 Sept 2026). Every "how does this compare to
-// its target" reading on those screens goes through here so the rule is
-// stated once: met = the dashboard's On Track green, within 10 points =
-// Needs Attention amber, further = At Risk red (`targetBand` in
-// src/lib/counselorOrg.ts), always with an icon and a word, never color
-// alone. The card frame is the same glass, glow and title block the
-// counselor Overview's cards already use, so the four Overviews read as one
-// product with different questions, not four products.
+// District Administrator). Rebuilt 24 Sept 2026 under a hard budget after
+// direct feedback ("so much copy and red ... everything looks super
+// overwhelming. v2 ... needs to be super intuitive, skimmable, glanceable"):
+//
+// - One verdict per card, a phrase, not a sentence. Text stays in the
+//   foreground color; only its leading dot carries the status color.
+// - One line per row: name, value, bar. No chips, no distance sentences, no
+//   footnotes. The bar's target tick says where 80% is.
+// - Color means "below target." A row that meets its target is quiet
+//   (primary-blue bar, foreground value). Amber within 10 points, red
+//   further (`targetBand` in src/lib/counselorOrg.ts). Green is not painted
+//   on rows at all: the absence of alarm is the signal.
+// - One hero per screen carries a tint; every other card is plain glass.
 
-import { CircleAlert, CircleCheck, TriangleAlert, ChevronRight } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { ChevronRight } from "lucide-react";
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 import { STATUS_COLORS } from "./Overview";
 import { targetBand, type TargetBand } from "@/lib/counselorOrg";
@@ -21,47 +26,25 @@ export const BAND_COLORS: Record<TargetBand, string> = {
   near: STATUS_COLORS["Needs Attention"],
   missed: STATUS_COLORS["At Risk"],
 };
-export const BAND_LABELS: Record<TargetBand, string> = { met: "On target", near: "Close", missed: "Behind" };
-const BAND_ICONS = { met: CircleCheck, near: TriangleAlert, missed: CircleAlert } as const;
-const BAND_RANK: Record<TargetBand, number> = { missed: 0, near: 1, met: 2 };
 
-export function worstBand(bands: TargetBand[]): TargetBand {
-  return bands.reduce<TargetBand>((worst, b) => (BAND_RANK[b] < BAND_RANK[worst] ? b : worst), "met");
+/** The color a value wears: nothing when it meets its target. */
+export function alertColor(value: number, target: number): string | undefined {
+  const band = targetBand(value, target);
+  return band === "met" ? undefined : BAND_COLORS[band];
 }
 
-/** Icon + word in the band's color. */
-export function BandChip({ band, label }: { band: TargetBand; label?: string }) {
-  const Icon = BAND_ICONS[band];
-  const color = BAND_COLORS[band];
-  return (
-    <span className="inline-flex flex-none items-center gap-[4px] rounded-full px-[8px] py-[2px] text-[10.5px] font-extrabold tracking-[0.02em] uppercase whitespace-nowrap" style={{ color, background: `color-mix(in srgb, ${color} 16%, transparent)` }}>
-      <Icon className="h-[11px] w-[11px]" aria-hidden />
-      {label ?? BAND_LABELS[band]}
-    </span>
-  );
-}
-
-/** The one card frame every role-Overview card uses. `hero` spends the
- *  page's single saturated surface, and only the hero carries a `tint`
- *  (its glow and border take the card's own reading, the worst band on it,
- *  the way the counselor Overview's Student Status hero glows its status
- *  color). Sidekicks stay the plain glass with the quiet primary glow every
- *  other card on the dashboard has: a status-colored glow on every card
- *  made the page shout everywhere and so point nowhere (direct feedback,
- *  24 Sept 2026: "only have it genuinely where it needs to be"). */
-export function OverviewCard({ title, sub, hero, tint, aside, children, className = "" }: { title: string; sub?: string; hero?: boolean; tint?: string; aside?: React.ReactNode; children: React.ReactNode; className?: string }) {
+export function OverviewCard({ title, unit, hero, tint, aside, children }: { title: string; /** one short muted qualifier, only when the title needs a unit */ unit?: string; hero?: boolean; tint?: string; aside?: React.ReactNode; children: React.ReactNode }) {
   const base = hero ? GLASS_CARD_HERO : GLASS_CARD;
-  const surface = tint ? { ...base, borderColor: `color-mix(in srgb, ${tint} ${hero ? 38 : 26}%, var(--glass-border))` } : base;
-  const glow = tint ?? "var(--primary)";
+  const surface = hero && tint ? { ...base, borderColor: `color-mix(in srgb, ${tint} 38%, var(--glass-border))` } : base;
   return (
-    <HoverBeam strength={hero ? 0.7 : 0.6} className={`h-full ${className}`}>
+    <HoverBeam strength={hero ? 0.7 : 0.6} className="h-full">
       <div className="relative flex h-full flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(glow, hero ? 0.28 : 0.12) }} />
-        <div className="relative flex flex-wrap items-start justify-between gap-[8px]">
-          <span className="flex min-w-0 flex-col gap-[2px]">
-            <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
-            {sub && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sub}</span>}
-          </span>
+        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(hero && tint ? tint : "var(--primary)", hero ? 0.26 : 0.1) }} />
+        <div className="relative flex flex-wrap items-baseline justify-between gap-x-[8px] gap-y-[4px]">
+          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>
+            {title}
+            {unit && <span className="ml-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{unit}</span>}
+          </h2>
           {aside}
         </div>
         <div className="relative flex flex-1 flex-col gap-[var(--space-4)]">{children}</div>
@@ -70,20 +53,16 @@ export function OverviewCard({ title, sub, hero, tint, aside, children, classNam
   );
 }
 
-/** The one sentence a card exists to say, in the band's color with its
- *  icon: "Grade 11 is behind: 77% on track, 6 need attention." */
+/** The one line a card exists to say. Neutral text, a colored dot. */
 export function Verdict({ band, children }: { band: TargetBand; children: React.ReactNode }) {
-  const Icon = BAND_ICONS[band];
-  const color = BAND_COLORS[band];
   return (
-    <p className="flex items-start gap-[6px] text-[13px] leading-[18px] font-bold" style={{ color }}>
-      <Icon className="mt-[2px] h-[14px] w-[14px] flex-none" aria-hidden />
+    <p className="flex items-center gap-[8px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+      <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: BAND_COLORS[band], boxShadow: `0 0 8px ${BAND_COLORS[band]}` }} />
       <span>{children}</span>
     </p>
   );
 }
 
-/** A "see" affordance in the same pill language as Overview's "See all". */
 export function SeeLink({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
     <button type="button" onClick={onClick} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>
@@ -92,67 +71,61 @@ export function SeeLink({ onClick, children }: { onClick: () => void; children: 
   );
 }
 
-/** A thin track with a fill and, optionally, a target tick. Single hue for
- *  the fill (magnitude is one hue); the tick is the same bronze the
- *  readiness charts use for their target line. */
-export function RankBar({ value, target, color, height = 8 }: { value: number; target?: number; color: string; height?: number }) {
+/** A thin track, a fill, a target tick. Quiet blue unless the value is
+ *  below its target. */
+export function RankBar({ value, target, height = 6 }: { value: number; target?: number; height?: number }) {
   const v = Math.max(0, Math.min(100, value));
+  const color = (typeof target === "number" && alertColor(value, target)) || "var(--primary)";
   return (
-    <span className="relative block w-full overflow-visible rounded-full" style={{ height, background: "rgba(255,255,255,0.08)" }} aria-hidden>
-      <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${v}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 72%, transparent), ${color})`, boxShadow: `0 0 8px color-mix(in srgb, ${color} 45%, transparent)` }} />
-      {typeof target === "number" && (
-        <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${target}% - 1px)`, background: "#A67C2E" }} />
-      )}
+    <span className="relative block w-full rounded-full" style={{ height, background: "rgba(255,255,255,0.08)" }} aria-hidden>
+      <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${v}%`, background: color, opacity: color === "var(--primary)" ? 0.75 : 1 }} />
+      {typeof target === "number" && <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${target}% - 1px)`, background: "rgba(255,255,255,0.55)" }} />}
     </span>
   );
 }
 
-/** One metric against its target: label and value on top, the bar with the
- *  target tick under it, then the distance from target in words. `value`
- *  null means the filter left nothing to measure (no seniors in Grade 9),
- *  stated as such rather than shown as 0%. */
-export function TargetRow({ label, value, target, detail, compact = false }: { label: string; value: number | null; target: number; detail?: string; compact?: boolean }) {
-  const band = value === null ? "near" : targetBand(value, target);
-  const color = value === null ? "var(--muted-foreground)" : BAND_COLORS[band];
-  const diff = value === null ? 0 : value - target;
-  const distance = value === null ? "Not measurable under this filter" : diff >= 0 ? `${diff} pts above the ${target}% target` : `${-diff} pts below the ${target}% target`;
-  return (
-    <div className="flex flex-col gap-[6px]">
-      <div className="flex items-baseline justify-between gap-[8px]">
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-          {detail && !compact && <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{detail}</span>}
+/** One row: label (and an optional muted note) left, value right, bar under.
+ *  The value wears the alert color only when below target. Click-through is
+ *  optional; the row looks the same either way. */
+export function MetricRow({ label, note, value, target, leading, onClick }: { label: string; note?: string; value: number | null; target: number; leading?: React.ReactNode; onClick?: () => void }) {
+  const color = value === null ? "var(--muted-foreground)" : alertColor(value, target) ?? "var(--foreground)";
+  const body = (
+    <>
+      {leading}
+      <span className="flex min-w-0 flex-1 flex-col gap-[6px]">
+        <span className="flex items-baseline justify-between gap-[10px]">
+          <span className="flex min-w-0 items-baseline gap-[6px]">
+            <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
+            {note && <span className="flex-none text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
+          </span>
+          <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color }}>{value === null ? "n/a" : `${value}%`}</span>
         </span>
-        <span className={`${compact ? "text-[20px]" : "text-[26px]"} leading-[1] font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value === null ? "n/a" : `${value}%`}</span>
-      </div>
-      <RankBar value={value ?? 0} target={target} color={value === null ? "rgba(255,255,255,0.25)" : color} height={compact ? 6 : 8} />
-      <span className="flex items-center gap-[6px] text-[11.5px] leading-[15px] font-bold" style={{ color }}>
-        {value !== null && <BandChip band={band} />}
-        <span className="font-semibold" style={{ color: value === null ? color : "var(--muted-foreground)" }}>{distance}</span>
+        <RankBar value={value ?? 0} target={target} />
       </span>
-    </div>
+    </>
+  );
+  if (!onClick) return <div className="flex items-center gap-[12px]">{body}</div>;
+  return (
+    <button type="button" onClick={onClick} className="dm-quiet -mx-[6px] flex w-[calc(100%+12px)] cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[6px] py-[4px] text-left">
+      {body}
+    </button>
   );
 }
 
-/** A three-segment status bar (On Track / Needs Attention / At Risk) with
- *  2px gaps, the same distribution mark Career Pathways uses. */
-export function StatusBar({ onTrack, needsAttention, atRisk, height = 8 }: { onTrack: number; needsAttention: number; atRisk: number; height?: number }) {
-  const total = Math.max(1, onTrack + needsAttention + atRisk);
-  const seg = (v: number, color: string, key: string) => (v > 0 ? <span key={key} className="h-full flex-none first:rounded-l-full last:rounded-r-full" style={{ width: `${(v / total) * 100}%`, background: color }} /> : null);
+/** A headline stat inside a card: number first, label under. */
+export function Stat({ value, label, color }: { value: string; label: string; color?: string }) {
   return (
-    <span className="flex w-full gap-[2px] overflow-hidden rounded-full" style={{ height, background: "rgba(255,255,255,0.06)" }} aria-hidden>
-      {seg(onTrack, STATUS_COLORS["On Track"], "a")}
-      {seg(needsAttention, STATUS_COLORS["Needs Attention"], "b")}
-      {seg(atRisk, STATUS_COLORS["At Risk"], "c")}
+    <span className="flex flex-col gap-[2px]">
+      <span className="text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: color ?? "var(--foreground)" }}>{value}</span>
+      <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
     </span>
   );
 }
 
-/** Initials in a primary-tinted circle, for a counselor or a school (no
- *  portrait set exists for staff, and none should be invented). */
-export function InitialsBadge({ name, size = 34 }: { name: string; size?: number }) {
+/** Initials in a primary-tinted circle, for a counselor or a school. */
+export function InitialsBadge({ name, size = 32 }: { name: string; size?: number }) {
   const initials = name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   return (
-    <span className="flex flex-none items-center justify-center rounded-full text-[12px] font-extrabold" style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>{initials}</span>
+    <span className="flex flex-none items-center justify-center rounded-full text-[11.5px] font-extrabold" style={{ width: size, height: size, background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>{initials}</span>
   );
 }
