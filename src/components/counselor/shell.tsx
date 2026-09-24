@@ -12,6 +12,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, signOutCounselor } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
+import { CounselorVersionChip } from "./version";
 
 // The isolated shell for the Counselor Dashboard -- a genuinely separate
 // product from the student app's own chrome (direct product decision: not a
@@ -284,7 +285,10 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
             </div>
           </header>
 
-          <main className="flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-6)] sm:px-[var(--space-5)] md:px-[var(--space-8)]">
+          {/* Bottom padding also clears the DEMO-ONLY version chip docked
+             bottom-center (./version.tsx), so a page's last row (roster
+             pagination, a card's footer) is never sitting under it. */}
+          <main className="flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-4)] pb-[calc(var(--space-6)+36px)] sm:px-[var(--space-5)] md:px-[var(--space-8)]">
             {/* Capped, not full-bleed -- a huge monitor stretching every
                card/table edge-to-edge is what reads as "undesigned
                wireframe" (direct feedback): thin progress bars, cavernous
@@ -306,6 +310,7 @@ export function CounselorShell({ active, children }: { active: CounselorView; ch
             </div>
           </main>
         </div>
+        <CounselorVersionChip />
       </div>
     </CounselorFiltersContext.Provider>
   );

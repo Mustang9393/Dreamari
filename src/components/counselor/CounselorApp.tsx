@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { CounselorShell, type CounselorView, VIEW_TITLES } from "./shell";
+import { CounselorVersionProvider, useCounselorVersion } from "./version";
 import { Overview } from "./Overview";
 import { StudentsRoster } from "./StudentsRoster";
 import { StudentProfileView } from "./StudentProfile";
@@ -16,10 +17,41 @@ import { ProductivitySuite } from "./ProductivitySuite";
 import { PlatformEngagement } from "./PlatformEngagement";
 import { MyImpact } from "./MyImpact";
 import { Settings } from "./Settings";
+import { Overview as OverviewV2 } from "./v2/Overview";
+import { StudentsRoster as StudentsRosterV2 } from "./v2/StudentsRoster";
+import { StudentProfileView as StudentProfileViewV2 } from "./v2/StudentProfile";
+import { MilestoneTracker as MilestoneTrackerV2 } from "./v2/MilestoneTracker";
+import { ReviewQueue as ReviewQueueV2 } from "./v2/ReviewQueue";
+import { StudentProgress as StudentProgressV2 } from "./v2/StudentProgress";
+import { CounselorConnect as CounselorConnectV2 } from "./v2/CounselorConnect";
+import { CareerCollegeInsights as CareerCollegeInsightsV2 } from "./v2/CareerCollegeInsights";
+import { ProductivitySuite as ProductivitySuiteV2 } from "./v2/ProductivitySuite";
+import { PlatformEngagement as PlatformEngagementV2 } from "./v2/PlatformEngagement";
+import { MyImpact as MyImpactV2 } from "./v2/MyImpact";
+import { Settings as SettingsV2 } from "./v2/Settings";
 
 const VALID_VIEWS = Object.keys(VIEW_TITLES) as CounselorView[];
 
+// DEMO-ONLY: v1 and v2 are separate forks (see ./version.tsx) picked here
+// per view, so the bottom-center chip swaps the whole screen, never
+// individual pieces inside one.
 function ViewFor({ view, initialStudentId }: { view: CounselorView; initialStudentId?: string }) {
+  const { version } = useCounselorVersion();
+  if (version === "v2") {
+    switch (view) {
+      case "overview": return <OverviewV2 />;
+      case "students": return initialStudentId ? <StudentProfileViewV2 studentId={initialStudentId} /> : <StudentsRosterV2 />;
+      case "milestones": return <MilestoneTrackerV2 />;
+      case "review-queue": return <ReviewQueueV2 />;
+      case "progress": return <StudentProgressV2 />;
+      case "connect": return <CounselorConnectV2 />;
+      case "insights": return <CareerCollegeInsightsV2 />;
+      case "productivity": return <ProductivitySuiteV2 />;
+      case "engagement": return <PlatformEngagementV2 />;
+      case "impact": return <MyImpactV2 />;
+      case "settings": return <SettingsV2 />;
+    }
+  }
   switch (view) {
     case "overview": return <Overview />;
     case "students": return initialStudentId ? <StudentProfileView studentId={initialStudentId} /> : <StudentsRoster />;
@@ -59,8 +91,10 @@ export function CounselorApp({ initialView, initialStudentId }: { initialView?: 
   if (!hydrated || !account.isSignedIn) return null;
 
   return (
-    <CounselorShell active={view}>
-      <ViewFor view={view} initialStudentId={initialStudentId} />
-    </CounselorShell>
+    <CounselorVersionProvider>
+      <CounselorShell active={view}>
+        <ViewFor view={view} initialStudentId={initialStudentId} />
+      </CounselorShell>
+    </CounselorVersionProvider>
   );
 }

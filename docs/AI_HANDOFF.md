@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Counselor Dashboard: v1/v2 version chip and a v2 fork for the audit's changes
+
+Direct instruction after the full 11-screen audit (same day, in chat): "keep what we have as is and do this in a v2 toggle like the other a/b we tested. But the subtle v2 toggle at the bottom centre." So v1 stays exactly as it is, and every change from the audit lands in a v2 that can be compared live.
+
+**How it's built.** `src/components/counselor/version.tsx`: a `v1 | v2` context, a provider that reads `?v=2`/`?v=1` on load (URL wins) then localStorage `dreamari:counselor-version`, and a small fixed bottom-center chip in the same visual language as the AT&T and Glossary chips. `CounselorApp.tsx` picks the v1 or v2 component per view. `src/components/counselor/v2/` holds one fork per screen (12 files, headers marked DEMO-ONLY), starting byte-identical to v1 apart from relative imports, so each screen diverges only when its pass lands. `shell.tsx` docks the chip and adds 36px of bottom padding to `<main>` so pagination and card footers never sit under it. Shared pieces (`shell.tsx`, `chips.tsx`, `surfaces.ts`, the data layer) are not forked.
+
+**Why localStorage, unlike the AT&T chip.** The AT&T chip is URL-only and rebuilds `v=2` into each of its few links. This dashboard navigates through dozens of `router.push("/counselor?view=...")` calls and `<Link>` hrefs across every screen; threading `v=2` through all of them would spread demo plumbing everywhere. Remembering the choice keeps a demo on v2 while clicking around, and `?v=2` still lands a shared link directly on v2. Registered in `docs/HANDOFF_INDEX.md` under demo-only UI.
+
+Verified live: chip renders bottom-center on every view at desktop and phone width, switching re-renders the screen from the other fork, `?v=2` opens on v2, choice survives navigation and reload. `npx tsc --noEmit -p .` and `npx eslint` clean on every new and touched file.
+
 ### 2026-09-24 Career Detail coachmarks: Top 3 first, supporting actions second
 
 Career management teaching now appears only on Career Detail. The first coachmark targets the Add/Remove Top 3 control alone and changes its copy based on the current state: adding explains that Top 3 choices can be edited or swapped later; removing explains that the career can be replaced from saved careers. Dismissing or using that control advances to a separate coachmark around Like, Not for me, and Save. The For You reel no longer presents these management coachmarks during discovery. Both steps repeat after a browser refresh for demos, and the copy contains no em dashes.
