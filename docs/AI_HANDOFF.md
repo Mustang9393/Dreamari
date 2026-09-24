@@ -43,6 +43,11 @@ tokens above, in both modes).
 **Why:** direct instruction ("I don't want a sign in / sign up flow for the counselor dashboard"). The gate was simulated anyway (localStorage, no backend), and it sent every signed-out browser, including Joshua's, to a demo login before the dashboard.
 
 **What:** `CounselorApp.tsx` no longer redirects to `/counselor/login` or renders nothing while signed out; it only waits one tick for hydration so the role menu renders from the stored role. `shell.tsx` drops the Sign out control (`signOutCounselor` is now unused by the UI). `/counselor/login` and `/counselor/signup` are server redirects to `/counselor`, so old links and bookmarks still land on the dashboard. `src/components/counselor/Auth.tsx` deleted. The account record (name, school, role) still lives in `counselorAccount.ts` and Settings still writes it. HANDOFF_INDEX updated.
+### 2026-09-25 Counselor prototype opens without login/signup
+
+User request: "remove the login/signup stuff for counsellor dashboard on main and push." Removed the simulated localStorage sign-in gate and unused auth forms so a fresh browser opens the dashboard directly. Legacy `/counselor/login` and `/counselor/signup` routes redirect to `/counselor`; desktop and mobile sign-out controls are removed. Local profile/role preferences and role-based view routing remain. The shared app access gate remains in place. This is a prototype-only change, documented in HANDOFF_INDEX and the reference deviations log.
+
+Validation: targeted ESLint and tokens:check passed; production build passed, including TypeScript and all routes. A standalone TypeScript run initially encountered pre-existing duplicate generated `.next/types/* 2.ts` files; the production build regenerated that output and passed its TypeScript check. React review: no conditional hooks added, profile subscription retained, removed obsolete hydration effect and navigation handler. No new layout, scrollbar, picker, tooltip or token introduced. Next step: verify the deployed counselor entry after Vercel finishes the main-branch deployment. Linear: CHA-36.
 
 ### 2026-09-25 Flow Lab: Top 3 fits the viewport, the detail modal is Match's, honest reason chips, (i) notes and the hamburger
 

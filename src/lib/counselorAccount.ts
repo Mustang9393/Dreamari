@@ -1,11 +1,6 @@
-// A school counselor's own account for the separate Counselor Dashboard
-// product (isolated from the student app's chrome and data by design --
-// see the "Counselor Dashboard" plan). There is no backend, so this is the
-// same localStorage-as-record idiom as studentProfile.ts: sign-up just
-// writes an account and flips `isSignedIn`, sign-in checks an account
-// already exists. Not real auth -- there's no password, no server check --
-// same honesty as the app's shared-PIN gate (src/middleware.ts): enough to
-// demo a real-feeling flow, not to protect anything.
+// Local profile and role preferences for the separate counselor prototype.
+// DEMO-ONLY: the dashboard opens without sign-in. The legacy isSignedIn
+// field is retained for stored-record compatibility, not access control.
 
 export const COUNSELOR_ACCOUNT_KEY = "dreamari-counselor-account";
 
@@ -96,8 +91,4 @@ export function writeCounselorAccount(patch: Partial<CounselorAccount>): void {
     // no storage: the session still works, it just won't be remembered
   }
   for (const listener of listeners) listener();
-}
-
-export function signOutCounselor(): void {
-  writeCounselorAccount({ isSignedIn: false });
 }
