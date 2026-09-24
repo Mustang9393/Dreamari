@@ -83,7 +83,7 @@ function outstanding(r: Row): string {
 
 function StatusBar({ r }: { r: Row }) {
   return (
-    <span className="flex h-[10px] w-full gap-[2px] overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} aria-hidden>
+    <span className="flex h-[10px] w-full gap-[2px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
       {STATES.map((s) => {
         const n = r.counts[s.key];
         if (!n) return null;

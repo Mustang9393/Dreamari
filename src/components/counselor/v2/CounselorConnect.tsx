@@ -10,8 +10,14 @@
 // metadata grid, announcements with plain dates, discussions as a compact
 // list ordered by activity. Data is the reference's, verbatim.
 
-import { useState } from "react";
-import { Plus, Send, Check } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, Send, Check, ChevronLeft } from "lucide-react";
+import { Listbox } from "@/components/app/Listbox";
+import { useCounselorFilters } from "../shell";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { CardLink } from "../chips";
+import { RankBar } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "@/components/connect/viz";
 import { Avatar, DetailPane, STATUS_COLORS, StudentLink } from "../chips";
@@ -85,26 +91,75 @@ const COMMUNITIES = [
   { name: "Summer Opportunities", desc: "Summer programs, internships, jobs, and volunteer opportunities", members: 312, posts: 176, last: "2026-09-15" },
 ];
 
-function AnnouncementCard({ a }: { a: (typeof ANNOUNCEMENTS)[number] }) {
+type Announcement = (typeof ANNOUNCEMENTS)[number];
+const AUDIENCES = ["All Students", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "Grades 11-12"] as const;
+
+function audienceGrades(to: string): number[] {
+  if (to.startsWith("Grades 11")) return [11, 12];
+  const m = to.match(/Grade (\d+)/);
+  return m ? [Number(m[1])] : [9, 10, 11, 12];
+}
+
+// A card opens (expands) to its read-receipt bar, who it went to, and the
+// way into that audience on Students. Direct question, 25 Sept 2026:
+// "the cards aren't clickable, should they be? Where does the announcement
+// go?" It goes to the students in its audience; the card now says how many
+// and how many have read it, and opens that roster.
+function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolean; onToggle: () => void }) {
+  const router = useRouter();
+  const { setGradeFilter } = useCounselorFilters();
+  const roster = useReviewedRoster();
   const [to, sent] = a.to.split(" · Sent: ");
+  const grades = audienceGrades(to);
+  const recipients = roster.filter((st) => grades.includes(st.grade)).length;
+  const readCount = Math.round((a.read / 100) * recipients);
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <div className="flex flex-wrap items-baseline justify-between gap-x-[var(--space-3)] gap-y-[2px]">
-          <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
-            <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{to} · {fmtDate(sent)}</span>
+        <button type="button" onClick={onToggle} aria-expanded={open} className="dm-quiet flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-sm)] text-left">
+          <span className="flex flex-wrap items-baseline justify-between gap-x-[var(--space-3)] gap-y-[2px]">
+            <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
+              <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{to} · {fmtDate(sent)}</span>
+            </span>
+            <span className="flex-none text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{a.read}% <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>read</span></span>
           </span>
-          <span className="flex-none text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{a.read}% <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>read</span></span>
-        </div>
-        <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--foreground)" }}>{a.body}</p>
-        {a.tags.length > 0 && (
-          <span className="flex flex-wrap gap-[6px] pt-[2px]">
-            {a.tags.map((t) => <span key={t} className="rounded-full border px-[9px] py-[3px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{t.replace(/^Related: /, "")}</span>)}
-          </span>
+          <p className={`text-[13.5px] leading-[19px] ${open ? "" : "line-clamp-1"}`} style={{ color: "var(--foreground)" }}>{a.body}</p>
+        </button>
+        {open && (
+          <div className="flex flex-col gap-[10px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+            <RankBar value={a.read} />
+            <div className="flex flex-wrap items-center justify-between gap-[8px]">
+              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read by {readCount} of {recipients} students{a.tags.length ? ` · ${a.tags.map((t) => t.replace(/^Related: /, "")).join(" · ")}` : ""}</span>
+              <CardLink onClick={() => { setGradeFilter(grades.length === 1 ? (grades[0] as 9 | 10 | 11 | 12) : "All Grades"); router.push("/counselor?view=students"); }}>Recipients</CardLink>
+            </div>
+          </div>
         )}
       </div>
     </HoverBeam>
+  );
+}
+
+function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) => void; onCancel: () => void }) {
+  const [title, setTitle] = useState("");
+  const [audience, setAudience] = useState<string>("All Students");
+  const [body, setBody] = useState("");
+  const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+  return (
+    <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+      <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>New announcement</h3>
+      <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_200px]">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" aria-label="Title" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
+        <Listbox ariaLabel="Audience" value={audience} onChange={setAudience} options={AUDIENCES.map((a) => ({ value: a, label: a }))} className="flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={field} />
+      </div>
+      <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What students need to know" aria-label="Body" rows={3} className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none" style={field} />
+      <div className="flex justify-end gap-[10px]">
+        <button type="button" onClick={onCancel} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
+        <button type="button" disabled={!title.trim() || !body.trim()} onClick={() => onSend({ id: `a-${Date.now()}`, title: title.trim(), to: `${audience} · Sent: ${new Date().toISOString().slice(0, 10)}`, read: 0, body: body.trim(), tags: [] })} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
+          <Send className="h-[14px] w-[14px]" aria-hidden /> Send
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -130,7 +185,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   const answered = selectedStatus === "responded" || selectedStatus === "resolved";
 
   return (
-    <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_1fr]">
+    <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_minmax(0,1fr)]">
       <div className="flex max-h-[70vh] flex-col gap-[8px] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
         {ordered.map((q) => {
           const on = selectedId === q.id;
@@ -206,24 +261,97 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   );
 }
 
-// One card, one row per group, most active first: the name says what the
-// group is (the reference's descriptions restated the name), the muted
-// line carries the counts.
+type Group = (typeof COMMUNITIES)[number];
+type Post = { id: string; author: string; text: string; at: string };
+
+// Seeded recent posts per group, three each, so a group opens onto
+// something (direct question, 25 Sept 2026: "can I see these groups,
+// what's happening in them?"). A backend replaces this with the group's
+// feed; the shape (author, text, at) stays.
+const POST_SEEDS = [
+  "Does anyone have the link to the FAFSA worksheet from last week's session?",
+  "Reminder: campus visit sign-ups close Friday.",
+  "I finished my career report, happy to share how I structured it.",
+  "Which electives pair well with the healthcare pathway?",
+  "The scholarship deadline moved to March 1, check the updated list.",
+  "Anyone doing the summer internship at the hospital again this year?",
+];
+function seededPosts(group: Group, roster: { name: string }[]): Post[] {
+  let h = 0;
+  for (const ch of group.name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return [0, 1, 2].map((i) => ({ id: `${group.name}-${i}`, author: roster[(h + i * 7) % Math.max(1, roster.length)]?.name ?? "A student", text: POST_SEEDS[(h + i) % POST_SEEDS.length], at: new Date(new Date(`${group.last}T00:00:00`).getTime() - i * 86400000).toISOString().slice(0, 10) }));
+}
+
+function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
+  const roster = useReviewedRoster();
+  const [posts, setPosts] = useState<Post[]>(() => seededPosts(group, roster));
+  const [draft, setDraft] = useState("");
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      <button type="button" onClick={onBack} className="dm-quiet flex w-fit cursor-pointer items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /> Groups</button>
+      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+        <div className="flex flex-col gap-[2px]">
+          <h2 className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>{group.name}</h2>
+          <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{group.desc}</span>
+          <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{group.members} members · {group.posts} posts · active {fmtDate(group.last)}</span>
+        </div>
+        <div className="flex gap-[8px]">
+          <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={`Post to ${group.name}`} aria-label="New post" className="h-10 min-w-0 flex-1 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+          <button type="button" disabled={!draft.trim()} onClick={() => { setPosts((p) => [{ id: `me-${Date.now()}`, author: "You", text: draft.trim(), at: new Date().toISOString().slice(0, 10) }, ...p]); setDraft(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-[14px] w-[14px]" aria-hidden /> Post</button>
+        </div>
+        <ul className="flex flex-col gap-[6px]">
+          {posts.map((p) => (
+            <li key={p.id} className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
+              <span className="flex items-baseline justify-between gap-[8px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span style={{ color: "var(--foreground)" }}>{p.author}</span><span>{fmtDate(p.at)}</span></span>
+              <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>{p.text}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+// One card, one row per group, most active first; a row opens the group.
+// "New group" is an inline form (name and one line), and the group lands
+// at the top with no members yet.
 function DiscussionsPanel() {
-  const ordered = [...COMMUNITIES].sort((a, b) => b.last.localeCompare(a.last) || b.posts - a.posts);
+  const [groups, setGroups] = useState<Group[]>(() => [...COMMUNITIES]);
+  const [openName, setOpenName] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+  const ordered = useMemo(() => [...groups].sort((a, b) => b.last.localeCompare(a.last) || b.posts - a.posts), [groups]);
+  const open = groups.find((g) => g.name === openName);
+  if (open) return <GroupDetail key={open.name} group={open} onBack={() => setOpenName(null)} />;
+  const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
     <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
       <div className="flex items-center justify-between gap-[8px]">
         <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Groups <span className="ml-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>most active first</span></h2>
-        <button type="button" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-          <Plus className="h-[14px] w-[14px]" aria-hidden /> New group
-        </button>
+        {!creating && (
+          <button type="button" onClick={() => setCreating(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+            <Plus className="h-[14px] w-[14px]" aria-hidden /> New group
+          </button>
+        )}
       </div>
+      {creating && (
+        <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Group name" aria-label="Group name" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
+          <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What it is for, in one line" aria-label="Description" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
+          <div className="flex justify-end gap-[10px]">
+            <button type="button" onClick={() => { setCreating(false); setName(""); setDesc(""); }} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
+            <button type="button" disabled={!name.trim()} onClick={() => { setGroups((g) => [{ name: name.trim(), desc: desc.trim() || "New group", members: 0, posts: 0, last: new Date().toISOString().slice(0, 10) }, ...g]); setCreating(false); setName(""); setDesc(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Create</button>
+          </div>
+        </div>
+      )}
       <ul className="flex flex-col gap-[6px]">
         {ordered.map((c) => (
-          <li key={c.name} className="flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[2px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
-            <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
-            <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{c.members} members · {c.posts} posts · active {fmtDate(c.last)}</span>
+          <li key={c.name}>
+            <button type="button" onClick={() => setOpenName(c.name)} className="dm-quiet flex w-full cursor-pointer flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[2px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={GLASS_INSET}>
+              <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
+              <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{c.members} members · {c.posts} posts · active {fmtDate(c.last)}</span>
+            </button>
           </li>
         ))}
       </ul>
@@ -236,6 +364,9 @@ export function CounselorConnect() {
   // comes first). Statuses live here so the tab badge and the panel agree.
   const [tab, setTab] = useState<"questions" | "announcements" | "discussions">("questions");
   const [statuses, setStatuses] = useState<Record<string, QuestionStatus>>({});
+  const [announcements, setAnnouncements] = useState<Announcement[]>(() => [...ANNOUNCEMENTS]);
+  const [composing, setComposing] = useState(false);
+  const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
   const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
   const open = QUESTIONS.filter((q) => OPEN.includes(statusOf(q.id)));
   const needsYou = open.filter((q) => statusOf(q.id) === "new" || statusOf(q.id) === "follow-up").length;
@@ -259,8 +390,8 @@ export function CounselorConnect() {
             <Stat value={String(QUESTIONS.length - open.length)} label="answered" />
           </div>
         )}
-        {tab === "announcements" && (
-          <button type="button" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+        {tab === "announcements" && !composing && (
+          <button type="button" onClick={() => setComposing(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
             <Plus className="h-[14px] w-[14px]" aria-hidden /> New announcement
           </button>
         )}
@@ -269,7 +400,8 @@ export function CounselorConnect() {
       {tab === "questions" && <QuestionsPanel statuses={statuses} setStatus={(id, st) => setStatuses((s) => ({ ...s, [id]: st }))} />}
       {tab === "announcements" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {ANNOUNCEMENTS.map((a) => <AnnouncementCard key={a.id} a={a} />)}
+          {composing && <AnnouncementComposer onCancel={() => setComposing(false)} onSend={(a) => { setAnnouncements((list) => [a, ...list]); setComposing(false); setOpenAnnouncement(a.id); }} />}
+          {announcements.map((a) => <AnnouncementCard key={a.id} a={a} open={openAnnouncement === a.id} onToggle={() => setOpenAnnouncement((o) => (o === a.id ? null : a.id))} />)}
         </div>
       )}
       {tab === "discussions" && <DiscussionsPanel />}

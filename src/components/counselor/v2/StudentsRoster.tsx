@@ -59,7 +59,7 @@ function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }
 function Roadmap({ pct }: { pct: number }) {
   return (
     <span className="flex items-center gap-[8px]">
-      <span className="relative block h-[6px] w-[64px] rounded-full" style={{ background: "rgba(255,255,255,0.1)" }} aria-hidden>
+      <span className="relative block h-[6px] w-[64px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
         <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${PRIMARY} 35%, transparent), ${PRIMARY})` }} />
       </span>
       <span className="text-[12.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{pct}%</span>

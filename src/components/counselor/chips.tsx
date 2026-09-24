@@ -23,14 +23,14 @@ export const MILESTONE_COLORS: Record<MilestoneStatus, string> = {
   "Pending Review": "#5B6CF9",
   "Changes Requested": "#E0453C",
   "In Progress": "#F5A623",
-  "Not Started": "rgba(255,255,255,0.35)",
+  "Not Started": "color-mix(in srgb, var(--foreground) 45%, transparent)",
   // The reference's own extra states: student-completed reads as done
   // (same green as Approved), overdue is the one red the dashboard
   // reserves for "act now", and a dash-in-the-reference "not applicable"
   // is the quietest gray of all.
   Completed: "#33C78C",
   Overdue: "#E0453C",
-  "Not Applicable": "rgba(255,255,255,0.18)",
+  "Not Applicable": "color-mix(in srgb, var(--foreground) 22%, transparent)",
 };
 
 function Chip({ label, color }: { label: string; color: string }) {
@@ -217,7 +217,7 @@ export function ScrollChips<K extends string>({ options, value, onChange, ariaLa
               aria-selected={on}
               onClick={() => onChange(o.key)}
               className="dm-quiet flex h-9 flex-none cursor-pointer items-center rounded-full border px-[14px] text-[13px] font-bold whitespace-nowrap transition-colors"
-              style={{ background: on ? "var(--primary)" : "color-mix(in srgb, #FFFFFF 7%, transparent)", borderColor: on ? "var(--primary)" : "color-mix(in srgb, #FFFFFF 14%, transparent)", color: on ? "#FFFFFF" : "var(--foreground)" }}
+              style={{ background: on ? "var(--primary)" : "var(--inset-bg)", borderColor: on ? "var(--primary)" : "var(--inset-border)", color: on ? "#FFFFFF" : "var(--foreground)" }}
             >
               {o.label}
             </button>
@@ -240,7 +240,7 @@ export function DetailPane({ open, onClose, children }: { open: boolean; onClose
   return (
     <>
       {open && <button type="button" aria-label="Close" onClick={onClose} className="fixed inset-0 z-30 cursor-default lg:hidden" style={{ background: "rgba(0,0,0,0.6)" }} />}
-      <div className={`${open ? "fixed inset-x-0 bottom-0 z-40 flex max-h-[88dvh] flex-col overflow-y-auto rounded-t-[var(--radius-lg)] border-t" : "hidden"} lg:static lg:z-auto lg:block lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0`} style={open ? { background: "var(--background)", borderColor: "var(--glass-border)" } : undefined}>
+      <div className={`${open ? "fixed inset-x-0 bottom-0 z-40 flex max-h-[88dvh] flex-col overflow-y-auto rounded-t-[var(--radius-lg)] border-t" : "hidden"} lg:static lg:z-auto lg:block lg:min-w-0 lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0`} style={open ? { background: "var(--background)", borderColor: "var(--glass-border)" } : undefined}>
         <div className="flex justify-end px-[var(--space-4)] pt-[10px] lg:hidden">
           <button type="button" onClick={onClose} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
             Close <ChevronDown className="h-[14px] w-[14px]" aria-hidden />

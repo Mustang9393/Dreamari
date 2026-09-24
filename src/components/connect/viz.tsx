@@ -160,7 +160,7 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
           </linearGradient>
         </defs>
         {[0.25, 0.5, 0.75].map((t) => (
-          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="color-mix(in srgb, var(--foreground) 10%, transparent)" strokeWidth="1" />
         ))}
         <path d={area} fill={`url(#fill-${id})`} />
         <path d={line} fill="none" stroke={`url(#line-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 60%, transparent))` }} />
@@ -182,7 +182,7 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
                  one of its own, on the leader line down to the curve. */}
               {peak !== last && <circle cx={px} cy={py} r="4" fill={accent} stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 4px ${accent})` }} />}
               <rect x={cx - 22} y={boxY} width="44" height="18" rx="5" fill="#0e0c20" stroke="rgba(255,255,255,0.14)" />
-              <text x={cx} y={boxY + 12.5} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>{max}</text>
+              <text x={cx} y={boxY + 12.5} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>{max}</text>
             </g>
           );
         })()}
@@ -340,7 +340,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
            unlabeled hairlines -- a chart with no axis reads as unfinished. */}
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
           <g key={t}>
-            <line x1={padLeft} x2={W - padRight} y1={padTop + t * plotH} y2={padTop + t * plotH} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+            <line x1={padLeft} x2={W - padRight} y1={padTop + t * plotH} y2={padTop + t * plotH} stroke="color-mix(in srgb, var(--foreground) 10%, transparent)" strokeWidth="1" />
             <text x={padLeft - 8} y={padTop + t * plotH + 3.5} textAnchor="end" style={{ fontSize: 10, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
               {Math.round(max * (1 - t))}{valueSuffix}
             </text>
@@ -376,7 +376,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
                       ariaLabel: `${label}: ${Math.round(v)}${valueSuffix}`,
                       onEnter: () => setHover({ gi, si: 0 }), onLeave: () => setHover(null),
                     })}
-                    <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+                    <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
                       {Math.round(v)}{valueSuffix}
                     </text>
                   </>
@@ -402,7 +402,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
                       ariaLabel: `${label}, ${s.label}: ${Math.round(v)}${valueSuffix}`,
                       onEnter: () => setHover({ gi, si }), onLeave: () => setHover(null),
                     })}
-                    <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+                    <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
                       {Math.round(v)}{valueSuffix}
                     </text>
                   </g>
@@ -428,9 +428,9 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
           return (
             <g style={{ pointerEvents: "none" }}>
               <line x1={bX + barW / 2} x2={bX + barW / 2} y1={boxY + 20} y2={bY} stroke={hoveredBar.color} strokeWidth="1.5" strokeDasharray="2 3" opacity="0.7" />
-              <circle cx={bX + barW / 2} cy={bY} r="3" fill={hoveredBar.color} stroke="#0e0c20" strokeWidth="1.5" />
-              <rect x={cx - 60} y={boxY} width="120" height="20" rx="6" fill="#0e0c20" stroke="rgba(255,255,255,0.14)" />
-              <text x={cx} y={boxY + 13.5} textAnchor="middle" style={{ fontSize: 10.5, fontWeight: 700, fill: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+              <circle cx={bX + barW / 2} cy={bY} r="3" fill={hoveredBar.color} stroke="var(--card)" strokeWidth="1.5" />
+              <rect x={cx - 60} y={boxY} width="120" height="20" rx="6" fill="var(--card)" stroke="var(--glass-border)" />
+              <text x={cx} y={boxY + 13.5} textAnchor="middle" style={{ fontSize: 10.5, fontWeight: 700, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
                 {text}: {Math.round(hoveredBar.value)}{valueSuffix}
               </text>
             </g>

@@ -188,7 +188,7 @@ function PathwaysCard({ total, topPathways, colors, activePathway, onToggle, onO
           )}
         </div>
         <div className="relative flex flex-1 flex-col justify-center gap-[var(--space-5)]">
-          <span className="flex h-[18px] w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)", boxShadow: "0 6px 16px -6px rgba(0,0,0,0.5)" }}>
+          <span className="flex h-[18px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)", boxShadow: "0 6px 16px -6px rgba(0,0,0,0.5)" }}>
             {topPathways.map(([label, value], i) => {
               const pct = total > 0 ? (value / total) * 100 : 0;
               if (pct <= 0) return null;

@@ -63,7 +63,7 @@ function RankedList({ items }: { items: { name: string; count: number }[] }) {
       {items.map((item, i) => (
         <li key={item.name} className="flex items-center gap-[10px]">
           <span className="w-[18px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
-          <span className="relative flex h-[28px] min-w-0 flex-1 items-center rounded-[6px]" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <span className="relative flex h-[28px] min-w-0 flex-1 items-center rounded-[6px]" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
             <span aria-hidden className="absolute inset-y-0 left-0 rounded-[6px]" style={{ width: `${(item.count / max) * 100}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent), color-mix(in srgb, var(--primary) 85%, transparent))" }} />
             <span className="relative truncate px-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</span>
           </span>
@@ -102,7 +102,7 @@ export function CareerCollegeInsights() {
               {/* One left edge for all three lines (direct feedback: the
                  number and its text "read like two different anchors"). */}
               {RECOMMENDATION_TILES.map((r) => (
-                <div key={r.subject} className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, #FFFFFF 14%, transparent)", background: "color-mix(in srgb, #FFFFFF 7%, transparent)" }}>
+                <div key={r.subject} className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
                   <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
                   <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.subject}</span>
                   <span className="mt-[6px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.action}</span>

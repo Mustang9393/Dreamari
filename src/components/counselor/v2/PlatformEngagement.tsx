@@ -62,14 +62,14 @@ function LoginsChart() {
           <linearGradient id={`pe-unique-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#9BA8FB" stopOpacity="0.7" /><stop offset="100%" stopColor="#9BA8FB" /></linearGradient>
         </defs>
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="color-mix(in srgb, var(--foreground) 12%, transparent)" strokeWidth="1" />
         ))}
         <path d={lineFor("total")} fill="none" stroke={`url(#pe-total-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(91,108,249,0.5))" }} />
         <path d={lineFor("unique")} fill="none" stroke={`url(#pe-unique-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(155,168,251,0.5))" }} />
         {MONTHS.map((m, i) => (
           <g key={m.label}>
-            <circle cx={x(i)} cy={y(m.total)} r="4.5" fill="#5B6CF9" stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-            <circle cx={x(i)} cy={y(m.unique)} r="4.5" fill="#9BA8FB" stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+            <circle cx={x(i)} cy={y(m.total)} r="4.5" fill="#5B6CF9" stroke="var(--card)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+            <circle cx={x(i)} cy={y(m.unique)} r="4.5" fill="#9BA8FB" stroke="var(--card)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
           </g>
         ))}
         {MONTHS.map((m, i) => (

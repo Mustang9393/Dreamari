@@ -176,7 +176,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[340px_1fr]">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[340px_minmax(0,1fr)]">
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <div className="flex items-start gap-[14px]">
@@ -223,7 +223,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                       <span style={{ color: "var(--foreground)" }}>{m.title}</span>
                       <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>{m.pct}%</span>
                     </span>
-                    <span className="relative block h-[6px] overflow-hidden rounded-[3px]" style={{ background: "rgba(255,255,255,0.12)" }}>
+                    <span className="relative block h-[6px] overflow-hidden rounded-[3px]" style={{ background: "var(--inset-border)" }}>
                       <span className="absolute inset-y-0 left-0 rounded-[3px]" style={{ width: `${m.pct}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 35%, transparent), var(--primary))" }} />
                     </span>
                   </span>

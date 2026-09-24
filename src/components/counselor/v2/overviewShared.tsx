@@ -71,11 +71,11 @@ export function RankBar({ value, target, height = 6 }: { value: number; target?:
   const v = Math.max(0, Math.min(100, value));
   const color = (typeof target === "number" && alertColor(value, target)) || "var(--primary)";
   return (
-    <span className="relative block w-full rounded-full" style={{ height, background: "rgba(255,255,255,0.08)" }} aria-hidden>
+    <span className="relative block w-full rounded-full" style={{ height, background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
       {/* Same family as the column charts: strongest at the value end,
          fading toward the start (direct question, 25 Sept 2026). */}
       <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${v}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 35%, transparent), ${color})` }} />
-      {typeof target === "number" && <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${target}% - 1px)`, background: "rgba(255,255,255,0.55)" }} />}
+      {typeof target === "number" && <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${target}% - 1px)`, background: "color-mix(in srgb, var(--foreground) 55%, transparent)" }} />}
     </span>
   );
 }

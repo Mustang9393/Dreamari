@@ -24,7 +24,7 @@ export const BLUE_7 = ["#D8DDFE", "#BDC5FD", "#A1ACFB", "#8592F9", "#6978F6", "#
 
 /** A target or benchmark line: neutral, so it is never mistaken for a
  *  series and adds no second hue. */
-export const TARGET_LINE = "rgba(255,255,255,0.6)";
+export const TARGET_LINE = "color-mix(in srgb, var(--foreground) 60%, transparent)";
 
 /** The one neutral for an "undecided" or "not started" slice. */
 export const NEUTRAL_SLICE = "#5B6470";
