@@ -109,9 +109,14 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     const isForYou = state.activeTab === FOR_YOU;
     const world = isMore ? moreWorld : isForYou ? FOR_YOU : state.activeTab;
     const ranked: Ranked[] = isForYou ? forYou(signals) : rankForStudent(world, signals);
+    // "Six more" must mean six: the last page is the LAST six of the set
+    // (it may overlap the page before), never a partial page with empty
+    // cells (direct report, 25 Sept 2026: "where it says six more only 4
+    // are available").
     const total = Math.max(1, Math.ceil(ranked.length / PAGE));
     const index = Math.min(state.page[world] ?? 0, total - 1);
-    const six = ranked.slice(index * PAGE, index * PAGE + PAGE);
+    const start = Math.max(0, Math.min(index * PAGE, ranked.length - PAGE));
+    const six = ranked.slice(start, start + PAGE);
     const setPage = (n: number, d: 1 | -1) => { setDir(d); setState((s) => ({ ...s, page: { ...s.page, [world]: ((n % total) + total) % total } })); };
     const open = openId ? six.find((r) => r.career.id === openId) : null;
     const openIdx = open ? six.indexOf(open) : -1;

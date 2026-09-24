@@ -88,16 +88,18 @@ export const SUBJECT_KEYWORDS: Record<string, string[]> = {
 const TRADES_KEYWORDS = ["technician", "electrician", "plumber", "mechanic", "welder", "carpenter", "hvac", "machinist", "operator", "driver", "chef", "cook", "cosmetolog", "paramedic", "emt", "lineman", "installer", "pipefitter", "roofer", "mason", "apprentice", "trucker", "barber", "esthetic", "firefighter", "ironworker", "millwright"];
 const COLLEGE_KEYWORDS = ["engineer", "scientist", "physician", "surgeon", "lawyer", "attorney", "analyst", "architect", "pharmacist", "professor", "psychologist", "accountant", "therapist", "dentist", "veterinarian", "economist", "researcher", "actuary", "banker", "consultant"];
 
-export type Ranked = { career: LabCareer; reason: string | null; score: number };
+export type Ranked = { career: LabCareer; reason: string; score: number };
 
 /** Order one world's careers by how well they fit the student's Build
  *  answers, combined: each matching subject scores, the college/trades
  *  answer nudges a fit up and pushes a mismatch down, ties keep catalog
- *  order. `reason` is the chip: only the subject(s) the student chose that
- *  this career fits ("Fits Mathematics · Computer Science"). The path is
- *  never a reason on its own (direct feedback, 25 Sept 2026: "I should get
- *  something relevant to my interests + college path, not something that's
- *  there only because of college path"). */
+ *  order. `reason` is the chip: the combination of the student's own
+ *  answers that put the card here (matched subjects, else the chosen world,
+ *  plus the path when it fits). A path never puts a card in front of the
+ *  student by itself; a mismatch pushes it out (direct feedback, 25 Sept
+ *  2026: "relevant to my interests + college path, not something that's
+ *  there only because of college path"; then "only one card has a reason
+ *  chip, so the others don't have anything relevant?"). */
 export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
   const path = signals.path;
   return careersForWorld(world)
@@ -115,10 +117,15 @@ export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
       // is a technician, not an engineer).
       const trades = TRADES_KEYWORDS.some((k) => t.includes(k));
       const college = !trades && COLLEGE_KEYWORDS.some((k) => t.includes(k));
-      if (path === "trades") score += trades ? 1 : college ? -2 : 0;
-      else if (path === "college") score += college ? 1 : trades ? -2 : 0;
-      const reason = hits.length ? `Fits ${hits.join(" · ")}` : null;
-      return { career, reason, score, index };
+      let pathFit: string | null = null;
+      if (path === "trades") { score += trades ? 1 : college ? -2 : 0; if (trades) pathFit = "Trades"; }
+      else if (path === "college") { score += college ? 1 : trades ? -2 : 0; if (college) pathFit = "College"; }
+      // The chip is the combination of Build answers that put the card
+      // here: matched subject(s), else the chosen world, plus the path
+      // when it fits ("Mathematics · College", "Tech & Engineering ·
+      // College"). Every card in a chosen world has at least the world.
+      const parts = [...(hits.length ? hits : [world]), ...(pathFit ? [pathFit] : [])];
+      return { career, reason: `Fits ${parts.join(" · ")}`, score, index };
     })
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ career, reason, score }) => ({ career, reason, score }));
