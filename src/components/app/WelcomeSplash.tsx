@@ -54,7 +54,7 @@ const SCENES: Record<SplashSurface, Scene> = {
   // Between the Build flow's "Congratulations" screen and the live
   // /match-grid picker. Copy rewritten 22 Sept 2026 (direct instruction) to
   // read as one clear sequence -- this splash says what's about to happen,
-  // the grid page's own heading ("Find Your Top 3", unchanged) says what to
+  // the grid page's own heading ("Choose up to 3") says what to
   // do once the six cards are actually on screen, rather than this splash
   // trying to explain the whole system before the student has anything to
   // look at yet. This isn't decorative copy -- direct context, 22 Sept
@@ -68,7 +68,7 @@ const SCENES: Record<SplashSurface, Scene> = {
     tint: ["100, 70, 255", "180, 40, 240"],
     title: "YOU’VE BEEN MATCHED!",
     // One line, all-caps, matching the match grid page's own compact
-    // heading style ("FIND YOUR TOP 3") instead of this splash's default
+    // heading style ("CHOOSE UP TO 3") instead of this splash's default
     // multi-line hero size -- direct feedback, 22 Sept 2026: the title
     // wrapping to two huge lines crowded the explanatory copy below it
     // (the actual disclaimer, see above) out of room to breathe.
@@ -82,7 +82,7 @@ const SCENES: Record<SplashSurface, Scene> = {
       <>
         Next, you’ll see 6 careers matched to you.
         <br />
-        Save 1–3, and later our EXPLORE feature will recommend more careers like the ones you save.
+        Save up to 3. You can continue with 1, and EXPLORE will recommend more like the ones you save.
       </>
     ),
     cta: "See My Matches",
