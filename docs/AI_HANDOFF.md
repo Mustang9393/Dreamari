@@ -38,6 +38,22 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Counselor Dashboard v2: Overview per role (step 2 of the role work)
+
+Direct instruction (this session's brief): after the role shell, an Overview per role, School Counselor first (already the improved v2 Overview), then Lead Counselor ("which counselor and which grade is behind"), School Administrator ("is the school on target: senior plan compliance, FAFSA, readiness vs targets, equity cuts"), District Administrator ("which schools are behind, is the platform used; 3 to 5 seeded sibling schools scaled deterministically from the reference roster and clearly marked seeded in code"), on the same design rules as the existing v2 Overview.
+
+**What landed.** `src/lib/counselorOrg.ts` (all seeded, header says so): three counselors by last-name range, the school targets, `readinessMetrics()` over any roster slice, `targetBand()` (met / near / missed), Lincoln's engagement share, four sibling schools scaled from Lincoln, `districtRollup()`. `v2/overviewShared.tsx`: `OverviewCard` (same glass, glow and title block as the counselor cards), `TargetRow`, `RankBar`, `StatusBar`, `BandChip`, `Verdict`, `SeeLink`, `InitialsBadge`. `v2/OverviewLead.tsx`, `v2/OverviewSchoolAdmin.tsx`, `v2/OverviewDistrict.tsx`, picked per role in `CounselorApp`'s v2 switch. `v2/Overview.tsx` now exports `DonutCard` (with an optional caption), `STATUS_COLORS`, `READINESS_SERIES` and `TARGET_LINE_COLOR` for reuse. `roles.ts` holds the per-role Overview subtitle; `shell.tsx` shows it on v2 and swaps the org chip and account line to the district for District Administrator.
+
+**Design rules applied.** One hero per screen (counselor comparison / targets scorecard / school ranking), sidekicks in plain glass, glow tinted by the worst band on the card, reserved status colors only for state (met / close / behind, always icon + word), the validated single-hue primary ramp and bronze target line for the readiness chart (`validate_palette.js "#9BA8FB,#5B6CF9,#2E3BB8" --ordinal --mode dark --surface "#0b0d14"` passes; `"#5B6CF9,#A67C2E"` passes), single-hue bars for magnitude, every card opens a screen (Counselors, Schools, Readiness, Engagement, Review Queue, Students with the grade filter set). Density kept to two rows per Overview.
+
+**Why each choice, against alternatives:** `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md`, "Overview per role (v2)" (the vs-target language over a numeric score, last-name caseloads over every-third or contiguous blocks, seeded targets for FAFSA and usage, the reference's senior-plan definition kept, honest "coming soon" for demographic equity cuts over seeded subgroups, scaled siblings over four independent rosters).
+
+**Corrected before commit:** senior plan compliance first used a milestone check and read 40%, contradicting v1 My Impact's 87% (seniors with a declared plan); switched to the reference's definition. Phone width truncated counselor and school names and clipped the Equity cuts toggle; row headers and card headers now wrap.
+
+**Verified live** (headless Chrome captures at 1440 and 375, plus the in-app browser): Lead Counselor (Renee Alvarez S-Z furthest behind at 75%, Grade 11 at 74%), School Administrator (2 of 4 targets met, FAFSA 25 pts under), District Administrator (Washington 0 of 4, 2 of 5 schools reach 60% active, district chip in the topbar); School Counselor v2 Overview unchanged; v1 under an admin role still the reference's 11 items and Overview. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+**Next:** step 3, screen by screen per role in the order Joshua asks for (Counselors, Readiness, Reports, Schools, School Impact are placeholders), stopping to report after each screen. Open question for Joshua: the four menus and the seeded targets (FAFSA 65%, active students 60%).
+
 ### 2026-09-24 Counselor Dashboard v2: role-based shell (step 1 of the role work)
 
 Direct instruction (this session's brief): the left menu changes with the role set in Settings; hidden screens disappear rather than grey out; a view a role does not have redirects to that role's Overview; v1's nav stays the reference's 11 items; the four menus are Joshua's to sign off, so build them as proposed and keep them easy to change in one place; new screens may start as honest "Coming soon" placeholders.

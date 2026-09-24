@@ -130,6 +130,125 @@ left in place as the record of why v2 made each change.
   only; v1 shows the reference's 11 items for every role, and a v1 link to
   a v2-only view goes to Overview.
 
+## Overview per role (v2)
+
+The reference has one Overview for one persona. In v2 each role's Overview
+answers that role's own question, on the same rules the counselor Overview
+was redesigned under (one hero surface, sidekicks in plain glass, reserved
+status colors for state, single-hue bars for magnitude, validated ramps,
+every card opens something). School Counselor keeps the improved v2 Overview
+logged under "Overview" below. The three new ones, 24 Sept 2026:
+
+- **One "vs target" language for all three** (`v2/overviewShared.tsx`,
+  `targetBand` in `src/lib/counselorOrg.ts`): met = On Track green, within
+  10 points = Needs Attention amber, further = At Risk red, always icon +
+  word ("On target" / "Close" / "Behind"), never color alone. Each card's
+  glow and border take the worst band on the card, and each card leads with
+  one verdict sentence ("Grade 11 is behind: 74% on track, 8 students need
+  attention"). Alternative: a numeric score per card. A number needs a
+  legend; a sentence in the status color needs nothing. Alternative: reuse
+  the attention strip's Critical/High/Medium. Those rank students within
+  "At Risk"; distance from a target is a different scale and reusing the
+  chips would have made one badge mean two things.
+- **Targets** (`SCHOOL_TARGETS`): 80% for on-track, plans on file and senior
+  plans is the "district target" the reference's own My Impact quotes; FAFSA
+  65% and students-active 60% are seeded (no target exists in the
+  reference). Marked seeded in code. Alternative: one 80% for everything.
+  A FAFSA target of 80% would make every school read "Behind" on a measure
+  where 60% is a strong real-world result, so the card would cry wolf.
+- **Senior plan compliance keeps the reference's definition** (seniors with
+  a declared postsecondary plan, 87%), and FAFSA is the separate, stricter
+  measure (seniors with Financial Aid approved or completed, 40%). A first
+  cut used the milestone check for both and read 40% for senior plans,
+  which contradicted v1 My Impact's 87%; corrected before commit.
+
+### Lead Counselor
+
+- **Hero: "Which counselor is behind."** Three caseloads ranked worst first
+  by on-track rate (tiebreak: overdue + changes requested), each row a
+  status distribution bar (the same three-segment mark Career Pathways
+  uses), the on-track % and its band chip, and "pending · overdue" counts;
+  rows open Counselors. Caseloads are SEEDED by last-name range (A-G / H-R /
+  S-Z, `SCHOOL_COUNSELORS` in `counselorOrg.ts`): the reference has one
+  counselor and no counselor field per student. Why last-name ranges: it is
+  how many schools really assign, it is deterministic, and it is uneven
+  (45 / 47 / 28), which is what makes the question answerable (Renee
+  Alvarez, S-Z: 75% on track, 54% with a plan). Alternatives tried on the
+  real roster before choosing: every third student (three caseloads within
+  five points of each other, no story) and three contiguous blocks of 40
+  (caseloads segregated by grade, which would have confounded the grade
+  card beside it).
+- **Sidekick: "Which grade is behind."** On-track rate per grade with the
+  80% tick, worst first; selecting a grade sets the shared grade filter and
+  opens Students, the same cross-view filter mechanism the donuts use.
+- **Second row: school status donut, review backlog, postsecondary donut.**
+  The two donuts are the counselor Overview's `DonutCard` with a caption
+  instead of a trend delta (no hand-authored "+2 pts" here: the counselor
+  card's deltas are already flagged as fixed demo numbers, and a lead's
+  school-wide figures should not add more). Review backlog reads the same
+  review store as the queue (pending, overdue, awaiting the student, per
+  counselor) and opens the Review Queue. Not included: the counselor
+  Overview's attention strip and readiness charts; a lead's first job is
+  the people and grades, not individual students, and two rows is the
+  density budget.
+
+### School Administrator
+
+- **Hero: "Is the school on target."** Four `TargetRow`s (senior plan
+  compliance, FAFSA completion, postsecondary plans on file, on-track rate):
+  value, bar with the target tick, distance from target in words, band chip.
+  Verdict counts targets met and names the one furthest behind. A seniors-
+  only measure under a non-senior grade filter reads "n/a · Not measurable
+  under this filter" rather than 0%. Alternative: four stat tiles with a
+  delta arrow. A delta against last month is a trend; the administrator's
+  question is distance from a target, and the tick on the bar shows it
+  without a second number.
+- **Sidekick: "Is the platform used."** Students active this month against
+  the 60% target (Lincoln's 71 of 120 from Platform Engagement, kept as a
+  share so the grade filter scales it), weekly active and logins per
+  student; opens Platform Engagement.
+- **"Readiness by grade" bar chart** on the validated single-hue ramp with
+  the bronze target line, three series: on track, Career Report approved,
+  Academic Plan approved. Whole school, not the filtered roster, since the
+  chart exists to compare grades.
+- **"Equity cuts": on-track rate by pathway or by postsecondary plan
+  (Segmented toggle), lowest first, verdict is the gap between the highest
+  and lowest group.** The roster has no demographic fields, so cuts by free
+  or reduced lunch, English learner and IEP status are named as coming with
+  SIS data (playbook tier 6), not fabricated onto 120 named students.
+  Alternative: seed subgroup flags deterministically. Rejected: invented
+  demographics on named students would be indistinguishable from real ones
+  in a demo, which is exactly the kind of fabricated signal this dashboard
+  avoids elsewhere (see the salary-threshold rule).
+
+### District Administrator
+
+- **Hero: "Which schools are behind."** Five schools ranked by readiness
+  targets met (tiebreak: on-track rate), each row: enrollment, plans %,
+  senior plans %, FAFSA %, on-track bar with the 80% tick and an "N/4 met"
+  chip; rows open Schools. Lincoln is live; the other four are SEEDED
+  (`SIBLING_SCHOOLS` in `counselorOrg.ts`, `seeded: true`): each is Lincoln
+  scaled by an enrollment factor plus fixed per-metric offsets, so they
+  move with the grade filter and with review decisions exactly as Lincoln
+  does and always sit in the same relation to it (Jefferson ahead,
+  Washington behind on readiness and usage, Roosevelt large and behind on
+  FAFSA and usage, Kennedy close). Alternative: four independent seeded
+  rosters. Four more 120-row datasets would be more to maintain, would not
+  react to the demo's own actions, and would imply real per-student data
+  the prototype does not have.
+- **Sidekick: district student status donut**, counts summed across the
+  five schools, rates recomputed from the sums (`districtRollup`).
+- **"Is the platform used": students active this month per school against
+  the 60% target, lowest first**, with active count and logins per student;
+  verdict is how many schools reach the target. Opens Engagement.
+- **"District against targets": the four readiness `TargetRow`s for the
+  rollup**, compact. The same component as the school administrator's hero
+  so the two roles read the same numbers the same way.
+- **Shell:** the topbar org chip and the account line read the district
+  (`DISTRICT_NAME`, short form in the account line) for this role on v2.
+  The grade filter and student search stay; the search still targets
+  Lincoln's roster, which is the only real one.
+
 ## Overview
 
 - **Top row restructured from 3 equal cards to an asymmetric hero layout**

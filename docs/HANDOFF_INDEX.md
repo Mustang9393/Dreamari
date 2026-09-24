@@ -120,7 +120,13 @@ This list is a snapshot; `grep -rohE '"dreamari[a-z0-9:_-]*"' src` returns the l
 
 All counts, followers, views, likes, impact numbers, event codes, and the
 notification feed (`src/components/app/notificationsData.ts`, written for a
-fictional "demo student, Jordan") are seeded demo data, not real. **The
+fictional "demo student, Jordan") are seeded demo data, not real.
+`src/lib/counselorOrg.ts` (Counselor Dashboard v2 role Overviews) is seeded
+end to end: three counselors split from the reference roster by last-name
+range, the school targets (FAFSA 65% and active students 60% have no source
+in the reference), and four sibling schools scaled from Lincoln's live
+numbers with `seeded: true`. Never present the sibling schools as real
+aggregate data. **The
 career/school comparison tables' underlying data accuracy is Usman's scope,
 not a UI question** -- confirmed data-mapping work, not yet independently
 verified by this codebase's own agents.

@@ -15,7 +15,7 @@ import { attentionReason, attentionSeverity, attentionRank, type CounselorStuden
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 
-const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
+export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "#33C78C",
   "Needs Attention": "#F5A623",
   "At Risk": "#E0453C",
@@ -50,13 +50,13 @@ const SEVERITY_COLORS: Record<AttentionSeverity, string> = {
 // `validate_palette.js "#9BA8FB,#5B6CF9,#2E3BB8" --ordinal --mode dark` ->
 // all checks pass. "Series 1" and "series 2" still mean the same shade on
 // every readiness chart.
-const READINESS_SERIES = ["#9BA8FB", "#5B6CF9", "#2E3BB8"];
+export const READINESS_SERIES = ["#9BA8FB", "#5B6CF9", "#2E3BB8"];
 // The target/benchmark line needs to read as "not one of the bars" against
 // an all-blue ramp, and "not the status amber" against the rest of the
 // page -- a warm bronze does both: validated clear of "Needs Attention"
 // (`validate_palette.js "#F5A623,#A67C2E" --mode dark` -> ΔE 17.9, passes)
 // and it's warm/cool-contrasting against every blue bar it sits over.
-const TARGET_LINE_COLOR = "#A67C2E";
+export const TARGET_LINE_COLOR = "#A67C2E";
 
 // Two surfaces, spent by role, not one surface repeated three times --
 // "dominance over equality": one card should carry the visual weight,
@@ -102,7 +102,7 @@ function DeltaChip({ pts }: { pts: number }) {
 // matches what it's actually reporting rather than just being "the loud
 // one." Every other donut stays the plain glass and a smaller ring, so
 // there's exactly one thing the eye lands on first.
-function DonutCard({ title, centerPct, centerLabel, deltaPts, rows, hero, heroTint }: { title: string; centerPct: number; centerLabel: string; deltaPts?: number; rows: { label: string; value: number; color: string; onClick?: () => void }[]; hero?: boolean; heroTint?: string }) {
+export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, rows, hero, heroTint }: { title: string; /** one muted line under the title, for a reading that has no trend delta */ caption?: string; centerPct: number; centerLabel: string; deltaPts?: number; rows: { label: string; value: number; color: string; onClick?: () => void }[]; hero?: boolean; heroTint?: string }) {
   const surface = hero ? { ...GLASS_CARD_HERO, borderColor: heroTint ? `color-mix(in srgb, ${heroTint} 38%, var(--glass-border))` : GLASS_CARD_HERO.borderColor } : GLASS_CARD;
   const ringSize = hero ? 152 : 108;
   const ringStroke = hero ? 17 : 13;
@@ -122,6 +122,7 @@ function DonutCard({ title, centerPct, centerLabel, deltaPts, rows, hero, heroTi
              live computation (there's no historical snapshot to compute
              it from). Direct instruction: trend deltas on the donut cards. */}
           {typeof deltaPts === "number" && <DeltaChip pts={deltaPts} />}
+          {caption && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{caption}</span>}
         </div>
         {/* flex-1 + justify-center: when the row-stretch that keeps every
            card the same height (direct instruction) leaves a shorter card

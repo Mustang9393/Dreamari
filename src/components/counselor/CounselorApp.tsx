@@ -7,6 +7,10 @@ import { CounselorShell, type CounselorView } from "./shell";
 import { ALL_VIEWS, REFERENCE_VIEWS, roleHasView } from "./roles";
 import { CounselorVersionProvider, useCounselorVersion } from "./version";
 import { ComingSoon } from "./v2/ComingSoon";
+import { OverviewLead } from "./v2/OverviewLead";
+import { OverviewSchoolAdmin } from "./v2/OverviewSchoolAdmin";
+import { OverviewDistrict } from "./v2/OverviewDistrict";
+import { roleOrDefault } from "./roles";
 import { Overview } from "./Overview";
 import { StudentsRoster } from "./StudentsRoster";
 import { StudentProfileView } from "./StudentProfile";
@@ -36,11 +40,18 @@ import { Settings as SettingsV2 } from "./v2/Settings";
 // DEMO-ONLY: v1 and v2 are separate forks (see ./version.tsx) picked here
 // per view, so the bottom-center chip swaps the whole screen, never
 // individual pieces inside one.
-function ViewFor({ view, initialStudentId }: { view: CounselorView; initialStudentId?: string }) {
+function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
   const { version } = useCounselorVersion();
   if (version === "v2") {
     switch (view) {
-      case "overview": return <OverviewV2 />;
+      // Each role's Overview answers a different question (roles.ts).
+      case "overview":
+        switch (roleOrDefault(role)) {
+          case "Lead Counselor": return <OverviewLead />;
+          case "School Administrator": return <OverviewSchoolAdmin />;
+          case "District Administrator": return <OverviewDistrict />;
+          default: return <OverviewV2 />;
+        }
       case "students": return initialStudentId ? <StudentProfileViewV2 studentId={initialStudentId} /> : <StudentsRosterV2 />;
       case "milestones": return <MilestoneTrackerV2 />;
       case "review-queue": return <ReviewQueueV2 />;
@@ -98,7 +109,7 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
   if (!ready) return null;
   return (
     <CounselorShell active={view} showTitle={!(view === "students" && initialStudentId)}>
-      <ViewFor view={view} initialStudentId={view === "students" ? initialStudentId : undefined} />
+      <ViewFor view={view} initialStudentId={view === "students" ? initialStudentId : undefined} role={role} />
     </CounselorShell>
   );
 }

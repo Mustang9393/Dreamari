@@ -82,6 +82,16 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
   ],
 };
 
+/** The Overview subtitle per role: each role's Overview answers a different
+ *  question, and the line under the title says which. `first` is the
+ *  signed-in person's first name (may be empty). */
+export const OVERVIEW_SUBTITLES: Record<CounselorRole, (first: string) => string> = {
+  "School Counselor": (first) => `Welcome back${first ? `, ${first}` : ""}. Here's your caseload at a glance.`,
+  "Lead Counselor": (first) => `Welcome back${first ? `, ${first}` : ""}. Here's which counselors and grades need you this week.`,
+  "School Administrator": (first) => `Welcome back${first ? `, ${first}` : ""}. Here's whether the school is on target.`,
+  "District Administrator": (first) => `Welcome back${first ? `, ${first}` : ""}. Here's how the district's schools compare.`,
+};
+
 /** An account whose role was never set (a sign-up before the role field
  *  existed, or a cleared value) is treated as a School Counselor, the
  *  reference's own persona. */

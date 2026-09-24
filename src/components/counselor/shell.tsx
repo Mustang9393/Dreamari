@@ -13,7 +13,8 @@ import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, signOutCounselor } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { CounselorVersionChip, useCounselorVersion } from "./version";
-import { menuForRole, REFERENCE_VIEWS, type CounselorView } from "./roles";
+import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, type CounselorView } from "./roles";
+import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 
 // The isolated shell for the Counselor Dashboard -- a genuinely separate
 // product from the student app's own chrome (direct product decision: not a
@@ -203,7 +204,15 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   // the counselor's first name, not a generic greeting. Falls back to the
   // unpersonalized line before an account name is set.
   const firstName = account.name.trim().split(/\s+/)[0];
-  const subtitle = active === "overview" && firstName ? `Welcome back, ${firstName}. Here's your caseload at a glance.` : subtitleRaw;
+  const { version } = useCounselorVersion();
+  // v2: each role's Overview answers its own question and the subtitle
+  // says which (roles.ts). v1 keeps the reference's line.
+  const subtitle = active === "overview"
+    ? version === "v2" ? OVERVIEW_SUBTITLES[roleOrDefault(account.role)](firstName) : firstName ? `Welcome back, ${firstName}. Here's your caseload at a glance.` : subtitleRaw
+    : subtitleRaw;
+  // A district administrator's frame of reference is the district, not one
+  // school: the topbar's org chip and the account line say so (v2 only).
+  const orgLabel = version === "v2" && account.role === "District Administrator" ? DISTRICT_NAME : DEMO_SCHOOL;
 
   const doSignOut = () => {
     signOutCounselor();
@@ -237,7 +246,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             <Wordmark />
           </div>
           <SidebarNav active={active} />
-          <SidebarAccount account={account} onSignOut={doSignOut} />
+          <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} onSignOut={doSignOut} />
         </aside>
 
         {/* Mobile drawer -- backdrop + slide-in panel, lg:hidden context only (never mounted interactive at lg+). */}
@@ -252,11 +261,11 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                 </button>
               </div>
               <div className="flex flex-col gap-[10px] border-b px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · 2023-2024</span>
+                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · 2023-2024</span>
                 <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
               </div>
               <SidebarNav active={active} onNavigate={() => setDrawerOpen(false)} />
-              <SidebarAccount account={account} onSignOut={doSignOut} />
+              <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} onSignOut={doSignOut} />
             </div>
           </div>
         )}
@@ -291,7 +300,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
           {/* Desktop topbar -- full filters row, lg and up only. */}
           <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
             <div className="flex flex-wrap items-center gap-[10px]">
-              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{DEMO_SCHOOL}</span>
+              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{orgLabel}</span>
               <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>2023-2024</span>
               <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
             </div>
