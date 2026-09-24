@@ -892,5 +892,45 @@ questions, ten groups) is the reference's, verbatim.
   paragraph are one muted line under the button: "A first draft from the
   student's Dreamari data. Review and edit before you use it."
 
+## Platform Engagement (v2)
+
+25 Sept 2026 copy pass only; the reference's numbers are unchanged. Tile
+labels are two words ("Active this month", "Logins per student") instead
+of a label plus a clause; card titles carry their qualifier as a muted
+unit ("Logins by month · Lincoln High School, this academic year"); the
+intervention card is "Students to check in with" with one closing count.
+The second line series is a light step of the blue ramp, not green.
+
+## My Impact (v2)
+
+25 Sept 2026 pass. This is the printable report a counselor hands a
+principal, so it keeps its sections; what changed is that every number is
+said once.
+
+- **Removed "Notable Achievements" and "District Compliance Summary".**
+  Both restated numbers already on the page (the achievements list was
+  seven sentences, each wrapping a stat shown above; the compliance tiles
+  repeated the milestones card). Alternative: keep them for a printout.
+  A principal reading the printout reads the same figure three times.
+- **Senior plan compliance uses the reference's definition** (seniors
+  with a declared plan), the same figure the School Administrator
+  Overview shows; the earlier fork computed it from application
+  milestones and read 40% against the reference's 87%.
+- **One color rule:** blue tiles and bars; a number wears amber only when
+  it misses its target. The reference painted every tile a different hue
+  and every target a green or red.
+- **Sentences under cards became the card's sub-line** ("Plan reviews
+  average 2.1 days against the district's 5-day standard"), the
+  engagement disclaimer is gone, the footer is one line.
+- ASCA cards kept as the report's substance, on the inset surface, with
+  shorter bullets.
+
+## Settings (v2)
+
+25 Sept 2026 pass. Role is the app's `Listbox` (guardrails: never a
+native select). "Role Permissions" shows only the chosen role's list,
+titled "What School Counselor can do", instead of all four roles' lists
+at once; three of the four were never the reader's.
+
 _Sections for the remaining screens ( Career + College Insights, Productivity Suite, Platform
 Engagement, My Impact, Settings) get added here as each is worked on._

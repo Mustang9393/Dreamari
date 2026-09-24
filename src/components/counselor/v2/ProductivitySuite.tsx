@@ -70,8 +70,8 @@ export function ProductivitySuite() {
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <div className="flex flex-col gap-[4px]">
-            <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-              <tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}
+            <h2 className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[2px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+              <span className="flex items-center gap-[8px]"><tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}</span>
               <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tool.sub}</span>
             </h2>
             <p className="max-w-[72ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{tool.desc.split(/(?<=\.)\s/)[0]}</p>

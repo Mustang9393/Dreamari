@@ -83,17 +83,16 @@ export function PlatformEngagement() {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Monthly Active Students · unique logins in Sep 2026" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Weekly Active Students · avg unique students per week" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={CalendarDays} value="18" label="Daily Active Students · avg unique students per day" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Avg Logins / Student · per student in Sep 2026" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Active this month" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Active weekly" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={CalendarDays} value="18" label="Active daily" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Logins per student" accent="#5B6CF9" /></div></HoverBeam>
       </div>
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Current Academic Year · Logins by Month</h2>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · Current Academic Year</span>
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by month <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL}, this academic year</span></h2>
           </span>
           <LoginsChart />
         </div>
@@ -101,7 +100,7 @@ export function PlatformEngagement() {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Monthly Login Summary</h2>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>By month</h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[480px] border-collapse text-[13px]">
               <thead>
@@ -130,8 +129,7 @@ export function PlatformEngagement() {
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students Needing Intervention by Grade</h2>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>At-risk students or students with low progress who may benefit from a check-in</span>
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students to check in with <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
           </span>
           <div className="grid grid-cols-4 items-end gap-[var(--space-4)] px-[var(--space-2)]" style={{ height: 140 }}>
             {INTERVENTION_BY_GRADE.map((g) => (
@@ -142,7 +140,7 @@ export function PlatformEngagement() {
               </div>
             ))}
           </div>
-          <p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Total of {INTERVENTION_BY_GRADE.reduce((a, g) => a + g.count, 0)} students recommended for check-in across all grades</p>
+          <p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{INTERVENTION_BY_GRADE.reduce((a, g) => a + g.count, 0)} students in all</p>
         </div>
       </HoverBeam>
     </div>

@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: My Impact, Platform Engagement and Settings passes
+
+`v2/MyImpact.tsx`: each number once (Notable Achievements and District Compliance Summary removed), senior plan compliance on the reference's definition, blue tiles with amber only on a missed target, card sub-lines instead of sentences, one-line footer. `v2/PlatformEngagement.tsx`: two-word tile labels, qualifiers as units, blue second series. `v2/Settings.tsx`: role as a Listbox, permissions for the chosen role only. `v2/ProductivitySuite.tsx`: tool sub-line wraps under the title on phones. Reasoning: deviations file, "My Impact (v2)", "Platform Engagement (v2)", "Settings (v2)". Verified at 1440; `npx tsc --noEmit -p .` and `npx eslint` clean.
+
+With this, every screen the reference had is passed in v2. Remaining: the five role placeholders (Counselors, School Impact, Readiness, Reports, Schools) and Student Profile.
+
 ### 2026-09-25 Counselor Dashboard v2: Career + College Insights and Productivity Suite passes
 
 `v2/CareerCollegeInsights.tsx`: recommendations as the hero with one stat and one action each, four ranked lists always as bars with noun titles and no ledes, career-fair note as one line plus chips. `v2/ProductivitySuite.tsx`: tools as a tab row instead of a side column, one sentence per tool, Listbox pickers in one row with the button, whole roster in the student picker, one muted line replacing the banner and helper paragraph. Reasoning: deviations file, "Career + College Insights (v2)" and "Productivity Suite (v2)". Verified at 1440 (and Productivity at 375); `npx tsc --noEmit -p .` and `npx eslint` clean.
