@@ -102,20 +102,13 @@ export function Settings() {
           {/* Only the chosen role's permissions: the reference listed all
              four roles' lists at once, three of which are not the reader's. */}
           <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>What {draft.role || "this role"} can do</h2>
-          <div className="grid grid-cols-1 gap-[var(--space-4)]">
-            {PERMISSIONS.filter((p) => p.role === draft.role).map((p) => (
-              <div key={p.role} className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: p.role === draft.role ? "var(--primary)" : "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{p.role}</span>
-                <ul className="flex flex-col gap-[4px]">
-                  {p.items.map((item) => (
-                    <li key={item} className="flex gap-[6px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
-                      <span aria-hidden style={{ color: "var(--primary)" }}>•</span>{item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          <ul className="flex flex-col gap-[6px]">
+            {(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).map((item) => (
+              <li key={item} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
+                <span aria-hidden className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{item}
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </HoverBeam>
 
