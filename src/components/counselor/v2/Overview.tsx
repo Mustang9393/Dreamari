@@ -263,7 +263,7 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
                   className="dm-quiet flex w-full cursor-pointer flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px] text-left"
                   style={GLASS_INSET}
                 >
-                  <Avatar name={s.name} size={32} />
+                  <Avatar name={s.name} size={32} index={s.avatarIndex} />
                   <span className="flex min-w-0 flex-1 flex-col leading-tight">
                     <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
                     <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.careerTrack}</span>

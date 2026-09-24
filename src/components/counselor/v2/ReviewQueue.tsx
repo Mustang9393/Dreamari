@@ -156,7 +156,7 @@ function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewIt
     >
       <span className="flex items-center justify-between gap-[10px]">
         <span className="flex min-w-0 items-center gap-[10px]">
-          <Avatar name={item.student.name} size={32} />
+          <Avatar name={item.student.name} size={32} index={item.student.avatarIndex} />
           <span className="flex min-w-0 flex-col leading-tight">
             <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{item.student.name}</span>
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.milestone} · Grade {item.student.grade}{showCounselor ? ` · ${counselorFor(item.student).name}` : ""}</span>
@@ -179,7 +179,7 @@ function ReviewedRow({ decision, roster, onUndo }: { decision: ReviewDecision; r
   const isToday = when.toDateString() === new Date().toDateString();
   return (
     <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
-      <Avatar name={student.name} size={28} />
+      <Avatar name={student.name} size={28} index={student.avatarIndex} />
       <span className="flex min-w-0 flex-1 flex-col leading-tight">
         <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{student.name} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {decision.milestone}</span></span>
         {decision.feedback && <span className="truncate text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{decision.feedback}&rdquo;</span>}
@@ -241,7 +241,10 @@ export function ReviewQueue() {
           <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
         )}
       </div>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[360px_1fr]">
+      {/* items-start: the pane hugs its content instead of stretching to
+         the list's height, which left the actions floating far below a
+         short submission (direct feedback, 25 Sept 2026). */}
+      <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_1fr]">
         <div className="flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
           {pending.length === 0 ? (
             <div className="rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--muted-foreground)" }}>
@@ -256,8 +259,8 @@ export function ReviewQueue() {
           )}
         </div>
 
-        <HoverBeam strength={0.5} className="h-full">
-          <div className="relative flex h-full flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={detailSurface}>
+        <HoverBeam strength={0.5}>
+          <div className="relative flex flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={detailSurface}>
             <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.22) }} />
             {!selected ? (
               <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select a submission to review.</p>
@@ -265,7 +268,7 @@ export function ReviewQueue() {
               <>
                 <div className="relative flex flex-wrap items-start justify-between gap-[var(--space-3)]">
                   <div className="flex min-w-0 items-center gap-[12px]">
-                    <Avatar name={selected.student.name} size={44} />
+                    <Avatar name={selected.student.name} size={44} index={selected.student.avatarIndex} />
                     <div className="flex min-w-0 flex-col gap-[2px]">
                       <h2 className="text-[17px] leading-[1.2] font-bold" style={{ color: "var(--foreground)" }}>{selected.milestone}</h2>
                       <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
@@ -301,7 +304,7 @@ export function ReviewQueue() {
                     style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                   />
                 </div>
-                <div className="relative mt-auto flex gap-[10px]">
+                <div className="relative flex gap-[10px]">
                   <button type="button" onClick={() => resolve("Approved")} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[13.5px] font-bold">Approve</button>
                   <button type="button" onClick={() => resolve("Changes Requested")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Request Changes</button>
                 </div>

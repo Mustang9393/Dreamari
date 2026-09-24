@@ -128,7 +128,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   const answered = selectedStatus === "responded" || selectedStatus === "resolved";
 
   return (
-    <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[360px_1fr]">
+    <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_1fr]">
       <div className="flex max-h-[70vh] flex-col gap-[8px] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
         {ordered.map((q) => {
           const on = selectedId === q.id;
@@ -156,8 +156,8 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
           );
         })}
       </div>
-      <HoverBeam strength={0.5} className="h-full">
-        <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+      <HoverBeam strength={0.5}>
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
             <div className="flex min-w-0 items-center gap-[12px]">
               <Avatar name={selected.name} size={44} />
@@ -185,7 +185,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
                   style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                 />
               </div>
-              <div className="mt-auto flex gap-[10px]">
+              <div className="flex gap-[10px]">
                 <button
                   type="button"
                   disabled={response.trim().length === 0}

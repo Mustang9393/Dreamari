@@ -14,6 +14,16 @@ import { Lightbulb } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
+// Each recommendation as a number, a subject and one action; the
+// reference's sentence-plus-three-bullets form is kept in `actions` for a
+// later "more" affordance but is not rendered (direct feedback, 25 Sept
+// 2026: "too text heavy. How can we simplify without losing value?").
+const RECOMMENDATION_TILES = [
+  { pct: 43, subject: "saved Investment Banker", action: "Invite a banking professional for a career talk" },
+  { pct: 32, subject: "want to be entrepreneurs", action: "Host a local business-owner speaker series" },
+  { pct: 29, subject: "exploring nursing and healthcare", action: "Partner with a clinic for job shadows" },
+];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- the reference's full copy, kept for a later "more" affordance
 const RECOMMENDATIONS = [
   { emoji: "💼", stat: "43% of students have saved Investment Banker as a top career", actions: ["Invite an investment banking professional or Wall Street firm representative to your school for a career talk", "Schedule a visit to a financial district campus, trading floor, or investment firm", "Explore a CTE Finance & Business pathway or dual-enrollment finance course"] },
   { emoji: "💰", stat: "32% of students aspire to be Entrepreneurs or Business Owners", actions: ["Host a \"Young Entrepreneurs\" speaker series featuring local business owners", "Connect students to DECA, FBLA, or local small business incubators", "Introduce a pitch competition or school-based enterprise activity"] },
@@ -52,7 +62,7 @@ function RankedList({ items }: { items: { name: string; count: number }[] }) {
           <span className="w-[16px] flex-none text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
           <span className="min-w-0 flex-1 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</span>
           <span className="relative h-[6px] w-[90px] flex-none rounded-full" style={{ background: "rgba(255,255,255,0.08)" }} aria-hidden>
-            <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${(item.count / max) * 100}%`, background: "var(--primary)", opacity: 0.85 }} />
+            <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${(item.count / max) * 100}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 35%, transparent), var(--primary))" }} />
           </span>
           <span className="w-[28px] flex-none text-right text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
         </li>
@@ -85,11 +95,16 @@ export function CareerCollegeInsights() {
             <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
               <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Recommended this semester
             </h2>
-            <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3">
-              {RECOMMENDATIONS.map((r) => (
-                <div key={r.stat} className="flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, #FFFFFF 14%, transparent)", background: "color-mix(in srgb, #FFFFFF 7%, transparent)" }}>
-                  <p className="text-[13.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.stat}</p>
-                  <p className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</p>
+            <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+              {RECOMMENDATION_TILES.map((r) => (
+                <div key={r.subject} className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, #FFFFFF 14%, transparent)", background: "color-mix(in srgb, #FFFFFF 7%, transparent)" }}>
+                  <span className="flex items-baseline gap-[8px]">
+                    <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                    <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.subject}</span>
+                  </span>
+                  <span className="flex items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+                    <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{r.action}
+                  </span>
                 </div>
               ))}
             </div>

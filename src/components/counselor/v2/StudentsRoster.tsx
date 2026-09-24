@@ -60,7 +60,7 @@ function Roadmap({ pct }: { pct: number }) {
   return (
     <span className="flex items-center gap-[8px]">
       <span className="relative block h-[6px] w-[64px] rounded-full" style={{ background: "rgba(255,255,255,0.1)" }} aria-hidden>
-        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: PRIMARY }} />
+        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${PRIMARY} 35%, transparent), ${PRIMARY})` }} />
       </span>
       <span className="text-[12.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{pct}%</span>
     </span>
@@ -87,11 +87,10 @@ function fmtDate(iso: string): string {
 function StudentCell({ s }: { s: CounselorStudent }) {
   return (
     <span className="flex min-w-0 items-center gap-[10px]">
-      <Avatar name={s.name} />
+      <Avatar name={s.name} index={s.avatarIndex} />
       <span className="flex min-w-0 flex-col leading-tight">
         <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>
           {s.name}
-          {s.isReal && <span className="ml-[6px] rounded-full px-[6px] py-[1px] text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--primary)" }}>You</span>}
         </span>
         <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.careerTrack}</span>
       </span>

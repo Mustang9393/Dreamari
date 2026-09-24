@@ -88,6 +88,10 @@ export type CounselorStudent = {
   lastActive: string;
   /** true for the one row backed by this browser's real student data. */
   isReal: boolean;
+  /** Which illustrated portrait this seeded student wears (roster position,
+   *  so repeats are as far apart as the set allows). Ignored for the real
+   *  student, who wears Jordan's own avatar. */
+  avatarIndex: number;
 };
 
 /** The milestones the reference shows for a grade, in order. */
@@ -166,6 +170,7 @@ function buildReferenceRoster(): CounselorStudent[] {
       engagement: { dreamScore, dailyDropsCompleted: dailyDrops, simulations, careersSaved, collegesSaved, challenges, questionsSubmitted: questions, communityPosts: posts },
       lastActive,
       isReal: false,
+      avatarIndex: i,
     };
   });
 }
@@ -249,10 +254,18 @@ export function realStudentEntry(): CounselorStudent {
     },
     lastActive: new Date().toISOString().slice(0, 10),
     isReal: true,
+    avatarIndex: -1,
   };
 }
 
 let cachedRoster: CounselorStudent[] | null = null;
+
+/** Portrait index for a seeded student known only by name (Connect's
+ *  questions carry names, not ids); the real student and unknown names fall
+ *  through to the name-based avatar. */
+export function avatarIndexForName(name: string): number | undefined {
+  return getRoster().find((s) => s.name === name)?.avatarIndex;
+}
 
 /** The reference caseload, exactly as the Replit shows it: 120 rows. */
 export function getRoster(): CounselorStudent[] {

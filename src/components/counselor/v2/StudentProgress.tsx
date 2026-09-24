@@ -7,6 +7,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, DollarSign, GraduationCap, ClipboardList, AlertTriangle } from "lucide-react";
 import { BarChart } from "@/components/connect/viz";
+import { ScrollChips } from "../chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Listbox } from "@/components/app/Listbox";
 import { Stat } from "./overviewShared";
@@ -45,7 +46,7 @@ type ReportType = { id: string; label: string; icon: typeof FileText; gradeMin?:
 
 const REPORT_TYPES: ReportType[] = [
   {
-    id: "career-report", label: "Career Report Completion", icon: FileText,
+    id: "career-report", label: "Career Report", icon: FileText,
     chart: (roster) => {
       const categories = ["approved", "pending review", "in progress", "overdue"];
       const tally = countByStatus(roster, "Career Report", { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", Overdue: "overdue", "Changes Requested": "overdue", "Not Started": "overdue" });
@@ -53,7 +54,7 @@ const REPORT_TYPES: ReportType[] = [
     },
   },
   {
-    id: "academic-plan", label: "Academic Plan Completion", icon: ClipboardCheck,
+    id: "academic-plan", label: "Academic Plan", icon: ClipboardCheck,
     chart: (roster) => {
       const categories = ["approved", "pending review", "in progress", "not started", "overdue"];
       const tally = countByStatus(roster, "Academic Plan", { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Not Started": "not started", Overdue: "overdue", "Changes Requested": "overdue" });
@@ -61,7 +62,7 @@ const REPORT_TYPES: ReportType[] = [
     },
   },
   {
-    id: "resume", label: "Resume Completion", icon: FileBadge, gradeMin: 10,
+    id: "resume", label: "Resume", icon: FileBadge, gradeMin: 10,
     chart: (roster) => {
       const categories = ["approved", "pending review", "in progress", "not started"];
       const tally = countByStatus(roster, "Resume", { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" });
@@ -69,17 +70,17 @@ const REPORT_TYPES: ReportType[] = [
     },
   },
   {
-    id: "college-list", label: "College List Progress", icon: School, gradeMin: 11,
+    id: "college-list", label: "College List", icon: School, gradeMin: 11,
     chart: (roster) => {
       const categories = ["approved", "in progress", "not started"];
       const tally = countByStatus(roster, "College List", { Approved: "approved", Completed: "approved", "Pending Review": "in progress", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" });
       return { title: "College List (Grade 11+)", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
     },
   },
-  { id: "applications", label: "Application Progress", icon: Send, chart: () => null },
-  { id: "financial-aid", label: "Financial Aid Progress", icon: DollarSign, chart: () => null },
+  { id: "applications", label: "Applications", icon: Send, chart: () => null },
+  { id: "financial-aid", label: "Financial Aid", icon: DollarSign, chart: () => null },
   {
-    id: "postsecondary", label: "Postsecondary Plans", icon: GraduationCap,
+    id: "postsecondary", label: "Plans", icon: GraduationCap,
     chart: (roster) => {
       const categories = ["4-Year College", "Undecided", "Trade/Technical School", "2-Year College"];
       const counts = new Map<string, number>();
@@ -94,7 +95,7 @@ const REPORT_TYPES: ReportType[] = [
     },
   },
   {
-    id: "review-activity", label: "Counselor Review Activity", icon: ClipboardList,
+    id: "review-activity", label: "Reviews", icon: ClipboardList,
     chart: (roster) => {
       const categories = ["Resume Draft", "Career Report", "Academic Plan", "Career Report - Revised", "Academic Plan - Revised"];
       const values = [
@@ -109,7 +110,7 @@ const REPORT_TYPES: ReportType[] = [
     },
   },
   {
-    id: "intervention", label: "Students Needing Intervention", icon: AlertTriangle,
+    id: "intervention", label: "Intervention", icon: AlertTriangle,
     chart: (roster) => {
       const grades = [9, 10, 11, 12];
       const values = grades.map((g) => roster.filter((s) => s.grade === g && s.status === "At Risk").length);
@@ -163,27 +164,20 @@ export function StudentProgress() {
   const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 
   return (
-    // No side list of report types. The reference (and v1) spend a 300px
-    // column on nine report names, permanently, next to a chart that then
-    // has to fit in what is left; a report is a choice made once per visit,
-    // so it is the first control in the filter row, and the chart and the
-    // table get the full width (direct feedback, 24 Sept 2026: "a submenu
-    // is taking up space inside its container"). Listbox, not a native
-    // select, per docs/CROSS_BROWSER_GUARDRAILS.md.
+    // No side list of report types: the reference (and v1) spend a 300px
+    // column on nine report names next to a chart that then has to fit in
+    // what is left (direct feedback, 24 Sept 2026: "a submenu is taking up
+    // space inside its container"). Listbox, not a native select, for the
+    // filters, per docs/CROSS_BROWSER_GUARDRAILS.md.
     <div className="flex flex-col gap-[var(--space-4)]">
+      {/* All nine reports visible at once as a chip row (direct question:
+         "what would be the best UX?"): a picker hid eight of them behind a
+         click, a side column cost a third of the width. Short labels fit
+         at 1440; on a phone the row bleeds into the gutter and the next
+         chip peeks past the edge. */}
+      <ScrollChips ariaLabel="Report" value={reportId} onChange={setReportId} options={REPORT_TYPES.map((r) => ({ key: r.id, label: r.label }))} />
       <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-          <label className="flex min-w-0 flex-col gap-[4px]">
-            <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Report</span>
-            <Listbox
-              ariaLabel="Report type"
-              value={reportId}
-              onChange={setReportId}
-              options={REPORT_TYPES.map((r) => ({ value: r.id, label: r.label }))}
-              className={FIELD}
-              style={fieldStyle}
-            />
-          </label>
+        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
           <label className="flex min-w-0 flex-col gap-[4px]">
             <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Grade Level</span>
             <Listbox ariaLabel="Grade level" value={gradeLevel} onChange={setGradeLevel} options={[{ value: "All Grades", label: "All Grades" }, ...GRADES.map((g) => ({ value: String(g), label: `Grade ${g}` }))]} className={FIELD} style={fieldStyle} />

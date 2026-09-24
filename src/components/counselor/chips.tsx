@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
-import { MILESTONE_KEYS, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
-import { useStudentAvatarSrc } from "@/lib/avatar";
+import { MILESTONE_KEYS, avatarIndexForName, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
+import { studentAvatarByIndex, useStudentAvatarSrc } from "@/lib/avatar";
 
 // Shared status pills -- the same caseload-status and milestone-review
 // vocabulary shows up on Students, the student drill-down, Milestone
@@ -118,10 +118,16 @@ export function initials(name: string): string {
 // elsewhere in the app) draw the identical face for the one real student.
 // Falls back to initials (this dashboard's original treatment) only if
 // the image itself ever fails to load.
-export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
+export function Avatar({ name, size = 34, index }: { name: string; size?: number; /** roster avatarIndex; when absent the name is looked up in the roster */ index?: number }) {
   const [failed, setFailed] = useState(false);
-  const seed = name.split(" ")[0] || name;
-  const src = useStudentAvatarSrc(seed);
+  // Seeded students wear the portrait at their roster position (see
+  // avatar.ts: first-name hashing put every "Aisha" on the same face). The
+  // real student keeps the "Jordan" seed so Jordan's own avatar and any
+  // picked override apply.
+  const resolvedIndex = index ?? avatarIndexForName(name);
+  const seed = name === "Jordan Rivera" ? "Jordan" : name;
+  const named = useStudentAvatarSrc(seed);
+  const src = resolvedIndex !== undefined && resolvedIndex >= 0 ? studentAvatarByIndex(resolvedIndex) : named;
   if (failed) {
     return (
       <span
@@ -169,5 +175,56 @@ export function CardLink({ onClick, children }: { onClick: () => void; children:
       {children}
       <ChevronRight className="h-[14px] w-[14px] transition-transform duration-150 group-hover:translate-x-[3px]" aria-hidden />
     </button>
+  );
+}
+
+// A row of choice chips that scrolls sideways when it does not fit. Unlike
+// the bordered Segmented pill, it has no container edge: the row bleeds
+// into the page gutter on both sides, so a chip that does not fit peeks
+// past the content edge instead of being clipped by a border, and a fade
+// on the overflowing side says there is more (direct feedback, 25 Sept
+// 2026: "the top chips don't read like scrollable ... show the chip
+// peeking, don't make the margins clip them"). The negative margins mirror
+// the shell's <main> padding so the bleed lands exactly on the viewport
+// edge on phones.
+export function ScrollChips<K extends string>({ options, value, onChange, ariaLabel }: { options: { key: K; label: string }[]; value: K; onChange: (k: K) => void; ariaLabel: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setEdges({ left: el.scrollLeft > 2, right: el.scrollLeft + el.clientWidth < el.scrollWidth - 2 });
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
+  }, [options.length]);
+  const fade = (side: "left" | "right") => (
+    <span aria-hidden className={`pointer-events-none absolute inset-y-0 ${side}-0 w-[48px] transition-opacity duration-150`} style={{ opacity: edges[side] ? 1 : 0, background: `linear-gradient(to ${side === "left" ? "right" : "left"}, var(--background), transparent)` }} />
+  );
+  return (
+    <div className="relative -mx-[var(--space-4)] sm:-mx-[var(--space-5)] md:-mx-[var(--space-8)]">
+      <div ref={ref} role="tablist" aria-label={ariaLabel} className="flex gap-[6px] overflow-x-auto px-[var(--space-4)] py-[2px] [scrollbar-width:none] sm:px-[var(--space-5)] md:px-[var(--space-8)] [&::-webkit-scrollbar]:hidden">
+        {options.map((o) => {
+          const on = o.key === value;
+          return (
+            <button
+              key={o.key}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => onChange(o.key)}
+              className="dm-quiet flex h-9 flex-none cursor-pointer items-center rounded-full border px-[14px] text-[13px] font-bold whitespace-nowrap transition-colors"
+              style={{ background: on ? "var(--primary)" : "color-mix(in srgb, #FFFFFF 7%, transparent)", borderColor: on ? "var(--primary)" : "color-mix(in srgb, #FFFFFF 14%, transparent)", color: on ? "#FFFFFF" : "var(--foreground)" }}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {fade("left")}
+      {fade("right")}
+    </div>
   );
 }

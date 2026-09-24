@@ -13,11 +13,11 @@
 
 import { useState } from "react";
 import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles } from "lucide-react";
-import { Segmented } from "@/components/connect/viz";
 import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
+import { ScrollChips } from "../chips";
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention";
 
@@ -65,7 +65,7 @@ export function ProductivitySuite() {
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <Segmented ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={TOOLS.map((t) => ({ key: t.id, label: t.label }))} />
+      <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={TOOLS.map((t) => ({ key: t.id, label: t.label }))} />
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
