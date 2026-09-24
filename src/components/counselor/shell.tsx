@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, LogOut, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy,
+  Search, Bell, LogOut, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
@@ -15,6 +15,7 @@ import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { CounselorVersionChip, useCounselorVersion } from "./version";
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, type CounselorView } from "./roles";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
+import { CHANGE_NOTES } from "./v2/changeNotes";
 
 // The isolated shell for the Counselor Dashboard -- a genuinely separate
 // product from the student app's own chrome (direct product decision: not a
@@ -193,6 +194,44 @@ function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gr
   );
 }
 
+// The (i) beside every v2 title: what this screen changed from the Replit
+// reference, why, and what makes it better (direct instruction, 25 Sept
+// 2026). Content in ./v2/changeNotes.ts; the icon carries its label as a
+// tooltip (icon-only rule), the click opens a panel under the subtitle so
+// it reads in place and never clips at a screen edge.
+function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open: boolean; onToggle: () => void }) {
+  if (!CHANGE_NOTES[view]) return null;
+  return (
+    <IconTip label="What changed and why">
+      <button type="button" aria-label="What changed and why" aria-expanded={open} onClick={onToggle} className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: open ? "var(--primary)" : "var(--glass-border)", color: open ? "var(--primary)" : "var(--muted-foreground)", background: open ? "color-mix(in srgb, var(--primary) 12%, transparent)" : "transparent" }}>
+        <Info className="h-[14px] w-[14px]" aria-hidden />
+      </button>
+    </IconTip>
+  );
+}
+
+function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () => void }) {
+  const note = CHANGE_NOTES[view];
+  return (
+    <div className="mt-[var(--space-3)] flex max-w-[760px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ background: "var(--inset-bg)", borderColor: "var(--inset-border)", boxShadow: "var(--inset-shadow)" }}>
+      <div className="flex items-start justify-between gap-[8px]">
+        <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>What changed from the reference</span>
+        <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button>
+      </div>
+      <ul className="flex flex-col gap-[4px]">
+        {note.changed.map((c) => (
+          <li key={c} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
+            <span aria-hidden className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{c}
+          </li>
+        ))}
+      </ul>
+      <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Why.</span> {note.why}</p>
+      <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Better because.</span> {note.better}</p>
+      <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Full reasoning and the alternatives each choice beat: docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md</span>
+    </div>
+  );
+}
+
 // `showTitle={false}` drops the page title/subtitle block for a view that
 // renders its own header row (the reference's Student Profile shows
 // "← Student Profile" plus its actions inline instead of the Students title).
@@ -205,6 +244,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   const [planFilter, setPlanFilter] = useState<PlanRosterFilter>("All");
   const [counselorFilter, setCounselorFilter] = useState("All");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
   const { title, subtitle: subtitleRaw } = VIEW_TITLES[active];
   // Matches the reference's own copy exactly ("Welcome back, Sarah...") --
   // the counselor's first name, not a generic greeting. Falls back to the
@@ -362,8 +402,12 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             <div className="flex w-full max-w-[1400px] flex-col gap-[var(--space-4)] [&>*]:shrink-0">
               {showTitle && (
                 <div className="flex flex-col gap-[2px]">
-                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
+                  <div className="flex items-center gap-[8px]">
+                    <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
+                    {version === "v2" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
+                  </div>
                   <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>
+                  {version === "v2" && noteOpen && <ChangeNotePanel view={active} onClose={() => setNoteOpen(false)} />}
                 </div>
               )}
               {children}

@@ -140,6 +140,46 @@ bottom."
   one of the three seeded counselors falls back to the A-H caseload, and
   the Students toolbar says whose caseload is showing.
 
+## Cross-cutting, 25 Sept 2026 (late)
+
+- **Every v2 title carries an (i) that opens the screen's change note**
+  (`v2/changeNotes.ts`: what changed, why, what makes it better), by
+  direct instruction. The note is the short form of this file.
+- **Every screen has loading, error and whole-screen empty states**
+  (`v2/states.tsx`, previewed with `?state=`), catalogued with in-screen
+  states and edge cases in `docs/COUNSELOR_V2_STATES.md`, so the backend
+  has one contract per screen even though the demo never reaches them.
+- **Devices.** Twelve-column heroes and chart pairs go side by side only
+  from 1280px (at 1024 they were cramped and chart labels shrank);
+  master-detail panes (Review Queue, Connect) become a bottom sheet with a
+  Close bar below 1024 instead of sitting under the list; grid tracks are
+  `minmax(0,1fr)` so a long meta line can never push a pane past the right
+  edge; chip rows (`ScrollChips`) bleed into the gutter and peek instead
+  of clipping.
+- **Light mode.** Hardcoded whites became `--foreground` mixes so tracks,
+  legends and dots flip; nested rows use `--inset-bg / --inset-border /
+  --inset-shadow` (app.css) so a row is lighter than its card in both
+  modes, a white lift in dark and white with a soft shadow in light
+  (standing rule: layers get lighter with elevation, never darker); chart
+  gridlines, value labels and tooltips use tokens.
+- **Drilldowns.** Avatars and names in the review and reply panes open
+  the profile; Counselors, Impact by-counselor and by-grade rows open
+  Students with the shared counselor or grade filter; announcement cards
+  open to their recipients; groups open to their feed. Insights rows do
+  not drill down yet (no career id in the roster).
+- **Counselor Connect works end to end:** New announcement is an inline
+  composer; cards expand to read receipts and recipients; groups open to
+  a seeded feed with a composer; New group is an inline form. The
+  reference's buttons did nothing.
+- **Productivity Suite drafts are built from the student's own data**
+  (milestones, matches, plan), are editable, and can be copied,
+  downloaded or saved to the student's notes; Students Needing Attention
+  is a ranked list that opens profiles. The reference produced one
+  paragraph for every student.
+- **My Impact and School Impact rebuilt as a scorecard** (see "My Impact
+  (v2)" below): outcomes against targets as the hero, one row of activity,
+  one of engagement, grades as bars, ASCA as three short columns.
+
 ## Role shell (v2)
 
 - **The left menu is decided by the role in Settings, 24 Sept 2026.** The
@@ -902,6 +942,17 @@ intervention card is "Students to check in with" with one closing count.
 The second line series is a light step of the blue ramp, not green.
 
 ## My Impact (v2)
+
+**Rebuilt later the same day** after "My Impact etc are especially
+cluttered ... a huge overload of information at once with so much copy":
+the report answers one question (did this period move the numbers?), so
+the hero is the four outcomes against their targets with one verdict, then
+one row of the counselor's activity, one of student engagement, grades as
+bars that open the roster, and ASCA as three columns of two short lines.
+Dropped: the pathway bar list (the Overview donut shows it), the milestone
+stat tiles (folded into the scorecard), and the two sections that
+restated the page. School Impact is the same report headed by the school
+with a by-counselor card. The earlier pass, below, is history.
 
 25 Sept 2026 pass. This is the printable report a counselor hands a
 principal, so it keeps its sections; what changed is that every number is

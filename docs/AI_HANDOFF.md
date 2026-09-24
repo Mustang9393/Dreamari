@@ -38,6 +38,18 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: every screen for every role, states, change notes, devices, light mode
+
+Direct instructions across the afternoon, in order: get everything done (Student Profile and the five role screens); drilldowns wherever valid; all devices and browsers, including wide desktops; every empty, loading, error and edge state verified and documented for Usman; an (i) on every screen with what changed and why; light mode; nested surfaces lighter than their parent; make Connect's announcements and groups work; improve the Productivity Suite; simplify My Impact ("so much copy"); then push live.
+
+**Built.** Counselors, Schools, Readiness, Reports (CSV from live numbers), School Impact; Student Profile pass (needs-you line, grade-scoped ordered milestones); Connect composer, expandable announcements with recipients, group feeds and creation; Productivity drafts from student data with Copy / Download / Save to notes and a real attention list; My Impact and School Impact as a scorecard; Review Queue attachment preview and profile links; scroll chips for Student Progress and Productivity; avatars by roster position (no repeats); the counselor filter in the shared context; a `?state=` preview and `StateGate` for loading / empty / error on every v2 screen; the (i) change note on every v2 title.
+
+**Fixed.** Heroes stack below 1280; panes become a bottom sheet below 1024; `minmax(0,1fr)` grid tracks (right-edge overflow); Student Progress used the header grade filter twice; the pathway filter listed non-roster careers; the "You" badge in the counselor's view; light-mode whites and the nested-surface elevation rule.
+
+**Docs.** `docs/COUNSELOR_V2_STATES.md` (new, the backend contract), deviations file ("Cross-cutting, 25 Sept 2026 (late)", per-screen sections), HANDOFF_INDEX (v2 reading list, previews). `npx tsc --noEmit -p .` and `npx eslint` clean; captures at 375, 768, 1024, 1280, 1440 and 2560, dark and light.
+
+**Open, by design or for the backend:** Insights rows have no drilldown (no career id in the roster); Share and Principal report on Impact are not wired (no export service); the trend deltas on the counselor Overview are fixed demo numbers; Milestone Tracker proportions are the reference's, scaled, so approvals do not move it.
+
 ### 2026-09-25 Counselor Dashboard v2: My Impact, Platform Engagement and Settings passes
 
 `v2/MyImpact.tsx`: each number once (Notable Achievements and District Compliance Summary removed), senior plan compliance on the reference's definition, blue tiles with amber only on a missed target, card sub-lines instead of sentences, one-line footer. `v2/PlatformEngagement.tsx`: two-word tile labels, qualifiers as units, blue second series. `v2/Settings.tsx`: role as a Listbox, permissions for the chosen role only. `v2/ProductivitySuite.tsx`: tool sub-line wraps under the title on phones. Reasoning: deviations file, "My Impact (v2)", "Platform Engagement (v2)", "Settings (v2)". Verified at 1440; `npx tsc --noEmit -p .` and `npx eslint` clean.

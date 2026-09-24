@@ -14,6 +14,7 @@ import { OverviewLead } from "./v2/OverviewLead";
 import { OverviewSchoolAdmin } from "./v2/OverviewSchoolAdmin";
 import { OverviewDistrict } from "./v2/OverviewDistrict";
 import { roleOrDefault } from "./roles";
+import { ScreenStateProvider, StateGate, readStateParam, type ScreenState } from "./v2/states";
 import { Overview } from "./Overview";
 import { StudentsRoster } from "./StudentsRoster";
 import { StudentProfileView } from "./StudentProfile";
@@ -45,7 +46,12 @@ import { Settings as SettingsV2 } from "./v2/Settings";
 // individual pieces inside one.
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
   const { version } = useCounselorVersion();
-  if (version === "v2") {
+  if (version === "v2") return <StateGate view={view}><V2View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
+  return <V1View view={view} initialStudentId={initialStudentId} />;
+}
+
+function V2View({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
+  {
     switch (view) {
       // Each role's Overview answers a different question (roles.ts).
       case "overview":
@@ -73,6 +79,9 @@ function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initia
       case "school-impact": return <MyImpactV2 scope="school" />;
     }
   }
+}
+
+function V1View({ view, initialStudentId }: { view: CounselorView; initialStudentId?: string }) {
   // v1 never reaches a role-shell view: RoutedView redirects them to
   // Overview before this renders.
   switch (view) {
@@ -108,11 +117,22 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
     if (ready && !allowed) router.replace("/counselor?view=overview");
   }, [ready, allowed, router]);
 
+  // DEMO-ONLY: `?state=loading|empty|error` previews a screen's state (see
+  // v2/states.tsx). Read after mount, like the version, so the server and
+  // first client render agree.
+  const [screenState, setScreenState] = useState<ScreenState>("ready");
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only URL read after mount, same justification as the hydrated flag
+    setScreenState(readStateParam());
+  }, [requestedView]);
+
   if (!ready) return null;
   return (
-    <CounselorShell active={view} showTitle={!(view === "students" && initialStudentId)}>
-      <ViewFor view={view} initialStudentId={view === "students" ? initialStudentId : undefined} role={role} />
-    </CounselorShell>
+    <ScreenStateProvider value={screenState}>
+      <CounselorShell active={view} showTitle={!(view === "students" && initialStudentId)}>
+        <ViewFor view={view} initialStudentId={view === "students" ? initialStudentId : undefined} role={role} />
+      </CounselorShell>
+    </ScreenStateProvider>
   );
 }
 
