@@ -61,7 +61,7 @@ export function OverviewSchoolAdmin() {
           <OverviewCard title="Targets" hero tint={BAND_COLORS[heroBand]} aside={<SeeLink onClick={() => router.push("/counselor?view=readiness")}>Readiness</SeeLink>}>
             {worst && (
               <Verdict band={heroBand}>
-                {met} of {measured.length} met{heroBand !== "met" ? ` · ${TARGET_LABELS[worst.key]} furthest behind` : ""}
+                {met} of {measured.length} met{heroBand !== "met" ? ` · ${TARGET_LABELS[worst.key]} has the most room to grow` : ""}
               </Verdict>
             )}
             <div className="grid grid-cols-1 gap-x-[var(--space-6)] gap-y-[var(--space-4)] sm:grid-cols-2">

@@ -145,19 +145,24 @@ export function MilestoneTracker() {
               <div className="relative flex flex-col gap-[var(--space-5)]">
                 <div className="flex flex-wrap items-start justify-between gap-[8px]">
                   <span className="flex flex-col gap-[2px]">
-                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Furthest behind · {hero.subtitle}</span>
+                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Focus first · {hero.subtitle}</span>
                     <h2 className="text-[17px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{hero.name}</h2>
                   </span>
                   <CardLink onClick={openStudents}>Students</CardLink>
                 </div>
-                <div className="flex flex-col items-start gap-[var(--space-5)] sm:flex-row sm:items-center sm:gap-[var(--space-7)]">
+                {/* The ring's glow reaches past its box, so the gap to the
+                   legend is generous; the legend column is narrow so each
+                   value sits beside its label (direct feedback, 25 Sept
+                   2026: "give it some space between the graph and the
+                   legend ... bring the values closer to their labels"). */}
+                <div className="flex flex-col items-start gap-[var(--space-5)] sm:flex-row sm:items-center sm:gap-[56px]">
                   <SegmentedRing segments={STATES.map((s) => ({ value: hero.counts[s.key], color: s.color })).filter((s) => s.value > 0)} size={152} stroke={17}>
                     <span className="flex flex-col items-center gap-[2px]">
                       <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{hero.donePct}%</span>
                       <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
                     </span>
                   </SegmentedRing>
-                  <div className="flex w-full max-w-[320px] flex-col gap-[4px]">
+                  <div className="flex w-full max-w-[230px] flex-col gap-[6px]">
                     {STATES.map((s) => <StatRow key={s.key} label={s.label} value={hero.counts[s.key]} color={s.color} />)}
                   </div>
                 </div>
@@ -166,7 +171,7 @@ export function MilestoneTracker() {
           </HoverBeam>
 
           {rest.length > 0 && (
-            <OverviewCard title="All milestones" unit="worst first" aside={<CardLink onClick={openStudents}>Students</CardLink>}>
+            <OverviewCard title="All milestones" unit="biggest opportunity first" aside={<CardLink onClick={openStudents}>Students</CardLink>}>
               <Legend />
               <ul className="flex flex-col gap-[8px]">
                 {rest.map((r) => (

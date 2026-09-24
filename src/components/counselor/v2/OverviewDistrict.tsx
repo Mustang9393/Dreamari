@@ -45,7 +45,7 @@ export function OverviewDistrict() {
         <div className="lg:col-span-8">
           <OverviewCard title="Schools" unit="% on track" hero tint={BAND_COLORS[heroBand]} aside={<SeeLink onClick={() => router.push("/counselor?view=schools")}>All</SeeLink>}>
             <Verdict band={heroBand}>
-              {behind === 0 ? `All ${schools.length} schools meet every target` : `${worst.short} is furthest behind · ${behind} of ${schools.length} miss a target`}
+              {behind === 0 ? `All ${schools.length} schools meet every target` : `${worst.short} needs the most support · ${behind} of ${schools.length} have a target to reach`}
             </Verdict>
             <div className="flex flex-col gap-[8px]">
               {ranked.map((s) => (

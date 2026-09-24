@@ -62,7 +62,7 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   // Role-shell views (v2 only; see ./roles.ts). Subtitles state the
   // question each screen exists to answer, so a placeholder still tells a
   // reviewer what will live here.
-  counselors: { title: "Counselors", subtitle: `Every counselor's caseload at ${DEMO_SCHOOL}, and who is behind` },
+  counselors: { title: "Counselors", subtitle: `Every counselor's caseload at ${DEMO_SCHOOL}, and who needs support` },
   readiness: { title: "Readiness", subtitle: "Senior plan compliance, FAFSA and milestone readiness against targets" },
   reports: { title: "Reports", subtitle: "Board, district and state reports built from live readiness data" },
   schools: { title: "Schools", subtitle: "Every school in the district, and which ones need support" },

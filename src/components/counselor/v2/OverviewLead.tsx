@@ -51,7 +51,7 @@ export function OverviewLead() {
           <OverviewCard title="Counselors" unit="% on track" hero tint={BAND_COLORS[counselorBand]} aside={<SeeLink onClick={() => router.push("/counselor?view=counselors")}>All</SeeLink>}>
             {worstCounselor && (
               <Verdict band={counselorBand}>
-                {counselorBand === "met" ? "Every caseload is on target" : `${worstCounselor.c.name} is furthest behind`}
+                {counselorBand === "met" ? "Every caseload is on target" : `${worstCounselor.c.name}'s caseload needs the most support`}
               </Verdict>
             )}
             <div className="flex flex-col gap-[8px]">
@@ -65,7 +65,7 @@ export function OverviewLead() {
           <OverviewCard title="Grades" unit="% on track">
             {worstGrade && (
               <Verdict band={gradeBand}>
-                {gradeBand === "met" ? "Every grade is on target" : `Grade ${worstGrade.g} is behind`}
+                {gradeBand === "met" ? "Every grade is on target" : `Grade ${worstGrade.g} needs the most support`}
               </Verdict>
             )}
             <div className="flex flex-col gap-[8px]">
