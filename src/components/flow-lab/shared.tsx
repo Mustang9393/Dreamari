@@ -11,14 +11,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, Info, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, FileText, GraduationCap, ImageOff, Info, Play, Plus, Route, Sparkles, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { IconTip } from "@/components/app/IconTip";
 import { Coachmark } from "@/components/flow/GestureSpotlight";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { careerSlug } from "@/components/career/slug";
-import { resolveCareer } from "@/components/career/data";
-import { type LabCareer, WORLDS } from "./lab";
+import { matchDetail, type LabCareer, WORLDS } from "./lab";
 
 export const CARD = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
 const SUCCESS = "var(--color-feedback-success)";
@@ -30,13 +30,29 @@ export const LabDockContext = createContext<ReactNode>(null);
 
 export type Hint = { active: boolean; label: string; onDismiss: () => void; cta?: string };
 
+/** What the (i) says about the screen that is open right now: the screen
+ *  registers it, FlowLab shows it above the version note (direct
+ *  instruction, 25 Sept 2026: "make sure the info notes are updated to be
+ *  relevant to each screen and their actions too"). */
+export type ScreenNote = { heading: string; bullets: string[] };
+export const LabInfoContext = createContext<(note: ScreenNote | null) => void>(() => {});
+
 // ---------------------------------------------------------------- layout ----
 
 /** Match's viewport-high section: header row, optional control row, then
  *  whatever fills the rest (`children`), above a fixed bottom bar. */
-export function LabScreen({ title, status, hint, controls, children }: { title: string; status?: string; hint?: string; controls?: ReactNode; children: ReactNode }) {
+export function LabScreen({ title, status, hint, controls, note, children }: { title: string; status?: string; hint?: string; controls?: ReactNode; note?: ScreenNote; children: ReactNode }) {
+  const setNote = useContext(LabInfoContext);
+  const noteKey = JSON.stringify(note ?? null);
+  useEffect(() => {
+    setNote(note ?? null);
+    return () => setNote(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- compared by content; the object is rebuilt every render
+  }, [noteKey, setNote]);
   return (
-    <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-24 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
+    // Phones carry the version dock above the bottom bar, so they need the
+    // extra bottom room; desktop docks it inside the bar.
+    <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-[136px] sm:pt-[72px] sm:pb-24" style={{ WebkitTapHighlightColor: "transparent" }}>
       <div className="flex min-h-0 w-full max-w-[880px] flex-1 flex-col">
         <div className="mb-1 flex flex-none items-center justify-between gap-3 px-1">
           <h1 className="text-[17px] font-extrabold whitespace-nowrap uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
@@ -160,7 +176,7 @@ export type LabControl = "save" | "pick" | "rank";
  *  INSIDE the card. Card click opens the detail modal; the control toggles.
  *  `fill` stretches to a grid cell (Match's six-up); otherwise the poster
  *  ratio. */
-export function LabCard({ career, control, selected, rank, onToggle, onOpen, reason, fill = false, hint }: {
+export function LabCard({ career, control, selected, rank, onToggle, onOpen, reason, fill = false, hint, className = "" }: {
   career: LabCareer;
   control: LabControl;
   selected: boolean;
@@ -170,6 +186,7 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
   reason?: string | null;
   fill?: boolean;
   hint?: Hint;
+  className?: string;
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const label = control === "save" ? (selected ? `Unsave ${career.title}` : `Save ${career.title}`) : control === "pick" ? (selected ? `Remove ${career.title} from your Top 3` : `Add ${career.title} to your Top 3`) : `#${rank} ${career.title}`;
@@ -195,7 +212,7 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
       aria-label={`Open ${career.title} details`}
       onClick={onOpen}
       onKeyDown={(e) => { if (onOpen && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onOpen(); } }}
-      className={`group relative ${fill ? "h-full min-h-0 w-full" : "aspect-[210/297] w-full"} cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left transition-[transform,box-shadow] duration-[260ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:z-[5] hover:-translate-y-[3px] hover:scale-[1.02]`}
+      className={`group relative ${fill ? "h-full min-h-0 w-full" : "aspect-[210/297] w-full"} cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left transition-[transform,box-shadow] duration-[260ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:z-[5] hover:-translate-y-[3px] hover:scale-[1.02] ${className}`}
       style={{
         borderColor: selected ? accent : "var(--glass-border)",
         boxShadow: selected ? `0 0 0 2px color-mix(in srgb, ${accent} 55%, transparent), 0 14px 30px -14px rgba(0,0,0,0.6)` : "0 8px 20px -14px rgba(0,0,0,0.5)",
@@ -223,18 +240,22 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
           <span className="rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md" style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{career.salary}</span>
         )}
       </div>
-      <IconTip label={tip} className="absolute top-2 right-2 z-[2]">
-        {hint ? (
-          /* The coachmark portals its bubble from inside this card, and React
-             bubbles the bubble's clicks through the tree, so "Next" would
-             also open the card's modal. Stop it here. */
-          <span className="contents" onClick={(e) => e.stopPropagation()}>
-            <Coachmark demoForce active={hint.active} label={hint.label} cta={hint.cta} onDismiss={hint.onDismiss} spotlight side="bottom" align="end">
-              {controlEl}
-            </Coachmark>
-          </span>
-        ) : controlEl}
-      </IconTip>
+      {hint ? (
+        /* The coachmark sits OUTSIDE the IconTip on purpose. Its bubble is a
+           portal that still belongs to this subtree in React's tree, so if
+           it lived inside the tooltip wrapper, the bubble's "Next" would
+           focus a button inside the tooltip's focus scope (tooltip shows),
+           then unmount without a blur (tooltip never hides). The same
+           subtree bubbling would also hand the click to the card's open
+           handler, so propagation stops here too. */
+        <span className="absolute top-2 right-2 z-[2]" onClick={(e) => e.stopPropagation()}>
+          <Coachmark demoForce active={hint.active} label={hint.label} cta={hint.cta} onDismiss={hint.onDismiss} spotlight side="bottom" align="end">
+            <IconTip label={tip}>{controlEl}</IconTip>
+          </Coachmark>
+        </span>
+      ) : (
+        <IconTip label={tip} className="absolute top-2 right-2 z-[2]">{controlEl}</IconTip>
+      )}
     </div>
   );
 }
@@ -292,9 +313,11 @@ export function Pager({ index, total, onPrev, onNext, nextLabel = "Six more", hi
 
 // ------------------------------------------------------------------ modal ----
 
-/** Match's detail modal on the data Career Detail already resolves for any
- *  catalog career: hero, then what they do and the school path, then one
- *  CTA. Prev/next through the six without closing. */
+/** Match's detail modal, section for section: hero with employers and
+ *  salary, "What You'd Do", "Good Fit If You Like", "School & Path" as
+ *  short bullets, one CTA, prev/next through the six. Content comes from
+ *  matchDetail(), which is the deck's own copy for the six deck careers and
+ *  the app's report/profile data for everything else. */
 export function DetailModal({ career, control, selected, full, onToggle, onClose, onPrev, onNext }: {
   career: LabCareer;
   control: Exclude<LabControl, "rank">;
@@ -306,10 +329,7 @@ export function DetailModal({ career, control, selected, full, onToggle, onClose
   onNext?: () => void;
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
-  const resolved = resolveCareer(careerSlug(career.title));
-  const salary = resolved?.medianSalary && resolved.medianSalary !== "Coming soon" ? resolved.medianSalary : career.salary;
-  const what = resolved?.whatTheyActuallyDo && resolved.whatTheyActuallyDo !== "Coming soon" ? resolved.whatTheyActuallyDo : resolved?.description || "";
-  const path = [resolved?.degreeRequired, resolved?.commonMajors].filter((x): x is string => !!x && x !== "Coming soon");
+  const detail = matchDetail(career);
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -323,6 +343,7 @@ export function DetailModal({ career, control, selected, full, onToggle, onClose
   }, [onClose, onPrev, onNext]);
   const round = "flex size-9 cursor-pointer items-center justify-center rounded-full border backdrop-blur-md";
   const roundStyle = { background: "color-mix(in srgb, var(--background) 55%, transparent)", borderColor: "rgba(255,255,255,0.4)" };
+  const chip = "rounded-[var(--radius-sm)] border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md";
   return (
     <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-label={`${career.title} details`}>
       <motion.div initial={{ scale: 0.96, y: 8 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 8 }} className="relative flex max-h-[92dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}>
@@ -342,28 +363,26 @@ export function DetailModal({ career, control, selected, full, onToggle, onClose
                 <button type="button" aria-label="Next career" onClick={onNext} className={round} style={roundStyle}><ChevronRight className="h-5 w-5 text-white" aria-hidden /></button>
               </IconTip>
             )}
-            {salary && (
-              <span className="absolute top-4 left-4 z-[1] rounded-[var(--radius-sm)] border px-2.5 py-1 text-[11px] font-bold backdrop-blur-md" style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 80%, transparent)" }}>{salary}</span>
-            )}
+            {/* pr-14 keeps the chips clear of the close button, as in Match. */}
+            <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-2 p-4 pr-14">
+              {detail.employers ? (
+                <span className={`max-w-[55%] truncate ${chip}`} style={{ color: "var(--poster-title)", background: "color-mix(in srgb, var(--background) 80%, transparent)", borderColor: "var(--glass-border)" }}>{detail.employers}</span>
+              ) : <span />}
+              {detail.salary && (
+                <span className={`flex-none ${chip}`} style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 80%, transparent)" }}>{detail.salary}</span>
+              )}
+            </div>
             <div className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center gap-1.5 px-2 pt-12 pb-3 text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)" }}>
               <p className="line-clamp-3" style={{ ...posterTitleFont(career.world), fontSize: 26, lineHeight: 1.15, color: "var(--poster-title)" }}>{career.title}</p>
               <p className="text-[10.5px] font-semibold tracking-[0.06em]" style={{ color: accent }}>{career.world}</p>
             </div>
           </div>
           <div className="flex flex-col px-5 pt-4 pb-4">
-            <Section icon={<BookOpen className="h-4 w-4" />} label="What they do">
-              <p className="text-[13.5px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>{what || "Coming soon"}</p>
-            </Section>
-            <hr aria-hidden className="my-3 border-0" style={{ height: 1, background: "var(--glass-border)" }} />
-            <Section icon={<GraduationCap className="h-4 w-4" />} label="School and path">
-              {path.length > 0 ? (
-                <ul className="flex flex-col gap-1 text-[13.5px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>
-                  {path.map((p) => <li key={p} className="flex gap-2"><span aria-hidden style={{ color: accent }}>•</span><span>{p}</span></li>)}
-                </ul>
-              ) : (
-                <p className="text-[13.5px] leading-[19px] font-medium" style={{ color: "var(--muted-foreground)" }}>Coming soon</p>
-              )}
-            </Section>
+            <Section icon={<BookOpen className="h-4 w-4" />} label="What You'd Do"><Bullets items={detail.whatYouDo} /></Section>
+            <Divider />
+            <Section icon={<Sparkles className="h-4 w-4" />} label="Good Fit If You Like"><Bullets items={detail.goodFitIf} /></Section>
+            <Divider />
+            <Section icon={<GraduationCap className="h-4 w-4" />} label="School & Path"><Bullets items={detail.schoolPath} /></Section>
           </div>
         </div>
         <div className="flex-none border-t px-4 py-3" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
@@ -375,6 +394,27 @@ export function DetailModal({ career, control, selected, full, onToggle, onClose
         </div>
       </motion.div>
     </motion.div>
+  );
+}
+
+function Divider() {
+  return <hr aria-hidden className="my-3 border-0" style={{ height: 1, background: "var(--glass-border)" }} />;
+}
+
+/** Match's BulletList: 2-3 short bullets, never a paragraph; "Details
+ *  coming soon." when nothing is authored yet (the app's thin-content
+ *  convention). */
+function Bullets({ items }: { items: string[] }) {
+  if (items.length === 0) return <p className="text-[13px] font-medium italic" style={{ color: "var(--muted-foreground)" }}>Details coming soon.</p>;
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {items.map((item) => (
+        <li key={item} className="flex items-start gap-2 text-[13px] leading-[1.5] font-medium" style={{ color: "var(--muted-foreground)" }}>
+          <span aria-hidden className="mt-[8px] size-1 flex-none rounded-full" style={{ background: "var(--muted-foreground)" }} />
+          {item}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -392,8 +432,78 @@ function Section({ icon, label, children }: { icon: ReactNode; label: string; ch
 
 // ------------------------------------------------------------------ top 3 ----
 
+// The student-facing ladder after a Top 3, in the counselor dashboard's own
+// milestone order (MILESTONE_KEYS in counselorRoster.ts: Career Report ->
+// Career Pathway -> Resume -> College Exploration -> Applications), so
+// "what's next" for the student is the same thing that moves their roadmap
+// on the counselor's screen. Each step opens the real app page for it.
+const LADDER: { key: string; label: string; icon: ReactNode; href: (slug: string) => string }[] = [
+  { key: "report", label: "Career Report", icon: <FileText className="h-3.5 w-3.5" aria-hidden />, href: (slug) => `/career-report?picks=${slug}` },
+  { key: "path", label: "Pathway", icon: <Route className="h-3.5 w-3.5" aria-hidden />, href: (slug) => `/career/${slug}` },
+  { key: "play", label: "Play a day", icon: <Play className="h-3.5 w-3.5" aria-hidden />, href: () => "/play" },
+  { key: "colleges", label: "Colleges", icon: <GraduationCap className="h-3.5 w-3.5" aria-hidden />, href: () => "/colleges" },
+];
+
+/** One recommended next step for #1, then the ladder. Nothing in the lab
+ *  records progress, so the recommendation is always the first rung; in
+ *  the product it would be the first rung not yet done. */
+function NextStep({ first }: { first: LabCareer }) {
+  const router = useRouter();
+  const slug = careerSlug(first.title);
+  const accent = WORLD_COLORS[first.world] ?? "var(--primary)";
+  return (
+    <div className="flex flex-none flex-col gap-2 rounded-[var(--radius-lg)] border p-3" style={{ ...CARD, borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))` }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 22%, transparent)`, color: accent }}><Sparkles className="h-4 w-4" aria-hidden /></span>
+          <div className="min-w-0">
+            <p className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Next step</p>
+            <p className="truncate text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>Career Report for {first.title}</p>
+          </div>
+        </div>
+        <PrimaryButton onClick={() => router.push(LADDER[0].href(slug))}>Start <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></PrimaryButton>
+      </div>
+      <ol className="flex flex-wrap items-center gap-1.5" aria-label="Your roadmap">
+        {LADDER.map((step, i) => (
+          <li key={step.key} className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold whitespace-nowrap" style={{ borderColor: i === 0 ? accent : "var(--glass-border)", background: i === 0 ? `color-mix(in srgb, ${accent} 18%, transparent)` : "transparent", color: i === 0 ? "var(--foreground)" : "var(--muted-foreground)" }}>
+              {step.icon}{step.label}
+            </span>
+            {i < LADDER.length - 1 && <ChevronRight className="h-3 w-3" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/** Icon-only actions under each Top 3 card, one per rung, each with its
+ *  tooltip (icon-only rule). Opens the real page; Back returns to the lab. */
+function CareerActions({ career }: { career: LabCareer }) {
+  const router = useRouter();
+  const slug = careerSlug(career.title);
+  return (
+    <div className="grid grid-cols-4 gap-1.5">
+      {LADDER.map((step) => (
+        <IconTip key={step.key} label={step.label} className="w-full">
+          <button type="button" aria-label={`${step.label}: ${career.title}`} onClick={() => router.push(step.href(slug))} className="dm-quiet flex h-9 w-full cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            {step.icon}
+          </button>
+        </IconTip>
+      ))}
+    </div>
+  );
+}
+
 /** The lab's My Profile > Top 3, shared by v2 and v3: Joshua's asks as
- *  written (prominent Explore more and Saved, obvious Remove and Replace). */
+ *  written (prominent Explore more and Saved, obvious Remove and Replace),
+ *  plus the answer to "what's next" (direct feedback, 25 Sept 2026): a
+ *  recommended next step for #1, the ladder, and actions on every card.
+ *  Everything fits the viewport, never scrolls (direct feedback, 25 Sept
+ *  2026: "these cards get cropped by the bottom, this should never
+ *  happen"): on desktop the three posters take whatever height is left;
+ *  on phones the three become compact rows. The swap list opens as an
+ *  overlay on the card so it never adds height. */
 export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPool, onRemove, onReplace, replacing, setReplacing, hint }: {
   top3: LabCareer[];
   pool: LabCareer[];
@@ -407,8 +517,42 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
   hint?: Hint;
 }) {
   const swappable = pool.filter((s) => !top3.some((t) => t.id === s.id));
+  const swapList = (c: LabCareer) => (
+    <div className="absolute inset-0 z-[6] flex flex-col gap-1 overflow-y-auto rounded-[var(--radius-lg)] border p-2 backdrop-blur-md" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 92%, transparent)" }}>
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Swap in</span>
+        <button type="button" aria-label="Cancel" onClick={() => setReplacing(null)} className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+      </div>
+      {swappable.map((p) => (
+        <button key={p.id} type="button" onClick={() => { onReplace(c.id, p.id); setReplacing(null); }} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+          {p.title} <ChevronRight className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+        </button>
+      ))}
+    </div>
+  );
+  const replaceBtn = (c: LabCareer, i: number, iconOnly: boolean) => {
+    const btn = (
+      <button type="button" aria-label={`Replace ${c.title}`} onClick={() => { hint?.onDismiss(); setReplacing(replacing === c.id ? null : c.id); }} disabled={swappable.length === 0} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold disabled:cursor-not-allowed disabled:opacity-40 ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+        <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />{!iconOnly && " Replace"}
+      </button>
+    );
+    const wrapped = iconOnly ? <IconTip label="Replace" className="w-full">{btn}</IconTip> : btn;
+    return i === 0 && hint ? (
+      <Coachmark demoForce active={hint.active} label={hint.label} onDismiss={hint.onDismiss} spotlight side="top" align="start" wrapperClassName={iconOnly ? "flex w-full" : "flex flex-1"}>
+        {wrapped}
+      </Coachmark>
+    ) : wrapped;
+  };
+  const removeBtn = (c: LabCareer, iconOnly: boolean) => {
+    const btn = (
+      <button type="button" aria-label={`Remove ${c.title}`} onClick={() => onRemove(c.id)} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "color-mix(in srgb, #E0453C 45%, transparent)", color: "#E0453C" }}>
+        <X className="h-3.5 w-3.5" aria-hidden />{!iconOnly && " Remove"}
+      </button>
+    );
+    return iconOnly ? <IconTip label="Remove" className="w-full">{btn}</IconTip> : btn;
+  };
   return (
-    <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 px-1">
       <div className="flex flex-none flex-wrap items-center gap-2">
         <PrimaryButton onClick={onExploreMore}>Explore more</PrimaryButton>
         <QuietButton onClick={onOpenPool}><Bookmark className="h-4 w-4" aria-hidden /> {poolLabel} ({pool.length})</QuietButton>
@@ -418,39 +562,51 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
           <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No picks yet</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {top3.map((c, i) => {
-            const replaceBtn = (
-              <button type="button" onClick={() => { hint?.onDismiss(); setReplacing(replacing === c.id ? null : c.id); }} disabled={swappable.length === 0} className="dm-quiet flex h-9 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Replace
-              </button>
-            );
-            return (
-              <div key={c.id} className="flex flex-col gap-2 rounded-[var(--radius-lg)] border p-2.5" style={CARD}>
-                <LabCard career={c} control="rank" selected rank={i + 1} />
-                <div className="flex gap-2">
-                  {i === 0 && hint ? (
-                    <Coachmark demoForce active={hint.active} label={hint.label} onDismiss={hint.onDismiss} spotlight side="top" align="start" wrapperClassName="flex flex-1">
-                      {replaceBtn}
-                    </Coachmark>
-                  ) : replaceBtn}
-                  <button type="button" onClick={() => onRemove(c.id)} className="dm-quiet flex h-9 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, #E0453C 45%, transparent)", color: "#E0453C" }}>
-                    <X className="h-3.5 w-3.5" aria-hidden /> Remove
-                  </button>
+        <>
+          <NextStep first={top3[0]} />
+          {/* Desktop: three columns, the poster takes the leftover height. */}
+          <div className="hidden min-h-0 flex-1 grid-cols-3 gap-3 sm:grid">
+            {top3.map((c, i) => (
+              <div key={c.id} className="flex min-h-0 flex-col gap-2 rounded-[var(--radius-lg)] border p-2.5" style={CARD}>
+                <div className="relative min-h-0 flex-1">
+                  <LabCard career={c} control="rank" selected rank={i + 1} fill className="absolute inset-0" />
+                  {replacing === c.id && swapList(c)}
                 </div>
-                {replacing === c.id && (
-                  <div className="flex flex-col gap-1 rounded-[var(--radius-md)] border p-2" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                    {swappable.map((p) => (
-                      <button key={p.id} type="button" onClick={() => { onReplace(c.id, p.id); setReplacing(null); }} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
-                        {p.title} <ChevronRight className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <CareerActions career={c} />
+                <div className="flex flex-none gap-2">
+                  {replaceBtn(c, i, false)}
+                  {removeBtn(c, false)}
+                </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+          {/* Phone: three compact rows that share the leftover height. */}
+          <div className="flex min-h-0 flex-1 flex-col gap-2 sm:hidden">
+            {top3.map((c, i) => {
+              const accent = WORLD_COLORS[c.world] ?? "var(--primary)";
+              return (
+                <div key={c.id} className="relative flex min-h-0 flex-1 items-stretch gap-2.5 rounded-[var(--radius-lg)] border p-2" style={CARD}>
+                  <div className="relative aspect-[3/4] h-full flex-none overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: accent }}>
+                    <LabPhoto career={c} sizes="96px" className="object-cover" />
+                    <span className="absolute top-1 left-1 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold text-white" style={{ background: accent }}>{i + 1}</span>
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-between gap-1.5">
+                    <div className="min-w-0">
+                      <p className="truncate text-[15px] leading-tight font-extrabold uppercase" style={{ ...posterTitleFont(c.world), color: "var(--poster-title)" }}>{c.title}</p>
+                      <p className="text-[9.5px] font-semibold tracking-[0.06em] uppercase" style={{ color: accent }}>{c.world}</p>
+                    </div>
+                    <CareerActions career={c} />
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {replaceBtn(c, i, true)}
+                      {removeBtn(c, true)}
+                    </div>
+                  </div>
+                  {replacing === c.id && swapList(c)}
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );

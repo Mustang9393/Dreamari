@@ -1011,3 +1011,8 @@ at once; three of the four were never the reader's.
 
 _Sections for the remaining screens ( Career + College Insights, Productivity Suite, Platform
 Engagement, My Impact, Settings) get added here as each is worked on._
+
+
+## 2026-09-25: Direct demo entry
+
+User requested removal of counselor login/signup. The prototype now opens directly at `/counselor`, including on fresh browsers. Legacy login/signup routes redirect there; simulated auth forms and desktop/mobile sign-out controls are removed. Local profile and role preferences remain. This is DEMO-ONLY; production authentication is not specified by this change.

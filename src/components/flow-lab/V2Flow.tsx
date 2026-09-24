@@ -13,7 +13,7 @@ import { ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { useFirstUseHint } from "@/components/flow/GestureSpotlight";
-import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
+import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, forYou, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PAGE, Pager, QuietButton, SixGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "explore" | "saved" | "rank" | "top3";
@@ -30,6 +30,36 @@ type State = {
   rank: string[];
 };
 const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", page: {}, saved: [], rank: [] };
+const FOR_YOU = "For you";
+
+const NOTES = {
+  build: { heading: "Build, standing in", bullets: [
+    "Only shown when this browser has no Build answers. In the product these come from Build itself.",
+    "Worlds are required; subjects and the college or trades answer sharpen the list.",
+  ] },
+  explore: { heading: "Mini Explore", bullets: [
+    "For you: careers from your chosen worlds, ranked by your subjects and path together. A chip on each card says which answers put it there.",
+    "A tab per chosen world; Explore more opens nearby worlds.",
+    "Tap a card for the same detail Match shows. Tap the bookmark to save, up to 7.",
+    "Six more slides in the next six; the arrow goes back.",
+    "Continue moves to Saved once you have at least one.",
+  ] },
+  saved: { heading: "Saved", bullets: [
+    "Everything you bookmarked, in one place. Tap the bookmark again to remove.",
+    "Rank my top 3 when you are ready; the back arrow returns to Mini Explore.",
+  ] },
+  rank: { heading: "Rank your top 3", bullets: [
+    "Tap + in the order you want them: first tap is #1. Tap again to undo.",
+    "Confirm Top 3 sets them; you can still change them on the next screen.",
+  ] },
+  top3: { heading: "My Top 3 and what happens next", bullets: [
+    "Next step: one recommended action for #1 (the Career Report). Start opens the real report page.",
+    "The ladder under it is the same order of milestones the counselor dashboard tracks: Career Report, Pathway, Play a day, Colleges.",
+    "The four icons under each card open the real pages for that career: Report, Pathway, Play, Colleges.",
+    "Replace swaps a pick for anything in Saved; Remove clears the slot.",
+    "Explore more and Saved go back to keep editing. Play again restarts the whole flow.",
+  ] },
+};
 const EXPLORE_MORE = "Explore more";
 
 export function V2Flow({ onRestart }: { onRestart: () => void }) {
@@ -49,7 +79,8 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     const build = buildSignals();
     let next = stored;
     if (stored.worlds.length === 0 && build.worlds.length > 0) next = { ...stored, worlds: build.worlds, subjects: build.subjects, path: build.path, fromBuild: true, step: "explore" };
-    if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_MORE) next = { ...next, activeTab: next.worlds[0] ?? "" };
+    // Land on For you: the six that fit the combination of every Build answer.
+    if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_MORE && next.activeTab !== FOR_YOU) next = { ...next, activeTab: FOR_YOU };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only storage read after mount, same pattern as the counselor version chip
     setState(next);
     setHydrated(true);
@@ -86,9 +117,9 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
   if (state.step === "interests") {
     return (
       <>
-        <LabScreen title="Build">
+        <LabScreen title="Build" note={NOTES.build}>
           <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-1 pt-2">
-            <Field label="Worlds · up to 2"><InterestPicker value={state.worlds} max={2} onChange={(worlds) => setState((s) => ({ ...s, worlds, activeTab: worlds[0] ?? "" }))} /></Field>
+            <Field label="Worlds · up to 2"><InterestPicker value={state.worlds} max={2} onChange={(worlds) => setState((s) => ({ ...s, worlds, activeTab: FOR_YOU }))} /></Field>
             <Field label="Favourite subjects · up to 2"><ChipRow ariaLabel="Subjects" options={SUBJECTS.map((x) => ({ key: x, label: x }))} value={state.subjects} max={2} onChange={(subjects) => setState((s) => ({ ...s, subjects }))} /></Field>
             <Field label="After high school"><ChipRow ariaLabel="Path" options={PATH_OPTIONS.map((p) => ({ key: p.id, label: p.title }))} value={state.path ? [state.path as "college" | "trades" | "both"] : []} max={1} onChange={([path]) => setState((s) => ({ ...s, path: path ?? "" }))} /></Field>
           </div>
@@ -100,21 +131,28 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
 
   // ---- Mini Explore: six at a time, paged like a carousel ----
   if (state.step === "explore") {
-    const tabs = [...state.worlds.map((w) => ({ key: w, label: w })), { key: EXPLORE_MORE, label: EXPLORE_MORE }];
+    const tabs = [{ key: FOR_YOU, label: FOR_YOU }, ...state.worlds.map((w) => ({ key: w, label: w })), { key: EXPLORE_MORE, label: EXPLORE_MORE }];
     const others = exploreMoreWorlds(state.worlds);
     const isMore = state.activeTab === EXPLORE_MORE;
     const moreWorld = others.includes(state.moreWorld) ? state.moreWorld : others[0];
-    const world = isMore ? moreWorld : state.activeTab;
-    const ranked: Ranked[] = rankForStudent(world, signals);
+    const isForYou = state.activeTab === FOR_YOU;
+    const world = isMore ? moreWorld : isForYou ? FOR_YOU : state.activeTab;
+    const ranked: Ranked[] = isForYou ? forYou(signals) : rankForStudent(world, signals);
+    // "Six more" must mean six: the last page is the LAST six of the set
+    // (it may overlap the page before), never a partial page with empty
+    // cells (direct report, 25 Sept 2026: "where it says six more only 4
+    // are available").
     const total = Math.max(1, Math.ceil(ranked.length / PAGE));
     const index = Math.min(state.page[world] ?? 0, total - 1);
-    const six = ranked.slice(index * PAGE, index * PAGE + PAGE);
+    const start = Math.max(0, Math.min(index * PAGE, ranked.length - PAGE));
+    const six = ranked.slice(start, start + PAGE);
     const setPage = (n: number, d: 1 | -1) => { setDir(d); setState((s) => ({ ...s, page: { ...s.page, [world]: ((n % total) + total) % total } })); };
     const open = openId ? six.find((r) => r.career.id === openId) : null;
     const openIdx = open ? six.indexOf(open) : -1;
     return (
       <>
         <LabScreen
+          note={NOTES.explore}
           title="Mini Explore"
           status={`${state.saved.length} of ${MAX_SAVED}`}
           hint="Tap a card for details. Tap the bookmark to save it."
@@ -134,7 +172,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
                 fill
                 control="save"
                 selected={state.saved.includes(r.career.id)}
-                reason={r.reason ? `Fits ${r.reason}` : null}
+                reason={r.reason}
                 onToggle={() => toggleSave(r.career.id)}
                 onOpen={() => setOpenId(r.career.id)}
                 hint={i === 0 ? { active: showSave && !openId && state.saved.length === 0, label: "Tap to save it. Save up to 7, then rank your top 3.", cta: "Next", onDismiss: dismissSave } : undefined}
@@ -160,7 +198,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     const openIdx = open ? savedCareers.indexOf(open) : -1;
     return (
       <>
-        <LabScreen title={ranking ? "Rank your top 3" : "Saved"} status={ranking ? `${state.rank.length} of 3` : `${savedCareers.length} of ${MAX_SAVED}`} hint={ranking ? "Tap + in the order you want them." : "Tap a card for details. Tap the bookmark to remove it."}>
+        <LabScreen note={ranking ? NOTES.rank : NOTES.saved} title={ranking ? "Rank your top 3" : "Saved"} status={ranking ? `${state.rank.length} of 3` : `${savedCareers.length} of ${MAX_SAVED}`} hint={ranking ? "Tap + in the order you want them." : "Tap a card for details. Tap the bookmark to remove it."}>
           {savedCareers.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-dashed text-center" style={{ borderColor: "var(--glass-border)" }}>
               <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet</p>
@@ -200,7 +238,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
   // ---- My Profile: Top 3 ----
   return (
     <>
-      <LabScreen title="My Top 3">
+      <LabScreen title="My Top 3" note={NOTES.top3}>
         <TopThreeScreen
           top3={top3}
           pool={savedCareers}

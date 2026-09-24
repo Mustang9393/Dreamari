@@ -137,25 +137,9 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
 }
 
 export function CounselorApp({ initialView, initialStudentId }: { initialView?: string; initialStudentId?: string }) {
-  const router = useRouter();
+  // DEMO-ONLY: open the counselor prototype directly, without simulated auth.
+  // Keep the local profile subscription for Settings and the role switcher.
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  // The server snapshot (and the client's very first, pre-hydration render,
-  // which must match it) has no access to localStorage and always reads
-  // signed-out -- redirecting on that render would bounce a genuinely
-  // signed-in counselor straight back to login before hydration ever gets
-  // a chance to read the real value. Wait one tick for hydration to settle
-  // before trusting `isSignedIn` enough to redirect on it.
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the value we're waiting on (localStorage) is client-only, same justification used elsewhere in this codebase for a client-only mount flag
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated && !account.isSignedIn) router.replace("/counselor/login");
-  }, [hydrated, account.isSignedIn, router]);
-
-  if (!hydrated || !account.isSignedIn) return null;
 
   return (
     <CounselorVersionProvider>
