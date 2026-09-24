@@ -4,11 +4,19 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
+// 25 Sept 2026 pass under the v2 budget: the five tools are a row of tabs
+// (the side list spent a 300px column on five names, the same problem
+// Student Progress had), the "you are always in control" banner and the
+// repeated helper paragraph are one muted line under the button, the
+// pickers are the app's Listbox and the student picker lists the whole
+// roster. Draft copy is the reference's.
+
 import { useState } from "react";
-import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, ShieldCheck, Sparkles } from "lucide-react";
+import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles } from "lucide-react";
+import { Segmented } from "@/components/connect/viz";
+import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention";
@@ -38,6 +46,9 @@ function buildDraft(toolId: ToolId, studentName: string, extra: string): string 
   }
 }
 
+const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
+const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+
 export function ProductivitySuite() {
   const roster = useReviewedRoster();
   const [toolId, setToolId] = useState<ToolId>("recommendation-letter");
@@ -45,6 +56,7 @@ export function ProductivitySuite() {
   const [letterType, setLetterType] = useState("");
   const [draft, setDraft] = useState<string | null>(null);
   const tool = TOOLS.find((t) => t.id === toolId)!;
+  const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
 
   const generate = () => {
     const student = roster.find((s) => s.id === studentId);
@@ -53,92 +65,45 @@ export function ProductivitySuite() {
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="flex items-start gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 10%, var(--card))" }}>
-        <ShieldCheck className="mt-[2px] h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />
-        <p className="text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>
-          <b>You are always in control.</b> Every document generated here is a draft — designed to save you time, not replace your judgment. Review, edit, and approve every document before sharing or acting on it.
-        </p>
-      </div>
+      <Segmented ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={TOOLS.map((t) => ({ key: t.id, label: t.label }))} />
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[300px_1fr]">
-        <div className="flex flex-col gap-[6px]">
-          <span className="px-[4px] text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Choose a Tool</span>
-          {TOOLS.map((t) => {
-            const Icon = t.icon;
-            const on = t.id === toolId;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => { setToolId(t.id); setDraft(null); }}
-                className="dm-quiet flex cursor-pointer items-start gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-left"
-                style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent" }}
-              >
-                <Icon className="mt-[1px] h-[15px] w-[15px] flex-none" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
-                <span className="flex flex-col gap-[1px]">
-                  <span className="text-[13px] font-bold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{t.label}</span>
-                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.sub}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <HoverBeam strength={0.6} className="h-full">
-          <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <span className="flex items-center gap-[10px]">
-              <span className="flex size-[30px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
-                <tool.icon className="h-[15px] w-[15px]" aria-hidden />
-              </span>
-              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{tool.label}</h2>
-            </span>
-            <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{tool.desc}</p>
-
-            {toolId !== "attention" && (
-              <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Configure &amp; Generate</span>
-                <label className="flex flex-col gap-[4px]">
-                  <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>Select Student</span>
-                  <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className="h-10 cursor-pointer rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                    <option value="" style={{ color: "#000" }}>Choose a student...</option>
-                    {roster.slice(0, 30).map((s) => <option key={s.id} value={s.id} style={{ color: "#000" }}>{s.name} (Grade {s.grade})</option>)}
-                  </select>
-                </label>
-                {toolId === "recommendation-letter" && (
-                  <label className="flex flex-col gap-[4px]">
-                    <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>Letter Type</span>
-                    <select value={letterType} onChange={(e) => setLetterType(e.target.value)} className="h-10 cursor-pointer rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                      <option value="" style={{ color: "#000" }}>Select letter type...</option>
-                      {LETTER_TYPES.map((t) => <option key={t} value={t} style={{ color: "#000" }}>{t}</option>)}
-                    </select>
-                  </label>
-                )}
-                <button type="button" onClick={generate} disabled={!studentId} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
-                  <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate Draft
-                </button>
-                <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Dreamari will generate a first draft using available student data. You review, edit, and approve — your professional judgment is what matters.</p>
-              </div>
-            )}
-            {toolId === "attention" && (
-              <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Configure &amp; Generate</span>
-                <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>This tool analyzes your entire caseload automatically — no student selection needed.</p>
-                <button type="button" onClick={generate} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold">
-                  <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate Draft
-                </button>
-                <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Dreamari will generate a first draft using available student data. You review, edit, and approve — your professional judgment is what matters.</p>
-              </div>
-            )}
-
-            {draft && (
-              <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--primary)" }}>Draft</span>
-                <p className="text-[13px] leading-[20px] whitespace-pre-line" style={{ color: "var(--foreground)" }}>{draft}</p>
-              </div>
-            )}
+      <HoverBeam strength={0.6} className="h-full">
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <div className="flex flex-col gap-[4px]">
+            <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+              <tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tool.sub}</span>
+            </h2>
+            <p className="max-w-[72ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{tool.desc.split(/(?<=\.)\s/)[0]}</p>
           </div>
-        </HoverBeam>
-      </div>
+
+          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
+            {toolId !== "attention" && (
+              <label className="flex min-w-0 flex-col gap-[4px]">
+                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Student</span>
+                <Listbox ariaLabel="Student" value={studentId} onChange={setStudentId} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
+              </label>
+            )}
+            {toolId === "recommendation-letter" && (
+              <label className="flex min-w-0 flex-col gap-[4px]">
+                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Letter type</span>
+                <Listbox ariaLabel="Letter type" value={letterType} onChange={setLetterType} placeholder="Choose a type" options={LETTER_TYPES.map((t) => ({ value: t, label: t }))} className={FIELD} style={fieldStyle} />
+              </label>
+            )}
+            <button type="button" onClick={generate} disabled={toolId !== "attention" && !studentId} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
+              <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate draft
+            </button>
+          </div>
+          <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A first draft from the student&apos;s Dreamari data. Review and edit before you use it.</p>
+
+          {draft && (
+            <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: "color-mix(in srgb, #FFFFFF 7%, transparent)" }}>
+              <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Draft</span>
+              <p className="text-[13px] leading-[20px] whitespace-pre-line" style={{ color: "var(--foreground)" }}>{draft}</p>
+            </div>
+          )}
+        </div>
+      </HoverBeam>
     </div>
   );
 }

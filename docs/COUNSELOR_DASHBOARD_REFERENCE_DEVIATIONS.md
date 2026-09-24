@@ -858,5 +858,39 @@ questions, ten groups) is the reference's, verbatim.
   cards and shorten the descriptions. Ten cards for ten names is the
   wrong form when a name is the whole content.
 
-_Sections for the remaining screens (Career + College Insights, Career + College Insights, Productivity Suite, Platform
+## Career + College Insights (v2)
+
+25 Sept 2026 pass under the v2 budget. Data is the reference's, verbatim.
+
+- **Recommendations are the hero: one stat, one action each.** The
+  reference gave each of the three stats three bullet actions and an
+  emoji, twelve lines of advice on every visit; v2 keeps the stat and the
+  first action. The other two actions stay in data for a later "more"
+  affordance. Alternative: keep all three and collapse. A collapsed list
+  on a screen meant to be glanced is a list nobody opens.
+- **The four ranked lists are always bars.** The reference's Chart / List
+  toggle only hid the bar; removed. The lede under each title ("Careers
+  most frequently saved to student profiles") restated the title;
+  replaced by a "top 10" unit. Titles shortened to nouns ("Saved
+  careers", "Saved majors"). The colleges list drops its decorative emoji.
+- **Career-fair note is one line plus its chips.** The reference's
+  paragraph named the same three clusters the chips already name.
+
+## Productivity Suite (v2)
+
+25 Sept 2026 pass under the v2 budget. Draft copy is the reference's.
+
+- **Tools are a row of tabs, not a side column.** Same fix as Student
+  Progress: five names do not need a permanent 300px column beside the
+  form. The card takes the full width.
+- **One sentence per tool**, the first of the reference's description
+  (which ran to three sentences each), with the tool's sub-line beside
+  the title.
+- **Student and letter type are `Listbox`es in one row with the button;**
+  the student picker lists the whole roster by name, not the first 30.
+  The "You are always in control" banner and the repeated helper
+  paragraph are one muted line under the button: "A first draft from the
+  student's Dreamari data. Review and edit before you use it."
+
+_Sections for the remaining screens ( Career + College Insights, Productivity Suite, Platform
 Engagement, My Impact, Settings) get added here as each is worked on._
