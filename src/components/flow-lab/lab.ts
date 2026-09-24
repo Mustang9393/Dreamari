@@ -1,0 +1,118 @@
+// DEMO-ONLY: the Flow Lab's own data and storage. Everything here is
+// isolated from the live demo on purpose (direct instruction, 24 Sept 2026:
+// "NOTHING SHOULD CHANGE IN THE DEMO... replayable, isolated from the
+// actual demo app"): the lab reads the catalog and the student's saved
+// interests read-only, and writes only to `dreamari:flowlab:*` keys, so
+// playing either flow can never alter what /match-grid or /profile show.
+
+import { ALL_CATALOG_CAREERS, type CatalogCareer } from "@/components/app/catalog";
+import { INTEREST_WORLDS } from "@/components/build/types";
+import { readStudentProfile } from "@/lib/studentProfile";
+
+export type LabVersion = "v2" | "v3";
+export const LAB_VERSION_KEY = "dreamari:flowlab:version";
+export const labStateKey = (v: LabVersion) => `dreamari:flowlab:${v}`;
+
+/** Joshua's proposal caps the saved tray at "around 7". */
+export const MAX_SAVED = 7;
+export const PAGE_SIZE = 6;
+
+export type LabCareer = CatalogCareer & { id: string };
+
+const slug = (s: string) => s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+let cache: LabCareer[] | null = null;
+export function labCatalog(): LabCareer[] {
+  if (!cache) cache = ALL_CATALOG_CAREERS.map((c) => ({ ...c, id: slug(c.title) }));
+  return cache;
+}
+export function careerById(id: string): LabCareer | undefined {
+  return labCatalog().find((c) => c.id === id);
+}
+export function careersForWorld(world: string): LabCareer[] {
+  return labCatalog().filter((c) => c.world === world);
+}
+
+export const WORLDS = INTEREST_WORLDS;
+export function worldLabel(slugOrLabel: string): string {
+  return WORLDS.find((w) => w.slug === slugOrLabel)?.label ?? slugOrLabel;
+}
+/** Worlds that actually have enough careers in the catalog to browse. */
+export function browsableWorlds(): string[] {
+  return WORLDS.map((w) => w.label).filter((label) => careersForWorld(label).length >= 3);
+}
+
+/** The interests the student chose in the real Build, as world labels
+ *  (read-only; the lab never writes to the profile). */
+export function interestsFromBuild(): string[] {
+  try {
+    return readStudentProfile().interests.map(worldLabel).filter((l) => browsableWorlds().includes(l));
+  } catch {
+    return [];
+  }
+}
+
+// One follow-up per world for v3's Build add-on ("Which parts of Arts, Media
+// & Sport?"), the granularity two Dreamonna testers asked for. Hand-authored
+// for the lab; production would draw these from the taxonomy.
+export const SUB_INTERESTS: Record<string, string[]> = {
+  "Arts, Media & Sport": ["Design & illustration", "Film, video & photo", "Music & audio", "Writing & journalism", "Sports & fitness", "Fashion"],
+  "Building & Construction": ["Architecture & design", "Hands-on building", "Electrical & plumbing", "Project management"],
+  "Business & Finance": ["Investing & markets", "Running a business", "Marketing & sales", "Accounting & numbers", "Real estate"],
+  "Counseling & Social Work": ["School counseling", "Mental health", "Community programs", "Youth work"],
+  "Driving, Flying & Shipping": ["Flying", "Logistics & shipping", "Driving & delivery", "Rail & transit"],
+  "Factories & Making Things": ["Manufacturing", "Robotics & automation", "Quality & inspection", "Product design"],
+  "Farming, Animals & Nature": ["Animals & vet care", "Farming & food production", "Parks & the outdoors", "Environment & climate"],
+  "Fixing Machines & Engines": ["Cars & motorcycles", "Aircraft", "Heating & cooling", "Industrial machines"],
+  "Food & Cooking": ["Cooking & kitchens", "Baking", "Food science", "Restaurants & hospitality"],
+  "Health & Medicine": ["Nursing & patient care", "Doctors & specialists", "Therapy & rehab", "Labs & research", "Dental & vision"],
+  "Law, Safety & Justice": ["Law & courts", "Police & investigation", "Fire & emergency", "Policy & government"],
+  "Personal Care & Community Services": ["Beauty & wellness", "Fitness & coaching", "Events", "Community services"],
+  "Science & Research": ["Lab research", "Space & physics", "Environment & earth", "Data & analysis"],
+  "Teaching & Education": ["Teaching kids", "Teaching teens", "Coaching & training", "Curriculum & ed-tech"],
+  "Tech & Engineering": ["Software & apps", "Data & AI", "Cybersecurity", "Design (UX/UI)", "Hardware & engineering", "Games"],
+};
+
+// Which worlds sit next to which, for v3's "one stretch pick" and "Show me
+// six more" so the set stays coherent instead of jumping across the map.
+export const WORLD_NEIGHBORS: Record<string, string[]> = {
+  "Arts, Media & Sport": ["Tech & Engineering", "Personal Care & Community Services", "Teaching & Education"],
+  "Building & Construction": ["Fixing Machines & Engines", "Factories & Making Things", "Driving, Flying & Shipping"],
+  "Business & Finance": ["Tech & Engineering", "Law, Safety & Justice", "Personal Care & Community Services"],
+  "Counseling & Social Work": ["Teaching & Education", "Health & Medicine", "Personal Care & Community Services"],
+  "Driving, Flying & Shipping": ["Fixing Machines & Engines", "Building & Construction", "Law, Safety & Justice"],
+  "Factories & Making Things": ["Fixing Machines & Engines", "Building & Construction", "Tech & Engineering"],
+  "Farming, Animals & Nature": ["Science & Research", "Health & Medicine", "Food & Cooking"],
+  "Fixing Machines & Engines": ["Factories & Making Things", "Driving, Flying & Shipping", "Building & Construction"],
+  "Food & Cooking": ["Personal Care & Community Services", "Business & Finance", "Farming, Animals & Nature"],
+  "Health & Medicine": ["Science & Research", "Counseling & Social Work", "Personal Care & Community Services"],
+  "Law, Safety & Justice": ["Business & Finance", "Counseling & Social Work", "Driving, Flying & Shipping"],
+  "Personal Care & Community Services": ["Counseling & Social Work", "Health & Medicine", "Arts, Media & Sport"],
+  "Science & Research": ["Health & Medicine", "Tech & Engineering", "Farming, Animals & Nature"],
+  "Teaching & Education": ["Counseling & Social Work", "Arts, Media & Sport", "Science & Research"],
+  "Tech & Engineering": ["Science & Research", "Business & Finance", "Arts, Media & Sport"],
+};
+
+export function readLabState<T>(v: LabVersion, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = window.localStorage.getItem(labStateKey(v));
+    return raw ? { ...fallback, ...(JSON.parse(raw) as Partial<T>) } : fallback;
+  } catch {
+    return fallback;
+  }
+}
+export function writeLabState<T>(v: LabVersion, state: T): void {
+  try {
+    window.localStorage.setItem(labStateKey(v), JSON.stringify(state));
+  } catch {
+    // no storage: the flow still works for this page load
+  }
+}
+export function clearLabState(v: LabVersion): void {
+  try {
+    window.localStorage.removeItem(labStateKey(v));
+  } catch {
+    // ignore
+  }
+}

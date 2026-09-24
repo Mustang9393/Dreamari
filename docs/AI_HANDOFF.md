@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Flow Lab: Joshua's Build -> Match proposal playable as v2, isolated from the demo
+
+**Why:** Joshua proposed replacing Match with BUILD -> MINI EXPLORE -> SAVED CAREERS -> RANK -> MY PROFILE (Slack, 24 Sept). The team wants him to click it rather than argue it in text, but the demo is used daily and cannot move (direct instruction: "do not mess with the demos... NOTHING SHOULD CHANGE IN THE DEMO. OR WE CAN PUT A QUICKLINK IN THE HAMBURGER TO LAUNCH THE FULL FLOW TOO. REPLAYABLE, ISOLATED FROM THE ACTUAL DEMO APP"). So the flow lives in its own route, reached only from the hamburger, with the same bottom-center version chip the counselor and AT&T builds use, plus a Restart control so it can be replayed in a meeting.
+
+**What:** `/flow-lab` (`src/app/flow-lab/page.tsx`, `src/components/flow-lab/`). `FlowLab.tsx` is the shell (own header marked "Flow lab · not the demo", `v2 | v3` chip, Restart). `lab.ts` holds the lab's catalog view (`ALL_CATALOG_CAREERS` with stable ids), the Build interests read read-only from `readStudentProfile()`, hand-authored sub-interest and world-adjacency tables for v3, and storage helpers that only ever touch `dreamari:flowlab:*`. `shared.tsx` has the step header, buttons, the poster-with-heart `LabCard` (the heart is a sibling of the poster, since `PosterCard` is itself a button), the interest picker used only when no Build interests exist on the device, and `TopThreeScreen`, the lab's Profile > Top 3 with Joshua's four asks (prominent Explore more, Saved careers, obvious Remove, Replace from Saved). `V2Flow.tsx` is his proposal as written: world tabs plus an "Explore more" tab that lists every other browsable world, six posters at a time with "Show 6 more", a Saved tray capped at 7 with a fixed bar, a Rank screen where tap order sets #1-#3, then the Top 3. `V3Flow.tsx` is a placeholder until the team's counter-proposal lands. `LAB_LINKS` in `chrome.tsx` adds the quick link under a "Match flow lab" divider. Registered in `docs/HANDOFF_INDEX.md`.
+
+**Verified live** in a fresh tab at 1440 and 375: interests picked up from the real Build (Tech & Engineering), save/unsave and the 7 cap, Saved -> Rank (4th pick blocked at 3) -> Confirm -> Top 3, Replace swaps from the Saved pool, Restart clears only the lab's state, chip switch writes `?v=3` and `dreamari:flowlab:version`, no horizontal scroll on phone, no console errors; the quick link resolves to `/flow-lab`. Only `dreamari:flowlab:version` and `dreamari:flowlab:v2` were written. `npx tsc --noEmit -p .` and `npx eslint` clean. Not pushed.
+
+**Next:** v3 (Build add-on with 3 interests + one sub-interest follow-up each, Match six with reason chips and "Show me six more", pick up to 3 = Top 3, same `TopThreeScreen`), then a short comparison note for Joshua.
+
 ### 2026-09-24 Counselor Dashboard v1: content matched to the reference 1:1, screen by screen at 1440
 
 Direct instruction after the structural reset below: "make sure the contents of cards etc match the replit 1:1 in v1. For example the overview cards don't. Always compare 1:1 visually, and on desktop screen size first." Compared every v1 screen against the live reference (web-app-prototype-maishak.replit.app) at 1440px, text and screenshots.

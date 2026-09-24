@@ -196,6 +196,13 @@ const DEMO_LINKS = [
 // Remove/replace once that exists. See docs/HANDOFF_INDEX.md.
 const COUNSELOR_LINKS = [{ label: "Counselor Dashboard", href: "/counselor" }] as const;
 
+// DEMO-ONLY: the Flow Lab -- alternate Build -> Match -> Top 3 flows (v2 =
+// Joshua's proposal, v3 = the team's counter-proposal), isolated from the
+// live demo's Match and Profile and replayable (direct instruction, 24 Sept
+// 2026). Remove once a flow is chosen and built for real. See
+// docs/HANDOFF_INDEX.md.
+const LAB_LINKS = [{ label: "Flow lab (v2 / v3)", href: "/flow-lab" }] as const;
+
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
   const router = useRouter();
   return (
@@ -246,6 +253,18 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
       ))}
       <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Counselor demo</span>
       {COUNSELOR_LINKS.map((link) => (
+        <Link
+          key={link.label}
+          href={link.href}
+          onClick={onNavigate}
+          className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+          style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+        >
+          {link.label}
+        </Link>
+      ))}
+      <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Match flow lab</span>
+      {LAB_LINKS.map((link) => (
         <Link
           key={link.label}
           href={link.href}
