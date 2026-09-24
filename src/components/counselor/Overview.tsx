@@ -6,7 +6,7 @@ import { TrendingDown, TrendingUp, ChevronRight, AlertTriangle } from "lucide-re
 import { SegmentedRing, BarChart } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { Avatar } from "./chips";
+import { Avatar, StatRow } from "./chips";
 import { getRoster, attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "./shell";
 
@@ -61,48 +61,15 @@ const TARGET_LINE_COLOR = "#A67C2E";
 // page (Student Status); every other card downgrades to the plain glass.
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "./surfaces";
 
-// A row is a button (not a bare span) whenever it can click through to a
-// pre-filtered Roster -- direct instruction: donut/pathway segments should
-// navigate somewhere, not just sit there as a static legend. Kept as the
-// same visual row either way so a clickable and a non-clickable legend
-// never look different at rest.
-//
-// Deliberately NOT a per-row micro-bar (tried once, reverted): a row that
-// fills to its own share of the total still reads as "this category has
-// its own progress toward its own goal," exactly the misreading already
-// corrected once on this same page (Career Pathways, 23 Sept 2026: "we're
-// showing distribution or breakdown," not independent bars). The ring
-// above (or the stacked bar, on Career Pathways) is already the correct,
-// sufficient distribution chart -- this legend's job is just to name and
-// count each slice, not draw a second, misleading chart under it.
-function StatRow({ label, value, color, onClick, active }: { label: string; value: number; color: string; onClick?: () => void; active?: boolean }) {
-  // `min-w-0` on every flex step down to the label is what lets `truncate`
-  // actually bite -- a flex child's default min-width is its content's
-  // width, which silently defeats truncation/wrap-prevention until it's
-  // overridden. Ellipsis beats a wrapped 2-3 line label every time here:
-  // it stays level with the dot and the value on one row instead of
-  // staggering them (direct feedback: "dont wrap and central alignment").
-  const row = (
-    <>
-      <span className="flex min-w-0 flex-1 items-center gap-[8px]" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>
-        <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: color }} />
-        <span className="truncate">{label}</span>
-      </span>
-      <span className="flex-none tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
-    </>
-  );
-  if (!onClick) return <span className="flex items-center justify-between text-[13px] font-semibold">{row}</span>;
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="dm-quiet flex w-full cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-[4px] py-[2px] text-[13px] font-semibold"
-      style={{ background: active ? `color-mix(in srgb, ${color} 16%, transparent)` : "transparent" }}
-    >
-      {row}
-    </button>
-  );
-}
+// Legend rows are the shared `StatRow` (chips.tsx) -- a row is a button
+// whenever it can click through to a pre-filtered Roster, and the same
+// visual row either way so clickable and static legends never look
+// different at rest. Deliberately NOT a per-row micro-bar (tried once,
+// reverted): a row that fills to its own share still reads as "this
+// category has its own progress toward its own goal," the misreading
+// already corrected on Career Pathways (23 Sept 2026: "we're showing
+// distribution or breakdown"). The ring or stacked bar above is the
+// distribution chart; the legend only names and counts each slice.
 
 function DeltaChip({ pts }: { pts: number }) {
   const up = pts >= 0;

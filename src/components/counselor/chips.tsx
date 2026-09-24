@@ -64,6 +64,34 @@ export function MilestonesMini({ milestones }: { milestones: Record<MilestoneKey
   );
 }
 
+// One legend row shared by every ring/bar card on the dashboard: dot + label
+// on the left, the value pinned to the right edge, so a card's values always
+// line up in one column. `min-w-0` on every flex step down to the label is
+// what lets `truncate` actually bite -- a flex child's default min-width is
+// its content's width, which silently defeats truncation until overridden.
+export function StatRow({ label, value, color, onClick, active }: { label: string; value: number; color: string; onClick?: () => void; active?: boolean }) {
+  const row = (
+    <>
+      <span className="flex min-w-0 flex-1 items-center gap-[8px]" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>
+        <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: color }} />
+        <span className="truncate">{label}</span>
+      </span>
+      <span className="flex-none tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
+    </>
+  );
+  if (!onClick) return <span className="flex items-center justify-between text-[13px] font-semibold">{row}</span>;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="dm-quiet flex w-full cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-[4px] py-[2px] text-[13px] font-semibold"
+      style={{ background: active ? `color-mix(in srgb, ${color} 16%, transparent)` : "transparent" }}
+    >
+      {row}
+    </button>
+  );
+}
+
 export function initials(name: string): string {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }

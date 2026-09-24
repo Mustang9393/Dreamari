@@ -173,6 +173,69 @@ that were available, not just against doing nothing.
   anything that navigates. Not logged as its own item above since the
   underlying behavior (still navigates to the grade-filtered roster)
   didn't change, only its visual affordance.
+- **Card composition rebuilt around one hierarchy, 24 Sept 2026** (direct
+  feedback: "needs better composition and alignment and information
+  hierarchy WITHIN cards"). What was wrong, specifically: each card mixed
+  three alignment axes (a left-aligned header, a centered ring cluster, a
+  2x2 legend whose `ml-auto` values floated to each column's far edge so
+  "Completed 22" read as "22 ... In Progress"); the same fact was stated
+  three times in three type styles ("73% completed" in the ring, "22 of
+  30" under it, then "4 of 30 need attention or haven't started"); and
+  the full-width hero held one narrow centered column with dead space
+  either side. Content/structure changes, each with the alternative it
+  beat:
+  - **Legend is now the shared `StatRow`** (moved from Overview into
+    `chips.tsx`): one column, dot + label left, value pinned right, so
+    every value lands in a single right-hand column. Alternative
+    considered: keep 2x2 and right-align values within each column --
+    still two value columns, still a wide gap between a label and its
+    number on any card wider than ~300px. One column costs ~40px of
+    height (cards already stretch to equal height) and makes Overview and
+    Milestone Tracker legends identical, which they were not before.
+  - **"completed" inside the ring replaced by "22 of 30"; the separate
+    "22 of 30" line removed; the tinted sentence becomes the single
+    verdict line.** Each number now appears once: ring = how far along,
+    verdict = the one fact the glow encodes, legend = per-state
+    breakdown. Alternative: drop the verdict and rely on the legend -- but
+    the verdict is the only line that explains the card's own color, which
+    the previous entry above fought to keep. Alternative: keep all three
+    lines but unify their type -- still three lines saying two things.
+  - **`reviewNote` no longer rendered.** In every entry in
+    `milestoneReadiness.ts` it restates the subtitle in lowercase
+    ("Counselor Review" -> "Counselor review", "Counselor Verification" ->
+    "Counselor verification") or restates who is responsible when the
+    subtitle already says so. The reference showed it; on this card it was
+    the third header line at the smallest size carrying zero new
+    information. Data field kept (the reference vocabulary is preserved
+    in data), only the render dropped.
+  - **Info icon removed.** It had no tooltip and no action -- an icon-only
+    element promising information it never delivers, and the 22px indent
+    it forced on the subtitle aligned with nothing else on the card. The
+    app-wide rule (icon-only controls carry a label tooltip) would have
+    meant inventing content for it; removing it is the honest fix.
+  - **"View Details & Student Breakdown" -> "See students."** The control
+    navigates to the grade roster and cannot yet filter to this milestone
+    (taxonomy split, first entry above), so the long label overpromised a
+    breakdown it does not deliver. Alternative: keep reference copy for
+    fidelity -- fidelity to a promise the control breaks is worse than a
+    short honest label. Same pill affordance as Overview's "See all."
+  - **Hero uses its width.** On a card 640px or wider (a container query,
+    not a viewport breakpoint, so it holds whether the hero spans the full
+    row or two thirds of it) the same five parts spread into
+    title + verdict + control | ring | legend. Below that it stacks in the
+    sidekick order. Alternative: cap the hero's content width and center
+    it -- the hero exists for prominence, and a centered narrow column in
+    a wide glowing card reads as empty, not prominent. Alternative: a
+    separate hero component -- two components drifting apart is how the
+    original alignment mess happened; one DOM order with two grid-area
+    arrangements keeps them one thing.
+  - **No orphaned card.** Grade 10 has 8 milestones: full-width hero + 7
+    sidekicks in three columns strands one card alone on the last row.
+    When `rest.length % 3 === 1` the hero spans two columns and the first
+    sidekick sits beside it. Alternative: four columns for that grade --
+    card widths would jump between grade tabs; the shared-row hero keeps
+    sidekick size constant across all four tabs and the hero still the
+    largest thing on the page.
 
 ---
 

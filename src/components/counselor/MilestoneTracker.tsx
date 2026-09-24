@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Info, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { SegmentedRing } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { GRADE_READINESS, type MilestoneCard } from "@/lib/milestoneReadiness";
+import { StatRow } from "./chips";
 import { useCounselorFilters } from "./shell";
 
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "./surfaces";
@@ -36,25 +37,26 @@ const STATUS_COLORS = {
   critical: "#E0453C",
 } as const;
 
-function StatRow({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <span className="flex items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-      <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: color }} />
-      {label}
-      <b className="ml-auto tabular-nums" style={{ color: "var(--foreground)" }}>{value}</b>
-    </span>
-  );
-}
-
 // `hero` spends the same one saturated, glowing surface Overview
 // established -- the four cards used to be visually identical regardless
 // of standing, which read as "passes distinguishability but not design
 // checks" (direct feedback). The single worst-completing milestone for
 // this grade gets the hero treatment (bigger ring, a glow tinted to its
-// own severity -- green/amber/red on the same 80%/60% thresholds Overview
-// uses for its own hero card), everything else recedes to the plain
-// glass. Same rule as Overview, this screen's own data deciding the tint.
-function MilestoneCardView({ card, hero, tint, onViewDetails }: { card: MilestoneCard; hero?: boolean; tint: string; onViewDetails: () => void }) {
+// own severity), everything else recedes to the plain glass.
+//
+// Composition follows Overview's DonutCard so the two screens read as one
+// system: title anchored to the left edge, the ring centered as the
+// card's one headline graphic, legend rows spanning the full width so every
+// value lands in a single right-hand column, one control anchored left at
+// the bottom. Each number is said once: the ring carries "% / n of total",
+// the tinted verdict line carries the one fact the glow color encodes, the
+// legend carries the per-state breakdown. The hero alone is allowed a
+// second arrangement -- on a wide enough card (container query, so it
+// works whether the hero spans the full row or two thirds of it) the same
+// five parts spread into title+verdict+control | ring | legend, which is
+// what a full-width card needs instead of one narrow centered column with
+// dead space either side.
+function MilestoneCardView({ card, hero, tint, onViewDetails, className = "" }: { card: MilestoneCard; hero?: boolean; tint: string; onViewDetails: () => void; className?: string }) {
   const stats: { label: string; value: number; color: string }[] = [
     { label: "Completed", value: card.completed, color: STATUS_COLORS.completed },
     { label: "In Progress", value: card.inProgress, color: STATUS_COLORS.inProgress },
@@ -62,74 +64,72 @@ function MilestoneCardView({ card, hero, tint, onViewDetails }: { card: Mileston
     { label: "Not Started", value: card.notStarted, color: STATUS_COLORS.notStarted },
   ];
   if (card.notApplicable) stats.push({ label: "Not Applicable", value: card.notApplicable, color: STATUS_COLORS.notApplicable });
+  const stuck = card.needsAttention + card.notStarted;
+  const verdictColor = stuck > 0 ? tint : STATUS_COLORS.completed;
   const surface = hero ? { ...GLASS_CARD_HERO, borderColor: `color-mix(in srgb, ${tint} 38%, var(--glass-border))` } : GLASS_CARD;
+  const wide = hero
+    ? "@[640px]:grid-cols-[minmax(0,1fr)_auto_minmax(220px,0.7fr)] @[640px]:grid-rows-[auto_1fr_auto] @[640px]:items-center @[640px]:gap-x-[var(--space-7)] @[640px]:[grid-template-areas:'head_ring_legend'_'verdict_ring_legend'_'cta_ring_legend']"
+    : "";
 
   return (
-    <HoverBeam strength={0.6} className="h-full">
-      <div className="relative flex h-full flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
-        {/* Every card's glow is tinted to ITS OWN completion severity, not
-           just the hero's -- a quiet sidekick still under 60% was showing
-           the same default green glow as a genuinely healthy one. */}
+    <HoverBeam strength={0.6} className={`h-full ${className}`}>
+      <div className="@container relative h-full overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
+        {/* Every card's glow is tinted to ITS OWN severity, not just the
+           hero's -- a quiet sidekick with stuck students was showing the
+           same default green glow as a genuinely healthy one. */}
         <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(tint, hero ? 0.3 : 0.12) }} />
-        <div className="relative flex flex-col gap-[2px]">
-          <span className="flex items-center gap-[8px]">
-            <Info aria-hidden className="h-[14px] w-[14px] flex-none" style={{ color: "var(--muted-foreground)" }} />
+        <div className={`relative grid h-full grid-rows-[auto_1fr_auto_auto_auto] gap-[var(--space-4)] [grid-template-areas:'head'_'ring'_'verdict'_'legend'_'cta'] ${wide}`}>
+          <div className={`flex flex-col gap-[3px] [grid-area:head] ${hero ? "@[640px]:self-start" : ""}`}>
             <h3 className="text-[14.5px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{card.name}</h3>
-          </span>
-          <span className="pl-[22px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{card.subtitle}</span>
-          {card.reviewNote && <span className="pl-[22px] text-[11.5px]" style={{ color: "var(--muted-foreground)", opacity: 0.75 }}>{card.reviewNote}</span>}
-        </div>
+            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{card.subtitle}</span>
+          </div>
 
-        <div className="relative flex flex-1 flex-col items-center justify-center gap-[6px] py-[var(--space-2)]">
-          <SegmentedRing
-            segments={stats.filter((s) => s.value > 0).map((s) => ({ value: s.value, color: s.color }))}
-            size={hero ? 152 : 100}
-            stroke={hero ? 17 : 11}
+          <div className="flex items-center justify-center self-center [grid-area:ring]">
+            <SegmentedRing
+              segments={stats.filter((s) => s.value > 0).map((s) => ({ value: s.value, color: s.color }))}
+              size={hero ? 168 : 104}
+              stroke={hero ? 18 : 12}
+            >
+              <span className="flex flex-col items-center gap-[2px]">
+                <span className={`${hero ? "text-[34px]" : "text-[24px]"} leading-[1] font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{card.pct}%</span>
+                <span className="text-[10.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{card.completed} of {card.total}</span>
+              </span>
+            </SegmentedRing>
+          </div>
+
+          {/* States in words what the card's own glow color means, since
+             the ring's biggest wedge is almost always green (direct
+             feedback: "I dont understand whats deciding the card glow").
+             This is the card's one verdict, so it's the only line under
+             the ring -- the completed count now lives inside the ring. */}
+          <span
+            className={`flex items-center justify-center gap-[7px] text-center text-[12.5px] leading-[1.3] font-bold [grid-area:verdict] ${hero ? "@[640px]:justify-start @[640px]:text-left @[640px]:text-[14px]" : ""}`}
+            style={{ color: verdictColor }}
           >
-            <span className="flex flex-col items-center">
-              <span className={`${hero ? "text-[32px]" : "text-[24px]"} leading-[1] font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{card.pct}%</span>
-              <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>completed</span>
-            </span>
-          </SegmentedRing>
-          <span className="text-[12.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{card.completed} of {card.total}</span>
-          {/* Spells out exactly what the card's own glow/border color means
-             instead of asking the reader to infer it (direct feedback:
-             "I dont understand whats deciding the card glow" -- the ring's
-             own biggest wedge is almost always green/Completed, so a
-             red-tinted card can look like it's contradicting its own
-             ring unless something states plainly that the tint tracks
-             stuck students specifically, not overall completion). */}
-          {card.needsAttention + card.notStarted > 0 ? (
-            <span className="text-[11px] font-bold" style={{ color: tint }}>{card.needsAttention + card.notStarted} of {card.total} need attention or haven&rsquo;t started</span>
-          ) : (
-            <span className="text-[11px] font-semibold" style={{ color: STATUS_COLORS.completed }}>Nobody stuck -- just finishing up</span>
-          )}
-        </div>
+            <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: verdictColor }} />
+            {stuck > 0 ? `${stuck} of ${card.total} need attention or haven’t started` : "Nobody stuck, just finishing up"}
+          </span>
 
-        <div className="relative grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[10px]">
-          {stats.map((s) => <StatRow key={s.label} {...s} />)}
-        </div>
+          <div className="flex w-full flex-col gap-[4px] [grid-area:legend]">
+            {stats.map((s) => <StatRow key={s.label} {...s} />)}
+          </div>
 
-        {/* Used to render with no onClick at all (flagged in the original
-           audit as one of 8 dead controls). This dashboard's milestone
-           taxonomy (completed/inProgress/needsAttention/...) and the
-           roster's own (MILESTONE_KEYS/MilestoneStatus) were never
-           reconciled into one shared vocabulary -- see
-           docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md -- so this
-           can't filter Students by "this exact milestone card" yet. What
-           it CAN do correctly today: jump to the same grade's roster,
-           which is a real, useful "show me who" instead of nothing.
-           Upgraded from a bare text link to a real pill button with a
-           chevron -- same affordance language as "See all" on Overview. */}
-        <button
-          type="button"
-          onClick={onViewDetails}
-          className="dm-quiet relative mt-auto flex w-fit cursor-pointer items-center gap-[4px] rounded-full border px-[12px] py-[6px] text-left text-[12.5px] font-bold"
-          style={{ color: "var(--primary)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)" }}
-        >
-          View Details & Student Breakdown
-          <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
-        </button>
+          {/* Navigates to the same grade's roster (this dashboard's
+             milestone taxonomy and the roster's were never reconciled, so
+             it can't yet filter to this exact milestone -- see
+             docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md). The label
+             says exactly that much and no more. Same pill affordance as
+             "See all" on Overview. */}
+          <button
+            type="button"
+            onClick={onViewDetails}
+            className={`dm-quiet flex w-fit cursor-pointer items-center gap-[4px] justify-self-start rounded-full border px-[12px] py-[6px] text-left text-[12.5px] font-bold [grid-area:cta] ${hero ? "@[640px]:self-end" : ""}`}
+            style={{ color: "var(--primary)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)" }}
+          >
+            See students
+            <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
+          </button>
+        </div>
       </div>
     </HoverBeam>
   );
@@ -206,12 +206,16 @@ export function MilestoneTracker() {
         };
         const heroCard = grade.cards.reduce((worst, c) => (stuckShare(c) > stuckShare(worst) ? c : worst), grade.cards[0]);
         const rest = grade.cards.filter((c) => c !== heroCard);
+        // Grade 10 has 8 milestones: a full-width hero plus 7 sidekicks in
+        // three columns strands one card alone on the last row. When the
+        // remainder would orphan, the hero gives up a column and the first
+        // sidekick sits beside it -- every row full, the hero still the
+        // biggest thing on the page.
+        const shareRow = rest.length % 3 === 1;
         return (
-          <div className="flex flex-col gap-[var(--space-4)]">
-            <MilestoneCardView card={heroCard} hero tint={tintFor(heroCard)} onViewDetails={goToGradeRoster} />
-            <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
-              {rest.map((card) => <MilestoneCardView key={card.name} card={card} tint={tintFor(card)} onViewDetails={goToGradeRoster} />)}
-            </div>
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+            <MilestoneCardView card={heroCard} hero tint={tintFor(heroCard)} onViewDetails={goToGradeRoster} className={shareRow ? "sm:col-span-2" : "sm:col-span-3"} />
+            {rest.map((card) => <MilestoneCardView key={card.name} card={card} tint={tintFor(card)} onViewDetails={goToGradeRoster} />)}
           </div>
         );
       })()}
