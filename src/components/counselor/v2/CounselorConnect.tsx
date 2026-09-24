@@ -4,12 +4,25 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
+// 25 Sept 2026 pass under the v2 budget: opens on Student Questions (the
+// tab with work in it), questions sorted so unanswered come first with one
+// status pill as the only color, a one-line detail header instead of a
+// metadata grid, announcements with plain dates, discussions as a compact
+// list ordered by activity. Data is the reference's, verbatim.
+
 import { useState } from "react";
 import { Plus, Send, Check } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "@/components/connect/viz";
+import { Avatar, STATUS_COLORS } from "../chips";
+import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
+import { BLUE_3 } from "../palette";
+import { Stat } from "./overviewShared";
 
-import { GLASS_CARD as TINTED_CARD } from "../surfaces";
+function fmtDate(iso: string): string {
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 export const ANNOUNCEMENTS = [
   { id: "a1", title: "FAFSA Deadline Approaching", to: "Grade 12 · Sent: 2026-09-10", read: 87, body: "Reminder: the priority deadline for fall admission is February 1st. All seniors should have their FAFSA submitted by this date to maximize financial aid opportunities.", tags: ["Related: Financial Aid Status", "Read Receipt Required", "Acknowledgment Required"] },
@@ -45,14 +58,18 @@ export const QUESTIONS: { id: string; name: string; grade: number; question: str
   { id: "q15", name: "Mia Johnson", grade: 12, question: "I want to confirm I'm on track to graduate. Can we review my transcript together?", tag: "Graduation", date: "2026-09-13", status: "responded" },
 ];
 
-const STATUS_STYLE: Record<QuestionStatus, { label: string; color: string }> = {
-  new: { label: "New", color: "#E0453C" },
-  viewed: { label: "Viewed", color: "#5B6CF9" },
-  "in-progress": { label: "In Progress", color: "#5B6CF9" },
-  responded: { label: "Responded", color: "#33C78C" },
-  resolved: { label: "Resolved", color: "#33C78C" },
-  "follow-up": { label: "Follow-Up Needed", color: "#F5A623" },
+// Color only where the counselor owes something: a new question and a
+// follow-up are amber; viewed and in progress are a light blue (someone is
+// on it); answered states are neutral. Order is the order to act in.
+const STATUS_STYLE: Record<QuestionStatus, { label: string; color: string; rank: number }> = {
+  new: { label: "New", color: STATUS_COLORS["Needs Attention"], rank: 0 },
+  "follow-up": { label: "Follow up", color: STATUS_COLORS["Needs Attention"], rank: 1 },
+  viewed: { label: "Viewed", color: BLUE_3[0], rank: 2 },
+  "in-progress": { label: "In progress", color: BLUE_3[0], rank: 3 },
+  responded: { label: "Responded", color: "var(--muted-foreground)", rank: 4 },
+  resolved: { label: "Resolved", color: "var(--muted-foreground)", rank: 5 },
 };
+const OPEN: QuestionStatus[] = ["new", "follow-up", "viewed", "in-progress"];
 
 const COMMUNITIES = [
   { name: "Grade 9 Planning", desc: "Academic planning, course selection, and getting started with career exploration", members: 142, posts: 87, last: "2026-09-15" },
@@ -68,18 +85,21 @@ const COMMUNITIES = [
 ];
 
 function AnnouncementCard({ a }: { a: (typeof ANNOUNCEMENTS)[number] }) {
+  const [to, sent] = a.to.split(" · Sent: ");
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <div className="flex items-start justify-between gap-[var(--space-3)]">
-          <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
-          <span className="flex-none text-[13px] font-bold tabular-nums" style={{ color: "var(--primary)" }}>{a.read}% Read</span>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-[var(--space-3)] gap-y-[2px]">
+          <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
+            <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
+            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{to} · {fmtDate(sent)}</span>
+          </span>
+          <span className="flex-none text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{a.read}% <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>read</span></span>
         </div>
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>To: {a.to}</span>
         <p className="text-[13.5px] leading-[19px]" style={{ color: "var(--foreground)" }}>{a.body}</p>
         {a.tags.length > 0 && (
           <span className="flex flex-wrap gap-[6px] pt-[2px]">
-            {a.tags.map((t) => <span key={t} className="rounded-full border px-[9px] py-[3px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{t}</span>)}
+            {a.tags.map((t) => <span key={t} className="rounded-full border px-[9px] py-[3px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{t.replace(/^Related: /, "")}</span>)}
           </span>
         )}
       </div>
@@ -87,86 +107,95 @@ function AnnouncementCard({ a }: { a: (typeof ANNOUNCEMENTS)[number] }) {
   );
 }
 
-function QuestionsPanel() {
-  const [selectedId, setSelectedId] = useState(QUESTIONS[0].id);
-  const [statuses, setStatuses] = useState<Record<string, QuestionStatus>>({});
+function StatusPill({ status }: { status: QuestionStatus }) {
+  const s = STATUS_STYLE[status];
+  return (
+    <span className="flex flex-none items-center gap-[4px] rounded-full px-[8px] py-[2px] text-[10.5px] font-extrabold tracking-[0.02em] uppercase" style={{ background: `color-mix(in srgb, ${s.color} 16%, transparent)`, color: s.color }}>
+      {status === "resolved" && <Check className="h-[9px] w-[9px]" strokeWidth={3} aria-hidden />}
+      {s.label}
+    </span>
+  );
+}
+
+function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, QuestionStatus>; setStatus: (id: string, s: QuestionStatus) => void }) {
+  const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
+  // Unanswered first, then by date within each state.
+  const ordered = [...QUESTIONS].sort((a, b) => STATUS_STYLE[statusOf(a.id)].rank - STATUS_STYLE[statusOf(b.id)].rank || b.date.localeCompare(a.date));
+  const [selectedId, setSelectedId] = useState(ordered[0].id);
   const [response, setResponse] = useState("");
   const selected = QUESTIONS.find((q) => q.id === selectedId)!;
-  const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
   const selectedStatus = statusOf(selected.id);
   const answered = selectedStatus === "responded" || selectedStatus === "resolved";
 
   return (
-    <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[380px_1fr]">
-      <div className="flex flex-col gap-[8px]">
-        <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Student Questions ({QUESTIONS.length})</span>
-        {QUESTIONS.map((q) => {
-          const status = statusOf(q.id);
-          const s = STATUS_STYLE[status];
+    <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[360px_1fr]">
+      <div className="flex max-h-[70vh] flex-col gap-[8px] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
+        {ordered.map((q) => {
+          const on = selectedId === q.id;
           return (
             <button
               key={q.id}
               type="button"
               onClick={() => { setSelectedId(q.id); setResponse(""); }}
-              className="dm-quiet flex cursor-pointer flex-col gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left"
-              style={{ borderColor: selectedId === q.id ? "var(--primary)" : "var(--glass-border)", background: selectedId === q.id ? "color-mix(in srgb, var(--primary) 10%, var(--card))" : "var(--card)" }}
+              aria-pressed={on}
+              className="dm-quiet flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left"
+              style={{ ...GLASS_INSET, borderColor: on ? "color-mix(in srgb, var(--primary) 60%, var(--glass-border))" : GLASS_INSET.borderColor, background: on ? "color-mix(in srgb, var(--primary) 12%, transparent)" : GLASS_INSET.background }}
             >
-              <span className="flex items-center justify-between gap-[8px]">
-                <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{q.name}</span>
-                <span className="flex flex-none items-center gap-[4px] rounded-full px-[7px] py-[1px] text-[10px] font-bold" style={{ background: `color-mix(in srgb, ${s.color} 18%, transparent)`, color: s.color }}>
-                  {status === "resolved" && <Check className="h-[9px] w-[9px]" strokeWidth={3} aria-hidden />}
-                  {s.label}
+              <span className="flex items-center justify-between gap-[10px]">
+                <span className="flex min-w-0 items-center gap-[10px]">
+                  <Avatar name={q.name} size={30} />
+                  <span className="flex min-w-0 flex-col leading-tight">
+                    <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{q.name}</span>
+                    <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {q.grade} · {q.tag} · {fmtDate(q.date)}</span>
+                  </span>
                 </span>
+                <StatusPill status={statusOf(q.id)} />
               </span>
-              <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {q.grade}</span>
-              <p className="line-clamp-2 text-[13px]" style={{ color: "var(--foreground)" }}>{q.question}</p>
-              <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{q.tag} · {q.date}</span>
+              <p className="line-clamp-2 text-[12.5px] leading-[17px]" style={{ color: "var(--foreground)" }}>{q.question}</p>
             </button>
           );
         })}
       </div>
       <HoverBeam strength={0.5} className="h-full">
         <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <div className="flex items-center justify-between gap-[8px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Question Detail</h2>
-            <span className="flex flex-none items-center gap-[4px] rounded-full px-[8px] py-[2px] text-[11px] font-bold" style={{ background: `color-mix(in srgb, ${STATUS_STYLE[selectedStatus].color} 18%, transparent)`, color: STATUS_STYLE[selectedStatus].color }}>{STATUS_STYLE[selectedStatus].label}</span>
+          <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+            <div className="flex min-w-0 items-center gap-[12px]">
+              <Avatar name={selected.name} size={44} />
+              <div className="flex min-w-0 flex-col gap-[2px]">
+                <h2 className="text-[17px] leading-[1.2] font-bold" style={{ color: "var(--foreground)" }}>{selected.name}</h2>
+                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {selected.grade} · {selected.tag} · {fmtDate(selected.date)}{selected.milestone ? ` · ${selected.milestone}` : ""}</span>
+              </div>
+            </div>
+            <StatusPill status={selectedStatus} />
           </div>
-          <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)] text-[13px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-            <span style={{ color: "var(--muted-foreground)" }}>Student</span><span className="font-semibold" style={{ color: "var(--foreground)" }}>{selected.name} (Grade {selected.grade})</span>
-            <span style={{ color: "var(--muted-foreground)" }}>Category</span><span className="font-semibold" style={{ color: "var(--foreground)" }}>{selected.tag}</span>
-            <span style={{ color: "var(--muted-foreground)" }}>Submitted</span><span className="font-semibold" style={{ color: "var(--foreground)" }}>{selected.date}</span>
-            {selected.milestone && <><span style={{ color: "var(--muted-foreground)" }}>Related Milestone</span><span className="font-semibold" style={{ color: "var(--foreground)" }}>{selected.milestone}</span></>}
-          </div>
-          <div className="flex flex-col gap-[4px]">
-            <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Student Question</span>
-            <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[13.5px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{selected.question}</p>
-          </div>
+          <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] leading-[21px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{selected.question}</p>
           {answered ? (
-            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>You&apos;ve already {selectedStatus === "resolved" ? "resolved" : "responded to"} this question.</p>
+            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selectedStatus === "resolved" ? "Resolved." : "You have replied."}</p>
           ) : (
             <>
-              <div className="flex flex-col gap-[4px]">
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your Response</span>
+              <div className="flex flex-col gap-[6px]">
+                <label htmlFor="connect-response" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your reply</label>
                 <textarea
+                  id="connect-response"
                   value={response}
                   onChange={(e) => setResponse(e.target.value)}
-                  placeholder="Type your response here..."
+                  placeholder={`Reply to ${selected.name.split(" ")[0]}`}
                   rows={4}
                   className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
                   style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                 />
               </div>
-              <div className="flex gap-[10px]">
+              <div className="mt-auto flex gap-[10px]">
                 <button
                   type="button"
                   disabled={response.trim().length === 0}
-                  onClick={() => { setStatuses((s) => ({ ...s, [selected.id]: "responded" })); setResponse(""); }}
+                  onClick={() => { setStatus(selected.id, "responded"); setResponse(""); }}
                   className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Send className="h-[14px] w-[14px]" aria-hidden /> Send Response
+                  <Send className="h-[14px] w-[14px]" aria-hidden /> Send reply
                 </button>
-                <button type="button" onClick={() => setStatuses((s) => ({ ...s, [selected.id]: "resolved" }))} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                  Mark Resolved
+                <button type="button" onClick={() => setStatus(selected.id, "resolved")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  Mark resolved
                 </button>
               </div>
             </>
@@ -177,34 +206,39 @@ function QuestionsPanel() {
   );
 }
 
+// One card, one row per group, most active first: the name says what the
+// group is (the reference's descriptions restated the name), the muted
+// line carries the counts.
 function DiscussionsPanel() {
+  const ordered = [...COMMUNITIES].sort((a, b) => b.last.localeCompare(a.last) || b.posts - a.posts);
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex justify-end">
+    <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+      <div className="flex items-center justify-between gap-[8px]">
+        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Groups <span className="ml-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>most active first</span></h2>
         <button type="button" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-          <Plus className="h-[14px] w-[14px]" aria-hidden /> Create Discussion
+          <Plus className="h-[14px] w-[14px]" aria-hidden /> New group
         </button>
       </div>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 xl:grid-cols-3">
-        {COMMUNITIES.map((c) => (
-          <HoverBeam key={c.name} strength={0.6} className="h-full">
-            <div className="flex h-full flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-              <h3 className="text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</h3>
-              <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{c.desc}</p>
-              <span className="mt-auto flex items-center gap-[14px] pt-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                <span>{c.members} members</span><span>{c.posts} posts</span>
-              </span>
-              <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Last: {c.last}</span>
-            </div>
-          </HoverBeam>
+      <ul className="flex flex-col gap-[6px]">
+        {ordered.map((c) => (
+          <li key={c.name} className="flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[2px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
+            <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
+            <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{c.members} members · {c.posts} posts · active {fmtDate(c.last)}</span>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
 
 export function CounselorConnect() {
-  const [tab, setTab] = useState<"announcements" | "questions" | "discussions">("announcements");
+  // Opens on the tab with work in it (standing rule: what needs attention
+  // comes first). Statuses live here so the tab badge and the panel agree.
+  const [tab, setTab] = useState<"questions" | "announcements" | "discussions">("questions");
+  const [statuses, setStatuses] = useState<Record<string, QuestionStatus>>({});
+  const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
+  const open = QUESTIONS.filter((q) => OPEN.includes(statusOf(q.id)));
+  const needsYou = open.filter((q) => statusOf(q.id) === "new" || statusOf(q.id) === "follow-up").length;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -213,24 +247,31 @@ export function CounselorConnect() {
           value={tab}
           onChange={setTab}
           options={[
+            { key: "questions", label: "Questions", badge: open.length || undefined },
             { key: "announcements", label: "Announcements" },
-            { key: "questions", label: "Student Questions" },
-            { key: "discussions", label: "Group Discussions" },
+            { key: "discussions", label: "Groups" },
           ]}
         />
+        {tab === "questions" && (
+          <div className="flex gap-[var(--space-6)]">
+            <Stat value={String(needsYou)} label="need a reply" color={needsYou > 0 ? STATUS_COLORS["Needs Attention"] : undefined} />
+            <Stat value={String(open.length - needsYou)} label="in progress" />
+            <Stat value={String(QUESTIONS.length - open.length)} label="answered" />
+          </div>
+        )}
         {tab === "announcements" && (
           <button type="button" className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-            <Plus className="h-[14px] w-[14px]" aria-hidden /> New Announcement
+            <Plus className="h-[14px] w-[14px]" aria-hidden /> New announcement
           </button>
         )}
       </div>
 
+      {tab === "questions" && <QuestionsPanel statuses={statuses} setStatus={(id, st) => setStatuses((s) => ({ ...s, [id]: st }))} />}
       {tab === "announcements" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           {ANNOUNCEMENTS.map((a) => <AnnouncementCard key={a.id} a={a} />)}
         </div>
       )}
-      {tab === "questions" && <QuestionsPanel />}
       {tab === "discussions" && <DiscussionsPanel />}
     </div>
   );

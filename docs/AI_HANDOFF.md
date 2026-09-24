@@ -38,6 +38,10 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: Counselor Connect pass
+
+`v2/CounselorConnect.tsx`: opens on Questions with the open count badged on the tab, questions sorted new and follow-up first with amber only on those, two-line cards on the inset surface, a one-line detail header, announcements with plain dates, groups as one card of rows by activity. Reasoning and what it replaced: deviations file, "Counselor Connect (v2)". `QUESTIONS` and `ANNOUNCEMENTS` exports kept (My Impact reads them). Verified at 1440 and 375; `npx tsc --noEmit -p .` and `npx eslint` clean.
+
 ### 2026-09-25 Counselor Dashboard v2: clutter sweep of the finished screens, Student Progress pass
 
 Direct instruction: "verify everything makes sense, no clutter, avoid overwhelming with copy and then onto the next."

@@ -828,5 +828,35 @@ kept as history.
 - Not changed: the nine report taxonomies, the CSV/PDF exports, the Summary
   by Grade table.
 
-_Sections for the remaining screens (Counselor Connect, Career + College Insights, Productivity Suite, Platform
+## Counselor Connect (v2)
+
+25 Sept 2026 pass under the v2 budget. Data (three announcements, fifteen
+questions, ten groups) is the reference's, verbatim.
+
+- **Opens on Questions, with the open count on the tab.** The reference
+  opens on Announcements; the tab with work in it is Questions (standing
+  rule: what needs attention first). Tabs read "Questions · Announcements
+  · Groups"; three header stats say need a reply / in progress /
+  answered.
+- **Questions sorted to act in:** new and follow-up, then viewed and in
+  progress, then answered; by date within each. Cards are two lines on
+  the inset surface (avatar, name, "Grade 11 · Career Exploration · Sep
+  14", the status pill, two lines of the question). Color only where the
+  counselor owes something: new and follow-up amber, viewed and in
+  progress light blue, answered neutral. Replaced: red "New" on every
+  fresh question, green on every answered one, and cards in reference
+  order.
+- **Detail pane leads with the student, one meta line**, the question,
+  the reply box, "Send reply" and "Mark resolved". Replaced the four-row
+  metadata grid (Student / Category / Submitted / Related Milestone) that
+  restated the card.
+- **Announcements:** "Grade 12 · Sep 10" on the title line, "87% read" in
+  the foreground color, tag chips without the "Related:" prefix.
+- **Groups are one card of rows, most active first** (name, "142 members
+  · 87 posts · active Sep 15"). The reference's ten description cards
+  restated each group's name in a sentence; dropped. Alternative: keep the
+  cards and shorten the descriptions. Ten cards for ten names is the
+  wrong form when a name is the whole content.
+
+_Sections for the remaining screens (Career + College Insights, Career + College Insights, Productivity Suite, Platform
 Engagement, My Impact, Settings) get added here as each is worked on._
