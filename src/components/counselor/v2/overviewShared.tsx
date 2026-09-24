@@ -16,7 +16,7 @@
 // - One hero per screen carries a tint; every other card is plain glass.
 
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { ChevronRight } from "lucide-react";
+import { CardLink } from "../chips";
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 import { STATUS_COLORS } from "./Overview";
 import { targetBand, type TargetBand } from "@/lib/counselorOrg";
@@ -38,7 +38,7 @@ export function OverviewCard({ title, unit, hero, tint, aside, children }: { tit
   const surface = hero && tint ? { ...base, borderColor: `color-mix(in srgb, ${tint} 38%, var(--glass-border))` } : base;
   return (
     <HoverBeam strength={hero ? 0.7 : 0.6} className="h-full">
-      <div className="relative flex h-full flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
+      <div className="group relative flex h-full flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
         {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(tint ?? "var(--primary)", 0.26) }} />}
         <div className="relative flex flex-wrap items-baseline justify-between gap-x-[8px] gap-y-[4px]">
           <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>
@@ -63,13 +63,7 @@ export function Verdict({ band, children }: { band: TargetBand; children: React.
   );
 }
 
-export function SeeLink({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button type="button" onClick={onClick} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>
-      {children} <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
-    </button>
-  );
-}
+export { CardLink as SeeLink };
 
 /** A thin track, a fill, a target tick. Quiet blue unless the value is
  *  below its target. */

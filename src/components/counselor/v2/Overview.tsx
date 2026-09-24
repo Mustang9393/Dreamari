@@ -6,11 +6,11 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingDown, TrendingUp, ChevronRight } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { SegmentedRing, BarChart } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { Avatar, StatRow } from "../chips";
+import { Avatar, CardLink, StatRow } from "../chips";
 import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -104,7 +104,7 @@ function DeltaChip({ pts }: { pts: number }) {
 // matches what it's actually reporting rather than just being "the loud
 // one." Every other donut stays the plain glass and a smaller ring, so
 // there's exactly one thing the eye lands on first.
-export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, rows, hero, heroTint }: { title: string; /** one muted line under the title, for a reading that has no trend delta */ caption?: string; centerPct: number; centerLabel: string; deltaPts?: number; rows: { label: string; value: number; color: string; onClick?: () => void }[]; hero?: boolean; heroTint?: string }) {
+export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, rows, hero, heroTint, aside }: { title: string; /** one muted line under the title, for a reading that has no trend delta */ caption?: string; centerPct: number; centerLabel: string; deltaPts?: number; rows: { label: string; value: number; color: string; onClick?: () => void }[]; hero?: boolean; heroTint?: string; /** the card's way in, a CardLink, visible at rest */ aside?: React.ReactNode }) {
   const surface = hero ? { ...GLASS_CARD_HERO, borderColor: heroTint ? `color-mix(in srgb, ${heroTint} 38%, var(--glass-border))` : GLASS_CARD_HERO.borderColor } : GLASS_CARD;
   const ringSize = hero ? 152 : 108;
   const ringStroke = hero ? 17 : 13;
@@ -115,10 +115,13 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
   const glowColor = heroTint ?? rows[0]?.color ?? "var(--primary)";
   return (
     <HoverBeam strength={0.7} className="h-full">
-      <div className="relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
+      <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
         {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(glowColor, 0.3) }} />}
         <div className="relative flex flex-col gap-[2px]">
-          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
+          <span className="flex items-start justify-between gap-[8px]">
+            <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
+            {aside}
+          </span>
           {/* Hand-authored, deterministic vs. last month -- same "seeded
              demo data" convention the roster itself already uses, not a
              live computation (there's no historical snapshot to compute
@@ -168,12 +171,13 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
 // click-throughs, which land on the Roster). The stacked bar's own
 // segments are the click targets too, not just the legend rows, since
 // they're already visually "the thing you'd click."
-function PathwaysCard({ total, topPathways, colors, activePathway, onToggle }: { total: number; topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void }) {
+function PathwaysCard({ total, topPathways, colors, activePathway, onToggle, onOpen }: { total: number; topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
-      <div className="relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
+      <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
         <div className="relative flex items-center justify-between gap-[8px]">
           <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways</h2>
+          {!activePathway && <CardLink onClick={onOpen}>Insights</CardLink>}
           {activePathway && (
             <button type="button" onClick={() => onToggle(activePathway)} className="dm-quiet flex cursor-pointer items-center gap-[4px] rounded-full border px-[8px] py-[2px] text-[11px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", color: "var(--foreground)" }}>
               {activePathway} <span aria-hidden style={{ color: "var(--muted-foreground)" }}>✕</span>
@@ -190,7 +194,7 @@ function PathwaysCard({ total, topPathways, colors, activePathway, onToggle }: {
                 <button
                   key={label} type="button" onClick={() => onToggle(label)} title={`${label}: ${value}`}
                   aria-pressed={activePathway === label}
-                  className="h-full flex-none cursor-pointer first:rounded-l-full last:rounded-r-full"
+                  className="h-full flex-none cursor-pointer first:rounded-l-full last:rounded-r-full [&:not(:last-child)]:shadow-[inset_-2px_0_0_var(--card)]"
                   style={{ width: `${pct}%`, background: colors[i % colors.length], opacity: dim ? 0.35 : 1, transition: "opacity 120ms ease" }}
                 />
               );
@@ -236,14 +240,10 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
   const shown = students.slice(0, 3);
   const rest = students.length - shown.length;
   return (
-    <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
+    <div className="group flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
       <div className="flex items-center justify-between gap-[8px]">
         <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs your attention</h2>
-        {rest > 0 && (
-          <button type="button" onClick={onSeeAll} className="dm-quiet flex cursor-pointer items-center gap-[2px] text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>
-            See all {students.length} <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
-          </button>
-        )}
+        <CardLink onClick={onSeeAll}>{rest > 0 ? `See all ${students.length}` : "Students"}</CardLink>
       </div>
       {students.length === 0 ? (
         <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing needs attention under the current filters.</p>
@@ -313,10 +313,14 @@ export function Overview() {
   const pathwayCounts = new Map<string, number>();
   for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
   const topPathways = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
-  // One hue, seven steps, light to dark in rank order (palette.ts). The
-  // earlier seven-hue set reused the status green and amber as pathway
-  // colors, which the dashboard reserves for state.
-  const pathwayColors = [...BLUE_7];
+  // One hue, seven steps (palette.ts), INTERLEAVED light/dark rather than in
+  // rank order: as a straight ramp, neighbouring segments were one step
+  // apart and blended (direct feedback, 25 Sept 2026: "education and skilled
+  // trades are blending together"). Alternating ends of the ramp puts at
+  // least three steps between any two adjacent segments; the legend dots
+  // use the same mapping, so a segment and its row always match. The
+  // earlier seven-hue set had reused the status green and amber.
+  const pathwayColors = [0, 4, 1, 5, 2, 6, 3].map((i) => BLUE_7[i]);
 
   const grades = [9, 10, 11, 12];
   const gradeStudents = (g: number) => roster.filter((s) => s.grade === g);
@@ -358,6 +362,7 @@ export function Overview() {
             deltaPts={2}
             hero
             heroTint={heroTint}
+            aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
             rows={[
               { label: "On Track", value: onTrack, color: STATUS_COLORS["On Track"], onClick: () => goToStudents("On Track") },
               { label: "Needs Attention", value: needsAttention, color: STATUS_COLORS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
@@ -366,7 +371,7 @@ export function Overview() {
           />
         </div>
         <div className="lg:col-span-4">
-          <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} />
+          <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
         </div>
         <div className="lg:col-span-3">
           <DonutCard
@@ -374,6 +379,7 @@ export function Overview() {
             centerPct={(withPlan / total) * 100}
             centerLabel="have a plan"
             deltaPts={4}
+            aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
             rows={[
               { label: "With Plan", value: withPlan, color: PRIMARY, onClick: () => goToStudents(undefined, "With Plan") },
               { label: "Undecided", value: undecided, color: NEUTRAL_SLICE, onClick: () => goToStudents(undefined, "Undecided") },

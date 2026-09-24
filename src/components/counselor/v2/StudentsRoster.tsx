@@ -5,15 +5,19 @@
 // carries name, grade and pathway so the table is six columns instead of
 // eight; Status sorts by severity, not alphabet; the two filters are
 // pickers in the toolbar instead of a popover behind a "Filters" button;
+// the default order is worst first; a flagged student's row says why; the
+// Lead Counselor and School Administrator see (and filter by) counselor;
 // and below the desktop breakpoint the same rows render as a card list
 // instead of a sideways-scrolling 1100px table.
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
-import { type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
+import { SCHOOL_COUNSELORS, counselorFor, myCounselor } from "@/lib/counselorOrg";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar } from "../chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
@@ -21,8 +25,16 @@ import { PRIMARY } from "../palette";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
-// Worst first when sorting by status: the order a counselor acts in.
+// Worst first is the DEFAULT order (direct feedback, 25 Sept 2026: "things
+// needing attention surfaced first, based on severity"): At Risk before
+// Needs Attention before On Track, then the same severity ranking the
+// Overview's attention strip uses (overdue and rejected work outranks
+// merely not-started), then the least-complete roadmap. Name, roadmap and
+// last-active sorts are still one click away on their headers.
 const STATUS_RANK: Record<CaseloadStatus, number> = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 };
+function priorityRank(a: CounselorStudent, b: CounselorStudent): number {
+  return STATUS_RANK[a.status] - STATUS_RANK[b.status] || attentionRank(a, b) || a.roadmapPct - b.roadmapPct;
+}
 
 type SortKey = "name" | "roadmapPct" | "status" | "lastActive";
 
@@ -55,6 +67,18 @@ function Roadmap({ pct }: { pct: number }) {
   );
 }
 
+/** The chip, and for anyone not On Track the one-line reason from the
+ *  student's own milestones (the Overview's attention strip's wording), so
+ *  the row says what to do without opening the profile. */
+function StatusCell({ s }: { s: CounselorStudent }) {
+  return (
+    <span className="flex flex-col items-start gap-[4px]">
+      <StatusChip status={s.status} />
+      {s.status !== "On Track" && <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{attentionReason(s)}</span>}
+    </span>
+  );
+}
+
 function fmtDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -80,10 +104,16 @@ const PAGE_SIZE = 20;
 export function StudentsRoster() {
   const router = useRouter();
   const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter } = useCounselorFilters();
-  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
   const [intentFilter, setIntentFilter] = useState<PostsecondaryIntent | "All">("All");
+  const [counselorFilter, setCounselorFilter] = useState<string>("All");
+  // Roles that oversee counselors see whose caseload each student is on and
+  // can narrow to one counselor; a School Counselor sees the school roster
+  // as the reference does. Caseloads are seeded (counselorOrg.ts).
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const showCounselor = account.role === "Lead Counselor" || account.role === "School Administrator";
 
   const reviewed = useReviewedRoster();
   const roster = useMemo(() => {
@@ -93,6 +123,7 @@ export function StudentsRoster() {
     if (planFilter === "With Plan") list = list.filter((s) => s.postsecondaryIntent !== "Undecided");
     if (planFilter === "Undecided") list = list.filter((s) => s.postsecondaryIntent === "Undecided");
     if (intentFilter !== "All") list = list.filter((s) => s.postsecondaryIntent === intentFilter);
+    if (showCounselor && counselorFilter !== "All") list = list.filter((s) => counselorFor(s).id === counselorFilter);
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((s) => s.name.toLowerCase().includes(q) || s.careerTrack.toLowerCase().includes(q));
     const dir = sortDir === "asc" ? 1 : -1;
@@ -100,9 +131,9 @@ export function StudentsRoster() {
       if (sortKey === "name") return a.name.localeCompare(b.name) * dir;
       if (sortKey === "roadmapPct") return (a.roadmapPct - b.roadmapPct) * dir;
       if (sortKey === "lastActive") return a.lastActive.localeCompare(b.lastActive) * dir;
-      return (STATUS_RANK[a.status] - STATUS_RANK[b.status]) * dir || a.roadmapPct - b.roadmapPct;
+      return priorityRank(a, b) * dir;
     });
-  }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, sortKey, sortDir]);
+  }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, sortKey, sortDir]);
 
   const pageCount = Math.max(1, Math.ceil(roster.length / PAGE_SIZE));
   const effectivePage = Math.min(page, pageCount - 1);
@@ -129,9 +160,12 @@ export function StudentsRoster() {
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
         <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {roster.length} student{roster.length === 1 ? "" : "s"}{pageCount > 1 ? ` · showing ${effectivePage * PAGE_SIZE + 1} to ${effectivePage * PAGE_SIZE + pageRows.length}` : ""}
+          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor ? ` · your caseload, ${myCounselor(account).range}` : ""}{pageCount > 1 ? ` · showing ${effectivePage * PAGE_SIZE + 1} to ${effectivePage * PAGE_SIZE + pageRows.length}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
+          {showCounselor && (
+            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "Any counselor" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={PICKER} style={pickerStyle} />
+          )}
           <Listbox ariaLabel="Status" value={statusFilter} onChange={(v) => setStatusFilter(v as StatusRosterFilter)} options={STATUS_OPTIONS.map((o) => ({ value: o, label: o === "All" ? "Any status" : o }))} className={PICKER} style={pickerStyle} />
           <Listbox ariaLabel="Postsecondary plan" value={planValue} onChange={setPlan} options={[{ value: "All", label: "Any plan" }, { value: "With Plan", label: "Has a plan" }, ...INTENT_OPTIONS.map((o) => ({ value: o, label: o }))]} className={PICKER} style={pickerStyle} />
         </div>
@@ -151,6 +185,7 @@ export function StudentsRoster() {
                   <HeaderCell label="Student" keyName="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Roadmap" keyName="roadmapPct" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Status" keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  {showCounselor && <HeaderCell label="Counselor" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />}
                   <HeaderCell label="Milestones" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Plan" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Last active" keyName="lastActive" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
@@ -167,7 +202,8 @@ export function StudentsRoster() {
                   >
                     <td className="px-[var(--space-4)] py-[10px]"><StudentCell s={s} /></td>
                     <td className="px-[var(--space-4)] py-[10px]"><Roadmap pct={s.roadmapPct} /></td>
-                    <td className="px-[var(--space-4)] py-[10px]"><StatusChip status={s.status} /></td>
+                    <td className="px-[var(--space-4)] py-[10px]"><StatusCell s={s} /></td>
+                    {showCounselor && <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{counselorFor(s).name}</td>}
                     <td className="px-[var(--space-4)] py-[10px]"><MilestonesMini milestones={s.milestones} /></td>
                     <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold" style={{ color: s.postsecondaryIntent === "Undecided" ? "var(--muted-foreground)" : "var(--foreground)" }}>{s.postsecondaryIntent}</td>
                     <td className="px-[var(--space-4)] py-[10px] text-[12.5px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fmtDate(s.lastActive)}</td>
@@ -187,6 +223,12 @@ export function StudentsRoster() {
                     <StudentCell s={s} />
                     <StatusChip status={s.status} />
                   </span>
+                  {(s.status !== "On Track" || showCounselor) && (
+                    <span className="flex flex-wrap items-center justify-between gap-x-[10px] gap-y-[2px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                      {s.status !== "On Track" && <span>{attentionReason(s)}</span>}
+                      {showCounselor && <span>{counselorFor(s).name}</span>}
+                    </span>
+                  )}
                   <span className="flex items-center justify-between gap-[10px]">
                     <Roadmap pct={s.roadmapPct} />
                     <MilestonesMini milestones={s.milestones} />

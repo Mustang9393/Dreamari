@@ -22,7 +22,7 @@ import { useState } from "react";
 import { Paperclip, Undo2 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
-import { decideReview, undoReview, useReviewDecisions, getReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
+import { decideReview, undoReview, useReviewDecisions, useReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
 import { Avatar, MilestoneChip, STATUS_COLORS } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
@@ -187,7 +187,7 @@ function ReviewedRow({ decision, roster, onUndo }: { decision: ReviewDecision; r
 export function ReviewQueue() {
   const { gradeFilter } = useCounselorFilters();
   const decisions = useReviewDecisions();
-  const roster = getReviewedRoster();
+  const roster = useReviewedRoster();
   const scoped = gradeFilter === "All Grades" ? roster : roster.filter((s) => s.grade === gradeFilter);
   const pending = buildQueue(scoped);
   const reviewed = Object.values(decisions)

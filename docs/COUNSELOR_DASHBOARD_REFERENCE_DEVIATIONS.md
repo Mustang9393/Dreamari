@@ -106,6 +106,28 @@ bottom."
   change the shared default. Connect's charts were reviewed and approved
   in the equalizer style, so the counselor dashboard opts in instead.
 
+## Who sees which students (v2, 25 Sept 2026)
+
+- **The roster is scoped by role.** Direct question: "is the lead
+  counsellor only seeing Sarah Chen's caseload? Is the number 121 supposed
+  to be the same for school counsellor and lead?" It was, and it should not
+  be. `useReviewedRoster()` (the one hook every v2 screen reads through)
+  now returns `scopeRosterForRole()`: a School Counselor sees their own
+  caseload (the seeded last-name split, matched to the account name, so
+  "Sarah Chen" carries A-H, 45 students, plus the one live demo student who
+  is always theirs); Lead Counselor and School Administrator see the whole
+  school (121). So a counselor's Overview, Students, Review Queue,
+  Progress, Settings' caseload and My Impact all read their caseload, and
+  the oversight roles' read the school, from one rule. The Lead's Overview
+  ranks all three caseloads through `useSchoolReviewedRoster()`.
+  Alternative: scope only the Students screen. Then a counselor's Overview
+  would say 121 while their roster said 45. Alternative: keep everyone on
+  121 as the reference does. The reference has one persona; with four
+  roles the same number for a counselor and their lead is a contradiction
+  the demo viewer notices first. Known limit: an account whose name is not
+  one of the three seeded counselors falls back to the A-H caseload, and
+  the Students toolbar says whose caseload is showing.
+
 ## Role shell (v2)
 
 - **The left menu is decided by the role in Settings, 24 Sept 2026.** The
@@ -241,7 +263,7 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
   by on-track rate (tiebreak: overdue + changes requested), each row a
   status distribution bar (the same three-segment mark Career Pathways
   uses), the on-track % and its band chip, and "pending · overdue" counts;
-  rows open Counselors. Caseloads are SEEDED by last-name range (A-G / H-R /
+  rows open Counselors. Caseloads are SEEDED by last-name range (A-H / I-R /
   S-Z, `SCHOOL_COUNSELORS` in `counselorOrg.ts`): the reference has one
   counselor and no counselor field per student. Why last-name ranges: it is
   how many schools really assign, it is deterministic, and it is uneven
@@ -324,6 +346,15 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
 
 ## Overview
 
+- **Career Pathways bar: one hue, interleaved.** The seven segments draw
+  from the 7-step blue ramp, but not in rank order: as a straight light-to-
+  dark ramp, neighbouring segments were one step apart and blended (direct
+  feedback: "education and skilled trades are blending together").
+  Alternating ends of the ramp puts three or more steps between any two
+  adjacent segments, a 2px surface gap separates them (dataviz mark spec),
+  and the legend dots use the same mapping. Alternative: seven distinct
+  hues. Passes distinguishability, breaks the one-hue rule set the same
+  day.
 - **Attention strip rebuilt quiet, 25 Sept 2026** (direct feedback: "lose
   the red glow on needs your attention" and, the day before, the standing
   budget). No glow, no filled red reason blocks, no three-column grid: one
@@ -401,6 +432,28 @@ list below is v1's history):
   the shared `Meter`'s "92/100" reading.
 - **Dates read "Jan 15"** instead of ISO.
 - **Empty result is one line** (playbook tier 5).
+- **Worst first by default** (direct feedback: "things needing attention
+  surfaced first, based on severity"): At Risk, then Needs Attention, then
+  On Track; within a status the Overview's own severity ranking (overdue
+  and rejected work before merely not-started), then the least-complete
+  roadmap. Alternative: alphabetical with a status filter. That makes the
+  counselor do the sort every visit.
+- **A flagged row says why.** Under the status chip, anyone not On Track
+  shows the one-line reason from their own milestones ("Career Report
+  overdue"), the same wording as the Overview's attention strip, so the
+  row is actionable without opening the profile.
+- **Lead Counselor and School Administrator see a Counselor column and a
+  counselor picker**; a School Counselor does not (they see only their own
+  caseload, see "Who sees which students" above).
+- **Every card has a visible way in** (`CardLink` in chips.tsx: a word
+  plus a chevron in the card header, visible at rest, nudging right on
+  hover). Direct question: "make all cards clickable, show the obvious
+  chevron ... or is this a bad approach considering the users might be
+  older?" Cards do open something, but the affordance is never hover-only:
+  older users and touch screens never see hover. So the link is always
+  there, and hover (the card beam, the chevron nudge) only reinforces it.
+  Rows inside a card stay their own targets, so the card is not itself one
+  big button (nested buttons are invalid and confuse screen readers).
 
 - **Table collapsed from 13 columns to 8.** The "School" column is
   removed entirely -- every row said "Lincoln High School" (a one-school

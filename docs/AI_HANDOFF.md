@@ -38,6 +38,20 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: roster scoped by role, Students worst-first with reasons, every card has a way in
+
+Direct feedback and questions, same session: "Make sure in the student table, things needing attention is surfaced first, based on severity." "Is lead counsellor only seeing Sarah Chen's caseload? Is the number 121 supposed to be same for school counsellor and lead?" "Make all cards clickable, show the obvious chevron ... or is this a bad approach? Considering the users might be older?"
+
+**Scoping.** `scopeRosterForRole()` and `myCounselor()` in `src/lib/counselorOrg.ts`; `useReviewedRoster()` in `counselorReviews.ts` now applies it (School Counselor: own caseload by last-name range matched to the account name, plus the live demo student; Lead and School Administrator: whole school). `useSchoolReviewedRoster()` is the unscoped read for the Lead's counselor ranking. Review Queue switched from `getReviewedRoster()` to the hook so it scopes too. Effect: signed in as Sarah Chen, a School Counselor sees 46 students everywhere; Lead sees 121.
+
+**Students.** Default sort is priority (status, then `attentionRank`, then roadmap); a flagged row shows its reason under the chip; Lead Counselor and School Administrator get a Counselor column and picker; the toolbar names the caseload for a counselor.
+
+**Career Pathways** segments now interleave the 7-step ramp (indices 0,4,1,5,2,6,3) with a 2px gap, after "education and skilled trades are blending together".
+
+**Cards.** `CardLink` (chips.tsx): word + chevron, visible at rest, chevron nudges on card hover (`group`). Added to every Overview card that lacked one (Student Status, Postsecondary Plans, Career Pathways to Insights, attention strip, Lead and District donuts). Reasoning on why not hover-only and why not a whole-card button: deviations file, "Students (roster)".
+
+**Verified live** (headless captures at 1440): Students as School Counselor (46, "your caseload, A-H", worst first, reasons), Students as Lead (121, Counselor column and picker), scoped counselor Overview with card links. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
 ### 2026-09-25 Counselor Dashboard v2: one hue, hero-only glow, gradient bars, quiet attention strip, Students rebuilt
 
 Direct feedback, in order: "Lets lose the red glow on needs your attention and lets have better contrast for the nested cards everywhere. Lets not use so many different colors. Choose a hue and stick to that. Blue is best. Lose the glow from anything that isnt a hero card. School counselor overview: yes execute your recommendation. Milestone tracker: dont tint cards. Review queue: do not tint cards. etc." Then: "Lose the equalizer style graphs too, just do a blueish tinted one with gradient running brighter to top and more transparent towards bottom." Then: Overview is finalised, next screen is Students.

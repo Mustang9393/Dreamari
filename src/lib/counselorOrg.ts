@@ -7,7 +7,7 @@
 //
 // - Counselors: the reference has one persona and no counselor field on a
 //   student, so the roster is split into three caseloads by last-name
-//   initial (A-G, H-R, S-Z), the way many real schools assign. Deterministic
+//   initial (A-H, I-R, S-Z), the way many real schools assign. Deterministic
 //   and uneven on purpose (45 / 47 / 28 students), which is what makes the
 //   Lead Counselor's "who is behind" question answerable.
 // - Targets: 80% is the "district target" the reference's own My Impact
@@ -24,6 +24,7 @@
 // schools as real aggregate data.
 
 import { DEMO_SCHOOL, type CounselorStudent } from "./counselorRoster";
+import type { CounselorRole } from "./counselorAccount";
 
 export const DISTRICT_NAME = "Lincoln Unified School District";
 /** For the sidebar account line, where the full name truncates. */
@@ -34,21 +35,42 @@ export const DISTRICT_SHORT = "Lincoln Unified";
 export type SeededCounselor = {
   id: string;
   name: string;
-  /** Last-name range this counselor carries, e.g. "A-G". */
+  /** Last-name range this counselor carries, e.g. "A-H". */
   range: string;
   from: string;
   to: string;
 };
 
 export const SCHOOL_COUNSELORS: SeededCounselor[] = [
-  { id: "c-ag", name: "Sarah Chen", range: "A-G", from: "A", to: "G" },
-  { id: "c-hr", name: "Daniel Okafor", range: "H-R", from: "H", to: "R" },
+  { id: "c-ah", name: "Sarah Chen", range: "A-H", from: "A", to: "H" },
+  { id: "c-ir", name: "Daniel Okafor", range: "I-R", from: "I", to: "R" },
   { id: "c-sz", name: "Renee Alvarez", range: "S-Z", from: "S", to: "Z" },
 ];
 
 function lastInitial(name: string): string {
   const parts = name.trim().split(/\s+/);
   return (parts[parts.length - 1]?.[0] ?? "Z").toUpperCase();
+}
+
+/** Which seeded counselor the signed-in account is. Matched by name so a
+ *  demo signed in as "Sarah Chen" gets her A-H caseload; any other name
+ *  falls back to the first counselor, since the seeded roster has no other
+ *  way to know whose caseload a new account should carry. */
+export function myCounselor(account: { name: string }): SeededCounselor {
+  const wanted = account.name.trim().toLowerCase();
+  return SCHOOL_COUNSELORS.find((c) => c.name.toLowerCase() === wanted) ?? SCHOOL_COUNSELORS[0];
+}
+
+/** The roster a role may see. A School Counselor sees their own caseload
+ *  (plus the one live demo student, who is always theirs: the "draws from
+ *  the student app" story has to land on the signed-in person); Lead
+ *  Counselor and School Administrator see the whole school; District
+ *  Administrator reads school rollups elsewhere and gets the whole school
+ *  here. The reference had one persona and showed everyone everything. */
+export function scopeRosterForRole(roster: CounselorStudent[], account: { name: string; role: CounselorRole | "" }): CounselorStudent[] {
+  if (account.role !== "School Counselor" && account.role !== "") return roster;
+  const mine = myCounselor(account).id;
+  return roster.filter((s) => s.isReal || counselorFor(s).id === mine);
 }
 
 export function counselorFor(student: CounselorStudent): SeededCounselor {

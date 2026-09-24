@@ -9,7 +9,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { StatRow } from "../chips";
 import { useCounselorFilters } from "../shell";
-import { useReviewedRoster } from "@/lib/counselorReviews";
+import { useSchoolReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, counselorFor, readinessMetrics, targetBand } from "@/lib/counselorOrg";
 import { DonutCard, STATUS_COLORS } from "./Overview";
 import { BAND_COLORS, InitialsBadge, MetricRow, OverviewCard, SeeLink, Stat, Verdict } from "./overviewShared";
@@ -19,7 +19,7 @@ const GRADES = [9, 10, 11, 12];
 export function OverviewLead() {
   const router = useRouter();
   const { gradeFilter, setGradeFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
-  const reviewed = useReviewedRoster();
+  const reviewed = useSchoolReviewedRoster();
   const roster = useMemo(() => (gradeFilter === "All Grades" ? reviewed : reviewed.filter((s) => s.grade === gradeFilter)), [reviewed, gradeFilter]);
 
   const counselors = useMemo(() => SCHOOL_COUNSELORS
@@ -82,6 +82,7 @@ export function OverviewLead() {
           <DonutCard
             title="Student Status"
             caption={`${school.students} students`}
+            aside={<SeeLink onClick={() => goToStudents()}>Students</SeeLink>}
             centerPct={(school.onTrack / total) * 100}
             centerLabel="on track"
             rows={[
@@ -108,6 +109,7 @@ export function OverviewLead() {
           <DonutCard
             title="Postsecondary Plans"
             caption="Students with a declared path"
+            aside={<SeeLink onClick={() => goToStudents()}>Students</SeeLink>}
             centerPct={(school.withPlan / total) * 100}
             centerLabel="have a plan"
             rows={[

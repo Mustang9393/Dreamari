@@ -9,8 +9,10 @@
 // real counselor input whether the submission underneath it is seeded or
 // live. Used by the v2 fork of the dashboard (see counselor/version.tsx).
 
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { getRosterWithLive, getStudentById, MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "./counselorRoster";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "./counselorAccount";
+import { scopeRosterForRole } from "./counselorOrg";
 
 const KEY = "dreamari:counselor-reviews";
 
@@ -126,9 +128,23 @@ export function useReviewDecisions(): Decisions {
   return useSyncExternalStore(subscribeReviews, readAll, () => EMPTY);
 }
 
-/** The roster every v2 screen should read: re-renders when a decision is
- *  recorded or undone anywhere. */
+/** The roster every v2 screen should read: the students the signed-in role
+ *  may see (scopeRosterForRole: a School Counselor's own caseload, the whole
+ *  school for Lead Counselor and School Administrator), with every review
+ *  decision applied. Re-renders when a decision is recorded or undone, or
+ *  the role changes. Memoized per (decisions, account) so one render gets
+ *  one array. */
 export function useReviewedRoster(): CounselorStudent[] {
+  useReviewDecisions();
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const roster = getReviewedRoster();
+  return useMemo(() => scopeRosterForRole(roster, account), [roster, account]);
+}
+
+/** The whole school regardless of role, for the few places that compare
+ *  caseloads (the Lead Counselor's Overview ranks every counselor even
+ *  though, by role, it already sees everyone). */
+export function useSchoolReviewedRoster(): CounselorStudent[] {
   useReviewDecisions();
   return getReviewedRoster();
 }

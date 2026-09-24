@@ -58,6 +58,7 @@ export function OverviewDistrict() {
           <DonutCard
             title="Student Status"
             caption={`${district.students.toLocaleString("en-US")} students · ${schools.length} schools`}
+            aside={<SeeLink onClick={() => router.push("/counselor?view=schools")}>Schools</SeeLink>}
             centerPct={(district.onTrack / total) * 100}
             centerLabel="on track"
             rows={[

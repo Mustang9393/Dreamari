@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { ChevronRight } from "lucide-react";
 import { MILESTONE_KEYS, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
 import { useStudentAvatarSrc } from "@/lib/avatar";
 
@@ -142,5 +143,22 @@ export function Avatar({ name, size = 34 }: { name: string; size?: number }) {
       style={{ width: size, height: size, background: "var(--secondary)" }}
       onError={() => setFailed(true)}
     />
+  );
+}
+
+// Every card on the v2 dashboard opens something, and the way in is this
+// link in the card's header: a word plus a chevron, visible at rest (not a
+// hover-only hint: many counselors and administrators are older and many
+// are on touch screens, where hover never happens). Hovering the card
+// (`group` on the card root) nudges the chevron right as reinforcement,
+// never as the only signal. Direct feedback, 25 Sept 2026: "make all cards
+// clickable, show the obvious chevron ... considering the users might be
+// older".
+export function CardLink({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button type="button" onClick={onClick} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>
+      {children}
+      <ChevronRight className="h-[14px] w-[14px] transition-transform duration-150 group-hover:translate-x-[3px]" aria-hidden />
+    </button>
   );
 }
