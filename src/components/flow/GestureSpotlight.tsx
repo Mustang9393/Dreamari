@@ -180,8 +180,17 @@ function tooltipOutlinePath(w: number, h: number, side: "top" | "bottom", arrowC
   ].join(" ");
 }
 
+// DEMO-ONLY: master switch for every Coachmark on the site (Explore's For
+// You -> Schools tour, the action-icon hints on the reel and Career Detail).
+// `false` right now: direct instruction, 24 Sept 2026, "disable the
+// coachmarks on every screen, they are distracting during the demos". Flip
+// back to `true` and every coachmark returns exactly as it was -- nothing
+// else about them was changed, and the per-device "seen" flags are
+// untouched. Registered in docs/HANDOFF_INDEX.md.
+const COACHMARKS_ENABLED = false;
+
 export function Coachmark({
-  active,
+  active: activeProp,
   label,
   onDismiss,
   cta = "Got it",
@@ -218,6 +227,7 @@ export function Coachmark({
       target rectangle used to position the portaled card and glow. */
   children: React.ReactNode;
 }) {
+  const active = COACHMARKS_ENABLED && activeProp;
   const targetRef = useRef<HTMLSpanElement | null>(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const spotlightId = useId().replaceAll(":", "");
