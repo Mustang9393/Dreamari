@@ -8,7 +8,8 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Filter, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, X } from "lucide-react";
 import { Meter } from "@/components/connect/viz";
-import { getRoster, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useCounselorFilters } from "../shell";
 import { StatusChip, MilestonesMini, Avatar } from "../chips";
 
@@ -45,8 +46,9 @@ export function StudentsRoster() {
   const [intentFilter, setIntentFilter] = useState<PostsecondaryIntent | "All">("All");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const reviewed = useReviewedRoster();
   const roster = useMemo(() => {
-    let list = getRoster();
+    let list = reviewed;
     if (gradeFilter !== "All Grades") list = list.filter((s) => s.grade === gradeFilter);
     if (statusFilter !== "All") list = list.filter((s) => s.status === statusFilter);
     if (planFilter === "With Plan") list = list.filter((s) => s.postsecondaryIntent !== "Undecided");
@@ -61,7 +63,7 @@ export function StudentsRoster() {
       if (sortKey === "roadmapPct") return (a.roadmapPct - b.roadmapPct) * dir;
       return a.status.localeCompare(b.status) * dir;
     });
-  }, [gradeFilter, search, statusFilter, planFilter, intentFilter, sortKey, sortDir]);
+  }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, sortKey, sortDir]);
 
   const pageCount = Math.max(1, Math.ceil(roster.length / PAGE_SIZE));
   // Clamped at read time, not reset via an effect: if a filter shrinks the

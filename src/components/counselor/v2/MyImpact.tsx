@@ -8,7 +8,8 @@ import { useMemo } from "react";
 import { Printer, Share2, FileBarChart, Users, TrendingUp, GraduationCap, MessageSquare, ClipboardCheck, Megaphone, Flag, CheckCircle2, Award, BookOpen, Briefcase, Heart, Star } from "lucide-react";
 import { MetricTile } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { getRoster, DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
 import { readCounselorAccount } from "@/lib/counselorAccount";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 
@@ -41,7 +42,7 @@ function SectionCard({ title, sub, children }: { title: string; sub?: string; ch
 }
 
 export function MyImpact() {
-  const roster = useMemo(() => getRoster(), []);
+  const roster = useReviewedRoster();
   const account = readCounselorAccount();
   const counselorName = account.name || "Sarah Chen";
 

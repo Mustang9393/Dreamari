@@ -11,8 +11,9 @@ import { SegmentedRing, BarChart } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Avatar, StatRow } from "../chips";
-import { getRoster, attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
+import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
+import { useReviewedRoster } from "@/lib/counselorReviews";
 
 const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "#33C78C",
@@ -323,12 +324,13 @@ export function Overview() {
   const [pathwayFilter, setPathwayFilter] = useState<string | null>(null);
   const togglePathway = (label: string) => setPathwayFilter((cur) => (cur === label ? null : label));
 
+  const reviewed = useReviewedRoster();
   const roster = useMemo(() => {
-    let all = getRoster();
+    let all = reviewed;
     if (gradeFilter !== "All Grades") all = all.filter((s) => s.grade === gradeFilter);
     if (pathwayFilter) all = all.filter((s) => s.careerTrack === pathwayFilter);
     return all;
-  }, [gradeFilter, pathwayFilter]);
+  }, [reviewed, gradeFilter, pathwayFilter]);
 
   const goToStudents = (status?: StatusRosterFilter, plan?: PlanRosterFilter) => {
     if (status) setStatusFilter(status);

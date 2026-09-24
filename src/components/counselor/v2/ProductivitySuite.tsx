@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, ShieldCheck, Sparkles } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { getRoster } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
@@ -39,7 +39,7 @@ function buildDraft(toolId: ToolId, studentName: string, extra: string): string 
 }
 
 export function ProductivitySuite() {
-  const roster = getRoster();
+  const roster = useReviewedRoster();
   const [toolId, setToolId] = useState<ToolId>("recommendation-letter");
   const [studentId, setStudentId] = useState("");
   const [letterType, setLetterType] = useState("");

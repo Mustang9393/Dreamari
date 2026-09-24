@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { MetricTile, Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { getStudentById, MILESTONE_KEYS, type MilestoneKey } from "@/lib/counselorRoster";
+import { MILESTONE_KEYS, type MilestoneKey } from "@/lib/counselorRoster";
+import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
 import { readNotes, addNote } from "@/lib/counselorNotes";
 import { StatusChip, MilestoneChip, Avatar } from "../chips";
 
@@ -74,7 +75,8 @@ function CardHead({ icon: Icon, title, accent = "var(--primary)" }: { icon: type
 
 export function StudentProfileView({ studentId }: { studentId: string }) {
   const router = useRouter();
-  const student = getStudentById(studentId);
+  useReviewDecisions();
+  const student = getReviewedStudentById(studentId);
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
   const [toast, setToast] = useState<string | null>(null);

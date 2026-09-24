@@ -8,7 +8,8 @@ import { useCallback, useMemo, useState } from "react";
 import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, DollarSign, GraduationCap, ClipboardList, AlertTriangle } from "lucide-react";
 import { BarChart } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { getRoster, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
+import { type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
 import { INTEREST_WORLDS } from "@/components/build/types";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
@@ -125,7 +126,7 @@ export function StudentProgress() {
   const [pathway, setPathway] = useState("All Pathways");
   const report = REPORT_TYPES.find((r) => r.id === reportId)!;
 
-  const fullRoster = useMemo(() => getRoster(), []);
+  const fullRoster = useReviewedRoster();
   const roster = useMemo(() => {
     let list = fullRoster;
     if (gradeLevel !== "All Grades") list = list.filter((s) => String(s.grade) === gradeLevel);

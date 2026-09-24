@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-24 Counselor Dashboard: v1 reset to the 1:1 port; Review Queue rebuilt in v2 on a shared review store
+
+Direct instruction: "go ahead, but make sure everything new is in v2.0. Let's reset v1.0 to match the Replit 1:1 except for design language and visuals."
+
+**v1 reset.** Overview, StudentsRoster and MilestoneTracker restored from `6f7a7e95` (the end of the 1:1 alignment pass, before any creative pass), then only the visual rules re-applied: the validated single-hue readiness ramp on Overview's bar charts, amber "Needs Attention" and the muted-foreground "Not Started" on Milestone Tracker. Shared modules (chips, surfaces, viz, shell, roster lib) are untouched, so v1 keeps the glass surfaces, real avatars, the SegmentedRing seam fix and the responsive shell. Verified live at 1440: three equal donuts, 13-column roster with School column and five milestone pills, equal 2x2 milestone cards with the (i) icon and the "View Details & Student Breakdown" link. The v2 fork (made earlier today from the improved v1) keeps every pass, so nothing was lost, only moved.
+
+**Review Queue v2** (`v2/ReviewQueue.tsx`) plus `src/lib/counselorReviews.ts`, a persisted decision store (`dreamari:counselor-reviews`, same idiom as counselorNotes) with `getReviewedRoster()` / `useReviewedRoster()` overlaying decisions on the roster. Every v2 screen that read `getRoster()` now reads the reviewed roster (Overview, Students, StudentProfile, Progress, Settings, Impact, Productivity), which is the "one source per count" fix from the audit landing as a side effect of the first screen pass. What changed on the screen and why, with alternatives, is in `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md` ("Review Queue (v2)"): one item per pending milestone, due-date-driven priority and order with the status-color glow, message-first detail pane, a Reviewed section with Undo, grade filter honored, reachable empty state.
+
+Verified live at 1440 in v2: 40 pending, worst-first; Approve with feedback -> Pending 39, Reviewed row shows the feedback; Settings' Pending Reviews reads 39 from the same store; decision survives navigating away and back; Undo -> 40 and the store empties. No console errors. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
 ### 2026-09-24 Counselor Dashboard: v1/v2 version chip and a v2 fork for the audit's changes
 
 Direct instruction after the full 11-screen audit (same day, in chat): "keep what we have as is and do this in a v2 toggle like the other a/b we tested. But the subtle v2 toggle at the bottom centre." So v1 stays exactly as it is, and every change from the audit lands in a v2 that can be compared live.

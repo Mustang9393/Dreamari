@@ -19,6 +19,21 @@ was the optimal way to solve it, not just a way** -> **what it replaced**.
 "Why" alone isn't enough -- a change is justified against the alternatives
 that were available, not just against doing nothing.
 
+**24 Sept 2026: v1 reset to 1:1, every deviation now lives in v2.** Direct
+instruction: "make sure everything new is in v2.0. Let's reset v1.0 to match
+the Replit 1:1 except for design language and visuals." So
+`src/components/counselor/` (v1) is back to the state at the end of the 1:1
+alignment pass (commit `6f7a7e95`) for Overview, Students and Milestone
+Tracker -- three equal donut cards, the 13-column roster, equal milestone
+cards with the (i) icon and "View Details & Student Breakdown" link -- and
+keeps only the visual rules that came later: the shared glass surfaces and
+avatars, the validated single-hue readiness ramp, amber for "Needs
+Attention", the muted-foreground gray for "Not Started", the responsive
+shell. Every content/data/structure entry below describes
+`src/components/counselor/v2/`, switched live by the bottom-center version
+chip (`counselor/version.tsx`, `?v=2`). v1 entries that were reverted are
+left in place as the record of why v2 made each change.
+
 ---
 
 ## Overview
@@ -237,8 +252,63 @@ that were available, not just against doing nothing.
     sidekick size constant across all four tabs and the hero still the
     largest thing on the page.
 
+## Review Queue (v2)
+
+- **Every pending milestone is its own queue item.** v1 (and the reference)
+  built one item per student from the *first* pending milestone, so a
+  student with two submissions had one silently hidden. Why this direction:
+  the queue's unit of work is a submission, not a student; a counselor
+  reviews a resume and a college list separately. Alternative: group by
+  student with sub-items -- adds a level of nesting to a list that is
+  usually 20 to 40 items, for a case (two pending at once) the seeded
+  roster never produces and a real one produces rarely.
+- **Priority and order come from the due date.** v1 assigned Urgent/High
+  by list position (`i % 5`, `i % 3`) and listed items in roster order.
+  Now: overdue is Urgent, due within two days is High, else Normal; sorted
+  most-overdue first, then due soonest, then longest-waiting. Cards and the
+  detail pane carry the same severity glow the Milestone Tracker cards use,
+  in the reserved status colors (red / amber / neutral), so the list reads
+  worst-first before a word is read. Alternative: keep a separate priority
+  the "student" set at submission -- there is no such input in the
+  reference or in Dreamari, so it would be invented data dressed up as a
+  signal. Due dates are deterministic per item (seeded hash, relative to
+  today) so a demo stays stable within a day.
+- **Decisions are recorded and shared.** `src/lib/counselorReviews.ts`
+  persists Approve / Request Changes with the feedback text and a
+  timestamp; `getReviewedRoster()` overlays those decisions on the roster
+  and every v2 screen reads the roster through it. Result: approving on
+  the queue changes the student's milestone on their profile, the Students
+  roster strip, Settings' "Pending Reviews", Student Progress' review
+  activity and Overview's attention strip ("Changes Requested" becomes a
+  Critical flag), all from one source. Why this over v1's local state:
+  three screens counted "pending" three different ways and none moved when
+  a counselor acted, which is the thing a demo viewer notices first.
+  Alternative considered: mutate the roster in place -- the seeded roster
+  is regenerated per load and the live row is re-read on every access, so
+  an overlay is the only shape that survives both. Feedback is kept because
+  the Replit's UI asks for it and then threw it away.
+- **A "Reviewed" section below the queue, with Undo.** v1 made the item
+  vanish on click with no trace. The section shows each decision (student,
+  milestone, status chip, the feedback, when), newest first, and Undo
+  removes the decision and returns the item to Pending. Alternative: a
+  toast -- gone in three seconds, no way back, no record of what was said.
+- **Detail pane leads with the submission.** Student message first, then
+  the attachment chip, then feedback and actions. The v1 metadata grid
+  (Student / Type / Submitted / Due / Priority / Status) collapses into the
+  header and one due-date line; "Status: Pending Review", true of every
+  item in a pending queue, is gone. The attachment is a chip, not a
+  link-styled span that doesn't open anything.
+- **Honors the topbar grade filter** like Overview, Students and Milestone
+  Tracker, with the grade shown in the "Pending (N) · Grade 9" heading.
+- **Empty state is reachable.** v1 checked total items, not pending ones,
+  so clearing the queue never showed "Nothing pending review right now."
+- Not changed: the canned per-milestone messages (now covering all 11
+  milestones instead of 5), which remain demo copy until Dreamari has a
+  student-to-counselor share action (report history's "Shared with
+  counselor" label is the natural source).
+
 ---
 
-_Sections for the remaining screens (Review Queue, Student Progress,
+_Sections for the remaining screens (Student Progress,
 Counselor Connect, Career + College Insights, Productivity Suite, Platform
 Engagement, My Impact, Settings) get added here as each is worked on._

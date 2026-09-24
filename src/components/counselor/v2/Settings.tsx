@@ -4,11 +4,11 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { readCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES, type CounselorRole } from "@/lib/counselorAccount";
-import { getRoster } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
@@ -54,7 +54,7 @@ export function Settings() {
 
   const [notifications, setNotifications] = useState<Record<string, boolean>>({ submissions: true, overdue: true, questions: true, "low-activity": true, weekly: false });
 
-  const roster = useMemo(() => getRoster(), []);
+  const roster = useReviewedRoster();
   const avgCompletion = roster.length ? Math.round(roster.reduce((sum, s) => sum + s.roadmapPct, 0) / roster.length) : 0;
   const pendingReviews = roster.filter((s) => Object.values(s.milestones).includes("Pending Review")).length;
 
