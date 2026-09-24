@@ -108,7 +108,19 @@ bottom."
 
 ## Who sees which students (v2, 25 Sept 2026)
 
-- **The roster is scoped by role.** Direct question: "is the lead
+- **Reversed the same day: everyone sees the whole school.** After the
+  scoping below shipped, a School Counselor's Milestone Tracker read "12
+  students" for Grade 9 against the school's 30, and the direct call was
+  "our numbers need to make sense, this is a school counsellor's dashboard
+  of a whole school". So `SCOPE_COUNSELOR_TO_CASELOAD` (counselorOrg.ts)
+  is off: every role reads the same 121 students, as the reference does,
+  and roles differ by what their screens show (the Lead's counselor
+  comparison and Counselor column, the administrators' targets and
+  schools), not by hiding students. The seeded caseload split stays as the
+  Counselor column and picker for the Lead and School Administrator, and
+  as the Lead Overview's comparison. The mechanism below is kept behind the
+  flag for when real counselor assignments exist.
+- **(Superseded) The roster is scoped by role.** Direct question: "is the lead
   counsellor only seeing Sarah Chen's caseload? Is the number 121 supposed
   to be the same for school counsellor and lead?" It was, and it should not
   be. `useReviewedRoster()` (the one hook every v2 screen reads through)

@@ -16,7 +16,7 @@ import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown } from "lucide-react"
 import { Listbox } from "@/components/app/Listbox";
 import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { SCHOOL_COUNSELORS, counselorFor, myCounselor } from "@/lib/counselorOrg";
+import { SCHOOL_COUNSELORS, SCOPE_COUNSELOR_TO_CASELOAD, counselorFor, myCounselor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar } from "../chips";
@@ -160,7 +160,7 @@ export function StudentsRoster() {
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
         <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor ? ` · your caseload, ${myCounselor(account).range}` : ""}{pageCount > 1 ? ` · showing ${effectivePage * PAGE_SIZE + 1} to ${effectivePage * PAGE_SIZE + pageRows.length}` : ""}
+          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}{pageCount > 1 ? ` · showing ${effectivePage * PAGE_SIZE + 1} to ${effectivePage * PAGE_SIZE + pageRows.length}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
           {showCounselor && (

@@ -38,6 +38,10 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: caseload scoping turned off, whole school for every role
+
+Direct feedback: "why is it 12 students total? Our numbers need to make sense. This is a school counsellor's dashboard of a whole school right?" The role scoping added earlier today narrowed a School Counselor to the seeded A-H caseload, so her Grade 9 read 12 against the school's 30. `SCOPE_COUNSELOR_TO_CASELOAD = false` in `src/lib/counselorOrg.ts`: every role reads the whole school (121), as the reference does; the Lead and School Administrator keep the Counselor column, picker and comparison. Mechanism kept behind the flag. Logged in the deviations file under "Who sees which students".
+
 ### 2026-09-25 Counselor Dashboard v2: Milestone Tracker on roster data, pathway clusters, card-link pills
 
 Direct feedback in sequence: overhaul the Milestone Tracker ("are we getting the proper data ... proper hierarchy ... readable ... understandable ... do things align ... Next-Year Course Plan: the components are overlapping"); pathways should be multicolor "but complementary, not random, have a logic"; "don't make the CTAs blue and make sure they highlight or animate a little more obviously when hovered"; "the padding that appears on hover is wrong, too tight and overlapping"; "milestone tracker hero is confusing me, the positions of the information are scattered".

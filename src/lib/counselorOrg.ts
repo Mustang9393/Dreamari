@@ -61,13 +61,21 @@ export function myCounselor(account: { name: string }): SeededCounselor {
   return SCHOOL_COUNSELORS.find((c) => c.name.toLowerCase() === wanted) ?? SCHOOL_COUNSELORS[0];
 }
 
-/** The roster a role may see. A School Counselor sees their own caseload
- *  (plus the one live demo student, who is always theirs: the "draws from
- *  the student app" story has to land on the signed-in person); Lead
- *  Counselor and School Administrator see the whole school; District
- *  Administrator reads school rollups elsewhere and gets the whole school
- *  here. The reference had one persona and showed everyone everything. */
+/** DEMO-ONLY: whether a School Counselor is narrowed to their own seeded
+ *  caseload. Off, by decision on 25 Sept 2026: this demo is one school
+ *  with one counselor persona, and narrowing made her Grade 9 read "12
+ *  students" against the school's 30 ("our numbers need to make sense,
+ *  this is a school counsellor's dashboard of a whole school"). Roles
+ *  differ by what their screens show (the Lead's counselor comparison and
+ *  column, the administrators' targets), not by hiding students. Flip on
+ *  when Dreamari has real counselor assignments. */
+export const SCOPE_COUNSELOR_TO_CASELOAD = false;
+
+/** The roster a role may see. With the flag off, everyone sees the whole
+ *  school, as the reference does. With it on, a School Counselor sees
+ *  their caseload plus the one live demo student. */
 export function scopeRosterForRole(roster: CounselorStudent[], account: { name: string; role: CounselorRole | "" }): CounselorStudent[] {
+  if (!SCOPE_COUNSELOR_TO_CASELOAD) return roster;
   if (account.role !== "School Counselor" && account.role !== "") return roster;
   const mine = myCounselor(account).id;
   return roster.filter((s) => s.isReal || counselorFor(s).id === mine);
