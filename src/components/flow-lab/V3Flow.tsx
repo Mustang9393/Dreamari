@@ -4,51 +4,41 @@
 // the three-stage shape students already rated easy and fix what the two
 // surveys actually named: inputs too coarse (so Build asks one follow-up
 // per world), matches feel scattered with no reason (so the six are built
-// from the chosen worlds with a reason chip on every card), and no escape
-// hatch (so "Show me six more" is a first-class row, not a dead end).
-// BUILD ADD-ON -> MATCH -> MY PROFILE; picking up to 3 IS the Top 3.
+// from the chosen worlds with a reason on every card), and no escape hatch
+// (so "Six more" is a first-class control). BUILD ADD-ON -> MATCH -> MY
+// PROFILE; picking up to 3 IS the Top 3.
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronRight, Sparkles, RefreshCw } from "lucide-react";
-import {
-  SUB_INTERESTS, WORLD_NEIGHBORS, browsableWorlds, buildSignals, careerById, careersForWorld, interestsFromBuild, rankForStudent, readLabState, subInterestFor, writeLabState, type LabCareer,
-} from "./lab";
-import { CARD, InterestPicker, LabCard, PrimaryButton, QuietButton, StepHeader, TopThreeScreen } from "./shared";
+import { AnimatePresence } from "framer-motion";
+import { ChevronLeft } from "lucide-react";
+import { useFirstUseHint } from "@/components/flow/GestureSpotlight";
+import { SUB_INTERESTS, WORLD_NEIGHBORS, browsableWorlds, buildSignals, careerById, careersForWorld, interestsFromBuild, rankForStudent, readLabState, subInterestFor, writeLabState, type LabCareer } from "./lab";
+import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, Pager, QuietButton, SixGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "subs" | "match" | "top3";
-type State = {
-  step: Step;
-  worlds: string[];
-  subs: Record<string, string[]>;
-  page: number;
-  picks: string[];
-  seen: string[];
-};
+type State = { step: Step; worlds: string[]; subs: Record<string, string[]>; page: number; picks: string[]; seen: string[] };
 const EMPTY: State = { step: "interests", worlds: [], subs: {}, page: 0, picks: [], seen: [] };
-const STEPS = ["Build", "Match", "My Profile"];
 const MAX_WORLDS = 3;
 const MAX_PICKS = 3;
 
-type Match = { career: LabCareer; reasons: string[]; stretch: boolean };
+type Match = { career: LabCareer; reason: string; stretch: boolean };
 
-/** Rank a world's careers: ones that match a chosen sub-interest first,
- *  then the rest, each with its reason. Deterministic, so a page is stable. */
+/** A world's careers: sub-interest hits first, then the rest; within each
+ *  half the real Build's subjects and path (rankForStudent) break ties, so
+ *  v2 and v3 draw on the same signals and stay comparable. */
 function rankWorld(world: string, subs: string[]): Match[] {
-  // Sub-interest hits first; within each half, the real Build's subjects
-  // and path (rankForStudent) break ties, so the same signals v2 uses
-  // shape v3 too and the two stay comparable.
   const hit: Match[] = [];
   const miss: Match[] = [];
   for (const r of rankForStudent(world, buildSignals())) {
     const sub = subInterestFor(r.career.title, subs);
-    if (sub) hit.push({ career: r.career, reasons: [sub, world], stretch: false });
-    else miss.push({ career: r.career, reasons: r.reason ? [`Fits ${r.reason}`, world] : [world], stretch: false });
+    if (sub) hit.push({ career: r.career, reason: sub, stretch: false });
+    else miss.push({ career: r.career, reason: r.reason ? `Fits ${r.reason}` : world, stretch: false });
   }
   return [...hit, ...miss];
 }
 
-/** Six for this page: shared out across the chosen worlds, with the last
- *  slot a stretch pick from a neighbouring world when there are 2+ worlds. */
+/** Six for a page: shared out across the chosen worlds, the last slot a
+ *  stretch pick from a neighbouring world when there are 2+ worlds. */
 function buildSix(worlds: string[], subs: Record<string, string[]>, page: number): Match[] {
   if (worlds.length === 0) return [];
   const withStretch = worlds.length >= 2;
@@ -65,23 +55,27 @@ function buildSix(worlds: string[], subs: Record<string, string[]>, page: number
     }
   });
   if (withStretch) {
-    const neighbours = worlds.flatMap((w) => WORLD_NEIGHBORS[w] ?? []).filter((n) => !worlds.includes(n) && browsableWorlds().includes(n));
-    const uniq = [...new Set(neighbours)];
+    const uniq = [...new Set(worlds.flatMap((w) => WORLD_NEIGHBORS[w] ?? []).filter((n) => !worlds.includes(n) && browsableWorlds().includes(n)))];
     if (uniq.length > 0) {
       const world = uniq[page % uniq.length];
       const pool = careersForWorld(world);
       const career = pool[Math.floor(page / uniq.length) % pool.length];
-      if (career && !used.has(career.id)) out.push({ career, reasons: ["Stretch pick", `Near ${worlds.find((w) => (WORLD_NEIGHBORS[w] ?? []).includes(world)) ?? worlds[0]}`], stretch: true });
+      if (career && !used.has(career.id)) out.push({ career, reason: "Stretch pick", stretch: true });
     }
   }
   return out;
 }
 
-export function V3Flow() {
+export function V3Flow({ onRestart }: { onRestart: () => void }) {
   const [state, setState] = useState<State>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
   const [replacing, setReplacing] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [dir, setDir] = useState<1 | -1>(1);
+  const [showPick, dismissPick] = useFirstUseHint("flowlab-v3-pick");
+  const [showMore, dismissMore] = useFirstUseHint("flowlab-v3-more");
+  const [showEdit, dismissEdit] = useFirstUseHint("flowlab-v3-edit");
 
   useEffect(() => {
     const stored = readLabState<State>("v3", EMPTY);
@@ -93,38 +87,43 @@ export function V3Flow() {
   useEffect(() => {
     if (hydrated) writeLabState("v3", state);
   }, [state, hydrated]);
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 2200);
+    return () => window.clearTimeout(t);
+  }, [toast]);
 
-  const go = (step: Step) => setState((s) => ({ ...s, step }));
+  const go = (step: Step) => { setOpenId(null); setState((s) => ({ ...s, step })); };
   const six = useMemo(() => buildSix(state.worlds, state.subs, state.page), [state.worlds, state.subs, state.page]);
   const top3 = useMemo(() => state.picks.map(careerById).filter((c): c is LabCareer => !!c), [state.picks]);
   const pool = useMemo(() => state.seen.map(careerById).filter((c): c is LabCareer => !!c), [state.seen]);
 
-  const flash = (t: string) => {
-    setToast(t);
-    window.setTimeout(() => setToast(null), 2200);
-  };
+  // Functional update: two quick taps must never double-add.
   const togglePick = (id: string) => {
-    setState((s) => {
-      if (s.picks.includes(id)) return { ...s, picks: s.picks.filter((x) => x !== id) };
-      if (s.picks.length >= MAX_PICKS) {
-        flash("That's your three. Unpick one to swap it.");
-        return s;
-      }
-      return { ...s, picks: [...s.picks, id] };
-    });
+    if (!state.picks.includes(id) && state.picks.length >= MAX_PICKS) setToast("Remove one first to pick this career.");
+    setState((s) => s.picks.includes(id) ? { ...s, picks: s.picks.filter((x) => x !== id) } : s.picks.length >= MAX_PICKS ? s : { ...s, picks: [...s.picks, id] });
   };
-  const rememberSeen = (ids: string[]) => setState((s) => ({ ...s, seen: [...new Set([...s.seen, ...ids])] }));
+  const remember = (ids: string[]) => setState((s) => ({ ...s, seen: [...new Set([...s.seen, ...ids])] }));
+  const setPage = (n: number, d: 1 | -1) => {
+    const next = Math.max(0, n);
+    setDir(d);
+    remember(buildSix(state.worlds, state.subs, next).map((m) => m.career.id));
+    setState((s) => ({ ...s, page: next }));
+  };
 
   if (!hydrated) return null;
 
   // ---- Build add-on, part 1: up to 3 worlds ----
   if (state.step === "interests") {
     return (
-      <div className="flex flex-col gap-[var(--space-6)]">
-        <StepHeader steps={STEPS} current={0} title="Pick up to 3 worlds" helper="Your Build picks are already here if you did one. A third world is optional; it widens the set without scattering it. This choice stays inside the lab." />
-        <InterestPicker value={state.worlds} max={MAX_WORLDS} onChange={(worlds) => setState((s) => ({ ...s, worlds }))} />
-        <div><PrimaryButton disabled={state.worlds.length === 0} onClick={() => go("subs")}>Next: what parts? <ChevronRight className="h-[16px] w-[16px]" aria-hidden /></PrimaryButton></div>
-      </div>
+      <>
+        <LabScreen title="Build">
+          <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-1 pt-2">
+            <Field label="Worlds · up to 3"><InterestPicker value={state.worlds} max={MAX_WORLDS} onChange={(worlds) => setState((s) => ({ ...s, worlds }))} /></Field>
+          </div>
+        </LabScreen>
+        <BottomBar status="Pick at least one world." cta="Next" ctaDisabled={state.worlds.length === 0} onCta={() => go("subs")} />
+      </>
     );
   }
 
@@ -132,91 +131,87 @@ export function V3Flow() {
   if (state.step === "subs") {
     const answered = state.worlds.every((w) => (state.subs[w] ?? []).length > 0);
     return (
-      <div className="flex flex-col gap-[var(--space-6)]">
-        <StepHeader steps={STEPS} current={0} title="Which parts pull you in?" helper="One quick follow-up per world. This is what turns a broad world into six careers that actually feel like you." />
-        <div className="flex flex-col gap-[var(--space-4)]">
-          {state.worlds.map((world) => {
-            const chosen = state.subs[world] ?? [];
-            return (
-              <section key={world} className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={CARD}>
-                <h2 className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{world}</h2>
-                <div className="flex flex-wrap gap-[8px]">
-                  {(SUB_INTERESTS[world] ?? []).map((sub) => {
-                    const on = chosen.includes(sub);
-                    return (
-                      <button key={sub} type="button" aria-pressed={on} onClick={() => setState((s) => ({ ...s, subs: { ...s.subs, [world]: on ? chosen.filter((x) => x !== sub) : [...chosen, sub] } }))} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[7px] text-[13px] font-bold" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "transparent", color: "var(--foreground)" }}>
-                        {sub}
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-        </div>
-        <div className="flex flex-wrap gap-[10px]">
-          <QuietButton onClick={() => go("interests")}>Back</QuietButton>
-          <PrimaryButton disabled={!answered} onClick={() => { rememberSeen(buildSix(state.worlds, state.subs, state.page).map((m) => m.career.id)); go("match"); }}>
-            <Sparkles className="h-[16px] w-[16px]" aria-hidden /> Show my six
-          </PrimaryButton>
-        </div>
-      </div>
+      <>
+        <LabScreen title="Which parts?">
+          <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-1 pt-2">
+            {state.worlds.map((world) => (
+              <Field key={world} label={world}>
+                <ChipRow ariaLabel={world} options={(SUB_INTERESTS[world] ?? []).map((x) => ({ key: x, label: x }))} value={state.subs[world] ?? []} max={99} onChange={(v) => setState((s) => ({ ...s, subs: { ...s.subs, [world]: v } }))} />
+              </Field>
+            ))}
+          </div>
+        </LabScreen>
+        <BottomBar left={<QuietButton ariaLabel="Back" onClick={() => go("interests")}><ChevronLeft className="h-4 w-4" aria-hidden /></QuietButton>} status="One or more per world." cta="Show my six" ctaDisabled={!answered} onCta={() => { remember(six.map((m) => m.career.id)); go("match"); }} />
+      </>
     );
   }
 
-  // ---- Match: six with reasons, pick up to 3 ----
+  // ---- Match: six with a reason each, pick up to 3 ----
   if (state.step === "match") {
+    const open = openId ? six.find((m) => m.career.id === openId) : null;
+    const openIdx = open ? six.indexOf(open) : -1;
     return (
-      <div className="flex flex-col gap-[var(--space-5)] pb-[80px]">
-        <StepHeader steps={STEPS} current={1} title="Six careers, and why each one is here" helper="Built from your worlds and the parts you picked, plus one stretch pick nearby. Pick up to three; that is your Top 3. Not feeling it? Six more, one tap." />
-        <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-3">
-          {six.map((m) => {
-            const pos = state.picks.indexOf(m.career.id);
-            return (
-              <LabCard key={m.career.id} career={m.career} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} onToggle={() => togglePick(m.career.id)} reasons={m.reasons} />
-            );
-          })}
-        </div>
-        <div className="flex flex-wrap items-center gap-[10px]">
-          <QuietButton onClick={() => { const next = state.page + 1; rememberSeen(buildSix(state.worlds, state.subs, next).map((m) => m.career.id)); setState((s) => ({ ...s, page: next })); }}>
-            <RefreshCw className="h-[16px] w-[16px]" aria-hidden /> Show me six more
-          </QuietButton>
-          <QuietButton onClick={() => go("subs")}>Change my answers</QuietButton>
-        </div>
-        <PickBar count={state.picks.length} toast={toast} onConfirm={() => go("top3")} />
-      </div>
+      <>
+        <LabScreen
+          title="Match"
+          status={`${state.picks.length} of ${MAX_PICKS}`}
+          hint="Tap a card for details. Tap + to pick it."
+          controls={
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <QuietButton onClick={() => go("subs")}><ChevronLeft className="h-4 w-4" aria-hidden /> Change answers</QuietButton>
+              <Pager index={state.page} onPrev={() => setPage(state.page - 1, -1)} onNext={() => setPage(state.page + 1, 1)} hint={{ active: showMore && !showPick && !openId, label: "Not feeling these? Six more, one tap.", onDismiss: dismissMore }} />
+            </div>
+          }
+        >
+          <SixGrid page={state.page} direction={dir}>
+            {six.map((m, i) => {
+              const pos = state.picks.indexOf(m.career.id);
+              return (
+                <LabCard
+                  key={m.career.id}
+                  career={m.career}
+                  fill
+                  control="pick"
+                  selected={pos >= 0}
+                  rank={pos >= 0 ? pos + 1 : undefined}
+                  reason={m.reason}
+                  onToggle={() => togglePick(m.career.id)}
+                  onOpen={() => setOpenId(m.career.id)}
+                  hint={i === 0 ? { active: showPick && !openId && state.picks.length === 0, label: "Tap + to pick it. Three picks make your Top 3.", cta: "Next", onDismiss: dismissPick } : undefined}
+                />
+              );
+            })}
+          </SixGrid>
+        </LabScreen>
+        <BottomBar status={state.picks.length === 0 ? `Pick up to ${MAX_PICKS}.` : state.picks.length < MAX_PICKS ? `${state.picks.length} picked.` : "Your Top 3 is set."} cta={state.picks.length === MAX_PICKS ? "Confirm Top 3" : "Continue"} ctaDisabled={state.picks.length === 0} onCta={() => go("top3")} />
+        <Toast text={toast} />
+        <AnimatePresence>
+          {open && (
+            <DetailModal career={open.career} control="pick" selected={state.picks.includes(open.career.id)} full={state.picks.length >= MAX_PICKS} onToggle={() => togglePick(open.career.id)} onClose={() => setOpenId(null)} onPrev={openIdx > 0 ? () => setOpenId(six[openIdx - 1].career.id) : undefined} onNext={openIdx < six.length - 1 ? () => setOpenId(six[openIdx + 1].career.id) : undefined} />
+          )}
+        </AnimatePresence>
+      </>
     );
   }
 
   // ---- My Profile: the same Top 3 screen as v2 ----
   return (
-    <div className="flex flex-col gap-[var(--space-5)]">
-      <StepHeader steps={STEPS} current={2} title="My Profile · Top 3" helper="Same screen as v2 on purpose: explore more, pull in one of your matches, or remove and replace any pick. The difference is how you got here." />
-      <TopThreeScreen
-        top3={top3}
-        saved={pool}
-        poolLabel="Your matches"
-        onExploreMore={() => go("match")}
-        onOpenSaved={() => go("match")}
-        onRemove={(id) => setState((s) => ({ ...s, picks: s.picks.filter((x) => x !== id) }))}
-        onReplace={(outId, inId) => setState((s) => ({ ...s, picks: s.picks.map((x) => (x === outId ? inId : x)) }))}
-        replacing={replacing}
-        setReplacing={setReplacing}
-      />
-    </div>
-  );
-}
-
-function PickBar({ count, toast, onConfirm }: { count: number; toast: string | null; onConfirm: () => void }) {
-  return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[64px] z-10 flex justify-center px-4">
-      <div className="pointer-events-auto flex items-center gap-[12px] rounded-full border px-[16px] py-[8px] backdrop-blur-[12px]" style={{ background: "color-mix(in srgb, var(--background) 82%, transparent)", borderColor: "var(--glass-border)" }}>
-        <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>Top 3: {count}/{MAX_PICKS}</span>
-        {toast && <span className="text-[12px] font-semibold" style={{ color: "#F5A623" }}>{toast}</span>}
-        <button type="button" onClick={onConfirm} disabled={count === 0} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[4px] rounded-full px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-40">
-          {count === MAX_PICKS ? "Confirm Top 3" : "Done for now"} <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
-        </button>
-      </div>
-    </div>
+    <>
+      <LabScreen title="My Top 3">
+        <TopThreeScreen
+          top3={top3}
+          pool={pool}
+          poolLabel="Matches"
+          onExploreMore={() => go("match")}
+          onOpenPool={() => go("match")}
+          onRemove={(id) => setState((s) => ({ ...s, picks: s.picks.filter((x) => x !== id) }))}
+          onReplace={(outId, inId) => setState((s) => ({ ...s, picks: s.picks.map((x) => (x === outId ? inId : x)) }))}
+          replacing={replacing}
+          setReplacing={setReplacing}
+          hint={{ active: showEdit, label: "Swap or remove any pick, any time.", onDismiss: dismissEdit }}
+        />
+      </LabScreen>
+      <BottomBar status="You can change these anytime." cta="Play again" onCta={onRestart} />
+    </>
   );
 }
