@@ -38,6 +38,24 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: one hue, hero-only glow, gradient bars, quiet attention strip, Students rebuilt
+
+Direct feedback, in order: "Lets lose the red glow on needs your attention and lets have better contrast for the nested cards everywhere. Lets not use so many different colors. Choose a hue and stick to that. Blue is best. Lose the glow from anything that isnt a hero card. School counselor overview: yes execute your recommendation. Milestone tracker: dont tint cards. Review queue: do not tint cards. etc." Then: "Lose the equalizer style graphs too, just do a blueish tinted one with gradient running brighter to top and more transparent towards bottom." Then: Overview is finalised, next screen is Students.
+
+**Palette.** New `src/components/counselor/palette.ts`: PRIMARY, BLUE_3 / BLUE_5 / BLUE_7 ordinal ramps (each passes `validate_palette.js --ordinal --mode dark --surface "#0b0d14"`), a neutral TARGET_LINE, NEUTRAL_SLICE. Swept every non-status hex in v2 to it: Career Pathways bar (7-step ramp in rank order), Postsecondary "With Plan", My Impact tiles / big stats / ASCA cards / stars, Platform Engagement tiles / second line series / intervention bars, Student Profile tile and card accents, Insights banner, Student Progress category charts, the role Overviews. Status colors (chips.tsx) untouched: they mean state.
+
+**Glow and tint.** Hero-only everywhere: Overview's donut sidekicks, pathways card and attention strip; Milestone Tracker (hero in brand blue, severity in the verdict dot only); Review Queue (priority pill stays, no card glow, detail pane in brand blue, due line neutral with a colored dot); the role Overviews' `OverviewCard`. `GLASS_INSET` raised to 7% / 14% for nested rows.
+
+**Charts.** `src/components/connect/viz.tsx` `BarChart` gained `barStyle="solid"` (one rounded bar, vertical gradient from the series color to near-transparent at the baseline, no track). Counselor v2 charts opt in; Connect's charts are unchanged.
+
+**Attention strip** (my recommendation, approved): one row per student on the inset surface, reason in plain text, severity as one colored word, three rows then "See all".
+
+**Students (v2)** rebuilt: six columns (grade and pathway fold into the student cell), Status sorts by severity, Last active sortable, Status and Plan `Listbox` pickers replace the popover and its chips, roadmap as a plain blue bar with the percent, "Jan 15" dates, a card list below `lg` instead of a 1100px sideways table, one-line empty state. Reasoning against alternatives: deviations file, "Students (roster)" and "v2 design rules".
+
+**Verified live** (headless captures at 1440 and 375): Overview, Milestone Tracker, Review Queue, School Administrator Overview, Students desktop and phone. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+**Next:** Student Profile (the drill-down from Students) on the same rules, then Milestone Tracker copy, Review Queue, and the five placeholder role screens.
+
 ### 2026-09-24 Counselor Dashboard v2: role Overviews rebuilt under a copy and color budget
 
 Direct feedback: "There is SO MUCH COPY AND RED and everything looks super overwhelming. V2 is the design layer it needs to be super intuitive, skimmable, glanceable, actionable, beautifully composed, the information delivered with proper hierarchy."

@@ -69,8 +69,11 @@ function MilestoneCardView({ card, hero, tint, onViewDetails, className = "" }: 
   ];
   if (card.notApplicable) stats.push({ label: "Not Applicable", value: card.notApplicable, color: STATUS_COLORS.notApplicable });
   const stuck = card.needsAttention + card.notStarted;
-  const verdictColor = stuck > 0 ? tint : STATUS_COLORS.completed;
-  const surface = hero ? { ...GLASS_CARD_HERO, borderColor: `color-mix(in srgb, ${tint} 38%, var(--glass-border))` } : GLASS_CARD;
+  const dotColor = stuck > 0 ? tint : STATUS_COLORS.completed;
+  // No severity tint on the card itself (direct feedback, 25 Sept 2026:
+  // "Milestone tracker: don't tint cards"). The hero is the one glowing
+  // surface, in the brand blue; the verdict's dot is where severity lives.
+  const surface = hero ? GLASS_CARD_HERO : GLASS_CARD;
   const wide = hero
     ? "@[640px]:grid-cols-[minmax(0,1fr)_auto_minmax(220px,0.7fr)] @[640px]:grid-rows-[auto_1fr_auto] @[640px]:items-center @[640px]:gap-x-[var(--space-7)] @[640px]:[grid-template-areas:'head_ring_legend'_'verdict_ring_legend'_'cta_ring_legend']"
     : "";
@@ -78,10 +81,7 @@ function MilestoneCardView({ card, hero, tint, onViewDetails, className = "" }: 
   return (
     <HoverBeam strength={0.6} className={`h-full ${className}`}>
       <div className="@container relative h-full overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
-        {/* Every card's glow is tinted to ITS OWN severity, not just the
-           hero's -- a quiet sidekick with stuck students was showing the
-           same default green glow as a genuinely healthy one. */}
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(tint, hero ? 0.3 : 0.12) }} />
+        {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.26) }} />}
         <div className={`relative grid h-full grid-rows-[auto_1fr_auto_auto_auto] gap-[var(--space-4)] [grid-template-areas:'head'_'ring'_'verdict'_'legend'_'cta'] ${wide}`}>
           <div className={`flex flex-col gap-[3px] [grid-area:head] ${hero ? "@[640px]:self-start" : ""}`}>
             <h3 className="text-[14.5px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{card.name}</h3>
@@ -108,9 +108,9 @@ function MilestoneCardView({ card, hero, tint, onViewDetails, className = "" }: 
              the ring -- the completed count now lives inside the ring. */}
           <span
             className={`flex items-center justify-center gap-[7px] text-center text-[12.5px] leading-[1.3] font-bold [grid-area:verdict] ${hero ? "@[640px]:justify-start @[640px]:text-left @[640px]:text-[14px]" : ""}`}
-            style={{ color: verdictColor }}
+            style={{ color: "var(--foreground)" }}
           >
-            <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: verdictColor }} />
+            <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}` }} />
             {stuck > 0 ? `${stuck} of ${card.total} need attention or haven’t started` : "Nobody stuck, just finishing up"}
           </span>
 

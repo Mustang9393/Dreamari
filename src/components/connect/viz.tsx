@@ -201,7 +201,7 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
  *  count charts pass their own ceiling). A missing/zero value in a series
  *  just draws no bar for that slot -- matches the reference's own "Gr. 9"
  *  columns with nothing plotted yet. */
-export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%", barColors, targetLine }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string; barColors?: string[]; /** a soft, gradient-shaded "target zone" from this value to the top of the chart, with a dashed reference line -- e.g. a district benchmark */ targetLine?: { value: number; label: string; color?: string } }) {
+export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%", barColors, targetLine, barStyle = "segmented" }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string; barColors?: string[]; /** a soft, gradient-shaded "target zone" from this value to the top of the chart, with a dashed reference line -- e.g. a district benchmark */ targetLine?: { value: number; label: string; color?: string }; /** "segmented" is the equalizer stack Connect uses; "solid" is one rounded bar with a vertical gradient, bright at the top fading toward the baseline (the Counselor Dashboard's v2 mark). */ barStyle?: "segmented" | "solid" }) {
   const W = 600;
   const H = height;
   // Left margin wide enough for real y-axis tick labels (0/25/50/75/100%) --
@@ -272,7 +272,38 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
   // the hit-target rect currently under the cursor, breaking hover before
   // it could ever visually register. Calling this as a plain function
   // avoids that: React never sees it as its own component boundary.
+  const gradId = useId().replace(/:/g, "");
   function renderSegmentedBar({ barX, barValueY, color, dim, onEnter, onLeave, ariaLabel }: { barX: number; barValueY: number; color: string; dim: boolean; onEnter: () => void; onLeave: () => void; ariaLabel: string }) {
+    if (barStyle === "solid") {
+      // One bar, one gradient: the series color at full strength at the
+      // top of the bar, fading toward transparent at the baseline (direct
+      // feedback, 25 Sept 2026:
+      // "lose the equalizer style graphs, just do a blueish tinted one
+      // with gradient running brighter to top and more transparent
+      // towards bottom"). No track behind the bar: a faint full-height
+      // column read as the old equalizer's ghost. The gradient is in
+      // bar-space so a short bar and a tall bar both fade over their own
+      // height.
+      const id = `bar-${gradId}-${color.replace(/[^a-zA-Z0-9]/g, "")}`;
+      const h = Math.max(2, baseline - barValueY);
+      return (
+        <g style={{ opacity: dim ? 0.4 : 1, transition: "opacity 120ms ease" }}>
+          <defs>
+            <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="1" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.12" />
+            </linearGradient>
+          </defs>
+          <rect x={barX} y={barValueY} width={barW} height={h} rx={4} fill={`url(#${id})`} />
+          <rect
+            x={barX} y={padTop} width={barW} height={plotH}
+            fill="transparent" style={{ cursor: "pointer" }}
+            tabIndex={0} role="button" aria-label={ariaLabel}
+            onMouseEnter={onEnter} onMouseLeave={onLeave} onFocus={onEnter} onBlur={onLeave}
+          />
+        </g>
+      );
+    }
     const filled: number[] = [];
     for (let i = 0; i < segCount; i++) {
       const segBottom = baseline - i * SEG_PITCH;

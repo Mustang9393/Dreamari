@@ -132,7 +132,6 @@ function PriorityPill({ priority }: { priority: Priority }) {
 }
 
 function QueueCard({ item, selected, onSelect }: { item: ReviewItem; selected: boolean; onSelect: () => void }) {
-  const color = PRIORITY_COLORS[item.priority];
   return (
     <button
       type="button"
@@ -144,10 +143,6 @@ function QueueCard({ item, selected, onSelect }: { item: ReviewItem; selected: b
         borderColor: selected ? "color-mix(in srgb, var(--primary) 55%, var(--glass-border))" : GLASS_CARD.borderColor,
       }}
     >
-      {/* Same quiet severity glow the Milestone Tracker cards use, tied to
-         this item's own priority, so the list reads worst-first by color
-         before a single word is read. Normal items get none. */}
-      {item.priority !== "Normal" && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(color, 0.14) }} />}
       <span className="relative flex items-center justify-between gap-[10px]">
         <span className="flex min-w-0 items-center gap-[10px]">
           <Avatar name={item.student.name} size={32} />
@@ -159,8 +154,8 @@ function QueueCard({ item, selected, onSelect }: { item: ReviewItem; selected: b
         <PriorityPill priority={item.priority} />
       </span>
       <span className="relative text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.milestone}</span>
-      <span className="relative flex items-center gap-[6px] text-[11.5px] font-bold" style={{ color: item.priority === "Normal" ? "var(--muted-foreground)" : color }}>
-        <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: item.priority === "Normal" ? "var(--muted-foreground)" : color }} />
+      <span className="relative flex items-center gap-[6px] text-[11.5px] font-bold" style={{ color: "var(--foreground)" }}>
+        <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: item.priority === "Normal" ? "var(--muted-foreground)" : PRIORITY_COLORS[item.priority] }} />
         {dueLabel(item.daysToDue)}
         <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· submitted {fmt(item.submitted)}</span>
       </span>
@@ -210,10 +205,10 @@ export function ReviewQueue() {
     setSelectedId(null);
   };
 
-  const selectedColor = selected ? PRIORITY_COLORS[selected.priority] : "var(--primary)";
-  const detailSurface = selected && selected.priority !== "Normal"
-    ? { ...GLASS_CARD_HERO, borderColor: `color-mix(in srgb, ${selectedColor} 38%, var(--glass-border))` }
-    : GLASS_CARD_HERO;
+  // The pane is the screen's one hero surface, in the brand blue; priority
+  // is the pill on each card, not a tint (direct feedback, 25 Sept 2026:
+  // "Review queue: do not tint cards").
+  const detailSurface = GLASS_CARD_HERO;
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
@@ -237,7 +232,7 @@ export function ReviewQueue() {
 
         <HoverBeam strength={0.5} className="h-full">
           <div className="relative flex h-full flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={detailSurface}>
-            {selected && selected.priority !== "Normal" && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(selectedColor, 0.18) }} />}
+            <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.22) }} />
             {!selected ? (
               <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select a submission to review.</p>
             ) : (
@@ -254,7 +249,7 @@ export function ReviewQueue() {
                   </div>
                   <div className="flex flex-col items-end gap-[6px]">
                     <PriorityPill priority={selected.priority} />
-                    <span className="text-[11.5px] font-bold tabular-nums" style={{ color: selected.priority === "Normal" ? "var(--muted-foreground)" : selectedColor }}>
+                    <span className="text-[11.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
                       {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· due {fmt(selected.due)} · submitted {fmt(selected.submitted)}</span>
                     </span>
                   </div>

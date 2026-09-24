@@ -67,6 +67,45 @@ left in place as the record of why v2 made each change.
 
 ---
 
+## v2 design rules (25 Sept 2026, apply to every v2 screen)
+
+Direct feedback that set these: "Let's lose the red glow on needs your
+attention and let's have better contrast for the nested cards everywhere.
+Let's not use so many different colors. Choose a hue and stick to that.
+Blue is best. Lose the glow from anything that isn't a hero card.
+Milestone tracker: don't tint cards. Review queue: do not tint cards."
+Then: "Lose the equalizer style graphs too, just do a blueish tinted one
+with gradient running brighter to top and more transparent towards
+bottom."
+
+- **One hue.** Every magnitude, series and category mark draws from the
+  blue ramps in `src/components/counselor/palette.ts` (3, 5 and 7 steps,
+  each validated as an ordinal ramp on the dark surface). The only other
+  colors are the three reserved status colors, and they mean state (On
+  Track, Needs Attention, At Risk; met, close, behind), never identity.
+  Replaced: seven-hue pathway bar (reused status green and amber), pink /
+  amber / purple / teal tile accents on My Impact, Platform Engagement and
+  the Student Profile, a bronze target line (now a neutral dashed line).
+  Alternative: a validated eight-hue categorical palette. Passes the
+  validator, fails the brief; a dashboard a counselor scans daily does not
+  need series identity by hue when a legend and rank order carry it.
+- **Glow is hero-only.** One card per screen carries the saturated
+  surface and glow; everything else is the plain glass. Removed: the
+  quiet per-card glows on Overview's donut and pathway cards and the
+  attention strip, Milestone Tracker's severity tints, Review Queue's
+  priority glows and tinted detail pane, the role Overviews' sidekick
+  glows. Severity now lives in one dot or one word on the card, not its
+  surface.
+- **Nested surfaces contrast.** `GLASS_INSET` (surfaces.ts) is white at
+  7% with a 14% border, up from 4% / 8%, and every nested row (attention
+  strip, role Overview rows, phone student cards) uses it.
+- **Bars are one gradient.** The shared `BarChart` gained
+  `barStyle="solid"`: one rounded bar, the series color at the top fading
+  toward the baseline, no track behind it. Every counselor v2 chart passes
+  it; Connect keeps the segmented style it was designed with. Alternative:
+  change the shared default. Connect's charts were reviewed and approved
+  in the equalizer style, so the counselor dashboard opts in instead.
+
 ## Role shell (v2)
 
 - **The left menu is decided by the role in Settings, 24 Sept 2026.** The
@@ -285,6 +324,15 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
 
 ## Overview
 
+- **Attention strip rebuilt quiet, 25 Sept 2026** (direct feedback: "lose
+  the red glow on needs your attention" and, the day before, the standing
+  budget). No glow, no filled red reason blocks, no three-column grid: one
+  row per student on the raised inset surface, name and grade left, the
+  reason in plain text and the severity as one colored word on the right,
+  three rows then "See all". What it replaced: three equal chips each with
+  a colored severity badge and a color-filled reason pill, which put six
+  red surfaces on a healthy page. The severity word and the sort order
+  keep the "which first" answer.
 - **Top row restructured from 3 equal cards to an asymmetric hero layout**
   (Student Status wide + tinted to its own reading, Career Pathways
   medium, Postsecondary Plans compact) instead of 3 equal-width boxes.
@@ -323,6 +371,36 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
   square -- this dashboard is a Dreamari product like every other screen.
 
 ## Students (roster)
+
+**25 Sept 2026, v2 rebuilt on the budget above** (the first pass in the
+list below is v1's history):
+
+- **Six columns, not eight.** Grade and Career Track fold into the
+  student cell as one muted line under the name ("Grade 12 · Healthcare"),
+  which is how every other row on the dashboard already names a student.
+  Alternative: keep them sortable as columns. Grade is already a topbar
+  filter, and a pathway sort was never asked for.
+- **Status sorts by severity** (At Risk, Needs Attention, On Track; ties by
+  roadmap), not alphabetically, so one click puts the students to act on
+  first. Last active is sortable too.
+- **Two pickers replace the "Filters" popover.** Status and Plan sit in
+  the toolbar as `Listbox`es (guardrails: never a native select), showing
+  the current value, "Any status" / "Any plan" to clear. The Overview's
+  "With Plan / Undecided" click-through and this screen's own intent
+  filter are the same question at two grains, so one picker shows either.
+  Removed: the removable chips that repeated the same state next to a
+  button that hid the control.
+- **Phone and tablet get a card list, not a sideways table.** Below the
+  desktop breakpoint each row is a card: student, status, roadmap,
+  milestones. Alternative: the 1100px table with horizontal scroll. The
+  roster is the one screen a counselor most plausibly opens on a phone
+  between meetings; a table that needs two-axis scrolling is not usable
+  there (and the guardrails flag paired-scrollbar CSS as a known
+  Windows/Chromebook trap).
+- **Roadmap is a plain blue bar with the percent beside it**, replacing
+  the shared `Meter`'s "92/100" reading.
+- **Dates read "Jan 15"** instead of ISO.
+- **Empty result is one line** (playbook tier 5).
 
 - **Table collapsed from 13 columns to 8.** The "School" column is
   removed entirely -- every row said "Lincoln High School" (a one-school

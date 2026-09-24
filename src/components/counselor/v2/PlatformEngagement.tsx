@@ -54,17 +54,17 @@ function LoginsChart() {
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Total logins and unique student logins by month" className="h-auto w-full overflow-visible" preserveAspectRatio="none" style={{ height: H }}>
         <defs>
           <linearGradient id={`pe-total-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#5B6CF9" stopOpacity="0.7" /><stop offset="100%" stopColor="#5B6CF9" /></linearGradient>
-          <linearGradient id={`pe-unique-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#33C78C" stopOpacity="0.7" /><stop offset="100%" stopColor="#33C78C" /></linearGradient>
+          <linearGradient id={`pe-unique-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#9BA8FB" stopOpacity="0.7" /><stop offset="100%" stopColor="#9BA8FB" /></linearGradient>
         </defs>
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
           <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
         ))}
         <path d={lineFor("total")} fill="none" stroke={`url(#pe-total-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(91,108,249,0.5))" }} />
-        <path d={lineFor("unique")} fill="none" stroke={`url(#pe-unique-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(51,199,140,0.5))" }} />
+        <path d={lineFor("unique")} fill="none" stroke={`url(#pe-unique-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(155,168,251,0.5))" }} />
         {MONTHS.map((m, i) => (
           <g key={m.label}>
             <circle cx={x(i)} cy={y(m.total)} r="4.5" fill="#5B6CF9" stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-            <circle cx={x(i)} cy={y(m.unique)} r="4.5" fill="#33C78C" stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+            <circle cx={x(i)} cy={y(m.unique)} r="4.5" fill="#9BA8FB" stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
           </g>
         ))}
         {MONTHS.map((m, i) => (
@@ -73,7 +73,7 @@ function LoginsChart() {
       </svg>
       <div className="flex flex-wrap gap-x-[16px] gap-y-[4px]">
         <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: "#5B6CF9" }} />Total Logins</span>
-        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: "#33C78C" }} />Unique Student Logins</span>
+        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: "#9BA8FB" }} />Unique Student Logins</span>
       </div>
     </figure>
   );
@@ -84,9 +84,9 @@ export function PlatformEngagement() {
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
         <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Monthly Active Students · unique logins in Sep 2026" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Weekly Active Students · avg unique students per week" accent="#33C78C" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={CalendarDays} value="18" label="Daily Active Students · avg unique students per day" accent="#F5A623" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Avg Logins / Student · per student in Sep 2026" accent="#EC5FA6" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Weekly Active Students · avg unique students per week" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={CalendarDays} value="18" label="Daily Active Students · avg unique students per day" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Avg Logins / Student · per student in Sep 2026" accent="#5B6CF9" /></div></HoverBeam>
       </div>
 
       <HoverBeam strength={0.6} className="h-full">
@@ -137,7 +137,7 @@ export function PlatformEngagement() {
             {INTERVENTION_BY_GRADE.map((g) => (
               <div key={g.grade} className="flex h-full flex-col items-center justify-end gap-[8px]">
                 <span className="text-[13px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{g.count}</span>
-                <span className="w-full max-w-[64px] rounded-t-[6px]" style={{ height: `${(g.count / 4) * 88}px`, background: "linear-gradient(180deg, #F5A623, color-mix(in srgb, #F5A623 55%, transparent))", boxShadow: "0 0 12px color-mix(in srgb, #F5A623 55%, transparent)" }} />
+                <span className="w-full max-w-[64px] rounded-t-[6px]" style={{ height: `${(g.count / 4) * 88}px`, background: "linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 55%, transparent))" }} />
                 <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {g.grade}</span>
               </div>
             ))}

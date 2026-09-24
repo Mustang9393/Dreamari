@@ -125,9 +125,9 @@ export function MyImpact() {
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
         <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(total)} label="Total Caseload · students" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={`${Math.round((onTrack / total) * 100)}%`} label="On-Track Rate · of caseload on pace" accent="#33C78C" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={GraduationCap} value={`${withPlanPct}%`} label="Postsecondary Plans · students with a declared plan" accent="#F5A623" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={MessageSquare} value={`${responseRatePct}%`} label="Question Response Rate · student inquiries answered" accent="#EC5FA6" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={`${Math.round((onTrack / total) * 100)}%`} label="On-Track Rate · of caseload on pace" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={GraduationCap} value={`${withPlanPct}%`} label="Postsecondary Plans · students with a declared plan" accent="#5B6CF9" /></div></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={MessageSquare} value={`${responseRatePct}%`} label="Question Response Rate · student inquiries answered" accent="#5B6CF9" /></div></HoverBeam>
       </div>
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
@@ -165,10 +165,10 @@ export function MyImpact() {
 
       <SectionCard title="College & Career Readiness Milestones">
         <div className="grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
-          <BigStat value={`${Math.round((careerReportApproved / total) * 100)}%`} label="Career Reports Approved" sub={`${careerReportApproved} of ${total} students`} color="#5B6CF9" />
-          <BigStat value={`${Math.round((academicPlanApproved / total) * 100)}%`} label="Academic Plans Approved" sub={`${academicPlanApproved} of ${total} students`} color="#33C78C" />
-          <BigStat value={`${gr10Plus.length ? Math.round((resumeApproved / gr10Plus.length) * 100) : 0}%`} label="Résumés Complete (Gr. 10+)" sub={`${resumeApproved} of ${gr10Plus.length} students`} color="#F5A623" />
-          <BigStat value={`${seniorCompliancePct}%`} label="Senior Plan Compliance" sub={`${seniors.length} seniors · district target: 80%`} color="#EC5FA6" />
+          <BigStat value={`${Math.round((careerReportApproved / total) * 100)}%`} label="Career Reports Approved" sub={`${careerReportApproved} of ${total} students`} color="var(--foreground)" />
+          <BigStat value={`${Math.round((academicPlanApproved / total) * 100)}%`} label="Academic Plans Approved" sub={`${academicPlanApproved} of ${total} students`} color="var(--foreground)" />
+          <BigStat value={`${gr10Plus.length ? Math.round((resumeApproved / gr10Plus.length) * 100) : 0}%`} label="Résumés Complete (Gr. 10+)" sub={`${resumeApproved} of ${gr10Plus.length} students`} color="var(--foreground)" />
+          <BigStat value={`${seniorCompliancePct}%`} label="Senior Plan Compliance" sub={`${seniors.length} seniors · district target: 80%`} color="var(--foreground)" />
         </div>
         <div className="flex items-start gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)] text-[13px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))", color: "var(--foreground)" }}>
           <CheckCircle2 className="mt-[1px] h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />
@@ -211,11 +211,11 @@ export function MyImpact() {
 
       <SectionCard title="Platform-Facilitated Student Engagement">
         <div className="grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-5">
-          <BigStat value={engagement.drops.toLocaleString("en-US")} label="Daily Career Drops Completed" color="#5B6CF9" />
-          <BigStat value={engagement.sims.toLocaleString("en-US")} label="Career Simulations Completed" color="#33C78C" />
-          <BigStat value={engagement.careers.toLocaleString("en-US")} label="Careers Saved to Profiles" color="#F5A623" />
-          <BigStat value={engagement.colleges.toLocaleString("en-US")} label="Colleges Saved by Students" color="#EC5FA6" />
-          <BigStat value={engagement.posts.toLocaleString("en-US")} label="Community Contributions" color="#7C5CFA" />
+          <BigStat value={engagement.drops.toLocaleString("en-US")} label="Daily Career Drops Completed" color="var(--foreground)" />
+          <BigStat value={engagement.sims.toLocaleString("en-US")} label="Career Simulations Completed" color="var(--foreground)" />
+          <BigStat value={engagement.careers.toLocaleString("en-US")} label="Careers Saved to Profiles" color="var(--foreground)" />
+          <BigStat value={engagement.colleges.toLocaleString("en-US")} label="Colleges Saved by Students" color="var(--foreground)" />
+          <BigStat value={engagement.posts.toLocaleString("en-US")} label="Community Contributions" color="var(--foreground)" />
         </div>
         <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>All engagement activity was generated by students in {counselorName.split(" ")[0]}&apos;s caseload through the Dreamari platform during this reporting period.</p>
       </SectionCard>
@@ -225,17 +225,17 @@ export function MyImpact() {
       </div>
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3">
         {[
-          { icon: BookOpen, color: "#5B6CF9", title: "Academic Development", items: [
+          { icon: BookOpen, color: "var(--primary)", title: "Academic Development", items: [
             `Academic planning supported for all ${total} students`,
             `${Math.round((academicPlanApproved / total) * 100)}% of students have approved four-year academic plans`,
             "Course selection and credit-monitoring support delivered",
           ] },
-          { icon: Briefcase, color: "#7C5CFA", title: "Career Development", items: [
+          { icon: Briefcase, color: "var(--primary)", title: "Career Development", items: [
             `${Math.round((careerReportApproved / total) * 100)}% career report completion rate across caseload`,
             `Career pathway declared for ${careerPathwayDeclaredPct}% of students`,
             "Career simulations and assessments facilitated via Dreamari",
           ] },
-          { icon: Heart, color: "#EC5FA6", title: "Social-Emotional Development", items: [
+          { icon: Heart, color: "var(--primary)", title: "Social-Emotional Development", items: [
             `${monitored} students identified and actively monitored for support`,
             `${responseRatePct}% student question response rate via Counselor Connect`,
             `${roster.filter((s) => s.status === "At Risk").length} at-risk students flagged for proactive intervention`,
@@ -272,7 +272,7 @@ export function MyImpact() {
             `Over ${engagement.drops.toLocaleString("en-US")} career-exploration activities completed by students on the Dreamari platform, driven by counselor-assigned prompts and deadlines.`,
           ].map((a) => (
             <li key={a} className="flex items-start gap-[8px] text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>
-              <Star className="mt-[3px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "#F5A623" }} />
+              <Star className="mt-[3px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />
               {a}
             </li>
           ))}

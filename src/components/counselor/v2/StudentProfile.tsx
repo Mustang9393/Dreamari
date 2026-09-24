@@ -118,14 +118,14 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const approvedCount = MILESTONE_KEYS.filter((k) => student.milestones[k] === "Approved").length;
 
   const engagement = [
-    { icon: Sparkles, value: String(student.engagement.dreamScore), label: "Dream Score", accent: "#7C5CFA" },
-    { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops Completed", accent: "#F5A623" },
+    { icon: Sparkles, value: String(student.engagement.dreamScore), label: "Dream Score", accent: "#5B6CF9" },
+    { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops Completed", accent: "#5B6CF9" },
     { icon: Gamepad2, value: String(student.engagement.simulations), label: "Career Simulations", accent: "#5B6CF9" },
-    { icon: Bookmark, value: String(student.engagement.careersSaved), label: "Careers Saved", accent: "#33C78C" },
-    { icon: Landmark, value: String(student.engagement.collegesSaved), label: "Colleges Saved", accent: "#4AB8D8" },
-    { icon: Trophy, value: String(student.engagement.challenges), label: "Career Challenges", accent: "#EC5FA6" },
-    { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions Submitted", accent: "#8FE3D9" },
-    { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community Posts", accent: "#F5A623" },
+    { icon: Bookmark, value: String(student.engagement.careersSaved), label: "Careers Saved", accent: "#5B6CF9" },
+    { icon: Landmark, value: String(student.engagement.collegesSaved), label: "Colleges Saved", accent: "#5B6CF9" },
+    { icon: Trophy, value: String(student.engagement.challenges), label: "Career Challenges", accent: "#5B6CF9" },
+    { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions Submitted", accent: "#5B6CF9" },
+    { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community Posts", accent: "#5B6CF9" },
   ];
 
   return (
@@ -180,7 +180,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <CardHead icon={Target} title="Top 5 Career Matches" accent="#7C5CFA" />
+            <CardHead icon={Target} title="Top 5 Career Matches" accent="#5B6CF9" />
             <div className="flex flex-col gap-[10px]">
               {student.topMatches.map((m, i) => (
                 <div key={m.title} className="flex items-center gap-[12px]">
@@ -205,7 +205,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex flex-wrap items-center justify-between gap-[8px]">
-            <CardHead icon={Target} title="Milestone Status" accent="#33C78C" />
+            <CardHead icon={Target} title="Milestone Status" accent="#5B6CF9" />
             <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{approvedCount} of {MILESTONE_KEYS.length} milestones approved</span>
           </span>
           <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-3">
@@ -223,7 +223,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         <HoverBeam strength={0.6} className="h-full">
           <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <span className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-              <CardHead icon={Sunrise} title="Plan Progress" accent="#F5A623" />
+              <CardHead icon={Sunrise} title="Plan Progress" accent="#5B6CF9" />
               <Segmented ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
             </span>
             {(() => {
@@ -263,7 +263,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <CardHead icon={Sparkles} title="Platform Engagement" accent="#7C5CFA" />
+          <CardHead icon={Sparkles} title="Platform Engagement" accent="#5B6CF9" />
           <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
             {engagement.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} accent={e.accent} />)}
           </div>
@@ -271,7 +271,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       </HoverBeam>
 
       <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <CardHead icon={StickyNote} title="Counselor Notes" accent="#EC5FA6" />
+        <CardHead icon={StickyNote} title="Counselor Notes" accent="#5B6CF9" />
         <div className="flex flex-col gap-[8px]">
           <textarea
             id="counselor-note-input"

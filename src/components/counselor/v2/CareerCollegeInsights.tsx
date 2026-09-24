@@ -83,7 +83,7 @@ function TrackChart({ title, lede, items }: { title: string; lede: string; items
 export function CareerCollegeInsights() {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="relative shrink-0 overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, var(--card)), color-mix(in srgb, #7C5CFA 24%, var(--card)))" }}>
+      <div className="relative shrink-0 overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ borderColor: "var(--glass-border)", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 30%, var(--card)), color-mix(in srgb, var(--primary) 24%, var(--card)))" }}>
         <span className="flex items-center gap-[8px] text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--primary)" }}>
           <Lightbulb className="h-[14px] w-[14px]" aria-hidden /> Dreamari Recommendations for You
         </span>

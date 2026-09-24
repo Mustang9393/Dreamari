@@ -88,7 +88,7 @@ const REPORT_TYPES: ReportType[] = [
           : s.postsecondaryIntent;
         counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
       }
-      const colors = ["#5B6CF9", "#5B6470", "#F5A623", "#4AB8D8"];
+      const colors = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4"];
       return { title: "Postsecondary Plans", categories, colors, values: () => categories.map((c) => counts.get(c) ?? 0), max: Math.max(1, roster.length) };
     },
   },
@@ -103,7 +103,7 @@ const REPORT_TYPES: ReportType[] = [
         roster.filter((s) => s.milestones["Career Report"] === "Changes Requested").length,
         roster.filter((s) => s.milestones["Academic Plan"] === "Changes Requested").length,
       ];
-      const colors = ["#5B6CF9", "#33C78C", "#4AB8D8", "#F5A623", "#7C5CFA"];
+      const colors = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4", "#2E3BB8"];
       return { title: "Counselor Review Activity", categories, colors, values: () => values, max: Math.max(4, ...values) };
     },
   },
@@ -210,7 +210,7 @@ export function StudentProgress() {
                 <h2 className="flex items-center gap-[8px] text-[16px] font-bold" style={{ color: "var(--foreground)" }}><ReportIcon className="h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{chart.title}</h2>
                 <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{reportRoster.length} students shown</span>
               </div>
-              <BarChart groups={chart.categories} series={[{ label: report.label, accent: chart.colors[0], values: chartValues }]} barColors={chart.colors} max={chart.max} valueSuffix="" />
+              <BarChart barStyle="solid" groups={chart.categories} series={[{ label: report.label, accent: chart.colors[0], values: chartValues }]} barColors={chart.colors} max={chart.max} valueSuffix="" />
             </div>
           </HoverBeam>
         )}

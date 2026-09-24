@@ -39,7 +39,7 @@ export function OverviewCard({ title, unit, hero, tint, aside, children }: { tit
   return (
     <HoverBeam strength={hero ? 0.7 : 0.6} className="h-full">
       <div className="relative flex h-full flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
-        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(hero && tint ? tint : "var(--primary)", hero ? 0.26 : 0.1) }} />
+        {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(tint ?? "var(--primary)", 0.26) }} />}
         <div className="relative flex flex-wrap items-baseline justify-between gap-x-[8px] gap-y-[4px]">
           <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>
             {title}

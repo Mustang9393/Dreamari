@@ -111,7 +111,7 @@ export function OverviewLead() {
             centerPct={(school.withPlan / total) * 100}
             centerLabel="have a plan"
             rows={[
-              { label: "With Plan", value: school.withPlan, color: "#2F6BF2", onClick: () => goToStudents(undefined, "With Plan") },
+              { label: "With Plan", value: school.withPlan, color: "#5B6CF9", onClick: () => goToStudents(undefined, "With Plan") },
               { label: "Undecided", value: school.students - school.withPlan, color: "#5B6470", onClick: () => goToStudents(undefined, "Undecided") },
             ]}
           />

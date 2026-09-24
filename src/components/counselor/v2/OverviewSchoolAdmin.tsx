@@ -84,7 +84,7 @@ export function OverviewSchoolAdmin() {
         <div className="lg:col-span-7">
           <HoverBeam strength={0.6} className="h-full">
             <Panel id="readiness-by-grade" title="Readiness by grade" className="h-full">
-              <BarChart
+              <BarChart barStyle="solid"
                 groups={GRADES.map((g) => `Gr. ${g}`)}
                 series={[
                   { label: "On track", accent: READINESS_SERIES[0], values: byGrade.map((m) => m.onTrackPct) },
