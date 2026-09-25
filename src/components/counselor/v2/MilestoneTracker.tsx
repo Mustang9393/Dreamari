@@ -35,11 +35,11 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { curriculumForGrade, curriculumFocus, curriculumAvgDone, statusesForItem, type CurriculumStatus, type CurriculumWindow } from "@/lib/counselorCurriculum";
-import { CardLink, Go, STATUS_COLORS } from "../chips";
+import { CardLink, Go } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
-import { OverviewCard, Stat } from "./overviewShared";
+import { SidePanel } from "./SidePanel";
 
 type Grade = 9 | 10 | 11 | 12;
 type Row = { id: string; title: string; window: CurriculumWindow; classification: string; kind: "auto" | "counselor-verified"; total: number; counts: Record<CurriculumStatus, number>; donePct: number; behindShare: number };
@@ -52,20 +52,14 @@ const STATES: { key: CurriculumStatus; label: string; color: string }[] = [
 ];
 const WINDOW_TITLE: Record<CurriculumWindow, string> = { fall: "Fall", winter: "Winter", spring: "Spring" };
 
-function outstanding(r: Row): string {
-  const parts: string[] = [];
-  if (r.counts["awaiting-review"]) parts.push(`${r.counts["awaiting-review"]} need attention`);
-  if (r.counts["not-started"]) parts.push(`${r.counts["not-started"]} not started`);
-  if (r.counts["in-progress"]) parts.push(`${r.counts["in-progress"]} in progress`);
-  return parts.length ? parts.join(" · ") : "Everyone is done";
-}
 
 
 export function MilestoneTracker() {
   const router = useRouter();
   const { gradeFilter, setGradeFilter, counselorFilter, setCounselorFilter, setStepFilter } = useCounselorFilters();
   const [grade, setGradeState] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
-  const setGrade = (g: Grade) => setGradeState(g);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const setGrade = (g: Grade) => { setGradeState(g); setSelectedId(null); };
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
@@ -126,119 +120,124 @@ export function MilestoneTracker() {
     const a = document.createElement("a"); a.href = url; a.download = `grade-${grade}-milestones.csv`; a.click(); URL.revokeObjectURL(url);
   };
 
+  const selected = rows.find((r) => r.id === selectedId) ?? null;
+
+  // The Replit's own structure, calmer (direct feedback: "Dont show
+  // everything together its too much information to process... Is milestone
+  // tracker too different from replit?"): grade tabs, one summary line, the
+  // one focus card, then a grid of plain milestone cards (name, ring, one
+  // line). Each card's full breakdown and its actions open in a side panel.
+  // The Fall/Winter/Spring grouping is gone: the reference has no seasons,
+  // they were an even three-way split of its list, not real timing.
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
-        {showCounselor && (
-          <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-        )}
-      </div>
-
-      {/* Its own row, not squeezed beside the grade tabs -- direct
-         feedback: "the numbered stats in the top right... are not
-         getting enough prominence and might be ignored." */}
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={GLASS_INSET}>
-        <div className="flex flex-wrap items-center gap-x-[var(--space-8)] gap-y-[var(--space-3)]">
-          <Stat value={String(students.length)} label="students" />
-          <Stat value={String(rows.length)} label="checkpoints" />
-          <Stat value={`${overallDone}%`} label="done" />
-          <Stat value={String(awaiting)} label="need attention" color={awaiting > 0 ? PRIMARY : undefined} />
-          <Stat value={String(notStarted)} label="not started" color={notStarted > 0 ? STATUS_COLORS["Needs Attention"] : undefined} />
-        </div>
-        <button type="button" onClick={exportCsv} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Download className="h-[14px] w-[14px]" aria-hidden /> CSV</button>
+        <span className="flex flex-wrap items-center gap-[8px]">
+          {showCounselor && (
+            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+          )}
+          <button type="button" onClick={exportCsv} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Download className="h-[14px] w-[14px]" aria-hidden /> CSV</button>
+        </span>
       </div>
 
       {students.length === 0 || !focus ? (
         <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No Grade {grade} students{showCounselor && counselorFilter !== "All" ? " on this counselor's caseload" : ""}.</p>
       ) : (
         <>
+          {/* The Replit's summary banner, as one line. */}
+          <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
+          <div className="flex flex-col gap-[4px]">
+            <p className="text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+              {students.length} students · {rows.length} milestones · <span style={{ color: PRIMARY }}>{overallDone}% done</span> on average
+              {awaiting > 0 && <span style={{ color: "var(--muted-foreground)" }}> · {awaiting} need attention</span>}
+              {notStarted > 0 && <span style={{ color: "var(--muted-foreground)" }}> · {notStarted} not started</span>}
+            </p>
+            <p className="text-[12.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Focus: {curriculumFocus(grade)}</p>
+          </div>
+          <CardLink onClick={openAll}>All Grade {grade} students</CardLink>
+          </div>
+
           <HoverBeam strength={0.7} className="h-full">
-            <div className="group relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
-              <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
-              {/* Focus first, said once: the title names it, the ring and its
-                 legend give the split, and the two actions are the only
-                 calls to act (was a pill, a sentence and a link all
-                 restating "8 not done"). */}
-              <div className="relative flex flex-col gap-[var(--space-4)]">
-                <span className="flex flex-wrap items-baseline gap-x-[10px]">
-                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Focus first</span>
-                  <h2 className="text-[18px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</h2>
+            <div className="group relative flex flex-wrap items-center justify-between gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
+              <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.22) }} />
+              <span className="relative flex items-center gap-[var(--space-4)]">
+                <SegmentedRing size={72} stroke={8} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
+                  <span className="text-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
+                </SegmentedRing>
+                <span className="flex flex-col gap-[3px]">
+                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Furthest behind</span>
+                  <span className="text-[16px] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</span>
                 </span>
-                <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-                  <div className="flex items-center gap-[var(--space-4)]">
-                    <SegmentedRing size={96} stroke={10} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
-                      <span className="flex flex-col items-center leading-none">
-                        <span className="text-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
-                        <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
-                      </span>
-                    </SegmentedRing>
-                    <ul className="flex flex-col gap-[4px]">
-                      {STATES.filter((st) => st.key !== "done" && focus.counts[st.key] > 0).map((st) => (
-                        <li key={st.key} className="flex items-center gap-[7px] text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>
-                          <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: st.color }} />
-                          <span className="tabular-nums">{focus.counts[st.key]}</span>
-                          <span style={{ color: "var(--muted-foreground)" }}>{st.label.toLowerCase()}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <span className="flex flex-wrap gap-[8px]">
-                    {focus.total - focus.counts.done > 0 && <CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} students not done</CardLink>}
-                    {focus.counts["awaiting-review"] > 0 && <CardLink onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }}>Review {focus.counts["awaiting-review"]}</CardLink>}
-                  </span>
-                </div>
-              </div>
+              </span>
+              <span className="relative flex flex-wrap gap-[8px]">
+                {focus.total - focus.counts.done > 0 && <CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink>}
+                {focus.counts["awaiting-review"] > 0 && <CardLink onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }}>Review {focus.counts["awaiting-review"]}</CardLink>}
+              </span>
             </div>
           </HoverBeam>
 
-          {/* Every milestone for the grade at rest, the Replit's own core
-             view (a v2-vs-Replit audit found them folded behind season
-             tiles), grouped by season for hierarchy. Each card is one ring
-             and its counts; clicking it opens the students not done. */}
-          <OverviewCard title={`Grade ${grade} milestones`} unit={curriculumFocus(grade)} aside={<CardLink onClick={openAll}>Students</CardLink>}>
-            <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
-              {STATES.map((st) => (
-                <span key={st.key} className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  <span aria-hidden className="size-[8px] rounded-full" style={{ background: st.color }} />{st.label}
-                </span>
-              ))}
-            </span>
-            {(["fall", "winter", "spring"] as const).map((w) => {
-              const list = rows.filter((r) => r.window === w);
-              if (list.length === 0) return null;
-              return (
-                <section key={w} className="flex flex-col gap-[8px]">
-                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{WINDOW_TITLE[w]}</span>
-                  <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 xl:grid-cols-3">
-                    {list.map((r) => {
-                      const na = r.counts["not-tracked"];
-                      return (
-                        <li key={r.id}>
-                          <button type="button" onClick={() => openNotDone(r)} className="dm-quiet group flex h-full w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] border p-[12px] text-left" style={GLASS_INSET}>
-                            <SegmentedRing size={56} stroke={7} segments={STATES.map((st) => ({ value: r.counts[st.key], color: st.color }))}>
-                              <span className="text-[13px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.donePct}%</span>
-                            </SegmentedRing>
-                            <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                              <span className="flex items-start justify-between gap-[6px]">
-                                <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</span>
-                                <Go className="mt-[2px] opacity-0 transition-opacity group-hover:opacity-100" />
-                              </span>
-                              <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.counts.done} of {r.total} completed{na ? ` · ${na} N/A` : ""}</span>
-                              <span className="text-[11.5px] font-semibold" style={{ color: r.counts["awaiting-review"] > 0 ? PRIMARY : "var(--muted-foreground)" }}>{outstanding(r)}</span>
-                              <span className="text-[10.5px] font-semibold tracking-[0.02em]" style={{ color: "color-mix(in srgb, var(--muted-foreground) 80%, transparent)" }}>{r.classification}</span>
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </section>
-              );
-            })}
-          </OverviewCard>
+          <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 xl:grid-cols-3">
+            {rows.map((r) => (
+              <li key={r.id}>
+                <button type="button" onClick={() => setSelectedId(r.id)} className="dm-quiet group flex h-full w-full cursor-pointer items-center gap-[14px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={GLASS_INSET}>
+                  <SegmentedRing size={60} stroke={7} segments={STATES.map((st) => ({ value: r.counts[st.key], color: st.color }))}>
+                    <span className="text-[14px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.donePct}%</span>
+                  </SegmentedRing>
+                  <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                    <span className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</span>
+                    <span className="text-[12px] font-semibold" style={{ color: r.counts["awaiting-review"] > 0 ? PRIMARY : "var(--muted-foreground)" }}>
+                      {r.counts.done} of {r.total}{r.counts["awaiting-review"] > 0 ? ` · ${r.counts["awaiting-review"]} need${r.counts["awaiting-review"] === 1 ? "s" : ""} attention` : ""}
+                    </span>
+                  </span>
+                  <Go kind="expand" className="-rotate-90 opacity-0 transition-opacity group-hover:opacity-100" />
+                </button>
+              </li>
+            ))}
+          </ul>
         </>
       )}
+
+      <SidePanel open={!!selected} onClose={() => setSelectedId(null)} title={selected?.title ?? ""} subtitle={selected ? `Grade ${grade} · ${selected.classification}` : undefined}>
+        {selected && (
+          <>
+            <span className="flex items-center gap-[var(--space-5)]">
+              <SegmentedRing size={112} stroke={12} segments={STATES.map((st) => ({ value: selected.counts[st.key], color: st.color }))}>
+                <span className="flex flex-col items-center leading-none">
+                  <span className="text-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{selected.donePct}%</span>
+                  <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.counts.done} of {selected.total}</span>
+                </span>
+              </SegmentedRing>
+              <ul className="flex flex-1 flex-col gap-[8px]">
+                {STATES.map((st) => (
+                  <li key={st.key} className="flex items-center justify-between gap-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    <span className="flex items-center gap-[8px]"><span aria-hidden className="size-[8px] rounded-full" style={{ background: st.color }} />{st.label}</span>
+                    <span className="tabular-nums">{selected.counts[st.key]}</span>
+                  </li>
+                ))}
+                {selected.counts["not-tracked"] > 0 && (
+                  <li className="flex items-center justify-between gap-[10px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                    <span>Not applicable</span><span className="tabular-nums">{selected.counts["not-tracked"]}</span>
+                  </li>
+                )}
+              </ul>
+            </span>
+            <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+              {selected.total - selected.counts.done > 0 && (
+                <button type="button" onClick={() => openNotDone(selected)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] text-[13px] font-bold">
+                  See the {selected.total - selected.counts.done} students not done
+                </button>
+              )}
+              {selected.counts["awaiting-review"] > 0 && (
+                <button type="button" onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }} className="dm-quiet flex h-10 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  Review {selected.counts["awaiting-review"]} waiting on you
+                </button>
+              )}
+              {selected.total - selected.counts.done === 0 && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Every student has completed this.</p>}
+            </div>
+          </>
+        )}
+      </SidePanel>
     </div>
   );
 }
