@@ -118,7 +118,7 @@ export function PreferencesTab() {
                   </span>
                   <span className="min-w-0 flex-1 truncate text-[15px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>{s.title}</span>
                   {s.optional && <span className="flex-none rounded-full border px-[7px] py-[1px] text-[10px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Optional</span>}
-                  <ChevronRight className="h-4 w-4 flex-none sm:hidden" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                  <span className="flex flex-none items-center gap-[2px] text-[12.5px] font-semibold sm:hidden" style={{ color: "var(--muted-foreground)" }}>Edit <ChevronRight className="h-4 w-4" aria-hidden /></span>
                 </span>
                 <span className="flex min-w-0 flex-1 flex-wrap items-center gap-[6px]">
                   {shown.length === 0 ? (
@@ -132,7 +132,10 @@ export function PreferencesTab() {
                     </>
                   )}
                 </span>
-                <ChevronRight className="hidden h-4 w-4 flex-none sm:block" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                {/* The edit affordance, quiet but always there (direct
+                   feedback, 25 Sept 2026: "make sure the edit CTA exists,
+                   subtly"). */}
+                <span className="hidden flex-none items-center gap-[2px] text-[12.5px] font-semibold sm:flex" style={{ color: "var(--muted-foreground)" }}>Edit <ChevronRight className="h-4 w-4" aria-hidden /></span>
               </button>
             </HoverBeam>
           );
