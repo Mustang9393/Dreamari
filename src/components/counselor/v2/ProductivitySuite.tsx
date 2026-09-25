@@ -182,6 +182,20 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
     const t = window.setTimeout(() => setFlash(false), 900);
     return () => window.clearTimeout(t);
   }, [flash]);
+  // The draft textarea grows to fit its own text instead of sitting at a
+  // fixed row count -- a fixed height left dead space below short drafts,
+  // which pushed the "AI couldn't write this part" nudge right under the
+  // box's bottom edge regardless of where the actual placeholder text
+  // was, so it read as grouped with the signature below it instead of
+  // the sentence it was actually about (direct feedback: "right now it
+  // sits with the footer"). Runs on every value change, not just once.
+  const draftAreaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = draftAreaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [draft]);
   const tool = TOOLS.find((t) => t.id === toolId)!;
   const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
   const student = fixedStudent ?? roster.find((s) => s.id === studentId);
@@ -397,11 +411,12 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                    prominent and obvious." */}
                 <div className="group/edit relative">
                   <textarea
+                    ref={draftAreaRef}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
-                    rows={toolId === "recommendation-letter" ? 10 : 12}
+                    rows={4}
                     aria-label="Draft"
-                    className="w-full resize-y rounded-[4px] border border-dashed px-[8px] py-[8px] text-[13.5px] leading-[21px] outline-none focus:border-solid"
+                    className="w-full resize-none overflow-hidden rounded-[4px] border border-dashed px-[8px] py-[8px] text-[13.5px] leading-[21px] outline-none focus:border-solid"
                     style={{ background: "transparent", color: "var(--ink)", borderColor: "color-mix(in srgb, var(--ink-faint) 35%, transparent)", fontFamily: "var(--font-serif, ui-serif, Georgia, serif)" }}
                   />
                   <span className="pointer-events-none absolute top-[6px] right-[10px] flex items-center gap-[4px] rounded-full px-[8px] py-[3px] text-[10.5px] font-bold shadow-sm transition-opacity group-focus-within/edit:opacity-0" style={{ color: "#fff", background: "#5B6CF9" }}>
