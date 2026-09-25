@@ -1,20 +1,36 @@
 "use client";
 
-// DEMO-ONLY: v2 = Joshua's proposal, as written (Slack, 24 Sept 2026):
-// BUILD (unchanged) -> MINI EXPLORE -> SAVED CAREERS -> RANK -> MY PROFILE.
-// Built faithfully so it can be compared live against v3; the reasoning for
-// and against lives in the handoff, not here. Mini Explore is ordered by
-// the real Build's answers via rankForStudent (direct feedback, 25 Sept
-// 2026: "actually shows relevant options based on what I choose").
+// DEMO-ONLY: the Flow Lab's flow. Started as a straight port of Joshua's
+// proposal (Slack, 24 Sept 2026): BUILD -> MINI EXPLORE -> SAVED -> RANK ->
+// MY PROFILE. Reworked after his review of that build (Slack, 25 Sept
+// 2026), point for point:
+//
+// "NO POP-UPS... the interface itself should make the next action obvious
+// through copy, hierarchy, and placement" -- every coachmark is gone; the
+// persistent hint line under each header carries the instruction instead.
+//
+// "REMOVE 'FOR YOU'... default directly to their strongest selected
+// industry... with their other selected industry available as another
+// tab. We can keep the small 'Fits...' labels" -- Mini Explore now opens on
+// the student's first chosen world; a second chosen world is the next tab;
+// the "Fits..." chip (rankForStudent's reason) stays on every card.
+//
+// "REMOVE 'SIX MORE'... make this work more like Netflix/YouTube. Show six
+// at a time, and as they scroll, naturally bring in the next set" -- the
+// carousel and its button are gone; RevealGrid (shared.tsx) grows the grid
+// on scroll.
+//
+// "'EXPLORE MORE' -> 'EXPLORE ALL': this section is really allowing
+// students to browse outside their selected industries" -- renamed, same
+// job (a world picker for everything outside their two).
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
-import { useFirstUseHint } from "@/components/flow/GestureSpotlight";
-import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, forYou, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
-import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PAGE, Pager, QuietButton, SixGrid, Toast, TopThreeScreen } from "./shared";
+import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
+import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, QuietButton, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "explore" | "saved" | "rank" | "top3";
 type State = {
@@ -25,12 +41,11 @@ type State = {
   fromBuild: boolean;
   activeTab: string;
   moreWorld: string;
-  page: Record<string, number>;
   saved: string[];
   rank: string[];
 };
-const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", page: {}, saved: [], rank: [] };
-const FOR_YOU = "For you";
+const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", saved: [], rank: [] };
+const EXPLORE_ALL = "Explore all";
 
 const NOTES = {
   build: { heading: "Build, standing in", bullets: [
@@ -38,15 +53,14 @@ const NOTES = {
     "Worlds are required; subjects and the college or trades answer sharpen the list.",
   ] },
   explore: { heading: "Mini Explore", bullets: [
-    "For you: careers from your chosen worlds, ranked by your subjects and path together. A chip on each card says which answers put it there.",
-    "A tab per chosen world; Explore more opens nearby worlds.",
-    "Tap a card for the same detail Match shows. Tap the bookmark to save, up to 7.",
-    "Six more slides in the next six; the arrow goes back.",
-    "Continue moves to Saved once you have at least one.",
+    "Opens on your strongest world; your second world is the next tab. A chip on each card says why it's there.",
+    "Explore all is for browsing outside your two worlds: pick any other industry and browse the same way.",
+    "Tap a card for details. Tap the bookmark to save it, up to 7.",
+    "Scroll for more. The next careers load in on their own.",
   ] },
   saved: { heading: "Saved", bullets: [
     "Everything you bookmarked, in one place. Tap the bookmark again to remove.",
-    "Rank my top 3 when you are ready; the back arrow returns to Mini Explore.",
+    "Rank my top 3 when you're ready; the back arrow returns to Mini Explore.",
   ] },
   rank: { heading: "Rank your top 3", bullets: [
     "Tap + in the order you want them: first tap is #1. Tap again to undo.",
@@ -60,7 +74,6 @@ const NOTES = {
     "Explore more and Saved go back to keep editing. Play again restarts the whole flow.",
   ] },
 };
-const EXPLORE_MORE = "Explore more";
 
 export function V2Flow({ onRestart }: { onRestart: () => void }) {
   const [state, setState] = useState<State>(EMPTY);
@@ -68,25 +81,20 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
   const [toast, setToast] = useState<string | null>(null);
   const [replacing, setReplacing] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
-  const [dir, setDir] = useState<1 | -1>(1);
-  const [showSave, dismissSave] = useFirstUseHint("flowlab-v2-save");
-  const [showMore, dismissMore] = useFirstUseHint("flowlab-v2-more");
-  const [showRank, dismissRank] = useFirstUseHint("flowlab-v2-rank");
-  const [showEdit, dismissEdit] = useFirstUseHint("flowlab-v2-edit");
 
   useEffect(() => {
-    const stored = readLabState<State>("v2", EMPTY);
+    const stored = readLabState<State>(EMPTY);
     const build = buildSignals();
     let next = stored;
     if (stored.worlds.length === 0 && build.worlds.length > 0) next = { ...stored, worlds: build.worlds, subjects: build.subjects, path: build.path, fromBuild: true, step: "explore" };
-    // Land on For you: the six that fit the combination of every Build answer.
-    if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_MORE && next.activeTab !== FOR_YOU) next = { ...next, activeTab: FOR_YOU };
+    // Default to the strongest (first chosen) world, never a leftover tab.
+    if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_ALL) next = { ...next, activeTab: next.worlds[0] ?? "" };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only storage read after mount, same pattern as the counselor version chip
     setState(next);
     setHydrated(true);
   }, []);
   useEffect(() => {
-    if (hydrated) writeLabState("v2", state);
+    if (hydrated) writeLabState(state);
   }, [state, hydrated]);
   useEffect(() => {
     if (!toast) return;
@@ -119,7 +127,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
       <>
         <LabScreen title="Build" note={NOTES.build}>
           <div className="flow-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-1 pt-2">
-            <Field label="Worlds · up to 2"><InterestPicker value={state.worlds} max={2} onChange={(worlds) => setState((s) => ({ ...s, worlds, activeTab: FOR_YOU }))} /></Field>
+            <Field label="Worlds · up to 2"><InterestPicker value={state.worlds} max={2} onChange={(worlds) => setState((s) => ({ ...s, worlds, activeTab: worlds[0] ?? "" }))} /></Field>
             <Field label="Favourite subjects · up to 2"><ChipRow ariaLabel="Subjects" options={SUBJECTS.map((x) => ({ key: x, label: x }))} value={state.subjects} max={2} onChange={(subjects) => setState((s) => ({ ...s, subjects }))} /></Field>
             <Field label="After high school"><ChipRow ariaLabel="Path" options={PATH_OPTIONS.map((p) => ({ key: p.id, label: p.title }))} value={state.path ? [state.path as "college" | "trades" | "both"] : []} max={1} onChange={([path]) => setState((s) => ({ ...s, path: path ?? "" }))} /></Field>
           </div>
@@ -129,69 +137,59 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     );
   }
 
-  // ---- Mini Explore: six at a time, paged like a carousel ----
+  // ---- Mini Explore: strongest world first, continuous scroll ----
   if (state.step === "explore") {
-    const tabs = [{ key: FOR_YOU, label: FOR_YOU }, ...state.worlds.map((w) => ({ key: w, label: w })), { key: EXPLORE_MORE, label: EXPLORE_MORE }];
+    const tabs = [...state.worlds.map((w) => ({ key: w, label: w })), { key: EXPLORE_ALL, label: EXPLORE_ALL }];
     const others = exploreMoreWorlds(state.worlds);
-    const isMore = state.activeTab === EXPLORE_MORE;
+    const isAll = state.activeTab === EXPLORE_ALL;
     const moreWorld = others.includes(state.moreWorld) ? state.moreWorld : others[0];
-    const isForYou = state.activeTab === FOR_YOU;
-    const world = isMore ? moreWorld : isForYou ? FOR_YOU : state.activeTab;
-    const ranked: Ranked[] = isForYou ? forYou(signals) : rankForStudent(world, signals);
-    // "Six more" must mean six: the last page is the LAST six of the set
-    // (it may overlap the page before), never a partial page with empty
-    // cells (direct report, 25 Sept 2026: "where it says six more only 4
-    // are available").
-    const total = Math.max(1, Math.ceil(ranked.length / PAGE));
-    const index = Math.min(state.page[world] ?? 0, total - 1);
-    const start = Math.max(0, Math.min(index * PAGE, ranked.length - PAGE));
-    const six = ranked.slice(start, start + PAGE);
-    const setPage = (n: number, d: 1 | -1) => { setDir(d); setState((s) => ({ ...s, page: { ...s.page, [world]: ((n % total) + total) % total } })); };
-    const open = openId ? six.find((r) => r.career.id === openId) : null;
-    const openIdx = open ? six.indexOf(open) : -1;
+    const world = isAll ? moreWorld : state.activeTab;
+    const ranked: Ranked[] = rankForStudent(world, signals);
+    const open = openId ? ranked.find((r) => r.career.id === openId) : null;
+    const openIdx = open ? ranked.indexOf(open) : -1;
     return (
       <>
         <LabScreen
+          scrollable
           note={NOTES.explore}
           title="Mini Explore"
           status={`${state.saved.length} of ${MAX_SAVED}`}
           hint="Tap a card for details. Tap the bookmark to save it."
           controls={
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => { setDir(1); setState((s) => ({ ...s, activeTab: key })); }} options={tabs} />
-              <Pager index={index} total={total} onPrev={() => setPage(index - 1, -1)} onNext={() => setPage(index + 1, 1)} hint={{ active: showMore && !showSave && !openId, label: "Six more, any time. Move back and forth.", onDismiss: dismissMore }} />
-              {isMore && <ChipRow small ariaLabel="More worlds" options={others.map((w) => ({ key: w, label: w }))} value={[moreWorld]} max={1} onChange={([w]) => { setDir(1); setState((s) => ({ ...s, moreWorld: w ?? others[0] })); }} />}
+            <div className="flex flex-col gap-2">
+              <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key }))} options={tabs} />
+              {isAll && <ChipRow small ariaLabel="Any other industry" options={others.map((w) => ({ key: w, label: w }))} value={[moreWorld]} max={1} onChange={([w]) => setState((s) => ({ ...s, moreWorld: w ?? others[0] }))} />}
             </div>
           }
         >
-          <SixGrid page={`${world}-${index}`} direction={dir}>
-            {six.map((r, i) => (
+          <RevealGrid
+            items={ranked}
+            resetKey={world}
+            renderItem={(r) => (
               <LabCard
                 key={r.career.id}
                 career={r.career}
-                fill
                 control="save"
                 selected={state.saved.includes(r.career.id)}
                 reason={r.reason}
                 onToggle={() => toggleSave(r.career.id)}
                 onOpen={() => setOpenId(r.career.id)}
-                hint={i === 0 ? { active: showSave && !openId && state.saved.length === 0, label: "Tap to save it. Save up to 7, then rank your top 3.", cta: "Next", onDismiss: dismissSave } : undefined}
               />
-            ))}
-          </SixGrid>
+            )}
+          />
         </LabScreen>
         <BottomBar status={state.saved.length === 0 ? `Save up to ${MAX_SAVED}.` : `${state.saved.length} saved.`} cta="Continue" ctaDisabled={state.saved.length === 0} onCta={() => go("saved")} />
         <Toast text={toast} />
         <AnimatePresence>
           {open && (
-            <DetailModal career={open.career} control="save" selected={state.saved.includes(open.career.id)} full={state.saved.length >= MAX_SAVED} onToggle={() => toggleSave(open.career.id)} onClose={() => setOpenId(null)} onPrev={openIdx > 0 ? () => setOpenId(six[openIdx - 1].career.id) : undefined} onNext={openIdx < six.length - 1 ? () => setOpenId(six[openIdx + 1].career.id) : undefined} />
+            <DetailModal career={open.career} control="save" selected={state.saved.includes(open.career.id)} full={state.saved.length >= MAX_SAVED} onToggle={() => toggleSave(open.career.id)} onClose={() => setOpenId(null)} onPrev={openIdx > 0 ? () => setOpenId(ranked[openIdx - 1].career.id) : undefined} onNext={openIdx < ranked.length - 1 ? () => setOpenId(ranked[openIdx + 1].career.id) : undefined} />
           )}
         </AnimatePresence>
       </>
     );
   }
 
-  // ---- Saved ----
+  // ---- Saved / Rank ----
   if (state.step === "saved" || state.step === "rank") {
     const ranking = state.step === "rank";
     const open = openId ? savedCareers.find((c) => c.id === openId) : null;
@@ -206,10 +204,10 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
           ) : (
             <div className="flow-scroll min-h-0 flex-1 overflow-y-auto px-1">
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-                {savedCareers.map((c, i) => {
+                {savedCareers.map((c) => {
                   const pos = state.rank.indexOf(c.id);
                   return ranking ? (
-                    <LabCard key={c.id} career={c} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} onToggle={() => assign(c.id)} onOpen={() => setOpenId(c.id)} hint={i === 0 ? { active: showRank && !openId && state.rank.length === 0, label: "Tap + in the order you want them. #1 first.", onDismiss: dismissRank } : undefined} />
+                    <LabCard key={c.id} career={c} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} onToggle={() => assign(c.id)} onOpen={() => setOpenId(c.id)} />
                   ) : (
                     <LabCard key={c.id} career={c} control="save" selected onToggle={() => toggleSave(c.id)} onOpen={() => setOpenId(c.id)} />
                   );
@@ -249,7 +247,6 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
           onReplace={(outId, inId) => setState((s) => ({ ...s, rank: s.rank.map((x) => (x === outId ? inId : x)) }))}
           replacing={replacing}
           setReplacing={setReplacing}
-          hint={{ active: showEdit, label: "Swap or remove any pick, any time.", onDismiss: dismissEdit }}
         />
       </LabScreen>
       <BottomBar status="You can change these anytime." cta="Play again" onCta={onRestart} />
