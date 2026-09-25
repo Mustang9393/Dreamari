@@ -36,9 +36,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
-import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound } from "lucide-react";
+import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound, Star } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
-import { DEMO_SCHOOL } from "@/lib/counselorRoster";
+import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { readCounselorAccount } from "@/lib/counselorAccount";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
@@ -100,14 +100,50 @@ function CounselorHeadshot({ src, size = 64 }: { src: string; size?: number }) {
 // hierarchy is number, then label, then note, top-down by size.
 const BODY = { fontFamily: "var(--font-body)" } as const;
 
-/** Number first, then its label, then an optional muted note. */
-function ImpactStat({ value, label, note, color }: { value: string; label: string; note?: string; color?: string }) {
+// Hierarchy for everything below Outcomes (direct feedback on the stat
+// walls: "So many numbers and clutter and competing for attention"). Only
+// Outcomes gets big numbers. Each card below it has at most ONE headline;
+// every other figure is a quiet row -- label left, value right, a hairline
+// between rows -- or, where the figure is a rate, a thin bar. Nothing v1
+// showed is dropped; it just stops shouting.
+
+/** A card's one headline figure. */
+function Headline({ value, label, note }: { value: string; label: string; note?: string }) {
   return (
-    <span className="flex min-w-0 flex-col gap-[4px]">
-      <span className="text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: color ?? "var(--foreground)" }}>{value}</span>
-      <span className="text-[12.5px] leading-[16px] font-semibold" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
-      {note && <span className="text-[11.5px] leading-[15px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{note}</span>}
+    <span className="flex flex-wrap items-baseline gap-x-[10px] gap-y-[2px]">
+      <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+      <span className="text-[13px] font-semibold" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
+      {note && <span className="text-[12px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{note}</span>}
     </span>
+  );
+}
+
+/** One quiet row: label (and muted note) left, value right. */
+function ListRow({ label, note, value }: { label: string; note?: string; value: string }) {
+  return (
+    <li className="flex items-baseline justify-between gap-[12px] border-t py-[9px] first:border-t-0 first:pt-0 last:pb-0" style={{ borderColor: "var(--glass-border)" }}>
+      <span className="flex min-w-0 flex-wrap items-baseline gap-x-[6px]">
+        <span className="text-[13px] font-medium" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
+        {note && <span className="text-[11.5px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{note}</span>}
+      </span>
+      <span className="flex-none text-[13.5px] font-bold tabular-nums" style={{ ...BODY, color: "var(--foreground)" }}>{value}</span>
+    </li>
+  );
+}
+
+/** A rate as a row with a thin bar under it. */
+function BarRow({ label, note, value, pct }: { label: string; note?: string; value: string; pct: number }) {
+  return (
+    <li className="flex flex-col gap-[6px]">
+      <span className="flex items-baseline justify-between gap-[12px]">
+        <span className="flex min-w-0 flex-wrap items-baseline gap-x-[6px]">
+          <span className="text-[13px] font-medium" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
+          {note && <span className="text-[11.5px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{note}</span>}
+        </span>
+        <span className="flex-none text-[13.5px] font-bold tabular-nums" style={{ ...BODY, color: "var(--foreground)" }}>{value}</span>
+      </span>
+      <RankBar value={pct} height={5} />
+    </li>
   );
 }
 
@@ -136,7 +172,8 @@ function OutcomeTile({ label, value, target, note, toGo, onClick }: { label: str
   );
 }
 
-type ImpactTab = "activity" | "grades" | "asca";
+type ImpactTab = "activity" | "breakdown" | "asca" | "highlights";
+const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
 
 // `scope="school"` is the Lead Counselor's School Impact: the same report
 // for the whole school, headed by the school, with a by-counselor card.
@@ -154,13 +191,26 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const responseRatePct = Math.round((respondedQuestions / QUESTIONS.length) * 100);
   const reviewableKeys = ["Career Report", "Academic Plan", "Resume"] as const;
   const plansReviewed = roster.reduce((sum, s) => sum + reviewableKeys.filter((k) => s.milestones[k] === "Approved" || s.milestones[k] === "Changes Requested").length, 0);
-  const monitored = roster.filter((s) => s.status !== "On Track").length;
-  const careerReportPct = Math.round((roster.filter((s) => s.milestones["Career Report"] === "Approved").length / total) * 100);
-  const academicPlanPct = Math.round((roster.filter((s) => s.milestones["Academic Plan"] === "Approved").length / total) * 100);
-  // v1's Notable Achievements: "X of Y seniors have active college or
-  // postsecondary applications underway".
+  const plansApproved = roster.reduce((sum, s) => sum + reviewableKeys.filter((k) => s.milestones[k] === "Approved").length, 0);
+  const plansPending = roster.reduce((sum, s) => sum + reviewableKeys.filter((k) => s.milestones[k] === "Pending Review").length, 0);
+  // v1's own definition (an active support flag), so both builds report the
+  // same number for "students monitored for support".
+  const monitored = roster.filter((s) => s.supportFlagReason).length;
+  const monitoredPct = Math.round((monitored / total) * 100);
+  const atRiskCount = roster.filter((s) => s.status === "At Risk").length;
+  const careerReportApproved = roster.filter((s) => s.milestones["Career Report"] === "Approved").length;
+  const academicPlanApproved = roster.filter((s) => s.milestones["Academic Plan"] === "Approved").length;
+  const careerReportPct = Math.round((careerReportApproved / total) * 100);
+  const academicPlanPct = Math.round((academicPlanApproved / total) * 100);
+  const gr10Plus = roster.filter((s) => s.grade >= 10);
+  const resumeApproved = gr10Plus.filter((s) => s.milestones.Resume === "Approved").length;
+  const resumePct = gr10Plus.length ? Math.round((resumeApproved / gr10Plus.length) * 100) : 0;
+  // v1's definition: applications in progress or submitted.
   const seniorRows = roster.filter((s) => s.grade === 12);
-  const seniorsApplying = seniorRows.filter((s) => s.milestones.Applications !== "Not Started").length;
+  const seniorsApplying = seniorRows.filter((s) => ["In Progress", "Completed", "Approved", "Pending Review"].includes(s.milestones.Applications)).length;
+  const overallAvgCompletion = Math.round(roster.reduce((sum, s) => sum + s.roadmapPct, 0) / total);
+  const pathway = PATHWAY_ORDER.map((p) => ({ label: p, count: roster.filter((s) => s.postsecondaryIntent === p).length }));
+  const pathwayMax = Math.max(1, ...pathway.map((p) => p.count));
 
   const engagement = { drops: 0, sims: 0, careers: 0, colleges: 0, posts: 0 };
   for (const s of roster) {
@@ -206,57 +256,65 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   // Each section is a small renderer, called once for whichever tab is
   // selected on screen and once more (all of them) in the print-only
   // compiled version below -- so the two never drift out of sync.
-  // Two cards by what the numbers ARE (what the counselor did, and what
-  // it produced), then platform engagement full width. The approval rates
-  // and senior applications used to be a muted footnote under the activity
-  // stats -- direct question: "the data like 72% etc seem like important
-  // stats? Why are they so muted and small?" There was no reason; they are
-  // outcomes of this counselor's work, so they get the same stat treatment.
+  // Three cards, each with one headline and the rest as quiet rows.
   const renderActivity = () => (
     <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
       <OverviewCard title={scope === "school" ? "Counselor activity" : "Your activity"} unit="this period">
-        <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-3">
-          <ImpactStat value={String(plansReviewed)} label="Plans reviewed" />
-          <ImpactStat value="2.1" label="Days per review" note="Standard: 5" />
-          <ImpactStat value={`${responseRatePct}%`} label="Questions answered" />
-          <ImpactStat value={String(ANNOUNCEMENTS.length)} label="Announcements" />
-          <ImpactStat value={String(monitored)} label="Students supported" />
-        </div>
+        <Headline value={String(plansReviewed)} label="plans reviewed" note={`${plansApproved} approved · ${plansPending} pending`} />
+        <ul className="flex flex-col">
+          <ListRow label="Review turnaround" note="district standard 5 days" value="2.1 days" />
+          <ListRow label="Student questions answered" note={`${responseRatePct}%`} value={`${respondedQuestions} of ${QUESTIONS.length}`} />
+          <ListRow label="Announcements sent" note="school-wide" value={String(ANNOUNCEMENTS.length)} />
+          <ListRow label="Support flags active" note={`${monitoredPct}% of caseload`} value={String(monitored)} />
+        </ul>
       </OverviewCard>
-      <OverviewCard title="Student results" unit="this period">
-        <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-3">
-          <ImpactStat value={`${careerReportPct}%`} label="Career reports approved" />
-          <ImpactStat value={`${academicPlanPct}%`} label="Academic plans approved" />
-          <ImpactStat value={`${seniorsApplying}/${seniorRows.length}`} label="Seniors applying" />
-        </div>
+      <OverviewCard title="Readiness milestones" unit="this period">
+        <ul className="flex flex-col gap-[14px]">
+          <BarRow label="Career reports approved" note={`${careerReportApproved} of ${roster.length}`} value={`${careerReportPct}%`} pct={careerReportPct} />
+          <BarRow label="Academic plans approved" note={`${academicPlanApproved} of ${roster.length}`} value={`${academicPlanPct}%`} pct={academicPlanPct} />
+          <BarRow label="Résumés complete" note={`Gr. 10+ · ${resumeApproved} of ${gr10Plus.length}`} value={`${resumePct}%`} pct={resumePct} />
+          <BarRow label="Seniors with applications underway" note="in progress or submitted" value={`${seniorsApplying} of ${seniorRows.length}`} pct={seniorRows.length ? (seniorsApplying / seniorRows.length) * 100 : 0} />
+        </ul>
       </OverviewCard>
       <div className="xl:col-span-2">
-        <OverviewCard title="Students on Dreamari" unit="this period">
-          <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-5">
-            <ImpactStat value={engagement.drops.toLocaleString("en-US")} label="Daily Career Drops" />
-            <ImpactStat value={engagement.sims.toLocaleString("en-US")} label="Simulations" />
-            <ImpactStat value={engagement.careers.toLocaleString("en-US")} label="Careers saved" />
-            <ImpactStat value={engagement.colleges.toLocaleString("en-US")} label="Colleges saved" />
-            <ImpactStat value={engagement.posts.toLocaleString("en-US")} label="Community posts" />
-          </div>
+        <OverviewCard title="Students on Dreamari" unit={`${scope === "school" ? "school-wide" : "your caseload"}, this period`}>
+          <Headline value={(engagement.drops + engagement.sims + engagement.careers + engagement.colleges + engagement.posts).toLocaleString("en-US")} label="student actions on the platform" />
+          <ul className="grid grid-cols-1 gap-x-[var(--space-6)] sm:grid-cols-2 [&>li:nth-child(2)]:sm:border-t-0 [&>li:nth-child(2)]:sm:pt-0">
+            <ListRow label="Daily Career Drops completed" value={engagement.drops.toLocaleString("en-US")} />
+            <ListRow label="Career simulations completed" value={engagement.sims.toLocaleString("en-US")} />
+            <ListRow label="Careers saved to profiles" value={engagement.careers.toLocaleString("en-US")} />
+            <ListRow label="Colleges saved" value={engagement.colleges.toLocaleString("en-US")} />
+            <ListRow label="Community contributions" value={engagement.posts.toLocaleString("en-US")} />
+          </ul>
         </OverviewCard>
       </div>
     </div>
   );
 
-  const renderGrades = () => (
+  const renderBreakdown = () => (
     <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-      <OverviewCard title="By grade" unit="% on track" aside={<CardLink onClick={() => router.push("/counselor?view=students")}>Students</CardLink>}>
+      <OverviewCard title="By grade" unit={`% on track · ${overallAvgCompletion}% avg plan completion overall`} aside={<CardLink onClick={() => router.push("/counselor?view=students")}>Students</CardLink>}>
         <div className="flex flex-col gap-[10px]">
-          {grades.map(({ g, m: gm }) => <MetricRow key={g} label={`Grade ${g}`} note={`${gm.students} students · ${gm.withPlanPct}% with a plan`} value={gm.onTrackPct} target={SCHOOL_TARGETS.onTrack} onClick={() => { setGradeFilter(g as 9 | 10 | 11 | 12); router.push("/counselor?view=students"); }} />)}
+          {grades.map(({ g, m: gm }) => {
+            const gr = roster.filter((s) => s.grade === g);
+            const avg = gr.length ? Math.round(gr.reduce((sum, s) => sum + s.roadmapPct, 0) / gr.length) : 0;
+            return <MetricRow key={g} label={`Grade ${g}`} note={`${gm.onTrack} of ${gm.students} · ${avg}% avg completion`} value={gm.onTrackPct} target={SCHOOL_TARGETS.onTrack} onClick={() => { setGradeFilter(g as 9 | 10 | 11 | 12); router.push("/counselor?view=students"); }} />;
+          })}
         </div>
       </OverviewCard>
+      <OverviewCard title="Postsecondary plans by pathway" unit={`${m.withPlan} of ${m.students} declared`}>
+        <ul className="flex flex-col gap-[12px]">
+          {pathway.map((p) => <BarRow key={p.label} label={p.label} value={String(p.count)} pct={(p.count / pathwayMax) * 100} />)}
+        </ul>
+      </OverviewCard>
       {scope === "school" && (
-        <OverviewCard title="By counselor" unit="% on track">
-          <div className="flex flex-col gap-[10px]">
-            {byCounselor.map(({ c, m: cm }) => <MetricRow key={c.id} label={c.name} note={`${c.range} · ${cm.students} students`} value={cm.onTrackPct} target={SCHOOL_TARGETS.onTrack} onClick={() => { setCounselorFilter(c.id); router.push("/counselor?view=students"); }} />)}
-          </div>
-        </OverviewCard>
+        <div className="xl:col-span-2">
+          <OverviewCard title="By counselor" unit="% on track">
+            <div className="flex flex-col gap-[10px]">
+              {byCounselor.map(({ c, m: cm }) => <MetricRow key={c.id} label={c.name} note={`${c.range} · ${cm.students} students`} value={cm.onTrackPct} target={SCHOOL_TARGETS.onTrack} onClick={() => { setCounselorFilter(c.id); router.push("/counselor?view=students"); }} />)}
+            </div>
+          </OverviewCard>
+        </div>
       )}
     </div>
   );
@@ -268,7 +326,7 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const renderAsca = () => (
     <OverviewCard title="ASCA National Model" unit="4th edition">
       <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
-        {ASCA(academicPlanPct, careerReportPct, monitored, responseRatePct).map((col) => (
+        {ASCA({ total: roster.length, academicPlanPct, careerReportPct, withPlanPct: m.withPlanPct, monitored, responseRatePct, atRiskCount }).map((col) => (
           <div key={col.title} className="flex flex-col gap-[14px] rounded-[var(--radius-md)] border p-[14px]" style={GLASS_INSET}>
             <span className="flex items-center gap-[8px]">
               <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)" }}>
@@ -276,11 +334,40 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
               </span>
               <span className="text-[13px] font-bold" style={{ ...BODY, color: "var(--foreground)" }}>{col.title}</span>
             </span>
-            <ImpactStat value={col.value} label={col.label} />
-            <span className="border-t pt-[10px] text-[11.5px] leading-[15px] font-medium" style={{ ...BODY, borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{col.practice}</span>
+            <Headline value={col.value} label={col.label} />
+            <ul className="flex flex-col gap-[6px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+              {col.practices.map((pr) => <li key={pr} className="text-[12px] leading-[16px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{pr}</li>)}
+            </ul>
           </div>
         ))}
       </div>
+    </OverviewCard>
+  );
+
+  // v1's "Notable Achievements", restored as its own tab: the same eight
+  // facts, each cut to one line (the principal-report narrative is what a
+  // counselor hands up, so it stays, just without the padding).
+  const seniorMeets = m.seniorPlanPct >= SCHOOL_TARGETS.seniorPlan;
+  const HIGHLIGHTS = [
+    `Senior plan rate of ${m.seniorPlanPct}% ${seniorMeets ? "meets" : "falls short of"} the district's ${SCHOOL_TARGETS.seniorPlan}% benchmark`,
+    `${m.onTrackPct}% on track across ${m.students} students, ${m.onTrackPct >= SCHOOL_AVERAGE_ON_TRACK ? "above" : "below"} the ${SCHOOL_AVERAGE_ON_TRACK}% school average`,
+    "Plan reviews average 2.1 days, inside the district's 5-day standard",
+    `${seniorsApplying} of ${seniorRows.length} seniors have college or postsecondary applications underway`,
+    `${responseRatePct}% of Counselor Connect questions answered`,
+    `${monitored} students identified early for additional support`,
+    `${engagement.drops.toLocaleString("en-US")} career-exploration activities completed on Dreamari`,
+    `${(engagement.sims + engagement.careers + engagement.colleges).toLocaleString("en-US")} engagement touchpoints from simulations, saved careers and saved colleges`,
+  ];
+  const renderHighlights = () => (
+    <OverviewCard title="Notable achievements" unit="this period">
+      <ul className="grid grid-cols-1 gap-x-[var(--space-6)] gap-y-[10px] lg:grid-cols-2">
+        {HIGHLIGHTS.map((h) => (
+          <li key={h} className="flex items-start gap-[8px] text-[13px] leading-[18px] font-medium" style={{ ...BODY, color: "var(--foreground)" }}>
+            <Star aria-hidden className="mt-[2px] h-[13px] w-[13px] flex-none" style={{ color: "var(--primary)" }} />
+            {h}
+          </li>
+        ))}
+      </ul>
     </OverviewCard>
   );
 
@@ -321,7 +408,7 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
                    report: "causing a long text string and colliding with
                    the ctas on small screens." Still stated once, on the
                    very next card (Outcomes' own unit caption below). */}
-                <span className="truncate text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{account.role || "School Counselor"} · {account.school || DEMO_SCHOOL}</span>
+                <span className="truncate text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{account.role || "School Counselor"} · {account.school || DEMO_SCHOOL} · {m.students} students</span>
               </div>
             </div>
             {/* One row under the identity, at every width (direct
@@ -398,38 +485,44 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
           ariaLabel="Report section"
           options={[
             { key: "activity", label: "Activity" },
-            { key: "grades", label: scope === "school" ? "Grades & counselors" : "By grade" },
-            { key: "asca", label: "ASCA model" },
+            { key: "breakdown", label: "Breakdown" },
+            { key: "asca", label: "ASCA" },
+            { key: "highlights", label: "Highlights" },
           ]}
           value={tab}
           onChange={(k) => setTab(k as ImpactTab)}
         />
         {tab === "activity" && renderActivity()}
-        {tab === "grades" && renderGrades()}
+        {tab === "breakdown" && renderBreakdown()}
         {tab === "asca" && renderAsca()}
+        {tab === "highlights" && renderHighlights()}
       </div>
 
       {/* Print only: every section compiled together, regardless of which
          tab was open on screen. */}
       <div className="hidden flex-col gap-[var(--space-4)] print:flex">
         {renderActivity()}
-        {renderGrades()}
+        {renderBreakdown()}
         {renderAsca()}
+        {renderHighlights()}
       </div>
 
       {/* One quiet line, not two with a bold all-caps half (direct
          feedback: "Other disclaimers can be more subtle"). */}
       <span className="text-[11px] leading-[15px] font-medium" style={{ ...BODY, color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-        Dreamari data, Aug 2026 to Jan 2027 · aggregated and anonymized · Confidential, for authorized personnel only
+        Dreamari data, Aug 2026 to Jan 2027 · aggregated and anonymized · prepared for administrative review under ASCA National Model (4th ed.) accountability standards · generated via Dreamari Counselor Dashboard · confidential, for authorized personnel only
       </span>
     </div>
   );
 }
 
-function ASCA(academicPlanPct: number, careerReportPct: number, monitored: number, responseRatePct: number) {
+
+// Every item v1's ASCA alignment cards listed, grouped under one headline
+// per domain.
+function ASCA(d: { total: number; academicPlanPct: number; careerReportPct: number; withPlanPct: number; monitored: number; responseRatePct: number; atRiskCount: number }) {
   return [
-    { icon: BookOpen, title: "Academic", value: `${academicPlanPct}%`, label: "Academic plans approved", practice: "Course selection support" },
-    { icon: Briefcase, title: "Career", value: `${careerReportPct}%`, label: "Career reports approved", practice: "Simulations and assessments" },
-    { icon: Heart, title: "Social-emotional", value: String(monitored), label: "Students supported", practice: `${responseRatePct}% of questions answered` },
+    { icon: BookOpen, title: "Academic", value: `${d.academicPlanPct}%`, label: "four-year plans approved", practices: [`Academic planning supported for all ${d.total} students`, "Course selection and credit monitoring"] },
+    { icon: Briefcase, title: "Career", value: `${d.careerReportPct}%`, label: "career reports complete", practices: [`Career pathway declared for ${d.withPlanPct}% of students`, "Simulations and assessments via Dreamari"] },
+    { icon: Heart, title: "Social-emotional", value: String(d.monitored), label: "students monitored", practices: [`${d.responseRatePct}% of Counselor Connect questions answered`, `${d.atRiskCount} at-risk students flagged for intervention`] },
   ];
 }

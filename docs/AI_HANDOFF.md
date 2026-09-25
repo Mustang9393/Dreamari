@@ -14628,3 +14628,13 @@ Direct feedback batch on My Impact, addressed together:
 - **Disclaimers** ("can be more subtle"): one 11px quiet line instead of two lines with a bold all-caps half.
 
 Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` clean. Browser-verified at desktop and 375px mobile: hero renders at full height, CTAs stay on one row, Outcomes tiles and CTA navigate, ASCA and activity tabs render. Not pushed.
+
+## 2026-09-26 · My Impact: v1 content restored, one headline per card
+
+Two instructions together. First: "Please always check if we have removed anything that was on v1 from the screens. We dont want content to be removed, just presented better." Second, on the stat-wall pass above: "So many numbers and clutter and competing for attention. Surely there is a better way?"
+
+**v1 audit** (`src/components/counselor/MyImpact.tsx` vs v2). v2 had dropped: the Postsecondary Plans by Pathway breakdown, average plan completion per grade and overall, the résumé rate (Gr. 10+), the approved/pending split on plans reviewed, question counts (X of Y), support-flag % of caseload, total caseload, half of each ASCA card's items (planning for all students, credit monitoring, pathway declared %, at-risk flagged), the whole Notable Achievements list, and the "prepared for administrative review" / "generated via" footer lines. All restored. "Students supported" now uses v1's definition (an active support flag), and "seniors applying" uses v1's (in progress or submitted), so both builds report the same numbers.
+
+**Hierarchy fix.** Only Outcomes keeps big numbers. Every other card has at most one headline figure; the rest are quiet rows (label left, value right, hairline between) or, for rates, a thin bar. Tabs are now Activity / Breakdown (by grade + by pathway) / ASCA / Highlights (v1's achievements, one line each). The print compile includes all four. Caseload size sits in the hero identity line.
+
+Validation: `tsc --noEmit`, targeted `eslint`, `npm run build` clean; all four tabs browser-verified.
