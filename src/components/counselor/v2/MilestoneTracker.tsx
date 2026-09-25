@@ -39,8 +39,7 @@ import { CardLink, Go, STATUS_COLORS } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
-import { OverviewCard, Stat, Verdict } from "./overviewShared";
-import { Ring } from "./PlanMap";
+import { OverviewCard, Stat } from "./overviewShared";
 
 type Grade = 9 | 10 | 11 | 12;
 type Row = { id: string; title: string; window: CurriculumWindow; classification: string; kind: "auto" | "counselor-verified"; total: number; counts: Record<CurriculumStatus, number>; donePct: number; behindShare: number };
@@ -61,28 +60,12 @@ function outstanding(r: Row): string {
   return parts.length ? parts.join(" · ") : "Everyone is done";
 }
 
-function StatusBar({ r }: { r: Row }) {
-  return (
-    <span className="flex h-[10px] w-full gap-[2px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 6%, transparent)" }} aria-hidden>
-      {STATES.map((s) => {
-        const n = r.counts[s.key];
-        if (!n) return null;
-        return <span key={s.key} title={`${s.label}: ${n}`} className="h-full flex-none first:rounded-l-full last:rounded-r-full" style={{ width: `${(n / Math.max(1, r.total)) * 100}%`, background: s.color }} />;
-      })}
-    </span>
-  );
-}
 
 export function MilestoneTracker() {
   const router = useRouter();
   const { gradeFilter, setGradeFilter, counselorFilter, setCounselorFilter, setStepFilter } = useCounselorFilters();
   const [grade, setGradeState] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
-  // Which season is open. None by default (direct instruction, 25 Sept
-  // 2026: "do not open any of the accordions ... by default. The three
-  // tiles with the graphs do the job of giving glanceable info"); a tile
-  // or a header opens one season at a time, reset on a grade change.
-  const [openWindow, setOpenWindow] = useState<CurriculumWindow | null>(null);
-  const setGrade = (g: Grade) => { setGradeState(g); setOpenWindow(null); };
+  const setGrade = (g: Grade) => setGradeState(g);
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
@@ -173,20 +156,20 @@ export function MilestoneTracker() {
           <HoverBeam strength={0.7} className="h-full">
             <div className="group relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
               <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
-              {/* Composition: title without an eyebrow, then the ring
-                 with its legend beside it, the insight alone in the
-                 middle behind a hairline, the pill in the corner. */}
-              <span className="absolute top-[var(--space-5)] right-[var(--space-5)] z-[1] hidden sm:block"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
-              <div className="relative flex flex-col gap-[var(--space-5)] sm:grid sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-x-[var(--space-8)] sm:pr-[150px]">
-                <div className="flex flex-col gap-[var(--space-4)]">
-                  <div className="flex flex-wrap items-start justify-between gap-[8px]">
-                    <h2 className="text-[18px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</h2>
-                    <span className="sm:hidden"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
-                  </div>
+              {/* Focus first, said once: the title names it, the ring and its
+                 legend give the split, and the two actions are the only
+                 calls to act (was a pill, a sentence and a link all
+                 restating "8 not done"). */}
+              <div className="relative flex flex-col gap-[var(--space-4)]">
+                <span className="flex flex-wrap items-baseline gap-x-[10px]">
+                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Focus first</span>
+                  <h2 className="text-[18px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</h2>
+                </span>
+                <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
                   <div className="flex items-center gap-[var(--space-4)]">
-                    <SegmentedRing size={104} stroke={11} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
+                    <SegmentedRing size={96} stroke={10} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
                       <span className="flex flex-col items-center leading-none">
-                        <span className="text-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
+                        <span className="text-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
                         <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
                       </span>
                     </SegmentedRing>
@@ -200,126 +183,59 @@ export function MilestoneTracker() {
                       ))}
                     </ul>
                   </div>
-                </div>
-                <div className="flex flex-col gap-[12px] sm:max-w-[420px] sm:border-l sm:pl-[var(--space-8)]" style={{ borderColor: "var(--glass-border)" }}>
-                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Focus first</span>
-                  <Verdict band={focus.counts["not-started"] / Math.max(1, focus.total) >= 0.5 ? "missed" : focus.counts["not-started"] > 0 || focus.counts["awaiting-review"] > 0 ? "near" : "met"}>
-                    {focus.total - focus.counts.done === 0 ? "Everyone is done" : `${focus.total - focus.counts.done} of ${focus.total} students still need this${focus.counts["awaiting-review"] ? `, ${focus.counts["awaiting-review"]} waiting on you` : ""}`}
-                  </Verdict>
-                  {/* The season/classification caption here didn't support
-                     the title above it -- direct question: "was it
-                     supposed to support the title?". Replaced with a
-                     terse tag ("dont put the whole ass sentence there...
-                     1 word or 2 thats all") that is itself the CTA
-                     (direct feedback: "there should be ctas to lead them
-                     to take those actions") -- straight to the Review
-                     Queue, grade-scoped, where Approve/Request Changes
-                     actually happen. A plain text link, not a bordered
-                     CardLink pill -- direct feedback ("looks ugly"): a
-                     boxed chip broke the rhythm of the plain text above
-                     it in this narrow stacked column. */}
-                  {focus.counts["awaiting-review"] > 0 && (
-                    <button type="button" onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }} className="dm-quiet group/cta flex w-fit cursor-pointer items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>
-                      Awaiting review <Go kind="open" className="transition-transform group-hover/cta:translate-x-[2px]" />
-                    </button>
-                  )}
+                  <span className="flex flex-wrap gap-[8px]">
+                    {focus.total - focus.counts.done > 0 && <CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} students not done</CardLink>}
+                    {focus.counts["awaiting-review"] > 0 && <CardLink onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }}>Review {focus.counts["awaiting-review"]}</CardLink>}
+                  </span>
                 </div>
               </div>
             </div>
           </HoverBeam>
 
-          <OverviewCard title={`Grade ${grade} curriculum`} unit={curriculumFocus(grade)} aside={<CardLink onClick={openAll}>Students</CardLink>}>
-            {/* Three season tiles -- the same tile/ring language the rest
-               of v2 uses, computed from the reference's own checkpoints
-               grouped into thirds by their own listed order (fall/winter/
-               spring; see counselorCurriculum.ts). A tile picks the
-               season accordion below. */}
-            <div className="grid grid-cols-3 gap-[8px]">
-              {(["fall", "winter", "spring"] as const).map((w) => {
-                const list = rows.filter((r) => r.window === w);
-                if (list.length === 0) return <span key={w} aria-hidden />;
-                const tracked = list.reduce((a, r) => a + r.total, 0);
-                const done = list.reduce((a, r) => a + r.counts.done, 0);
-                const pct = tracked ? Math.round((done / tracked) * 100) : 0;
-                const needAttn = list.reduce((a, r) => a + r.counts["awaiting-review"], 0);
-                const notDone = list.reduce((a, r) => a + r.counts["not-started"], 0);
-                const active = openWindow === w;
-                return (
-                  <button
-                    key={w}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setOpenWindow(active ? null : w)}
-                    className="dm-quiet group flex min-w-0 cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[10px] py-[9px] text-left sm:px-[12px]"
-                    style={{ ...GLASS_INSET, ...(active ? { borderColor: `color-mix(in srgb, ${PRIMARY} 55%, var(--glass-border))` } : null) }}
-                  >
-                    <Ring pct={pct} size={36} stroke={4.5} />
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: active ? PRIMARY : "var(--muted-foreground)" }}>{WINDOW_TITLE[w]}</span>
-                      <span className="text-[15px] leading-[1.1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{pct}%</span>
-                      <span className="hidden truncate text-[11px] font-semibold sm:block" style={{ color: needAttn > 0 ? PRIMARY : "var(--muted-foreground)" }}>{needAttn > 0 ? `${needAttn} to review` : notDone > 0 ? `${notDone} to do` : "all done"}</span>
-                    </span>
-                    {/* Nothing on the tile read as clickable (direct
-                       report: "they dont read as clickable") -- the same
-                       expand chevron every other opener on this dashboard
-                       carries. */}
-                    <Go kind="expand" open={active} className="hidden sm:block" />
-                  </button>
-                );
-              })}
-            </div>
-            {/* A tile picks a season; the whole area below the tiles then
-               shows ONLY that season's checklist, not a list of three
-               accordions (direct instruction, 26 Sept 2026: "instead of
-               when i click the rows under it expand, make it so that the
-               entire section under the tiles reflect what i click with a
-               close button or back button"). Nothing renders here until a
-               tile is picked. */}
-            {openWindow && (() => {
-              const list = rows.filter((r) => r.window === openWindow).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct);
-              const seasonDone = list.length ? Math.round(list.reduce((a, r) => a + r.donePct, 0) / list.length) : 0;
-              const toReview = list.reduce((a, r) => a + r.counts["awaiting-review"], 0);
+          {/* Every milestone for the grade at rest, the Replit's own core
+             view (a v2-vs-Replit audit found them folded behind season
+             tiles), grouped by season for hierarchy. Each card is one ring
+             and its counts; clicking it opens the students not done. */}
+          <OverviewCard title={`Grade ${grade} milestones`} unit={curriculumFocus(grade)} aside={<CardLink onClick={openAll}>Students</CardLink>}>
+            <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
+              {STATES.map((st) => (
+                <span key={st.key} className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                  <span aria-hidden className="size-[8px] rounded-full" style={{ background: st.color }} />{st.label}
+                </span>
+              ))}
+            </span>
+            {(["fall", "winter", "spring"] as const).map((w) => {
+              const list = rows.filter((r) => r.window === w);
+              if (list.length === 0) return null;
               return (
-                <div className="flex flex-col gap-[var(--space-4)]">
-                  {/* The Back button felt redundant once the tiles above
-                     already do that job (a different tile switches
-                     straight to it; the active tile closes it) -- direct
-                     feedback: "the back button now feels redundant." The
-                     season's own summary takes its place instead. */}
-                  <div className="flex flex-wrap items-center gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                    <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{WINDOW_TITLE[openWindow]} · {list.length} checkpoint{list.length === 1 ? "" : "s"} · {seasonDone}% done{toReview ? ` · ${toReview} to review` : ""}</span>
-                  </div>
-                  <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
-                    {STATES.map((st) => (
-                      <span key={st.key} className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                        <span aria-hidden className="size-[8px] rounded-full" style={{ background: st.color }} />{st.label}
-                      </span>
-                    ))}
-                  </span>
-                  <ul className="flex flex-col gap-[6px]">
-                    {list.map((r) => (
-                      <li key={r.id}>
-                        <button type="button" onClick={() => openNotDone(r)} className="dm-quiet group flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[14px] py-[10px] text-left" style={GLASS_INSET}>
-                          <span className="flex flex-wrap items-baseline justify-between gap-x-[10px] gap-y-[2px]">
-                            <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
-                              <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</span>
+                <section key={w} className="flex flex-col gap-[8px]">
+                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{WINDOW_TITLE[w]}</span>
+                  <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 xl:grid-cols-3">
+                    {list.map((r) => {
+                      const na = r.counts["not-tracked"];
+                      return (
+                        <li key={r.id}>
+                          <button type="button" onClick={() => openNotDone(r)} className="dm-quiet group flex h-full w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] border p-[12px] text-left" style={GLASS_INSET}>
+                            <SegmentedRing size={56} stroke={7} segments={STATES.map((st) => ({ value: r.counts[st.key], color: st.color }))}>
+                              <span className="text-[13px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.donePct}%</span>
+                            </SegmentedRing>
+                            <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                              <span className="flex items-start justify-between gap-[6px]">
+                                <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</span>
+                                <Go className="mt-[2px] opacity-0 transition-opacity group-hover:opacity-100" />
+                              </span>
+                              <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.counts.done} of {r.total} completed{na ? ` · ${na} N/A` : ""}</span>
                               <span className="text-[11.5px] font-semibold" style={{ color: r.counts["awaiting-review"] > 0 ? PRIMARY : "var(--muted-foreground)" }}>{outstanding(r)}</span>
+                              <span className="text-[10.5px] font-semibold tracking-[0.02em]" style={{ color: "color-mix(in srgb, var(--muted-foreground) 80%, transparent)" }}>{r.classification}</span>
                             </span>
-                            <span className="flex flex-none items-baseline gap-[8px]">
-                              <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.classification}</span>
-                              <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{r.donePct}% <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span></span>
-                              <Go className="self-center" />
-                            </span>
-                          </span>
-                          <StatusBar r={r} />
-                        </button>
-                      </li>
-                    ))}
+                          </button>
+                        </li>
+                      );
+                    })}
                   </ul>
-                </div>
+                </section>
               );
-            })()}
+            })}
           </OverviewCard>
         </>
       )}
