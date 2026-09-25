@@ -16,7 +16,7 @@
 // - One hero per screen carries a tint; every other card is plain glass.
 
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { CardLink } from "../chips";
+import { CardLink, Go } from "../chips";
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 import { STATUS_COLORS } from "./Overview";
 import { targetBand, type TargetBand } from "@/lib/counselorOrg";
@@ -104,8 +104,9 @@ export function MetricRow({ label, note, value, target, leading, onClick, displa
   );
   if (!onClick) return <div className="flex items-center gap-[12px]">{body}</div>;
   return (
-    <button type="button" onClick={onClick} className="dm-quiet -mx-[6px] flex w-[calc(100%+12px)] cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[6px] py-[4px] text-left">
+    <button type="button" onClick={onClick} className="dm-quiet group -mx-[6px] flex w-[calc(100%+12px)] cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[6px] py-[4px] text-left">
       {body}
+      <Go />
     </button>
   );
 }

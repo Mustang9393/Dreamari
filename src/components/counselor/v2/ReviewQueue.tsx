@@ -29,7 +29,7 @@ import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { decideReview, undoReview, useReviewDecisions, useReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
-import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, StudentLink } from "../chips";
+import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, StudentLink, Go } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
@@ -151,7 +151,7 @@ function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewIt
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="dm-quiet flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left"
+      className="dm-quiet group flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left"
       style={{ ...GLASS_INSET, borderColor: selected ? "color-mix(in srgb, var(--primary) 60%, var(--glass-border))" : GLASS_INSET.borderColor, background: selected ? "color-mix(in srgb, var(--primary) 12%, transparent)" : GLASS_INSET.background }}
     >
       <span className="flex items-center justify-between gap-[10px]">
@@ -162,7 +162,7 @@ function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewIt
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.milestone} · Grade {item.student.grade}{showCounselor ? ` · ${counselorFor(item.student).name}` : ""}</span>
           </span>
         </span>
-        <PriorityPill priority={item.priority} />
+        <span className="flex flex-none items-center gap-[8px]"><PriorityPill priority={item.priority} /><Go kind="open" /></span>
       </span>
       <span className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--foreground)" }}>
         <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: color }} />

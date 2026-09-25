@@ -6,15 +6,16 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, TrendingDown, TrendingUp } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { SegmentedRing, BarChart } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { Avatar, CardLink, StatRow } from "../chips";
+import { Avatar, CardLink, Go, StatRow } from "../chips";
 import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { BLUE_3, NEUTRAL_SLICE, PATHWAY_SEQUENCE, PRIMARY, TARGET_LINE } from "../palette";
+import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "../palette";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import { GLASS_INSET } from "../surfaces";
 import { planGradeSummary } from "./PlanMap";
 
@@ -261,7 +262,7 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
                 <button
                   type="button"
                   onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)}
-                  className="dm-quiet flex w-full cursor-pointer flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px] text-left"
+                  className="dm-quiet group flex w-full cursor-pointer flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px] text-left"
                   style={GLASS_INSET}
                 >
                   <Avatar name={s.name} size={32} index={s.avatarIndex} />
@@ -272,6 +273,7 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
                   <span className="flex flex-none items-center gap-[10px] text-[12.5px] font-semibold">
                     <span style={{ color: "var(--foreground)" }}>{attentionReason(s)}</span>
                     <span className="text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={{ color }}>{severity}</span>
+                    <Go />
                   </span>
                 </button>
               </li>
@@ -326,12 +328,15 @@ export function Overview() {
   const ranked = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
   const rest = ranked.slice(6).reduce((n, [, v]) => n + v, 0);
   const topPathways: [string, number][] = rest > 0 ? [...ranked.slice(0, 6), ["Other", rest]] : ranked.slice(0, 7);
-  // Seven distinct hues in spectral order, assigned by rank (palette.ts).
-  // History: a seven-hue set that reused status colors; a single-hue ramp
-  // that blended neighbours; three cluster hues that repeated ("please
-  // don't do this ... each thing in that legend has to be different but
-  // stick to a known sequence").
-  const pathwayColors = topPathways.map((_, i) => PATHWAY_SEQUENCE[i % PATHWAY_SEQUENCE.length]);
+  // Each pathway wears the colour its world has everywhere else in the
+  // student app (WORLD_COLORS, the Figma Career Poster Card variants, light
+  // and dark values in tokens.css). Direct instruction, 25 Sept 2026: "let
+  // pathways use the actual color system we use for the different
+  // industries in the dreamari app." History: a seven-hue set that reused
+  // status colors; a single-hue ramp that blended neighbours; three
+  // cluster hues that repeated; a spectral rank order (palette.ts
+  // PATHWAY_SEQUENCE, now unused here). "Other" stays neutral.
+  const pathwayColors = topPathways.map(([label]) => (label === "Other" ? NEUTRAL_SLICE : WORLD_COLORS[label] ?? PRIMARY));
 
   const grades = [9, 10, 11, 12];
   const gradeStudents = (g: number) => roster.filter((s) => s.grade === g);
@@ -422,7 +427,7 @@ export function Overview() {
             <ul className="flex flex-col gap-[6px]">
               {gradeSummary.map((g) => (
                 <li key={g.grade}>
-                  <button type="button" onClick={() => { setGradeFilter(g.grade); router.push("/counselor?view=milestones"); }} className="dm-quiet group/row flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left" style={GLASS_INSET}>
+                  <button type="button" onClick={() => { setGradeFilter(g.grade); router.push("/counselor?view=milestones"); }} className="dm-quiet group flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left" style={GLASS_INSET}>
                     <span className="flex items-baseline justify-between gap-[10px]">
                       <span className="flex min-w-0 items-baseline gap-[8px]">
                         <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>Grade {g.grade}</span>
@@ -430,7 +435,7 @@ export function Overview() {
                       </span>
                       <span className="flex flex-none items-center gap-[6px]">
                         <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{g.donePct}%</span>
-                        <ChevronRight aria-hidden className="h-[14px] w-[14px] transition-transform group-hover/row:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+                        <Go />
                       </span>
                     </span>
                     <span className="block h-[6px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>

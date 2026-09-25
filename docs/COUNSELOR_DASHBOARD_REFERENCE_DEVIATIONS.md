@@ -870,6 +870,30 @@ kept as history.
 
 ### 2026-09-25: School year map on top (v2)
 
+- **Hero is a ring, not a bar (25 Sept 2026).** The Focus first step's
+  four states are arcs of one `SegmentedRing` with done % inside and the
+  open counts beside it; the verdict is one action line. Alternative:
+  keep the stacked bar; direct feedback asked for "simpler, much more
+  cleaner ... with some beauty", and the ring is the mark the tiles and
+  the Overview already use.
+- **Season tiles carry the student My Plan's season scene; accordions
+  are plain and closed by default; the legend sits inside the open
+  season (25 Sept 2026).** Three direct instructions in one sitting.
+- **Every clickable row shows its affordance at rest (25 Sept 2026).**
+  `Go` in chips.tsx: arrow = leaves the screen, chevron = opens here,
+  turning chevron = unfolds. Visible without hover because tablets and
+  phones have none and the users may be older; hover only adds motion.
+- **Pathways wear the app's world colors (25 Sept 2026)**, `WORLD_COLORS`
+  from `src/components/app/worlds.ts`, so a world is the same colour on
+  Home, Explore and here. The spectral rank order is retired.
+- **The four-grade map is gone; the grade tabs pick the grade and the
+  grade's three seasons sit as rings above the list (25 Sept 2026).**
+  Direct feedback: "the tabs are under the school year map now. The
+  school year map is genuinely confusing me ... we already have a grade
+  toggle, let's use that." The season rings double as the season picker
+  for the accordions below. Alternative: keep the map and move the tabs
+  above it; two grade controls on one screen is the confusion, not the
+  order.
 - **Seasons are accordions (25 Sept 2026).** One season open at a time,
   the Focus first step's season by default, each closed season keeping
   its summary in the header, the same shape as the student's own My Plan.
