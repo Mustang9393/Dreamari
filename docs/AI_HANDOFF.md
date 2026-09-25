@@ -14507,3 +14507,11 @@ Finished the move started earlier this session: `SidebarAccount` (shell.tsx) is 
 With the role pill gone from the dock and v1 hidden, the dock was left showing one unclickable "v2" pill with nothing to switch to -- removed from the shell entirely, direct instruction: "Remove the v2 chip from the ui we dont need it anymore." `CounselorVersionChip` itself stays defined in `version.tsx`, just unrendered; re-enabling `V1_ENABLED`/`V3_ENABLED` and adding `<CounselorVersionChip />` back next to `ChangeNotePanel` in shell.tsx is the entire "bring the dock back."
 
 Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the popover opens/closes, switching roles re-renders the whole dashboard (confirmed Lead Counselor's own Overview/menu), and the dock is gone. Not pushed; awaiting explicit go-ahead per this project's push rule.
+
+## 2026-09-26 · Career Pathways: "Other" answers what's folded into it
+
+Direct question: "what is other in the career pathways... that seems like some are more important than others. How can we solve for this without cluttering everything? Are we showing the categories we have from build?" Confirmed: yes, these are Build's own 15 interest worlds verbatim; "Other" folds whichever 6+ worlds have the smallest headcount in the current caseload (a dataviz "fold the tail" rule, not an editorial ranking), and nothing previously said so.
+
+"Other" is now clickable to reveal exactly which worlds it contains and their individual counts, sorted largest first, collapsing back on a second click -- answers "what's in here" without permanently listing all of them and lengthening the card. Repurposed a click that was previously a dead no-op (`onToggle("Other")` filtered the roster to a `careerTrack` value no real student ever has, since "Other" is a synthetic label, not a Build world).
+
+Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the expand/collapse. Not pushed; awaiting explicit go-ahead per this project's push rule.
