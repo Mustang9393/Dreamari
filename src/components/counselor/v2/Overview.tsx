@@ -177,8 +177,7 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
 // click-throughs, which land on the Roster). The stacked bar's own
 // segments are the click targets too, not just the legend rows, since
 // they're already visually "the thing you'd click."
-function PathwaysCard({ total, topPathways, otherBreakdown, colors, activePathway, onToggle, onOpen }: { total: number; topPathways: [string, number][]; otherBreakdown: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
-  const [otherOpen, setOtherOpen] = useState(false);
+function PathwaysCard({ total, topPathways, colors, activePathway, onToggle, onOpen }: { total: number; topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
       <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
@@ -207,38 +206,21 @@ function PathwaysCard({ total, topPathways, otherBreakdown, colors, activePathwa
               );
             })}
           </span>
-          {/* Tried a 2-column legend twice (mobile wrap, then a wider card
-             still wrapping/staggering) -- several of these category names
-             ("Counseling & Social Work", "Personal Care & Community
-             Services", "Fixing Machines & Engines") just don't fit a
-             half-width column with a right-aligned number at any
+          {/* Tried a 2-column legend twice already (mobile wrap, then a
+             wider card still wrapping/staggering) -- several of these
+             world names ("Counseling & Social Work", "Personal Care &
+             Community Services", "Fixing Machines & Engines") just don't
+             fit a half-width column with a right-aligned number at any
              reasonable card size (direct report, with a screenshot: "This
-             isnt fixed"). Single column, proven to hold up everywhere. */}
+             isnt fixed"). Single column, proven to hold up everywhere --
+             now showing every one of the caseload's real Build worlds,
+             not a folded "Other" (direct feedback: "i dont want certian
+             careers reading like theya re lesser than the ones
+             prominently listed"). */}
           <div className="flex flex-col gap-[4px]">
-            {topPathways.map(([label, value], i) =>
-              label === "Other" ? (
-                <div key={label} className="flex flex-col gap-[2px]">
-                  {/* "Other" answers "what's in here" on click instead of
-                     always listing all nine folded worlds -- direct
-                     question: "what is other... seems like some are more
-                     important than others." It isn't: these are just this
-                     caseload's nine smallest worlds right now. */}
-                  <StatRow label={`Other (${otherBreakdown.length})`} value={value} color={colors[i % colors.length]} active={activePathway === label} onClick={() => setOtherOpen((v) => !v)} />
-                  {otherOpen && (
-                    <ul className="ml-[16px] flex flex-col gap-[2px] border-l pl-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-                      {otherBreakdown.map(([l, v]) => (
-                        <li key={l} className="flex items-center justify-between gap-[8px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                          <span className="truncate">{l}</span>
-                          <span className="tabular-nums" style={{ color: "var(--foreground)" }}>{v}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ) : (
-                <StatRow key={label} label={label} value={value} color={colors[i % colors.length]} active={activePathway === label} onClick={() => onToggle(label)} />
-              )
-            )}
+            {topPathways.map(([label, value], i) => (
+              <StatRow key={label} label={label} value={value} color={colors[i % colors.length]} active={activePathway === label} onClick={() => onToggle(label)} />
+            ))}
           </div>
         </div>
       </div>
@@ -318,17 +300,12 @@ export function Overview() {
   const togglePathway = (label: string) => setPathwayFilter((cur) => (cur === label ? null : label));
 
   const reviewed = useReviewedRoster();
-  const topSix = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const s of reviewed) counts.set(s.careerTrack, (counts.get(s.careerTrack) ?? 0) + 1);
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => k);
-  }, [reviewed]);
   const roster = useMemo(() => {
     let all = reviewed;
     if (gradeFilter !== "All Grades") all = all.filter((s) => s.grade === gradeFilter);
-    if (pathwayFilter) all = pathwayFilter === "Other" ? all.filter((s) => !topSix.includes(s.careerTrack)) : all.filter((s) => s.careerTrack === pathwayFilter);
+    if (pathwayFilter) all = all.filter((s) => s.careerTrack === pathwayFilter);
     return all;
-  }, [reviewed, gradeFilter, pathwayFilter, topSix]);
+  }, [reviewed, gradeFilter, pathwayFilter]);
 
   const goToStudents = (status?: StatusRosterFilter, plan?: PlanRosterFilter) => {
     if (status) setStatusFilter(status);
@@ -346,19 +323,15 @@ export function Overview() {
 
   const pathwayCounts = new Map<string, number>();
   for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
-  // Fifteen Build worlds are too many for one bar: the six largest, then
-  // "Other" (dataviz rule: fold the tail, never a ninth hue). "Other" folds
-  // whichever nine worlds have the smallest headcount in THIS caseload right
-  // now, not an editorial ranking of which pathways matter -- worth saying
-  // explicitly, since a folded bucket that outsizes every named one reads
-  // as if it's hiding something (direct question, 26 Sept 2026: "that seems
-  // like some are more important than others"). `otherBreakdown` keeps the
-  // real members so "Other" can answer "what's in here" on click instead of
-  // permanently listing all nine and cluttering the card.
-  const ranked = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
-  const otherBreakdown = ranked.slice(6).sort((a, b) => b[1] - a[1]);
-  const rest = otherBreakdown.reduce((n, [, v]) => n + v, 0);
-  const topPathways: [string, number][] = rest > 0 ? [...ranked.slice(0, 6), ["Other", rest]] : ranked.slice(0, 7);
+  // No "Other" -- folding the smaller worlds together read as if those
+  // pathways mattered less (direct feedback, 26 Sept 2026: "i dont want
+  // certian careers reading like theya re lesser than the ones prominently
+  // listed... show only the tracks on build"). All of a caseload's real
+  // Build worlds are shown, largest first, single column -- a two-column
+  // grid was tried once already for this exact legend and rejected (see
+  // PathwaysCard below): several of these world names are long enough to
+  // wrap and stagger in a half-width column at any reasonable card size.
+  const topPathways: [string, number][] = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
   // Each pathway wears the colour its world has everywhere else in the
   // student app (WORLD_COLORS -- Build, Explore, Career Poster Cards),
   // not a bespoke sequence invented for this one screen (direct
@@ -367,7 +340,7 @@ export function Overview() {
   // across the dreamari app" -- restoring the 25 Sept decision after a
   // same-day detour through the reference's own seven tracks). "Other"
   // stays neutral.
-  const pathwayColors = topPathways.map(([label]) => (label === "Other" ? NEUTRAL_SLICE : WORLD_COLORS[label] ?? PRIMARY));
+  const pathwayColors = topPathways.map(([label]) => WORLD_COLORS[label] ?? PRIMARY);
 
   // The reference's own per-grade percentage, verbatim (v1's Overview.tsx):
   // of the grade's students, how many have this milestone Approved. A grade
@@ -444,7 +417,7 @@ export function Overview() {
           />
         </div>
         <div className="@[1100px]:col-span-4">
-          <PathwaysCard total={total} topPathways={topPathways} otherBreakdown={otherBreakdown} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
+          <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
         </div>
         <div className="@[1100px]:col-span-3">
           <DonutCard
