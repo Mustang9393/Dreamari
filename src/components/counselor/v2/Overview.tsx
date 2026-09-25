@@ -6,7 +6,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronDown, TrendingDown, TrendingUp } from "lucide-react";
 import { BarChart, SegmentedRing } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -15,8 +15,7 @@ import { attentionReason, attentionSeverity, attentionRank, milestonesForGrade, 
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "../palette";
-import { WORLD_COLORS } from "@/components/app/worlds";
-import { GLASS_INSET } from "../surfaces";
+import { GLASS_INSET, pathwayTileSurface } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "#33C78C",
@@ -164,145 +163,70 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
   );
 }
 
-// Settled 26 Sept 2026, final instruction after eleven earlier attempts
-// (full history in AI_HANDOFF.md): "just use one horizontal bar
-// representing the total number of students and show segments in colors
-// to show the distribution or number of students in each career pathways,
-// making up the total Thats it." One bar, one shape: its own width IS the
-// full roster, each pathway is a contiguous segment sized to its exact
-// share -- a real 100%-stacked bar, not a chart style at all. The compact
-// dot+label+value key below (unchanged since the earlier attempts) still
-// carries every pathway's name and count.
-// Direct follow-up the same day: "not so flat and bright and align with
-// the other graph styling for the colors, gradients, opacity etc. Hover
-// can show number and pathway details with a glow." Each segment now
-// carries the same recipe this dashboard's other data-viz already uses --
-// a subtle top-to-base gradient at a toned-down rest opacity (GLASS_CARD's
-// own sheen direction, not a flat saturated fill) -- and brightens to full
-// opacity with a real glow plus a floating tooltip on hover, the same
-// two-part "quiet at rest, lit on hover" language as the Career Readiness
-// bars above it.
-function PathwaysBarChart({ topPathways, colors, activePathway, onToggle }: { topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void }) {
-  const total = topPathways.reduce((sum, [, v]) => sum + v, 0) || 1;
-  const [hoverLabel, setHoverLabel] = useState<string | null>(null);
-  // Cumulative left offset per segment, computed once -- the tooltip
-  // below needs each segment's position but has to live OUTSIDE the
-  // bar's own clipping row (see why below), so it can't just be an
-  // absolutely-positioned child of that segment anymore.
-  const segments = topPathways.reduce<{ label: string; value: number; pct: number; left: number; color: string }[]>((acc, [label, value], i) => {
-    const pct = (value / total) * 100;
-    const left = acc.length > 0 ? acc[acc.length - 1].left + acc[acc.length - 1].pct : 0;
-    acc.push({ label, value, pct, left, color: colors[i % colors.length] });
-    return acc;
-  }, []);
-  const hovered = segments.find((s) => s.label === hoverLabel) ?? null;
-  return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      {/* Direct correction on the glass treatment: "revert this is worse.
-         just use flat colors with the glow like in the donuts." Ring/
-         SegmentedRing's own recipe -- flat, fully-saturated per-segment
-         color (no gradient, no frost), plus ONE shared soft blurred glow
-         behind the whole shape (not a glow baked into each segment). Its
-         own small wrapper, sized to the bar's own footprint -- nested one
-         level too high the first time, it inherited the WHOLE
-         chart+legend block's height and washed out as a huge diffuse
-         blob across the entire card instead of sitting behind just the
-         bar. */}
-      <div className="relative">
-        <span aria-hidden className="pointer-events-none absolute inset-[-40%] opacity-60 blur-[16px]" style={{ background: `radial-gradient(ellipse 70% 140% at 50% 50%, color-mix(in srgb, ${(hovered ?? segments[0])?.color ?? "var(--primary)"} 45%, transparent), transparent 70%)` }} />
-        <div className="relative flex h-[30px] w-full overflow-hidden rounded-[8px]" role="img" aria-label={`Career pathways: ${topPathways.map(([l, v]) => `${l} ${v}`).join(", ")}`}>
-        {segments.map((seg, i) => {
-          const active = activePathway === seg.label;
-          const isHover = seg.label === hoverLabel;
-          const dim = activePathway !== null && !active;
-          return (
-            <button
-              key={seg.label}
-              type="button"
-              onClick={() => onToggle(seg.label)}
-              onMouseEnter={() => setHoverLabel(seg.label)}
-              onMouseLeave={() => setHoverLabel(null)}
-              onFocus={() => setHoverLabel(seg.label)}
-              onBlur={() => setHoverLabel(null)}
-              aria-pressed={active}
-              aria-label={`${seg.label}: ${seg.value}`}
-              // No `.dm-quiet` here -- its own `:hover { background: ...
-              // !important }` was overriding this button's colored fill
-              // on hover, which is what turned every segment flat gray
-              // the moment it was pointed at.
-              className="h-full cursor-pointer transition-[opacity,filter] duration-150"
-              style={{
-                width: `${seg.pct}%`,
-                background: seg.color,
-                opacity: dim ? 0.35 : 1,
-                borderRight: i < segments.length - 1 ? "1px solid var(--card)" : "none",
-                filter: isHover || active ? `drop-shadow(0 0 8px color-mix(in srgb, ${seg.color} 80%, transparent))` : undefined,
-              }}
-            />
-          );
-        })}
-      </div>
-      {/* Rendered as a sibling of the bar row, not nested inside it -- the
-         row above needs its own `overflow-hidden` to clip the segments
-         into one rounded pill, and an absolutely-positioned tooltip
-         nested inside that same clipped box was invisible no matter what
-         z-index or bottom offset it had (confirmed via devtools: it was
-         in the DOM, fully opaque, just clipped to zero visible area by
-         its own clipping ancestor). Positioned here instead, by the
-         hovered segment's own precomputed left%, with nothing above it
-         to clip it. "Hover can show number and pathway details with a
-         glow." */}
-      {hovered && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-[calc(100%+8px)] rounded-[8px] border px-[10px] py-[6px] text-center"
-          style={{ left: `${hovered.left + hovered.pct / 2}%`, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: `0 0 14px color-mix(in srgb, ${hovered.color} 55%, transparent), 0 6px 16px rgba(0,0,0,0.35)` }}
-        >
-          <div className="whitespace-nowrap text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{hovered.label}</div>
-          <div className="whitespace-nowrap text-[13px] font-extrabold" style={{ color: "var(--foreground)" }}>{hovered.value} students</div>
-        </div>
-        )}
-      </div>
-      <div className="@container">
-        <div className="grid grid-cols-2 gap-x-[22px] gap-y-[5px] @[440px]:grid-cols-3">
-          {topPathways.map(([label, value], i) => {
-            const active = activePathway === label;
-            const dim = activePathway !== null && !active;
-            return (
-              <button
-                key={label}
-                type="button"
-                onClick={() => onToggle(label)}
-                aria-pressed={active}
-                className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[4px] py-[2px] text-left transition-opacity"
-                style={{ opacity: dim ? 0.45 : 1 }}
-              >
-                <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: colors[i % colors.length] }} />
-                <span className="truncate text-[10.5px] font-semibold" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>{label}</span>
-                <span className="flex-none text-[10.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
+type PathwayTile = { label: string; value: number; x: number; y: number; width: number; height: number };
+
+// Balanced binary treemap: partition at the closest half of the count,
+// then split the longer side. Every tile's area is exactly count / total.
+function layoutPathways(rows: [string, number][], x = 0, y = 0, width = 100, height = 40): PathwayTile[] {
+  if (!rows.length) return [];
+  if (rows.length === 1) return [{ label: rows[0][0], value: rows[0][1], x, y, width, height }];
+  const total = rows.reduce((sum, [, value]) => sum + value, 0);
+  let split = 1;
+  let sum = rows[0][1];
+  while (split < rows.length - 1 && Math.abs(sum + rows[split][1] - total / 2) < Math.abs(sum - total / 2)) {
+    sum += rows[split][1];
+    split++;
+  }
+  const share = total > 0 ? sum / total : split / rows.length;
+  return width >= height
+    ? [...layoutPathways(rows.slice(0, split), x, y, width * share, height), ...layoutPathways(rows.slice(split), x + width * share, y, width * (1 - share), height)]
+    : [...layoutPathways(rows.slice(0, split), x, y, width, height * share), ...layoutPathways(rows.slice(split), x, y + height * share, width, height * (1 - share))];
 }
 
-function PathwaysCard({ topPathways, colors, activePathway, onToggle, onOpen }: { topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
+// One rectangular whole, split by student count. Details are progressively disclosed so
+// the overview never requires reading fifteen labels to understand the split.
+function PathwaysCard({ topPathways, activePathway, onToggle, onOpen }: { topPathways: [string, number][]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
+  const total = topPathways.reduce((sum, [, count]) => sum + count, 0);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [focused, setFocused] = useState<string | null>(null);
+  const detail = topPathways.find(([label]) => label === (hovered ?? focused ?? activePathway));
+
   return (
     <HoverBeam strength={0.7} className="h-full">
-      <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-        <div className="relative flex items-center justify-between gap-[8px]">
-          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{topPathways.reduce((sum, [, v]) => sum + v, 0)} students</span></h2>
-          {!activePathway && <CardLink onClick={onOpen}>Insights</CardLink>}
-          {activePathway && (
-            <button type="button" onClick={() => onToggle(activePathway)} className="dm-quiet flex cursor-pointer items-center gap-[4px] rounded-full border px-[8px] py-[2px] text-[11px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", color: "var(--foreground)" }}>
-              {activePathway} <span aria-hidden style={{ color: "var(--muted-foreground)" }}>✕</span>
-            </button>
-          )}
+      <div className="group flex min-w-0 flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
+        <div className="flex flex-wrap items-center justify-between gap-[8px]">
+          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways <span className="ml-[6px] text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>{total} students</span></h2>
+          <CardLink onClick={onOpen}>Insights</CardLink>
         </div>
-        <PathwaysBarChart topPathways={topPathways} colors={colors} activePathway={activePathway} onToggle={onToggle} />
+        <figure className="min-w-0" aria-label={`${total} students split across ${topPathways.length} career pathways`}>
+          <div className="relative h-[280px] w-full overflow-hidden rounded-[var(--radius-md)] sm:h-[240px]" style={{ background: "radial-gradient(ellipse at 20% 0%, color-mix(in srgb, var(--primary) 35%, transparent), transparent 70%), var(--card)", boxShadow: "0 12px 36px -20px color-mix(in srgb, var(--primary) 55%, transparent), 0 0 0 1px color-mix(in srgb, var(--primary) 22%, var(--glass-border))" }} onMouseLeave={() => setHovered(null)}>
+            {layoutPathways(topPathways).map(({ label, value, x, y, width, height }) => (
+              <button key={label} type="button" onClick={() => onToggle(label)} onMouseEnter={() => setHovered(label)} onFocus={() => setFocused(label)} onBlur={() => setFocused(null)}
+                aria-pressed={activePathway === label} aria-label={`${label}: ${value} of ${total} students. ${activePathway === label ? "Clear" : "Filter by"} pathway`}
+                className="absolute flex min-w-0 cursor-pointer flex-col items-start justify-center overflow-hidden border p-[5px] text-left sm:p-[10px] focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--foreground)]"
+                style={{ ...pathwayTileSurface(total ? value / total : 0, detail?.[0] === label), left: `${x}%`, top: `${y / 40 * 100}%`, width: `${width}%`, height: `${height / 40 * 100}%` }}>
+                {width >= 17 && height >= 9 && <span className="hidden text-[12px] leading-[16px] font-medium sm:block">{label}</span>}
+                <span className="text-[13px] leading-[16px] font-bold tabular-nums sm:text-[18px] sm:leading-[24px]">{value}</span>
+              </button>
+            ))}
+          </div>
+          <figcaption className="mt-[10px] flex min-h-[32px] flex-wrap items-center justify-between gap-x-[12px] gap-y-[4px] text-[12px]" style={{ color: "var(--muted-foreground)" }}>
+            {detail ? <span><span className="font-semibold" style={{ color: "var(--foreground)" }}>{detail[0]}</span> · {detail[1]} of {total} students <span className="tabular-nums">({total ? (detail[1] / total * 100).toFixed(1) : 0}%)</span></span> : <span>{topPathways.length} pathways · area represents student count</span>}
+            {activePathway && <button type="button" onClick={() => onToggle(activePathway)} aria-label={`Clear ${activePathway} filter`} className="dm-quiet cursor-pointer rounded px-[4px] py-[6px] font-semibold" style={{ color: "var(--foreground)" }}>Clear filter ×</button>}
+          </figcaption>
+        </figure>
+        <details className="group/pathways border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+          <summary className="flex min-h-[32px] cursor-pointer items-center justify-between gap-[8px] rounded text-[12px] font-semibold focus-visible:outline-2 focus-visible:outline-[var(--primary)]" style={{ color: "var(--muted-foreground)" }}>
+            <span className="group-open/pathways:hidden">View all pathways</span><span className="hidden group-open/pathways:inline">Hide pathways</span><ChevronDown aria-hidden className="h-[14px] w-[14px] group-open/pathways:rotate-180" />
+          </summary>
+          <ul className="mt-[8px] grid grid-cols-1 gap-x-[32px] md:grid-cols-2">
+            {topPathways.map(([label, value]) => <li key={label}>
+              <button type="button" onClick={() => onToggle(label)} aria-pressed={activePathway === label} className="dm-quiet flex min-h-[44px] w-full cursor-pointer items-center gap-[8px] rounded text-left text-[12px] focus-visible:outline-2 focus-visible:outline-[var(--primary)]" style={{ color: "var(--foreground)" }}>
+                <span aria-hidden className="size-[6px] shrink-0 rounded-full" style={{ background: "var(--primary)" }} /><span className="min-w-0 flex-1" style={{ overflowWrap: "anywhere" }}>{label}</span><strong className="tabular-nums">{value}</strong>
+              </button>
+            </li>)}
+          </ul>
+        </details>
       </div>
     </HoverBeam>
   );
@@ -405,26 +329,12 @@ export function Overview() {
   const undecided = total - withPlan;
 
   const pathwayCounts = new Map<string, number>();
-  for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
-  // No "Other" -- folding the smaller worlds together read as if those
-  // pathways mattered less (direct feedback, 26 Sept 2026: "i dont want
-  // certian careers reading like theya re lesser than the ones prominently
-  // listed... show only the tracks on build"). All of a caseload's real
-  // Build worlds are shown, largest first, single column -- a two-column
-  // grid was tried once already for this exact legend and rejected (see
-  // PathwaysCard below): several of these world names are long enough to
-  // wrap and stagger in a half-width column at any reasonable card size.
+  // Keep the whole grade cohort visible when a pathway filters the other cards.
+  for (const s of reviewed) {
+    if (gradeFilter === "All Grades" || s.grade === gradeFilter) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
+  }
+  // Keep every original pathway and count, including the smallest groups.
   const topPathways: [string, number][] = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
-  // Each pathway wears the colour its world has everywhere else in the
-  // student app (WORLD_COLORS -- Build, Explore, Career Poster Cards),
-  // not a bespoke sequence invented for this one screen (direct
-  // instruction, 26 Sept 2026: "the nomenclature is wrong for career
-  // pathways and so are the colors. they [should match what's] fixed
-  // across the dreamari app" -- restoring the 25 Sept decision after a
-  // same-day detour through the reference's own seven tracks). "Other"
-  // stays neutral.
-  const pathwayColors = topPathways.map(([label]) => WORLD_COLORS[label] ?? PRIMARY);
-
   // The reference's own per-grade percentage, verbatim (v1's Overview.tsx):
   // of the grade's students, how many have this milestone Approved. A grade
   // where the milestone doesn't apply yet (e.g. Resume before Grade 10)
@@ -516,7 +426,7 @@ export function Overview() {
          wrap its chips into just a few rows rather than many; a 1/3-width
          column left it both cramped and, before the chip redesign, the
          tallest thing on the page by far. */}
-      <PathwaysCard topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
+      <PathwaysCard topPathways={topPathways} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
 
       {/* Reviews approved chart. A "My Plan by grade" panel briefly lived
          here, driven by the student app's own My Plan steps rather than

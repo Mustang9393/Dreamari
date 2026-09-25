@@ -155,3 +155,7 @@ reach that student.
   removed, so v2 shows the same true reference numbers v1 shows. A v3
   toggle snapshots the pre-audit build for comparison (`./version.tsx`,
   `src/components/counselor/v3/`).
+
+### 2026-09-26 Career Pathways treemap (approved for main)
+
+Career Pathways uses a treemap: tile area is proportional to pathway count within the grade-filtered cohort. Selecting a pathway filters other cards but preserves the whole-cohort chart denominator. Full names and exact counts remain in a collapsed disclosure, with contextual hover/focus/selection detail. User requested softened glass/gradient styling; the shared tile surface uses one brand-blue family with gentle shade variation, uniform glass sheen and a luminous interaction state, following the supplied visual references. User approved the reviewed preview for main on 26 September; Claude's working directory is not modified. See AI_HANDOFF for rationale and validation.

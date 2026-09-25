@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-26 Career Pathways treemap: approved for main
+
+User requested less clutter with unchanged content, rejected independent bars ("we arent counting them to a full progression we are showing the split up of a total"), invited other logical chart models, then requested better colors and a glass/gradient surface. Current preview is a balanced binary treemap: every pathway's area equals its share of the unchanged cohort count. Counts remain visible; names appear where space permits and every full name/count is accessible by hover, focus or selection, plus a collapsed "View all pathways" disclosure. No categories grouped into Other or omitted.
+
+The grade-scoped total remains visible when selecting a pathway, while other cards retain cross-filtering, so the chart continues to say 21 of 121 instead of shrinking to 21 of 21. After the user supplied three polished dashboard references and explicitly invited a single hue, tiles now use one brand-blue family, a gentle count-based tint, uniform glass gradients, fine inset edges and a soft glow behind the chart. Hover/focus gets a brighter luminous fill. Area remains the primary quantitative encoding, with a subdued tint reinforcing share; no new palette tokens. Shared recipe in counselor/surfaces.ts. This follows the user's explicit gradient request despite generic chart guidance favoring flat marks.
+
+Branch: codex/counselor-pathways-preview, separate from Claude's active worktree. Preview: localhost:3001/counselor?v=2. No API keys used and no dependencies installed. User explicitly requested "push to main" after reviewing the blue glass treemap. The earlier independent-bar proposal was rejected and removed.
+
+Validation: ESLint and TypeScript passed. Browser: 15 tiles, 121 students; rendered tile area shares agree with count/121 within 0.000006 rounding error. Selecting Health & Medicine filters other cards to 21 but retains the chart's 121 denominator and 15 tiles. Full disclosure contains every name/count. At 390px all 15 tiles remain and no horizontal document overflow. No Windows device or color-vision simulation performed. Tiny tiles also have full-size controls in the expanded breakdown; no native tooltip, portal or new scroll surface. Token definitions unchanged; tokens:check passed again before release. After rebasing on latest main, the production webpack build passed, including TypeScript and all 29 static pages. Latest origin/main contains only intervening Milestone Tracker changes, with no overlapping source edits. Next: verify the main deployment after pushing; preserve Claude's worktree and its ongoing work.
+
 ### 2026-09-25 Counselor Dashboard: v3 backup, then a full content audit resolves the Overview/Tracker conflict
 
 Direct instruction, following up on the earlier content audit: "the
