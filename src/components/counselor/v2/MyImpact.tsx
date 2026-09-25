@@ -36,16 +36,18 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
-import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound, Star } from "lucide-react";
-import { Segmented } from "@/components/connect/viz";
+import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound } from "lucide-react";
+import { BarChart, Ring, Segmented, SegmentedRing } from "@/components/connect/viz";
 import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { readCounselorAccount } from "@/lib/counselorAccount";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 
-import { MetricRow, OverviewCard, RankBar, Verdict, alertColor } from "./overviewShared";
+import { OverviewCard, Verdict, alertColor } from "./overviewShared";
 import { CardLink, Go } from "../chips";
 import { GLASS_INSET } from "../surfaces";
+import { Disclosure } from "./Disclosure";
+import { BLUE_3, BLUE_5, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "../palette";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, TARGET_LABELS, counselorFor, readinessMetrics, targetBand, type TargetKey } from "@/lib/counselorOrg";
 const GRADES = [9, 10, 11, 12];
 
@@ -100,50 +102,89 @@ function CounselorHeadshot({ src, size = 64 }: { src: string; size?: number }) {
 // hierarchy is number, then label, then note, top-down by size.
 const BODY = { fontFamily: "var(--font-body)" } as const;
 
-// Hierarchy for everything below Outcomes (direct feedback on the stat
-// walls: "So many numbers and clutter and competing for attention"). Only
-// Outcomes gets big numbers. Each card below it has at most ONE headline;
-// every other figure is a quiet row -- label left, value right, a hairline
-// between rows -- or, where the figure is a rate, a thin bar. Nothing v1
-// showed is dropped; it just stops shouting.
+// Everything below Outcomes is grouped, not listed (direct feedback:
+// "So many numbers and clutter and competing for attention" and then
+// "consolidate data better, group them better, dont just display
+// everything all at once with 50 lines and copy and bars"). Three summary
+// cards, each ONE headline or ONE small chart, with the rest of its facts
+// folded behind "Details" -- every v1 fact is still one click away, and
+// the print report opens all of them.
 
 /** A card's one headline figure. */
-function Headline({ value, label, note }: { value: string; label: string; note?: string }) {
+function Headline({ value, label }: { value: string; label: string }) {
   return (
-    <span className="flex flex-wrap items-baseline gap-x-[10px] gap-y-[2px]">
-      <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
-      <span className="text-[13px] font-semibold" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
-      {note && <span className="text-[12px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{note}</span>}
+    <span className="flex flex-wrap items-baseline gap-x-[8px]">
+      <span className="text-[28px] leading-[1] font-extrabold whitespace-nowrap tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+      <span className="text-[13px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>{label}</span>
     </span>
   );
 }
 
-/** One quiet row: label (and muted note) left, value right. */
-function ListRow({ label, note, value }: { label: string; note?: string; value: string }) {
-  return (
-    <li className="flex items-baseline justify-between gap-[12px] border-t py-[9px] first:border-t-0 first:pt-0 last:pb-0" style={{ borderColor: "var(--glass-border)" }}>
-      <span className="flex min-w-0 flex-wrap items-baseline gap-x-[6px]">
-        <span className="text-[13px] font-medium" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
-        {note && <span className="text-[11.5px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{note}</span>}
+/** One quiet row: label left, value right, hairline between rows.
+ *  Clickable when given `onClick` (opens the students behind it). */
+function ListRow({ label, value, dot, onClick }: { label: string; value: string; dot?: string; onClick?: () => void }) {
+  const body = (
+    <>
+      <span className="flex min-w-0 items-center gap-[8px]">
+        {dot && <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: dot }} />}
+        <span className="truncate text-[12.5px] font-medium" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
       </span>
-      <span className="flex-none text-[13.5px] font-bold tabular-nums" style={{ ...BODY, color: "var(--foreground)" }}>{value}</span>
+      <span className="flex flex-none items-center gap-[6px] text-[12.5px] font-bold tabular-nums" style={{ ...BODY, color: "var(--foreground)" }}>{value}{onClick && <Go />}</span>
+    </>
+  );
+  return (
+    <li className="border-t py-[7px] first:border-t-0 first:pt-0 last:pb-0" style={{ borderColor: "var(--glass-border)" }}>
+      {onClick ? (
+        <button type="button" onClick={onClick} className="dm-quiet -mx-[6px] flex w-[calc(100%+12px)] cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-sm)] px-[6px] py-[2px] text-left">{body}</button>
+      ) : (
+        <span className="flex items-center justify-between gap-[12px]">{body}</span>
+      )}
     </li>
   );
 }
 
-/** A rate as a row with a thin bar under it. */
-function BarRow({ label, note, value, pct }: { label: string; note?: string; value: string; pct: number }) {
+/** A rate or a comparison: short label, value, one thin bar. `muted`
+ *  draws the bar in the neutral (a benchmark, not a result). */
+function BarRow({ label, value, pct, muted, tick }: { label: string; value: string; pct: number; muted?: boolean; /** a benchmark tick, as % of the bar */ tick?: number }) {
+  const color = muted ? NEUTRAL_SLICE : PRIMARY;
   return (
-    <li className="flex flex-col gap-[6px]">
-      <span className="flex items-baseline justify-between gap-[12px]">
-        <span className="flex min-w-0 flex-wrap items-baseline gap-x-[6px]">
-          <span className="text-[13px] font-medium" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
-          {note && <span className="text-[11.5px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{note}</span>}
-        </span>
-        <span className="flex-none text-[13.5px] font-bold tabular-nums" style={{ ...BODY, color: "var(--foreground)" }}>{value}</span>
+    <li className="flex flex-col gap-[5px]">
+      <span className="flex items-baseline justify-between gap-[12px] text-[12.5px]" style={BODY}>
+        <span className="truncate font-medium" style={{ color: muted ? "var(--muted-foreground)" : "var(--foreground)" }}>{label}</span>
+        <span className="flex-none font-bold tabular-nums" style={{ color: muted ? "var(--muted-foreground)" : "var(--foreground)" }}>{value}</span>
       </span>
-      <RankBar value={pct} height={5} />
+      <span className="relative block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} aria-hidden>
+        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(0, Math.min(100, pct))}%`, background: muted ? color : `linear-gradient(90deg, color-mix(in srgb, ${color} 35%, transparent), ${color})` }} />
+        {typeof tick === "number" && <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${tick}% - 1px)`, background: TARGET_LINE }} />}
+      </span>
     </li>
+  );
+}
+
+/** Parts of one whole: a single bar, one segment per category. */
+function CompositionBar({ parts }: { parts: { label: string; value: number; color: string }[] }) {
+  const sum = parts.reduce((a, p) => a + p.value, 0) || 1;
+  return (
+    <span className="flex h-[12px] w-full gap-[2px] overflow-hidden rounded-full" role="img" aria-label={parts.map((p) => `${p.label} ${p.value}`).join(", ")}>
+      {parts.filter((p) => p.value > 0).map((p) => <span key={p.label} className="h-full" style={{ width: `${(p.value / sum) * 100}%`, background: p.color }} />)}
+    </span>
+  );
+}
+
+/** A summary card: its one headline/chart always, its details folded (and
+ *  always open in print). */
+function SummaryCard({ id, title, unit, children, details }: { id: string; title: string; unit?: string; children: React.ReactNode; details: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <OverviewCard title={title} unit={unit}>
+      {children}
+      <div className="mt-auto print:hidden">
+        <Disclosure id={id} title="Details" open={open} onToggle={() => setOpen((v) => !v)}>
+          <ul className="flex flex-col">{details}</ul>
+        </Disclosure>
+      </div>
+      <ul className="hidden flex-col print:flex">{details}</ul>
+    </OverviewCard>
   );
 }
 
@@ -152,27 +193,27 @@ function BarRow({ label, note, value, pct }: { label: string; note?: string; val
 // opens the students behind the number (direct feedback on the old rows:
 // "too wordy and text heavy and not glanceable. No actionable cta").
 function OutcomeTile({ label, value, target, note, toGo, onClick }: { label: string; value: number | null; target: number; note: string; /** students still needed to reach the target, when below it */ toGo: number; onClick: () => void }) {
-  const color = value === null ? "var(--muted-foreground)" : alertColor(value, target) ?? "var(--foreground)";
+  const alert = value === null ? undefined : alertColor(value, target);
   return (
-    <button type="button" onClick={onClick} className="dm-quiet flex min-w-0 cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[14px] text-left" style={GLASS_INSET}>
-      <span className="flex items-center justify-between gap-[8px]">
-        <span className="truncate text-[12.5px] font-bold" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
-        <Go />
-      </span>
-      <span className="flex items-baseline gap-[8px]">
-        <span className="text-[30px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color }}>{value === null ? "n/a" : `${value}%`}</span>
-        <span className="text-[11.5px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>target {target}%</span>
-      </span>
-      <RankBar value={value ?? 0} target={target} />
-      <span className="flex items-center justify-between gap-[8px] text-[11.5px] font-semibold" style={BODY}>
-        <span className="truncate" style={{ color: "var(--muted-foreground)" }}>{note}</span>
-        {toGo > 0 && <span className="flex-none" style={{ color }}>{toGo} to go</span>}
+    <button type="button" onClick={onClick} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[14px] rounded-[var(--radius-md)] border p-[14px] text-left" style={GLASS_INSET}>
+      {/* A rate of one caseload reads as a ring (share of a whole), not a
+         bar filling toward nothing. */}
+      <Ring pct={value ?? 0} size={68} stroke={7} accent={alert ?? PRIMARY}>
+        <span className="text-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: alert ?? "var(--foreground)" }}>{value === null ? "n/a" : `${value}%`}</span>
+      </Ring>
+      <span className="flex min-w-0 flex-1 flex-col gap-[3px]" style={BODY}>
+        <span className="flex items-center justify-between gap-[6px]">
+          <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
+          <Go />
+        </span>
+        <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{note} · target {target}%</span>
+        {toGo > 0 && <span className="text-[11.5px] font-bold" style={{ color: alert }}>{toGo} to go</span>}
       </span>
     </button>
   );
 }
 
-type ImpactTab = "activity" | "breakdown" | "asca" | "highlights";
+type ImpactTab = "outcomes" | "activity" | "readiness" | "asca";
 const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
 
 // `scope="school"` is the Lead Counselor's School Impact: the same report
@@ -185,7 +226,7 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const who = scope === "school" ? (account.school || DEMO_SCHOOL) : (account.name || "Sarah Chen");
   const m = readinessMetrics(roster);
   const total = roster.length || 1;
-  const [tab, setTab] = useState<ImpactTab>("activity");
+  const [tab, setTab] = useState<ImpactTab>("outcomes");
 
   const respondedQuestions = QUESTIONS.filter((q) => q.status === "responded" || q.status === "resolved").length;
   const responseRatePct = Math.round((respondedQuestions / QUESTIONS.length) * 100);
@@ -210,7 +251,6 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const seniorsApplying = seniorRows.filter((s) => ["In Progress", "Completed", "Approved", "Pending Review"].includes(s.milestones.Applications)).length;
   const overallAvgCompletion = Math.round(roster.reduce((sum, s) => sum + s.roadmapPct, 0) / total);
   const pathway = PATHWAY_ORDER.map((p) => ({ label: p, count: roster.filter((s) => s.postsecondaryIntent === p).length }));
-  const pathwayMax = Math.max(1, ...pathway.map((p) => p.count));
 
   const engagement = { drops: 0, sims: 0, careers: 0, colleges: 0, posts: 0 };
   for (const s of roster) {
@@ -256,78 +296,183 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   // Each section is a small renderer, called once for whichever tab is
   // selected on screen and once more (all of them) in the print-only
   // compiled version below -- so the two never drift out of sync.
-  // Three cards, each with one headline and the rest as quiet rows.
+  // Ranked largest first, darkest blue first, so the ramp doubles as rank.
+  const RAMP = [...BLUE_5].reverse();
+  const actions = [
+    { label: "Daily Career Drops", value: engagement.drops },
+    { label: "Colleges saved", value: engagement.colleges },
+    { label: "Careers saved", value: engagement.careers },
+    { label: "Simulations", value: engagement.sims },
+    { label: "Community posts", value: engagement.posts },
+  ].sort((a, b) => b.value - a.value).map((a, i) => ({ ...a, color: RAMP[i] }));
+  const totalActions = actions.reduce((a, x) => a + x.value, 0);
+  const intents = pathway.filter((p) => p.label !== "Undecided").sort((a, b) => b.count - a.count).map((p, i) => ({ label: p.label, value: p.count, color: RAMP[i] }));
+  const pathwayParts = [...intents, { label: "Undecided", value: pathway.find((p) => p.label === "Undecided")?.count ?? 0, color: NEUTRAL_SLICE }];
+  const plansChanges = plansReviewed - plansApproved;
+
+  // ---- Outcomes tab: the four targets, then how they compare.
+  const renderOutcomes = () => (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {/* No status tint on this card (direct instruction: "remove the red
+         glow from outcomes card"); red lives only on the outcomes actually
+         below target. The one CTA names the worst of them. */}
+      <OverviewCard
+        title="Outcomes"
+        unit="Aug 2026 to Jan 2027"
+        hero
+        aside={worst && heroBand !== "met" ? <CardLink onClick={worst.open}>{SHORT_LABEL[worst.key]} follow-up</CardLink> : undefined}
+      >
+        <Verdict band={heroBand}>{met} of {measured.length} targets met</Verdict>
+        <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
+          {outcomes.map((o) => <OutcomeTile key={o.key} label={TARGET_LABELS[o.key]} value={o.value} target={SCHOOL_TARGETS[o.key]} note={o.note} toGo={o.value === null ? 0 : toGo(o)} onClick={o.open} />)}
+        </div>
+      </OverviewCard>
+      {renderBenchmarks()}
+    </div>
+  );
+
+  // v1's "Notable Achievements" were eight sentences restating numbers
+  // shown elsewhere; the facts only that list carried are the COMPARISONS
+  // (school average, district benchmark, 5-day standard), so that is what
+  // this draws: each result as a bar, the benchmark as a tick, the gap as
+  // the one number (direct feedback: "The notable achievements is REALLY
+  // BAD. We need better data viz"). The rest of v1's list -- seniors
+  // applying, questions answered, support flags, Career Drops -- lives in
+  // the Activity and Readiness tabs.
+  const benchmarks = [
+    { label: "On-track rate", gap: `${m.onTrackPct - SCHOOL_AVERAGE_ON_TRACK >= 0 ? "+" : ""}${m.onTrackPct - SCHOOL_AVERAGE_ON_TRACK} pts`, note: `${m.onTrackPct}% vs ${SCHOOL_AVERAGE_ON_TRACK}% school avg`, pct: m.onTrackPct, tick: SCHOOL_AVERAGE_ON_TRACK },
+    { label: "Senior plan rate", gap: `${m.seniorPlanPct - SCHOOL_TARGETS.seniorPlan >= 0 ? "+" : ""}${m.seniorPlanPct - SCHOOL_TARGETS.seniorPlan} pts`, note: `${m.seniorPlanPct}% vs ${SCHOOL_TARGETS.seniorPlan}% district`, pct: m.seniorPlanPct, tick: SCHOOL_TARGETS.seniorPlan },
+    { label: "Review turnaround", gap: "2.9 days faster", note: "2.1 days vs 5-day standard", pct: (2.1 / 5) * 100, tick: 100 },
+  ];
+  const renderBenchmarks = () => (
+    <OverviewCard title="Against benchmarks">
+      <ul className="grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-3">
+        {benchmarks.map((b) => (
+          <li key={b.label} className="flex flex-col gap-[8px]">
+            <span className="text-[12.5px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>{b.label}</span>
+            <span className="text-[24px] leading-[1] font-extrabold whitespace-nowrap tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{b.gap}</span>
+            <ul><BarRow label={b.note} value="" pct={b.pct} tick={b.tick} muted={false} /></ul>
+          </li>
+        ))}
+      </ul>
+    </OverviewCard>
+  );
+
+  // ---- Activity tab: what the counselor did, and what students did.
   const renderActivity = () => (
     <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-      <OverviewCard title={scope === "school" ? "Counselor activity" : "Your activity"} unit="this period">
-        <Headline value={String(plansReviewed)} label="plans reviewed" note={`${plansApproved} approved · ${plansPending} pending`} />
-        <ul className="flex flex-col">
-          <ListRow label="Review turnaround" note="district standard 5 days" value="2.1 days" />
-          <ListRow label="Student questions answered" note={`${responseRatePct}%`} value={`${respondedQuestions} of ${QUESTIONS.length}`} />
-          <ListRow label="Announcements sent" note="school-wide" value={String(ANNOUNCEMENTS.length)} />
-          <ListRow label="Support flags active" note={`${monitoredPct}% of caseload`} value={String(monitored)} />
-        </ul>
-      </OverviewCard>
-      <OverviewCard title="Readiness milestones" unit="this period">
-        <ul className="flex flex-col gap-[14px]">
-          <BarRow label="Career reports approved" note={`${careerReportApproved} of ${roster.length}`} value={`${careerReportPct}%`} pct={careerReportPct} />
-          <BarRow label="Academic plans approved" note={`${academicPlanApproved} of ${roster.length}`} value={`${academicPlanPct}%`} pct={academicPlanPct} />
-          <BarRow label="Résumés complete" note={`Gr. 10+ · ${resumeApproved} of ${gr10Plus.length}`} value={`${resumePct}%`} pct={resumePct} />
-          <BarRow label="Seniors with applications underway" note="in progress or submitted" value={`${seniorsApplying} of ${seniorRows.length}`} pct={seniorRows.length ? (seniorsApplying / seniorRows.length) * 100 : 0} />
-        </ul>
-      </OverviewCard>
-      <div className="xl:col-span-2">
-        <OverviewCard title="Students on Dreamari" unit={`${scope === "school" ? "school-wide" : "your caseload"}, this period`}>
-          <Headline value={(engagement.drops + engagement.sims + engagement.careers + engagement.colleges + engagement.posts).toLocaleString("en-US")} label="student actions on the platform" />
-          <ul className="grid grid-cols-1 gap-x-[var(--space-6)] sm:grid-cols-2 [&>li:nth-child(2)]:sm:border-t-0 [&>li:nth-child(2)]:sm:pt-0">
-            <ListRow label="Daily Career Drops completed" value={engagement.drops.toLocaleString("en-US")} />
-            <ListRow label="Career simulations completed" value={engagement.sims.toLocaleString("en-US")} />
-            <ListRow label="Careers saved to profiles" value={engagement.careers.toLocaleString("en-US")} />
-            <ListRow label="Colleges saved" value={engagement.colleges.toLocaleString("en-US")} />
-            <ListRow label="Community contributions" value={engagement.posts.toLocaleString("en-US")} />
+      <SummaryCard
+        id="impact-work"
+        title={scope === "school" ? "Counselor work" : "Your work"}
+        details={<>
+          <ListRow label="Pending review" value={String(plansPending)} />
+          <ListRow label={`Questions answered (${responseRatePct}%)`} value={`${respondedQuestions} of ${QUESTIONS.length}`} />
+          <ListRow label="Announcements sent" value={String(ANNOUNCEMENTS.length)} />
+          <ListRow label={`Support flags active (${monitoredPct}% of caseload)`} value={String(monitored)} />
+        </>}
+      >
+        {/* Plans reviewed split by outcome: parts of one total, a donut. */}
+        <span className="flex items-center gap-[var(--space-5)]">
+          <SegmentedRing segments={[{ value: plansApproved, color: PRIMARY }, { value: plansChanges, color: BLUE_3[0] }]} size={96} stroke={11}>
+            <span className="flex flex-col items-center leading-none">
+              <span className="text-[20px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{plansReviewed}</span>
+              <span className="text-[10px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>reviewed</span>
+            </span>
+          </SegmentedRing>
+          <ul className="flex min-w-0 flex-1 flex-col">
+            <ListRow label="Approved" value={String(plansApproved)} dot={PRIMARY} />
+            <ListRow label="Changes requested" value={String(plansChanges)} dot={BLUE_3[0]} />
+            <ListRow label="Avg turnaround (standard 5)" value="2.1 days" />
           </ul>
+        </span>
+      </SummaryCard>
+      <SummaryCard
+        id="impact-engagement"
+        title="Student engagement"
+        unit={scope === "school" ? "school-wide" : "your caseload"}
+        details={<>{actions.map((a) => <ListRow key={a.label} label={a.label} value={a.value.toLocaleString("en-US")} dot={a.color} />)}</>}
+      >
+        <Headline value={totalActions.toLocaleString("en-US")} label="actions on Dreamari" />
+        <CompositionBar parts={actions} />
+        <span className="flex flex-wrap gap-x-[12px] gap-y-[4px] text-[11.5px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>
+          {actions.map((a) => <span key={a.label} className="flex items-center gap-[5px]"><span aria-hidden className="size-[7px] rounded-full" style={{ background: a.color }} />{a.label}</span>)}
+        </span>
+      </SummaryCard>
+    </div>
+  );
+
+  // ---- Readiness tab: milestone rates, pathways, and the grade split.
+  const milestoneRings = [
+    { label: "Career reports", pct: careerReportPct, count: `${careerReportApproved} of ${roster.length}` },
+    { label: "Academic plans", pct: academicPlanPct, count: `${academicPlanApproved} of ${roster.length}` },
+    { label: "Résumés (Gr. 10+)", pct: resumePct, count: `${resumeApproved} of ${gr10Plus.length}` },
+    { label: "Seniors applying", pct: seniorRows.length ? Math.round((seniorsApplying / seniorRows.length) * 100) : 0, count: `${seniorsApplying} of ${seniorRows.length}` },
+  ];
+  const renderReadiness = () => (
+    <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
+      <SummaryCard
+        id="impact-readiness"
+        title="Milestones approved"
+        details={<>{milestoneRings.map((r) => <ListRow key={r.label} label={r.label} value={r.count} />)}</>}
+      >
+        {/* Four independent rates of the same caseload: small multiples of
+           one ring each, so they compare at a glance. */}
+        <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-4">
+          {milestoneRings.map((r) => (
+            <span key={r.label} className="flex flex-col items-center gap-[8px] text-center">
+              <Ring pct={r.pct} size={72} stroke={7} accent={PRIMARY}>
+                <span className="text-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+              </Ring>
+              <span className="text-[12px] leading-[15px] font-semibold" style={{ ...BODY, color: "var(--foreground)" }}>{r.label}</span>
+            </span>
+          ))}
+        </div>
+      </SummaryCard>
+      <OverviewCard title="Postsecondary pathways" unit={`${m.withPlan} of ${m.students} declared`}>
+        {/* Parts of one caseload: a donut, with its key beside it. */}
+        <span className="flex flex-wrap items-center gap-[var(--space-5)]">
+          <SegmentedRing segments={pathwayParts.map((p) => ({ value: p.value, color: p.color }))} size={112} stroke={13}>
+            <span className="flex flex-col items-center leading-none">
+              <span className="text-[20px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.withPlanPct}%</span>
+              <span className="text-[10px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>declared</span>
+            </span>
+          </SegmentedRing>
+          <ul className="flex min-w-[180px] flex-1 flex-col">
+            {pathwayParts.map((p) => <ListRow key={p.label} label={p.label} value={String(p.value)} dot={p.color} />)}
+          </ul>
+        </span>
+      </OverviewCard>
+      {/* One grouped column chart for the grade split: on-track rate and
+         plan completion per grade, the 80% target as a line. */}
+      <div className="xl:col-span-2">
+        <OverviewCard title="By grade" unit={`${overallAvgCompletion}% plan completion overall`} aside={<CardLink onClick={() => router.push("/counselor?view=students")}>Students</CardLink>}>
+          <BarChart
+            barStyle="solid"
+            hideValuesUntilHover
+            height={200}
+            groups={GRADES.map((g) => `Gr. ${g}`)}
+            series={[
+              { label: "On track", accent: BLUE_3[1], values: GRADES.map((g) => grades.find((x) => x.g === g)?.m.onTrackPct ?? NaN) },
+              { label: "Plan completion", accent: BLUE_3[0], values: GRADES.map((g) => { const gr = roster.filter((s) => s.grade === g); return gr.length ? Math.round(gr.reduce((sum, s) => sum + s.roadmapPct, 0) / gr.length) : NaN; }) },
+            ]}
+            targetLine={{ value: SCHOOL_TARGETS.onTrack, label: "On-track target" }}
+          />
+          {scope === "school" && (
+            <ul className="flex flex-col border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+              {byCounselor.map(({ c, m: cm }) => <ListRow key={c.id} label={`${c.name} · ${c.range}`} value={`${cm.onTrackPct}% on track`} onClick={() => { setCounselorFilter(c.id); router.push("/counselor?view=students"); }} />)}
+            </ul>
+          )}
         </OverviewCard>
       </div>
     </div>
   );
 
-  const renderBreakdown = () => (
-    <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-      <OverviewCard title="By grade" unit={`% on track · ${overallAvgCompletion}% avg plan completion overall`} aside={<CardLink onClick={() => router.push("/counselor?view=students")}>Students</CardLink>}>
-        <div className="flex flex-col gap-[10px]">
-          {grades.map(({ g, m: gm }) => {
-            const gr = roster.filter((s) => s.grade === g);
-            const avg = gr.length ? Math.round(gr.reduce((sum, s) => sum + s.roadmapPct, 0) / gr.length) : 0;
-            return <MetricRow key={g} label={`Grade ${g}`} note={`${gm.onTrack} of ${gm.students} · ${avg}% avg completion`} value={gm.onTrackPct} target={SCHOOL_TARGETS.onTrack} onClick={() => { setGradeFilter(g as 9 | 10 | 11 | 12); router.push("/counselor?view=students"); }} />;
-          })}
-        </div>
-      </OverviewCard>
-      <OverviewCard title="Postsecondary plans by pathway" unit={`${m.withPlan} of ${m.students} declared`}>
-        <ul className="flex flex-col gap-[12px]">
-          {pathway.map((p) => <BarRow key={p.label} label={p.label} value={String(p.count)} pct={(p.count / pathwayMax) * 100} />)}
-        </ul>
-      </OverviewCard>
-      {scope === "school" && (
-        <div className="xl:col-span-2">
-          <OverviewCard title="By counselor" unit="% on track">
-            <div className="flex flex-col gap-[10px]">
-              {byCounselor.map(({ c, m: cm }) => <MetricRow key={c.id} label={c.name} note={`${c.range} · ${cm.students} students`} value={cm.onTrackPct} target={SCHOOL_TARGETS.onTrack} onClick={() => { setCounselorFilter(c.id); router.push("/counselor?view=students"); }} />)}
-            </div>
-          </OverviewCard>
-        </div>
-      )}
-    </div>
-  );
-
-  // Rebuilt from three columns of muted text (direct feedback: "Worst
-  // designed thing on the page") into three matching tiles: the domain,
-  // its one headline number, and the supporting practice underneath --
-  // every item the old columns listed is still here.
+  // One tile per ASCA domain: its headline number, then its practices.
   const renderAsca = () => (
     <OverviewCard title="ASCA National Model" unit="4th edition">
       <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
         {ASCA({ total: roster.length, academicPlanPct, careerReportPct, withPlanPct: m.withPlanPct, monitored, responseRatePct, atRiskCount }).map((col) => (
-          <div key={col.title} className="flex flex-col gap-[14px] rounded-[var(--radius-md)] border p-[14px]" style={GLASS_INSET}>
+          <div key={col.title} className="flex flex-col gap-[12px] rounded-[var(--radius-md)] border p-[14px]" style={GLASS_INSET}>
             <span className="flex items-center gap-[8px]">
               <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)" }}>
                 <col.icon className="h-[15px] w-[15px]" style={{ color: "var(--primary)" }} />
@@ -335,39 +480,12 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
               <span className="text-[13px] font-bold" style={{ ...BODY, color: "var(--foreground)" }}>{col.title}</span>
             </span>
             <Headline value={col.value} label={col.label} />
-            <ul className="flex flex-col gap-[6px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+            <ul className="flex flex-col gap-[4px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
               {col.practices.map((pr) => <li key={pr} className="text-[12px] leading-[16px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{pr}</li>)}
             </ul>
           </div>
         ))}
       </div>
-    </OverviewCard>
-  );
-
-  // v1's "Notable Achievements", restored as its own tab: the same eight
-  // facts, each cut to one line (the principal-report narrative is what a
-  // counselor hands up, so it stays, just without the padding).
-  const seniorMeets = m.seniorPlanPct >= SCHOOL_TARGETS.seniorPlan;
-  const HIGHLIGHTS = [
-    `Senior plan rate of ${m.seniorPlanPct}% ${seniorMeets ? "meets" : "falls short of"} the district's ${SCHOOL_TARGETS.seniorPlan}% benchmark`,
-    `${m.onTrackPct}% on track across ${m.students} students, ${m.onTrackPct >= SCHOOL_AVERAGE_ON_TRACK ? "above" : "below"} the ${SCHOOL_AVERAGE_ON_TRACK}% school average`,
-    "Plan reviews average 2.1 days, inside the district's 5-day standard",
-    `${seniorsApplying} of ${seniorRows.length} seniors have college or postsecondary applications underway`,
-    `${responseRatePct}% of Counselor Connect questions answered`,
-    `${monitored} students identified early for additional support`,
-    `${engagement.drops.toLocaleString("en-US")} career-exploration activities completed on Dreamari`,
-    `${(engagement.sims + engagement.careers + engagement.colleges).toLocaleString("en-US")} engagement touchpoints from simulations, saved careers and saved colleges`,
-  ];
-  const renderHighlights = () => (
-    <OverviewCard title="Notable achievements" unit="this period">
-      <ul className="grid grid-cols-1 gap-x-[var(--space-6)] gap-y-[10px] lg:grid-cols-2">
-        {HIGHLIGHTS.map((h) => (
-          <li key={h} className="flex items-start gap-[8px] text-[13px] leading-[18px] font-medium" style={{ ...BODY, color: "var(--foreground)" }}>
-            <Star aria-hidden className="mt-[2px] h-[13px] w-[13px] flex-none" style={{ color: "var(--primary)" }} />
-            {h}
-          </li>
-        ))}
-      </ul>
     </OverviewCard>
   );
 
@@ -463,54 +581,39 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
       {/* Outcomes is the one number a counselor reads every time, not a
          section to page through -- it stays outside the tabs, on screen
          and in print alike. */}
-      {/* No status tint on this card any more (direct instruction: "remove
-         the red glow from outcomes card") -- the red now lives only on the
-         one tile that is actually below target. The verdict is the count
-         alone; which outcome needs work is said once, by the CTA. */}
-      <OverviewCard
-        title="Outcomes"
-        unit="Aug 2026 to Jan 2027"
-        hero
-        aside={worst && heroBand !== "met" ? <CardLink onClick={worst.open}>{SHORT_LABEL[worst.key]} follow-up</CardLink> : undefined}
-      >
-        <Verdict band={heroBand}>{met} of {measured.length} targets met</Verdict>
-        <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2 xl:grid-cols-4">
-          {outcomes.map((o) => <OutcomeTile key={o.key} label={TARGET_LABELS[o.key]} value={o.value} target={SCHOOL_TARGETS[o.key]} note={o.note} toGo={o.value === null ? 0 : toGo(o)} onClick={o.open} />)}
-        </div>
-      </OverviewCard>
-
-      {/* On screen: one section at a time. */}
+      {/* Everything lives in tabs, directly under the header (direct
+         instruction: "Organise everything into tabs dont just put a tab
+         for the last row"). */}
       <div className="flex flex-col gap-[var(--space-4)] print:hidden">
         <Segmented
           ariaLabel="Report section"
           options={[
+            { key: "outcomes", label: "Outcomes" },
             { key: "activity", label: "Activity" },
-            { key: "breakdown", label: "Breakdown" },
+            { key: "readiness", label: "Readiness" },
             { key: "asca", label: "ASCA" },
-            { key: "highlights", label: "Highlights" },
           ]}
           value={tab}
           onChange={(k) => setTab(k as ImpactTab)}
         />
+        {tab === "outcomes" && renderOutcomes()}
         {tab === "activity" && renderActivity()}
-        {tab === "breakdown" && renderBreakdown()}
+        {tab === "readiness" && renderReadiness()}
         {tab === "asca" && renderAsca()}
-        {tab === "highlights" && renderHighlights()}
       </div>
 
-      {/* Print only: every section compiled together, regardless of which
-         tab was open on screen. */}
+      {/* Print only: every tab compiled together. */}
       <div className="hidden flex-col gap-[var(--space-4)] print:flex">
+        {renderOutcomes()}
         {renderActivity()}
-        {renderBreakdown()}
+        {renderReadiness()}
         {renderAsca()}
-        {renderHighlights()}
       </div>
 
       {/* One quiet line, not two with a bold all-caps half (direct
          feedback: "Other disclaimers can be more subtle"). */}
       <span className="text-[11px] leading-[15px] font-medium" style={{ ...BODY, color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-        Dreamari data, Aug 2026 to Jan 2027 · aggregated and anonymized · prepared for administrative review under ASCA National Model (4th ed.) accountability standards · generated via Dreamari Counselor Dashboard · confidential, for authorized personnel only
+        Dreamari Counselor Dashboard · Aug 2026 to Jan 2027 · aggregated, anonymized · ASCA (4th ed.) accountability review · confidential
       </span>
     </div>
   );
@@ -521,8 +624,8 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
 // per domain.
 function ASCA(d: { total: number; academicPlanPct: number; careerReportPct: number; withPlanPct: number; monitored: number; responseRatePct: number; atRiskCount: number }) {
   return [
-    { icon: BookOpen, title: "Academic", value: `${d.academicPlanPct}%`, label: "four-year plans approved", practices: [`Academic planning supported for all ${d.total} students`, "Course selection and credit monitoring"] },
-    { icon: Briefcase, title: "Career", value: `${d.careerReportPct}%`, label: "career reports complete", practices: [`Career pathway declared for ${d.withPlanPct}% of students`, "Simulations and assessments via Dreamari"] },
-    { icon: Heart, title: "Social-emotional", value: String(d.monitored), label: "students monitored", practices: [`${d.responseRatePct}% of Counselor Connect questions answered`, `${d.atRiskCount} at-risk students flagged for intervention`] },
+    { icon: BookOpen, title: "Academic", value: `${d.academicPlanPct}%`, label: "four-year plans approved", practices: [`All ${d.total} students supported`, "Course selection, credit monitoring"] },
+    { icon: Briefcase, title: "Career", value: `${d.careerReportPct}%`, label: "career reports complete", practices: [`${d.withPlanPct}% declared a pathway`, "Simulations and assessments"] },
+    { icon: Heart, title: "Social-emotional", value: String(d.monitored), label: "students monitored", practices: [`${d.responseRatePct}% of questions answered`, `${d.atRiskCount} at-risk students flagged`] },
   ];
 }

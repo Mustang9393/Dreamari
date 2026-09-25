@@ -14638,3 +14638,14 @@ Two instructions together. First: "Please always check if we have removed anythi
 **Hierarchy fix.** Only Outcomes keeps big numbers. Every other card has at most one headline figure; the rest are quiet rows (label left, value right, hairline between) or, for rates, a thin bar. Tabs are now Activity / Breakdown (by grade + by pathway) / ASCA / Highlights (v1's achievements, one line each). The print compile includes all four. Caseload size sits in the hero identity line.
 
 Validation: `tsc --noEmit`, targeted `eslint`, `npm run build` clean; all four tabs browser-verified.
+
+## 2026-09-26 · My Impact: everything in tabs, charts matched to their data
+
+Follow-ups on the restore pass: "make sure all the graphs make sense for the data... reduce copy... The notable achievements is REALLY BAD", "consolidate data better, group them better", "why are the tabs at the end?... Organise everything into tabs", "see if anything can be displayed with other charts/graphs and not so many bar lines."
+
+- **Tabs directly under the header**, and all content inside them: Outcomes (targets + benchmarks), Activity (your work + student engagement), Readiness (milestones, pathways, by grade), ASCA. The print report compiles every tab.
+- **Chart per data shape:** outcome rates and milestone rates are rings (share of one caseload); plans reviewed (approved vs changes requested) and postsecondary pathways are donuts (parts of a whole); engagement actions stay one composition bar; by-grade on-track rate and plan completion are one grouped column chart with the 80% target line (values on hover). Bars remain only on the three benchmark comparisons, where a bar plus a tick is the right shape.
+- **Notable Achievements → Against benchmarks.** The eight sentences restated numbers shown elsewhere; the only facts unique to them were comparisons (vs 71% school average, vs 80% district, vs the 5-day standard). Those are now three gap figures with bar and tick. The rest (seniors applying, questions answered, support flags, Career Drops) are in Activity/Readiness. The "3,200 engagement touchpoints" sentence was a sum of three numbers already shown and isn't repeated.
+- **Consolidation:** secondary facts (pending review, question counts, announcements, support-flag %, milestone counts, per-action counts) are folded behind each card's Details toggle; print opens them all.
+
+Validation: tsc, eslint, build clean; all four tabs browser-verified at 1280px and pane width.
