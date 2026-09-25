@@ -1013,6 +1013,41 @@ Built on request from the SchooLinks staff dashboard, DEMO-ONLY
   each with a red due line read as a wall of alarm; one pill per card
   says the same.
 
+**25 Sept 2026, later the same day: the attachment opens as a centered
+document, not an inline expand.** Direct feedback: "in the counselor
+connect etc where there are document previews, please open the document
+in a central document preview like you would for pdfs, etc. Mock those
+up too to look realistic." Review Queue is the one screen with
+attachments today (Counselor Connect has none yet -- questions,
+announcements and groups carry no files). The new `DocumentPreview.tsx`:
+
+- **Chrome matches this app's own established modal convention**
+  (`ResumeModal`'s "overlay" presentation in resume/ui.tsx): a `Portal`
+  (escapes `<main>`'s stacking context), a backdrop button that closes on
+  click, `role="dialog"`, `aria-modal`, Escape-to-close. A dark toolbar
+  (filename, size, page count, Download/Print/Close) over a darker
+  viewer surface, with a white page centered in the middle -- the exact
+  relationship every real PDF viewer uses, and deliberately NOT
+  re-themed to the app's own dark mode, because a real PDF never is.
+- **The page itself is realistic, not three bullet lines.** Each
+  milestone type gets its own layout built from the student's own
+  seeded data: Career Report (top matches with bars, pathway, cluster,
+  engagement), Resume (education, activities and experience as bullets,
+  skills, a computed class year), Academic Plan (an actual four-year
+  course table, the current grade row tinted), College List (three
+  colleges sampled from the app's own `COLLEGES` catalog, tagged
+  Reach/Target/Safety by admit rate), Financial Aid (a FAFSA worksheet
+  grid with dependency status, household size, an estimated EFC, an
+  "awaiting review" banner). All share `--paper`/`--ink` tokens, the
+  same set `ResumeDocument.tsx` and `CareerReport.tsx` already print
+  with, so paper reads as paper regardless of the dashboard's theme.
+- **Alternative considered:** keep the inline expand and just improve
+  its copy; rejected, because "look realistic like a PDF" is a shape
+  request, not a wording one -- a plain-text card inside the row can't
+  read as a document no matter what it says.
+- Chip changed from "Hide/View" with a chevron to a plain "View" with an
+  eye icon, since there's no in-place expanded state to hide anymore.
+
 ---
 
 ## Student Progress (v2)
@@ -1092,6 +1127,14 @@ questions, ten groups) is the reference's, verbatim.
   first action. The other two actions stay in data for a later "more"
   affordance. Alternative: keep all three and collapse. A collapsed list
   on a screen meant to be glanced is a list nobody opens.
+
+**25 Sept 2026: the other two actions are reachable again.** Direct
+content audit ("have we removed content from the v1/Replit?") found the
+first cut's "later 'more' affordance" was never built -- the code's own
+comment said so ("kept for a later affordance ... but is not rendered").
+Fixed: each tile now shows its first action plus a quiet "+2 more" that
+expands to the reference's other two bullets in place, so all three
+survive and the default view stays one line per tile.
 - **The four ranked lists are always bars.** The reference's Chart / List
   toggle only hid the bar; removed. The lede under each title ("Careers
   most frequently saved to student profiles") restated the title;
@@ -1115,6 +1158,55 @@ questions, ten groups) is the reference's, verbatim.
   The "You are always in control" banner and the repeated helper
   paragraph are one muted line under the button: "A first draft from the
   student's Dreamari data. Review and edit before you use it."
+
+**25 Sept 2026, later the same day, redesigned again** (direct report:
+"the Productivity Suite is the worst UI right now, lots of long copy,
+not looking like a proper workspace tool. How can we improve this?").
+Two causes, both fixed at the cause rather than trimmed further:
+
+- **The one-sentence description above is gone entirely.** The icon,
+  the tool's name and its short sub-line (already 2-6 words, e.g.
+  "Pre-meeting one-pager") already say what the tool is for; a workspace
+  tool does not caption its own toolbar. Alternative: shorten the
+  sentence further; even one clause read as an explainer no other tool
+  in this dashboard carries.
+- **The tool switcher is a left rail at `lg` and up, not a horizontal
+  row of full names.** It is the exact active/inactive language the
+  app's own sidebar nav already uses for its own current item (a quiet
+  row, a tinted pill and a primary-coloured icon when selected, in
+  `SidebarNav`, shell.tsx) -- so the Suite now reads as a tool with its
+  own tool list, the same idiom as the rest of the app, instead of a
+  form with a stack of buttons above it. Below `lg` the horizontal chip
+  row stays: there is no room for a persistent rail on a phone, and nav
+  items compress worse than tool switches do at that width. Alternative:
+  icon-only rail with tooltips; rejected, the older-user/no-hover
+  affordance rule this dashboard already follows elsewhere means the
+  label should stay visible at rest, and six short labels fit a 228px
+  rail without truncating.
+- **A draft tool always shows its editor pane, even before Generate is
+  pressed.** A dashed empty state ("Generate a draft, or write your own,
+  to fill this in.") now occupies the space a blank card used to leave
+  under the button row, so the workspace looks intentional mid-task
+  rather than half-built. Group Message and Students Needing Attention
+  never show it -- their own body (the composer, the ranked list)
+  already fills the card.
+
+**25 Sept 2026, same session: is a rail next to the app's own sidebar
+good UX?** Direct question after the redesign shipped. Answer given and
+acted on: nested left-side navigation is a well-established pattern
+(VS Code's activity bar plus explorer, Slack's workspace rail plus
+channel list, Notion's sidebar plus page tree) and not inherently a
+problem -- the two rails here already read as different things on
+inspection, since the app's own sidebar is the page's full-height frame
+(logo top, account footer bottom, no border) while the tool rail is a
+bordered card scoped to the page content, starting and ending with it.
+The one real risk was that both use an identical active-row treatment
+(tinted pill, primary-colored icon), which could still read as
+"duplicated nav" at a glance before that structural difference is
+noticed. Fix: a small "TOOLS" header label above the rail's rows, the
+same device Slack's channel list and VS Code's explorer panel both use
+for exactly this -- it makes the scoping explicit without adding a
+second visual language.
 
 ## Platform Engagement (v2)
 
@@ -1147,6 +1239,17 @@ said once.
   seven sentences, each wrapping a stat shown above; the compliance tiles
   repeated the milestones card). Alternative: keep them for a printout.
   A principal reading the printout reads the same figure three times.
+
+**25 Sept 2026: two figures that were genuinely gone, restored.** A
+direct content audit against v1's Notable Achievements list found each
+bullet's underlying number does survive somewhere on the page except
+two: the "well above the school average of 71%" comparator on the
+on-track rate, and the count of seniors with an application underway
+(distinct from having a postsecondary plan on file). Both are back --
+the first as a note beside on-track rate in Outcomes, the second folded
+into the Activity card's own fact line, the same place "Reviews average
+2.1 days" already lives. The footer's "Confidential -- for authorized
+personnel only" line, also dropped, is back too.
 - **Senior plan compliance uses the reference's definition** (seniors
   with a declared plan), the same figure the School Administrator
   Overview shows; the earlier fork computed it from application
@@ -1159,6 +1262,42 @@ said once.
   engagement disclaimer is gone, the footer is one line.
 - ASCA cards kept as the report's substance, on the inset surface, with
   shorter bullets.
+
+**25 Sept 2026, tabbed** (direct instruction: "for My Impact, we can do
+the tabbed version and have the export just compile everything together
+when that is needed. So its easy on UI load and the report brings
+everything together when exported"; the same day, more generally: "let's
+do tabbed UI to reduce cognitive load wherever necessary. ONLY wherever
+necessary"). Outcomes stays outside the tabs -- it is the one number a
+counselor reads every visit, not a section to page through. Everything
+else (Activity & Engagement, By Grade/Counselor, ASCA) is a `Segmented`
+tab, one rendered at a time, the same tab control the Milestone Tracker's
+grade picker uses. Print and Principal report both call `window.print()`;
+a `hidden print:block` container renders every section stacked together
+for that path, built from the exact same section-renderer functions the
+on-screen tabs call, so the printed/shared report and the screen can
+never show different numbers. Share stays unwired (still no export
+service; unchanged from the earlier pass). A side effect worth noting:
+the reference's "By Grade" and ASCA columns used to share one grid row
+for the School Counselor's report (paired only because they needed a
+second column to fill); now each has its own tab, which also removed the
+one place ASCA was rendered twice for School Impact (once paired with By
+Grade for `mine`-scope logic that never applied to `scope="school"`,
+once again unconditionally below) -- a de-duplication, not a visual bug
+fix, since the second render was already gated correctly.
+
+**Why not tab other screens the same day:** surveyed against the same
+"ONLY wherever necessary" instruction. Counselor Connect already tabs
+Questions / Announcements / Groups. Settings already folds four of its
+five cards behind a disclosure summary. The Milestone Tracker already
+tabs by grade and folds each grade's seasons behind an accordion. The
+Student Profile already folds Drafts and Check-ins and opens one My Plan
+season at a time. Career + College Insights' four cards each open with
+five rows and a "Show all" rather than a full tab switch, because a
+counselor typically wants to glance across all four categories (careers,
+majors, colleges, simulations) in one visit, not pick one. The Overview
+is deliberately never tabbed: it is the one screen meant to be scanned
+whole, attention-first, in a single glance.
 
 ## Settings (v2)
 

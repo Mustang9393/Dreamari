@@ -29,9 +29,9 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "The step with the largest share not started (awaiting review counts half) leads as Focus first; within each season the same order. A step everyone is still working on is not treated as behind.",
   },
   "review-queue": {
-    changed: ["One item per pending submission, ordered by due date", "Decisions recorded and shared with every screen, with Undo", "Attachment previewed in place; the student's name opens the profile", "Pane opens as a sheet on phones"],
-    why: "The reference hid a student's second submission, ordered by position, and lost the decision on click.",
-    better: "Overdue first, a real record of what you said, and the review done without leaving the screen.",
+    changed: ["One item per pending submission, ordered by due date", "Decisions recorded and shared with every screen, with Undo", "Attachment opens in a centered document viewer, a realistic page built from the student's own data; the student's name opens the profile", "Pane opens as a sheet on phones"],
+    why: "The reference hid a student's second submission, ordered by position, and lost the decision on click. The attachment used to expand into a plain-text card in place; reported as unrealistic and asked for a real preview.",
+    better: "Overdue first, a real record of what you said, the review done without leaving the screen, and a document that reads like the file it stands in for.",
     order: "Most overdue first, then due soonest, then longest waiting. Overdue is Urgent, due within two days is High, else Normal. Nothing here is ordered by who submitted or by roster position.",
   },
   progress: {
@@ -47,16 +47,16 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Questions: new and follow-up first, then viewed and in progress, then answered; newest first within each. Groups: most recently active first. Announcements: newest first.",
   },
   insights: {
-    changed: ["Recommendations as one number, one subject, one action", "Ranked lists as full-width bars; chart/list toggles removed", "One blue hue", "Each list opens with its top five; Show all reveals ten"],
+    changed: ["Recommendations as one number, one subject, one action, with \"+2 more\" for the reference's other two suggestions", "Ranked lists as full-width bars; chart/list toggles removed", "One blue hue", "Each list opens with its top five; Show all reveals ten"],
     why: "Twelve lines of advice and four tiny sparkline lists asked for reading, not glancing.",
-    better: "The three things to do this semester, then the ranking, in one look.",
+    better: "The three things to do this semester, then the ranking, in one look; every suggestion the reference gave is still one click away.",
     order: "Recommendations are the three largest interest clusters, largest first; ranked lists are by count.",
   },
   productivity: {
-    changed: ["Left the menu; the four draft tools now live on each student's profile as Drafts", "Drafts are built from the student's own plan, editable, with Copy, Download, Save to notes, or Write my own", "Back in the menu on 25 Sept 2026: this is the batch workspace (many students, one tool); the profile Drafts card is the one-student version", "Group Message tool: an audience by grade, status or pathway, or students you pick by name; one message, reminder or to-do to all of them; letters and briefs stay one student at a time"],
-    why: "Pick a student, then generate something belongs inside the student profile, not on its own page (Usman).",
-    better: "A draft where the student already is, from their own data, with a manual option.",
-    order: "Not in the menu.",
+    changed: ["Back in the menu on 25 Sept 2026: this is the batch workspace (many students, one tool); the profile Drafts card is the one-student version", "Drafts are built from the student's own plan, editable, with Copy, Download, Save to notes, or Write my own", "Group Message tool: an audience by grade, status or pathway, or students you pick by name; one message, reminder or to-do to all of them; letters and briefs stay one student at a time", "Tool switcher is a left rail on desktop (the same active-row language as the app's own sidebar nav), a chip row on phones; every tool's long description sentence is gone; a dashed empty-state pane fills the space before a draft exists"],
+    why: "Pick a student, then generate something belongs inside the student profile, not on its own page (Usman); reported later the same day as \"the worst UI right now, lots of long copy, not looking like a proper workspace tool.\"",
+    better: "A draft where the student already is, from their own data, with a manual option; the tool itself reads as a workspace, not a form with a paragraph above it.",
+    order: "Tools list top to bottom in the rail/chip row: the four personal drafts, then Group Message, then Students Needing Attention (no student needed).",
   },
   engagement: {
     changed: ["Two-word tile labels; qualifiers moved into muted units", "One blue hue for both series", "District role sees schools compared first"],
@@ -65,10 +65,10 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "District view: schools with the lowest active share first.",
   },
   impact: {
-    changed: ["Outcomes against targets as the hero scorecard", "One row of your activity, one of student engagement", "Grades as bars that open the roster; ASCA as three short columns", "Achievements list and compliance summary removed"],
-    why: "The reference stated each number three times across eight sections.",
-    better: "A principal reads whether the period moved the numbers in one screen, with the evidence under it.",
-    order: "Outcomes are shown against their target, the one furthest below target named in the verdict; grades and counselors are ranked lowest on-track first.",
+    changed: ["Outcomes against targets as the hero scorecard, always visible", "Activity & Engagement, By Grade (and Counselor), and ASCA Framework are tabs: one on screen at a time", "Print and Principal report compile every tab together, whichever one is open", "Achievements list and compliance summary reshaped into the page's own cards, not deleted: the school-average comparator, the seniors-applying count and the confidentiality line are folded into Outcomes, Activity and the footer"],
+    why: "The reference stated each number three times across eight sections; showing all three tabs' worth of cards at once on screen repeated that overload.",
+    better: "A principal reads whether the period moved the numbers in one screen; a counselor viewing it reads one section at a time, and the printed or shared report still has everything, including the two figures a content audit found had gone missing.",
+    order: "Outcomes are shown against their target, the one furthest below target named in the verdict; grades and counselors are ranked lowest on-track first; tabs read left to right in the order a counselor would check them.",
   },
   settings: {
     changed: ["Role is a proper picker and drives the whole dashboard", "Permissions shown for your role only", "Caseload card titled by role", "Profile stays open; permissions, notifications, caseload and academic year fold behind their summary"],

@@ -24,7 +24,7 @@
 // counselor names for the Lead Counselor.
 
 import { useState, useSyncExternalStore } from "react";
-import { Paperclip, Undo2, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { Undo2, FileText, Eye } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
@@ -35,6 +35,7 @@ import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfa
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Stat } from "./overviewShared";
+import { DocumentPage, DocumentPreviewModal } from "./DocumentPreview";
 
 type Priority = "Normal" | "High" | "Urgent";
 type ReviewItem = {
@@ -172,29 +173,20 @@ function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewIt
   );
 }
 
-// The attachment, viewable in place. There is no file store in this
-// prototype, so the preview is a document card built from the student's own
-// data for that milestone (a backend replaces `PreviewBody` with the file's
-// rendered pages or an embedded PDF viewer; the chip, the toggle and the
-// frame stay). Direct feedback, 25 Sept 2026: "I see attachments but I
-// can't view them ... have an option to view them there itself."
-function previewLines(item: ReviewItem): string[] {
-  const s = item.student;
-  switch (item.milestone) {
-    case "Career Report": return [`Top match: ${s.topMatches[0]?.title ?? "Undeclared"} (${s.topMatches[0]?.pct ?? 0}%)`, `Pathway: ${s.careerTrack} · Cluster: ${s.careerCluster}`, `Roadmap ${s.roadmapPct}% complete · Dream Score ${s.engagement.dreamScore}`];
-    case "Resume": return ["Education: " + (s.educationGoals[0] ?? "Lincoln High School"), `Experience: ${s.engagement.challenges} career challenges · ${s.engagement.simulations} simulations`, `Skills drawn from the ${s.careerTrack} pathway`];
-    case "Academic Plan": return [`Four-year plan for Grade ${s.grade}, ${s.careerTrack} pathway`, `Goals: ${s.educationGoals.join(", ") || "not set"}`, `Postsecondary intent: ${s.postsecondaryIntent}`];
-    case "College List": return [`${s.engagement.collegesSaved} colleges saved`, `Intent: ${s.postsecondaryIntent}`, `Pathway: ${s.careerTrack}`];
-    case "Financial Aid": return ["FAFSA worksheet, dependent student", `Intent: ${s.postsecondaryIntent}`, "Awaiting counselor check before submission"];
-    default: return [`${item.milestone} for ${s.name}`, `Grade ${s.grade} · ${s.careerTrack}`, `Submitted ${fmt(item.submitted)}`];
-  }
-}
-
-function AttachmentCard({ item, open, onToggle }: { item: ReviewItem; open: boolean; onToggle: () => void }) {
+// The attachment, opened in a centered document viewer -- the shape every
+// real PDF viewer takes, not the inline expand this used to be. Direct
+// feedback, 25 Sept 2026: "in the counselor connect etc where there are
+// document previews, please open the document in a central document
+// preview like you would for pdfs ... mock those up too to look
+// realistic." Review Queue is the one screen with attachments today
+// (Counselor Connect has none yet); the modal itself lives in
+// DocumentPreview.tsx so any future screen with a document opens the same
+// way.
+function AttachmentCard({ item, open, onOpen, onClose }: { item: ReviewItem; open: boolean; onOpen: () => void; onClose: () => void }) {
   const kb = 40 + seededOffset(`${item.id}:kb`, 380);
   return (
-    <div className="flex flex-col rounded-[var(--radius-md)] border" style={GLASS_INSET}>
-      <button type="button" onClick={onToggle} aria-expanded={open} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[12px] py-[10px] text-left">
+    <>
+      <button type="button" onClick={onOpen} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={GLASS_INSET}>
         <span className="flex size-[32px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
           <FileText className="h-[16px] w-[16px]" aria-hidden />
         </span>
@@ -202,18 +194,12 @@ function AttachmentCard({ item, open, onToggle }: { item: ReviewItem; open: bool
           <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{item.attachment}</span>
           <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>PDF · {kb} KB</span>
         </span>
-        <span className="flex flex-none items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
-          {open ? "Hide" : "View"} {open ? <ChevronUp className="h-[14px] w-[14px]" aria-hidden /> : <ChevronDown className="h-[14px] w-[14px]" aria-hidden />}
-        </span>
+        <span className="flex flex-none items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}><Eye className="h-[14px] w-[14px]" aria-hidden /> View</span>
       </button>
-      {open && (
-        <div className="mx-[12px] mb-[12px] flex flex-col gap-[8px] rounded-[var(--radius-sm)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
-          <span className="flex items-center gap-[6px] text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}><Paperclip className="h-[12px] w-[12px]" aria-hidden /> Preview · page 1</span>
-          <span className="text-[15px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{item.milestone} · {item.student.name}</span>
-          {previewLines(item).map((l) => <p key={l} className="text-[13px] leading-[19px]" style={{ color: "var(--foreground)" }}>{l}</p>)}
-        </div>
-      )}
-    </div>
+      <DocumentPreviewModal open={open} onClose={onClose} fileName={item.attachment} kb={kb}>
+        <DocumentPage student={item.student} milestone={item.milestone} />
+      </DocumentPreviewModal>
+    </>
   );
 }
 
@@ -330,7 +316,7 @@ export function ReviewQueue() {
                 <div className="relative flex flex-col gap-[6px]">
                   <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>From {selected.student.name.split(" ")[0]}</span>
                   <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] leading-[21px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{selected.message}</p>
-                  <AttachmentCard item={selected} open={previewOpen} onToggle={() => setPreviewOpen((o) => !o)} />
+                  <AttachmentCard item={selected} open={previewOpen} onOpen={() => setPreviewOpen(true)} onClose={() => setPreviewOpen(false)} />
                 </div>
 
                 <div className="relative flex flex-col gap-[6px]">

@@ -415,7 +415,16 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
               {showTitle && (
                 <div className="flex flex-col gap-[2px]">
                   <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
-                  <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>
+                  {/* v2 drops the caption line under every page title (direct
+                     feedback, 25 Sept 2026: "Remove all the captions to the
+                     main page titles ... there is so much copy on every
+                     screen"). Every v2 screen already states its purpose in
+                     its hero card or its (i) note, so the caption only ever
+                     repeated the title in longer words ("Milestone Tracker"
+                     / "Every My Plan step for a grade, and who has not done
+                     it"). v1 keeps the reference's subtitle line untouched --
+                     it stays a 1:1 port of the Replit, copy included. */}
+                  {version !== "v2" && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>}
                 </div>
               )}
               {children}

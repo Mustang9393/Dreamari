@@ -79,7 +79,7 @@ export function BatchComposer({ students, audience, onDone, onCancel }: { studen
             <input type="date" value={due} onChange={(e) => setDue(e.target.value)} aria-label="Due date" className="h-8 rounded-[var(--radius-sm)] border px-[8px] text-[13px] outline-none" style={fieldStyle} />
           </label>
         ) : (
-          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Goes to each student&apos;s inbox on Dreamari. Letters and briefs stay one student at a time.</span>
+          <span aria-hidden />
         )}
         <button
           type="button"

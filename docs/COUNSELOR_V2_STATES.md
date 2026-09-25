@@ -72,7 +72,8 @@ Administrator, DA District Administrator.
 - Data: every Pending Review milestone in the roster, due dates seeded per item; decisions persisted (`counselorReviews.ts`).
 - Whole-screen empty: "Nothing to review" / "Submissions land here when students share work for approval." CTA Students.
 - In-screen: no pending under the current filter: "Nothing pending review right now." with the pane hidden; nothing selected: "Select a submission to review."; a decision undone returns the item to its due-date position.
-- Edge: header counts are 0 / 0 / 0 when empty; the attachment preview is built from student data until a file URL exists; on phones the pane is a bottom sheet with Close.
+- Document preview (25 Sept 2026): clicking the attachment row opens `DocumentPreviewModal` (`DocumentPreview.tsx`) -- a centered PDF-viewer-style dialog (dark toolbar with filename/size/page count, Download/Print/Close, a darker viewer surface, a white paper page). The page itself is `DocumentPage`, a realistic layout per milestone (Career Report: top matches with bars; Resume: education/activities/skills; Academic Plan: a four-year course table; College List: three colleges with Reach/Target/Safety tags, from the app's own `COLLEGES` catalog; Financial Aid: a FAFSA worksheet grid; any other milestone: a generic page), built from the student's own seeded data, closes on Escape, backdrop click or the X.
+- Edge: header counts are 0 / 0 / 0 when empty; the document page is built from student data until a real file exists; on phones the queue pane is a bottom sheet with Close, and the document preview opens as its own centered dialog on top of that sheet.
 
 ### Student Progress (SC, LC)
 - Data: roster, filtered by the header grade, a pathway, and (LC) a counselor.
@@ -96,6 +97,7 @@ Administrator, DA District Administrator.
 - Data: roster for the student picker and drafts; notes store for Save to notes.
 - Whole-screen empty: "No students to draft for" / "Drafts are built from a student's plan; add students first." CTA Students.
 - In-screen: Students Needing Attention with everyone on track: "Everyone is on track."; Generate is disabled until a student is chosen; Save to notes reads "Saved to notes" after saving.
+- Tool switcher (25 Sept 2026): a left rail at `lg` and up (mirrors the app's own sidebar nav row); the horizontal chip row below `lg`, unchanged. A draft tool with no draft yet shows a dashed empty-state pane ("Generate a draft, or write your own, to fill this in.") instead of empty space; Group Message and Students Needing Attention never show it (their own body already fills the card).
 - Edge: drafts for a student with no matches use "their chosen pathway"; the clipboard call is guarded for browsers without it.
 
 ### Platform Engagement (SA, DA)
@@ -107,7 +109,8 @@ Administrator, DA District Administrator.
 - Data: roster, questions, announcements; targets from `counselorOrg.ts`.
 - Whole-screen empty: "Nothing to report yet" / "Your impact report builds from milestones, reviews and replies over the period." (school: "The school's impact report...").
 - In-screen: seniors-only outcomes with no seniors: "n/a"; a grade with no students is omitted from By grade.
-- Edge: "Reviews average 2.1 days" and the reporting period are fixed copy until the backend supplies them; Print uses the browser; Share and Principal report are not wired (no export service).
+- Tabbed (25 Sept 2026, DEMO-ONLY behavior, permanent structure): Outcomes stays outside the tabs, always visible. "Activity & Engagement", "By Grade" (School Counselor) / "By Grade & Counselor" (Lead Counselor), and "ASCA Framework" are `Segmented` tabs; only the selected one renders on screen. Print and Principal report both call `window.print()`; a `hidden print:block` container (built from the same section renderers as the tabs, so they can't drift apart) stacks every section together for that path regardless of which tab was open on screen. Share remains unwired (no export service).
+- Edge: "Reviews average 2.1 days" and the reporting period are fixed copy until the backend supplies them.
 
 ### Settings (all roles)
 - Data: the account record (`counselorAccount.ts`), roster for the caseload card.

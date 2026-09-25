@@ -429,7 +429,7 @@ export function Overview() {
       <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
         <HoverBeam strength={0.6} className="h-full">
           <Panel id="plan-by-grade" title="My Plan by grade" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Steps done this year. A grade opens the Milestone Tracker.</p>
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Steps done this year</p>
             {gradeSummary.length > 0 && (
               <p className="flex items-center gap-[8px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
                 <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: gradeVerdictColor, boxShadow: `0 0 8px ${gradeVerdictColor}` }} />
@@ -470,7 +470,7 @@ export function Overview() {
              row per measure, over the grades it applies to, keeps all five
              with nothing empty, in the same footprint. */}
           <Panel id="readiness" title="Readiness" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% approved, over the grades each milestone applies to. A row opens the Milestone Tracker.</p>
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% approved, over the grades each milestone applies to</p>
             {readiness.length > 0 && (
               <p className="flex items-center gap-[8px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
                 <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: readinessColor(readiness[0].pct), boxShadow: `0 0 8px ${readinessColor(readiness[0].pct)}` }} />

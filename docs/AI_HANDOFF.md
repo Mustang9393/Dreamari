@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Glossary Games: music was gated by the Sound toggle, not Music
+
+**Why:** urgent report -- "sounds/music toggle is not working in the games, career simulations/glossary etc", then "an annoying beeping sound playing constantly", then the exact root cause named directly: "the music for glossary games is tied to the sounds button instead of the music button."
+
+**What was actually wrong (`glossaryThemeSound.ts`):** the v2/v3/v4 background loop's per-note `AudioContext` getter was the *same function* used by the click/correct/wrong SFX, so scheduling a music note checked the Sound-mute flag (`isMuted()`) instead of the dedicated Music one (`musicMuted()`). Muting Sound silently killed the tune even with Music left on; the tune kept playing through a Sound mute whenever Music was on. Separately, the CRT (v2) theme's tape-hiss bed was a background noise node started once and only ever torn down by an explicit music-mute call or a theme switch -- once running, nothing re-gated it, so it could keep humming under a Sound-only mute (the reported "annoying beeping... constantly").
+
+**The fix:** split the shared `AudioContext` into two gates -- `audio()` (SFX, Sound toggle) and a new `musicAudio()` (the loop, Music toggle) -- and made the loop's own `setInterval` tick re-check `musicMuted()` on every pass, tearing itself down immediately if muted from anywhere, not just when this module's own setter happens to be the one flipping it. The CRT hiss bed is removed entirely, per direct instruction ("take the static sound out completely") rather than re-gated, since it was the one thing nothing could reliably stop.
+
+**Verified live** on `investment-banking`'s glossary game, v2 CRT theme: instrumented `AudioContext.prototype.createOscillator`/`createBufferSource` directly. Music (31 oscillators/4s) kept firing with Sound muted; zero oscillators fired within 4s of muting Music; zero `AudioBufferSource` ever created in any state (hiss fully gone). `npx tsc --noEmit -p .` and `npx eslint` clean. Scoped to `src/components/play/glossaryThemeSound.ts` only -- career-simulation music (`music.ts`) already used its own independent mute key and was unaffected.
+
 ### 2026-09-25 Flow Lab: Mini Explore's scroll header fixed for real, scroll-reveal on cards
 
 **Why:** the header/scroll pass in the previous entry shipped broken on first look -- direct reports: "lose the black bars everywhere... when I scroll down I can see the scrolling away things through the header," then, after a first fix attempt, "UGLY. Breaking the header treatment," and "use our loading states we design... let me see them."
@@ -68,6 +78,201 @@ tokens above, in both modes).
 **Usman's reply in the same thread** raised further changes (industry choice as sequential questions rather than tabs; 9 cards per screen instead of 6; unlimited saves instead of a 7 cap; deferring Top 3 to My Plan) that partly conflict with Joshua's own concrete asks in the message above (tabs, explicitly). Not implemented this round -- flagging for a product decision rather than guessing which stakeholder's version to build, since the two messages disagree on the tab question specifically.
 
 **Verified live** on the dedicated dev server for this checkout (`dreamari-main-3005`; `:3000` is a separate worktree's server) at 1440 and 375: default tab is the first Build world; scrolling the grid loads more cards with no button (18 -> 24 on one scroll); Explore all shows the world picker and browses the same way; the full Build -> Explore -> Saved -> Rank -> Top 3 path works; zero `[data-coachmark-bubble]` elements at any point; Restart clears state and returns to the strongest-world default; no console errors; no horizontal scroll on phone. `npx tsc --noEmit -p .` clean across the whole project; `npx eslint` clean on every touched file (the pre-existing `gate/page.tsx` findings are untouched and unrelated).
+
+### 2026-09-25 Counselor Dashboard v2: content audit against v1/the Replit reference
+
+Direct question, prompted by Maisha's note ("keep content the same as
+that's needed for counselors ... don't adjust the content itself too
+much ... open to you making it visually look better as long as content
+and comprehension isn't reduced"): "Have we removed content from the
+v1/Replit?" Read every "Dropped"/"Removed" line already logged in the
+deviations doc plus v1's own source files, not just this repo's own
+claims about itself. Findings, in order of severity:
+
+**1. Milestone Tracker: the reference's real named curriculum is
+completely unused in v2 today (flagged, not yet resolved -- see below).**
+v1's `src/lib/milestoneReadiness.ts` (`GRADE_READINESS`) holds the
+Replit's actual per-grade checkpoints: Grade 9 has 7 (Career Assessment,
+Career Exploration, Career Goals, Four-Year Academic Plan, Next-Year
+Course Plan, Postsecondary Pathways Exploration, Grade 9 College &
+Career Reflection), Grade 10 has 8, Grade 11 has 11, Grade 12 has 10 --
+each with its own completion %, a counted breakdown, and a classification
+("Student Completion" / "Counselor Review" / "Counselor Verification" /
+"Student Submission, Counselor Visibility" / "Student + Counselor
+Tracking"). `grep`-confirmed: zero v2 files import this module. When the
+Milestone Tracker was rebuilt on My Plan ("the bridge", earlier this
+session, direct instruction that My Plan should define the tracker),
+these named checkpoints were replaced with the student app's own My Plan
+steps (a different, smaller list -- Grade 9 has 6, named "Build your
+Profile", "Play 3 Career Simulations", etc.) rather than kept alongside
+them. v1 itself is untouched and still shows the full reference data;
+this is v2-only. This is a real architectural fork between two
+stakeholders' asks (My Plan should define the tracker vs. the reference's
+own content must survive), not something to silently pick a side on --
+raised to the user directly rather than assumed.
+
+**2. Career + College Insights: fixed.** The reference gave each of the
+three recommendation stats three bullet actions; v2's first cut rendered
+only one and left the other two in an unused array, with a code comment
+admitting "kept for a later 'more' affordance ... not rendered" that was
+never followed up. Fixed: each tile now shows its first action plus a
+"+2 more" that expands the other two in place.
+
+**3. My Impact: fixed.** Two figures from the reference's "Notable
+Achievements" list were not reproduced anywhere on the page: the "well
+above the school average of 71%" on-track comparator, and the count of
+seniors with an application underway (a different fact from having a
+postsecondary plan on file). Both restored -- the first as a note beside
+the on-track outcome, the second folded into the Activity card's own
+fact line. The footer's "Confidential, for authorized personnel only"
+line, also dropped, is back too.
+
+**Checked and NOT a content loss (moved, not removed):** Counselor
+Connect's ten group descriptions moved from the list card into each
+group's own detail view, one click away, not deleted. The District
+Compliance Summary's three figures (plans on file %, senior compliance
+%, review turnaround days) all still appear individually in My Impact's
+Outcomes and Activity cards, just not as three separate big-stat tiles.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on both fixed files.
+
+### 2026-09-25 Counselor Dashboard v2: is the tool rail good UX, and a realistic centered document preview
+
+Two questions in one message: "Is the left menu after another left menu
+really a good UX?" and "in the counselor connect etc where there are
+document previews, please open the document in a central document
+preview like you would for pdfs, etc. So mock those up too to look
+realistic."
+
+**The rail question, answered honestly, not just defended.** Nested
+left-side navigation (an app's own sidebar plus a page-scoped tool list)
+is a common, well-established pattern -- VS Code's activity bar plus
+explorer, Slack's workspace rail plus channel list, Notion's sidebar
+plus page tree -- not automatically bad. Looking at the actual
+screenshot: the app's own sidebar is the page's full-height frame (logo
+top, account footer bottom, no border, spans the whole viewport height);
+the tool rail is a bordered card scoped to the page content, starting
+and ending with it, well short of the viewport. They already read as
+different things structurally. The one real remaining risk: both used
+an identical active-row treatment (tinted pill, primary icon), which
+could still read as duplicated nav at a first glance. Fix: a small
+"TOOLS" header label above the rail (`ProductivitySuite.tsx`), the same
+device Slack and VS Code use for exactly this. Cheap, standard, removes
+the ambiguity without adding a new visual language.
+
+**Document previews, rebuilt as a centered viewer** (`DocumentPreview.tsx`,
+new). Review Queue is the one screen with attachments today; Counselor
+Connect has none yet (checked -- questions, announcements and groups
+carry no files, logged so "etc" doesn't get lost). What changed:
+
+- The attachment used to expand in place into a plain-text card ("Top
+  match: Software Engineer (94%)", three lines). It now opens
+  `DocumentPreviewModal`: a Portal-based centered dialog matching this
+  app's own modal convention (`ResumeModal`'s overlay presentation) --
+  dark toolbar (filename, size, page count, Download/Print/Close), a
+  darker viewer surface, a white page centered in the middle, Escape or
+  backdrop to close.
+- The page is a realistic document per milestone, built from the
+  student's own seeded data, using the same `--paper`/`--ink` tokens
+  `ResumeDocument.tsx` and `CareerReport.tsx` already print with: Career
+  Report (top matches with bars), Resume (education, activities, skills,
+  a computed class year), Academic Plan (an actual four-year course
+  table), College List (three real colleges from the app's own
+  `COLLEGES` catalog, tagged Reach/Target/Safety by admit rate),
+  Financial Aid (a FAFSA worksheet grid with an "awaiting review"
+  banner), and a generic fallback for anything else.
+
+Verified live at 1440 (Career Report, Financial Aid, Resume, Academic
+Plan all opened and read correctly; College List and the generic
+fallback share the identical code shape and passed type-check/lint) and
+at narrower widths (the modal's own responsive padding). `npx tsc
+--noEmit -p .` and `npx eslint` clean. Docs: AI_HANDOFF, deviations,
+states, (i) notes for Review Queue and Productivity Suite.
+
+### 2026-09-25 Counselor Dashboard v2: Productivity Suite redesigned as an actual workspace
+
+Direct report: "the Productivity Suite is the worst UI right now, lots
+of long copy, not looking like a proper workspace tool. How can we
+improve this?"
+
+Two causes, fixed at the cause:
+
+- **Every tool's full-sentence description is gone.** ("Generate a
+  personalized recommendation letter using each student's career
+  report, resume, assessments, reflections, milestones, activities, and
+  counselor notes.") The icon, the tool's name and its existing 2-6
+  word sub-line already say what it's for; nothing else in this
+  dashboard explains a tool in a paragraph, and this was the one place
+  it still did. `desc` dropped from the `TOOLS` array entirely.
+- **The tool switcher is a left rail at `lg` and up**, not a horizontal
+  row of full tool names: the same quiet-row/tinted-pill/primary-icon
+  language the app's own sidebar nav (`SidebarNav`, shell.tsx) already
+  uses for its own active item, so the Suite reads as a tool with its
+  own tool list rather than a form with a button row above it. Below
+  `lg` it stays the horizontal `ScrollChips` row -- no room for a
+  persistent rail on a phone. Labels stay visible (not icon-only with a
+  tooltip), consistent with the dashboard's own rule that an affordance
+  is visible at rest for older users and touch devices without hover.
+- A draft tool now always shows an editor pane: a dashed empty state
+  ("Generate a draft, or write your own, to fill this in.") before
+  Generate is pressed, so the card never leaves a void under the button
+  row. Group Message and Students Needing Attention don't need it --
+  their own body already fills the space.
+
+Verified live at 1440 (rail, all six tools, empty-state pane) and 390
+(chip row, same empty state), and inside the Student Profile's folded
+Drafts card (the `fixedStudent` path: chip row at that card's width,
+Student picker correctly hidden, same empty state). `npx tsc --noEmit
+-p .` and `npx eslint` clean.
+
+### 2026-09-25 Counselor Dashboard v2: My Impact tabbed with a compiled print report; every page caption removed
+
+Two direct instructions, addressed together since both are about cutting
+copy/load on screen:
+
+**My Impact tabbed.** "For My Impact, we can do the tabbed version and
+have the export just compile everything together when that is needed. So
+its easy on UI load and the report brings everything together when
+exported." Outcomes (the scorecard against district targets) stays
+outside the tabs -- it is the one thing read every visit. Activity &
+Engagement, By Grade (By Grade & Counselor for Lead Counselor's School
+Impact), and ASCA Framework are now `Segmented` tabs (the same control the
+Milestone Tracker's grade picker uses); only the selected one renders on
+screen. Print and Principal report both call `window.print()`; a `hidden
+print:block` container -- built from the exact same section-renderer
+functions the tabs call, so they can never disagree -- stacks every
+section together for that path regardless of which tab was open. Share
+stays unwired (no export service, unchanged).
+
+Then, more broadly: "let's do tabbed UI to reduce cognitive load wherever
+necessary. ONLY wherever necessary." Surveyed the rest of v2 before
+touching anything else: Counselor Connect already tabs Questions /
+Announcements / Groups; Settings already folds four of five cards behind
+a disclosure; the Milestone Tracker already tabs by grade and folds
+seasons; the Student Profile already folds Drafts/Check-ins and opens one
+season at a time; Career + College Insights' four cards work better
+side-by-side (a counselor scans all four categories in one visit) with
+"Show all" rather than a full tab switch; the Overview is deliberately
+never tabbed, since it exists to be scanned whole. No other screen changed.
+
+**Every page caption removed (v2 only).** "Remove all the captions to
+the main page titles in the counselor dashboard. There is so much copy on
+every screen, how do we fix?" The one-line subtitle under every page's
+`<h1>` (`VIEW_TITLES[view].subtitle` in `shell.tsx`, e.g. "Every My Plan
+step for a grade, and who has not done it" under "Milestone Tracker") is
+now v2-only hidden (`version !== "v2"` gate on the single render site);
+v1 keeps the reference's subtitle line exactly as before, since v1 stays
+a byte-for-byte 1:1 port including copy. Every v2 screen already states
+its purpose in its hero card's verdict or its (i) note, so the caption
+was restating the title in longer words on every single screen -- the
+most repeated "extra obvious copy" pattern in the whole dashboard.
+
+Verified live at 1440: My Impact (all three tabs, Counselor scope),
+School Impact (By Grade & Counselor tab, Lead scope), print DOM structure
+(exactly two `print:hidden` and two `hidden print:block` containers), the
+caption gone from Overview/Students/Milestone Tracker/My Impact on v2 and
+still present on v1's My Impact. `npx tsc --noEmit -p .` and `npx eslint`
+clean on every touched file.
 
 ### 2026-09-25 Counselor Dashboard v2: batch sends, the Readiness card, the spec as a Google Doc
 

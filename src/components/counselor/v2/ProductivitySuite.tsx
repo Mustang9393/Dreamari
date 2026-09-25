@@ -10,6 +10,26 @@
 // repeated helper paragraph are one muted line under the button, the
 // pickers are the app's Listbox and the student picker lists the whole
 // roster. Draft copy is the reference's.
+//
+// 25 Sept 2026, later the same day: redesigned again (direct feedback,
+// "the Productivity Suite is the worst UI right now, lots of long copy,
+// not looking like a proper workspace tool"). Two things made it read as
+// a stray form instead of a tool: the full-sentence description under
+// every tool's name ("Generate a personalized recommendation letter
+// using each student's career report, resume, assessments, reflections,
+// milestones, activities, and counselor notes.") -- cut; the icon and the
+// short sub-label already say what the tool is for -- and a horizontal
+// row of full tool names as the only way to switch tools, which reads as
+// a stack of buttons rather than a workspace. At `lg` and up the switcher
+// is now a left rail, the exact active/inactive language the app's own
+// sidebar nav already uses (`SidebarNav` in shell.tsx: a quiet row, a
+// tinted pill and a primary-colored icon when active) -- so the Suite
+// reads as a tool with its own tool list, not a copy of Student Progress'
+// old side list. Below `lg` it is still the horizontal chip row; there is
+// no room for a persistent rail on a phone. The draft pane is now always
+// present once a tool is a draft tool, even before Generate is pressed --
+// a dashed empty state fills the space a blank card used to leave, so the
+// workspace never looks unfinished mid-task.
 
 import { useState } from "react";
 import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check } from "lucide-react";
@@ -30,13 +50,13 @@ import { Segmented } from "@/components/connect/viz";
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
 
-const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignature; desc: string }[] = [
-  { id: "recommendation-letter", label: "Recommendation Letter", sub: "College · Scholarship · Internship · Employment", icon: FileSignature, desc: "Generate a personalized recommendation letter using each student's career report, resume, assessments, reflections, milestones, activities, and counselor notes. Tailored to the application type and audience." },
-  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText, desc: "Generate a one-page overview before a student meeting — covering career interests, milestone progress, missing requirements, suggested discussion topics, and recommended next steps." },
-  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2, desc: "Generate talking points before a parent-teacher or parent-counselor conference — summarizing student progress, career readiness, academic planning, areas needing attention, and recommended action steps." },
-  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo, desc: "Generate a personalized intervention plan for students who are behind — including missing milestones, recommended Dreamari activities, career simulations, suggested professional connections, and counselor follow-up recommendations." },
-  { id: "group-message", label: "Group Message", sub: "One message, reminder or to-do to many students", icon: Megaphone, desc: "Pick an audience by grade, status or pathway and send one message, reminder or to-do to everyone in it. For anything personal (a letter, a brief) use the tools to the left, one student at a time." },
-  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle, desc: "Automatically identify and prioritize students requiring counselor follow-up based on engagement, milestone completion, missing plans, and other risk indicators. No student selection needed — Dreamari does the analysis." },
+const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignature }[] = [
+  { id: "recommendation-letter", label: "Recommendation Letter", sub: "College · Scholarship · Internship · Employment", icon: FileSignature },
+  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText },
+  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2 },
+  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo },
+  { id: "group-message", label: "Group Message", sub: "One message, reminder or to-do to many students", icon: Megaphone },
+  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle },
 ];
 
 const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
@@ -138,19 +158,54 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
     URL.revokeObjectURL(url);
   };
 
-  return (
-    <div className="flex flex-col gap-[var(--space-5)]">
-      <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={TOOLS.filter((t) => !fixedStudent || (t.id !== "attention" && t.id !== "group-message")).map((t) => ({ key: t.id, label: t.label }))} />
+  const visibleTools = TOOLS.filter((t) => !fixedStudent || (t.id !== "attention" && t.id !== "group-message"));
+  const isDraftTool = toolId !== "attention" && toolId !== "group-message";
 
-      <HoverBeam strength={0.6} className="h-full">
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <div className="flex flex-col gap-[4px]">
-            <h2 className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[2px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-              <span className="flex items-center gap-[8px]"><tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}</span>
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tool.sub}</span>
-            </h2>
-            <p className="max-w-[72ch] text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{tool.desc.split(/(?<=\.)\s/)[0]}</p>
-          </div>
+  return (
+    <div className="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-start">
+      {/* Phone/tablet: the horizontal chip row, unchanged -- no room for a
+         persistent rail at that width. */}
+      <div className="lg:hidden">
+        <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={visibleTools.map((t) => ({ key: t.id, label: t.label }))} />
+      </div>
+
+      {/* Desktop: a real tool rail -- the same quiet-row/tinted-pill/
+         primary-icon language the app's own sidebar nav uses for its own
+         active item, so this reads as a tool with a tool list, not a form
+         with a row of buttons above it. */}
+      <nav aria-label="Tool" className="hidden flex-none flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[8px] lg:flex lg:w-[228px]" style={TINTED_CARD}>
+        {/* A header the app's own sidebar doesn't have (direct question,
+           25 Sept 2026: "is the left menu after another left menu really
+           good UX?"): the outer sidebar is the app's own full-height frame
+           (logo, account footer); this is a bordered card that starts and
+           ends with the page content. The label makes that scoping
+           explicit at a glance instead of relying only on the container
+           shape. */}
+        <span className="px-[10px] pt-[4px] pb-[6px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Tools</span>
+        {visibleTools.map((t) => {
+          const on = t.id === toolId;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => { setToolId(t.id); setDraft(null); }}
+              aria-current={on ? "true" : undefined}
+              className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[10px] py-[9px] text-left text-[13.5px] font-semibold"
+              style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+            >
+              <t.icon className="h-[16px] w-[16px] flex-none" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
+              {t.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      <HoverBeam strength={0.6} className="h-full min-w-0 flex-1">
+        <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <h2 className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[2px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+            <span className="flex items-center gap-[8px]"><tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}</span>
+            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tool.sub}</span>
+          </h2>
 
           {toolId === "group-message" ? (
             <div className="flex flex-col gap-[var(--space-3)]">
@@ -241,7 +296,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             </div>
           </div>
           )}
-          {toolId !== "attention" && toolId !== "group-message" && <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Generate a first draft from the student&apos;s Dreamari data, or write your own. Either way, edit here, then copy, download or save to the student&apos;s notes.</p>}
 
           {draft !== null && toolId !== "attention" && toolId !== "group-message" && (
             <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: GLASS_INSET.background }}>
@@ -254,6 +308,16 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 </span>
               </div>
               <textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={9} aria-label="Draft" className="w-full resize-y rounded-[var(--radius-sm)] border px-[12px] py-[10px] text-[13px] leading-[20px] outline-none" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+            </div>
+          )}
+
+          {/* A resting editor pane, not a void: before Generate or Write my
+             own is pressed, a draft tool still shows the shape of its own
+             workspace instead of empty space under the button row. */}
+          {draft === null && isDraftTool && (
+            <div className="flex min-h-[160px] flex-1 flex-col items-center justify-center gap-[6px] rounded-[var(--radius-md)] border border-dashed p-[var(--space-6)] text-center" style={{ borderColor: "var(--glass-border)" }}>
+              <Sparkles className="h-[18px] w-[18px]" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+              <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Generate a draft, or write your own, to fill this in.</span>
             </div>
           )}
         </div>
