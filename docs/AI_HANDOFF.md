@@ -38,6 +38,59 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: is the tool rail good UX, and a realistic centered document preview
+
+Two questions in one message: "Is the left menu after another left menu
+really a good UX?" and "in the counselor connect etc where there are
+document previews, please open the document in a central document
+preview like you would for pdfs, etc. So mock those up too to look
+realistic."
+
+**The rail question, answered honestly, not just defended.** Nested
+left-side navigation (an app's own sidebar plus a page-scoped tool list)
+is a common, well-established pattern -- VS Code's activity bar plus
+explorer, Slack's workspace rail plus channel list, Notion's sidebar
+plus page tree -- not automatically bad. Looking at the actual
+screenshot: the app's own sidebar is the page's full-height frame (logo
+top, account footer bottom, no border, spans the whole viewport height);
+the tool rail is a bordered card scoped to the page content, starting
+and ending with it, well short of the viewport. They already read as
+different things structurally. The one real remaining risk: both used
+an identical active-row treatment (tinted pill, primary icon), which
+could still read as duplicated nav at a first glance. Fix: a small
+"TOOLS" header label above the rail (`ProductivitySuite.tsx`), the same
+device Slack and VS Code use for exactly this. Cheap, standard, removes
+the ambiguity without adding a new visual language.
+
+**Document previews, rebuilt as a centered viewer** (`DocumentPreview.tsx`,
+new). Review Queue is the one screen with attachments today; Counselor
+Connect has none yet (checked -- questions, announcements and groups
+carry no files, logged so "etc" doesn't get lost). What changed:
+
+- The attachment used to expand in place into a plain-text card ("Top
+  match: Software Engineer (94%)", three lines). It now opens
+  `DocumentPreviewModal`: a Portal-based centered dialog matching this
+  app's own modal convention (`ResumeModal`'s overlay presentation) --
+  dark toolbar (filename, size, page count, Download/Print/Close), a
+  darker viewer surface, a white page centered in the middle, Escape or
+  backdrop to close.
+- The page is a realistic document per milestone, built from the
+  student's own seeded data, using the same `--paper`/`--ink` tokens
+  `ResumeDocument.tsx` and `CareerReport.tsx` already print with: Career
+  Report (top matches with bars), Resume (education, activities, skills,
+  a computed class year), Academic Plan (an actual four-year course
+  table), College List (three real colleges from the app's own
+  `COLLEGES` catalog, tagged Reach/Target/Safety by admit rate),
+  Financial Aid (a FAFSA worksheet grid with an "awaiting review"
+  banner), and a generic fallback for anything else.
+
+Verified live at 1440 (Career Report, Financial Aid, Resume, Academic
+Plan all opened and read correctly; College List and the generic
+fallback share the identical code shape and passed type-check/lint) and
+at narrower widths (the modal's own responsive padding). `npx tsc
+--noEmit -p .` and `npx eslint` clean. Docs: AI_HANDOFF, deviations,
+states, (i) notes for Review Queue and Productivity Suite.
+
 ### 2026-09-25 Counselor Dashboard v2: Productivity Suite redesigned as an actual workspace
 
 Direct report: "the Productivity Suite is the worst UI right now, lots

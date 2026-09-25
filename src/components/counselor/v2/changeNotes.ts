@@ -29,9 +29,9 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "The step with the largest share not started (awaiting review counts half) leads as Focus first; within each season the same order. A step everyone is still working on is not treated as behind.",
   },
   "review-queue": {
-    changed: ["One item per pending submission, ordered by due date", "Decisions recorded and shared with every screen, with Undo", "Attachment previewed in place; the student's name opens the profile", "Pane opens as a sheet on phones"],
-    why: "The reference hid a student's second submission, ordered by position, and lost the decision on click.",
-    better: "Overdue first, a real record of what you said, and the review done without leaving the screen.",
+    changed: ["One item per pending submission, ordered by due date", "Decisions recorded and shared with every screen, with Undo", "Attachment opens in a centered document viewer, a realistic page built from the student's own data; the student's name opens the profile", "Pane opens as a sheet on phones"],
+    why: "The reference hid a student's second submission, ordered by position, and lost the decision on click. The attachment used to expand into a plain-text card in place; reported as unrealistic and asked for a real preview.",
+    better: "Overdue first, a real record of what you said, the review done without leaving the screen, and a document that reads like the file it stands in for.",
     order: "Most overdue first, then due soonest, then longest waiting. Overdue is Urgent, due within two days is High, else Normal. Nothing here is ordered by who submitted or by roster position.",
   },
   progress: {

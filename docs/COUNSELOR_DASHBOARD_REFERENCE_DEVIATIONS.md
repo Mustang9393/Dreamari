@@ -1013,6 +1013,41 @@ Built on request from the SchooLinks staff dashboard, DEMO-ONLY
   each with a red due line read as a wall of alarm; one pill per card
   says the same.
 
+**25 Sept 2026, later the same day: the attachment opens as a centered
+document, not an inline expand.** Direct feedback: "in the counselor
+connect etc where there are document previews, please open the document
+in a central document preview like you would for pdfs, etc. Mock those
+up too to look realistic." Review Queue is the one screen with
+attachments today (Counselor Connect has none yet -- questions,
+announcements and groups carry no files). The new `DocumentPreview.tsx`:
+
+- **Chrome matches this app's own established modal convention**
+  (`ResumeModal`'s "overlay" presentation in resume/ui.tsx): a `Portal`
+  (escapes `<main>`'s stacking context), a backdrop button that closes on
+  click, `role="dialog"`, `aria-modal`, Escape-to-close. A dark toolbar
+  (filename, size, page count, Download/Print/Close) over a darker
+  viewer surface, with a white page centered in the middle -- the exact
+  relationship every real PDF viewer uses, and deliberately NOT
+  re-themed to the app's own dark mode, because a real PDF never is.
+- **The page itself is realistic, not three bullet lines.** Each
+  milestone type gets its own layout built from the student's own
+  seeded data: Career Report (top matches with bars, pathway, cluster,
+  engagement), Resume (education, activities and experience as bullets,
+  skills, a computed class year), Academic Plan (an actual four-year
+  course table, the current grade row tinted), College List (three
+  colleges sampled from the app's own `COLLEGES` catalog, tagged
+  Reach/Target/Safety by admit rate), Financial Aid (a FAFSA worksheet
+  grid with dependency status, household size, an estimated EFC, an
+  "awaiting review" banner). All share `--paper`/`--ink` tokens, the
+  same set `ResumeDocument.tsx` and `CareerReport.tsx` already print
+  with, so paper reads as paper regardless of the dashboard's theme.
+- **Alternative considered:** keep the inline expand and just improve
+  its copy; rejected, because "look realistic like a PDF" is a shape
+  request, not a wording one -- a plain-text card inside the row can't
+  read as a document no matter what it says.
+- Chip changed from "Hide/View" with a chevron to a plain "View" with an
+  eye icon, since there's no in-place expanded state to hide anymore.
+
 ---
 
 ## Student Progress (v2)
@@ -1147,6 +1182,23 @@ Two causes, both fixed at the cause rather than trimmed further:
   rather than half-built. Group Message and Students Needing Attention
   never show it -- their own body (the composer, the ranked list)
   already fills the card.
+
+**25 Sept 2026, same session: is a rail next to the app's own sidebar
+good UX?** Direct question after the redesign shipped. Answer given and
+acted on: nested left-side navigation is a well-established pattern
+(VS Code's activity bar plus explorer, Slack's workspace rail plus
+channel list, Notion's sidebar plus page tree) and not inherently a
+problem -- the two rails here already read as different things on
+inspection, since the app's own sidebar is the page's full-height frame
+(logo top, account footer bottom, no border) while the tool rail is a
+bordered card scoped to the page content, starting and ending with it.
+The one real risk was that both use an identical active-row treatment
+(tinted pill, primary-colored icon), which could still read as
+"duplicated nav" at a glance before that structural difference is
+noticed. Fix: a small "TOOLS" header label above the rail's rows, the
+same device Slack's channel list and VS Code's explorer panel both use
+for exactly this -- it makes the scoping explicit without adding a
+second visual language.
 
 ## Platform Engagement (v2)
 

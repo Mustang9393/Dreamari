@@ -72,7 +72,8 @@ Administrator, DA District Administrator.
 - Data: every Pending Review milestone in the roster, due dates seeded per item; decisions persisted (`counselorReviews.ts`).
 - Whole-screen empty: "Nothing to review" / "Submissions land here when students share work for approval." CTA Students.
 - In-screen: no pending under the current filter: "Nothing pending review right now." with the pane hidden; nothing selected: "Select a submission to review."; a decision undone returns the item to its due-date position.
-- Edge: header counts are 0 / 0 / 0 when empty; the attachment preview is built from student data until a file URL exists; on phones the pane is a bottom sheet with Close.
+- Document preview (25 Sept 2026): clicking the attachment row opens `DocumentPreviewModal` (`DocumentPreview.tsx`) -- a centered PDF-viewer-style dialog (dark toolbar with filename/size/page count, Download/Print/Close, a darker viewer surface, a white paper page). The page itself is `DocumentPage`, a realistic layout per milestone (Career Report: top matches with bars; Resume: education/activities/skills; Academic Plan: a four-year course table; College List: three colleges with Reach/Target/Safety tags, from the app's own `COLLEGES` catalog; Financial Aid: a FAFSA worksheet grid; any other milestone: a generic page), built from the student's own seeded data, closes on Escape, backdrop click or the X.
+- Edge: header counts are 0 / 0 / 0 when empty; the document page is built from student data until a real file exists; on phones the queue pane is a bottom sheet with Close, and the document preview opens as its own centered dialog on top of that sheet.
 
 ### Student Progress (SC, LC)
 - Data: roster, filtered by the header grade, a pathway, and (LC) a counselor.

@@ -174,6 +174,14 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
          active item, so this reads as a tool with a tool list, not a form
          with a row of buttons above it. */}
       <nav aria-label="Tool" className="hidden flex-none flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[8px] lg:flex lg:w-[228px]" style={TINTED_CARD}>
+        {/* A header the app's own sidebar doesn't have (direct question,
+           25 Sept 2026: "is the left menu after another left menu really
+           good UX?"): the outer sidebar is the app's own full-height frame
+           (logo, account footer); this is a bordered card that starts and
+           ends with the page content. The label makes that scoping
+           explicit at a glance instead of relying only on the container
+           shape. */}
+        <span className="px-[10px] pt-[4px] pb-[6px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Tools</span>
         {visibleTools.map((t) => {
           const on = t.id === toolId;
           return (
