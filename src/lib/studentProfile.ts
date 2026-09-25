@@ -28,8 +28,10 @@ export type StudentProfile = {
 
 export const EMPTY_PROFILE: StudentProfile = { interests: [], subjects: [], states: [], email: "", gpa: "", gpaType: "", zipCode: "", travelDistance: "", path: "" };
 
-export const MAX_INTERESTS = 2;
-export const MAX_SUBJECTS = 2;
+// Build still asks for two; Preferences (Joshua, 25 Sept 2026) allows three
+// industries and five subjects, and this store must not truncate them.
+export const MAX_INTERESTS = 3;
+export const MAX_SUBJECTS = 5;
 
 export const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",

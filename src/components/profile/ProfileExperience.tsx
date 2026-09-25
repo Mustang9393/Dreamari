@@ -16,6 +16,7 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
+import { PreferencesTab } from "./PreferencesTab";
 import { simulationFor } from "@/components/play/games";
 import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
@@ -56,7 +57,7 @@ import {
 // horizon, and the Career Locker is its own tab plus a strip at the end of
 // Overview. College Lookup CTAs point at /colleges (feature in the works).
 
-type TabId = "overview" | "top3" | "routes" | "plan" | "report" | "locker" | "resume" | "settings";
+type TabId = "overview" | "top3" | "routes" | "plan" | "report" | "locker" | "resume" | "preferences" | "settings";
 
 function careerById(id: string | null): ProfileCareer | null {
   return ALL_PROFILE_CAREERS.find((career) => career.id === id) ?? null;
@@ -116,7 +117,7 @@ const COVER_CAREER = "career";
 // else's), then stored picks on a later visit, and finally the demo default so
 // /profile still stands up on its own with nothing saved.
 
-const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "settings"];
+const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "preferences", "settings"];
 export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
   const [profileTourReady, setProfileTourReady] = useState(false);
@@ -142,8 +143,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   }, [initialWelcome]);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
+    // An explicit ?tab= (Home's links, the Preferences link) wins over the
+    // first-visit Overview tour; the tour waits for the next Overview visit.
     if (showProfileTour) {
-      setTab("overview");
+      if (!initialTab) setTab("overview");
       setProfileTourReady(true);
     }
     markDemoSeenThisSession("dreamari:welcome:profile");
@@ -176,7 +179,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   useEffect(() => {
     if (initialWelcome || (DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
     const timer = window.setTimeout(() => {
-      if (showProfileTour) setTab("overview");
+      if (showProfileTour && !initialTab) setTab("overview");
       setProfileTourReady(true);
     }, 1200);
     return () => window.clearTimeout(timer);
@@ -828,6 +831,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               { id: "plan", label: "My Plan" },
               { id: "report", label: "Report" },
               { id: "resume", label: "Resume" },
+              // Joshua, Slack, 25 Sept 2026: a Preferences tab so students
+              // can update their Build answers any time and counselors can
+              // read a student's interests in one place.
+              { id: "preferences", label: "Preferences" },
             ] as const
           ).map((item) => (
             <button
@@ -921,6 +928,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             />
           </div>
         )}
+        {tab === "preferences" && <PreferencesTab />}
         {tab === "resume" && (
           <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume" className="flex flex-col gap-[var(--space-4)]">
             <ResumeExperience hideTitle />
