@@ -68,9 +68,9 @@ export function PreferencesTab() {
         </span>
         <div className="flex min-w-0 flex-col gap-[4px]">
           <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
-          <p className="text-[14.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>Your interests can change. Update them anytime and Dreamari adjusts your recommendations.</p>
+          <p className="text-[14.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>Choose what fits you best right now. You can change this anytime.</p>
           <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Dreamari uses this to personalize your experience.</p>
-          <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>{updated ? `Last updated ${updated}` : "From your Build answers"}</p>
+          {updated && <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
         </div>
       </div>
 
@@ -134,9 +134,10 @@ function SectionEditor({ id, prefs, namedCareers, onClose }: { id: SectionId; pr
         <>
           <Single label="How do you like to work?" options={O.WORK_WITH} value={draft.workWith} onChange={(workWith) => patch({ workWith })} />
           <Single label="What pace feels best?" options={O.PACE} value={draft.pace} onChange={(pace) => patch({ pace })} />
-          <Single label="Structured or flexible?" options={O.STRUCTURE} value={draft.structure} onChange={(structure) => patch({ structure })} />
+          {/* Structured/flexible and work environment are in the Slack spec
+             but not in the reference build; copy follows the reference
+             (direct instruction, 25 Sept 2026). Fields stay in the store. */}
           <Multi label="What team size do you prefer?" options={O.TEAM_SIZE} value={draft.teamSize} max={LIMITS.teamSize} onChange={(teamSize) => patch({ teamSize })} />
-          <Multi label="Where would you like to work?" options={O.ENVIRONMENTS} value={draft.environments} max={LIMITS.environments} onChange={(environments) => patch({ environments })} />
         </>
       ),
     },
