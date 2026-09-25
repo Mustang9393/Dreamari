@@ -92,6 +92,11 @@ const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignatur
 
 const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
 
+// The one thing the letter genuinely can't write for the counselor. Kept
+// as one constant so the placeholder text generated into the draft and
+// the contextual nudge that watches for it never drift apart.
+const EXAMPLE_PLACEHOLDER = "[Add one specific example.]";
+
 // Drafts are built from the student's own roster data (milestones,
 // matches, plan), not a canned paragraph, so two students never get the
 // same letter. A backend replaces this with a model call; the shape (a
@@ -104,7 +109,7 @@ function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra
   const open = student ? MILESTONE_KEYS.filter((k) => ["Not Started", "Overdue", "Changes Requested", "In Progress", "Pending Review"].includes(student.milestones[k])).slice(0, 3) : [];
   switch (toolId) {
     case "recommendation-letter":
-      return `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"},\n\nIt is my privilege to recommend ${name} for ${extra ? `this ${extra.toLowerCase()} opportunity` : "this opportunity"}. ${first} is a Grade ${student?.grade ?? ""} student on the ${student?.careerTrack ?? "career"} pathway whose top career match is ${top}. ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required milestones this year${approved.length ? `, including ${approved.slice(0, 2).join(" and ")}` : ""}, and is working toward ${student?.postsecondaryIntent === "Undecided" || !student ? "a postsecondary plan" : student.postsecondaryIntent}.\n\n[Add one specific example.]`;
+      return `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"},\n\nIt is my privilege to recommend ${name} for ${extra ? `this ${extra.toLowerCase()} opportunity` : "this opportunity"}. ${first} is a Grade ${student?.grade ?? ""} student on the ${student?.careerTrack ?? "career"} pathway whose top career match is ${top}. ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required milestones this year${approved.length ? `, including ${approved.slice(0, 2).join(" and ")}` : ""}, and is working toward ${student?.postsecondaryIntent === "Undecided" || !student ? "a postsecondary plan" : student.postsecondaryIntent}.\n\n${EXAMPLE_PLACEHOLDER}`;
     case "student-brief":
       return `Status: ${student?.status ?? "unknown"} · roadmap ${student?.roadmapPct ?? 0}% · ${approved.length} of ${student?.milestoneCount ?? 11} milestones done.\nPathway: ${student?.careerTrack ?? "undeclared"} · top match ${top}.\nOpen items: ${open.length ? open.join(", ") : "none"}.\nTalking points: what went well, the one milestone to finish next, confirm the postsecondary plan (${student?.postsecondaryIntent ?? "not set"}).`;
     case "parent-brief":
@@ -384,8 +389,12 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 )}
 
                 {/* The editable region says so, at rest -- a quiet dashed
-                   rule and a pencil mark, neither of which a flat printed
-                   page would have; both fade once the text has focus. */}
+                   rule and a solid pill mark, neither of which a flat
+                   printed page would have; both fade once the text has
+                   focus. Made more prominent (a filled chip, full
+                   opacity, not bare faint text) per direct feedback:
+                   "make the click to edit on the report preview more
+                   prominent and obvious." */}
                 <div className="group/edit relative">
                   <textarea
                     value={draft}
@@ -395,10 +404,28 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                     className="w-full resize-y rounded-[4px] border border-dashed px-[8px] py-[8px] text-[13.5px] leading-[21px] outline-none focus:border-solid"
                     style={{ background: "transparent", color: "var(--ink)", borderColor: "color-mix(in srgb, var(--ink-faint) 35%, transparent)", fontFamily: "var(--font-serif, ui-serif, Georgia, serif)" }}
                   />
-                  <span className="pointer-events-none absolute top-[6px] right-[10px] flex items-center gap-[4px] text-[10.5px] font-semibold opacity-70 transition-opacity group-focus-within/edit:opacity-0" style={{ color: "var(--ink-faint)" }}>
+                  <span className="pointer-events-none absolute top-[6px] right-[10px] flex items-center gap-[4px] rounded-full px-[8px] py-[3px] text-[10.5px] font-bold shadow-sm transition-opacity group-focus-within/edit:opacity-0" style={{ color: "#fff", background: "#5B6CF9" }}>
                     <Pencil className="h-[11px] w-[11px]" aria-hidden /> Click to edit
                   </span>
                 </div>
+
+                {/* A SEPARATE, contextual nudge -- distinct from "click to
+                   edit" on purpose (direct question: "i dont know if we
+                   should combine this with the general nudge... how do
+                   we solve this so its more intuitive"). The general mark
+                   says "this whole page is live text"; this one calls out
+                   the one specific thing the letter still needs from the
+                   counselor, the way a mail-merge field or a Word content
+                   control would -- it can't be a highlighted span inside
+                   the placeholder text itself (a plain <textarea> can't
+                   style part of its own value), so it surfaces as its own
+                   line right under the page, and disappears the moment
+                   the placeholder is actually edited out. */}
+                {toolId === "recommendation-letter" && draft.includes(EXAMPLE_PLACEHOLDER) && (
+                  <p className="flex items-center gap-[6px] rounded-[4px] px-[8px] py-[6px] text-[12px] font-bold" style={{ color: "#8a5a00", background: "#fff3cd" }}>
+                    <Sparkles className="h-[12px] w-[12px] flex-none" aria-hidden /> AI couldn&apos;t write this part. Add a specific example before sending.
+                  </p>
+                )}
 
                 {toolId === "recommendation-letter" && (
                   <div className="flex flex-col gap-[2px] px-[8px] pt-[18px]">

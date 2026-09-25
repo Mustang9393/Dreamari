@@ -14515,3 +14515,12 @@ Direct question: "what is other in the career pathways... that seems like some a
 "Other" is now clickable to reveal exactly which worlds it contains and their individual counts, sorted largest first, collapsing back on a second click -- answers "what's in here" without permanently listing all of them and lengthening the card. Repurposed a click that was previously a dead no-op (`onToggle("Other")` filtered the roster to a `careerTrack` value no real student ever has, since "Other" is a synthetic label, not a Build world).
 
 Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the expand/collapse. Not pushed; awaiting explicit go-ahead per this project's push rule.
+
+## 2026-09-26 · Productivity Suite: two separate nudges, not one combined
+
+Direct question: "Make the click to edit on the report preview more prominent and obvious and contextual... for add one specific example generated with AI there should be a contextual nudge but i dont know if we should combine this with the general nudge? How do we solve this so its more intuitive?" Landed on keeping them separate rather than combining, since they answer different questions: "can I edit this at all" (always true, structural) versus "what specifically still needs me" (true only for one bracketed phrase, content-dependent).
+
+- **The general "Click to edit" mark** is now a solid filled pill (white text on the dashboard's primary blue) instead of faint floating text, so it reads as a real UI affordance instead of a watermark.
+- **A new, separate contextual nudge** appears only on the Recommendation Letter, only while its `[Add one specific example.]` placeholder is still literally present in the draft (both now read from one shared `EXAMPLE_PLACEHOLDER` constant so they can't drift apart) -- an amber callout naming the one thing the AI couldn't write, directly under the letter. It disappears the moment the counselor edits that phrase out, with no manual dismiss needed. Couldn't be a highlighted span inside the placeholder text itself, since a plain `<textarea>` can't style part of its own value -- a real constraint worth documenting for whoever next reaches for rich inline highlighting here (would need to move off `<textarea>` to `contentEditable`).
+
+Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified both marks render, and the contextual nudge disappears after editing the placeholder. Not pushed; awaiting explicit go-ahead per this project's push rule.
