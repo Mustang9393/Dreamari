@@ -14,12 +14,20 @@
 // isn't reduced." Rows here are that curriculum, verbatim
 // (`src/lib/counselorCurriculum.ts`), wearing the same visual language
 // this screen already had: a hero ring for the checkpoint furthest
-// behind, three season tiles, an accordion per season, drill-through to
-// the students who have not done it.
+// behind, three season tiles, drill-through to the students who have not
+// done it.
+//
+// A tile used to open its own accordion inline, stacked among the other
+// two seasons' collapsed summaries. Changed 26 Sept 2026 (direct
+// instruction: "instead of when i click the rows under it expand, make
+// it so that the entire section under the tiles reflect what i click
+// with a close button or back button"): a tile now replaces the whole
+// area below the tiles with just that season's checklist, with a Back
+// button to return to nothing selected.
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { Download } from "lucide-react";
+import { ChevronLeft, Download } from "lucide-react";
 import { Segmented, SegmentedRing } from "@/components/connect/viz";
 import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -33,7 +41,6 @@ import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 import { OverviewCard, Stat, Verdict } from "./overviewShared";
 import { Ring } from "./PlanMap";
-import { Disclosure } from "./Disclosure";
 
 type Grade = 9 | 10 | 11 | 12;
 type Row = { id: string; title: string; window: CurriculumWindow; classification: string; kind: "auto" | "counselor-verified"; total: number; counts: Record<CurriculumStatus, number>; donePct: number; behindShare: number };
@@ -237,16 +244,25 @@ export function MilestoneTracker() {
                 );
               })}
             </div>
-            {(["fall", "winter", "spring"] as const).map((w) => {
-              const list = rows.filter((r) => r.window === w).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct);
-              if (list.length === 0) return null;
+            {/* A tile picks a season; the whole area below the tiles then
+               shows ONLY that season's checklist, not a list of three
+               accordions (direct instruction, 26 Sept 2026: "instead of
+               when i click the rows under it expand, make it so that the
+               entire section under the tiles reflect what i click with a
+               close button or back button"). Nothing renders here until a
+               tile is picked. */}
+            {openWindow && (() => {
+              const list = rows.filter((r) => r.window === openWindow).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct);
               const seasonDone = list.length ? Math.round(list.reduce((a, r) => a + r.donePct, 0) / list.length) : 0;
               const toReview = list.reduce((a, r) => a + r.counts["awaiting-review"], 0);
-              const isOpen = openWindow === w;
               return (
-                <Disclosure key={w} id={`season-${w}`} title={WINDOW_TITLE[w]} open={isOpen} onToggle={() => setOpenWindow(isOpen ? null : w)}
-                  summary={`${list.length} checkpoint${list.length === 1 ? "" : "s"} · ${seasonDone}% done${toReview ? ` · ${toReview} to review` : ""}`}>
-                  {/* The legend lives inside the open season only. */}
+                <div className="flex flex-col gap-[var(--space-4)]">
+                  <div className="flex flex-wrap items-center justify-between gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+                    <button type="button" onClick={() => setOpenWindow(null)} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+                      <ChevronLeft className="h-4 w-4" aria-hidden /> Back
+                    </button>
+                    <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{WINDOW_TITLE[openWindow]} · {list.length} checkpoint{list.length === 1 ? "" : "s"} · {seasonDone}% done{toReview ? ` · ${toReview} to review` : ""}</span>
+                  </div>
                   <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
                     {STATES.map((st) => (
                       <span key={st.key} className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
@@ -274,9 +290,9 @@ export function MilestoneTracker() {
                       </li>
                     ))}
                   </ul>
-                </Disclosure>
+                </div>
               );
-            })}
+            })()}
           </OverviewCard>
         </>
       )}
