@@ -17,6 +17,7 @@ import { careerSlug } from "@/components/career/slug";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { ALL_PROFILE_CAREERS } from "./data";
 import * as O from "./preferencesOptions";
+import { HoverBeam } from "@/components/app/HoverBeam";
 
 type SectionId = "career" | "subjects" | "work" | "education" | "location" | "school" | "skills" | "jobs";
 
@@ -68,8 +69,7 @@ export function PreferencesTab() {
         </span>
         <div className="flex min-w-0 flex-col gap-[4px]">
           <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
-          <p className="text-[14.5px] leading-[20px]" style={{ color: "var(--foreground)" }}>Choose what fits you best right now. You can change this anytime.</p>
-          <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Dreamari uses this to personalize your experience.</p>
+          <p className="text-[14.5px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Choose what fits you best right now. You can change this anytime.</p>
           {updated && <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
         </div>
       </div>
@@ -78,11 +78,11 @@ export function PreferencesTab() {
         {SECTIONS.map((s) => {
           const summary = summaryFor(s.id, prefs);
           return (
+            <HoverBeam key={s.id} strength={0.6}>
             <button
-              key={s.id}
               type="button"
               onClick={() => setOpen(s.id)}
-              className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)] text-left"
+              className="dm-tap flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)] text-left"
               style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 85%, transparent)" }}
             >
               <span className="flex min-w-0 flex-col gap-[3px]">
@@ -94,6 +94,7 @@ export function PreferencesTab() {
               </span>
               <span className="flex flex-none items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>Edit <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /></span>
             </button>
+            </HoverBeam>
           );
         })}
       </div>
@@ -114,23 +115,15 @@ function SectionEditor({ id, prefs, namedCareers, onClose }: { id: SectionId; pr
   const firstCareer = draft.careers[0] ?? namedCareers[0];
   const suggest = useMemo(() => O.suggestionsFor(firstCareer), [firstCareer]);
 
-  const body: Record<SectionId, { instruction: string; content: ReactNode }> = {
-    career: {
-      instruction: "Choose the industries and careers that fit you best.",
-      content: (
+  const body: Record<SectionId, ReactNode> = {
+    career: (
         <>
           <Multi label="What industries interest you most?" options={O.INDUSTRY_OPTIONS} value={draft.industries} max={LIMITS.industries} onChange={(industries) => patch({ industries })} initial={8} />
           <Multi label="What careers are you considering?" options={O.careerOptions(draft.industries, [...namedCareers, ...draft.careers])} value={draft.careers} max={LIMITS.careers} onChange={(careers) => patch({ careers })} initial={6} />
         </>
-      ),
-    },
-    subjects: {
-      instruction: `Pick up to ${LIMITS.subjects} subjects you enjoy most.`,
-      content: <Multi label="Subjects I enjoy most" options={O.SUBJECT_OPTIONS} value={draft.subjects} max={LIMITS.subjects} onChange={(subjects) => patch({ subjects })} />,
-    },
-    work: {
-      instruction: "Choose the ways of working that feel right for you.",
-      content: (
+    ),
+    subjects: <Multi label="Subjects I enjoy most" options={O.SUBJECT_OPTIONS} value={draft.subjects} max={LIMITS.subjects} onChange={(subjects) => patch({ subjects })} />,
+    work: (
         <>
           <Single label="How do you like to work?" options={O.WORK_WITH} value={draft.workWith} onChange={(workWith) => patch({ workWith })} />
           <Single label="What pace feels best?" options={O.PACE} value={draft.pace} onChange={(pace) => patch({ pace })} />
@@ -139,11 +132,8 @@ function SectionEditor({ id, prefs, namedCareers, onClose }: { id: SectionId; pr
              (direct instruction, 25 Sept 2026). Fields stay in the store. */}
           <Multi label="What team size do you prefer?" options={O.TEAM_SIZE} value={draft.teamSize} max={LIMITS.teamSize} onChange={(teamSize) => patch({ teamSize })} />
         </>
-      ),
-    },
-    education: {
-      instruction: "Update your GPA and education plans.",
-      content: (
+    ),
+    education: (
         <>
           <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
             <label className="flex flex-col gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
@@ -157,11 +147,8 @@ function SectionEditor({ id, prefs, namedCareers, onClose }: { id: SectionId; pr
             <Multi label="Education pathways" options={O.PATHWAYS} value={draft.pathways} max={LIMITS.pathways} onChange={(pathways) => patch({ pathways })} />
           </div>
         </>
-      ),
-    },
-    location: {
-      instruction: "Where would you consider going to school?",
-      content: (
+    ),
+    location: (
         <>
           <Multi label="Preferred states" options={O.STATES as string[]} value={draft.states} max={LIMITS.states} onChange={(states) => patch({ states })} initial={8} />
           <Single label="How far would you travel?" options={O.DISTANCES} value={draft.distance} onChange={(distance) => patch({ distance })} />
@@ -173,21 +160,15 @@ function SectionEditor({ id, prefs, namedCareers, onClose }: { id: SectionId; pr
             </select>
           </label>
         </>
-      ),
-    },
-    school: {
-      instruction: "What kind of school feels right for you?",
-      content: (
+    ),
+    school: (
         <>
           <Multi label="School type" options={O.SCHOOL_TYPES} value={draft.schoolTypes} max={LIMITS.schoolTypes} onChange={(schoolTypes) => patch({ schoolTypes })} />
           <Multi label="Campus setting" options={O.CAMPUS} value={draft.campus} max={LIMITS.campus} onChange={(campus) => patch({ campus })} />
           <Multi label="School size" options={O.SIZES} value={draft.sizes} max={LIMITS.sizes} onChange={(sizes) => patch({ sizes })} />
         </>
-      ),
-    },
-    skills: {
-      instruction: "Choose what you want to build next.",
-      content: (
+    ),
+    skills: (
         <>
           {firstCareer && <p className="text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>Suggested for {firstCareer}</p>}
           <Multi label="What I want to build next" caps options={Array.from(new Set([...suggest.skills.slice(0, 6), ...suggest.software.slice(0, 6), ...suggest.skills.slice(6), ...suggest.software.slice(6)]))} value={draft.skillsToBuild} max={LIMITS.skillsToBuild} onChange={(skillsToBuild) => patch({ skillsToBuild })} initial={8} />
@@ -196,11 +177,8 @@ function SectionEditor({ id, prefs, namedCareers, onClose }: { id: SectionId; pr
             <Multi label="Software I know" options={suggest.software} value={draft.softwareKnow} onChange={(softwareKnow) => patch({ softwareKnow })} initial={8} />
           </Expander>
         </>
-      ),
-    },
-    jobs: {
-      instruction: "Tell us what kinds of opportunities interest you.",
-      content: (
+    ),
+    jobs: (
         <>
           <Multi label="What opportunities are you interested in?" options={O.OPPORTUNITY_TYPES} value={draft.jobs.types} onChange={(types) => patchJobs({ types })} />
           <Multi label="What roles interest you?" options={Array.from(new Set([...suggest.roles, ...draft.jobs.roles]))} value={draft.jobs.roles} max={LIMITS.jobRoles} onChange={(roles) => patchJobs({ roles })} />
@@ -217,13 +195,12 @@ function SectionEditor({ id, prefs, namedCareers, onClose }: { id: SectionId; pr
             <Text label="Portfolio or professional profile" type="url" value={draft.jobs.portfolio} placeholder="https://" onChange={(portfolio) => patchJobs({ portfolio })} />
           </Expander>
         </>
-      ),
-    },
+    ),
   };
 
   return (
-    <Modal title={section.title} optional={section.optional} instruction={body[id].instruction} onCancel={onClose} onSave={save}>
-      {body[id].content}
+    <Modal title={section.title} optional={section.optional} onCancel={onClose} onSave={save}>
+      {body[id]}
     </Modal>
   );
 }
@@ -242,10 +219,12 @@ function Text({ label, value, onChange, placeholder, type = "text" }: { label: s
   );
 }
 
-function Chip({ on, disabled, onClick, children }: { on: boolean; disabled?: boolean; onClick: () => void; children: ReactNode }) {
+/** Build's chip: the same lift-and-accent hover every tappable card in the
+ *  app uses (dm-tap), never a brightness change. */
+function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" aria-pressed={on} disabled={disabled} onClick={onClick} className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] py-[8px] text-left text-[12.5px] font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: on ? "color-mix(in srgb, var(--primary) 60%, transparent)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "var(--glass-surface-1)", color: "var(--foreground)" }}>
-      {on && <Check className="h-[14px] w-[14px] flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--accent-subtle)" }} />}
+    <button type="button" aria-pressed={on} onClick={onClick} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[14px] py-[8px] text-left text-[13.5px] font-semibold" style={{ borderColor: on ? "color-mix(in srgb, var(--accent-subtle) 70%, transparent)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "color-mix(in srgb, var(--glass-surface-1) 70%, transparent)", color: "var(--foreground)" }}>
+      <span aria-hidden className="h-2 w-2 flex-none rounded-full transition-transform duration-150" style={{ background: on ? "var(--accent-subtle)" : "var(--glass-border)", transform: on ? "scale(1.25)" : "scale(1)" }} />
       {children}
     </button>
   );
@@ -257,15 +236,17 @@ function Multi({ label, options, value, onChange, max, initial, caps = false }: 
   const [more, setMore] = useState(false);
   const shown = initial && !more ? options.filter((o, i) => i < initial || value.includes(o)) : options;
   const full = max !== undefined && value.length >= max;
-  const toggle = (o: string) => onChange(value.includes(o) ? value.filter((x) => x !== o) : full ? value : [...value, o]);
+  // At the cap the oldest pick makes room (Build's own rule, 24 Sept 2026:
+  // locking new picks out "creates friction").
+  const toggle = (o: string) => onChange(value.includes(o) ? value.filter((x) => x !== o) : full ? [...value.slice(1), o] : [...value, o]);
   return (
     <div className="flex flex-col gap-[var(--space-2)]">
       <div className="flex items-baseline justify-between gap-[var(--space-3)]">
         <p className={`text-[13px] font-extrabold ${caps ? "tracking-[0.06em] uppercase" : ""}`} style={{ color: caps ? "var(--muted-foreground)" : "var(--foreground)" }}>{label}</p>
-        {max !== undefined && <span className="text-[12px] font-bold whitespace-nowrap" style={{ color: full ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{value.length} of {max} selected</span>}
+        {max !== undefined && <span className="text-[12px] font-bold whitespace-nowrap" style={{ color: full ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{value.length} of {max}</span>}
       </div>
       <div className="flex flex-wrap gap-[8px]">
-        {shown.map((o) => <Chip key={o} on={value.includes(o)} disabled={full && !value.includes(o)} onClick={() => toggle(o)}>{o}</Chip>)}
+        {shown.map((o) => <Chip key={o} on={value.includes(o)} onClick={() => toggle(o)}>{o}</Chip>)}
       </div>
       {initial && options.length > initial && (
         <button type="button" onClick={() => setMore((m) => !m)} className="dm-link flex w-fit cursor-pointer items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>
@@ -299,7 +280,7 @@ function Expander({ label, openLabel, children }: { label: string; openLabel: st
   );
 }
 
-function Modal({ title, optional, instruction, onCancel, onSave, children }: { title: string; optional?: boolean; instruction: string; onCancel: () => void; onSave: () => void; children: ReactNode }) {
+function Modal({ title, optional, onCancel, onSave, children }: { title: string; optional?: boolean; onCancel: () => void; onSave: () => void; children: ReactNode }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
     document.addEventListener("keydown", onKey);
@@ -316,7 +297,6 @@ function Modal({ title, optional, instruction, onCancel, onSave, children }: { t
               <h3 id="preference-editor-title" className="text-[22px] leading-tight font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
               {optional && <span className="rounded-full border px-[8px] py-[2px] text-[10.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Optional</span>}
             </div>
-            <p className="mt-[2px] text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>{instruction}</p>
           </div>
           <button type="button" aria-label="Close editor" onClick={onCancel} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[18px] w-[18px]" aria-hidden /></button>
         </header>
