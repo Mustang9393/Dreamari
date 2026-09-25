@@ -16,7 +16,7 @@ import {
   ChevronLeft, Bell, MessageSquare, StickyNote, Target, GraduationCap, BookOpen, Flag, Compass,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle, FileText, Briefcase,
 } from "lucide-react";
-import { MetricTile, Ring, Segmented } from "@/components/connect/viz";
+import { MetricTile, Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { PLAN_PROGRESS_3MO } from "@/lib/counselorProfileData";
@@ -160,51 +160,40 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         </div>
       )}
 
-      {/* Identity: who, where they stand, and what they need from you. */}
+      {/* Identity, calm: who, one status, and what they need from you --
+         nothing that the tabs below already say (direct feedback on the
+         first pass: "the student profile header is making my head spin. So
+         many signals all at once"). Student number, school and DOB live in
+         About the student; the milestone count lives on the Milestones card;
+         the support flag is one of the "Needs you" items, not its own banner. */}
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-            <div className="flex min-w-0 items-center gap-[14px]">
-              <Avatar name={student.name} size={60} index={student.avatarIndex} />
-              <div className="flex min-w-0 flex-col gap-[4px]">
-                <span className="flex flex-wrap items-baseline gap-x-[8px]">
-                  <span className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</span>
-                  <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{student.tag}</span>
-                </span>
-                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.school} · DOB {student.dob} · active {fmtDate(student.lastActive)}</span>
-                <span className="flex flex-wrap items-center gap-[6px]">
-                  <StatusChip status={student.status} />
-                  <span className="rounded-full border px-[9px] py-[3px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{student.careerTrack}</span>
-                </span>
-              </div>
+          <div className="flex min-w-0 items-center gap-[14px]">
+            <Avatar name={student.name} size={56} index={student.avatarIndex} />
+            <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+              <span className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</span>
+              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack} · active {fmtDate(student.lastActive)}</span>
             </div>
-            <span className="flex items-center gap-[10px]">
-              <Ring pct={(approvedCount / Math.max(1, gradeKeys.length)) * 100} size={64} stroke={6} accent="var(--primary)">
-                <span className="text-[14px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{approvedCount}/{gradeKeys.length}</span>
-              </Ring>
-              <span className="flex flex-col text-[12px] font-semibold leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
-                <span>milestones done</span>
-                <span>roadmap {student.roadmapPct}%</span>
-              </span>
-            </span>
+            <StatusChip status={student.status} />
           </div>
-          {student.supportFlagReason && (
-            <span className="flex items-start gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={{ borderColor: "color-mix(in srgb, #F5A623 40%, transparent)", background: "color-mix(in srgb, #F5A623 10%, transparent)" }}>
-              <Flag className="mt-[2px] h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "#F5A623" }} />
-              <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}><b style={{ color: "#F5A623" }}>Support flag</b> · {student.supportFlagReason}</span>
-            </span>
-          )}
-          {actions.length > 0 && (
-            <div className="flex flex-wrap items-center gap-x-[16px] gap-y-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-              <span className="text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Needs you</span>
+          {(actions.length > 0 || student.supportFlagReason) && (
+            <ul className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
               {actions.map((a) => (
-                <span key={a.text} className="flex items-center gap-[7px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
-                  <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: a.alert ? "#E0453C" : "var(--primary)" }} />
-                  {a.text}
+                <li key={a.text} className="flex items-center justify-between gap-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+                  <span className="flex items-center gap-[8px]">
+                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: a.alert ? "#E0453C" : "var(--primary)" }} />
+                    {a.text}
+                  </span>
                   {a.review && <CardLink onClick={() => router.push("/counselor?view=review-queue")}>Review</CardLink>}
-                </span>
+                </li>
               ))}
-            </div>
+              {student.supportFlagReason && (
+                <li className="flex items-center gap-[8px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+                  <Flag aria-hidden className="h-[13px] w-[13px] flex-none" style={{ color: "#F5A623" }} />
+                  {student.supportFlagReason}
+                </li>
+              )}
+            </ul>
           )}
         </div>
       </HoverBeam>
@@ -231,7 +220,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
               <span className="flex flex-wrap items-baseline gap-x-[8px]">
                 <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Milestones</h2>
-                <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {approvedCount} of {gradeKeys.length} done</span>
+                <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{approvedCount} of {gradeKeys.length} done · roadmap {student.roadmapPct}%</span>
               </span>
               <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-3">
                 {orderedKeys.map((key) => (
@@ -252,6 +241,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                     { icon: GraduationCap, label: "Education goals", value: student.educationGoals.join(" → ") },
                     { icon: Target, label: "Favorite career cluster", value: student.careerCluster },
                     { icon: Compass, label: "Postsecondary plan", value: student.postsecondaryIntent === "Undecided" ? "Undecided" : student.postsecondaryIntent },
+                    { icon: BookOpen, label: "Student", value: `${student.tag} · ${student.school} · born ${student.dob}` },
                   ].map((r) => (
                     <span key={r.label} className="flex items-start gap-[10px]">
                       <r.icon className="mt-[2px] h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
