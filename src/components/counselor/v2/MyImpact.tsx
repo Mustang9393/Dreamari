@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- the hero's cover photo is a plain absolutely-positioned background layer, same as ProfileExperience's own cover; next/image's `fill` mode buys nothing here. */
 
 // DEMO-ONLY v2 fork of ../MyImpact.tsx (24 Sept 2026). v1 stays untouched so the
 // two builds can be compared live via the bottom-center version chip
@@ -32,19 +33,108 @@
 // even though the screen only ever shows one section.
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
-import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart } from "lucide-react";
+import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { readCounselorAccount } from "@/lib/counselorAccount";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 
-import { BAND_COLORS, MetricRow, OverviewCard, Stat, Verdict } from "./overviewShared";
-import { CardLink } from "../chips";
+import { MetricRow, OverviewCard, RankBar, Verdict, alertColor } from "./overviewShared";
+import { CardLink, Go } from "../chips";
+import { GLASS_INSET } from "../surfaces";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, TARGET_LABELS, counselorFor, readinessMetrics, targetBand, type TargetKey } from "@/lib/counselorOrg";
 const GRADES = [9, 10, 11, 12];
+
+// A real photo, not the illustrated black/white portrait the roster wears
+// everywhere else (direct instruction: "Add a photo avatr and cover image
+// to the my impact screen like we did for student profiles. Use one of
+// the ehadshots not the black and white style avatarrs we have") -- the
+// counselor is an adult professional, not a student, so this borrows a
+// couple of Connect's real headshot photos and the student profile page's
+// own cover-photo pool (both already-shipped, real assets) rather than
+// inventing a third avatar system. No account field for this exists yet
+// (CounselorAccount has no photo/cover), so both are a deterministic pick
+// off the counselor's own name -- the same "no backend, seeded pick"
+// convention avatarIndexForName already uses for students.
+const COUNSELOR_HEADSHOTS = ["/images/connect/avatars/pro-rossi.jpg", "/images/connect/avatars/pro-martinez.jpg", "/images/connect/avatars/pro-tanaka.jpg", "/images/connect/avatars/pro-brooks.jpg", "/images/connect/avatars/pro-desai.png", "/images/connect/avatars/pro-cole.jpg"];
+// One pinned, vibrant cover rather than a seeded pick (direct instruction:
+// "use a better cover image for sarah chen too. Something vibrant") -- the
+// seeded pool had landed on a dark bokeh shot for Lincoln High.
+const COUNSELOR_COVER = "/images/profile/covers/fluid-paint.webp";
+function seededPick<T>(seed: string, pool: T[]): T {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  return pool[Math.abs(hash) % pool.length];
+}
+
+function CounselorHeadshot({ src, size = 64 }: { src: string; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <span className="flex flex-none items-center justify-center rounded-full border-2" style={{ width: size, height: size, borderColor: "rgba(255,255,255,0.9)", background: "color-mix(in srgb, var(--primary) 22%, var(--card))" }}>
+        <UserRound className="h-1/2 w-1/2" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+      </span>
+    );
+  }
+  return (
+    <Image
+      key={src}
+      src={src}
+      alt=""
+      width={128}
+      height={128}
+      className="flex-none rounded-full border-2 object-cover"
+      style={{ width: size, height: size, borderColor: "rgba(255,255,255,0.9)" }}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+// Supporting text on this page is Inter, not the page-wide Bricolage
+// default (direct feedback: "Review average 2.1 days etc can be inter font
+// and more concise"). Bricolage stays on the big numbers only, so the type
+// hierarchy is number, then label, then note, top-down by size.
+const BODY = { fontFamily: "var(--font-body)" } as const;
+
+/** Number first, then its label, then an optional muted note. */
+function ImpactStat({ value, label, note, color }: { value: string; label: string; note?: string; color?: string }) {
+  return (
+    <span className="flex min-w-0 flex-col gap-[4px]">
+      <span className="text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: color ?? "var(--foreground)" }}>{value}</span>
+      <span className="text-[12.5px] leading-[16px] font-semibold" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
+      {note && <span className="text-[11.5px] leading-[15px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{note}</span>}
+    </span>
+  );
+}
+
+// One outcome as a glanceable tile: the percentage is the headline, the
+// target and the counts drop to a single muted line, and the tile itself
+// opens the students behind the number (direct feedback on the old rows:
+// "too wordy and text heavy and not glanceable. No actionable cta").
+function OutcomeTile({ label, value, target, note, toGo, onClick }: { label: string; value: number | null; target: number; note: string; /** students still needed to reach the target, when below it */ toGo: number; onClick: () => void }) {
+  const color = value === null ? "var(--muted-foreground)" : alertColor(value, target) ?? "var(--foreground)";
+  return (
+    <button type="button" onClick={onClick} className="dm-quiet flex min-w-0 cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[14px] text-left" style={GLASS_INSET}>
+      <span className="flex items-center justify-between gap-[8px]">
+        <span className="truncate text-[12.5px] font-bold" style={{ ...BODY, color: "var(--foreground)" }}>{label}</span>
+        <Go />
+      </span>
+      <span className="flex items-baseline gap-[8px]">
+        <span className="text-[30px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color }}>{value === null ? "n/a" : `${value}%`}</span>
+        <span className="text-[11.5px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>target {target}%</span>
+      </span>
+      <RankBar value={value ?? 0} target={target} />
+      <span className="flex items-center justify-between gap-[8px] text-[11.5px] font-semibold" style={BODY}>
+        <span className="truncate" style={{ color: "var(--muted-foreground)" }}>{note}</span>
+        {toGo > 0 && <span className="flex-none" style={{ color }}>{toGo} to go</span>}
+      </span>
+    </button>
+  );
+}
 
 type ImpactTab = "activity" | "grades" | "asca";
 
@@ -52,7 +142,7 @@ type ImpactTab = "activity" | "grades" | "asca";
 // for the whole school, headed by the school, with a by-counselor card.
 export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const router = useRouter();
-  const { setGradeFilter, setCounselorFilter } = useCounselorFilters();
+  const { setGradeFilter, setCounselorFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
   const roster = useReviewedRoster();
   const account = readCounselorAccount();
   const who = scope === "school" ? (account.school || DEMO_SCHOOL) : (account.name || "Sarah Chen");
@@ -85,15 +175,27 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   // school average of 71%"), the same convention as "Reviews average 2.1
   // days" below -- a comparator the backend eventually computes for real.
   const SCHOOL_AVERAGE_ON_TRACK = 71;
-  const outcomes: { key: TargetKey; value: number | null; note: string }[] = [
-    { key: "onTrack", value: m.onTrackPct, note: `${m.onTrack} of ${m.students} · school average ${SCHOOL_AVERAGE_ON_TRACK}%` },
-    { key: "plansOnFile", value: m.withPlanPct, note: `${m.withPlan} of ${m.students}` },
-    { key: "seniorPlan", value: m.seniors ? m.seniorPlanPct : null, note: `${m.seniorsCompliant} of ${m.seniors} seniors` },
-    { key: "fafsa", value: m.seniors ? m.fafsaPct : null, note: `${m.fafsaDone} of ${m.seniors} seniors` },
+  // Each outcome opens the students behind it -- the ones still keeping it
+  // below target -- instead of only reporting it.
+  const openStudents = (opts: { grade?: 12; plan?: "Undecided"; status?: "At Risk" }) => () => {
+    if (opts.grade) setGradeFilter(opts.grade);
+    if (opts.plan) setPlanFilter(opts.plan);
+    if (opts.status) setStatusFilter(opts.status);
+    router.push("/counselor?view=students");
+  };
+  const outcomes: { key: TargetKey; value: number | null; note: string; count: number; of: number; open: () => void }[] = [
+    { key: "onTrack", value: m.onTrackPct, note: `${m.onTrack} of ${m.students} · school avg ${SCHOOL_AVERAGE_ON_TRACK}%`, count: m.onTrack, of: m.students, open: openStudents({ status: "At Risk" }) },
+    { key: "plansOnFile", value: m.withPlanPct, note: `${m.withPlan} of ${m.students}`, count: m.withPlan, of: m.students, open: openStudents({ plan: "Undecided" }) },
+    { key: "seniorPlan", value: m.seniors ? m.seniorPlanPct : null, note: `${m.seniorsCompliant} of ${m.seniors} seniors`, count: m.seniorsCompliant, of: m.seniors, open: openStudents({ grade: 12, plan: "Undecided" }) },
+    { key: "fafsa", value: m.seniors ? m.fafsaPct : null, note: `${m.fafsaDone} of ${m.seniors} seniors`, count: m.fafsaDone, of: m.seniors, open: openStudents({ grade: 12 }) },
   ];
-  const measured = outcomes.filter((o) => o.value !== null) as { key: TargetKey; value: number; note: string }[];
+  /** Students still needed to reach this outcome's target. */
+  const toGo = (o: (typeof outcomes)[number]) => Math.max(0, Math.ceil((SCHOOL_TARGETS[o.key] / 100) * o.of) - o.count);
+  const SHORT_LABEL: Record<TargetKey, string> = { onTrack: "On-track", plansOnFile: "Plans", seniorPlan: "Senior plans", fafsa: "FAFSA", activeStudents: "Active students" };
+  type Measured = (typeof outcomes)[number] & { value: number };
+  const measured = outcomes.filter((o): o is Measured => o.value !== null);
   const met = measured.filter((o) => targetBand(o.value, SCHOOL_TARGETS[o.key]) === "met").length;
-  const worst = measured.slice().sort((a, b) => (a.value - SCHOOL_TARGETS[a.key]) - (b.value - SCHOOL_TARGETS[b.key]))[0];
+  const worst = measured.slice().sort((a, b) => (a.value - SCHOOL_TARGETS[a.key]) - (b.value - SCHOOL_TARGETS[b.key]))[0] as Measured | undefined;
   const heroBand = worst ? targetBand(worst.value, SCHOOL_TARGETS[worst.key]) : "met";
 
   const grades = GRADES.map((g) => ({ g, m: readinessMetrics(roster.filter((s) => s.grade === g)) })).filter((x) => x.m.students > 0).sort((a, b) => a.m.onTrackPct - b.m.onTrackPct);
@@ -104,26 +206,41 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   // Each section is a small renderer, called once for whichever tab is
   // selected on screen and once more (all of them) in the print-only
   // compiled version below -- so the two never drift out of sync.
+  // Two cards by what the numbers ARE (what the counselor did, and what
+  // it produced), then platform engagement full width. The approval rates
+  // and senior applications used to be a muted footnote under the activity
+  // stats -- direct question: "the data like 72% etc seem like important
+  // stats? Why are they so muted and small?" There was no reason; they are
+  // outcomes of this counselor's work, so they get the same stat treatment.
   const renderActivity = () => (
     <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
       <OverviewCard title={scope === "school" ? "Counselor activity" : "Your activity"} unit="this period">
-        <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-4">
-          <Stat value={String(plansReviewed)} label="plans reviewed" />
-          <Stat value={`${responseRatePct}%`} label="questions answered" />
-          <Stat value={String(ANNOUNCEMENTS.length)} label="announcements" />
-          <Stat value={String(monitored)} label="students supported" />
-        </div>
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Reviews average 2.1 days · district standard 5 · {careerReportPct}% career reports and {academicPlanPct}% academic plans approved · {seniorsApplying} of {seniorRows.length} seniors have an application underway</span>
-      </OverviewCard>
-      <OverviewCard title="Students on Dreamari" unit="this period">
-        <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-3">
-          <Stat value={engagement.drops.toLocaleString("en-US")} label="Daily Career Drops" />
-          <Stat value={engagement.sims.toLocaleString("en-US")} label="simulations" />
-          <Stat value={engagement.careers.toLocaleString("en-US")} label="careers saved" />
-          <Stat value={engagement.colleges.toLocaleString("en-US")} label="colleges saved" />
-          <Stat value={engagement.posts.toLocaleString("en-US")} label="community posts" />
+        <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-3">
+          <ImpactStat value={String(plansReviewed)} label="Plans reviewed" />
+          <ImpactStat value="2.1" label="Days per review" note="Standard: 5" />
+          <ImpactStat value={`${responseRatePct}%`} label="Questions answered" />
+          <ImpactStat value={String(ANNOUNCEMENTS.length)} label="Announcements" />
+          <ImpactStat value={String(monitored)} label="Students supported" />
         </div>
       </OverviewCard>
+      <OverviewCard title="Student results" unit="this period">
+        <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-3">
+          <ImpactStat value={`${careerReportPct}%`} label="Career reports approved" />
+          <ImpactStat value={`${academicPlanPct}%`} label="Academic plans approved" />
+          <ImpactStat value={`${seniorsApplying}/${seniorRows.length}`} label="Seniors applying" />
+        </div>
+      </OverviewCard>
+      <div className="xl:col-span-2">
+        <OverviewCard title="Students on Dreamari" unit="this period">
+          <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-5">
+            <ImpactStat value={engagement.drops.toLocaleString("en-US")} label="Daily Career Drops" />
+            <ImpactStat value={engagement.sims.toLocaleString("en-US")} label="Simulations" />
+            <ImpactStat value={engagement.careers.toLocaleString("en-US")} label="Careers saved" />
+            <ImpactStat value={engagement.colleges.toLocaleString("en-US")} label="Colleges saved" />
+            <ImpactStat value={engagement.posts.toLocaleString("en-US")} label="Community posts" />
+          </div>
+        </OverviewCard>
+      </div>
     </div>
   );
 
@@ -144,38 +261,109 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
     </div>
   );
 
+  // Rebuilt from three columns of muted text (direct feedback: "Worst
+  // designed thing on the page") into three matching tiles: the domain,
+  // its one headline number, and the supporting practice underneath --
+  // every item the old columns listed is still here.
   const renderAsca = () => (
     <OverviewCard title="ASCA National Model" unit="4th edition">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
         {ASCA(academicPlanPct, careerReportPct, monitored, responseRatePct).map((col) => (
-          <div key={col.title} className="flex flex-col gap-[6px]">
-            <span className="flex items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><col.icon className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{col.title}</span>
-            {col.items.map((it) => <span key={it} className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{it}</span>)}
+          <div key={col.title} className="flex flex-col gap-[14px] rounded-[var(--radius-md)] border p-[14px]" style={GLASS_INSET}>
+            <span className="flex items-center gap-[8px]">
+              <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)" }}>
+                <col.icon className="h-[15px] w-[15px]" style={{ color: "var(--primary)" }} />
+              </span>
+              <span className="text-[13px] font-bold" style={{ ...BODY, color: "var(--foreground)" }}>{col.title}</span>
+            </span>
+            <ImpactStat value={col.value} label={col.label} />
+            <span className="border-t pt-[10px] text-[11.5px] leading-[15px] font-medium" style={{ ...BODY, borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{col.practice}</span>
           </div>
         ))}
       </div>
     </OverviewCard>
   );
 
+  const headshotSrc = seededPick(account.name || "Sarah Chen", COUNSELOR_HEADSHOTS);
+  const coverSrc = COUNSELOR_COVER;
+
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] print:hidden">
-        <div className="flex flex-col gap-[2px]">
-          <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{who}</h2>
-          <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{scope === "school" ? `Prepared by ${account.name || "Sarah Chen"}` : `${account.role || "School Counselor"} · ${account.school || DEMO_SCHOOL}`} · August 2026 to January 2027</span>
+      {/* This counselor's own report gets a real identity hero (photo +
+         cover), the same shape Student Profile uses -- gated to "mine"
+         only. School Impact's `who` is the SCHOOL, not this counselor, so
+         leading that report with one person's face would misattribute it
+         (a District Administrator paging through several schools would
+         see the same face over every one). */}
+      {/* `min-h` on the inner content div alone wasn't enough -- as a flex
+         child of this page's own `flex flex-col` wrapper, the SECTION's
+         own box collapsed to ~47px regardless of its child's real 132px
+         height (confirmed via devtools: child rect was 132px tall, the
+         section clipping it was not). Repeating the floor on the section
+         itself fixes it directly rather than depending on content-based
+         auto-sizing that wasn't working here. */}
+      {scope === "mine" && (
+        // Same floor as Student Profile's own cover hero (ProfileExperience.tsx:
+        // `min-h-[192px] sm:min-h-[208px]`) -- direct instruction: "make sure
+        // the cover image header is the same height as the student profile
+        // ones."
+        <section className="relative min-h-[208px] overflow-hidden rounded-[var(--radius-lg)] border print:hidden" style={{ borderColor: "var(--glass-border)" }}>
+          <div className="absolute inset-0" aria-hidden>
+            <img src={coverSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.55) 45%, rgba(12,16,35,0.18) 75%, transparent 100%)" }} />
+          </div>
+          <div className="relative flex min-h-[208px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-4)] pt-[52px] sm:p-[var(--space-5)]">
+            <div className="flex min-w-0 items-end gap-[var(--space-4)]">
+              <CounselorHeadshot src={headshotSrc} />
+              <div className="flex min-w-0 flex-col gap-[2px]" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
+                <h2 className="truncate text-[18px] font-extrabold text-white" style={{ fontFamily: "var(--font-display)" }}>{who}</h2>
+                {/* The reporting period dropped from this line -- direct
+                   report: "causing a long text string and colliding with
+                   the ctas on small screens." Still stated once, on the
+                   very next card (Outcomes' own unit caption below). */}
+                <span className="truncate text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{account.role || "School Counselor"} · {account.school || DEMO_SCHOOL}</span>
+              </div>
+            </div>
+            {/* One row under the identity, at every width (direct
+               instruction: "ctas can fit neatly in a row under the
+               identity") -- pinning them to a photo corner collided with
+               the name on narrow screens. A solid backing (not
+               `dm-quiet`'s transparent default) keeps them readable on the
+               photo. */}
+            <div className="flex flex-wrap items-center gap-[6px] sm:gap-[8px]">
+              <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] text-[13px] font-semibold sm:px-[12px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderColor: "rgba(255,255,255,0.18)", color: "#fff" }}>
+                <Printer className="h-[14px] w-[14px]" aria-hidden /> Print
+              </button>
+              <button type="button" className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] text-[13px] font-semibold sm:px-[12px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderColor: "rgba(255,255,255,0.18)", color: "#fff" }}>
+                <Share2 className="h-[14px] w-[14px]" aria-hidden /> Share
+              </button>
+              <button type="button" onClick={() => window.print()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[12px] text-[13px] font-bold sm:px-[14px]">
+                <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {scope === "school" && (
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] print:hidden">
+          <div className="flex flex-col gap-[2px]">
+            <h2 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{who}</h2>
+            <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{`Prepared by ${account.name || "Sarah Chen"}`} · August 2026 to January 2027</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-[8px]">
+            <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <Printer className="h-[14px] w-[14px]" aria-hidden /> Print
+            </button>
+            <button type="button" className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <Share2 className="h-[14px] w-[14px]" aria-hidden /> Share
+            </button>
+            <button type="button" onClick={() => window.print()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+              <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report
+            </button>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-[8px]">
-          <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            <Printer className="h-[14px] w-[14px]" aria-hidden /> Print
-          </button>
-          <button type="button" className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            <Share2 className="h-[14px] w-[14px]" aria-hidden /> Share
-          </button>
-          <button type="button" onClick={() => window.print()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-            <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Print-only header: the on-screen one above is print:hidden so the
          compiled report leads with the same identity line, not the tab
@@ -188,10 +376,19 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
       {/* Outcomes is the one number a counselor reads every time, not a
          section to page through -- it stays outside the tabs, on screen
          and in print alike. */}
-      <OverviewCard title="Outcomes" unit="against district targets" hero tint={BAND_COLORS[heroBand]}>
-        <Verdict band={heroBand}>{met} of {measured.length} targets met{worst && heroBand !== "met" ? ` · ${TARGET_LABELS[worst.key]} has the most room to grow` : ""}</Verdict>
-        <div className="grid grid-cols-1 gap-x-[var(--space-6)] gap-y-[var(--space-4)] sm:grid-cols-2">
-          {outcomes.map((o) => <MetricRow key={o.key} label={TARGET_LABELS[o.key]} note={o.value === null ? undefined : o.note} value={o.value} target={SCHOOL_TARGETS[o.key]} />)}
+      {/* No status tint on this card any more (direct instruction: "remove
+         the red glow from outcomes card") -- the red now lives only on the
+         one tile that is actually below target. The verdict is the count
+         alone; which outcome needs work is said once, by the CTA. */}
+      <OverviewCard
+        title="Outcomes"
+        unit="Aug 2026 to Jan 2027"
+        hero
+        aside={worst && heroBand !== "met" ? <CardLink onClick={worst.open}>{SHORT_LABEL[worst.key]} follow-up</CardLink> : undefined}
+      >
+        <Verdict band={heroBand}>{met} of {measured.length} targets met</Verdict>
+        <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2 xl:grid-cols-4">
+          {outcomes.map((o) => <OutcomeTile key={o.key} label={TARGET_LABELS[o.key]} value={o.value} target={SCHOOL_TARGETS[o.key]} note={o.note} toGo={o.value === null ? 0 : toGo(o)} onClick={o.open} />)}
         </div>
       </OverviewCard>
 
@@ -200,9 +397,9 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
         <Segmented
           ariaLabel="Report section"
           options={[
-            { key: "activity", label: "Activity & Engagement" },
-            { key: "grades", label: scope === "school" ? "By Grade & Counselor" : "By Grade" },
-            { key: "asca", label: "ASCA Framework" },
+            { key: "activity", label: "Activity" },
+            { key: "grades", label: scope === "school" ? "Grades & counselors" : "By grade" },
+            { key: "asca", label: "ASCA model" },
           ]}
           value={tab}
           onChange={(k) => setTab(k as ImpactTab)}
@@ -220,9 +417,10 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
         {renderAsca()}
       </div>
 
-      <span className="flex flex-col gap-[2px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        <span>Dreamari data, August 2026 to January 2027 · aggregated and anonymized</span>
-        <span className="font-bold tracking-[0.02em] uppercase">Confidential · for authorized personnel only</span>
+      {/* One quiet line, not two with a bold all-caps half (direct
+         feedback: "Other disclaimers can be more subtle"). */}
+      <span className="text-[11px] leading-[15px] font-medium" style={{ ...BODY, color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+        Dreamari data, Aug 2026 to Jan 2027 · aggregated and anonymized · Confidential, for authorized personnel only
       </span>
     </div>
   );
@@ -230,8 +428,8 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
 
 function ASCA(academicPlanPct: number, careerReportPct: number, monitored: number, responseRatePct: number) {
   return [
-    { icon: BookOpen, title: "Academic", items: [`${academicPlanPct}% approved academic plans`, "Course selection support"] },
-    { icon: Briefcase, title: "Career", items: [`${careerReportPct}% career reports approved`, "Simulations and assessments"] },
-    { icon: Heart, title: "Social-emotional", items: [`${monitored} students supported`, `${responseRatePct}% of questions answered`] },
+    { icon: BookOpen, title: "Academic", value: `${academicPlanPct}%`, label: "Academic plans approved", practice: "Course selection support" },
+    { icon: Briefcase, title: "Career", value: `${careerReportPct}%`, label: "Career reports approved", practice: "Simulations and assessments" },
+    { icon: Heart, title: "Social-emotional", value: String(monitored), label: "Students supported", practice: `${responseRatePct}% of questions answered` },
   ];
 }
