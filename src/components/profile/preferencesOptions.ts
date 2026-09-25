@@ -3,7 +3,7 @@
 // selection limits. Career-specific suggestions (skills, software, roles)
 // come from the data the app already holds for that career.
 
-import { INTEREST_WORLDS, SUBJECTS } from "@/components/build/types";
+import { EDUCATION_OPTIONS, INTEREST_WORLDS, SUBJECTS } from "@/components/build/types";
 import { US_STATES } from "@/lib/studentProfile";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { DECK } from "@/components/match-lab/data";
@@ -21,6 +21,9 @@ export const STRUCTURE = ["Structured", "Flexible", "Mix of both"];
 export const TEAM_SIZE = ["Mostly solo", "Small team", "Medium team", "Large team"];
 export const ENVIRONMENTS = ["Office", "Remote", "Outdoors", "Lab", "Hospital or clinic", "Workshop or job site", "Classroom", "Studio"];
 export const GPA_TYPES: { id: string; label: string }[] = [{ id: "weighted", label: "Weighted" }, { id: "unweighted", label: "Unweighted" }, { id: "unsure", label: "Not sure" }];
+export const EDUCATION_LEVELS = EDUCATION_OPTIONS.map((o) => o.title);
+// Joshua's own examples for "skills I want to build" (Slack, 25 Sept 2026).
+export const SKILL_OPTIONS = ["Leadership", "Coding", "Public speaking", "Financial analysis", "Writing", "Design", "Problem solving", "Teamwork", "Research", "Data analysis", "Time management", "Negotiation"];
 export const PATHWAYS = ["Trade / Certificate", "2-Year College", "4-Year College", "Graduate / Professional", "Not sure"];
 export const DISTANCES = ["25 miles", "50 miles", "100 miles", "Best opportunity"];
 export const BUDGETS = ["Up to $10,000/year", "Up to $25,000/year", "Up to $50,000/year", "Over $50,000/year", "Need to explore financial aid"];
@@ -49,6 +52,11 @@ const uniq = (xs: (string | undefined)[]) => Array.from(new Set(xs.filter((x): x
 export function careerOptions(industries: string[], first: string[]): string[] {
   const inWorlds = ALL_CATALOG_CAREERS.filter((c) => industries.includes(c.world)).map((c) => c.title);
   return uniq([...first, ...inWorlds]);
+}
+/** The poster the app already shows for a career, for the picker tiles. */
+export function careerPhoto(title: string): { photo: string; world: string } | null {
+  const c = ALL_CATALOG_CAREERS.find((x) => x.title === title);
+  return c ? { photo: c.photo, world: c.world } : null;
 }
 
 /** Skills and software the app already connects to a career (Career

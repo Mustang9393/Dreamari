@@ -24,6 +24,7 @@ export const PREFERENCES_KEY = "dreamari-preferences";
 export type JobPrefs = {
   types: string[];
   roles: string[];
+  industries: string[]; // max 3 (Slack spec item 7)
   locations: string[];
   modes: string[];
   gradYear: string;
@@ -45,6 +46,7 @@ export type Preferences = {
   environments: string[]; // max 3
   gpa: string;
   gpaType: string; // weighted | unweighted | unsure | ""
+  educationLevel: string; // how much education after high school (Build's EDUCATION_OPTIONS)
   pathways: string[]; // max 2
   states: string[]; // max 3, full names
   distance: string; // 25 miles | 50 miles | 100 miles | Best opportunity
@@ -52,20 +54,21 @@ export type Preferences = {
   schoolTypes: string[]; // max 2
   campus: string[]; // max 2
   sizes: string[]; // max 2
-  skillsToBuild: string[]; // max 5, skills or software
+  skillsToBuild: string[]; // max 5 (Subjects & Skills)
   skillsHave: string[];
   softwareKnow: string[];
+  softwareLearn: string[]; // max 5
   jobs: JobPrefs;
   updatedAt: string; // ISO; "" until the student saves something here
 };
 
-export const LIMITS = { industries: 3, careers: 3, subjects: 5, teamSize: 2, environments: 3, pathways: 2, states: 3, schoolTypes: 2, campus: 2, sizes: 2, skillsToBuild: 5, jobRoles: 3, jobIndustries: 3, jobLocations: 3, jobModes: 2 } as const;
+export const LIMITS = { industries: 3, careers: 3, subjects: 5, teamSize: 3, environments: 3, pathways: 2, states: 3, schoolTypes: 2, campus: 2, sizes: 2, skillsToBuild: 5, softwareLearn: 5, jobRoles: 3, jobIndustries: 3, jobLocations: 3, jobModes: 2 } as const;
 
-export const EMPTY_JOBS: JobPrefs = { types: [], roles: [], locations: [], modes: [], gradYear: "", availability: "", relocate: "", languages: "", certifications: "", portfolio: "" };
+export const EMPTY_JOBS: JobPrefs = { types: [], roles: [], industries: [], locations: [], modes: [], gradYear: "", availability: "", relocate: "", languages: "", certifications: "", portfolio: "" };
 export const EMPTY_PREFERENCES: Preferences = {
   industries: [], careers: [], subjects: [], workWith: "", pace: "", structure: "", teamSize: [], environments: [],
-  gpa: "", gpaType: "", pathways: [], states: [], distance: "", budget: "", schoolTypes: [], campus: [], sizes: [],
-  skillsToBuild: [], skillsHave: [], softwareKnow: [], jobs: EMPTY_JOBS, updatedAt: "",
+  gpa: "", gpaType: "", educationLevel: "", pathways: [], states: [], distance: "", budget: "", schoolTypes: [], campus: [], sizes: [],
+  skillsToBuild: [], skillsHave: [], softwareKnow: [], softwareLearn: [], jobs: EMPTY_JOBS, updatedAt: "",
 };
 
 const strs = (v: unknown, max?: number): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").slice(0, max) : []);
@@ -76,10 +79,10 @@ function normalize(v: Partial<Preferences> | null | undefined): Preferences {
   return {
     industries: strs(v?.industries, LIMITS.industries), careers: strs(v?.careers, LIMITS.careers), subjects: strs(v?.subjects, LIMITS.subjects),
     workWith: str(v?.workWith), pace: str(v?.pace), structure: str(v?.structure), teamSize: strs(v?.teamSize, LIMITS.teamSize), environments: strs(v?.environments, LIMITS.environments),
-    gpa: str(v?.gpa), gpaType: str(v?.gpaType), pathways: strs(v?.pathways, LIMITS.pathways), states: strs(v?.states, LIMITS.states), distance: str(v?.distance), budget: str(v?.budget),
+    gpa: str(v?.gpa), gpaType: str(v?.gpaType), educationLevel: str(v?.educationLevel), pathways: strs(v?.pathways, LIMITS.pathways), states: strs(v?.states, LIMITS.states), distance: str(v?.distance), budget: str(v?.budget),
     schoolTypes: strs(v?.schoolTypes, LIMITS.schoolTypes), campus: strs(v?.campus, LIMITS.campus), sizes: strs(v?.sizes, LIMITS.sizes),
-    skillsToBuild: strs(v?.skillsToBuild, LIMITS.skillsToBuild), skillsHave: strs(v?.skillsHave), softwareKnow: strs(v?.softwareKnow),
-    jobs: { types: strs(j.types), roles: strs(j.roles, LIMITS.jobRoles), locations: strs(j.locations, LIMITS.jobLocations), modes: strs(j.modes, LIMITS.jobModes), gradYear: str(j.gradYear), availability: str(j.availability), relocate: str(j.relocate), languages: str(j.languages), certifications: str(j.certifications), portfolio: str(j.portfolio) },
+    skillsToBuild: strs(v?.skillsToBuild, LIMITS.skillsToBuild), skillsHave: strs(v?.skillsHave), softwareKnow: strs(v?.softwareKnow), softwareLearn: strs(v?.softwareLearn, LIMITS.softwareLearn),
+    jobs: { types: strs(j.types), roles: strs(j.roles, LIMITS.jobRoles), industries: strs(j.industries, LIMITS.jobIndustries), locations: strs(j.locations, LIMITS.jobLocations), modes: strs(j.modes, LIMITS.jobModes), gradYear: str(j.gradYear), availability: str(j.availability), relocate: str(j.relocate), languages: str(j.languages), certifications: str(j.certifications), portfolio: str(j.portfolio) },
     updatedAt: str(v?.updatedAt),
   };
 }
