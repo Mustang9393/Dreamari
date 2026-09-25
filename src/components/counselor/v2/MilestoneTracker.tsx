@@ -146,20 +146,24 @@ export function MilestoneTracker() {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-        <div className="flex flex-wrap items-center gap-[10px]">
-          <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
-          {showCounselor && (
-            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-[var(--space-6)]">
+        <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
+        {showCounselor && (
+          <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+        )}
+      </div>
+
+      {/* Its own row, not squeezed beside the grade tabs -- direct
+         feedback: "the numbered stats in the top right... are not
+         getting enough prominence and might be ignored." */}
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={GLASS_INSET}>
+        <div className="flex flex-wrap items-center gap-x-[var(--space-8)] gap-y-[var(--space-3)]">
           <Stat value={String(students.length)} label="students" />
           <Stat value={String(rows.length)} label="checkpoints" />
           <Stat value={`${overallDone}%`} label="done" />
           <Stat value={String(awaiting)} label="need attention" color={awaiting > 0 ? PRIMARY : undefined} />
           <Stat value={String(notStarted)} label="not started" color={notStarted > 0 ? STATUS_COLORS["Needs Attention"] : undefined} />
-          <button type="button" onClick={exportCsv} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Download className="h-[14px] w-[14px]" aria-hidden /> CSV</button>
         </div>
+        <button type="button" onClick={exportCsv} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Download className="h-[14px] w-[14px]" aria-hidden /> CSV</button>
       </div>
 
       {students.length === 0 || !focus ? (
