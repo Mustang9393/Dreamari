@@ -19,20 +19,18 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { ShowAll } from "./Disclosure";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
-// Each recommendation as a number, a subject and one action; the
-// reference's sentence-plus-three-bullets form is kept in `actions` for a
-// later "more" affordance but is not rendered (direct feedback, 25 Sept
-// 2026: "too text heavy. How can we simplify without losing value?").
+// Each recommendation as a number, a subject and its actions -- the
+// reference gave each stat three bullet actions and an emoji, twelve
+// lines of advice on every visit (direct feedback, 25 Sept 2026: "too
+// text heavy. How can we simplify without losing value?"). The first
+// action is always visible; the other two are a click away ("+N more"),
+// not deleted -- Maisha, 25 Sept 2026: "don't adjust the content itself
+// too much, that's important... open to you making it visually look
+// better as long as content and comprehension isn't reduced."
 const RECOMMENDATION_TILES = [
-  { pct: 43, subject: "saved Investment Banker", action: "Invite a banking professional for a career talk" },
-  { pct: 32, subject: "want to be entrepreneurs", action: "Host a local business-owner speaker series" },
-  { pct: 29, subject: "exploring nursing and healthcare", action: "Partner with a clinic for job shadows" },
-];
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- the reference's full copy, kept for a later "more" affordance
-const RECOMMENDATIONS = [
-  { emoji: "💼", stat: "43% of students have saved Investment Banker as a top career", actions: ["Invite an investment banking professional or Wall Street firm representative to your school for a career talk", "Schedule a visit to a financial district campus, trading floor, or investment firm", "Explore a CTE Finance & Business pathway or dual-enrollment finance course"] },
-  { emoji: "💰", stat: "32% of students aspire to be Entrepreneurs or Business Owners", actions: ["Host a \"Young Entrepreneurs\" speaker series featuring local business owners", "Connect students to DECA, FBLA, or local small business incubators", "Introduce a pitch competition or school-based enterprise activity"] },
-  { emoji: "🏥", stat: "29% of students are exploring Nursing & Healthcare careers", actions: ["Partner with a local hospital or clinic for a job shadow or career fair", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
+  { pct: 43, subject: "saved Investment Banker", actions: ["Invite a banking professional for a career talk", "Schedule a visit to a financial district campus, trading floor, or investment firm", "Explore a CTE Finance & Business pathway or dual-enrollment finance course"] },
+  { pct: 32, subject: "want to be entrepreneurs", actions: ["Host a local business-owner speaker series", "Connect students to DECA, FBLA, or local small business incubators", "Introduce a pitch competition or school-based enterprise activity"] },
+  { pct: 29, subject: "exploring nursing and healthcare", actions: ["Partner with a clinic for job shadows", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
 ];
 
 const TOP_SAVED_CAREERS = [
@@ -97,13 +95,14 @@ function RankCard({ title, items }: { title: string; items: { name: string; coun
   );
 }
 
-type Tile = { pct: number | null; subject: string; action: string; mine?: boolean };
+type Tile = { pct: number | null; subject: string; actions: string[]; mine?: boolean };
 
 export function CareerCollegeInsights() {
   // The three tiles are Dreamari's suggestions; a counselor can add their
   // own (direct instruction, 25 Sept 2026: a manual option wherever
   // something is AI generated). Session state until a backend stores it.
   const [tiles, setTiles] = useState<Tile[]>(() => RECOMMENDATION_TILES.map((t) => ({ ...t })));
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [adding, setAdding] = useState(false);
   const [subject, setSubject] = useState("");
   const [action, setAction] = useState("");
@@ -148,7 +147,7 @@ export function CareerCollegeInsights() {
                 <input value={action} onChange={(e) => setAction(e.target.value)} placeholder="What to do about it" aria-label="Action" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
                 <div className="flex justify-end gap-[8px]">
                   <button type="button" onClick={() => { setAdding(false); setSubject(""); setAction(""); }} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
-                  <button type="button" disabled={!subject.trim() || !action.trim()} onClick={() => { setTiles((t) => [{ pct: null, subject: subject.trim(), action: action.trim(), mine: true }, ...t]); setAdding(false); setSubject(""); setAction(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Plus className="h-[14px] w-[14px]" aria-hidden /> Add</button>
+                  <button type="button" disabled={!subject.trim() || !action.trim()} onClick={() => { setTiles((t) => [{ pct: null, subject: subject.trim(), actions: [action.trim()], mine: true }, ...t]); setAdding(false); setSubject(""); setAction(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Plus className="h-[14px] w-[14px]" aria-hidden /> Add</button>
                 </div>
               </div>
             )}
@@ -166,7 +165,16 @@ export function CareerCollegeInsights() {
                     <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
                   )}
                   <span className="text-[12.5px] font-semibold" style={{ color: r.mine ? "var(--foreground)" : "var(--muted-foreground)" }}>{r.subject}</span>
-                  <span className="mt-[6px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.action}</span>
+                  <span className="mt-[6px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.actions[0]}</span>
+                  {r.actions.length > 1 && (
+                    expanded.has(r.subject) ? (
+                      <ul className="mt-[4px] flex flex-col gap-[4px] pl-[14px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}>
+                        {r.actions.slice(1).map((a) => <li key={a}>{a}</li>)}
+                      </ul>
+                    ) : (
+                      <button type="button" onClick={() => setExpanded((prev) => new Set(prev).add(r.subject))} className="dm-quiet mt-[2px] flex w-fit cursor-pointer items-center text-[11.5px] font-bold" style={{ color: "var(--primary)" }}>+{r.actions.length - 1} more</button>
+                    )
+                  )}
                 </div>
               ))}
             </div>

@@ -1127,6 +1127,14 @@ questions, ten groups) is the reference's, verbatim.
   first action. The other two actions stay in data for a later "more"
   affordance. Alternative: keep all three and collapse. A collapsed list
   on a screen meant to be glanced is a list nobody opens.
+
+**25 Sept 2026: the other two actions are reachable again.** Direct
+content audit ("have we removed content from the v1/Replit?") found the
+first cut's "later 'more' affordance" was never built -- the code's own
+comment said so ("kept for a later affordance ... but is not rendered").
+Fixed: each tile now shows its first action plus a quiet "+2 more" that
+expands to the reference's other two bullets in place, so all three
+survive and the default view stays one line per tile.
 - **The four ranked lists are always bars.** The reference's Chart / List
   toggle only hid the bar; removed. The lede under each title ("Careers
   most frequently saved to student profiles") restated the title;
@@ -1231,6 +1239,17 @@ said once.
   seven sentences, each wrapping a stat shown above; the compliance tiles
   repeated the milestones card). Alternative: keep them for a printout.
   A principal reading the printout reads the same figure three times.
+
+**25 Sept 2026: two figures that were genuinely gone, restored.** A
+direct content audit against v1's Notable Achievements list found each
+bullet's underlying number does survive somewhere on the page except
+two: the "well above the school average of 71%" comparator on the
+on-track rate, and the count of seniors with an application underway
+(distinct from having a postsecondary plan on file). Both are back --
+the first as a note beside on-track rate in Outcomes, the second folded
+into the Activity card's own fact line, the same place "Reviews average
+2.1 days" already lives. The footer's "Confidential -- for authorized
+personnel only" line, also dropped, is back too.
 - **Senior plan compliance uses the reference's definition** (seniors
   with a declared plan), the same figure the School Administrator
   Overview shows; the earlier fork computed it from application

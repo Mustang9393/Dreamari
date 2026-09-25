@@ -47,9 +47,9 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Questions: new and follow-up first, then viewed and in progress, then answered; newest first within each. Groups: most recently active first. Announcements: newest first.",
   },
   insights: {
-    changed: ["Recommendations as one number, one subject, one action", "Ranked lists as full-width bars; chart/list toggles removed", "One blue hue", "Each list opens with its top five; Show all reveals ten"],
+    changed: ["Recommendations as one number, one subject, one action, with \"+2 more\" for the reference's other two suggestions", "Ranked lists as full-width bars; chart/list toggles removed", "One blue hue", "Each list opens with its top five; Show all reveals ten"],
     why: "Twelve lines of advice and four tiny sparkline lists asked for reading, not glancing.",
-    better: "The three things to do this semester, then the ranking, in one look.",
+    better: "The three things to do this semester, then the ranking, in one look; every suggestion the reference gave is still one click away.",
     order: "Recommendations are the three largest interest clusters, largest first; ranked lists are by count.",
   },
   productivity: {
@@ -65,9 +65,9 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "District view: schools with the lowest active share first.",
   },
   impact: {
-    changed: ["Outcomes against targets as the hero scorecard, always visible", "Activity & Engagement, By Grade (and Counselor), and ASCA Framework are tabs: one on screen at a time", "Print and Principal report compile every tab together, whichever one is open", "Achievements list and compliance summary removed"],
+    changed: ["Outcomes against targets as the hero scorecard, always visible", "Activity & Engagement, By Grade (and Counselor), and ASCA Framework are tabs: one on screen at a time", "Print and Principal report compile every tab together, whichever one is open", "Achievements list and compliance summary reshaped into the page's own cards, not deleted: the school-average comparator, the seniors-applying count and the confidentiality line are folded into Outcomes, Activity and the footer"],
     why: "The reference stated each number three times across eight sections; showing all three tabs' worth of cards at once on screen repeated that overload.",
-    better: "A principal reads whether the period moved the numbers in one screen; a counselor viewing it reads one section at a time, and the printed or shared report still has everything.",
+    better: "A principal reads whether the period moved the numbers in one screen; a counselor viewing it reads one section at a time, and the printed or shared report still has everything, including the two figures a content audit found had gone missing.",
     order: "Outcomes are shown against their target, the one furthest below target named in the verdict; grades and counselors are ranked lowest on-track first; tabs read left to right in the order a counselor would check them.",
   },
   settings: {

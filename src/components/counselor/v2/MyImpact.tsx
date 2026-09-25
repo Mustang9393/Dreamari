@@ -67,6 +67,10 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const monitored = roster.filter((s) => s.status !== "On Track").length;
   const careerReportPct = Math.round((roster.filter((s) => s.milestones["Career Report"] === "Approved").length / total) * 100);
   const academicPlanPct = Math.round((roster.filter((s) => s.milestones["Academic Plan"] === "Approved").length / total) * 100);
+  // v1's Notable Achievements: "X of Y seniors have active college or
+  // postsecondary applications underway".
+  const seniorRows = roster.filter((s) => s.grade === 12);
+  const seniorsApplying = seniorRows.filter((s) => s.milestones.Applications !== "Not Started").length;
 
   const engagement = { drops: 0, sims: 0, careers: 0, colleges: 0, posts: 0 };
   for (const s of roster) {
@@ -77,8 +81,12 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
     engagement.posts += s.engagement.communityPosts;
   }
 
+  // Fixed reference figure from the Replit reference ("well above the
+  // school average of 71%"), the same convention as "Reviews average 2.1
+  // days" below -- a comparator the backend eventually computes for real.
+  const SCHOOL_AVERAGE_ON_TRACK = 71;
   const outcomes: { key: TargetKey; value: number | null; note: string }[] = [
-    { key: "onTrack", value: m.onTrackPct, note: `${m.onTrack} of ${m.students}` },
+    { key: "onTrack", value: m.onTrackPct, note: `${m.onTrack} of ${m.students} · school average ${SCHOOL_AVERAGE_ON_TRACK}%` },
     { key: "plansOnFile", value: m.withPlanPct, note: `${m.withPlan} of ${m.students}` },
     { key: "seniorPlan", value: m.seniors ? m.seniorPlanPct : null, note: `${m.seniorsCompliant} of ${m.seniors} seniors` },
     { key: "fafsa", value: m.seniors ? m.fafsaPct : null, note: `${m.fafsaDone} of ${m.seniors} seniors` },
@@ -105,7 +113,7 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
           <Stat value={String(ANNOUNCEMENTS.length)} label="announcements" />
           <Stat value={String(monitored)} label="students supported" />
         </div>
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Reviews average 2.1 days · district standard 5 · {careerReportPct}% career reports and {academicPlanPct}% academic plans approved</span>
+        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Reviews average 2.1 days · district standard 5 · {careerReportPct}% career reports and {academicPlanPct}% academic plans approved · {seniorsApplying} of {seniorRows.length} seniors have an application underway</span>
       </OverviewCard>
       <OverviewCard title="Students on Dreamari" unit="this period">
         <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-3">
@@ -212,7 +220,10 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
         {renderAsca()}
       </div>
 
-      <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Dreamari data, August 2026 to January 2027 · aggregated and anonymized</span>
+      <span className="flex flex-col gap-[2px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <span>Dreamari data, August 2026 to January 2027 · aggregated and anonymized</span>
+        <span className="font-bold tracking-[0.02em] uppercase">Confidential · for authorized personnel only</span>
+      </span>
     </div>
   );
 }

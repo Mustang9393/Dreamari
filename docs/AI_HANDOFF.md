@@ -38,6 +38,63 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: content audit against v1/the Replit reference
+
+Direct question, prompted by Maisha's note ("keep content the same as
+that's needed for counselors ... don't adjust the content itself too
+much ... open to you making it visually look better as long as content
+and comprehension isn't reduced"): "Have we removed content from the
+v1/Replit?" Read every "Dropped"/"Removed" line already logged in the
+deviations doc plus v1's own source files, not just this repo's own
+claims about itself. Findings, in order of severity:
+
+**1. Milestone Tracker: the reference's real named curriculum is
+completely unused in v2 today (flagged, not yet resolved -- see below).**
+v1's `src/lib/milestoneReadiness.ts` (`GRADE_READINESS`) holds the
+Replit's actual per-grade checkpoints: Grade 9 has 7 (Career Assessment,
+Career Exploration, Career Goals, Four-Year Academic Plan, Next-Year
+Course Plan, Postsecondary Pathways Exploration, Grade 9 College &
+Career Reflection), Grade 10 has 8, Grade 11 has 11, Grade 12 has 10 --
+each with its own completion %, a counted breakdown, and a classification
+("Student Completion" / "Counselor Review" / "Counselor Verification" /
+"Student Submission, Counselor Visibility" / "Student + Counselor
+Tracking"). `grep`-confirmed: zero v2 files import this module. When the
+Milestone Tracker was rebuilt on My Plan ("the bridge", earlier this
+session, direct instruction that My Plan should define the tracker),
+these named checkpoints were replaced with the student app's own My Plan
+steps (a different, smaller list -- Grade 9 has 6, named "Build your
+Profile", "Play 3 Career Simulations", etc.) rather than kept alongside
+them. v1 itself is untouched and still shows the full reference data;
+this is v2-only. This is a real architectural fork between two
+stakeholders' asks (My Plan should define the tracker vs. the reference's
+own content must survive), not something to silently pick a side on --
+raised to the user directly rather than assumed.
+
+**2. Career + College Insights: fixed.** The reference gave each of the
+three recommendation stats three bullet actions; v2's first cut rendered
+only one and left the other two in an unused array, with a code comment
+admitting "kept for a later 'more' affordance ... not rendered" that was
+never followed up. Fixed: each tile now shows its first action plus a
+"+2 more" that expands the other two in place.
+
+**3. My Impact: fixed.** Two figures from the reference's "Notable
+Achievements" list were not reproduced anywhere on the page: the "well
+above the school average of 71%" on-track comparator, and the count of
+seniors with an application underway (a different fact from having a
+postsecondary plan on file). Both restored -- the first as a note beside
+the on-track outcome, the second folded into the Activity card's own
+fact line. The footer's "Confidential, for authorized personnel only"
+line, also dropped, is back too.
+
+**Checked and NOT a content loss (moved, not removed):** Counselor
+Connect's ten group descriptions moved from the list card into each
+group's own detail view, one click away, not deleted. The District
+Compliance Summary's three figures (plans on file %, senior compliance
+%, review turnaround days) all still appear individually in My Impact's
+Outcomes and Activity cards, just not as three separate big-stat tiles.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on both fixed files.
+
 ### 2026-09-25 Counselor Dashboard v2: is the tool rail good UX, and a realistic centered document preview
 
 Two questions in one message: "Is the left menu after another left menu
