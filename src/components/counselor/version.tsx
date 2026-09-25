@@ -14,13 +14,25 @@ import { roleOrDefault } from "./roles";
 // DemoControlsDock is, per the standing feedback that a demo switch in the
 // top bar "gets confused with actual UI". Never part of the product.
 //
+// v3 (added 25 Sept 2026, direct instruction: "move our current version to
+// a backup or a v3 toggle and implement the changes") is a byte-for-byte
+// snapshot of v2 taken that day, before the content-audit fixes below --
+// `src/components/counselor/v3/` is a straight directory copy of v2 at
+// that point, never edited again. v2 keeps being where active work lands
+// (as it has all session); v3 is a frozen comparison point, the same role
+// "v1" plays for the Replit reference, one step later. Shell-level
+// behavior (no page-title caption, the (i) button, role-based Overview)
+// treats v2 and v3 identically -- both are "the new design"; only v1 is
+// the old Replit-styled build -- so every such check below reads
+// `version === "v1"` / `!== "v1"` rather than naming "v2" specifically.
+//
 // Unlike the AT&T chip (URL-only, rebuilt into every link), this one is
 // remembered in localStorage: the dashboard navigates through dozens of
 // `router.push("/counselor?view=...")` calls and hrefs, and threading
 // `v=2` through all of them would spread demo plumbing across every
 // screen. `?v=2` / `?v=1` in the URL still wins on load so a demo link can
 // land on either build directly.
-export type CounselorVersion = "v1" | "v2";
+export type CounselorVersion = "v1" | "v2" | "v3";
 
 const STORAGE_KEY = "dreamari:counselor-version";
 
@@ -42,7 +54,7 @@ export function useCounselorVersion() {
 function readStored(): CounselorVersion | null {
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
-    return v === "v2" || v === "v1" ? v : null;
+    return v === "v3" || v === "v2" || v === "v1" ? v : null;
   } catch {
     return null;
   }
@@ -50,8 +62,8 @@ function readStored(): CounselorVersion | null {
 
 function syncUrl(version: CounselorVersion) {
   const url = new URL(window.location.href);
-  if (version === "v2") url.searchParams.set("v", "2");
-  else url.searchParams.delete("v");
+  if (version === "v1") url.searchParams.delete("v");
+  else url.searchParams.set("v", version === "v3" ? "3" : "2");
   window.history.replaceState(window.history.state, "", url.toString());
 }
 
@@ -63,7 +75,7 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const param = new URLSearchParams(window.location.search).get("v");
-    const fromUrl: CounselorVersion | null = param === "2" ? "v2" : param === "1" ? "v1" : null;
+    const fromUrl: CounselorVersion | null = param === "3" ? "v3" : param === "2" ? "v2" : param === "1" ? "v1" : null;
     const next = fromUrl ?? readStored() ?? "v1";
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);
@@ -143,7 +155,7 @@ export function CounselorVersionChip() {
   const role = roleOrDefault(account.role);
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-3 z-20 flex flex-wrap justify-center gap-[6px] px-4">
-      <Pills label="Dashboard version" options={[{ key: "v1", label: "v1" }, { key: "v2", label: "v2" }] as const} value={version} onChange={setVersion} />
+      <Pills label="Dashboard version" options={[{ key: "v1", label: "v1" }, { key: "v2", label: "v2" }, { key: "v3", label: "v3" }] as const} value={version} onChange={setVersion} />
       {version === "v2" && (
         <Pills
           label="Signed-in role"

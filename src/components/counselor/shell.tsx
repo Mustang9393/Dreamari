@@ -117,7 +117,7 @@ export function useCounselorFilters(): FiltersState {
 function useNavItems(): { view: CounselorView; label: string; icon: typeof LayoutGrid }[] {
   const { version } = useCounselorVersion();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  if (version !== "v2") return NAV_ITEMS;
+  if (version === "v1") return NAV_ITEMS;
   return menuForRole(account.role).map((item) => ({ view: item.view, label: item.label ?? VIEW_TITLES[item.view].title, icon: VIEW_ICONS[item.view] }));
 }
 
@@ -269,11 +269,11 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   // v2: each role's Overview answers its own question and the subtitle
   // says which (roles.ts). v1 keeps the reference's line.
   const subtitle = active === "overview"
-    ? version === "v2" ? OVERVIEW_SUBTITLES[roleOrDefault(account.role)](firstName) : firstName ? `Welcome back, ${firstName}. Here's your caseload at a glance.` : subtitleRaw
+    ? version !== "v1" ? OVERVIEW_SUBTITLES[roleOrDefault(account.role)](firstName) : firstName ? `Welcome back, ${firstName}. Here's your caseload at a glance.` : subtitleRaw
     : subtitleRaw;
   // A district administrator's frame of reference is the district, not one
   // school: the topbar's org chip and the account line say so (v2 only).
-  const orgLabel = version === "v2" && account.role === "District Administrator" ? DISTRICT_NAME : DEMO_SCHOOL;
+  const orgLabel = version !== "v1" && account.role === "District Administrator" ? DISTRICT_NAME : DEMO_SCHOOL;
 
   return (
     <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
@@ -341,7 +341,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
                 </button>
               </IconTip>
-              {version === "v2" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
+              {version !== "v1" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
               {/* DEMO-ONLY: the site-wide "quick links" hamburger, same one
                  the student app uses to reach this dashboard in the first
                  place -- without it, this shell's own isolation (no shared
@@ -379,7 +379,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
                 </button>
               </IconTip>
-              {version === "v2" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
+              {version !== "v1" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
               {/* DEMO-ONLY: see the matching comment on the mobile header
                  above -- the way back to the rest of the demo. */}
               <QuickLinksMenu align="right" />
@@ -424,14 +424,14 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                      / "Every My Plan step for a grade, and who has not done
                      it"). v1 keeps the reference's subtitle line untouched --
                      it stays a 1:1 port of the Replit, copy included. */}
-                  {version !== "v2" && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>}
+                  {version === "v1" && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>}
                 </div>
               )}
               {children}
             </div>
           </main>
         </div>
-        {version === "v2" && noteOpen && <ChangeNotePanel view={active} onClose={() => setNoteOpen(false)} />}
+        {version !== "v1" && noteOpen && <ChangeNotePanel view={active} onClose={() => setNoteOpen(false)} />}
         <CounselorVersionChip />
       </div>
     </CounselorFiltersContext.Provider>

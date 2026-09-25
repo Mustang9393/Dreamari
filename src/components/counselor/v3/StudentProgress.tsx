@@ -1,0 +1,290 @@
+"use client";
+
+// DEMO-ONLY v2 fork of ../StudentProgress.tsx (24 Sept 2026). v1 stays untouched so the
+// two builds can be compared live via the bottom-center version chip
+// (../version.tsx). Changes from the 24 Sept audit land here.
+
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useCounselorFilters } from "../shell";
+import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, DollarSign, GraduationCap, ClipboardList, AlertTriangle } from "lucide-react";
+import { BarChart } from "@/components/connect/viz";
+import { ScrollChips } from "../chips";
+import { HoverBeam } from "@/components/app/HoverBeam";
+import { Listbox } from "@/components/app/Listbox";
+import { Stat } from "./overviewShared";
+import { type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { CAREER_TRACKS } from "@/lib/counselorRoster";
+
+import { GLASS_CARD as TINTED_CARD } from "../surfaces";
+
+// Each report's chart shape and category set is copied from the reference
+// (all 9 report types clicked through live) -- a genuinely different
+// taxonomy per report, not one generic "% approved by grade" chart reused
+// everywhere. Two reports (Application Progress, Financial Aid Progress)
+// render no chart at all on the reference -- same here, table only.
+type ChartSpec = { title: string; categories: string[]; colors: string[]; values: (roster: CounselorStudent[]) => number[]; max: number; suffix?: string } | null;
+
+const STATUS_COLORS: Record<string, string> = {
+  approved: "#33C78C",
+  "pending review": "#5B6CF9",
+  "in progress": "#F5A623",
+  "not started": "#5B6470",
+  overdue: "#E0453C",
+};
+
+function countByStatus(roster: CounselorStudent[], key: MilestoneKey, fold: Partial<Record<MilestoneStatus, string>>): (categories: string[]) => number[] {
+  const counts = new Map<string, number>();
+  for (const s of roster) {
+    const status = s.milestones[key];
+    const bucket = fold[status];
+    if (bucket) counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
+  }
+  return (categories) => categories.map((c) => counts.get(c) ?? 0);
+}
+
+type ReportType = { id: string; label: string; icon: typeof FileText; gradeMin?: number; chart: (roster: CounselorStudent[]) => ChartSpec };
+
+const REPORT_TYPES: ReportType[] = [
+  {
+    id: "career-report", label: "Career Report", icon: FileText,
+    chart: (roster) => {
+      const categories = ["approved", "pending review", "in progress", "overdue"];
+      const tally = countByStatus(roster, "Career Report", { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", Overdue: "overdue", "Changes Requested": "overdue", "Not Started": "overdue" });
+      return { title: "Career Report Completion", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
+    },
+  },
+  {
+    id: "academic-plan", label: "Academic Plan", icon: ClipboardCheck,
+    chart: (roster) => {
+      const categories = ["approved", "pending review", "in progress", "not started", "overdue"];
+      const tally = countByStatus(roster, "Academic Plan", { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Not Started": "not started", Overdue: "overdue", "Changes Requested": "overdue" });
+      return { title: "Academic Plan Completion", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
+    },
+  },
+  {
+    id: "resume", label: "Resume", icon: FileBadge, gradeMin: 10,
+    chart: (roster) => {
+      const categories = ["approved", "pending review", "in progress", "not started"];
+      const tally = countByStatus(roster, "Resume", { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" });
+      return { title: "Resume Completion (Grade 10+)", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
+    },
+  },
+  {
+    id: "college-list", label: "College List", icon: School, gradeMin: 11,
+    chart: (roster) => {
+      const categories = ["approved", "in progress", "not started"];
+      const tally = countByStatus(roster, "College List", { Approved: "approved", Completed: "approved", "Pending Review": "in progress", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" });
+      return { title: "College List (Grade 11+)", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
+    },
+  },
+  { id: "applications", label: "Applications", icon: Send, chart: () => null },
+  { id: "financial-aid", label: "Financial Aid", icon: DollarSign, chart: () => null },
+  {
+    id: "postsecondary", label: "Plans", icon: GraduationCap,
+    chart: (roster) => {
+      const categories = ["4-Year College", "Undecided", "Trade/Technical School", "2-Year College"];
+      const counts = new Map<string, number>();
+      for (const s of roster) {
+        const bucket = s.postsecondaryIntent === "Trade/Technical School" ? "Trade/Technical School"
+          : s.postsecondaryIntent === "Workforce" || s.postsecondaryIntent === "Military" ? "Undecided"
+          : s.postsecondaryIntent;
+        counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
+      }
+      const colors = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4"];
+      return { title: "Postsecondary Plans", categories, colors, values: () => categories.map((c) => counts.get(c) ?? 0), max: Math.max(1, roster.length) };
+    },
+  },
+  {
+    id: "review-activity", label: "Reviews", icon: ClipboardList,
+    chart: (roster) => {
+      const categories = ["Resume Draft", "Career Report", "Academic Plan", "Career Report - Revised", "Academic Plan - Revised"];
+      const values = [
+        roster.filter((s) => s.milestones.Resume === "Pending Review").length,
+        roster.filter((s) => s.milestones["Career Report"] === "Pending Review").length,
+        roster.filter((s) => s.milestones["Academic Plan"] === "Pending Review").length,
+        roster.filter((s) => s.milestones["Career Report"] === "Changes Requested").length,
+        roster.filter((s) => s.milestones["Academic Plan"] === "Changes Requested").length,
+      ];
+      const colors = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4", "#2E3BB8"];
+      return { title: "Counselor Review Activity", categories, colors, values: () => values, max: Math.max(4, ...values) };
+    },
+  },
+  {
+    id: "intervention", label: "Intervention", icon: AlertTriangle,
+    chart: (roster) => {
+      const grades = [9, 10, 11, 12];
+      const values = grades.map((g) => roster.filter((s) => s.grade === g && s.status === "At Risk").length);
+      return { title: "Students Needing Intervention", categories: grades.map((g) => `Grade ${g}`), colors: grades.map(() => "#E0453C"), values: () => values, max: Math.max(4, ...values) };
+    },
+  },
+];
+
+const GRADES = [9, 10, 11, 12];
+
+// The roster's own seven pathways. The earlier list was the student app's
+// 15 interest worlds, none of which match a roster careerTrack, so every
+// pathway choice returned an empty report.
+const PATHWAY_OPTIONS = ["All Pathways", ...CAREER_TRACKS];
+
+export function StudentProgress() {
+  const [reportId, setReportId] = useState(REPORT_TYPES[0].id);
+  const [pathway, setPathway] = useState("All Pathways");
+  const report = REPORT_TYPES.find((r) => r.id === reportId)!;
+  // Grade comes from the header filter (the screen had its own grade
+  // picker as well, which asked the same question twice); the Lead
+  // Counselor gets the same counselor picker as Students.
+  const { gradeFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const showCounselor = account.role === "Lead Counselor";
+
+  const fullRoster = useReviewedRoster();
+  const roster = useMemo(() => {
+    let list = fullRoster;
+    if (gradeFilter !== "All Grades") list = list.filter((s) => s.grade === gradeFilter);
+    if (pathway !== "All Pathways") list = list.filter((s) => s.careerTrack === pathway);
+    if (showCounselor && counselorFilter !== "All") list = list.filter((s) => counselorFor(s).id === counselorFilter);
+    return list;
+  }, [fullRoster, gradeFilter, pathway, showCounselor, counselorFilter]);
+
+  const byGrade = useCallback((g: number) => roster.filter((s) => s.grade === g), [roster]);
+
+  const reportRoster = report.gradeMin ? roster.filter((s) => s.grade >= report.gradeMin!) : roster;
+  const chart = useMemo(() => report.chart(reportRoster), [report, reportRoster]);
+  const chartValues = chart ? chart.values(reportRoster) : [];
+
+  const exportCsv = () => {
+    if (!chart) return;
+    const rows = [["Category", "Students"], ...chart.categories.map((c, i) => [c, String(Math.round(chartValues[i] ?? 0))])];
+    const csv = rows.map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${report.id}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const ReportIcon = report.icon;
+  const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
+  const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+
+  return (
+    // No side list of report types: the reference (and v1) spend a 300px
+    // column on nine report names next to a chart that then has to fit in
+    // what is left (direct feedback, 24 Sept 2026: "a submenu is taking up
+    // space inside its container"). Listbox, not a native select, for the
+    // filters, per docs/CROSS_BROWSER_GUARDRAILS.md.
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {/* All nine reports visible at once as a chip row (direct question:
+         "what would be the best UX?"): a picker hid eight of them behind a
+         click, a side column cost a third of the width. Short labels fit
+         at 1440; on a phone the row bleeds into the gutter and the next
+         chip peeks past the edge. */}
+      <ScrollChips ariaLabel="Report" value={reportId} onChange={setReportId} options={REPORT_TYPES.map((r) => ({ key: r.id, label: r.label }))} />
+      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:flex lg:items-end lg:[&>label]:min-w-[220px]">
+          {showCounselor && (
+            <label className="flex min-w-0 flex-col gap-[4px]">
+              <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Counselor</span>
+              <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={FIELD} style={fieldStyle} />
+            </label>
+          )}
+          <label className="flex min-w-0 flex-col gap-[4px]">
+            <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Career Pathway</span>
+            <Listbox ariaLabel="Career pathway" value={pathway} onChange={setPathway} options={PATHWAY_OPTIONS.map((p) => ({ value: p, label: p }))} className={FIELD} style={fieldStyle} />
+          </label>
+          <div className="flex items-center gap-[8px] sm:col-span-2 lg:ml-auto">
+            <button type="button" onClick={exportCsv} disabled={!chart} className="dm-quiet flex h-10 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <Download className="h-[14px] w-[14px]" aria-hidden /> CSV
+            </button>
+            <button type="button" onClick={() => window.print()} className="dm-quiet flex h-10 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <FileDown className="h-[14px] w-[14px]" aria-hidden /> PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-[var(--space-4)]">
+        {!chart && (
+          <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{report.label} has no chart; the grade summary below is the report.</p>
+        )}
+        {chart && (() => {
+          const shown = reportRoster.length || 1;
+          const lead = chartValues[0] ?? 0;
+          const leadPct = Math.round((lead / shown) * 100);
+          // The last category is the one that needs something (overdue, not
+          // started); name it only when it is non-zero.
+          const tailIdx = chart.categories.length - 1;
+          const tail = chartValues[tailIdx] ?? 0;
+          // A readable axis: the largest bar rounded up to the next 10, not
+          // the roster size (which gave ticks like 121 / 91 / 61).
+          const niceMax = Math.max(10, Math.ceil(Math.max(...chartValues, 1) / 10) * 10);
+          const cap = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
+          return (
+            <HoverBeam strength={0.6} className="h-full">
+              <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+                <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}><ReportIcon className="h-[16px] w-[16px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{chart.title}<span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{reportRoster.length} students</span></h2>
+                {/* The verdict beside the chart, not above it: the chart is
+                   capped at a readable width (its SVG text scales with
+                   width, and full-bleed at 1100px it read as a poster), so
+                   the leading number takes the space that freed. */}
+                <div className="flex flex-col gap-[var(--space-5)] lg:flex-row lg:items-center lg:gap-[var(--space-8)]">
+                  <div className="flex flex-none flex-col gap-[var(--space-3)] lg:w-[200px]">
+                    <Stat value={`${leadPct}%`} label={`${cap(chart.categories[0])} · ${lead} of ${reportRoster.length}`} />
+                    {tail > 0 && tailIdx > 0 && <Stat value={String(tail)} label={cap(chart.categories[tailIdx])} color={chart.colors[tailIdx]} />}
+                  </div>
+                  <div className="w-full max-w-[720px] flex-1">
+                    <BarChart barStyle="solid" height={200} groups={chart.categories.map(cap)} series={[{ label: report.label, accent: chart.colors[0], values: chartValues }]} barColors={chart.colors} max={niceMax} valueSuffix="" />
+                  </div>
+                </div>
+              </div>
+            </HoverBeam>
+          );
+        })()}
+
+        <HoverBeam strength={0.6} className="h-full">
+          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Summary by Grade</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[520px] border-collapse text-[13px]">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
+                    <th className="px-[var(--space-3)] py-[10px] text-left font-bold" style={{ color: "var(--muted-foreground)" }}>Metric</th>
+                    {GRADES.map((g) => <th key={g} className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Grade {g}</th>)}
+                    <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
+                    <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>Total Students</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{byGrade(g).length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{roster.length}</td>
+                  </tr>
+                  <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
+                    <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>On Track</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#33C78C" }}>{byGrade(g).filter((s) => s.status === "On Track").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#33C78C" }}>{roster.filter((s) => s.status === "On Track").length}</td>
+                  </tr>
+                  <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
+                    <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>Needs Attention</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#F5A623" }}>{byGrade(g).filter((s) => s.status === "Needs Attention").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#F5A623" }}>{roster.filter((s) => s.status === "Needs Attention").length}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>At Risk</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#E0453C" }}>{byGrade(g).filter((s) => s.status === "At Risk").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#E0453C" }}>{roster.filter((s) => s.status === "At Risk").length}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </HoverBeam>
+      </div>
+    </div>
+  );
+}
