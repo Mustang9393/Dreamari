@@ -91,10 +91,19 @@ export function serverMusicMutedSnapshot(): boolean {
 // separate clocks (each just schedules its own notes against real time),
 // and keeping them apart means this module never has to reach into
 // sound.ts's internals to share one.
+//
+// One context, two gates: `audio()` (SFX -- select/correct/wrong/sweep,
+// gated by the Sound toggle's `isMuted()`) and `musicAudio()` (the
+// background loop, gated by the dedicated `musicMuted()` above) both pull
+// from the same `sharedContext()`. They used to be the same function, which
+// meant the loop's own notes were silently gated by the SOUND toggle
+// instead of the MUSIC one (direct feedback, 25 Sept 2026: "the music for
+// glossary games is tied to the sounds button instead of the music
+// button" -- muting Sound killed the tune even with Music left on, and the
+// tune played through a Sound mute whenever Music was on).
 let ctx: AudioContext | null = null;
-function audio(): AudioContext | null {
+function sharedContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
-  if (isMuted()) return null;
   try {
     const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return null;
@@ -104,6 +113,14 @@ function audio(): AudioContext | null {
   } catch {
     return null;
   }
+}
+function audio(): AudioContext | null {
+  if (isMuted()) return null;
+  return sharedContext();
+}
+function musicAudio(): AudioContext | null {
+  if (musicMuted()) return null;
+  return sharedContext();
 }
 
 type Shape = "sine" | "triangle" | "square" | "sawtooth";
@@ -292,26 +309,6 @@ const PATTERNS: Partial<Record<PlayTheme, Pattern>> = {
 
 let loopTimer: ReturnType<typeof setInterval> | null = null;
 let loopStep = 0;
-let hissNode: AudioBufferSourceNode | null = null;
-let hissGain: GainNode | null = null;
-
-function startHiss(at: AudioContext) {
-  // A quiet tape-hiss bed, CRT only -- a short noise buffer looped, the
-  // cheap way to get continuous static texture without scheduling a note
-  // every few milliseconds.
-  const seconds = 2;
-  const buffer = at.createBuffer(1, at.sampleRate * seconds, at.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.6;
-  hissNode = at.createBufferSource();
-  hissNode.buffer = buffer;
-  hissNode.loop = true;
-  hissGain = at.createGain();
-  hissGain.gain.value = 0.012;
-  hissNode.connect(hissGain);
-  hissGain.connect(at.destination);
-  hissNode.start();
-}
 
 export function startThemeMusic(theme: PlayTheme) {
   stopThemeMusic();
@@ -320,9 +317,18 @@ export function startThemeMusic(theme: PlayTheme) {
   if (!pattern) return;
   loopStep = 0;
   loopTimer = setInterval(() => {
-    const at = audio();
+    // Self-healing: re-checked every tick (not just when setMusicMuted is
+    // the one flipping it) so the loop tears itself down the moment Music
+    // is muted from anywhere -- another tab, a race with a mount/unmount --
+    // instead of only reacting to a call that happens to go through this
+    // module's own setter (direct feedback, 25 Sept 2026: "verify every
+    // game and fix so it never breaks").
+    if (musicMuted()) {
+      stopThemeMusic();
+      return;
+    }
+    const at = musicAudio();
     if (at) {
-      if (theme === "v2" && !hissNode) startHiss(at);
       const freq = pattern.notes[loopStep % pattern.notes.length];
       if (freq > 0) tone(at, freq, at.currentTime, pattern.noteLen, pattern.gain, pattern.shape);
     }
@@ -334,14 +340,5 @@ export function stopThemeMusic() {
   if (loopTimer) {
     clearInterval(loopTimer);
     loopTimer = null;
-  }
-  if (hissNode) {
-    try {
-      hissNode.stop();
-    } catch {
-      // Already stopped -- nothing to do.
-    }
-    hissNode = null;
-    hissGain = null;
   }
 }
