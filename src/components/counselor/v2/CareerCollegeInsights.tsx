@@ -16,6 +16,7 @@ import { signalsFor } from "@/lib/studentSignals";
 import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { Lightbulb, PenLine, Plus, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { ShowAll } from "./Disclosure";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
 // Each recommendation as a number, a subject and one action; the
@@ -78,12 +79,19 @@ function RankedList({ items }: { items: { name: string; count: number }[] }) {
   );
 }
 
+// Five rows open, the rest behind "Show all" (progressive disclosure, 25
+// Sept 2026): four cards of ten bars each was forty bars on one screen,
+// and the question a counselor brings here is answered by the top few.
+const SHOWN = 5;
 function RankCard({ title, items }: { title: string; items: { name: string; count: number }[] }) {
+  const [all, setAll] = useState(false);
+  const visible = all ? items : items.slice(0, SHOWN);
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title} <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>top 10</span></h2>
-        <RankedList items={items} />
+        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title} <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>top {visible.length}</span></h2>
+        <RankedList items={visible} />
+        <ShowAll total={items.length} shown={SHOWN} open={all} onToggle={() => setAll((v) => !v)} />
       </div>
     </HoverBeam>
   );

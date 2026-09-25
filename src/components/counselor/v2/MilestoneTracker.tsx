@@ -29,6 +29,7 @@ import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 import { OverviewCard, Stat, Verdict } from "./overviewShared";
 import { PlanMap } from "./PlanMap";
+import { Disclosure } from "./Disclosure";
 
 type Grade = 9 | 10 | 11 | 12;
 type Row = { id: string; title: string; window: GradeWindow["id"]; kind: StepKind; total: number; counts: Record<StepStatus, number>; donePct: number; behindShare: number; tracked: boolean; deadlineBound: boolean };
@@ -65,7 +66,12 @@ function StatusBar({ r }: { r: Row }) {
 export function MilestoneTracker() {
   const router = useRouter();
   const { gradeFilter, setGradeFilter, counselorFilter, setCounselorFilter, setStepFilter } = useCounselorFilters();
-  const [grade, setGrade] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
+  const [grade, setGradeState] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
+  // Which season is open. null = the Focus first step's season, so the
+  // page opens on what needs the counselor; a pick sticks until the grade
+  // changes (the student's My Plan opens one season at a time the same way).
+  const [openWindow, setOpenWindow] = useState<GradeWindow["id"] | "none" | null>(null);
+  const setGrade = (g: Grade) => { setGradeState(g); setOpenWindow(null); };
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
@@ -165,9 +171,13 @@ export function MilestoneTracker() {
             {(["fall", "winter", "spring"] as const).map((w) => {
               const list = rows.filter((r) => r.window === w).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct);
               if (list.length === 0) return null;
+              const trackedHere = list.filter((r) => r.tracked);
+              const seasonDone = trackedHere.length ? Math.round(trackedHere.reduce((a, r) => a + r.donePct, 0) / trackedHere.length) : 0;
+              const toReview = list.reduce((a, r) => a + r.counts["awaiting-review"], 0);
+              const isOpen = (openWindow ?? focus.window) === w;
               return (
-                <div key={w} className="flex flex-col gap-[8px]">
-                  <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{WINDOW_TITLE[w]}</span>
+                <Disclosure key={w} id={`season-${w}`} title={WINDOW_TITLE[w]} open={isOpen} onToggle={() => setOpenWindow(isOpen ? "none" : w)}
+                  summary={`${list.length} step${list.length === 1 ? "" : "s"} · ${trackedHere.length ? `${seasonDone}% done` : "student reports"}${toReview ? ` · ${toReview} to review` : ""}`}>
                   <ul className="flex flex-col gap-[6px]">
                     {list.map((r) => (
                       <li key={r.id}>
@@ -187,7 +197,7 @@ export function MilestoneTracker() {
                       </li>
                     ))}
                   </ul>
-                </div>
+                </Disclosure>
               );
             })}
           </OverviewCard>

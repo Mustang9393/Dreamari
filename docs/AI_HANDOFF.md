@@ -38,6 +38,22 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: the grid in one place, progressive disclosure everywhere it is logical
+
+Direct feedback on the previous push: "good direction, but let's not show the grid in two places, also try to use progressive disclosure as much as possible wherever logical. For My Plan etc things can be progressively disclosed like we have in the student My Plan, behind accordions. Make sure everything's [not] always thrown at the user at once."
+
+**Grid in one place.** The school year map now lives only on the Milestone Tracker, where it is the grade picker and the drill-down starts (both counselor roles have that screen). The Overview's card became "My Plan by grade": one line per grade (steps done, who still owes something, pending reviews in blue), lowest first with one verdict, each line opening the tracker at that grade. Glance on the Overview, act on the tracker, so the same numbers are not drawn twice.
+
+**Progressive disclosure** (`v2/Disclosure.tsx`: the student My Plan's season accordion shape, header button with title, one-line summary and a turning chevron, body only when open; `ShowAll` for lists):
+- Milestone Tracker: seasons open one at a time, the Focus first step's season by default; a closed season still shows "3 steps · 66% done · 2 to review".
+- Student Profile: My Plan seasons the same way (the season that needs the counselor opens first); Drafts folds to its header until a letter is needed.
+- Career + College Insights: each list opens with its top five, "Show all 10" underneath (was forty bars on one screen).
+- School Admin Overview, By group: the five lowest groups, "Show all 14".
+- Settings: Profile stays open; permissions, notifications, caseload and academic year fold behind a summary ("4 of 5 on", "121 students · 18 pending reviews").
+- Left as they were, on purpose: the attention strip (three rows plus See all), Students (paginated), Review Queue (a list plus one pane), Counselor Connect (already expandable cards), My Impact and Readiness (four cards each, one line per row).
+
+**Verified live** at 1440 and 390 on the Overview, tracker, a Grade 12 profile, Insights, Settings and the School Admin Overview. `npx tsc --noEmit -p .` and `npx eslint src/components/counselor/v2/` clean.
+
 ### 2026-09-25 My Profile: Preferences tab (Joshua's spec, ported from his reference)
 
 **Why:** Joshua Pierce, Slack, 25 Sept 2026: counselors supporting 300+ students need to read a student's interests, careers, education and school preferences in one place and see whether the Career Report and My Plan line up with them; students "complete Build once and may feel like those answers are permanent. They need to be able to update them anytime." Reference: dceeai.replit.app/my-profile#preferences, walked section by section (every editor, every option list) before building.
