@@ -12,6 +12,18 @@
       "autoPort": true
     },
     {
+      "name": "dreamari-main-3005",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "3005"
+      ],
+      "port": 3005
+    },
+    {
       "name": "dreamari-motion",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
