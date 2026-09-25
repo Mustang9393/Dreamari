@@ -102,7 +102,9 @@ export function StatRow({ label, value, color, onClick, active }: { label: strin
         <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: color }} />
         <span className="truncate">{label}</span>
       </span>
-      <span className="flex flex-none items-center gap-[6px] tabular-nums" style={{ color: "var(--foreground)" }}>{value}{onClick && <Go />}</span>
+      {/* The arrow shows on hover/focus only: one per row, always on, was a
+         column of arrows competing with the numbers. */}
+      <span className="flex flex-none items-center gap-[6px] tabular-nums" style={{ color: "var(--foreground)" }}>{value}{onClick && <Go className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />}</span>
     </>
   );
   if (!onClick) return <span className="flex items-center justify-between text-[13px] font-semibold">{row}</span>;

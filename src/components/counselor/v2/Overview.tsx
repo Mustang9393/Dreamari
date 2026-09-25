@@ -294,7 +294,7 @@ function PathwaysCard({ topPathways, colors, activePathway, onToggle, onOpen }: 
     <HoverBeam strength={0.7} className="h-full">
       <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
         <div className="relative flex items-center justify-between gap-[8px]">
-          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways</h2>
+          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{topPathways.reduce((sum, [, v]) => sum + v, 0)} students</span></h2>
           {!activePathway && <CardLink onClick={onOpen}>Insights</CardLink>}
           {activePathway && (
             <button type="button" onClick={() => onToggle(activePathway)} className="dm-quiet flex cursor-pointer items-center gap-[4px] rounded-full border px-[8px] py-[2px] text-[11px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 35%, var(--glass-border))", color: "var(--foreground)" }}>
@@ -329,10 +329,13 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
   const router = useRouter();
   const shown = students.slice(0, 3);
   const rest = students.length - shown.length;
+  // When every row shown has the same severity, say it once in the header
+  // instead of repeating the same red word on every row.
+  const oneSeverity = shown.length > 0 && shown.every((s) => attentionSeverity(s) === attentionSeverity(shown[0])) ? attentionSeverity(shown[0]) : null;
   return (
     <div className="group flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
       <div className="flex items-center justify-between gap-[8px]">
-        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs your attention</h2>
+        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs your attention{oneSeverity && <span className="ml-[8px] text-[11px] font-extrabold tracking-[0.04em] uppercase" style={{ color: SEVERITY_COLORS[oneSeverity] }}>{oneSeverity}</span>}</h2>
         <CardLink onClick={onSeeAll}>{rest > 0 ? `See all ${students.length}` : "Students"}</CardLink>
       </div>
       {students.length === 0 ? (
@@ -357,8 +360,8 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
                   </span>
                   <span className="flex flex-none items-center gap-[10px] text-[12.5px] font-semibold">
                     <span style={{ color: "var(--foreground)" }}>{attentionReason(s)}</span>
-                    <span className="text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={{ color }}>{severity}</span>
-                    <Go />
+                    {!oneSeverity && <span className="text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={{ color }}>{severity}</span>}
+                    <Go className="opacity-0 transition-opacity group-hover:opacity-100" />
                   </span>
                 </button>
               </li>
@@ -487,7 +490,6 @@ export function Overview() {
           deltaPts={2}
           hero
           heroTint={heroTint}
-          aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
           rows={[
             { label: "On Track", value: onTrack, color: STATUS_COLORS["On Track"], onClick: () => goToStudents("On Track") },
             { label: "Needs Attention", value: needsAttention, color: STATUS_COLORS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
@@ -499,7 +501,6 @@ export function Overview() {
           centerPct={(withPlan / total) * 100}
           centerLabel="have a plan"
           deltaPts={4}
-          aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
           rows={[
             { label: "With Plan", value: withPlan, color: PRIMARY, onClick: () => goToStudents(undefined, "With Plan") },
             { label: "Undecided", value: undecided, color: NEUTRAL_SLICE, onClick: () => goToStudents(undefined, "Undecided") },
