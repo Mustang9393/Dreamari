@@ -35,7 +35,6 @@ import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { Stat } from "./overviewShared";
 import { DocumentPage, DocumentPreviewModal } from "./DocumentPreview";
 
 type Priority = "Normal" | "High" | "Urgent";
@@ -91,7 +90,10 @@ function fmt(d: Date): string {
 }
 
 const QUEUE_STATUSES: MilestoneStatus[] = ["Pending Review", "In Progress", "Overdue"];
-const QUEUE_STATUS_LABEL: Record<MilestoneStatus, string> = { "Pending Review": "Awaiting you", "In Progress": "In progress", Overdue: "Overdue", Approved: "Approved", "Changes Requested": "Changes requested", "Not Started": "Not started", Completed: "Completed", "Not Applicable": "Not applicable" };
+// "Missed deadline", not "Overdue": this tab is items the student never
+// submitted, and "Overdue" read as the same thing as an overdue REVIEW in the
+// Awaiting-you list (the two counts disagreed on screen, 6 vs 5).
+const QUEUE_STATUS_LABEL: Record<MilestoneStatus, string> = { "Pending Review": "Awaiting you", "In Progress": "In progress", Overdue: "Missed deadline", Approved: "Approved", "Changes Requested": "Changes requested", "Not Started": "Not started", Completed: "Completed", "Not Applicable": "Not applicable" };
 
 // Priority is the due date, nothing else: overdue is urgent, due within two
 // days is high, the rest is normal. v1 assigned it by list position.
@@ -149,7 +151,7 @@ function PriorityPill({ priority }: { priority: Priority }) {
 // priority pill is the one colored element (a status: overdue is urgent,
 // due within two days is high); the due line's dot repeats it, its text
 // stays neutral. "Submitted" lives in the detail pane, not here.
-function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewItem; selected: boolean; showCounselor: boolean; onSelect: () => void }) {
+function QueueCard({ item, selected, showCounselor, submitted, onSelect }: { item: ReviewItem; selected: boolean; showCounselor: boolean; /** only a real submission has a sent date */ submitted: boolean; onSelect: () => void }) {
   const color = item.priority === "Normal" ? "var(--muted-foreground)" : PRIORITY_COLORS[item.priority];
   return (
     <button
@@ -167,11 +169,15 @@ function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewIt
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.milestone} · Grade {item.student.grade}{showCounselor ? ` · ${counselorFor(item.student).name}` : ""}</span>
           </span>
         </span>
-        <span className="flex flex-none items-center gap-[8px]"><PriorityPill priority={item.priority} /><Go kind="open" /></span>
+        {/* No priority pill here: priority IS the due date in this queue, so
+           the pill only repeated the due line below (every overdue row read
+           "URGENT" + "Overdue by N days"). It stays in the detail pane. */}
+        <Go kind="open" className="flex-none opacity-0 transition-opacity group-hover:opacity-100" />
       </span>
       <span className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--foreground)" }}>
         <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: color }} />
         {dueLabel(item.daysToDue)}
+        {submitted && <span style={{ color: "var(--muted-foreground)" }}>· sent {fmt(item.submitted)}</span>}
       </span>
     </button>
   );
@@ -258,6 +264,7 @@ export function ReviewQueue() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [reminded, setReminded] = useState<Set<string>>(() => new Set());
   const selected = pending.find((i) => i.id === selectedId) ?? pending[0] ?? null;
 
   const resolve = (status: ReviewDecision["status"]) => {
@@ -275,19 +282,24 @@ export function ReviewQueue() {
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      {/* Same header as the Milestone Tracker: the counts that decide the
-         day, and the one control the role needs. */}
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-        <div className="flex gap-[var(--space-6)]">
-          <Stat value={String(pending.length)} label={`${QUEUE_STATUS_LABEL[statusFilter].toLowerCase()}${gradeFilter !== "All Grades" ? ` · Grade ${gradeFilter}` : ""}`} />
-          {statusFilter === "Pending Review" && <Stat value={String(overdue)} label="overdue" color={overdue > 0 ? STATUS_COLORS["At Risk"] : undefined} />}
-          {statusFilter === "Pending Review" && <Stat value={String(dueSoon)} label="due in 2 days" color={dueSoon > 0 ? STATUS_COLORS["Needs Attention"] : undefined} />}
-        </div>
-        {showCounselor && (
-          <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-        )}
+      {/* The tabs carry the counts; the header row of big numbers only
+         repeated them. What the tabs can't say (how many of the waiting
+         items are late or nearly late) is one quiet caption beside them. */}
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <Segmented ariaLabel="Status" value={statusFilter} onChange={(k) => { setStatusFilter(k as MilestoneStatus); setSelectedId(null); }} options={QUEUE_STATUSES.map((s, i) => ({ key: s, label: `${QUEUE_STATUS_LABEL[s]} (${counts[i]})` }))} />
+        <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+          {statusFilter === "Pending Review" && (overdue > 0 || dueSoon > 0) && (
+            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              {overdue > 0 && <span style={{ color: STATUS_COLORS["At Risk"] }}>{overdue} past due</span>}
+              {overdue > 0 && dueSoon > 0 && " · "}
+              {dueSoon > 0 && <span style={{ color: STATUS_COLORS["Needs Attention"] }}>{dueSoon} due within 2 days</span>}
+            </span>
+          )}
+          {showCounselor && (
+            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+          )}
+        </span>
       </div>
-      <Segmented ariaLabel="Status" value={statusFilter} onChange={(k) => { setStatusFilter(k as MilestoneStatus); setSelectedId(null); }} options={QUEUE_STATUSES.map((s, i) => ({ key: s, label: `${QUEUE_STATUS_LABEL[s]} (${counts[i]})` }))} />
       {/* items-start: the pane hugs its content instead of stretching to
          the list's height, which left the actions floating far below a
          short submission (direct feedback, 25 Sept 2026). */}
@@ -300,7 +312,7 @@ export function ReviewQueue() {
           ) : (
             <div className="flex flex-col gap-[8px]">
               {pending.map((item) => (
-                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} onSelect={() => { setSelectedId(item.id); setFeedback(""); setPreviewOpen(false); setSheetOpen(true); }} />
+                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} submitted={statusFilter === "Pending Review"} onSelect={() => { setSelectedId(item.id); setFeedback(""); setPreviewOpen(false); setSheetOpen(true); }} />
               ))}
             </div>
           )}
@@ -324,7 +336,7 @@ export function ReviewQueue() {
                   <PriorityPill priority={selected.priority} />
                 </div>
                 <span className="relative text-[12px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
-                  {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· submitted {fmt(selected.submitted)}</span>
+                  {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· due {fmt(selected.due)}{statusFilter === "Pending Review" ? ` · submitted ${fmt(selected.submitted)}` : ""}</span>
                 </span>
 
                 {statusFilter === "Pending Review" ? (
@@ -361,7 +373,16 @@ export function ReviewQueue() {
                   // Nothing submitted yet for these two statuses -- no
                   // message, no attachment, no Approve/Request Changes to
                   // fake a review that hasn't happened.
-                  <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.student.name.split(" ")[0]} hasn&apos;t submitted this yet.</p>
+                  // Not a dead end: the one thing a counselor can do about
+                  // an unsubmitted item is nudge the student.
+                  <div className="relative flex flex-col gap-[var(--space-3)]">
+                    <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.student.name.split(" ")[0]} hasn&apos;t submitted this yet.</p>
+                    {reminded.has(selected.id) ? (
+                      <p className="text-[13px] font-bold" style={{ color: "var(--primary)" }}>Reminder sent</p>
+                    ) : (
+                      <button type="button" onClick={() => setReminded((r) => new Set(r).add(selected.id))} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[18px] text-[13.5px] font-bold">Send a reminder</button>
+                    )}
+                  </div>
                 )}
               </>
             )}
