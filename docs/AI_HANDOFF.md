@@ -14457,3 +14457,15 @@ Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed cle
 Content audit (this session's "go screen by screen" comparison against v1) found only 3 of the reference's 10 announcements had survived an earlier pass -- confirmed directly against both files before reporting it, then: "FIX, display better, no cognitive overload, long copy etc. Keep tabbed structure but do not miss data points." Restored all 10 to `v2/CounselorConnect.tsx`'s `ANNOUNCEMENTS`, verbatim (title, audience, body, tags), dates reformatted to this dashboard's 2026-09-DD convention matching the 3 that were already there. No display changes needed: `AnnouncementCard` already defaulted every card closed with a one-line-clamped body preview and opened one at a time, so 10 collapsed cards is the same reading footprint 3 already had -- the progressive-disclosure structure just needed the missing data back.
 
 Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified all 10 render collapsed under the Announcements tab. Not pushed; awaiting explicit go-ahead per this project's push rule.
+
+## 2026-09-26 · Productivity Suite: rail replaced by a chip row, draft is now a real document
+
+Direct feedback: "Can we Show the preview like we did in resume for the productivity suite stuff? Use the camera tracking effects etc... Im not sure the side menu for tools is the best approach here." Confirmed what "camera tracking" meant before touching anything: in the resume builder it's the live preview panning to whichever field is being edited, not a 3D tilt effect.
+
+Removed the desktop-only left rail (228px, five tool names, `lg:` and up only); `ScrollChips` (previously mobile-only) is now the one tool switcher at every width. The freed width goes to the draft, which now renders on the same realistic-paper surface (`PAPER_VARS`, now exported from `DocumentPreview.tsx`) the Milestone Tracker/Review Queue document previews already use, with a letterhead line (tool name + student/grade) instead of a plain dark `<textarea>` in a bordered card. Still a real, editable textarea underneath, just restyled -- Copy/Download/Save to notes unchanged.
+
+The "camera" equivalent for this screen: there's one draft page, not fielded sections to pan between, so a new draft scrolls its own page into view and flashes its border once (900ms), rather than silently repainting off-screen. `showDraft()` wraps both `generate()` and `writeOwn()` so both paths get the same feedback.
+
+`DraftTools` (the same component embedded on Student Profile, `fixedStudent` set) inherits all of this for free since it's the same component.
+
+Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the chip row and paper preview on the Productivity Suite page and Student Profile's embedded Drafts card, and confirmed the two non-draft tools (Group Message, Students Needing Attention) are unaffected. Not pushed; awaiting explicit go-ahead per this project's push rule.

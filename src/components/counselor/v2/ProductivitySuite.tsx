@@ -20,18 +20,28 @@
 // milestones, activities, and counselor notes.") -- cut; the icon and the
 // short sub-label already say what the tool is for -- and a horizontal
 // row of full tool names as the only way to switch tools, which reads as
-// a stack of buttons rather than a workspace. At `lg` and up the switcher
-// is now a left rail, the exact active/inactive language the app's own
-// sidebar nav already uses (`SidebarNav` in shell.tsx: a quiet row, a
-// tinted pill and a primary-colored icon when active) -- so the Suite
-// reads as a tool with its own tool list, not a copy of Student Progress'
-// old side list. Below `lg` it is still the horizontal chip row; there is
-// no room for a persistent rail on a phone. The draft pane is now always
-// present once a tool is a draft tool, even before Generate is pressed --
-// a dashed empty state fills the space a blank card used to leave, so the
-// workspace never looks unfinished mid-task.
+// a stack of buttons rather than a workspace. The draft pane is now
+// always present once a tool is a draft tool, even before Generate is
+// pressed -- a dashed empty state fills the space a blank card used to
+// leave, so the workspace never looks unfinished mid-task.
+//
+// 26 Sept 2026, redesigned a third time (direct feedback: "can we show
+// the preview like we did in resume for the productivity suite stuff...
+// im not sure the side menu for tools is the best approach here"). The
+// desktop left rail is gone -- it spent 228px on five names and still
+// left the draft in a plain dark textarea that read as a form field, not
+// a document. The chip row (previously mobile-only) is now the one
+// switcher at every width, and the freed space goes to the draft, which
+// now renders on the same realistic "paper" surface (`PAPER_VARS`) the
+// Milestone Tracker/Review Queue's document previews already use, so a
+// letter reads like a letter instead of a `<textarea>` in a dark card.
+// "Camera tracking," per the resume builder, means the live preview pans
+// to what the counselor is doing -- there's one draft, not fielded
+// sections to pan between, so the equivalent here is the page scrolling
+// itself into view and flashing once when a new draft lands, instead of
+// silently repainting off-screen.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check } from "lucide-react";
 import { BatchComposer } from "./Batch";
 import { CAREER_TRACKS } from "@/lib/counselorRoster";
@@ -47,6 +57,7 @@ import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { ScrollChips } from "../chips";
 import { Segmented } from "@/components/connect/viz";
+import { PAPER_VARS } from "./DocumentPreview";
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
 
@@ -105,6 +116,21 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const [draft, setDraft] = useState<string | null>(null);
   const [savedTo, setSavedTo] = useState<string | null>(null);
   const router = useRouter();
+  // The "camera" a new draft pans to: there's one page here, not fielded
+  // sections, so panning means scrolling the page into view and flashing
+  // its border once, rather than silently repainting off-screen.
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [flash, setFlash] = useState(false);
+  const showDraft = (text: string) => {
+    setDraft(text);
+    setFlash(true);
+    pageRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
+  useEffect(() => {
+    if (!flash) return;
+    const t = window.setTimeout(() => setFlash(false), 900);
+    return () => window.clearTimeout(t);
+  }, [flash]);
   const tool = TOOLS.find((t) => t.id === toolId)!;
   const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
   const student = fixedStudent ?? roster.find((s) => s.id === studentId);
@@ -129,7 +155,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
 
   const generate = () => {
     setSavedTo(null);
-    setDraft(buildDraft(toolId, student, letterType));
+    showDraft(buildDraft(toolId, student, letterType));
   };
   // A blank start with only the headings, for a counselor who would rather
   // write than edit a generated draft (direct instruction, 25 Sept 2026:
@@ -146,7 +172,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
       attention: "",
       "group-message": "",
     };
-    setDraft(skeleton[toolId]);
+    showDraft(skeleton[toolId]);
   };
   const download = () => {
     if (!draft) return;
@@ -162,43 +188,11 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const isDraftTool = toolId !== "attention" && toolId !== "group-message";
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-start">
-      {/* Phone/tablet: the horizontal chip row, unchanged -- no room for a
-         persistent rail at that width. */}
-      <div className="lg:hidden">
-        <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={visibleTools.map((t) => ({ key: t.id, label: t.label }))} />
-      </div>
-
-      {/* Desktop: a real tool rail -- the same quiet-row/tinted-pill/
-         primary-icon language the app's own sidebar nav uses for its own
-         active item, so this reads as a tool with a tool list, not a form
-         with a row of buttons above it. */}
-      <nav aria-label="Tool" className="hidden flex-none flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[8px] lg:flex lg:w-[228px]" style={TINTED_CARD}>
-        {/* A header the app's own sidebar doesn't have (direct question,
-           25 Sept 2026: "is the left menu after another left menu really
-           good UX?"): the outer sidebar is the app's own full-height frame
-           (logo, account footer); this is a bordered card that starts and
-           ends with the page content. The label makes that scoping
-           explicit at a glance instead of relying only on the container
-           shape. */}
-        <span className="px-[10px] pt-[4px] pb-[6px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Tools</span>
-        {visibleTools.map((t) => {
-          const on = t.id === toolId;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => { setToolId(t.id); setDraft(null); }}
-              aria-current={on ? "true" : undefined}
-              className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[10px] py-[9px] text-left text-[13.5px] font-semibold"
-              style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
-            >
-              <t.icon className="h-[16px] w-[16px] flex-none" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
-              {t.label}
-            </button>
-          );
-        })}
-      </nav>
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {/* The one switcher at every width -- the desktop left rail this
+         used to have spent 228px on five names and still left the draft
+         in a plain textarea; that width now goes to the draft itself. */}
+      <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={visibleTools.map((t) => ({ key: t.id, label: t.label }))} />
 
       <HoverBeam strength={0.6} className="h-full min-w-0 flex-1">
         <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
@@ -298,7 +292,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
           )}
 
           {draft !== null && toolId !== "attention" && toolId !== "group-message" && (
-            <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: GLASS_INSET.background }}>
+            <div className="flex flex-col gap-[10px]">
               <div className="flex flex-wrap items-center justify-between gap-[8px]">
                 <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Draft{student ? ` · ${student.name}` : ""}</span>
                 <span className="flex flex-wrap gap-[6px]">
@@ -307,7 +301,30 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                   {student && <button type="button" onClick={() => { addNote(student.id, `${tool.label}:\n${draft}`); setSavedTo(student.name); }} className="dm-quiet flex h-8 cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Save className="h-[13px] w-[13px]" aria-hidden /> {savedTo ? "Saved to notes" : "Save to notes"}</button>}
                 </span>
               </div>
-              <textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={9} aria-label="Draft" className="w-full resize-y rounded-[var(--radius-sm)] border px-[12px] py-[10px] text-[13px] leading-[20px] outline-none" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+              {/* The same realistic-paper surface the document previews
+                 use elsewhere (PAPER_VARS), not a dark textarea -- a
+                 letter reads like a letter. Still a real, editable
+                 textarea underneath; only the surface changed. The
+                 border flashes once when a new draft lands (the "camera"
+                 this single-page tool has to pan to). */}
+              <div
+                ref={pageRef}
+                className="rounded-[2px] p-[4px] transition-[box-shadow] duration-300"
+                style={{ ...PAPER_VARS, background: "var(--paper)", boxShadow: flash ? "0 0 0 2px var(--primary), 0 12px 32px -12px rgba(0,0,0,0.4)" : "0 12px 32px -12px rgba(0,0,0,0.4)" }}
+              >
+                <div className="mb-[10px] flex items-center justify-between border-b px-[8px] pt-[4px] pb-[10px]" style={{ borderColor: "var(--rule)" }}>
+                  <span className="text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--ink-faint)" }}>{tool.label}</span>
+                  {student && <span className="text-[10.5px] font-semibold" style={{ color: "var(--ink-faint)" }}>{student.name} · Grade {student.grade}</span>}
+                </div>
+                <textarea
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  rows={12}
+                  aria-label="Draft"
+                  className="w-full resize-y px-[8px] pb-[8px] text-[13.5px] leading-[21px] outline-none"
+                  style={{ background: "transparent", color: "var(--ink)", fontFamily: "var(--font-serif, ui-serif, Georgia, serif)" }}
+                />
+              </div>
             </div>
           )}
 

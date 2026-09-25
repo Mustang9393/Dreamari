@@ -29,7 +29,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { COLLEGES } from "@/components/colleges/data";
 import type { CounselorStudent, MilestoneKey } from "@/lib/counselorRoster";
 
-const PAPER_VARS = {
+export const PAPER_VARS = {
   "--paper": "#ffffff",
   "--paper-sunken": "#f4f4f5",
   "--ink": "#1a1a1a",
