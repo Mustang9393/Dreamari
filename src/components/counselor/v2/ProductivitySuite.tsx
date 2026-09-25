@@ -22,10 +22,11 @@ import { useRouter } from "next/navigation";
 import { Copy, Download, Save, PenLine } from "lucide-react";
 import { MILESTONE_KEYS, attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
 import { addNote } from "@/lib/counselorNotes";
-import { Avatar, StatusChip } from "../chips";
+import { Avatar, SelectBox, StatusChip } from "../chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { ScrollChips } from "../chips";
+import { Segmented } from "@/components/connect/viz";
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
 
@@ -95,8 +96,16 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const [gStatus, setGStatus] = useState("All");
   const [gPathway, setGPathway] = useState("All");
   const [gSent, setGSent] = useState<string | null>(null);
-  const audience = roster.filter((s) => (gGrade === "All" || String(s.grade) === gGrade) && (gStatus === "All" || s.status === gStatus) && (gPathway === "All" || s.careerTrack === gPathway));
-  const audienceLabel = [gGrade === "All" ? "All grades" : `Grade ${gGrade}`, gStatus === "All" ? null : gStatus, gPathway === "All" ? null : gPathway].filter(Boolean).join(" · ");
+  // Or a hand-picked set (25 Sept 2026: "the batch thing should be in
+  // Productivity Suite, not in the Students tab itself").
+  const [gMode, setGMode] = useState<"audience" | "pick">("audience");
+  const [picked, setPicked] = useState<Set<string>>(() => new Set());
+  const [pickSearch, setPickSearch] = useState("");
+  const togglePick = (id: string) => setPicked((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  const byAudience = roster.filter((s) => (gGrade === "All" || String(s.grade) === gGrade) && (gStatus === "All" || s.status === gStatus) && (gPathway === "All" || s.careerTrack === gPathway));
+  const audience = gMode === "pick" ? students.filter((s) => picked.has(s.id)) : byAudience;
+  const audienceLabel = gMode === "pick" ? `${picked.size} picked` : [gGrade === "All" ? "All grades" : `Grade ${gGrade}`, gStatus === "All" ? null : gStatus, gPathway === "All" ? null : gPathway].filter(Boolean).join(" · ");
+  const pickList = students.filter((s) => !pickSearch.trim() || s.name.toLowerCase().includes(pickSearch.trim().toLowerCase()));
 
   const generate = () => {
     setSavedTo(null);
@@ -145,7 +154,33 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
 
           {toolId === "group-message" ? (
             <div className="flex flex-col gap-[var(--space-3)]">
-              <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+              <Segmented ariaLabel="Who receives it" options={[{ key: "audience", label: "By audience" }, { key: "pick", label: "Pick students" }]} value={gMode} onChange={(k) => setGMode(k as "audience" | "pick")} />
+              {gMode === "pick" && (
+                <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[10px]" style={GLASS_INSET}>
+                  <div className="flex flex-wrap items-center justify-between gap-[8px]">
+                    <input value={pickSearch} onChange={(e) => setPickSearch(e.target.value)} placeholder="Search a name" aria-label="Search students" className="h-9 min-w-[200px] flex-1 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle} />
+                    <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                      {picked.size} picked
+                      {picked.size > 0 && <button type="button" onClick={() => setPicked(new Set())} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Clear</button>}
+                      {pickList.length > 0 && <button type="button" onClick={() => setPicked((prev) => { const next = new Set(prev); for (const s of pickList) next.add(s.id); return next; })} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Pick all {pickList.length}</button>}
+                    </span>
+                  </div>
+                  <ul className="flex max-h-[260px] flex-col gap-[2px] overflow-y-auto pr-[4px]">
+                    {pickList.map((s) => (
+                      <li key={s.id}>
+                        <label className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[5px]">
+                          <SelectBox checked={picked.has(s.id)} label={`Pick ${s.name}`} onChange={() => togglePick(s.id)} />
+                          <Avatar name={s.name} size={26} index={s.avatarIndex} />
+                          <span className="min-w-0 flex-1 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.name} <span style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
+                          <StatusChip status={s.status} />
+                        </label>
+                      </li>
+                    ))}
+                    {pickList.length === 0 && <li className="px-[6px] py-[5px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No student by that name.</li>}
+                  </ul>
+                </div>
+              )}
+              <div className={`grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3 ${gMode === "pick" ? "hidden" : ""}`}>
                 <label className="flex min-w-0 flex-col gap-[4px]">
                   <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Grade</span>
                   <Listbox ariaLabel="Grade" value={gGrade} onChange={setGGrade} options={[{ value: "All", label: "All grades" }, ...["9", "10", "11", "12"].map((g) => ({ value: g, label: `Grade ${g}` }))]} className={FIELD} style={fieldStyle} />
@@ -161,9 +196,9 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
               </div>
               {gSent && <p className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Check className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{gSent}</p>}
               {audience.length === 0 ? (
-                <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students match that audience. Widen a filter.</p>
+                <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{gMode === "pick" ? "Pick at least one student above." : "No students match that audience. Widen a filter."}</p>
               ) : (
-                <BatchComposer students={audience} audience={audienceLabel} onDone={(summary) => setGSent(summary)} />
+                <BatchComposer students={audience} audience={audienceLabel} onDone={(summary) => { setGSent(summary); if (gMode === "pick") setPicked(new Set()); }} />
               )}
             </div>
           ) : toolId === "attention" ? (

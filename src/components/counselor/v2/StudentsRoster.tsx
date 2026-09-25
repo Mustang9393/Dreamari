@@ -18,8 +18,7 @@ import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStud
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCOPE_COUNSELOR_TO_CASELOAD, counselorFor, myCounselor } from "@/lib/counselorOrg";
 import { planReadings } from "@/lib/studentSignals";
-import { X, Check } from "lucide-react";
-import { BatchComposer } from "./Batch";
+import { X } from "lucide-react";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar, Go } from "../chips";
@@ -103,16 +102,6 @@ function StudentCell({ s }: { s: CounselorStudent }) {
 
 const PAGE_SIZE = 20;
 
-/** A 20px tick box that reads as a control at rest (older users, no
- *  hover on tablets): bordered, filled in the primary when on. */
-function SelectBox({ checked, label, onChange }: { checked: boolean; label: string; onChange: (on: boolean) => void }) {
-  return (
-    <button type="button" role="checkbox" aria-checked={checked} aria-label={label} onClick={() => onChange(!checked)} className="flex size-[20px] cursor-pointer items-center justify-center rounded-[6px] border transition-colors" style={{ borderColor: checked ? PRIMARY : "color-mix(in srgb, var(--foreground) 35%, transparent)", background: checked ? PRIMARY : "transparent", color: "#fff" }}>
-      {checked && <Check className="h-[12px] w-[12px]" aria-hidden />}
-    </button>
-  );
-}
-
 export function StudentsRoster() {
   const router = useRouter();
   const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter } = useCounselorFilters();
@@ -120,14 +109,6 @@ export function StudentsRoster() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
   const [intentFilter, setIntentFilter] = useState<PostsecondaryIntent | "All">("All");
-  // Hand-picked set for one message, reminder or to-do to many (25 Sept
-  // 2026: "select more than one student and send stuff"). Ids, so the set
-  // survives paging and sorting.
-  const [selected, setSelected] = useState<Set<string>>(() => new Set());
-  const [composing, setComposing] = useState(false);
-  const [sentNote, setSentNote] = useState<string | null>(null);
-  const toggleSelect = (id: string) => setSelected((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
-  const clearSelection = () => { setSelected(new Set()); setComposing(false); };
   // Roles that oversee counselors see whose caseload each student is on and
   // can narrow to one counselor; a School Counselor sees the school roster
   // as the reference does. Caseloads are seeded (counselorOrg.ts).
@@ -203,34 +184,12 @@ export function StudentsRoster() {
         <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students match these filters.</p>
       ) : (
         <>
-          {(selected.size > 0 || sentNote) && (
-            <div className="flex flex-col gap-[var(--space-3)]">
-              {sentNote && selected.size === 0 && (
-                <p className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Check className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{sentNote}</p>
-              )}
-              {selected.size > 0 && !composing && (
-                <div className="flex flex-wrap items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[12px] py-[8px]" style={{ ...GLASS_INSET, borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))" }}>
-                  <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{selected.size} selected</span>
-                  <span className="flex flex-wrap items-center gap-[6px]">
-                    <button type="button" onClick={() => setComposing(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-8 cursor-pointer items-center rounded-full px-[12px] text-[12.5px] font-bold">Message, remind or assign</button>
-                    <button type="button" onClick={clearSelection} className="dm-quiet flex h-8 cursor-pointer items-center gap-[4px] rounded-full border px-[10px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><X className="h-[12px] w-[12px]" aria-hidden /> Clear</button>
-                  </span>
-                </div>
-              )}
-              {selected.size > 0 && composing && (
-                <BatchComposer students={reviewed.filter((s) => selected.has(s.id))} audience={`${selected.size} selected`} onCancel={() => setComposing(false)} onDone={(summary) => { setSentNote(summary); clearSelection(); }} />
-              )}
-            </div>
-          )}
           {/* Desktop: the table. Bounded height with its own scroll so the
              header stays put over 20 rows. */}
           <div className="hidden max-h-[70vh] overflow-auto rounded-[var(--radius-lg)] border lg:block" style={GLASS_CARD}>
             <table className="w-full border-collapse">
               <thead className="sticky top-0 z-10" style={{ background: "var(--card)" }}>
                 <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
-                  <th className="w-[40px] px-[var(--space-3)] py-[var(--space-3)]">
-                    <SelectBox checked={pageRows.length > 0 && pageRows.every((s) => selected.has(s.id))} label="Select everyone on this page" onChange={(on) => setSelected((prev) => { const next = new Set(prev); for (const s of pageRows) { if (on) next.add(s.id); else next.delete(s.id); } return next; })} />
-                  </th>
                   <HeaderCell label="Student" keyName="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Roadmap" keyName="roadmapPct" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Status" keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
@@ -249,7 +208,6 @@ export function StudentsRoster() {
                     className="dm-quiet cursor-pointer border-b transition-colors last:border-b-0 hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]"
                     style={{ borderColor: "var(--glass-border)" }}
                   >
-                    <td className="px-[var(--space-3)] py-[10px]" onClick={(e) => e.stopPropagation()}><SelectBox checked={selected.has(s.id)} label={`Select ${s.name}`} onChange={() => toggleSelect(s.id)} /></td>
                     <td className="px-[var(--space-4)] py-[10px]"><StudentCell s={s} /></td>
                     <td className="px-[var(--space-4)] py-[10px]"><Roadmap pct={s.roadmapPct} /></td>
                     <td className="px-[var(--space-4)] py-[10px]"><StatusCell s={s} /></td>
@@ -267,9 +225,8 @@ export function StudentsRoster() {
           {/* Phone and tablet: the same rows as cards, no sideways scroll. */}
           <ul className="flex flex-col gap-[8px] lg:hidden">
             {pageRows.map((s) => (
-              <li key={s.id} className="flex items-start gap-[8px]">
-                <span className="pt-[14px]"><SelectBox checked={selected.has(s.id)} label={`Select ${s.name}`} onChange={() => toggleSelect(s.id)} /></span>
-                <button type="button" onClick={() => open(s)} className="dm-quiet group relative flex min-w-0 flex-1 cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px] pr-[32px] text-left" style={GLASS_INSET}>
+              <li key={s.id}>
+                <button type="button" onClick={() => open(s)} className="dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px] pr-[32px] text-left" style={GLASS_INSET}>
                   <span className="absolute top-[12px] right-[12px]"><Go /></span>
                   <span className="flex items-center justify-between gap-[10px]">
                     <StudentCell s={s} />
