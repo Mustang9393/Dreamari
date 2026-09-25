@@ -19,7 +19,11 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
   // pills animate into each other.
   const uid = useId();
   return (
-    <div role="tablist" aria-label={ariaLabel} className={`flex max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] ${grow ? "w-full" : "w-fit"}`} style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    // `shrink-0`: a flex item with overflow-x-auto gets a zero automatic
+    // minimum height, so inside a height-constrained flex column the whole
+    // bar collapsed to ~14px and clipped its own pill and labels (found live
+    // on the counselor Student Profile and My Impact, 26 Sept 2026).
+    <div role="tablist" aria-label={ariaLabel} className={`flex max-w-full shrink-0 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] ${grow ? "w-full" : "w-fit"}`} style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
       {options.map((option) => {
         const on = option.key === value;
         return (
