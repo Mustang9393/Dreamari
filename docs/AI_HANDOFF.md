@@ -45,6 +45,22 @@ tokens above, in both modes).
 **Spec, in full:** seven sections with the spec's names and every field: Career & Industries (industries max 3, careers max 3), Subjects & Skills (subjects max 5, skills I want to build max 5, with Joshua's examples plus the career's own), Work Style (pace, independent/team, structured/flexible, team size max 3, work environment max 3), Education (GPA + type, how much education after high school from Build's own options, pathways max 2), College & Trade School (states max 3, distance, tuition budget, school type / campus setting / size max 2 each, one sheet as the spec has it), Skills & Software (skills I have, software I know, software I want to learn max 5, all suggested for the student's first career), Internship & Job Preferences (Optional: opportunity type, roles max 3, industries max 3, locations max 3, remote/hybrid/in-person max 2, and graduation year, availability, relocate, languages, certifications, portfolio behind a fold; the fold is how "these become more relevant as students get older" is handled for now, since the prototype has no per-grade gating). Top line is Joshua's own sentence. Store fields added: `educationLevel`, `softwareLearn`, `jobs.industries`.
 
 **Design pass:** rows are cards in a two-column grid, each with a section icon and the answers as chips (four, then "+n"), so a counselor reads the whole student in one screen without opening anything; the careers picker uses posters in the world's own face and colour with a check, since careers look like posters everywhere else in the app; the sheet header is the title only; Save closes, confirms with the banner and briefly outlines the card that changed. Hover is the app's own (HoverBeam + dm-tap). Phone: one column, sheet from the bottom.
+### 2026-09-25 Counselor Dashboard v2: feedback re-verified, Productivity Suite back, SchooLinks mocks, the hero recomposed
+
+Direct instruction: "Do not just agree with me ... verify if the suggested directions are optimal for us or not before incorporating. Always justify with reasons"; "mock up stuff from SchooLinks that were not built because it would read as copy. Build them, then we'll see how we can make them not look like a copy"; and a third hero layout note.
+
+**Productivity Suite: partially reversed.** Usman's "pick a student, then generate belongs in the profile" is right for the one-student job (a brief before a meeting, one letter) and wrong for the batch job (ten recommendation letters in a sitting, briefs for the week). Folding it into the profile alone turned the batch job into Students, search, open, expand Drafts, tool, generate, back, repeat. Both entry points now exist: Productivity Suite is back in the School Counselor and Lead Counselor menus as the batch workspace, and the profile keeps the folded Drafts card for the one-student case. `HIDDEN_VIEWS` keeps only Student Progress.
+
+**SchooLinks mocks (DEMO-ONLY, `src/lib/counselorCasefile.ts`, `v2/Casefile.tsx`).** Built as asked, ours in shape, to be judged live:
+- Plan sign-off on the profile: student (from the Academic Plan milestone), you (Sign / Undo), guardian (Invite / Remind; seeded approved for every second student whose plan is approved). Guardian is the party Dreamari does not have; the card makes the gap visible.
+- To-dos on the profile: a task with a due date, overdue in red, done fades, removable. Production: these land in the student's My Plan and inbox.
+- Check-ins on the profile, folded: four words from the student's own activity, with the honest line that a real check-in needs a student-side prompt and alert words. Product decision.
+- Reports: Schedule on every template (weekly or monthly, a day, recipients), a Scheduled list that a delivery job would run. No mail sent.
+Not mocked: course planning and graduation pathways (state-mandated, outside Dreamari); the live activity feed (would be a fourth list on an Overview that is already attention-first).
+
+**Hero, third pass:** title without the eyebrow; the ring with its legend beside it under the title; the insight in its own middle column behind a hairline with a small "Focus first" label and the season and kind under it; the pill in the corner. Verified at 1440, 2000 and 390.
+
+`npx tsc --noEmit -p .` and `npx eslint src/components/counselor/` clean.
 
 ### 2026-09-25 Counselor Dashboard v2: season tiles, world colors for pathways, the drill-down arrow, a ring hero
 

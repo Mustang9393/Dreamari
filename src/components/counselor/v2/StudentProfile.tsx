@@ -26,6 +26,7 @@ import { planReadings, signalsFor, STATUS_LABEL, type StepReading } from "@/lib/
 import { decideReview } from "@/lib/counselorReviews";
 import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
+import { CheckinsCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 
@@ -245,6 +246,14 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         </div>
       </HoverBeam>
 
+      {/* Mocked from SchooLinks on request (25 Sept 2026): the three-party
+         plan sign-off and counselor-assigned to-dos sit right under the
+         plan they belong to; check-ins fold below On Dreamari. */}
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
+        <HoverBeam strength={0.6} className="h-full"><PlanSignoffCard student={student} /></HoverBeam>
+        <HoverBeam strength={0.6} className="h-full"><TodosCard student={student} /></HoverBeam>
+      </div>
+
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           {/* Collapsed until needed: four tools and a form is the heaviest
@@ -264,6 +273,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           </div>
         </div>
       </HoverBeam>
+
+      <HoverBeam strength={0.6} className="h-full"><CheckinsCard student={student} /></HoverBeam>
 
       <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
         <CardHead icon={StickyNote} title="Notes" accent="#5B6CF9" />

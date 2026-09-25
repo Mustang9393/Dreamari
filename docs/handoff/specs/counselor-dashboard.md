@@ -98,6 +98,11 @@ reach that student.
 - **School year map** (`v2/PlanMap.tsx`): per grade and season, tracked
   (student, step) pairs, done, done %, students with something still to
   do, steps awaiting the counselor. Cells open the Milestone Tracker.
+- **Casefile mocks** (`counselorCasefile.ts`, DEMO-ONLY): to-dos (student
+  id, text, due date, done), plan sign-off (counselor signed at, guardian
+  invited at; student from the Academic Plan milestone), report
+  schedules (template, cadence, day, recipients). Guardian accounts,
+  check-in prompts and a delivery job are product decisions.
 - **Seeded mid-year progress** (`counselorSeedProgress.ts`, DEMO-ONLY,
   v2 only): deterministic overlay on the captured roster so every grade
   has done, in-progress and not-started work; delete in production.
