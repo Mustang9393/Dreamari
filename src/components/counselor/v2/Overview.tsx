@@ -7,11 +7,11 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { SegmentedRing } from "@/components/connect/viz";
+import { BarChart, SegmentedRing } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Avatar, CardLink, Go, StatRow } from "../chips";
-import { attentionReason, attentionSeverity, attentionRank, milestonesForGrade, type CounselorStudent, type AttentionSeverity, type MilestoneKey } from "@/lib/counselorRoster";
+import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { BLUE_3, NEUTRAL_SLICE, PATHWAY_SEQUENCE, PRIMARY, TARGET_LINE } from "../palette";
@@ -53,18 +53,7 @@ const SEVERITY_COLORS: Record<AttentionSeverity, string> = {
 // all checks pass. "Series 1" and "series 2" still mean the same shade on
 // every readiness chart.
 export const READINESS_SERIES = [...BLUE_3];
-const READINESS_TARGET = 80;
 const grades: (9 | 10 | 11 | 12)[] = [9, 10, 11, 12];
-const READINESS_ROWS: { key: MilestoneKey; label: string }[] = [
-  { key: "Career Report", label: "Career Report" },
-  { key: "Resume", label: "Resume" },
-  { key: "Academic Plan", label: "Academic Plan" },
-  { key: "College List", label: "College List" },
-  { key: "Financial Aid", label: "FAFSA" },
-];
-function readinessColor(pct: number): string {
-  return pct >= READINESS_TARGET ? STATUS_COLORS["On Track"] : READINESS_TARGET - pct <= 10 ? STATUS_COLORS["Needs Attention"] : STATUS_COLORS["At Risk"];
-}
 // The target/benchmark line needs to read as "not one of the bars" against
 // an all-blue ramp, and "not the status amber" against the rest of the
 // page -- a warm bronze does both: validated clear of "Needs Attention"
@@ -297,7 +286,7 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
 
 export function Overview() {
   const router = useRouter();
-  const { gradeFilter, setGradeFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
+  const { gradeFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
   // Local to this page, not the shared context -- distinct from the donut
   // click-throughs on purpose (direct instruction: this one "cross-filters
   // the whole Overview page", the donuts navigate to Students instead).
@@ -347,14 +336,17 @@ export function Overview() {
   // fifteen worlds.
   const pathwayColors = topPathways.map(([label], i) => (label === "Other" ? NEUTRAL_SLICE : PATHWAY_SEQUENCE[i % PATHWAY_SEQUENCE.length]));
 
-  // Five milestones, each over the grades the reference tracks it for
-  // (milestonesForGrade), lowest share first.
-  const readiness = useMemo(() => READINESS_ROWS.map((r) => {
-    const rowGrades = grades.filter((g) => milestonesForGrade(g).includes(r.key));
-    const pool = roster.filter((s) => rowGrades.includes(s.grade as 9 | 10 | 11 | 12));
-    const done = pool.filter((s) => s.milestones[r.key] === "Approved" || s.milestones[r.key] === "Completed").length;
-    return { ...r, grades: rowGrades, pool: pool.length, done, pct: pool.length ? Math.round((done / pool.length) * 100) : 0 };
-  }).filter((r) => r.pool > 0).sort((a, b) => a.pct - b.pct), [roster]);
+  // The reference's own per-grade percentage, verbatim (v1's Overview.tsx):
+  // of the grade's students, how many have this milestone Approved. A grade
+  // where the milestone doesn't apply yet (e.g. Resume before Grade 10)
+  // reads 0 and BarChart draws no bar for that slot, matching the
+  // reference's own "nothing plotted yet" columns exactly.
+  const pctApproved = (g: number, key: string) => {
+    const gs = roster.filter((s) => s.grade === g);
+    if (gs.length === 0) return 0;
+    const approved = gs.filter((s) => (s.milestones as Record<string, string>)[key] === "Approved").length;
+    return (approved / gs.length) * 100;
+  };
 
   // Worst first, not roster order -- direct instruction: "rate by severity
   // so counselor knows what to give attention first."
@@ -421,47 +413,44 @@ export function Overview() {
          it had no reference equivalent. The full school year map (grade by
          season) lives on the Milestone Tracker, which this card still
          links to. */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)]">
+      {/* Career Readiness and Academic Readiness, the reference's own two
+         charts, restored 26 Sept 2026 (direct feedback: "refer v1, I dont
+         think these are the same graphs... one tile seems missing" -- a
+         same-day pass had merged both into one five-row list, reasoning
+         that Resume/College List/FAFSA don't apply until later grades and
+         would render as "empty columns"; BarChart already draws no bar at
+         all for a 0%/not-applicable slot -- confirmed against v1's own
+         live charts above, Grade 9's Resume column is simply blank, not an
+         ugly empty bar -- so that reasoning no longer holds and the
+         reference's own two-panel bar-chart form is back, verbatim in
+         grouping and grades, wearing v2's "solid" bar style already used
+         elsewhere on this dashboard. */}
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
         <HoverBeam strength={0.6} className="h-full">
-          {/* Maisha's Career Readiness and Academic Readiness bars, kept as
-             measures and re-shaped (25 Sept 2026, direct question: "why
-             did we remove career readiness and academic readiness? ... we
-             need a concrete reason"). The bars split five milestones over
-             four grade columns, but Resume starts in Grade 10 and College
-             List and FAFSA in Grade 12, so three of five series were Not
-             Applicable for Grades 9-11 and rendered as empty columns. One
-             row per measure, over the grades it applies to, keeps all five
-             with nothing empty, in the same footprint. */}
-          <Panel id="readiness" title="Readiness" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% approved, over the grades each milestone applies to</p>
-            {readiness.length > 0 && (
-              <p className="flex items-center gap-[8px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
-                <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: readinessColor(readiness[0].pct), boxShadow: `0 0 8px ${readinessColor(readiness[0].pct)}` }} />
-                <span>{readiness[0].pct >= READINESS_TARGET ? "Every milestone is on target" : `${readiness[0].label} has the most room to grow`}</span>
-              </p>
-            )}
-            <ul className="flex flex-col gap-[6px]">
-              {readiness.map((r) => (
-                <li key={r.key}>
-                  <button type="button" onClick={() => { setGradeFilter(r.grades[0]); router.push("/counselor?view=milestones"); }} className="dm-quiet group flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left" style={GLASS_INSET}>
-                    <span className="flex items-baseline justify-between gap-[10px]">
-                      <span className="flex min-w-0 items-baseline gap-[8px]">
-                        <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.label}</span>
-                        <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.grades.length > 1 ? `Gr ${r.grades[0]}–${r.grades[r.grades.length - 1]}` : `Gr ${r.grades[0]}`} · {r.done} of {r.pool}</span>
-                      </span>
-                      <span className="flex flex-none items-center gap-[6px]">
-                        <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: r.pct >= READINESS_TARGET ? "var(--foreground)" : readinessColor(r.pct) }}>{r.pct}%</span>
-                        <Go />
-                      </span>
-                    </span>
-                    <span className="relative block h-[6px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
-                      <span className="block h-full rounded-full" style={{ width: `${r.pct}%`, background: r.pct >= READINESS_TARGET ? `linear-gradient(90deg, color-mix(in srgb, ${PRIMARY} 55%, transparent), ${PRIMARY})` : readinessColor(r.pct) }} />
-                      <span className="absolute top-[-2px] h-[10px] w-[2px] rounded-full" style={{ left: `${READINESS_TARGET}%`, background: TARGET_LINE_COLOR }} />
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+          <Panel id="career-readiness" title="Career Readiness" className="h-full">
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
+            <BarChart
+              barStyle="solid"
+              groups={grades.map((g) => `Gr. ${g}`)}
+              series={[
+                { label: "Career Report", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Career Report")) },
+                { label: "Resume", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "Resume")) },
+              ]}
+            />
+          </Panel>
+        </HoverBeam>
+        <HoverBeam strength={0.6} className="h-full">
+          <Panel id="academic-readiness" title="Academic Readiness" className="h-full">
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
+            <BarChart
+              barStyle="solid"
+              groups={grades.map((g) => `Gr. ${g}`)}
+              series={[
+                { label: "Academic Plan", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Academic Plan")) },
+                { label: "College List", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "College List")) },
+                { label: "Financial Aid / FAFSA", accent: READINESS_SERIES[2], values: grades.map((g) => pctApproved(g, "Financial Aid")) },
+              ]}
+            />
           </Panel>
         </HoverBeam>
       </div>

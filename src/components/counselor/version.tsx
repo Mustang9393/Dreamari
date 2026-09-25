@@ -34,6 +34,15 @@ import { roleOrDefault } from "./roles";
 // land on either build directly.
 export type CounselorVersion = "v1" | "v2" | "v3";
 
+// Hidden 26 Sept 2026, direct instruction ("hide v3... make sure you can
+// bring it back as is on my say so"): v3 itself (every file under
+// `v3/`, CounselorApp's V3View, this file's own v3 plumbing below) is
+// completely untouched. Flipping this one flag back to `true` is the
+// entire "bring it back": the dock's third pill reappears and `?v=3` /
+// a stale `dreamari:counselor-version` of "v3" both resolve to v3 again
+// exactly as they did before.
+const V3_ENABLED = false;
+
 const STORAGE_KEY = "dreamari:counselor-version";
 
 // `ready` flips once the real value has been read after mount. Anything
@@ -54,7 +63,8 @@ export function useCounselorVersion() {
 function readStored(): CounselorVersion | null {
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
-    return v === "v3" || v === "v2" || v === "v1" ? v : null;
+    if (v === "v3") return V3_ENABLED ? "v3" : null;
+    return v === "v2" || v === "v1" ? v : null;
   } catch {
     return null;
   }
@@ -75,7 +85,7 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const param = new URLSearchParams(window.location.search).get("v");
-    const fromUrl: CounselorVersion | null = param === "3" ? "v3" : param === "2" ? "v2" : param === "1" ? "v1" : null;
+    const fromUrl: CounselorVersion | null = param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? "v2" : param === "1" ? "v1" : null;
     const next = fromUrl ?? readStored() ?? "v1";
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);
@@ -155,7 +165,7 @@ export function CounselorVersionChip() {
   const role = roleOrDefault(account.role);
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-3 z-20 flex flex-wrap justify-center gap-[6px] px-4">
-      <Pills label="Dashboard version" options={[{ key: "v1", label: "v1" }, { key: "v2", label: "v2" }, { key: "v3", label: "v3" }] as const} value={version} onChange={setVersion} />
+      <Pills label="Dashboard version" options={[{ key: "v1", label: "v1" }, { key: "v2", label: "v2" }, ...(V3_ENABLED ? [{ key: "v3", label: "v3" }] : [])] as { key: CounselorVersion; label: string }[]} value={version} onChange={setVersion} />
       {version === "v2" && (
         <Pills
           label="Signed-in role"

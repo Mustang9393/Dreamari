@@ -574,6 +574,31 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
   approved resumes; the overlay moves a deterministic share forward and
   never touches Overdue, Changes Requested or Pending Review. v1 reads
   the untouched roster.
+- **Career Readiness and Academic Readiness, both charts fully restored
+  (26 Sept 2026).** Everything above this bullet, from "Career Readiness
+  became Reviews approved" onward, is superseded. Direct feedback after
+  a live comparison against v1: "refer v1. I dont think these are the
+  same graphs for readiness. And also one tile seems missing." Checked
+  directly: v1's Overview renders two `BarChart` panels (Career
+  Readiness: Career Report + Resume; Academic Readiness: Academic Plan +
+  College List + Financial Aid/FAFSA, all four grades), the exact
+  original the entries above moved away from over an "empty columns"
+  concern -- Resume has no Grade 9 step, College List and FAFSA have none
+  before Grade 12. Re-checked that specific concern against v1's own
+  live charts before reverting: `BarChart` already treats a 0%/not-
+  applicable value as "draw no bar for that slot" (its own doc comment:
+  "matches the reference's own 'Gr. 9' columns with nothing plotted
+  yet"), so those grades render as clean gaps, not empty-looking 0% bars
+  -- confirmed by screenshot, Grade 9's Resume column is simply blank.
+  The concern that justified every change in this section no longer
+  holds against the current shared chart component, so both tiles are
+  back verbatim in grouping, grades and series, wearing v2's own
+  "solid" `barStyle` (already this dashboard's convention elsewhere --
+  `OverviewSchoolAdmin.tsx`, `StudentProgress.tsx`) rather than v1's
+  "segmented" default. `counselorSeedProgress.ts` and its
+  `getReviewedRoster()` wrapping stay removed regardless (a separate,
+  already-settled finding, above); nothing in this restoration reads
+  from it.
 
 ## Students (roster)
 

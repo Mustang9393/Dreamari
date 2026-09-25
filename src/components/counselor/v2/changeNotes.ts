@@ -11,9 +11,9 @@ export type ChangeNote = { changed: string[]; why: string; better: string; /** h
 
 export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   overview: {
-    changed: ["Attention list leads the page, students ranked by severity with the reason", "One hero card, plain glass elsewhere; one blue hue plus status colors", "Pathways are the reference's own seven career tracks, verbatim, in a spectral color sequence, six largest plus Other", "Reviews approved chart keeps the two milestones every grade has; the old Academic Readiness bars were empty for Grades 9-11", "Every card opens its screen; every clickable row carries an arrow (leaves the screen) or a chevron (opens here)"],
-    why: "The reference showed three equal donuts, readiness bars that were blank for three grades, and no way to act.",
-    better: "Worst first, one glance, one click to the student, the same pathway names the reference tracks.",
+    changed: ["Attention list leads the page, students ranked by severity with the reason", "One hero card, plain glass elsewhere; one blue hue plus status colors", "Pathways are the reference's own seven career tracks, verbatim, in a spectral color sequence, six largest plus Other", "Career Readiness and Academic Readiness are the reference's own two bar charts, same grouping and grades, in this dashboard's solid bar style", "Every card opens its screen; every clickable row carries an arrow (leaves the screen) or a chevron (opens here)"],
+    why: "The reference showed three equal donuts and no way to act.",
+    better: "Worst first, one glance, one click to the student, the same pathway names and readiness charts the reference shows.",
     order: "Needs your attention shows At Risk students only, ranked Critical (an overdue or rejected milestone) before High (three or more not started) before Medium, ties by the least-complete roadmap; three rows, See all for the rest. Legends and pathways are ordered by size.",
   },
   students: {
