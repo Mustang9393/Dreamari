@@ -14,9 +14,12 @@ export type CounselorAccount = {
   school: string;
   role: CounselorRole | "";
   isSignedIn: boolean;
+  /** A real uploaded signature image (data URL), used on generated letters
+   *  in place of the auto cursive signature when present. */
+  signatureDataUrl: string;
 };
 
-export const EMPTY_COUNSELOR: CounselorAccount = { name: "", email: "", school: "", role: "", isSignedIn: false };
+export const EMPTY_COUNSELOR: CounselorAccount = { name: "", email: "", school: "", role: "", isSignedIn: false, signatureDataUrl: "" };
 
 function str(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -34,6 +37,7 @@ function normalize(value: unknown): CounselorAccount {
     school: str(v.school),
     role: role(v.role),
     isSignedIn: v.isSignedIn === true,
+    signatureDataUrl: str(v.signatureDataUrl),
   };
 }
 

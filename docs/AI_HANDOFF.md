@@ -14481,3 +14481,9 @@ Honest read on the prior pass, stated to the user before changing anything: putt
 - **The editable region now says it's editable**: a quiet dashed border and a small pencil "Click to edit" mark at rest, both fading on focus -- flat print has neither.
 
 Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the Recommendation Letter (letterhead, cursive signature, editable affordance) and Student Success Plan (memo header, no signature block). Not pushed; awaiting explicit go-ahead per this project's push rule.
+
+## 2026-09-26 · Settings: upload a real signature
+
+Direct instruction: "In settings add an option to upload a signature." `CounselorAccount` (`src/lib/counselorAccount.ts`) gains `signatureDataUrl`, stored the same "no backend, localStorage as record" way every other account field already is. Settings' Profile Information card gets an Upload image / Remove control (accepts PNG/JPEG/WebP/SVG, read via `FileReader` as a data URL, no size validation since this is a prototype with no upload ceiling to enforce). The Recommendation Letter's signature block now shows the uploaded image when present, falling back to the auto cursive (Dancing Script) signature otherwise.
+
+Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the upload field renders in Settings. Not pushed; awaiting explicit go-ahead per this project's push rule.

@@ -105,6 +105,46 @@ export function Settings() {
               <Listbox ariaLabel="Role" value={draft.role} onChange={(v) => setDraft({ ...draft, role: v as CounselorRole })} options={COUNSELOR_ROLES.map((r) => ({ value: r, label: r }))} className="flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={fieldStyle()} />
             </label>
           </div>
+          {/* A real uploaded signature, used on generated letters in place
+             of the auto cursive one when present (direct instruction:
+             "add an option to upload a signature"). Stored as a data URL,
+             the same "no backend, localStorage as record" convention this
+             prototype uses everywhere else. */}
+          <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Signature</span>
+            <div className="flex flex-wrap items-center gap-[12px]">
+              <div className="flex h-[64px] w-[160px] flex-none items-center justify-center rounded-[var(--radius-sm)] border" style={{ background: "#ffffff", borderColor: "var(--glass-border)" }}>
+                {draft.signatureDataUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- a user-uploaded data: URL, not an optimizable static asset
+                  <img src={draft.signatureDataUrl} alt="Your signature" className="max-h-full max-w-full object-contain p-[6px]" />
+                ) : (
+                  <span className="text-[11.5px] font-semibold" style={{ color: "#9a9aa0" }}>No signature uploaded</span>
+                )}
+              </div>
+              <span className="flex items-center gap-[8px]">
+                <label className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  Upload image
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setDraft((d) => ({ ...d, signatureDataUrl: typeof reader.result === "string" ? reader.result : d.signatureDataUrl }));
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+                {draft.signatureDataUrl && (
+                  <button type="button" onClick={() => setDraft({ ...draft, signatureDataUrl: "" })} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Remove</button>
+                )}
+              </span>
+            </div>
+            <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Used on generated recommendation letters. A photo of your signature on plain paper works well; without one, letters use an auto-generated signature instead.</span>
+          </div>
           <div className="flex items-center justify-end gap-[10px]">
             {saved && <span className="text-[12.5px] font-semibold" style={{ color: "#33C78C" }}>Saved.</span>}
             <button type="button" onClick={() => setDraft(account)} disabled={!dirty} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>

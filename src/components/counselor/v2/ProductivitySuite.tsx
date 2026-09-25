@@ -403,7 +403,14 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 {toolId === "recommendation-letter" && (
                   <div className="flex flex-col gap-[2px] px-[8px] pt-[18px]">
                     <span className="text-[13px]" style={{ color: "var(--ink)" }}>Sincerely,</span>
-                    <span className="text-[30px] leading-[1.1]" style={{ color: "var(--ink)", fontFamily: "'Dancing Script', cursive" }}>{account.name || "Your Counselor"}</span>
+                    {/* A real uploaded signature (Settings) wins over the
+                       auto cursive one when present. */}
+                    {account.signatureDataUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- a user-uploaded data: URL
+                      <img src={account.signatureDataUrl} alt={`${account.name || "Counselor"}'s signature`} className="h-[46px] max-w-[220px] object-contain object-left" />
+                    ) : (
+                      <span className="text-[30px] leading-[1.1]" style={{ color: "var(--ink)", fontFamily: "'Dancing Script', cursive" }}>{account.name || "Your Counselor"}</span>
+                    )}
                     <span className="text-[12.5px] font-bold" style={{ color: "var(--ink)" }}>{account.name || "Your Counselor"}</span>
                     <span className="text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>{account.role || "School Counselor"} · {DEMO_SCHOOL}</span>
                   </div>
