@@ -17,7 +17,7 @@ import { Listbox } from "@/components/app/Listbox";
 import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCOPE_COUNSELOR_TO_CASELOAD, counselorFor, myCounselor } from "@/lib/counselorOrg";
-import { planReadings } from "@/lib/studentSignals";
+import { curriculumItemById, statusesForItem } from "@/lib/counselorCurriculum";
 import { X } from "lucide-react";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
@@ -125,8 +125,16 @@ export function StudentsRoster() {
     if (intentFilter !== "All") list = list.filter((s) => s.postsecondaryIntent === intentFilter);
     if (showCounselor && counselorFilter !== "All") list = list.filter((s) => counselorFor(s).id === counselorFilter);
     // From the Milestone Tracker: only the students who have not done this
-    // My Plan step (the counselor's actual to-do list for it).
-    if (stepFilter) list = list.filter((s) => s.grade === stepFilter.grade && planReadings(s).some((r) => r.step.id === stepFilter.id && r.status !== "done" && r.status !== "not-tracked"));
+    // curriculum checkpoint (the counselor's actual to-do list for it).
+    // The full grade cohort (not this already-filtered `list`) is what
+    // statusesForItem needs to reproduce the checkpoint's own counts.
+    if (stepFilter) {
+      const item = curriculumItemById(stepFilter.grade, stepFilter.id);
+      if (item) {
+        const statusMap = statusesForItem(item, reviewed.filter((s) => s.grade === stepFilter.grade));
+        list = list.filter((s) => s.grade === stepFilter.grade && statusMap.get(s.id) !== "done" && statusMap.get(s.id) !== "not-tracked");
+      }
+    }
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((s) => s.name.toLowerCase().includes(q) || s.careerTrack.toLowerCase().includes(q));
     const dir = sortDir === "asc" ? 1 : -1;

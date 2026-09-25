@@ -38,6 +38,88 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard: v3 backup, then a full content audit resolves the Overview/Tracker conflict
+
+Direct instruction, following up on the earlier content audit: "the
+overview also has conflicting content in v2 right? Please check every
+single thing... Can we move our current version to a backup or a v3
+toggle and implement the changes? including the data or school
+curriculum conflicts."
+
+**v3, a frozen snapshot, added first, before any further changes.**
+`src/components/counselor/v3/` is a byte-for-byte directory copy of `v2/`
+taken at this point in the session (before the fixes below). The bottom
+dock's version pill is now V1 / V2 / V3; `?v=3` opens it directly. v2
+keeps being where active work lands, exactly as it has all session; v1
+stays the Replit reference; v3 is a second frozen comparison point, one
+step later than v1. `version.tsx`, `shell.tsx` and `CounselorApp.tsx`
+updated so every shell-level check (page caption, (i) button, role-based
+Overview) treats v2 and v3 identically -- both are "the new design", only
+v1 is the old Replit-styled build. One caveat, stated plainly rather than
+hidden: v3 freezes the UI/component layer only. The shared data layer
+(`src/lib/*`, the same seeded roster v1 also reads from) is not forked,
+so a data-accuracy fix below (removing a false overlay) applies to v3 too
+-- freezing a known data bug for comparison's sake would defeat the point
+of the audit that follows.
+
+**Full sweep, screen by screen, against v1's actual source files** (not
+just this repo's own claims about itself): Overview (matches, the
+Career/Academic Readiness bars use the same roster-milestone source v1's
+own bars used, so no divergence once the number below is fixed), Students
+(the "School" column and Resume/Applications/Transcript text columns
+folded into the 6-column table and `MilestonesMini`'s dots, all 11
+milestones still there on hover, confirmed), Settings (v1's 5 sections
+all present, folded behind accordions), Counselors / Readiness / Reports
+/ Schools / District & Lead Overviews (no v1 equivalent exists at all --
+the Replit only modeled the School Counselor persona, so these are
+additive v2 screens, not comparison points), Platform Engagement (same 6
+months of figures, relabeled to the current demo dates, already
+documented), Student Progress (menu-hidden, all 9 reports still present
+and reachable at `?view=progress`, unchanged). Two real problems found:
+
+**1. Overview (and every screen sharing its roster) disagreed with v1 on
+the same fact.** `counselorSeedProgress.ts`, added earlier the same day
+to stop a few grade/milestone combinations reading as nearly empty, wrapped
+every v2 screen's roster in an overlay v1 never got. Removed entirely
+(`counselorReviews.ts` no longer calls it; the file is deleted). The
+original empty-looking-chart problem was independently and already fixed
+by the Readiness card's own redesign (measure only the grades a milestone
+applies to, so a low single value folds into a combined non-empty
+percentage rather than standing alone); verified live that every
+Readiness row still reads real and non-zero after the removal.
+
+**2. The Milestone Tracker's own content was the biggest, flagged-not-fixed
+item from the earlier audit.** Resolved: `src/lib/counselorCurriculum.ts`
+restores the reference's per-grade curriculum
+(`milestoneReadiness.ts`/`GRADE_READINESS`) verbatim -- names,
+percentages, classifications, all four grades -- as the Tracker's own
+rows, wearing the exact hero/season-tile/accordion/drill-through UI the
+earlier My-Plan-based rebuild already built (that presentation was never
+in question; only its data source was). A new `statusesForItem` gives
+each seeded student a deterministic per-checkpoint status so drill-through
+to Students always sums to the row's own numbers; `StudentsRoster.tsx`'s
+"Not done" chip reads this module now instead of `studentSignals.ts`. The
+Lead Counselor's counselor picker scales proportionally again (a
+behavior an earlier, pre-My-Plan build had and the rebuild had lost).
+Verified programmatically against the source data for all four grades --
+every name, percentage and count matches exactly, including Grade 12's
+Financial Aid & FAFSA Status not-applicable edge case -- and live in the
+browser: Grade 9's Next-Year Course Plan (73% done, 2 needing attention,
+4 in progress, 2 not started) and its drill-through (8 students,
+matching exactly), Grade 12's Final Resume (60% done, matching exactly),
+and a Lead Counselor narrowed to one caseload (7 students, 82% done, a
+different focus checkpoint than the whole-grade view).
+
+One more thing checked, not changed: `src/lib/studentSignals.ts` and the
+Student Profile's own "Grade N My Plan" card. That is a genuine v2
+addition -- v1 has no per-student My Plan concept at all, so there is
+nothing in the reference to compare it against or restore -- and stays
+exactly as built.
+
+`npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+Docs: this entry, deviations, states, the spec, (i) notes for Overview
+and Milestone Tracker.
+
 ### 2026-09-25 Counselor Dashboard v2: content audit against v1/the Replit reference
 
 Direct question, prompted by Maisha's note ("keep content the same as

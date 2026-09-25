@@ -9,7 +9,6 @@
 // real counselor input whether the submission underneath it is seeded or
 // live. Used by the v2 fork of the dashboard (see counselor/version.tsx).
 
-import { seedSchoolYearProgress } from "./counselorSeedProgress";
 import { useMemo, useSyncExternalStore } from "react";
 import { getRosterWithLive, getStudentById, MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "./counselorRoster";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "./counselorAccount";
@@ -115,16 +114,14 @@ let rosterCache: { decisions: Decisions; roster: CounselorStudent[] } | null = n
 export function getReviewedRoster(): CounselorStudent[] {
   const decisions = readAll();
   if (rosterCache && rosterCache.decisions === decisions) return rosterCache.roster;
-  // v2 only: the seeded roster reads mid-year (counselorSeedProgress.ts)
-  // before the counselor's own decisions go on top.
-  const roster = getRosterWithLive().map((s) => applyDecisions(seedSchoolYearProgress(s), decisions));
+  const roster = getRosterWithLive().map((s) => applyDecisions(s, decisions));
   rosterCache = { decisions, roster };
   return roster;
 }
 
 export function getReviewedStudentById(id: string): CounselorStudent | undefined {
   const s = getStudentById(id);
-  return s ? applyDecisions(seedSchoolYearProgress(s)) : undefined;
+  return s ? applyDecisions(s) : undefined;
 }
 
 export function useReviewDecisions(): Decisions {

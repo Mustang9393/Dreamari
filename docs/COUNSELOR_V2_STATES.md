@@ -49,7 +49,7 @@ Administrator, DA District Administrator.
 - Edge: the trend deltas (+2 pts, +4 pts) on SC's donuts are hand-authored; the backend supplies real month-over-month or removes the chip.
 
 ### Students (SC, LC, SA)
-- Data: roster; LC and SA add a Counselor column and picker; an optional `stepFilter` from the tracker narrows to students who have not done one My Plan step (chip "Not done: [step]", X clears it).
+- Data: roster; LC and SA add a Counselor column and picker; an optional `stepFilter` from the Milestone Tracker narrows to students who have not done one curriculum checkpoint (`counselorCurriculum.ts`'s `statusesForItem`, chip "Not done: [checkpoint]", X clears it).
 - Whole-screen empty: "No students enrolled" / "The roster fills as students join Dreamari at your school."
 - In-screen: filters return nothing: "No students match these filters."; a student with no pathway shows "Undeclared"; Undecided plan renders muted; long names wrap in the card list, truncate in the table cell (title on hover is not provided, the profile has the full name).
 - Edge: pagination at 20; last-active dates format "Jan 5"; sort by status is severity, ties by roadmap.
@@ -62,11 +62,11 @@ Administrator, DA District Administrator.
 - Edge: a grade with fewer required milestones shows only those (3 / 5 / 6 / 11); a student with every milestone approved shows the plan card empty across all windows.
 
 ### Milestone Tracker (SC, LC)
-- Data: the grade's My Plan steps (`gradePlanData.ts`) with each student's status from `studentSignals.ts` (live stores for the live student, the reference's counts for seeded ones); LC can narrow to a counselor. Rows open Students with `stepFilter` set.
-- Backend: in-app steps need the student's real events (saves, completed runs, resume sections, report shares); counselor-verified steps read `counselorReviews`; student-reported steps need My Plan's checkbox state persisted (today "Not tracked yet", row disabled).
-- Whole-screen empty: "No milestones to track" / "Milestones appear once a grade has students and a curriculum assigned."
-- In-screen: no students in the grade (or in the chosen counselor's grade): "No Grade N students." / "No Grade N students on this counselor's caseload."; a step with nothing outstanding: "Everyone is done"; a student-reported step: "Student reports this; not tracked in the app yet" and no drill-through.
-- Edge: a grade with one milestone renders the hero only (the "All milestones" card is omitted when there is nothing else).
+- Data (restored 25 Sept 2026 after a content audit): the reference's own per-grade curriculum (`src/lib/milestoneReadiness.ts` -> `src/lib/counselorCurriculum.ts`), verbatim names, percentages and classifications. `statusesForItem` gives each seeded student a deterministic status per checkpoint, sized to match the checkpoint's own counts, so drill-through and CSV always agree with what the row shows. LC's counselor picker re-tallies from the same per-student assignment, scaled to that counselor's own share of the grade.
+- Backend: this is the reference's own captured data, static; a real system would compute each checkpoint's counts from actual student and counselor records the same way `statusesForItem` fakes them here.
+- Whole-screen empty: "No Grade N students." / "No Grade N students on this counselor's caseload."
+- In-screen: a checkpoint with nothing outstanding: "Everyone is done".
+- Edge: Grade 12's "Financial Aid & FAFSA Status" has 3 of 30 students marked not applicable (the reference's own figure); its percentage is computed over the remaining 27, exactly as the reference computed it.
 
 ### Review Queue (SC, LC)
 - Data: every Pending Review milestone in the roster, due dates seeded per item; decisions persisted (`counselorReviews.ts`).

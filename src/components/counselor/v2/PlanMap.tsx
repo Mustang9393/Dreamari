@@ -90,7 +90,7 @@ export function planGradeSummary(roster: CounselorStudent[]): GradeSummary[] {
   return out.filter((g) => g.students > 0).sort((a, b) => a.donePct - b.donePct || b.notDone - a.notDone);
 }
 
-function Ring({ pct, size = 38, stroke = 5 }: { pct: number; size?: number; stroke?: number }) {
+export function Ring({ pct, size = 38, stroke = 5 }: { pct: number; size?: number; stroke?: number }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   return (

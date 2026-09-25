@@ -28,8 +28,9 @@ reach that student.
 ## 2. Use cases
 
 1. See which students need attention today, and why, and open them.
-2. See, for a grade, which My Plan step the cohort is behind on, and get
-   the list of students who have not done it.
+2. See, for a grade, which of the reference's own curriculum checkpoints
+   the cohort is behind on, and get the list of students who have not
+   done it.
 3. Review a submission (career report, plan, resume), approve or request
    changes with a note, undo.
 4. Answer a student's question; announce to a grade; run a group.
@@ -64,10 +65,13 @@ reach that student.
   hero card per screen; nested rows lighter than their card in both modes.
 - Every avatar and name opens the profile; every card has a visible link;
   Back returns to the exact spot.
-- My Plan defines the tracker and the profile: in-app steps auto-complete
-  from real actions and are never manually ticked; counselor-verified
-  steps complete only by the counselor's decision; student-reported steps
-  complete by the student's own checkbox.
+- My Plan defines the Student Profile's own plan card: in-app steps
+  auto-complete from real actions and are never manually ticked;
+  counselor-verified steps complete only by the counselor's decision;
+  student-reported steps complete by the student's own checkbox. The
+  Milestone Tracker itself reads the reference's own named curriculum
+  (`counselorCurriculum.ts`), restored 25 Sept 2026 after a content audit
+  found the tracker had replaced it rather than kept it alongside.
 - A report shared with the counselor is a submission (Pending Review);
   saved or printed is not.
 - Targets: 80% on-track, plans on file and senior plans (the reference's
@@ -144,3 +148,10 @@ reach that student.
   Build's worlds; Student Progress and Productivity Suite leave the menus;
   drafts live on the profile (Usman's review, user: "do what you think is
   optimal").
+- 25 Sept 2026, later: content audit against v1/the Replit (user: "have
+  we removed content from the v1/replit?"). Two fixes: the Milestone
+  Tracker's rows are the reference's own curriculum again (not My Plan
+  steps -- that had replaced it, not extended it); `counselorSeedProgress.ts`
+  removed, so v2 shows the same true reference numbers v1 shows. A v3
+  toggle snapshots the pre-audit build for comparison (`./version.tsx`,
+  `src/components/counselor/v3/`).

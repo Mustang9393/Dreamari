@@ -23,10 +23,10 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Default sort is priority: At Risk, then Needs Attention, then On Track; within a status the same Critical / High / Medium ranking the Overview uses; ties by the least-complete roadmap.",
   },
   milestones: {
-    changed: ["The grade tabs pick the grade; the grade's three seasons sit as tiles above the list, with the student My Plan's own season art, and open the season", "Rows are the grade's own My Plan steps, Fall / Winter / Spring, the same list the student sees; all seasons closed until you open one; each season keeps its summary in its header", "Counts come from what students actually did on Dreamari: in-app steps auto-track, steps you verify read your decisions, student-reported steps say not tracked yet", "Every row opens Students filtered to who has not done it", "CSV of the grid; Student Progress' reports are folded in here"],
-    why: "The reference tracked its own list of milestones with fixed numbers that never matched the roster or the student app.",
-    better: "One list, the student's and yours, live, and one click from any step to the students who owe it.",
-    order: "The step with the largest share not started (awaiting review counts half) leads as Focus first; within each season the same order. A step everyone is still working on is not treated as behind.",
+    changed: ["Rows are the reference's own named checkpoints for the grade, verbatim (Grade 9 has 7, Grade 10 has 8, Grade 11 has 11, Grade 12 has 10), each with its exact completion % and classification", "Grouped into Fall / Winter / Spring by the reference's own listed order; the grade tabs pick the grade, three season tiles pick the season, closed until you open one", "The Lead Counselor's counselor picker scales every number to that counselor's own share of the grade", "Every row opens Students filtered to who has not done it", "CSV of the grid"],
+    why: "A content audit (25 Sept 2026, Maisha: \"keep content the same as that's needed for counselors\") found an earlier pass had replaced this screen's rows with the student app's own My Plan steps instead of keeping the reference's curriculum alongside it, so the checkpoints a counselor actually reports against had gone missing from v2.",
+    better: "The exact checklist the reference tracked, with the same drill-through and one-click-to-the-students this dashboard already does everywhere else.",
+    order: "The checkpoint with the largest share not started (needing attention counts half) leads as Focus first; within each season the same order.",
   },
   "review-queue": {
     changed: ["One item per pending submission, ordered by due date", "Decisions recorded and shared with every screen, with Undo", "Attachment opens in a centered document viewer, a realistic page built from the student's own data; the student's name opens the profile", "Pane opens as a sheet on phones"],

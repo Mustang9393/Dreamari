@@ -912,6 +912,111 @@ kept as history.
   grade, so they belong together. Alternative: per-step rings like
   SchooLinks; 30-plus rings on one screen is the wall the map avoids.
 
+## Milestone Tracker: the reference's own curriculum, restored (25 Sept 2026)
+
+Direct question, after a content audit prompted by Maisha's note ("keep
+content the same as that's needed for counselors... don't adjust the
+content itself too much... open to you making it visually look better as
+long as content and comprehension isn't reduced"): "the overview also has
+conflicting content in v2 right? Please check every single thing." The
+audit found the earlier My-Plan rebuild (immediately above this entry)
+had REPLACED the reference's own named checklist rather than kept it
+alongside: `src/lib/milestoneReadiness.ts` (`GRADE_READINESS`), the
+Replit's verbatim per-grade curriculum -- Grade 9 has 7 named checkpoints
+(Career Assessment, Career Exploration, Career Goals, Four-Year Academic
+Plan, Next-Year Course Plan, Postsecondary Pathways Exploration, Grade 9
+College & Career Reflection), Grade 10 has 8, Grade 11 has 11, Grade 12
+has 10, each with its own completion %, counted breakdown and
+classification ("Student Completion", "Counselor Review", "Counselor
+Verification", "Student Submission / Counselor Visibility", "Student +
+Counselor Tracking") -- had zero v2 consumers, confirmed by grep.
+
+**Restored via a new module, `src/lib/counselorCurriculum.ts`, not by
+reverting the season-tile/hero/drill-through UI the My-Plan pass built,**
+since that presentation was never the content in question:
+
+- **Rows are the reference's checkpoints verbatim.** Name,
+  classification and every count (completed / in progress / needs
+  attention / not started / not applicable) come straight from
+  `GRADE_READINESS`, unmodified. Verified programmatically against the
+  source array for all four grades before shipping -- every name,
+  percentage and count matches exactly, including Grade 12's Financial
+  Aid & FAFSA Status (3 of 30 marked not applicable, percentage computed
+  over the remaining 27, exactly as the reference computed it).
+- **Season is a presentation choice, not content:** the reference lists
+  each grade's checkpoints in one flat, already-roughly-chronological
+  order; the first third of that order becomes Fall, the middle third
+  Winter, the last third Spring -- mechanical (by index), so it is
+  auditable against the source rather than a per-item judgment call.
+  Alternative: a flat list with no season grouping, closer to the
+  reference's own screen; rejected because the season tiles are a
+  well-liked navigational device already built for this screen and nothing
+  about grouping by index changes what any checkpoint says.
+- **Per-student drill-through is invented, because the reference has no
+  such field to preserve.** `GRADE_READINESS` only has the aggregate
+  counts (how many of the 30 are done, in progress, etc.), never which
+  specific students. `statusesForItem` assigns each seeded student a
+  status with a stable hash keyed to the checkpoint and the student, sized
+  to match the checkpoint's own counts exactly, so a "Not done" drill to
+  Students always shows the same number the row claims, and the same
+  student always lands in the same bucket for a given checkpoint across
+  reloads. The live student (this browser) reads "in progress" -- there is
+  no real signal tying the reference's own checkpoint names to actual
+  Dreamari data the way My Plan's steps had.
+- **The Lead Counselor's counselor picker scales proportionally again**
+  (a behavior the pre-My-Plan build already had, lost in that rebuild):
+  narrowing to one counselor re-tallies from the same per-student
+  assignment restricted to that counselor's caseload, rather than
+  showing the whole-grade aggregate divided by caseload size.
+- **The grade's own one-line description is back** (`curriculumFocus`,
+  e.g. "Career exploration and building a foundation for a four-year
+  academic plan"), as the section's own caption -- an EARLIER v2 pass
+  had dropped this exact line as "explained the grade, not the state of
+  it" when it doubled as a stat row; it does not compete with anything
+  once it is just a caption.
+- **The header's own %-done stat uses the reference's precomputed grade
+  average** (`curriculumAvgDone`) when unscoped, rather than an average
+  recomputed from the rows here, so it matches the Replit's own number
+  exactly; recomputed from this counselor's own rows once narrowed to a
+  caseload, since the reference has no such per-counselor figure to defer
+  to.
+- **Students.tsx's "Not done: [step]" drill-through now reads this same
+  module** (`curriculumItemById` + `statusesForItem`) instead of
+  `studentSignals.ts`'s My-Plan-based `planReadings`, so the chip and the
+  filtered list agree with the row that opened them.
+
+**Not changed:** the hero ring, the season tiles, the accordion-per-season
+structure, the CSV export, the drill-through mechanic itself -- all of
+that presentation stays exactly as the My-Plan pass built it; only the
+data feeding it changed.
+
+## Overview: the same seeded roster the Tracker now uses (25 Sept 2026)
+
+A second finding from the same content audit: `counselorReviews.ts` had
+applied a `counselorSeedProgress.ts` overlay (added the same day, to stop
+Grade 9's Career Report / Academic Plan, Grade 10's Resume and Grade 11's
+Applications from reading as empty-looking near-zero values) to every v2
+screen's roster -- Overview, Students, My Impact, Insights, the Tracker's
+own (now-superseded) My-Plan numbers -- but never to v1, which reads the
+roster directly. The result: v1 and v2 disagreed on the same nominal fact
+(e.g. "% of Grade 9 students with an approved Career Report") for four
+grade/milestone combinations, which is exactly the kind of conflict this
+audit was run to catch.
+
+**Removed.** `counselorSeedProgress.ts` deleted; `counselorReviews.ts`'s
+`getReviewedRoster()` and `getReviewedStudentById()` no longer wrap the
+roster in it. v2 now shows the same true, reference-seeded numbers v1
+shows, for every screen that touches these milestones. The root reason
+those numbers once looked "empty" -- Overview's Readiness card measuring
+whole series that were Not Applicable for a grade -- was independently
+fixed the same day by the Readiness card's own redesign (one row per
+milestone, measured only over the grades it applies to); with that fix
+already in place, a low but real percentage for one milestone folds into
+a combined, non-empty number across all applicable grades rather than
+standing alone as a blank chart, so removing the overlay does not
+reintroduce the original complaint. Verified live: every Readiness row
+still reads a real, non-zero, non-alarming percentage after the removal.
+
 ## Student Profile casefile mocks (v2, 25 Sept 2026)
 
 Built on request from the SchooLinks staff dashboard, DEMO-ONLY
