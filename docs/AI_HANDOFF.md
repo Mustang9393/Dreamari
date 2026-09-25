@@ -38,6 +38,14 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Preferences: the Slack spec in full, and a design pass
+
+**Why:** direct instruction after the reference port ("incorporate all his notes, his replit might be just a quick example... do a considered enhancement and aesthetic pass, and whatever you recommend"). The reference had merged and dropped items from the spec; the spec is the source now.
+
+**Spec, in full:** seven sections with the spec's names and every field: Career & Industries (industries max 3, careers max 3), Subjects & Skills (subjects max 5, skills I want to build max 5, with Joshua's examples plus the career's own), Work Style (pace, independent/team, structured/flexible, team size max 3, work environment max 3), Education (GPA + type, how much education after high school from Build's own options, pathways max 2), College & Trade School (states max 3, distance, tuition budget, school type / campus setting / size max 2 each, one sheet as the spec has it), Skills & Software (skills I have, software I know, software I want to learn max 5, all suggested for the student's first career), Internship & Job Preferences (Optional: opportunity type, roles max 3, industries max 3, locations max 3, remote/hybrid/in-person max 2, and graduation year, availability, relocate, languages, certifications, portfolio behind a fold; the fold is how "these become more relevant as students get older" is handled for now, since the prototype has no per-grade gating). Top line is Joshua's own sentence. Store fields added: `educationLevel`, `softwareLearn`, `jobs.industries`.
+
+**Design pass:** rows are cards in a two-column grid, each with a section icon and the answers as chips (four, then "+n"), so a counselor reads the whole student in one screen without opening anything; the careers picker uses posters in the world's own face and colour with a check, since careers look like posters everywhere else in the app; the sheet header is the title only; Save closes, confirms with the banner and briefly outlines the card that changed. Hover is the app's own (HoverBeam + dm-tap). Phone: one column, sheet from the bottom.
+
 ### 2026-09-25 Counselor Dashboard v2: season tiles, world colors for pathways, the drill-down arrow, a ring hero
 
 Seven direct notes in one sitting, each applied at the cause:
