@@ -75,15 +75,19 @@ export function PreferencesTab() {
 
   return (
     <div role="tabpanel" id="profile-panel-preferences" aria-labelledby="profile-tab-preferences" className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex items-start gap-[var(--space-3)]">
-        <span className="flex size-10 flex-none items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
-          <SlidersHorizontal className="h-[18px] w-[18px]" aria-hidden />
-        </span>
-        <div className="flex min-w-0 flex-col gap-[4px]">
-          <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
-          <p className="text-[15.5px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Your interests can change. Update them anytime and Dreamari will adjust your recommendations.</p>
-          {updated && <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
+      <div className="flex flex-wrap items-start justify-between gap-x-[var(--space-4)] gap-y-[6px]">
+        <div className="flex min-w-0 items-start gap-[var(--space-3)]">
+          <span className="flex size-10 flex-none items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
+            <SlidersHorizontal className="h-[18px] w-[18px]" aria-hidden />
+          </span>
+          <div className="flex min-w-0 flex-col gap-[4px]">
+            <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
+            <p className="text-[15.5px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Your interests can change. Update them anytime.</p>
+          </div>
         </div>
+        {/* The date sits apart from the copy, at the row's end (under it on
+           phones), so it reads as metadata, not a third sentence. */}
+        {updated && <p className="pl-[52px] text-[11.5px] sm:pl-0 sm:pt-[10px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
       </div>
 
       {savedNote && (
