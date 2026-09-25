@@ -164,136 +164,121 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
   );
 }
 
-// Settled 26 Sept 2026 after eight earlier attempts (full history in
-// AI_HANDOFF.md). Direct correction on attempt #8, with new reference
-// screenshots (a fitness-tracker "Statistics" screen, an "Energy Usage"
-// card, a Cash Flow bar chart, Orion's ring dashboard): "the graphs
-// surfaces and design treatment should be like this... Whatever you have
-// done now is BAD," then, on the glow specifically: "see how the lines on
-// the energy usage and statistic images are as graphics/materials." Two
-// things those references actually do that #8 didn't:
-// 1. A real glow is TWO strokes on the same path -- a wide, soft, blurred
-//    halo underneath, and a thin, bright, crisp core on top -- not one
-//    faint drop-shadow. That's what makes a line/edge read as light
-//    instead of a colored outline.
-// 2. Restraint through CONTRAST, not uniform decoration (the Cash Flow
-//    reference: every resting bar is a plain muted gray column; exactly
-//    ONE -- the hovered one -- turns bright, colorful and glowing, with a
-//    marker and a floating tooltip). Every bar being "extra" at once is
-//    what read as a mess two attempts ago.
-// So: bars rest as plain muted columns (this dashboard's own neutral
-// shade, height still honestly proportional -- the distribution is
-// legible at a glance with zero interaction). Hovering one bar is what
-// lights it up: its own world color, a real two-layer glow line at its
-// tip, a thin guide line to the baseline, and a floating tooltip
-// naming it and its count -- which is also the "hover shows legend and
-// number" behavior asked for directly. The legend below still carries
-// every pathway's color permanently, for reference without hovering.
+// Settled 26 Sept 2026, final instruction after eleven earlier attempts
+// (full history in AI_HANDOFF.md): "just use one horizontal bar
+// representing the total number of students and show segments in colors
+// to show the distribution or number of students in each career pathways,
+// making up the total Thats it." One bar, one shape: its own width IS the
+// full roster, each pathway is a contiguous segment sized to its exact
+// share -- a real 100%-stacked bar, not a chart style at all. The compact
+// dot+label+value key below (unchanged since the earlier attempts) still
+// carries every pathway's name and count.
+// Direct follow-up the same day: "not so flat and bright and align with
+// the other graph styling for the colors, gradients, opacity etc. Hover
+// can show number and pathway details with a glow." Each segment now
+// carries the same recipe this dashboard's other data-viz already uses --
+// a subtle top-to-base gradient at a toned-down rest opacity (GLASS_CARD's
+// own sheen direction, not a flat saturated fill) -- and brightens to full
+// opacity with a real glow plus a floating tooltip on hover, the same
+// two-part "quiet at rest, lit on hover" language as the Career Readiness
+// bars above it.
 function PathwaysBarChart({ topPathways, colors, activePathway, onToggle }: { topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void }) {
+  const total = topPathways.reduce((sum, [, v]) => sum + v, 0) || 1;
   const [hoverLabel, setHoverLabel] = useState<string | null>(null);
-  const max = Math.max(1, ...topPathways.map(([, v]) => v));
-  const n = Math.max(1, topPathways.length);
-  const W = 600;
-  const H = 176;
-  const padSide = 4;
-  const padTop = 30;
-  const padBottom = 14;
-  const plotH = H - padTop - padBottom;
-  // Bars distribute evenly across the FULL card width (direct
-  // instruction: "have it span the width of the card") -- each pathway
-  // gets an equal slot, the bar itself sized to a fraction of its slot so
-  // real air remains between columns.
-  const slot = (W - padSide * 2) / n;
-  const barW = Math.min(20, slot * 0.42);
-  const bars = topPathways.map(([label, value], i) => {
-    const barH = Math.max(4, (value / max) * plotH);
-    const cx = padSide + i * slot + slot / 2;
-    return { label, value, color: colors[i % colors.length], x: cx - barW / 2, cx, yTop: H - padBottom - barH };
-  });
-  const hovered = bars.find((b) => b.label === hoverLabel) ?? null;
-  const tipW = hovered ? Math.min(220, Math.max(92, hovered.label.length * 6.2 + 20)) : 0;
-  const tipCx = hovered ? Math.min(W - padSide - tipW / 2, Math.max(padSide + tipW / 2, hovered.cx)) : 0;
-  const tipY = hovered ? Math.max(2, hovered.yTop - 46) : 0;
+  // Cumulative left offset per segment, computed once -- the tooltip
+  // below needs each segment's position but has to live OUTSIDE the
+  // bar's own clipping row (see why below), so it can't just be an
+  // absolutely-positioned child of that segment anymore.
+  const segments = topPathways.reduce<{ label: string; value: number; pct: number; left: number; color: string }[]>((acc, [label, value], i) => {
+    const pct = (value / total) * 100;
+    const left = acc.length > 0 ? acc[acc.length - 1].left + acc[acc.length - 1].pct : 0;
+    acc.push({ label, value, pct, left, color: colors[i % colors.length] });
+    return acc;
+  }, []);
+  const hovered = segments.find((s) => s.label === hoverLabel) ?? null;
   return (
     <div className="relative flex flex-col gap-[var(--space-4)]">
-      {/* The ambient light responds to what's hovered -- near-invisible at
-         rest, tinted toward the highlighted pathway's own color the
-         moment something's lit, the same way the Cash Flow reference's
-         background glows warmer around its active bar. */}
-      <span aria-hidden className="pointer-events-none absolute inset-0 transition-[background] duration-200" style={{ background: glowBackdrop(hovered?.color ?? "var(--primary)", hovered ? 0.32 : 0.08) }} />
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Career pathways: ${topPathways.map(([l, v]) => `${l} ${v}`).join(", ")}`} className="relative h-auto w-full overflow-visible" style={{ aspectRatio: `${W} / ${H}` }}>
-        <line x1={padSide} x2={W - padSide} y1={H - padBottom} y2={H - padBottom} stroke="color-mix(in srgb, var(--foreground) 12%, transparent)" strokeWidth="1" />
-        {bars.map((b) => {
-          const isHover = b.label === hoverLabel;
-          const muted = "color-mix(in srgb, var(--foreground) 16%, transparent)";
+      <div className="flex h-[34px] w-full overflow-hidden rounded-[8px]" role="img" aria-label={`Career pathways: ${topPathways.map(([l, v]) => `${l} ${v}`).join(", ")}`}>
+        {segments.map((seg, i) => {
+          const active = activePathway === seg.label;
+          const isHover = seg.label === hoverLabel;
+          const dim = activePathway !== null && !active;
           return (
-            <g
-              key={b.label}
-              onClick={() => onToggle(b.label)}
-              onMouseEnter={() => setHoverLabel(b.label)}
+            <button
+              key={seg.label}
+              type="button"
+              onClick={() => onToggle(seg.label)}
+              onMouseEnter={() => setHoverLabel(seg.label)}
               onMouseLeave={() => setHoverLabel(null)}
-              onFocus={() => setHoverLabel(b.label)}
+              onFocus={() => setHoverLabel(seg.label)}
               onBlur={() => setHoverLabel(null)}
-              role="button"
-              tabIndex={0}
-              aria-pressed={activePathway === b.label}
-              aria-label={`${b.label}: ${b.value}`}
-              style={{ cursor: "pointer" }}
-            >
-              {/* Rounded top corners only, never a full capsule -- a pill
-                 shape with a bright dot centered on its tip read as an
-                 unintentionally phallic shape, direct report: "these
-                 look like dicks." */}
-              <rect x={b.x} y={b.yTop} width={barW} height={H - padBottom - b.yTop} rx={3} fill={isHover ? b.color : muted} style={{ transition: "fill 120ms ease" }} />
-              {isHover && (
-                <>
-                  <line x1={b.cx} x2={b.cx} y1={b.yTop} y2={H - padBottom} stroke={b.color} strokeWidth="1" strokeDasharray="2 3" opacity="0.6" />
-                  {/* The actual "line as light" technique from the
-                     references: a wide blurred halo stroke UNDER a thin
-                     crisp bright core stroke on the same segment, not one
-                     faint shadow. */}
-                  <line x1={b.x} x2={b.x + barW} y1={b.yTop} y2={b.yTop} stroke={b.color} strokeWidth="9" strokeLinecap="round" opacity="0.8" style={{ filter: "blur(4px)" }} />
-                  <line x1={b.x} x2={b.x + barW} y1={b.yTop} y2={b.yTop} stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.95" />
-                  <circle cx={b.cx} cy={b.yTop} r="7" fill={b.color} opacity="0.5" style={{ filter: "blur(5px)" }} />
-                  <circle cx={b.cx} cy={b.yTop} r="2.6" fill="white" />
-                </>
-              )}
-            </g>
+              aria-pressed={active}
+              aria-label={`${seg.label}: ${seg.value}`}
+              // No `.dm-quiet` here -- its own `:hover { background: ...
+              // !important }` was overriding this button's colored
+              // gradient on hover, which is what turned every segment
+              // flat gray the moment it was pointed at.
+              className="h-full cursor-pointer transition-[opacity,filter] duration-150"
+              style={{
+                width: `${seg.pct}%`,
+                // Glass, not a solid saturated block -- the color is
+                // mixed WITH transparency (into this dashboard's own
+                // glass-surface tone), backed by a real blur, with a thin
+                // bright inset line along the top standing in for a
+                // glass edge catching light -- the same recipe
+                // GLASS_CARD uses everywhere else on this dashboard, just
+                // tinted per segment (direct instruction: "make the bar
+                // color things itself a glassy surface with gradient
+                // glow... some sort of glass/opacity/frost etc make them
+                // feel light").
+                background: `linear-gradient(180deg, color-mix(in srgb, ${seg.color} 58%, var(--glass-surface-2)) 0%, color-mix(in srgb, ${seg.color} 30%, transparent) 100%)`,
+                backdropFilter: "blur(6px)",
+                WebkitBackdropFilter: "blur(6px)",
+                boxShadow: `inset 0 1px 0 0 color-mix(in srgb, white 32%, transparent)`,
+                opacity: dim ? 0.32 : isHover || active ? 1 : 0.85,
+                borderRight: i < segments.length - 1 ? "1px solid color-mix(in srgb, var(--foreground) 14%, transparent)" : "none",
+                filter: isHover || active ? `drop-shadow(0 0 10px color-mix(in srgb, ${seg.color} 70%, transparent))` : undefined,
+              }}
+            />
           );
         })}
-        {/* A real floating tooltip (this dashboard's own card surface, a
-           border, a drop shadow) instead of the browser's native title --
-           "Hover shows legend and number." */}
-        {hovered && (
-          <g style={{ pointerEvents: "none" }}>
-            <rect x={tipCx - tipW / 2} y={tipY} width={tipW} height={34} rx={8} fill="var(--card)" stroke="var(--glass-border)" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,0.35))" }} />
-            <text x={tipCx} y={tipY + 14} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{hovered.label}</text>
-            <text x={tipCx} y={tipY + 27} textAnchor="middle" style={{ fontSize: 13, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>{hovered.value} students</text>
-          </g>
-        )}
-      </svg>
+      </div>
+      {/* Rendered as a sibling of the bar row, not nested inside it -- the
+         row above needs its own `overflow-hidden` to clip the segments
+         into one rounded pill, and an absolutely-positioned tooltip
+         nested inside that same clipped box was invisible no matter what
+         z-index or bottom offset it had (confirmed via devtools: it was
+         in the DOM, fully opaque, just clipped to zero visible area by
+         its own clipping ancestor). Positioned here instead, by the
+         hovered segment's own precomputed left%, with nothing above it
+         to clip it. "Hover can show number and pathway details with a
+         glow." */}
+      {hovered && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-[calc(100%+8px)] rounded-[8px] border px-[10px] py-[6px] text-center"
+          style={{ left: `${hovered.left + hovered.pct / 2}%`, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: `0 0 14px color-mix(in srgb, ${hovered.color} 55%, transparent), 0 6px 16px rgba(0,0,0,0.35)` }}
+        >
+          <div className="whitespace-nowrap text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{hovered.label}</div>
+          <div className="whitespace-nowrap text-[13px] font-extrabold" style={{ color: "var(--foreground)" }}>{hovered.value} students</div>
+        </div>
+      )}
       <div className="@container">
         <div className="grid grid-cols-2 gap-x-[22px] gap-y-[5px] @[440px]:grid-cols-3">
           {topPathways.map(([label, value], i) => {
             const active = activePathway === label;
-            const emphasized = active || label === hoverLabel;
-            const dim = (activePathway !== null || hoverLabel !== null) && !emphasized;
+            const dim = activePathway !== null && !active;
             return (
               <button
                 key={label}
                 type="button"
                 onClick={() => onToggle(label)}
-                onMouseEnter={() => setHoverLabel(label)}
-                onMouseLeave={() => setHoverLabel(null)}
                 aria-pressed={active}
                 className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[4px] py-[2px] text-left transition-opacity"
                 style={{ opacity: dim ? 0.45 : 1 }}
               >
                 <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: colors[i % colors.length] }} />
-                {/* Number sits right after the label, not pushed to the
-                   cell's far edge -- direct instruction: "bring the
-                   numbers closer to their labels." */}
-                <span className="truncate text-[10.5px] font-semibold" style={{ color: emphasized ? "var(--foreground)" : "var(--muted-foreground)" }}>{label}</span>
+                <span className="truncate text-[10.5px] font-semibold" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>{label}</span>
                 <span className="flex-none text-[10.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
               </button>
             );
@@ -558,6 +543,7 @@ export function Overview() {
             <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
             <BarChart
               barStyle="solid"
+              hideValuesUntilHover
               groups={grades.map((g) => `Gr. ${g}`)}
               series={[
                 { label: "Career Report", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Career Report")) },
@@ -571,6 +557,7 @@ export function Overview() {
             <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
             <BarChart
               barStyle="solid"
+              hideValuesUntilHover
               groups={grades.map((g) => `Gr. ${g}`)}
               series={[
                 { label: "Academic Plan", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Academic Plan")) },

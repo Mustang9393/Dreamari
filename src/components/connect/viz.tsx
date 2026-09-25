@@ -207,7 +207,7 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
  *  grade 9 is zero. Dont do that" -- Grade 9 does track Career Report, and
  *  all 30 students were genuinely still Not Started; the chart had been
  *  hiding that fact the same way it hides a truly not-applicable grade). */
-export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%", barColors, targetLine, barStyle = "segmented" }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string; barColors?: string[]; /** a soft, gradient-shaded "target zone" from this value to the top of the chart, with a dashed reference line -- e.g. a district benchmark */ targetLine?: { value: number; label: string; color?: string }; /** "segmented" is the equalizer stack Connect uses; "solid" is one rounded bar with a vertical gradient, bright at the top fading toward the baseline (the Counselor Dashboard's v2 mark). */ barStyle?: "segmented" | "solid" }) {
+export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%", barColors, targetLine, barStyle = "segmented", maxBarWidth = 34, hideValuesUntilHover = false }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string; barColors?: string[]; /** a soft, gradient-shaded "target zone" from this value to the top of the chart, with a dashed reference line -- e.g. a district benchmark */ targetLine?: { value: number; label: string; color?: string }; /** "segmented" is the equalizer stack Connect uses; "solid" is one rounded bar with a vertical gradient, bright at the top fading toward the baseline (the Counselor Dashboard's v2 mark). */ barStyle?: "segmented" | "solid"; /** caps how wide a single bar can grow -- lower it for a chart with many groups (e.g. 15 categories), where the default reads as too thick (direct report: "They are to othick now"). */ maxBarWidth?: number; /** hides the per-bar value labels and the y-axis tick numbers until a bar is actually hovered/focused -- direct instruction: "do not show numbers on those graphs or in the y axis until hovered." Gridlines and bar heights still show the shape at rest; only the printed numbers wait for interaction. */ hideValuesUntilHover?: boolean }) {
   const W = 600;
   const H = height;
   // Left margin wide enough for real y-axis tick labels (0/25/50/75/100%) --
@@ -233,7 +233,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
   // (now narrower) cluster is centered in the group instead of left-packed,
   // so the extra room becomes breathing space on both sides, not a gap on
   // one side only.
-  const MAX_BAR_W = 34;
+  const MAX_BAR_W = maxBarWidth;
   const idealClusterW = perGroupColor ? groupW - barGap * 2 : groupW - barGap * (series.length + 1);
   const barCount = perGroupColor ? 1 : series.length;
   const barW = Math.max(4, Math.min(MAX_BAR_W, idealClusterW / barCount));
@@ -306,8 +306,12 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
               <stop offset="100%" stopColor={color} stopOpacity="0.12" />
             </linearGradient>
           </defs>
+          {/* No dot at the tip -- a rounded bar with a round marker
+             centered on it kept reading as an unintentionally phallic
+             shape (direct reports, more than once: "these look like
+             dicks... remove the dot from the top they look like
+             condoms"). The rect's own glow is the only "light" now. */}
           <rect x={barX} y={barValueY} width={barW} height={h} rx={4} fill={`url(#${id})`} style={{ filter: `drop-shadow(0 0 5px color-mix(in srgb, ${color} 55%, transparent))` }} />
-          <circle cx={barX + barW / 2} cy={barValueY} r={2.2} fill={color} style={{ filter: `drop-shadow(0 0 4px color-mix(in srgb, ${color} 85%, transparent))` }} />
           <rect
             x={barX} y={padTop} width={barW} height={plotH}
             fill="transparent" style={{ cursor: "pointer" }}
@@ -354,9 +358,11 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
           <g key={t}>
             <line x1={padLeft} x2={W - padRight} y1={padTop + t * plotH} y2={padTop + t * plotH} stroke="color-mix(in srgb, var(--foreground) 10%, transparent)" strokeWidth="1" />
-            <text x={padLeft - 8} y={padTop + t * plotH + 3.5} textAnchor="end" style={{ fontSize: 10, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
-              {Math.round(max * (1 - t))}{valueSuffix}
-            </text>
+            {(!hideValuesUntilHover || hover !== null) && (
+              <text x={padLeft - 8} y={padTop + t * plotH + 3.5} textAnchor="end" style={{ fontSize: 10, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
+                {Math.round(max * (1 - t))}{valueSuffix}
+              </text>
+            )}
           </g>
         ))}
         {/* Just the dashed reference line, named in the legend below --
@@ -380,6 +386,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
             const barX = groupX + barGap;
             const barY = y(v);
             const dim = hover !== null && hover.gi !== gi;
+            const showValue = !hideValuesUntilHover || hover?.gi === gi;
             return (
               <g key={label}>
                 {!Number.isNaN(v) && v >= 0 && (
@@ -389,9 +396,11 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
                       ariaLabel: `${label}: ${Math.round(v)}${valueSuffix}`,
                       onEnter: () => setHover({ gi, si: 0 }), onLeave: () => setHover(null),
                     })}
-                    <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-                      {Math.round(v)}{valueSuffix}
-                    </text>
+                    {showValue && (
+                      <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+                        {Math.round(v)}{valueSuffix}
+                      </text>
+                    )}
                   </>
                 )}
                 <text x={labelCenterX} y={H - 6} textAnchor="middle" style={{ fontSize: 11.5, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>
@@ -408,6 +417,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
                 const barX = groupX + barGap + si * (barW + barGap);
                 const barY = y(v);
                 const dim = hover !== null && (hover.gi !== gi || hover.si !== si);
+                const showValue = !hideValuesUntilHover || (hover?.gi === gi && hover?.si === si);
                 return (
                   <g key={s.label}>
                     {renderSegmentedBar({
@@ -415,9 +425,11 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
                       ariaLabel: `${label}, ${s.label}: ${Math.round(v)}${valueSuffix}`,
                       onEnter: () => setHover({ gi, si }), onLeave: () => setHover(null),
                     })}
-                    <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-                      {Math.round(v)}{valueSuffix}
-                    </text>
+                    {showValue && (
+                      <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+                        {Math.round(v)}{valueSuffix}
+                      </text>
+                    )}
                   </g>
                 );
               })}
