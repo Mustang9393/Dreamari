@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, ChevronRight } from "lucide-react";
 import { MILESTONE_KEYS, avatarIndexForName, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
 import { studentPortraitSrc, useStudentAvatarSrc } from "@/lib/avatar";
 
@@ -287,6 +287,16 @@ export function StudentLink({ id, name, index, size = 44, children }: { id?: str
   return (
     <button type="button" onClick={() => router.push(`/counselor?view=students&studentId=${id}`)} className="dm-quiet group flex min-w-0 cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] text-left">
       {inner}
+    </button>
+  );
+}
+
+/** A 20px tick box that reads as a control at rest (older users, no hover
+ *  on tablets): bordered, filled in the primary when on. */
+export function SelectBox({ checked, label, onChange }: { checked: boolean; label: string; onChange: (on: boolean) => void }) {
+  return (
+    <button type="button" role="checkbox" aria-checked={checked} aria-label={label} onClick={() => onChange(!checked)} className="flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-[6px] border transition-colors" style={{ borderColor: checked ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 35%, transparent)", background: checked ? "var(--primary)" : "transparent", color: "#fff" }}>
+      {checked && <Check className="h-[12px] w-[12px]" aria-hidden />}
     </button>
   );
 }

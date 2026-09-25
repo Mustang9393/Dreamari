@@ -928,9 +928,13 @@ Built on request from the SchooLinks staff dashboard, DEMO-ONLY
   with the honest line that a real check-in needs a student-side prompt.
 - **Reports, Schedule**: cadence, day, recipients per template; the
   Scheduled list is what a delivery job would run.
-- **Batch sends (25 Sept 2026)**: tick boxes on Students and a Group
-  Message tool in the Suite, one composer for a message, reminder or
-  to-do. Alternative: batch letters too; rejected on instruction, they
+- **Batch sends (25 Sept 2026)**: the Productivity Suite's Group
+  Message tool only, an audience by grade, status and pathway or a
+  hand-picked list, one composer for a message, reminder or to-do. Tick
+  boxes on the Students table were built first and removed the same
+  hour on instruction ("the batch thing should be in Productivity Suite
+  not in the Students tab itself"): Students stays the place to find
+  and open one student. Alternative: batch letters too; rejected on instruction, they
   are personal. Alternative: only Connect announcements; those reach a
   grade, not a hand-picked set or a filtered audience.
 - **Readiness card on the Overview (25 Sept 2026)**: Maisha's five
