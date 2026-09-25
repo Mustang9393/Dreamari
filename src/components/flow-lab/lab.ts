@@ -1,9 +1,9 @@
-// DEMO-ONLY: the Flow Lab's own data and storage. Everything here is
-// isolated from the live demo on purpose (direct instruction, 24 Sept 2026:
-// "NOTHING SHOULD CHANGE IN THE DEMO... replayable, isolated from the
-// actual demo app"): the lab reads the catalog and the student's saved
-// interests read-only, and writes only to `dreamari:flowlab:*` keys, so
-// playing either flow can never alter what /match-grid or /profile show.
+// DEMO-ONLY: the Flow Lab's own data and storage. Isolated from the live
+// demo on purpose (direct instruction, 24 Sept 2026: "NOTHING SHOULD CHANGE
+// IN THE DEMO... replayable, isolated from the actual demo app"): the lab
+// reads the catalog and the student's Build answers read-only, and writes
+// only to `dreamari:flowlab:*` keys, so playing it can never alter what
+// /match-grid or /profile show.
 
 import { ALL_CATALOG_CAREERS, type CatalogCareer } from "@/components/app/catalog";
 import { INTEREST_WORLDS } from "@/components/build/types";
@@ -14,13 +14,16 @@ import { reportV2 } from "@/components/profile/report-data";
 import { resolveCareer } from "@/components/career/data";
 import { careerSlug } from "@/components/career/slug";
 
-export type LabVersion = "v2" | "v3";
-export const LAB_VERSION_KEY = "dreamari:flowlab:version";
-export const labStateKey = (v: LabVersion) => `dreamari:flowlab:${v}`;
+// Storage key for the lab's own state -- isolated from every other
+// dreamari:* key in the app, per the isolation rule above.
+const LAB_STATE_KEY = "dreamari:flowlab:v2";
 
 /** Joshua's proposal caps the saved tray at "around 7". */
 export const MAX_SAVED = 7;
-export const PAGE_SIZE = 6;
+/** Cards shown per "page" of continuous scroll (direct feedback, 25 Sept
+ *  2026: "show six at a time, and as they scroll, naturally bring in the
+ *  next set"). */
+export const REVEAL_STEP = 6;
 
 export type LabCareer = CatalogCareer & { id: string };
 
@@ -131,28 +134,20 @@ export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
     .map(({ career, reason, score }) => ({ career, reason, score }));
 }
 
-/** The "For you" set: every career from the chosen worlds, ranked by the
- *  combined answers, with path mismatches left out entirely. Worlds are
- *  interleaved on ties so one world never crowds the other out. */
-export function forYou(signals: BuildSignals): Ranked[] {
-  const perWorld = signals.worlds.map((w) => rankForStudent(w, signals).filter((r) => r.score >= 0));
-  const out: Ranked[] = [];
-  const max = Math.max(0, ...perWorld.map((l) => l.length));
-  for (let i = 0; i < max; i++) for (const list of perWorld) if (list[i]) out.push(list[i]);
-  return out.sort((a, b) => b.score - a.score);
-}
-
-/** Worlds to offer under "Explore more": neighbours of the chosen worlds
- *  first, so the next tab over is the next-nearest thing, not alphabetical. */
+/** Worlds to offer under "Explore all": neighbours of the chosen worlds
+ *  first, so the next tab over is the next-nearest thing, not alphabetical
+ *  (direct feedback, 25 Sept 2026: "'Explore more' -> 'Explore all': this
+ *  section is really allowing students to browse outside their selected
+ *  industries"). */
 export function exploreMoreWorlds(chosen: string[]): string[] {
   const near = chosen.flatMap((w) => WORLD_NEIGHBORS[w] ?? []);
   const rest = browsableWorlds();
   return [...new Set([...near, ...rest])].filter((w) => !chosen.includes(w) && rest.includes(w));
 }
 
-// One follow-up per world for v3's Build add-on ("Which parts of Arts, Media
-// & Sport?"), the granularity two Dreamonna testers asked for. Hand-authored
-// for the lab; production would draw these from the taxonomy.
+// Sub-interests per world, used only to explain WHY a career appears
+// (matchDetail's "Good Fit If You Like" bullets below). Hand-authored for
+// the lab; production would draw these from the taxonomy.
 export const SUB_INTERESTS: Record<string, string[]> = {
   "Arts, Media & Sport": ["Design & illustration", "Film, video & photo", "Music & audio", "Writing & journalism", "Sports & fitness", "Fashion"],
   "Building & Construction": ["Architecture & design", "Hands-on building", "Electrical & plumbing", "Project management"],
@@ -171,10 +166,9 @@ export const SUB_INTERESTS: Record<string, string[]> = {
   "Tech & Engineering": ["Software & apps", "Data & AI", "Cybersecurity", "Design (UX/UI)", "Hardware & engineering", "Games"],
 };
 
-// Title keywords that tie a catalog career to a sub-interest, so v3 can put
-// a real reason on each card ("Software & apps", not just the world). A
-// career that matches none of the student's chosen sub-interests still
-// shows its world as the reason. Hand-authored for the lab.
+// Title keywords that tie a catalog career to a sub-interest, used by
+// matchDetail() below to fill in a real "good fit if" line instead of just
+// the world. Hand-authored for the lab.
 export const SUB_KEYWORDS: Record<string, string[]> = {
   "Design & illustration": ["design", "illustrat", "graphic", "animator", "artist"],
   "Film, video & photo": ["film", "video", "photo", "director", "cinemat", "editor", "producer"],
@@ -244,17 +238,8 @@ export const SUB_KEYWORDS: Record<string, string[]> = {
   "Games": ["game"],
 };
 
-export function subInterestFor(title: string, candidates: string[]): string | null {
-  const t = title.toLowerCase();
-  for (const sub of candidates) {
-    const keys = SUB_KEYWORDS[sub] ?? [];
-    if (keys.some((k) => t.includes(k))) return sub;
-  }
-  return null;
-}
-
-// Which worlds sit next to which, for v3's "one stretch pick" and "Show me
-// six more" so the set stays coherent instead of jumping across the map.
+// Which worlds sit next to which, so "Explore all" offers the next-nearest
+// industry first instead of an alphabetical list.
 export const WORLD_NEIGHBORS: Record<string, string[]> = {
   "Arts, Media & Sport": ["Tech & Engineering", "Personal Care & Community Services", "Teaching & Education"],
   "Building & Construction": ["Fixing Machines & Engines", "Factories & Making Things", "Driving, Flying & Shipping"],
@@ -312,25 +297,25 @@ export function matchDetail(career: LabCareer): MatchDetail {
   return { employers, salary, whatYouDo, goodFitIf, schoolPath };
 }
 
-export function readLabState<T>(v: LabVersion, fallback: T): T {
+export function readLabState<T>(fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
-    const raw = window.localStorage.getItem(labStateKey(v));
+    const raw = window.localStorage.getItem(LAB_STATE_KEY);
     return raw ? { ...fallback, ...(JSON.parse(raw) as Partial<T>) } : fallback;
   } catch {
     return fallback;
   }
 }
-export function writeLabState<T>(v: LabVersion, state: T): void {
+export function writeLabState<T>(state: T): void {
   try {
-    window.localStorage.setItem(labStateKey(v), JSON.stringify(state));
+    window.localStorage.setItem(LAB_STATE_KEY, JSON.stringify(state));
   } catch {
     // no storage: the flow still works for this page load
   }
 }
-export function clearLabState(v: LabVersion): void {
+export function clearLabState(): void {
   try {
-    window.localStorage.removeItem(labStateKey(v));
+    window.localStorage.removeItem(LAB_STATE_KEY);
   } catch {
     // ignore
   }

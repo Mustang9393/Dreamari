@@ -201,7 +201,7 @@ const COUNSELOR_LINKS = [{ label: "Counselor Dashboard", href: "/counselor" }] a
 // live demo's Match and Profile and replayable (direct instruction, 24 Sept
 // 2026). Remove once a flow is chosen and built for real. See
 // docs/HANDOFF_INDEX.md.
-const LAB_LINKS = [{ label: "Flow lab (v2 / v3)", href: "/flow-lab" }] as const;
+const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }] as const;
 
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
   const router = useRouter();

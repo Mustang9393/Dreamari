@@ -1,34 +1,30 @@
 "use client";
 
-// DEMO-ONLY: pieces both Flow Lab versions share, so v2 and v3 are compared
-// on identical chrome and the only visible difference is the flow itself.
-// Every screen follows the live Match screen's composition (direct feedback,
-// 25 Sept 2026: "stick to earlier layouts, kill all redundant copy"): a
-// fixed viewport-high section, a one-line header row with a status chip,
-// six cards that fill the space, a sticky bottom bar, an in-place detail
-// modal. Instructions are coachmarks, not paragraphs.
+// DEMO-ONLY: pieces the Flow Lab's screens share. Every screen follows the
+// live Match screen's visual language: a one-line header row with a status
+// chip, a card grid, a sticky bottom bar, an in-place detail modal. No
+// instructional pop-ups anywhere (direct feedback, 25 Sept 2026: "as a
+// general design/architecture rule across Dreamari, I want to avoid
+// instructional pop-ups unless absolutely necessary... the interface itself
+// should make the next action obvious through copy, hierarchy, and
+// placement"); the persistent hint line under each header carries that job
+// instead.
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, FileText, GraduationCap, ImageOff, Info, Play, Plus, Route, Sparkles, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { IconTip } from "@/components/app/IconTip";
-import { Coachmark } from "@/components/flow/GestureSpotlight";
+import { Working } from "@/components/app/Working";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { careerSlug } from "@/components/career/slug";
-import { matchDetail, type LabCareer, WORLDS } from "./lab";
+import { matchDetail, REVEAL_STEP, type LabCareer, WORLDS } from "./lab";
 
 export const CARD = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
 const SUCCESS = "var(--color-feedback-success)";
 export const PAGE = 6;
-
-/** The version chip + Restart, rendered by FlowLab and slotted into every
- *  screen's bottom bar so it stays bottom-center without covering cards. */
-export const LabDockContext = createContext<ReactNode>(null);
-
-export type Hint = { active: boolean; label: string; onDismiss: () => void; cta?: string };
 
 /** What the (i) says about the screen that is open right now: the screen
  *  registers it, FlowLab shows it above the version note (direct
@@ -39,9 +35,19 @@ export const LabInfoContext = createContext<(note: ScreenNote | null) => void>((
 
 // ---------------------------------------------------------------- layout ----
 
-/** Match's viewport-high section: header row, optional control row, then
- *  whatever fills the rest (`children`), above a fixed bottom bar. */
-export function LabScreen({ title, status, hint, controls, note, children }: { title: string; status?: string; hint?: string; controls?: ReactNode; note?: ScreenNote; children: ReactNode }) {
+/** Match's header language: a one-line title row with a status chip, a
+ *  persistent hint line (this replaces any coachmark or pop-up -- the copy
+ *  itself has to teach the screen), an optional control row, then whatever
+ *  fills the rest.
+ *
+ *  Two layouts: the default is viewport-locked (no scroll) for screens that
+ *  must never crop -- the Build questions, Saved, Rank, Top 3. `scrollable`
+ *  is for Mini Explore, which now grows with the page instead of paging
+ *  through a carousel (direct feedback, 25 Sept 2026: "make this work more
+ *  like Netflix/YouTube... browsing should feel continuous"): the header
+ *  and world tabs stay sticky under the app's own fixed top bar while the
+ *  card grid below scrolls the ordinary way. */
+export function LabScreen({ title, status, hint, controls, note, scrollable = false, children }: { title: string; status?: string; hint?: string; controls?: ReactNode; note?: ScreenNote; scrollable?: boolean; children: ReactNode }) {
   const setNote = useContext(LabInfoContext);
   const noteKey = JSON.stringify(note ?? null);
   useEffect(() => {
@@ -49,32 +55,59 @@ export function LabScreen({ title, status, hint, controls, note, children }: { t
     return () => setNote(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- compared by content; the object is rebuilt every render
   }, [noteKey, setNote]);
-  return (
-    // Phones carry the version dock above the bottom bar, so they need the
-    // extra bottom room; desktop docks it inside the bar.
-    <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-[136px] sm:pt-[72px] sm:pb-24" style={{ WebkitTapHighlightColor: "transparent" }}>
-      <div className="flex min-h-0 w-full max-w-[880px] flex-1 flex-col">
-        <div className="mb-1 flex flex-none items-center justify-between gap-3 px-1">
-          <h1 className="text-[17px] font-extrabold whitespace-nowrap uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
-          {status && (
-            <span className="flex flex-none items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold whitespace-nowrap backdrop-blur" style={{ color: "var(--foreground)", background: "var(--glass-surface-2)", borderColor: `color-mix(in srgb, ${SUCCESS} 40%, var(--glass-border))` }}>
-              <span aria-hidden className="h-2 w-2 flex-none rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 10px ${SUCCESS}` }} />
-              {status}
-            </span>
-          )}
+  const header = (
+    <>
+      <div className="mb-1 flex flex-none items-center justify-between gap-3 px-1">
+        <h1 className="text-[17px] font-extrabold whitespace-nowrap uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
+        {status && (
+          <span className="flex flex-none items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold whitespace-nowrap backdrop-blur" style={{ color: "var(--foreground)", background: "var(--glass-surface-2)", borderColor: `color-mix(in srgb, ${SUCCESS} 40%, var(--glass-border))` }}>
+            <span aria-hidden className="h-2 w-2 flex-none rounded-full" style={{ background: SUCCESS, boxShadow: `0 0 10px ${SUCCESS}` }} />
+            {status}
+          </span>
+        )}
+      </div>
+      {hint && <p className="mb-2.5 flex-none px-1 text-[12.5px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
+      {controls && <div className="mb-2.5 flex flex-none flex-col gap-2 px-1">{controls}</div>}
+    </>
+  );
+  if (scrollable) {
+    // A genuinely full-bleed sticky bar (`w-full`, no side padding of its
+    // own) with its content re-centered to the same 880px column inside it
+    // -- the same shape DesktopNavigation uses for the site's own top nav.
+    // Card content sits right up against this bar from the very first
+    // scroll pixel here (no hero, no breathing room above the grid), so it
+    // is always frosted rather than fading in on scroll: a bar that is
+    // sometimes transparent right over dense photos is the exact
+    // "scrolling things visible through the header" complaint, and a
+    // narrower bar constrained to the content column (a negative-margin
+    // trick tried first) reads as a floating slab with hard side edges
+    // instead of a real header (direct feedback, 25 Sept 2026: "ugly...
+    // breaking the header treatment"). Same background/blur formula as
+    // FlowLab's own fixed app header immediately above it, and no box
+    // shadow of its own, so together they read as one continuous frosted
+    // band with a single soft edge at the very bottom, not two stacked
+    // bars with a seam.
+    return (
+      <section className="relative z-10 flex w-full flex-col items-center pt-16 pb-24 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
+        <div className="sticky top-16 z-10 w-full sm:top-[72px]" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(20px) saturate(1.6)", WebkitBackdropFilter: "blur(20px) saturate(1.6)" }}>
+          <div className="mx-auto flex w-full max-w-[880px] flex-col px-4 pt-2 pb-2 sm:px-6">{header}</div>
         </div>
-        {hint && <p className="mb-2.5 flex-none px-1 text-[12.5px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
-        {controls && <div className="mb-2.5 flex flex-none flex-col gap-2 px-1">{controls}</div>}
+        <div className="flex w-full max-w-[880px] flex-col px-4 sm:px-6">{children}</div>
+      </section>
+    );
+  }
+  return (
+    <section className="relative z-10 flex h-dvh w-full flex-col items-center overflow-hidden px-4 pt-16 pb-24 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
+      <div className="flex min-h-0 w-full max-w-[880px] flex-1 flex-col">
+        {header}
         {children}
       </div>
     </section>
   );
 }
 
-/** Match's sticky bar: one status line left, the dock in the middle, one
- *  CTA right. */
+/** Match's sticky bar: one status line left, one CTA right. */
 export function BottomBar({ status, cta, onCta, ctaDisabled, left }: { status: string; cta: string; onCta: () => void; ctaDisabled?: boolean; left?: ReactNode }) {
-  const dock = useContext(LabDockContext);
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t px-4 py-3" style={{ background: "color-mix(in srgb, var(--background) 94%, transparent)", borderColor: "var(--glass-border)" }}>
       <div className="flex w-full max-w-[880px] items-center justify-between gap-3">
@@ -82,13 +115,9 @@ export function BottomBar({ status, cta, onCta, ctaDisabled, left }: { status: s
           {left}
           <p className="truncate text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{status}</p>
         </div>
-        <div className="hidden flex-none sm:block">{dock}</div>
         <button type="button" onClick={onCta} disabled={ctaDisabled} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-[var(--radius-md)] px-5 text-[14px] font-bold whitespace-nowrap text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--color-brand-500)" }}>
           {cta} <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
         </button>
-      </div>
-      <div className="pointer-events-none fixed inset-x-0 bottom-[72px] flex justify-center sm:hidden">
-        <div className="pointer-events-auto">{dock}</div>
       </div>
     </div>
   );
@@ -176,7 +205,7 @@ export type LabControl = "save" | "pick" | "rank";
  *  INSIDE the card. Card click opens the detail modal; the control toggles.
  *  `fill` stretches to a grid cell (Match's six-up); otherwise the poster
  *  ratio. */
-export function LabCard({ career, control, selected, rank, onToggle, onOpen, reason, fill = false, hint, className = "" }: {
+export function LabCard({ career, control, selected, rank, onToggle, onOpen, reason, fill = false, className = "" }: {
   career: LabCareer;
   control: LabControl;
   selected: boolean;
@@ -185,7 +214,6 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
   onOpen?: () => void;
   reason?: string | null;
   fill?: boolean;
-  hint?: Hint;
   className?: string;
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
@@ -198,7 +226,7 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
       type="button"
       aria-pressed={selected}
       aria-label={label}
-      onClick={(e) => { e.stopPropagation(); hint?.onDismiss(); onToggle?.(); }}
+      onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
       className="flex size-8 cursor-pointer items-center justify-center rounded-full border-2 backdrop-blur-md transition-transform active:scale-90"
       style={{ background: selected ? accent : "color-mix(in srgb, var(--background) 55%, transparent)", borderColor: selected ? accent : "rgba(255,255,255,0.5)" }}
     >
@@ -240,73 +268,84 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
           <span className="rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md" style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{career.salary}</span>
         )}
       </div>
-      {hint ? (
-        /* The coachmark sits OUTSIDE the IconTip on purpose. Its bubble is a
-           portal that still belongs to this subtree in React's tree, so if
-           it lived inside the tooltip wrapper, the bubble's "Next" would
-           focus a button inside the tooltip's focus scope (tooltip shows),
-           then unmount without a blur (tooltip never hides). The same
-           subtree bubbling would also hand the click to the card's open
-           handler, so propagation stops here too. */
-        <span className="absolute top-2 right-2 z-[2]" onClick={(e) => e.stopPropagation()}>
-          <Coachmark demoForce active={hint.active} label={hint.label} cta={hint.cta} onDismiss={hint.onDismiss} spotlight side="bottom" align="end">
-            <IconTip label={tip}>{controlEl}</IconTip>
-          </Coachmark>
-        </span>
-      ) : (
-        <IconTip label={tip} className="absolute top-2 right-2 z-[2]">{controlEl}</IconTip>
+      <IconTip label={tip} className="absolute top-2 right-2 z-[2]">{controlEl}</IconTip>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------ continuous ----
+
+/** Reveals `total` items REVEAL_STEP at a time as the caller's sentinel
+ *  scrolls into view -- no "load more" button, the grid just keeps growing
+ *  the way a Netflix or YouTube grid does (direct feedback, 25 Sept 2026:
+ *  "I don't think students should have to press a button to receive
+ *  another set of careers... browsing should feel continuous"). Resets to
+ *  one page whenever `resetKey` changes (a world switch). */
+export function useRevealCount(total: number, resetKey: string): { count: number; sentinelRef: (node: HTMLDivElement | null) => void } {
+  const [count, setCount] = useState(REVEAL_STEP);
+  // React's own "adjust state when a prop changes" pattern: plain state, not
+  // a ref (a ref read/write during render is itself a lint error), compared
+  // and corrected inline during render rather than in an effect.
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  if (prevResetKey !== resetKey) {
+    setPrevResetKey(resetKey);
+    setCount(REVEAL_STEP);
+  }
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = (node: HTMLDivElement | null) => {
+    observerRef.current?.disconnect();
+    if (!node) return;
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) setCount((c) => Math.min(c + REVEAL_STEP, total));
+    }, { rootMargin: "600px 0px" });
+    observerRef.current.observe(node);
+  };
+  return { count: Math.min(count, total), sentinelRef };
+}
+
+// The card-scale version of the app's own scroll-reveal (SchoolsIllustrations.tsx's
+// `rise`/`VIEW`): same ease curve, a lighter lift since a poster card is not
+// a hero section. `whileInView` with `once: true` is what makes a card
+// animate in ONLY the first time it scrolls into view -- already-seen cards
+// re-rendered by a later reveal never replay it (direct feedback, 25 Sept
+// 2026: "when I scroll down things should load in with an animated
+// transition, not just like it was always there").
+const REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
+const revealVariants = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } };
+const REVEAL_VIEWPORT = { once: true, amount: 0.3, margin: "0px 0px -40px 0px" } as const;
+
+function RevealItem({ index, children }: { index: number; children: ReactNode }) {
+  return (
+    <motion.div
+      variants={revealVariants}
+      initial="hidden"
+      whileInView="show"
+      viewport={REVEAL_VIEWPORT}
+      transition={{ duration: 0.45, ease: REVEAL_EASE, delay: (index % REVEAL_STEP) * 0.05 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/** The grid itself: a plain wrapping grid (Match's own card language, not a
+ *  fixed 2x3 viewport). Each card animates in the first time it scrolls
+ *  into view; a sentinel row pulls in the next REVEAL_STEP as IT scrolls
+ *  into view, with the app's own `Working` chip while the next batch
+ *  settles (per docs/COMPONENT_STATES_PLAYBOOK.md's loading-state default). */
+export function RevealGrid<T>({ items, resetKey, renderItem }: { items: T[]; resetKey: string; renderItem: (item: T, index: number) => ReactNode }) {
+  const { count, sentinelRef } = useRevealCount(items.length, resetKey);
+  const shown = items.slice(0, count);
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4">
+        {shown.map((item, i) => <RevealItem key={i} index={i}>{renderItem(item, i)}</RevealItem>)}
+      </div>
+      {count < items.length && (
+        <div ref={sentinelRef} className="flex h-10 flex-none items-center justify-center">
+          <Working label="Loading more" />
+        </div>
       )}
-    </div>
-  );
-}
-
-// -------------------------------------------------------------- carousel ----
-
-/** Match's six-up grid, paged: the six slide out and the next six slide in,
- *  and the pager moves both ways (direct feedback, 25 Sept 2026: "show six
- *  more, all 6 scroll out of the screen, new 6 loads, I can keep moving
- *  between these like a carousel"). */
-export function SixGrid({ page, direction, children }: { page: string | number; direction: 1 | -1; children: ReactNode }) {
-  return (
-    <div className="relative min-h-0 flex-1">
-      <AnimatePresence mode="popLayout" initial={false} custom={direction}>
-        <motion.div
-          key={page}
-          custom={direction}
-          initial={{ x: direction > 0 ? 80 : -80, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: direction > 0 ? -80 : 80, opacity: 0 }}
-          transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }}
-          className="absolute inset-0 grid min-h-0 grid-cols-2 grid-rows-3 gap-2.5 sm:grid-cols-3 sm:grid-rows-2 sm:gap-4"
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
-}
-
-/** `total` omitted = open-ended (v3 keeps generating sixes): the count reads
- *  "Set 3" instead of "3/N". */
-export function Pager({ index, total, onPrev, onNext, nextLabel = "Six more", hint }: { index: number; total?: number; onPrev: () => void; onNext: () => void; nextLabel?: string; hint?: Hint }) {
-  const nextBtn = (
-    <button type="button" aria-label={nextLabel} onClick={() => { hint?.onDismiss(); onNext(); }} disabled={total !== undefined && total <= 1} className="dm-quiet flex h-9 cursor-pointer items-center gap-1 rounded-full border px-3 text-[12.5px] font-bold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-      {nextLabel} <ChevronRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-    </button>
-  );
-  return (
-    <div className="flex flex-none items-center gap-1.5">
-      <IconTip label="Previous six">
-        <button type="button" aria-label="Previous six" onClick={onPrev} disabled={index === 0} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-          <ChevronLeft className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-        </button>
-      </IconTip>
-      <span className="text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{total !== undefined ? `${index + 1}/${total}` : `Set ${index + 1}`}</span>
-      {hint ? (
-        <Coachmark demoForce active={hint.active} label={hint.label} onDismiss={hint.onDismiss} spotlight side="top" align="end">
-          {nextBtn}
-        </Coachmark>
-      ) : nextBtn}
     </div>
   );
 }
@@ -495,16 +534,15 @@ function CareerActions({ career }: { career: LabCareer }) {
   );
 }
 
-/** The lab's My Profile > Top 3, shared by v2 and v3: Joshua's asks as
- *  written (prominent Explore more and Saved, obvious Remove and Replace),
- *  plus the answer to "what's next" (direct feedback, 25 Sept 2026): a
- *  recommended next step for #1, the ladder, and actions on every card.
- *  Everything fits the viewport, never scrolls (direct feedback, 25 Sept
- *  2026: "these cards get cropped by the bottom, this should never
- *  happen"): on desktop the three posters take whatever height is left;
- *  on phones the three become compact rows. The swap list opens as an
- *  overlay on the card so it never adds height. */
-export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPool, onRemove, onReplace, replacing, setReplacing, hint }: {
+/** The lab's My Profile > Top 3: Joshua's asks as written (prominent
+ *  Explore more and Saved, obvious Remove and Replace), plus the answer to
+ *  "what's next": a recommended next step for #1, the ladder, and actions
+ *  on every card. Everything fits the viewport, never scrolls (direct
+ *  feedback, 25 Sept 2026: "these cards get cropped by the bottom, this
+ *  should never happen"): on desktop the three posters take whatever
+ *  height is left; on phones the three become compact rows. The swap list
+ *  opens as an overlay on the card so it never adds height. */
+export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPool, onRemove, onReplace, replacing, setReplacing }: {
   top3: LabCareer[];
   pool: LabCareer[];
   poolLabel: string;
@@ -514,7 +552,6 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
   onReplace: (outId: string, inId: string) => void;
   replacing: string | null;
   setReplacing: (id: string | null) => void;
-  hint?: Hint;
 }) {
   const swappable = pool.filter((s) => !top3.some((t) => t.id === s.id));
   const swapList = (c: LabCareer) => (
@@ -530,18 +567,13 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
       ))}
     </div>
   );
-  const replaceBtn = (c: LabCareer, i: number, iconOnly: boolean) => {
+  const replaceBtn = (c: LabCareer, iconOnly: boolean) => {
     const btn = (
-      <button type="button" aria-label={`Replace ${c.title}`} onClick={() => { hint?.onDismiss(); setReplacing(replacing === c.id ? null : c.id); }} disabled={swappable.length === 0} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold disabled:cursor-not-allowed disabled:opacity-40 ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+      <button type="button" aria-label={`Replace ${c.title}`} onClick={() => setReplacing(replacing === c.id ? null : c.id)} disabled={swappable.length === 0} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold disabled:cursor-not-allowed disabled:opacity-40 ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
         <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />{!iconOnly && " Replace"}
       </button>
     );
-    const wrapped = iconOnly ? <IconTip label="Replace" className="w-full">{btn}</IconTip> : btn;
-    return i === 0 && hint ? (
-      <Coachmark demoForce active={hint.active} label={hint.label} onDismiss={hint.onDismiss} spotlight side="top" align="start" wrapperClassName={iconOnly ? "flex w-full" : "flex flex-1"}>
-        {wrapped}
-      </Coachmark>
-    ) : wrapped;
+    return iconOnly ? <IconTip label="Replace" className="w-full">{btn}</IconTip> : btn;
   };
   const removeBtn = (c: LabCareer, iconOnly: boolean) => {
     const btn = (
@@ -574,7 +606,7 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
                 </div>
                 <CareerActions career={c} />
                 <div className="flex flex-none gap-2">
-                  {replaceBtn(c, i, false)}
+                  {replaceBtn(c, false)}
                   {removeBtn(c, false)}
                 </div>
               </div>
@@ -597,7 +629,7 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
                     </div>
                     <CareerActions career={c} />
                     <div className="grid grid-cols-2 gap-1.5">
-                      {replaceBtn(c, i, true)}
+                      {replaceBtn(c, true)}
                       {removeBtn(c, true)}
                     </div>
                   </div>
