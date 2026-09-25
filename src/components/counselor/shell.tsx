@@ -4,14 +4,14 @@ import { createContext, useContext, useEffect, useState, useSyncExternalStore } 
 import Link from "next/link";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info,
+  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
-import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
-import { CounselorVersionChip, useCounselorVersion } from "./version";
+import { useCounselorVersion } from "./version";
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, type CounselorView } from "./roles";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 import { CHANGE_NOTES } from "./v2/changeNotes";
@@ -146,16 +146,77 @@ function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?
   );
 }
 
+// The role switcher used to be a second pill row in the bottom-center demo
+// dock; moved here, 26 Sept 2026, direct instruction: "Make the user role
+// switcher accessible from the profile name thing in the footer of the
+// side menu as a menu that pops up when you click there." The profile
+// block itself is now the trigger; v1 has no role concept, so it stays
+// plain there (same gate the dock's own pill used).
 function SidebarAccount({ account }: { account: { name: string; school: string } }) {
-  return (
-    <div className="flex items-center gap-[10px] border-t px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+  const { version } = useCounselorVersion();
+  const live = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const role = roleOrDefault(live.role);
+  const [open, setOpen] = useState(false);
+  const canSwitch = version !== "v1";
+
+  const initials = account.name ? account.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase() : "?";
+  const content = (
+    <>
       <span className="flex size-[34px] flex-none items-center justify-center rounded-full text-[13px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>
-        {account.name ? account.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase() : "?"}
+        {initials}
       </span>
       <span className="flex min-w-0 flex-1 flex-col leading-tight">
         <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{account.name || "Counselor"}</span>
         <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{account.school || DEMO_SCHOOL}</span>
       </span>
+    </>
+  );
+
+  if (!canSwitch) {
+    return (
+      <div className="flex items-center gap-[10px] border-t px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative border-t" style={{ borderColor: "var(--glass-border)" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] px-[var(--space-4)] py-[var(--space-4)] text-left"
+      >
+        {content}
+        <ChevronsUpDown className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+      </button>
+      {open && (
+        <>
+          <button type="button" aria-label="Close" className="fixed inset-0 z-[110] cursor-default" onClick={() => setOpen(false)} />
+          <div role="menu" aria-label="Signed-in role" className="absolute bottom-[calc(100%+6px)] left-[var(--space-3)] z-[120] w-[212px] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
+            <span className="block px-[8px] pt-[2px] pb-[6px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Viewing as</span>
+            {COUNSELOR_ROLES.map((r) => {
+              const on = r === role;
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={on}
+                  onClick={() => { writeCounselorAccount({ role: r }); setOpen(false); }}
+                  className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] px-[8px] py-[8px] text-left text-[13px] font-semibold"
+                  style={{ background: on ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+                >
+                  {r}
+                  {on && <Check className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -436,7 +497,6 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
           </main>
         </div>
         {version !== "v1" && noteOpen && <ChangeNotePanel view={active} onClose={() => setNoteOpen(false)} />}
-        <CounselorVersionChip />
       </div>
     </CounselorFiltersContext.Provider>
   );

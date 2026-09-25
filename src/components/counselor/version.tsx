@@ -158,9 +158,13 @@ function Pills<K extends string>({ label, options, value, onChange }: { label: s
 // row moved to the sidebar's own profile-name footer (direct instruction:
 // "Make the user role switcher accessible from the profile name thing in
 // the footer of the side menu as a menu that pops up when you click
-// there") -- see `SidebarAccount` in shell.tsx. Hiding v1 the same day
-// left this dock with only one control, so the pointer-events-only,
-// bottom-center dock is now just the version pill.
+// there") -- see `SidebarAccount` in shell.tsx. With v1 hidden the same
+// day, this dock was left showing a single, unclickable "v2" pill with
+// nothing to switch to -- removed from the shell entirely the same day
+// ("Remove the v2 chip from the ui we dont need it anymore"). Kept here,
+// unrendered, rather than deleted: re-enabling v1 or v3 (V1_ENABLED /
+// V3_ENABLED above) makes this a real switcher again the moment
+// shell.tsx renders `<CounselorVersionChip />` next to `noteOpen` again.
 export function CounselorVersionChip() {
   const { version, setVersion } = useCounselorVersion();
   return (

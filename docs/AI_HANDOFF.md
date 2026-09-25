@@ -14499,3 +14499,11 @@ Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed cle
 **Review Queue's "From {student}" message box** is now a solid `var(--card)` surface at 15px medium weight instead of a glassy `--glass-surface-1` tint at 14px regular, direct feedback: "more solid background with more prominent text so it stand out more."
 
 Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean after each change. Browser-verified v1 is unreachable via dock/URL, the Awaiting-review CTA navigates to the grade-scoped Review Queue, and the message box reads as solid/prominent. Not pushed; awaiting explicit go-ahead per this project's push rule.
+
+## 2026-09-26 · Role switcher lands in the sidebar footer; bottom dock removed
+
+Finished the move started earlier this session: `SidebarAccount` (shell.tsx) is now the role-switcher trigger itself, direct instruction fulfilled ("Make the user role switcher accessible from the profile name thing in the footer of the side menu as a menu that pops up when you click there"). Clicking the profile block opens a small upward popover ("Viewing as," the four roles, a check on the current one) anchored to the sidebar footer; picking one calls the same `writeCounselorAccount` Settings' own Role dropdown uses, so every surface stays in sync. Gated the same way the dock's old role pill was (`version !== "v1"`); v1 (hidden anyway) shows the plain, non-interactive profile block.
+
+With the role pill gone from the dock and v1 hidden, the dock was left showing one unclickable "v2" pill with nothing to switch to -- removed from the shell entirely, direct instruction: "Remove the v2 chip from the ui we dont need it anymore." `CounselorVersionChip` itself stays defined in `version.tsx`, just unrendered; re-enabling `V1_ENABLED`/`V3_ENABLED` and adding `<CounselorVersionChip />` back next to `ChangeNotePanel` in shell.tsx is the entire "bring the dock back."
+
+Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the popover opens/closes, switching roles re-renders the whole dashboard (confirmed Lead Counselor's own Overview/menu), and the dock is gone. Not pushed; awaiting explicit go-ahead per this project's push rule.
