@@ -54,6 +54,14 @@
   --world-fixing-machines-engines: #64748b;
   --world-helping-human-services: #c05fa6;
   --world-teaching-learning: #8b5cf6;
+  /* Added 26 Sept 2026 -- this 13-world set predates "Personal Care &
+     Community Services" being added to worlds.ts's 15-entry WORLD_COLORS
+     map; the dark base block never got a matching entry, so the var
+     resolved to nothing and rendered black wherever this world's color
+     was used (counselor Overview's Career Pathways chart). Fuchsia:
+     distinct from the two nearby pink/violet worlds (arts-media-sport,
+     teaching-learning) at a glance. */
+  --world-personal-care-community-services: #d946ef;
 
   /* ---- App Home/Explore additions (values as emitted by the certified
      Figma file's design context for Home — v2.1 and Explore — v2.1B) ---- */

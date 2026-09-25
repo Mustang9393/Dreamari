@@ -122,7 +122,7 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
   return (
     <HoverBeam strength={0.7} className="h-full">
       <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
-        {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(glowColor, 0.3) }} />}
+        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(glowColor, hero ? 0.3 : 0.12) }} />
         <div className="relative flex flex-col gap-[2px]">
           {/* Single line always: the title truncates before the pill is
              ever forced onto its own line -- a dropped-pill wrap read as
@@ -194,48 +194,43 @@ function PathwaysCard({ topPathways, colors, activePathway, onToggle, onOpen }: 
             </button>
           )}
         </div>
-        {/* Attempt #4. A single stacked bar (built for the reference's own
-           7 tracks) became 15 unreadable slivers; a chip cloud "didn't
-           help"; ranked full-width bars (this dashboard's own Insights-
-           screen pattern) were still "just another list" with text too
-           big. Looked at how modern dashboards (Zentra, Boltshift, Orbit,
-           this project's own moodboard) handle a same-size stat grid --
-           a grid of small, equal-size tiles reads as a real dashboard
-           module rather than a list wearing a new skin, and "equal size
-           regardless of value" directly answers "i dont want certian
-           careers reading like theya re lesser" one more time, this time
-           structurally (every tile is literally the same footprint).
-           Magnitude still reads honestly through the number and the
-           tile's own thin base bar, just without forcing a long column
-           or an unreadable single stacked bar. */}
-        <div className="relative grid flex-1 auto-rows-min grid-cols-2 gap-[8px] content-start sm:grid-cols-3">
-          {(() => {
-            const max = Math.max(1, ...topPathways.map(([, v]) => v));
-            return topPathways.map(([label, value], i) => {
+        {/* Direct instruction, 26 Sept 2026: "JUST USE A PIE OR DONUT CHART
+           FOR THE CAREER PATHWAYS> HAVE THE LEGEND BE SMALL LIKE WE DID
+           BEFORE FOR THE RADIAL." SegmentedRing is the same donut every
+           other Overview card already uses (Student Status, Postsecondary
+           Plans) -- same glow/gradient arcs, same "arc length = real share
+           of the total" honesty, no new component. The compact 2-3 column
+           key below is the exact legend built for the (now-removed)
+           radial attempt: small text, dot + label + value, no per-item
+           bar or fill -- just a lookup, since the donut itself is the one
+           graphic carrying the split. */}
+        <div className="relative flex flex-1 flex-col items-center justify-center gap-[var(--space-4)]">
+          <SegmentedRing segments={topPathways.map(([, value], i) => ({ value, color: colors[i % colors.length] }))} size={148} stroke={16}>
+            <span className="flex flex-col items-center">
+              <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{topPathways.reduce((a, [, v]) => a + v, 0)}</span>
+              <span className="text-[9px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>students</span>
+            </span>
+          </SegmentedRing>
+          <div className="grid w-full grid-cols-2 gap-x-[10px] gap-y-[4px] sm:grid-cols-3">
+            {topPathways.map(([label, value], i) => {
               const active = activePathway === label;
               const dim = activePathway !== null && !active;
-              const color = colors[i % colors.length];
               return (
                 <button
                   key={label}
                   type="button"
                   onClick={() => onToggle(label)}
                   aria-pressed={active}
-                  className="dm-quiet relative flex cursor-pointer flex-col gap-[6px] overflow-hidden rounded-[8px] border p-[8px] text-left transition-opacity"
-                  style={{ borderColor: active ? color : "var(--glass-border)", background: "var(--glass-surface-1)", opacity: dim ? 0.45 : 1 }}
+                  className="dm-quiet flex cursor-pointer items-center gap-[5px] rounded-[4px] py-[2px] text-left transition-opacity"
+                  style={{ opacity: dim ? 0.45 : 1 }}
                 >
-                  <span className="flex items-center gap-[5px]">
-                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: color }} />
-                    <span className="truncate text-[11px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-                  </span>
-                  <span className="text-[17px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
-                  <span aria-hidden className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
-                    <span className="block h-full" style={{ width: `${(value / max) * 100}%`, background: color }} />
-                  </span>
+                  <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: colors[i % colors.length] }} />
+                  <span className="truncate text-[10.5px] font-semibold" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>{label}</span>
+                  <span className="ml-auto flex-none text-[10.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
                 </button>
               );
-            });
-          })()}
+            })}
+          </div>
         </div>
       </div>
     </HoverBeam>

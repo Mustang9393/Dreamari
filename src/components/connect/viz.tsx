@@ -292,6 +292,12 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
       // height.
       const id = `bar-${gradId}-${color.replace(/[^a-zA-Z0-9]/g, "")}`;
       const h = Math.max(2, baseline - barValueY);
+      // Glow added 26 Sept 2026, applied to every "solid" bar chart on the
+      // Counselor Dashboard at once (direct feedback: "the visual polish,
+      // design language upgrade applies to all data viz on the dashboard")
+      // -- same drop-shadow-behind-the-mark language Ring/SegmentedRing
+      // already use for the donuts, so bars and rings read as one family
+      // instead of the rings alone looking finished.
       return (
         <g style={{ opacity: dim ? 0.4 : 1, transition: "opacity 120ms ease" }}>
           <defs>
@@ -300,7 +306,8 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
               <stop offset="100%" stopColor={color} stopOpacity="0.12" />
             </linearGradient>
           </defs>
-          <rect x={barX} y={barValueY} width={barW} height={h} rx={4} fill={`url(#${id})`} />
+          <rect x={barX} y={barValueY} width={barW} height={h} rx={4} fill={`url(#${id})`} style={{ filter: `drop-shadow(0 0 5px color-mix(in srgb, ${color} 55%, transparent))` }} />
+          <circle cx={barX + barW / 2} cy={barValueY} r={2.2} fill={color} style={{ filter: `drop-shadow(0 0 4px color-mix(in srgb, ${color} 85%, transparent))` }} />
           <rect
             x={barX} y={padTop} width={barW} height={plotH}
             fill="transparent" style={{ cursor: "pointer" }}
