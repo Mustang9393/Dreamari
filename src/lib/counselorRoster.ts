@@ -23,6 +23,7 @@ import { readReportHistory } from "./reportHistory";
 import { readDreamScore } from "./dreamScore";
 import { REFERENCE_ROSTER } from "./counselorRosterData";
 import { REFERENCE_PROFILES, STATUS_CODES, MILESTONES_FOR_GRADE, CLUSTER_BY_TRACK, TOP5_BY_TRACK, educationGoalsFor } from "./counselorProfileData";
+import { INTEREST_WORLDS } from "@/components/build/types";
 import { ROSTER_PORTRAITS } from "./counselorRosterPortraits";
 
 export const DEMO_SCHOOL = "Lincoln High School";
@@ -50,10 +51,31 @@ export type CaseloadStatus = "On Track" | "Needs Attention" | "At Risk";
 // Spelled the reference's way ("Trade/Technical School").
 export type PostsecondaryIntent = "4-Year College" | "2-Year College" | "Trade/Technical School" | "Workforce" | "Military" | "Undecided";
 
-// The reference's seven career pathways, in the order its Overview lists
-// them (by caseload size).
-export const CAREER_TRACKS = ["Technology", "Healthcare", "Finance & Business", "Skilled Trades", "Education", "Arts & Media", "Law & Government"] as const;
-export type CareerTrack = (typeof CAREER_TRACKS)[number];
+// The reference's seven career families, kept for its own cluster and
+// Top 5 tables (counselorProfileData.ts).
+export const REFERENCE_TRACKS = ["Technology", "Healthcare", "Finance & Business", "Skilled Trades", "Education", "Arts & Media", "Law & Government"] as const;
+export type CareerTrack = (typeof REFERENCE_TRACKS)[number];
+
+// A student's pathway on the dashboard is one of Build's fifteen interest
+// worlds, the same names and grouping the student app uses (Usman, 25 Sept
+// 2026: "use the same names and grouping"). Seeded students are spread
+// deterministically from the reference's seven families onto the worlds
+// that family covers.
+export const CAREER_TRACKS = INTEREST_WORLDS.map((w) => w.label);
+const TRACK_TO_WORLDS: Record<CareerTrack, string[]> = {
+  Technology: ["Tech & Engineering", "Science & Research"],
+  Healthcare: ["Health & Medicine"],
+  "Finance & Business": ["Business & Finance"],
+  "Skilled Trades": ["Building & Construction", "Fixing Machines & Engines", "Factories & Making Things", "Driving, Flying & Shipping", "Farming, Animals & Nature", "Food & Cooking"],
+  Education: ["Teaching & Education", "Counseling & Social Work", "Personal Care & Community Services"],
+  "Arts & Media": ["Arts, Media & Sport"],
+  "Law & Government": ["Law, Safety & Justice"],
+};
+/** The reference family a world belongs to (for its cluster and Top 5). */
+export function familyOfWorld(world: string): CareerTrack {
+  for (const [family, worlds] of Object.entries(TRACK_TO_WORLDS) as [CareerTrack, string[]][]) if (worlds.includes(world)) return family;
+  return "Technology";
+}
 
 export type CounselorStudent = {
   id: string;
@@ -151,6 +173,8 @@ function buildReferenceRoster(): CounselorStudent[] {
     milestones["Career Report"] = asStatus(careerReport);
     milestones["Resume"] = statuses.length >= 5 ? milestones["Resume"] : asStatus(resume);
     const id = i + 1;
+    const worlds = TRACK_TO_WORLDS[careerTrack as CareerTrack] ?? [careerTrack];
+    const world = worlds[i % worlds.length];
     return {
       id: `ref-${i}`,
       tag: `#${initialsOf(name)}-${String(id).padStart(5, "0")}`,
@@ -158,7 +182,7 @@ function buildReferenceRoster(): CounselorStudent[] {
       grade,
       school: DEMO_SCHOOL,
       dob,
-      careerTrack,
+      careerTrack: world,
       careerCluster: CLUSTER_BY_TRACK[careerTrack] ?? careerTrack,
       educationGoals: educationGoalsFor(intent),
       roadmapPct,
@@ -196,8 +220,12 @@ export function realStudentEntry(): CounselorStudent {
   const reports = readReportHistory();
   const dreamScore = readDreamScore();
 
-  const careerTrack = (profile.interests[0] && WORLD_TO_TRACK[profile.interests[0]]) ?? "Undeclared";
-  const topMatches = picks.ids.map((id, i) => ({ title: titleFromId(id), pct: Math.max(60, 94 - i * 8) }));
+  // The live student's pathway is their first Build interest, by its own
+  // name; the reference family behind it feeds the cluster and Top 5 tables.
+  const world = profile.interests[0] ? (INTEREST_WORLDS.find((w) => w.slug === profile.interests[0])?.label ?? profile.interests[0]) : "Undeclared";
+  const careerTrack = world;
+  const family: CareerTrack | undefined = profile.interests[0] ? WORLD_TO_TRACK[profile.interests[0]] : undefined;
+  const topMatches = picks.ids.length > 0 ? picks.ids.map((id, i) => ({ title: titleFromId(id), pct: Math.max(60, 94 - i * 8) })) : family ? TOP5_BY_TRACK[family] : [];
 
   const resumeDone = resume.education.length > 0 || resume.experience.length > 0;
   const roadmapSignals = [profile.interests.length > 0, profile.subjects.length > 0, picks.ids.length > 0, resumeDone, reports.length > 0];
@@ -209,7 +237,12 @@ export function realStudentEntry(): CounselorStudent {
   // read as not started rather than pretending.
   const milestones = Object.fromEntries(MILESTONE_KEYS.map((k) => [k, "Not Started"])) as Record<MilestoneKey, MilestoneStatus>;
   milestones["Career Pathway"] = profile.interests.length > 0 ? "Approved" : "Not Started";
-  milestones["Career Report"] = reports.length > 0 ? "Approved" : "Not Started";
+  // A report the student shared with their counselor is a submission: it
+  // lands in the Review Queue as Pending Review until the counselor decides
+  // (counselorReviews overlays the decision). A report only saved or
+  // printed is the student's own, complete but not reviewed.
+  const shared = reports.some((r) => r.label === "Shared with counselor");
+  milestones["Career Report"] = shared ? "Pending Review" : reports.length > 0 ? "Completed" : "Not Started";
   milestones["Resume"] = resumeDone ? "Approved" : "Not Started";
   milestones["Academic Plan"] = profile.subjects.length > 0 ? "Approved" : "Not Started";
 
@@ -234,7 +267,7 @@ export function realStudentEntry(): CounselorStudent {
     school: DEMO_SCHOOL,
     dob: "—",
     careerTrack,
-    careerCluster: CLUSTER_BY_TRACK[careerTrack] ?? careerTrack,
+    careerCluster: family ? CLUSTER_BY_TRACK[family] : "Undeclared",
     educationGoals: educationGoalsFor(intent),
     roadmapPct,
     status,

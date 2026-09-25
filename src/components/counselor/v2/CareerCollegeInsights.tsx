@@ -10,7 +10,10 @@
 // decorative emoji; the career-fair note is one line plus its chips. Data
 // is the reference's, verbatim.
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { signalsFor } from "@/lib/studentSignals";
+import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { Lightbulb, PenLine, Plus, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
@@ -97,6 +100,21 @@ export function CareerCollegeInsights() {
   const [subject, setSubject] = useState("");
   const [action, setAction] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+  // Saved careers come from the roster (each student's top matches plus
+  // the live student's real picks and saves), not the reference's fixed
+  // list, so the ranking moves with the school. The other three lists are
+  // still the reference's until the app records majors, simulations by
+  // career and college saves by id.
+  const roster = useReviewedRoster();
+  const savedCareers = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of roster) {
+      const sig = signalsFor(s);
+      const titles = s.isReal ? sig.top3.map((id) => ALL_PROFILE_CAREERS.find((c) => c.id === id)?.title ?? id) : s.topMatches.slice(0, 2).map((m) => m.title);
+      for (const t of titles) counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 10);
+  }, [roster]);
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       {/* The screen's hero: what the data suggests doing. One stat, one
@@ -149,7 +167,7 @@ export function CareerCollegeInsights() {
       </HoverBeam>
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <RankCard title="Saved careers" items={TOP_SAVED_CAREERS} />
+        <RankCard title="Saved careers" items={savedCareers.length ? savedCareers : TOP_SAVED_CAREERS} />
         <RankCard title="Careers explored in simulations" items={TOP_SIMULATIONS} />
         <RankCard title="Saved majors" items={TOP_MAJORS} />
         <RankCard title="Saved colleges" items={TOP_COLLEGES} />

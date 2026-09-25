@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: the bridge from the student app (My Plan drives the tracker), pathways on Build's worlds, menus consolidated
+
+Direct instruction after Usman's and Maisha's feedback and the SchooLinks demo: "do what you think is optimal. Find ways to bring things from the Dreamari app into this dashboard, things in the app that aren't being tracked here, the bridge Usman talked about."
+
+**Built.** `src/lib/studentSignals.ts` reads every store the student app writes and derives each My Plan step's status (in-app auto-tracked, counselor-verified from `counselorReviews`, student-reported not yet tracked); seeded students derive the same shape from the reference's counts. Milestone Tracker rebuilt on it: the grade's steps by season, each row a stacked status bar that opens Students filtered to who has not done it (`stepFilter` in the shell context, "Not done: [step]" chip), CSV export. Student Profile shows the student's My Plan with Approve on steps awaiting the counselor, "On Dreamari" tiles from real signals, and the Drafts card (Productivity Suite's tools, per Usman). Pathways switched to Build's fifteen interest worlds (`TRACK_TO_WORLDS` spreads seeded students; the reference families stay behind for cluster and Top 5); Overview's bar shows six plus Other. A report the live student shares with the counselor becomes a Pending Review submission. Insights' saved careers are computed from the roster. Student Progress and Productivity Suite left the SC and LC menus (routes still resolve). Six-part spec: `docs/handoff/specs/counselor-dashboard.md`. SchooLinks observations: `docs/reference/schoolinks-counselor-notes-2026-09.md`.
+
+**Verified live** at 1440: tracker Grade 9 (Four-Year Academic Plan focus, "30 not done"), the drill-through lands on Students with 30 rows and the chip, Charlotte Davis' profile shows her Grade 12 plan by season and Drafts, Overview reads Build world names with Other. No console errors. `npx tsc --noEmit -p .` and `npx eslint` clean on every touched file.
+
+**Honest limits.** In-app steps for seeded students derive from the reference's counts, so Grade 9 reads "in progress" on Explore (their saved-career counts sit under 10). Questions asked has no per-student store in Connect. Student-reported steps need My Plan's checkboxes persisted. Insights' majors, simulations by career and colleges by id are still the reference's lists.
+
 ### 2026-09-25 Counselor Dashboard: no sign-in or sign-up
 
 **Why:** direct instruction ("I don't want a sign in / sign up flow for the counselor dashboard"). The gate was simulated anyway (localStorage, no backend), and it sent every signed-out browser, including Joshua's, to a demo login before the dashboard.

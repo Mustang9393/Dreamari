@@ -11,22 +11,22 @@ export type ChangeNote = { changed: string[]; why: string; better: string; /** h
 
 export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   overview: {
-    changed: ["Attention list leads the page, students ranked by severity with the reason", "One hero card, plain glass elsewhere; one blue hue plus status colors", "Pathways as one distribution bar with a fixed spectral order", "Every card opens its screen"],
-    why: "The reference showed three equal donuts and no way to act. A counselor's first question is who needs me today.",
-    better: "Worst first, one glance, one click to the student. Fewer colors, each meaning something.",
-    order: "Needs your attention shows At Risk students only, ranked Critical (an overdue or rejected milestone) before High (three or more not started) before Medium (one or two not started, or a low roadmap), ties by the least-complete roadmap; three rows, See all for the rest. The strip leads the page because it is the only card that says act now; everything under it is context. Legends and pathways are ordered by size.",
+    changed: ["Attention list leads the page, students ranked by severity with the reason", "One hero card, plain glass elsewhere; one blue hue plus status colors", "Pathways are Build's own interest worlds, six largest plus Other, in a fixed spectral order", "Every card opens its screen"],
+    why: "The reference showed three equal donuts, its own seven career families, and no way to act.",
+    better: "Worst first, one glance, one click to the student, and the same pathway names the student chose in Build.",
+    order: "Needs your attention shows At Risk students only, ranked Critical (an overdue or rejected milestone) before High (three or more not started) before Medium, ties by the least-complete roadmap; three rows, See all for the rest. Legends and pathways are ordered by size.",
   },
   students: {
-    changed: ["Six columns instead of thirteen; grade and pathway sit under the name", "Sorted attention first, with the reason under the status", "Status and plan pickers in the toolbar, a counselor column for oversight roles", "Card list on phones, paginated at twenty"],
-    why: "The reference's 120-row, 13-column table repeated 'Lincoln High School' and 'Approved' on every row and blank-rendered on phones.",
-    better: "The students to act on are at the top with why, on any device.",
-    order: "Default sort is priority: At Risk, then Needs Attention, then On Track; within a status the same Critical / High / Medium ranking the Overview uses; ties by the least-complete roadmap. Name, roadmap and last active are one click on their headers. The reason under the chip is derived from the student's own milestones.",
+    changed: ["Six columns instead of thirteen; grade and pathway sit under the name", "Sorted attention first, with the reason under the status", "Status and plan pickers in the toolbar, a counselor column for oversight roles", "Opens pre-filtered from the tracker: Not done: [step]", "Card list on phones, paginated at twenty"],
+    why: "The reference's 120-row, 13-column table repeated Lincoln High School and Approved on every row and blank-rendered on phones.",
+    better: "The students to act on are at the top with why, on any device, and the tracker hands you exactly the ones who owe a step.",
+    order: "Default sort is priority: At Risk, then Needs Attention, then On Track; within a status the same Critical / High / Medium ranking the Overview uses; ties by the least-complete roadmap.",
   },
   milestones: {
-    changed: ["One ring for the milestone that needs the most focus, then every milestone as a stacked status bar", "Four states, one color code, attention first", "Counts scaled to the students the role sees; a counselor picker for the Lead"],
-    why: "Seven identical ring cards per grade asked the reader to decode each one; the question is which milestone first.",
-    better: "One answer at the top, the full breakdown in one column of bars below.",
-    order: "The milestone with the largest share of students needing attention (weighted double) plus not started leads as the hero; the rest follow the same score, then the lowest percent done. A milestone everyone is still working on is not treated as behind.",
+    changed: ["Rows are the grade's own My Plan steps, Fall / Winter / Spring, the same list the student sees", "Counts come from what students actually did on Dreamari: in-app steps auto-track, steps you verify read your decisions, student-reported steps say not tracked yet", "Every row opens Students filtered to who has not done it", "CSV of the grid; Student Progress' reports are folded in here"],
+    why: "The reference tracked its own list of milestones with fixed numbers that never matched the roster or the student app.",
+    better: "One list, the student's and yours, live, and one click from any step to the students who owe it.",
+    order: "The step with the largest share not started (awaiting review counts half) leads as Focus first; within each season the same order. A step everyone is still working on is not treated as behind.",
   },
   "review-queue": {
     changed: ["One item per pending submission, ordered by due date", "Decisions recorded and shared with every screen, with Undo", "Attachment previewed in place; the student's name opens the profile", "Pane opens as a sheet on phones"],
@@ -35,10 +35,10 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Most overdue first, then due soonest, then longest waiting. Overdue is Urgent, due within two days is High, else Normal. Nothing here is ordered by who submitted or by roster position.",
   },
   progress: {
-    changed: ["Nine reports as a chip row instead of a 300px side menu", "Grade comes from the header filter; the Lead can pick a counselor", "Verdict beside a readable chart; pathway filter uses the roster's pathways"],
-    why: "The side menu cost a third of the width; the old pathway filter listed careers that no student had, so every choice emptied the report.",
-    better: "Full-width chart, every report one tap away, filters that return results.",
-    order: "Report chips are in the reference's order; chart categories keep the reference's order for each report.",
+    changed: ["Left the menu; its nine reports are the tracker's rows and CSV now", "Still reachable by link for the reference's report views"],
+    why: "Overview, Milestone Tracker, Student Progress and Insights were four analytics screens repeating each other (Usman).",
+    better: "One tracker on My Plan replaces the nine reports, with the same export.",
+    order: "Not in the menu.",
   },
   connect: {
     changed: ["Opens on Questions with the open count; unanswered first", "Announcements can be written, and open to who read them", "Groups open to their feed and can be created"],
@@ -53,10 +53,10 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Recommendations are the three largest interest clusters, largest first; ranked lists are by count.",
   },
   productivity: {
-    changed: ["Tools as a chip row instead of a side column", "Drafts built from the student's own plan, editable, with Copy, Download and Save to notes", "Students Needing Attention is a ranked list that opens profiles"],
-    why: "The reference generated the same paragraph for every student and left it on screen with nowhere to go.",
-    better: "A draft that is specific, and three ways to use it.",
-    order: "Students Needing Attention uses the Overview's ranking: Critical, High, Medium, then the least-complete roadmap; ten rows.",
+    changed: ["Left the menu; the four draft tools now live on each student's profile as Drafts", "Drafts are built from the student's own plan, editable, with Copy, Download, Save to notes, or Write my own"],
+    why: "Pick a student, then generate something belongs inside the student profile, not on its own page (Usman).",
+    better: "A draft where the student already is, from their own data, with a manual option.",
+    order: "Not in the menu.",
   },
   engagement: {
     changed: ["Two-word tile labels; qualifiers moved into muted units", "One blue hue for both series", "District role sees schools compared first"],

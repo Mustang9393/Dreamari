@@ -21,6 +21,9 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 - `docs/COUNSELOR_V2_STATES.md`: every loading, empty, error and edge state per screen, with copy, and the `?state=` preview. This is the backend integration contract.
 - `src/components/counselor/v2/changeNotes.ts`: the per-screen (i) note shown in the UI.
 - `src/lib/counselorOrg.ts`: everything seeded for the role screens (counselors, targets, sibling schools), marked as such.
+- `src/lib/studentSignals.ts`: the bridge from the student app to the dashboard; every My Plan step's status derived from the app's own stores. Start here for "what does the counselor see when a student does X".
+- `docs/handoff/specs/counselor-dashboard.md`: the six-part spec (Who, Use cases, Journeys, Rules, Data, Acceptance).
+- `docs/reference/schoolinks-counselor-notes-2026-09.md`: the counselor persona reference, watched screen by screen.
 
 ## Source of truth for content
 

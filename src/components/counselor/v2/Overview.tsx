@@ -292,12 +292,17 @@ export function Overview() {
   const togglePathway = (label: string) => setPathwayFilter((cur) => (cur === label ? null : label));
 
   const reviewed = useReviewedRoster();
+  const topSix = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of reviewed) counts.set(s.careerTrack, (counts.get(s.careerTrack) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => k);
+  }, [reviewed]);
   const roster = useMemo(() => {
     let all = reviewed;
     if (gradeFilter !== "All Grades") all = all.filter((s) => s.grade === gradeFilter);
-    if (pathwayFilter) all = all.filter((s) => s.careerTrack === pathwayFilter);
+    if (pathwayFilter) all = pathwayFilter === "Other" ? all.filter((s) => !topSix.includes(s.careerTrack)) : all.filter((s) => s.careerTrack === pathwayFilter);
     return all;
-  }, [reviewed, gradeFilter, pathwayFilter]);
+  }, [reviewed, gradeFilter, pathwayFilter, topSix]);
 
   const goToStudents = (status?: StatusRosterFilter, plan?: PlanRosterFilter) => {
     if (status) setStatusFilter(status);
@@ -315,7 +320,11 @@ export function Overview() {
 
   const pathwayCounts = new Map<string, number>();
   for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
-  const topPathways = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
+  // Fifteen Build worlds are too many for one bar: the six largest, then
+  // "Other" (dataviz rule: fold the tail, never a ninth hue).
+  const ranked = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const rest = ranked.slice(6).reduce((n, [, v]) => n + v, 0);
+  const topPathways: [string, number][] = rest > 0 ? [...ranked.slice(0, 6), ["Other", rest]] : ranked.slice(0, 7);
   // Seven distinct hues in spectral order, assigned by rank (palette.ts).
   // History: a seven-hue set that reused status colors; a single-hue ramp
   // that blended neighbours; three cluster hues that repeated ("please

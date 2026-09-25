@@ -140,6 +140,55 @@ bottom."
   one of the three seeded counselors falls back to the A-H caseload, and
   the Students toolbar says whose caseload is showing.
 
+## The bridge to the student app, 25 Sept 2026 (latest)
+
+Usman: "the student app in general, and My Plan in particular, should
+define what the counselor dashboard shows." Direct instruction: "find
+ways to bring things from the Dreamari app into this dashboard, things in
+the app that aren't being tracked here."
+
+- **`src/lib/studentSignals.ts` is the bridge.** One module reads every
+  store the student app writes (profile, picks, saved careers and
+  colleges, resume and its versions, report history, play and glossary
+  progress, dream score, career exploration, stage) into one shape, and
+  derives the status of every My Plan step for the student's grade
+  (`gradePlanData.ts`): in-app steps auto-complete from real actions,
+  counselor-verified steps read the counselor's decisions, student-
+  reported steps say "not tracked yet" until the backend persists My
+  Plan's checkboxes. Seeded students get the same shape from the
+  reference's per-student counts. Alternative: keep two vocabularies (the
+  roster's eleven milestones and My Plan's steps). That is what made the
+  tracker and the profile disagree with the student's own plan.
+- **Milestone Tracker is My Plan by grade.** Rows are the grade's steps
+  by season, each a stacked status bar, each opening Students filtered to
+  the students who have not done it (the shared `stepFilter`, a removable
+  "Not done: [step]" chip). The SchooLinks demo's best screen is this
+  drill-through. CSV of the grid replaces Student Progress' reports.
+- **Student Profile shows the student's My Plan** by season, with how
+  each step is tracked (auto / you verify / student reports), its status
+  and progress, and Approve on steps awaiting the counselor, recorded in
+  the same review store as the queue. "On Dreamari" tiles read the real
+  signals. The Drafts card (the Productivity Suite's four tools) sits on
+  the profile, per Usman.
+- **Pathways are Build's fifteen interest worlds**, not the reference's
+  seven families. Seeded students are spread deterministically from each
+  family onto the worlds it covers (`TRACK_TO_WORLDS`); the live
+  student's pathway is their first Build interest by name. The families
+  remain behind the scenes for the reference's cluster and Top 5 tables.
+  Overview's bar shows the six largest worlds plus Other.
+- **A career report shared with the counselor is a submission.** The live
+  student's "Shared with counselor" report version puts Career Report in
+  Pending Review, so it reaches the Review Queue and the tracker; a report
+  only saved or printed reads Completed.
+- **Insights' saved careers are computed** from every student's top
+  matches plus the live student's real picks. Majors, simulations by
+  career and colleges by id stay the reference's lists until the app
+  records them.
+- **Menus consolidate (Usman):** Student Progress and Productivity Suite
+  leave the School Counselor and Lead Counselor menus; both routes still
+  resolve. Overview, Milestone Tracker and Insights remain as the three
+  analytics screens, each answering a different question.
+
 ## Cross-cutting, 25 Sept 2026 (late)
 
 - **A manual option beside every AI-generated thing** (direct instruction,

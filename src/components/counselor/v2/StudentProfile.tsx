@@ -10,54 +10,31 @@
 // first, dates read "Jan 8", no "You" badge (this is the counselor's view,
 // not the student's), plain notes copy.
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft, Bell, MessageSquare, StickyNote, Target, Compass, GraduationCap,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle,
 } from "lucide-react";
-import { MetricTile, Segmented } from "@/components/connect/viz";
+import { MetricTile } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { MILESTONE_KEYS, milestonesForGrade, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
+import { milestonesForGrade, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
 import { readNotes, addNote } from "@/lib/counselorNotes";
-import { StatusChip, MilestoneChip, Avatar } from "../chips";
+import { StatusChip, Avatar } from "../chips";
+import { planReadings, signalsFor, STATUS_LABEL, type StepReading } from "@/lib/studentSignals";
+import { decideReview } from "@/lib/counselorReviews";
+import { DraftTools } from "./ProductivitySuite";
+import { GLASS_INSET } from "../surfaces";
+import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 
-// The reference's own Plan Progress task names are more specific than the
-// Milestone Status grid's labels above them ("Applications" the milestone
-// vs. "College Application Essays" the task) -- same vocabulary the
-// reference itself used (Emma Rodriguez's plan: College Application
-// Essays / FAFSA Submission / Recommendation Letter Request / Transcript
-// Submission), generalized to whichever milestones aren't approved yet.
-const PLAN_TASK_NAMES: Partial<Record<MilestoneKey, string>> = {
-  Applications: "College Application Essays",
-  "Financial Aid": "FAFSA Submission",
-  "Recommendation Letter": "Recommendation Letter Request",
-  "Transcript Submission": "Transcript Submission",
-  "Career Report": "Career Report Draft",
-  "Academic Plan": "Academic Plan Review",
-  "College List": "College List Finalization",
-  "College Exploration": "College Exploration Checklist",
-  Resume: "Resume Draft",
-  "Career Pathway": "Career Pathway Selection",
-  "Career Assessment": "Career Assessment Retake",
-};
 
-type PlanBucket = "3mo" | "6mo" | "12mo";
-const PLAN_TABS: { key: PlanBucket; label: string }[] = [
-  { key: "3mo", label: "3 months" },
-  { key: "6mo", label: "6 months" },
-  { key: "12mo", label: "12 months" },
-];
 
 function fmtDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-// Attention first: what needs the counselor, then what the student owes,
-// then what is moving, then what is done.
-const STATE_RANK: Record<MilestoneStatus, number> = { Overdue: 0, "Changes Requested": 1, "Pending Review": 2, "Not Started": 3, "In Progress": 4, Approved: 5, Completed: 5, "Not Applicable": 6 };
 
 /** What this student needs from the counselor, from their own milestones. */
 function needsYou(m: Record<MilestoneKey, MilestoneStatus>, keys: MilestoneKey[]): string[] {
@@ -70,14 +47,28 @@ function needsYou(m: Record<MilestoneKey, MilestoneStatus>, keys: MilestoneKey[]
   return out;
 }
 
-function seededOffset(seed: string, min: number, max: number): number {
-  let h = 2166136261;
-  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
-  h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
-  return min + (h % (max - min + 1));
-}
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
+
+const STEP_COLOR: Record<string, string> = { done: PRIMARY, "awaiting-review": BLUE_3[0], "in-progress": "#C9D0FE", "not-started": NEUTRAL_SLICE, "not-tracked": "transparent" };
+
+// One My Plan step: a status dot, the title, how it is tracked, and for a
+// step the counselor verifies that is awaiting review, an Approve action
+// (recorded in counselorReviews, so the Review Queue and every screen agree).
+function PlanStepRow({ r, studentId }: { r: StepReading; studentId: string }) {
+  const color = STEP_COLOR[r.status];
+  const label = r.kind === "in-app" ? "auto" : r.kind === "counselor-verified" ? "you verify" : "student reports";
+  return (
+    <li className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px]" style={GLASS_INSET}>
+      <span aria-hidden className="size-[8px] flex-none rounded-full border" style={{ background: color, borderColor: r.status === "not-tracked" ? "var(--glass-border)" : color }} />
+      <span className="min-w-0 flex-1 text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{r.step.title}</span>
+      <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label} · {STATUS_LABEL[r.status]}{r.progress ? ` · ${r.progress[0]} of ${r.progress[1]}` : ""}</span>
+      {r.kind === "counselor-verified" && r.status === "awaiting-review" && r.milestone && (
+        <button type="button" onClick={() => decideReview(studentId, r.milestone!, "Approved", "")} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-7 cursor-pointer items-center rounded-full px-[10px] text-[12px] font-bold">Approve</button>
+      )}
+    </li>
+  );
+}
 
 function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Bell; label: string; onClick?: () => void }) {
   return (
@@ -106,26 +97,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
   const [toast, setToast] = useState<string | null>(null);
-  const [planTab, setPlanTab] = useState<PlanBucket>("3mo");
-  // Read once via a lazy initializer, not inside the memo below --
-  // Date.now() is an impure call and isn't allowed directly in a
-  // render-time computation or ref access.
-  const [now] = useState(() => Date.now());
 
-  // Every unapproved milestone becomes a plan task, bucketed by how soon
-  // it's due -- deterministic per student+key so the same task always
-  // lands in the same bucket with the same due date across renders.
-  const planTasks = useMemo(() => {
-    if (!student) return [];
-    const notApprovedKeys = MILESTONE_KEYS.filter((k) => student.milestones[k] !== "Approved");
-    return notApprovedKeys.map((key, i) => {
-      const bucket: PlanBucket = i === 0 ? "3mo" : i <= 2 ? "6mo" : "12mo";
-      const dayOffset = seededOffset(`${student.id}-${key}`, 5, bucket === "3mo" ? 45 : bucket === "6mo" ? 120 : 300);
-      const due = new Date(now + dayOffset * 86400000).toISOString().slice(0, 10);
-      const status: "In Progress" | "Not Started" = student.milestones[key] === "In Progress" || student.milestones[key] === "Pending Review" ? "In Progress" : "Not Started";
-      return { key, label: PLAN_TASK_NAMES[key] ?? key, due, status, bucket };
-    });
-  }, [student, now]);
 
   if (!student) {
     return (
@@ -142,19 +114,24 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   };
 
   const gradeKeys = milestonesForGrade(student.grade);
-  const orderedKeys = [...gradeKeys].sort((a, b) => STATE_RANK[student.milestones[a]] - STATE_RANK[student.milestones[b]]);
   const approvedCount = gradeKeys.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed").length;
   const actions = needsYou(student.milestones, gradeKeys);
+  // The student's own My Plan, read from what they have actually done
+  // (studentSignals.ts): the bridge from the student app to this profile.
+  const signals = signalsFor(student);
+  const readings = planReadings(student, signals);
+  const tracked = readings.filter((r) => r.status !== "not-tracked");
+  const stepsDone = tracked.filter((r) => r.status === "done").length;
 
   const engagement = [
-    { icon: Sparkles, value: String(student.engagement.dreamScore), label: "Dream Score", accent: "#5B6CF9" },
-    { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops", accent: "#5B6CF9" },
-    { icon: Gamepad2, value: String(student.engagement.simulations), label: "Simulations", accent: "#5B6CF9" },
-    { icon: Bookmark, value: String(student.engagement.careersSaved), label: "Careers Saved", accent: "#5B6CF9" },
-    { icon: Landmark, value: String(student.engagement.collegesSaved), label: "Colleges Saved", accent: "#5B6CF9" },
-    { icon: Trophy, value: String(student.engagement.challenges), label: "Challenges", accent: "#5B6CF9" },
-    { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions asked", accent: "#5B6CF9" },
-    { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community Posts", accent: "#5B6CF9" },
+    { icon: Sparkles, value: String(signals.dreamScore), label: "Dream Score", accent: "#5B6CF9" },
+    { icon: Bookmark, value: String(signals.careersSaved), label: "Careers saved", accent: "#5B6CF9" },
+    { icon: Landmark, value: String(signals.collegesSaved), label: "Colleges saved", accent: "#5B6CF9" },
+    { icon: Gamepad2, value: String(signals.simulationsCompleted), label: "Simulations", accent: "#5B6CF9" },
+    { icon: Trophy, value: String(signals.glossaryLessonsCompleted), label: "Skill games", accent: "#5B6CF9" },
+    { icon: HelpCircle, value: signals.resumeAtsScore === null ? "none" : String(signals.resumeAtsScore), label: "Resume score", accent: "#5B6CF9" },
+    { icon: Sunrise, value: String(signals.reportVersions), label: "Career reports", accent: "#5B6CF9" },
+    { icon: MessageCircle, value: String(signals.experiencesLogged), label: "Experiences logged", accent: "#5B6CF9" },
   ];
 
   return (
@@ -238,61 +215,31 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex flex-wrap items-center justify-between gap-[8px]">
-            <CardHead icon={Target} title="Milestones" accent="#5B6CF9" />
-            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{gradeKeys.length} required in Grade {student.grade} · {approvedCount} approved</span>
+            <CardHead icon={Target} title={`Grade ${student.grade} My Plan`} accent="#5B6CF9" />
+            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stepsDone} of {tracked.length} tracked steps done</span>
           </span>
-          <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-3">
-            {orderedKeys.map((key) => (
-              <span key={key} className="flex items-center justify-between rounded-[var(--radius-md)] border px-[14px] py-[10px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{key}</span>
-                <MilestoneChip status={student.milestones[key]} />
-              </span>
-            ))}
-          </div>
+          {(["fall", "winter", "spring"] as const).map((w) => {
+            const rows = readings.filter((r) => r.window === w);
+            if (rows.length === 0) return null;
+            return (
+              <div key={w} className="flex flex-col gap-[6px]">
+                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{w}</span>
+                <ul className="flex flex-col gap-[6px]">
+                  {rows.map((r) => <PlanStepRow key={r.step.id} r={r} studentId={student.id} />)}
+                </ul>
+              </div>
+            );
+          })}
+          <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>In-app steps track automatically from what {student.name.split(" ")[0]} does on Dreamari. Steps you verify wait for your approval here or in the Review Queue.</span>
         </div>
       </HoverBeam>
 
-      {planTasks.length > 0 && (
-        <HoverBeam strength={0.6} className="h-full">
-          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <span className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-              <CardHead icon={Sunrise} title="Plan" accent="#5B6CF9" />
-              <Segmented ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
-            </span>
-            {(() => {
-              const rows = planTasks.filter((t) => t.bucket === planTab);
-              if (rows.length === 0) return <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Nothing due in this window.</p>;
-              // Row treatment borrowed from the student's own My Plan tab
-              // (Profile > My Plan): a status dot standing in for that
-              // view's checkbox -- a counselor doesn't complete these
-              // tasks, the student does, so a tickable box would be
-              // misleading here, but the same "small status mark, task
-              // name, meta line" rhythm keeps the two screens legible as
-              // the same product seen from different sides.
-              return (
-                <ul className="flex flex-col gap-[6px]">
-                  {rows.map((t) => (
-                    <li key={t.key} className="flex items-center gap-[12px] rounded-[var(--radius-md)] border px-[14px] py-[11px] transition-colors" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                      <span
-                        aria-hidden
-                        className="flex size-[20px] flex-none items-center justify-center rounded-full border-2"
-                        style={{ borderColor: t.status === "In Progress" ? "#5B6CF9" : "var(--glass-border)", background: t.status === "In Progress" ? "color-mix(in srgb, #5B6CF9 22%, transparent)" : "transparent" }}
-                      >
-                        {t.status === "In Progress" && <span className="size-[8px] rounded-full" style={{ background: "#5B6CF9" }} />}
-                      </span>
-                      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                        <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.label}</span>
-                        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Due {fmtDate(t.due)}</span>
-                      </span>
-                      <MilestoneChip status={t.status} />
-                    </li>
-                  ))}
-                </ul>
-              );
-            })()}
-          </div>
-        </HoverBeam>
-      )}
+      <HoverBeam strength={0.6} className="h-full">
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <CardHead icon={Sparkles} title="Drafts" accent="#5B6CF9" />
+          <DraftTools student={student} />
+        </div>
+      </HoverBeam>
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
