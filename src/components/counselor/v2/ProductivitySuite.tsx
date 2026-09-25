@@ -241,7 +241,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             </div>
           </div>
           )}
-          {toolId !== "attention" && toolId !== "group-message" && <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Generate a first draft from the student&apos;s Dreamari data, or write your own. Either way, edit here, then copy, download or save to the student&apos;s notes.</p>}
 
           {draft !== null && toolId !== "attention" && toolId !== "group-message" && (
             <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: GLASS_INSET.background }}>

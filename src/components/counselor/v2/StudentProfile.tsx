@@ -242,7 +242,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               </Disclosure>
             );
           })}
-          <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>In-app steps track automatically from what {student.name.split(" ")[0]} does on Dreamari. Steps you verify wait for your approval here or in the Review Queue.</span>
         </div>
       </HoverBeam>
 
