@@ -14,10 +14,8 @@ import { Avatar, CardLink, Go, StatRow } from "../chips";
 import { attentionReason, attentionSeverity, attentionRank, milestonesForGrade, type CounselorStudent, type AttentionSeverity, type MilestoneKey } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "../palette";
-import { WORLD_COLORS } from "@/components/app/worlds";
+import { BLUE_3, NEUTRAL_SLICE, PATHWAY_SEQUENCE, PRIMARY, TARGET_LINE } from "../palette";
 import { GLASS_INSET } from "../surfaces";
-import { planGradeSummary } from "./PlanMap";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "#33C78C",
@@ -340,18 +338,15 @@ export function Overview() {
   const ranked = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
   const rest = ranked.slice(6).reduce((n, [, v]) => n + v, 0);
   const topPathways: [string, number][] = rest > 0 ? [...ranked.slice(0, 6), ["Other", rest]] : ranked.slice(0, 7);
-  // Each pathway wears the colour its world has everywhere else in the
-  // student app (WORLD_COLORS, the Figma Career Poster Card variants, light
-  // and dark values in tokens.css). Direct instruction, 25 Sept 2026: "let
-  // pathways use the actual color system we use for the different
-  // industries in the dreamari app." History: a seven-hue set that reused
-  // status colors; a single-hue ramp that blended neighbours; three
-  // cluster hues that repeated; a spectral rank order (palette.ts
-  // PATHWAY_SEQUENCE, now unused here). "Other" stays neutral.
-  const pathwayColors = topPathways.map(([label]) => (label === "Other" ? NEUTRAL_SLICE : WORLD_COLORS[label] ?? PRIMARY));
+  // A spectral rank order over the reference's seven tracks (palette.ts
+  // PATHWAY_SEQUENCE), largest pathway first; "Other" stays neutral. A
+  // 25 Sept 2026 pass tried coloring each pathway by its matching Build
+  // world instead, reverted the same day along with the Build-world
+  // pathway substitution itself (see counselorRoster.ts) since the
+  // dashboard's pathways are the reference's own seven tracks, not Build's
+  // fifteen worlds.
+  const pathwayColors = topPathways.map(([label], i) => (label === "Other" ? NEUTRAL_SLICE : PATHWAY_SEQUENCE[i % PATHWAY_SEQUENCE.length]));
 
-  const gradeSummary = useMemo(() => planGradeSummary(reviewed), [reviewed]);
-  const gradeVerdictColor = gradeSummary.length === 0 ? STATUS_COLORS["On Track"] : gradeSummary[0].donePct >= 80 ? STATUS_COLORS["On Track"] : gradeSummary[0].donePct >= 50 ? STATUS_COLORS["Needs Attention"] : STATUS_COLORS["At Risk"];
   // Five milestones, each over the grades the reference tracks it for
   // (milestonesForGrade), lowest share first.
   const readiness = useMemo(() => READINESS_ROWS.map((r) => {
@@ -418,47 +413,15 @@ export function Overview() {
         </div>
       </div>
 
-      {/* My Plan by grade and the reviews chart. This row replaced the
-         "Academic Readiness" bars, whose College List and FAFSA series
-         were "Not Applicable" for Grades 9-11 and rendered as empty
-         columns (direct report, 25 Sept 2026: "i see empty graphs in
-         overview"). The full school year map (grade by season) lives on
-         the Milestone Tracker only ("let's not show the grid in two
-         places"); here it is one line per grade, the glance version,
-         and each line opens the tracker at that grade. */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-        <HoverBeam strength={0.6} className="h-full">
-          <Panel id="plan-by-grade" title="My Plan by grade" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Steps done this year</p>
-            {gradeSummary.length > 0 && (
-              <p className="flex items-center gap-[8px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
-                <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: gradeVerdictColor, boxShadow: `0 0 8px ${gradeVerdictColor}` }} />
-                <span>Grade {gradeSummary[0].grade} has the most room to grow</span>
-              </p>
-            )}
-            <ul className="flex flex-col gap-[6px]">
-              {gradeSummary.map((g) => (
-                <li key={g.grade}>
-                  <button type="button" onClick={() => { setGradeFilter(g.grade); router.push("/counselor?view=milestones"); }} className="dm-quiet group flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left" style={GLASS_INSET}>
-                    <span className="flex items-baseline justify-between gap-[10px]">
-                      <span className="flex min-w-0 items-baseline gap-[8px]">
-                        <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>Grade {g.grade}</span>
-                        <span className="truncate text-[11.5px] font-semibold" style={{ color: g.awaiting > 0 ? PRIMARY : "var(--muted-foreground)" }}>{g.awaiting > 0 ? `${g.awaiting} pending your review` : g.notDone > 0 ? `${g.notDone} of ${g.students} still have steps to do` : "everyone is done"}</span>
-                      </span>
-                      <span className="flex flex-none items-center gap-[6px]">
-                        <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{g.donePct}%</span>
-                        <Go />
-                      </span>
-                    </span>
-                    <span className="block h-[6px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
-                      <span className="block h-full rounded-full" style={{ width: `${g.donePct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${PRIMARY} 55%, transparent), ${PRIMARY})` }} />
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-        </HoverBeam>
+      {/* Reviews approved chart. A "My Plan by grade" panel briefly lived
+         here, driven by the student app's own My Plan steps rather than
+         the reference's curriculum; removed in the 25 Sept 2026 content
+         reversion (direct instruction: "take out all the additional stuff
+         we did for parity with dreamari's plan... match the replit") since
+         it had no reference equivalent. The full school year map (grade by
+         season) lives on the Milestone Tracker, which this card still
+         links to. */}
+      <div className="grid grid-cols-1 gap-[var(--space-4)]">
         <HoverBeam strength={0.6} className="h-full">
           {/* Maisha's Career Readiness and Academic Readiness bars, kept as
              measures and re-shaped (25 Sept 2026, direct question: "why

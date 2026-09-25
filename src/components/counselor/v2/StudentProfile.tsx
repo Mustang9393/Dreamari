@@ -16,19 +16,18 @@ import {
   ChevronLeft, Bell, MessageSquare, StickyNote, Target, Compass, GraduationCap,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle,
 } from "lucide-react";
-import { MetricTile } from "@/components/connect/viz";
+import { MetricTile, Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { milestonesForGrade, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
+import { PLAN_PROGRESS_3MO } from "@/lib/counselorProfileData";
 import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
 import { readNotes, addNote } from "@/lib/counselorNotes";
-import { StatusChip, Avatar } from "../chips";
-import { planReadings, signalsFor, STATUS_LABEL, type StepReading } from "@/lib/studentSignals";
-import { decideReview } from "@/lib/counselorReviews";
+import { StatusChip, MilestoneChip, Avatar } from "../chips";
+import { signalsFor } from "@/lib/studentSignals";
 import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
 import { CheckinsCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
-import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 
 
 
@@ -52,25 +51,12 @@ function needsYou(m: Record<MilestoneKey, MilestoneStatus>, keys: MilestoneKey[]
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
-const STEP_COLOR: Record<string, string> = { done: PRIMARY, "awaiting-review": BLUE_3[0], "in-progress": "#C9D0FE", "not-started": NEUTRAL_SLICE, "not-tracked": "transparent" };
-
-// One My Plan step: a status dot, the title, how it is tracked, and for a
-// step the counselor verifies that is awaiting review, an Approve action
-// (recorded in counselorReviews, so the Review Queue and every screen agree).
-function PlanStepRow({ r, studentId }: { r: StepReading; studentId: string }) {
-  const color = STEP_COLOR[r.status];
-  const label = r.kind === "in-app" ? "auto" : r.kind === "counselor-verified" ? "you verify" : "student reports";
-  return (
-    <li className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px]" style={GLASS_INSET}>
-      <span aria-hidden className="size-[8px] flex-none rounded-full border" style={{ background: color, borderColor: r.status === "not-tracked" ? "var(--glass-border)" : color }} />
-      <span className="min-w-0 flex-1 text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{r.step.title}</span>
-      <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label} · {STATUS_LABEL[r.status]}{r.progress ? ` · ${r.progress[0]} of ${r.progress[1]}` : ""}</span>
-      {r.kind === "counselor-verified" && r.status === "awaiting-review" && r.milestone && (
-        <button type="button" onClick={() => decideReview(studentId, r.milestone!, "Approved", "")} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-7 cursor-pointer items-center rounded-full px-[10px] text-[12px] font-bold">Approve</button>
-      )}
-    </li>
-  );
-}
+type PlanBucket = "3mo" | "6mo" | "12mo";
+const PLAN_TABS: { key: PlanBucket; label: string }[] = [
+  { key: "3mo", label: "Next 3 Months" },
+  { key: "6mo", label: "Next 6 Months" },
+  { key: "12mo", label: "Next 12 Months" },
+];
 
 function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Bell; label: string; onClick?: () => void }) {
   return (
@@ -99,7 +85,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
   const [toast, setToast] = useState<string | null>(null);
-  const [openSeason, setOpenSeason] = useState<"fall" | "winter" | "spring" | "none" | null>(null);
+  const [planTab, setPlanTab] = useState<PlanBucket>("3mo");
   const [draftsOpen, setDraftsOpen] = useState(false);
 
 
@@ -120,16 +106,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const gradeKeys = milestonesForGrade(student.grade);
   const approvedCount = gradeKeys.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed").length;
   const actions = needsYou(student.milestones, gradeKeys);
-  // The student's own My Plan, read from what they have actually done
-  // (studentSignals.ts): the bridge from the student app to this profile.
   const signals = signalsFor(student);
-  const readings = planReadings(student, signals);
-  const tracked = readings.filter((r) => r.status !== "not-tracked");
-  const stepsDone = tracked.filter((r) => r.status === "done").length;
-  // One season open at a time, like the student's own My Plan: by default
-  // the first season with something for the counselor (awaiting review
-  // first, then anything not done), or Fall when the plan is complete.
-  const firstOpen = readings.find((r) => r.status === "awaiting-review")?.window ?? readings.find((r) => r.status !== "done" && r.status !== "not-tracked")?.window ?? "fall";
 
   const engagement = [
     { icon: Sparkles, value: String(signals.dreamScore), label: "Dream Score", accent: "#5B6CF9" },
@@ -222,26 +199,25 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <span className="flex flex-wrap items-center justify-between gap-[8px]">
-            <CardHead icon={Target} title={`Grade ${student.grade} My Plan`} accent="#5B6CF9" />
-            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{stepsDone} of {tracked.length} tracked steps done</span>
-          </span>
-          {(["fall", "winter", "spring"] as const).map((w) => {
-            const rows = readings.filter((r) => r.window === w);
-            if (rows.length === 0) return null;
-            const isOpen = (openSeason ?? firstOpen) === w;
-            const rowsTracked = rows.filter((r) => r.status !== "not-tracked");
-            const rowsDone = rowsTracked.filter((r) => r.status === "done").length;
-            const waiting = rows.filter((r) => r.status === "awaiting-review").length;
-            return (
-              <Disclosure key={w} id={`profile-season-${w}`} title={w} open={isOpen} onToggle={() => setOpenSeason(isOpen ? "none" : w)}
-                summary={waiting ? `${waiting} awaiting you · ${rowsDone} of ${rowsTracked.length} done` : rowsTracked.length ? `${rowsDone} of ${rowsTracked.length} done` : "student reports"}>
-                <ul className="flex flex-col gap-[6px]">
-                  {rows.map((r) => <PlanStepRow key={r.step.id} r={r} studentId={student.id} />)}
-                </ul>
-              </Disclosure>
-            );
-          })}
+          <CardHead icon={Target} title="Plan Progress" accent="#5B6CF9" />
+          <Segmented ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
+          {planTab === "3mo" ? (
+            <ul className="flex flex-col gap-[8px]">
+              {PLAN_PROGRESS_3MO.map((t) => (
+                <li key={t.name} className="flex items-center justify-between gap-[12px] rounded-[var(--radius-md)] border px-[14px] py-[11px]" style={GLASS_INSET}>
+                  <span className="flex min-w-0 flex-col gap-[2px]">
+                    <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.name}</span>
+                    <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Due: {fmtDate(t.due)}</span>
+                  </span>
+                  <MilestoneChip status={t.status} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>
+              {planTab === "6mo" ? "6-month view: milestones due in the next 6 months." : "12-month view: milestones due in the next 12 months."}
+            </p>
+          )}
         </div>
       </HoverBeam>
 

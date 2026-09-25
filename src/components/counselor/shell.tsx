@@ -93,9 +93,9 @@ type FiltersState = {
    *  Review Queue and Milestone Tracker for the roles that see counselors,
    *  and set by the Counselors screen's click-through. */
   counselorFilter: string; setCounselorFilter: (c: string) => void;
-  /** A My Plan step id (gradePlanData.ts) plus its title: Students then
-   *  shows only the students who have not done it. Set by the Milestone
-   *  Tracker's rows; cleared by the chip on Students. */
+  /** A curriculum checkpoint id (counselorCurriculum.ts) plus its title:
+   *  Students then shows only the students who have not done it. Set by
+   *  the Milestone Tracker's rows; cleared by the chip on Students. */
   stepFilter: { id: string; title: string; grade: 9 | 10 | 11 | 12 } | null; setStepFilter: (f: { id: string; title: string; grade: 9 | 10 | 11 | 12 } | null) => void;
 };
 const CounselorFiltersContext = createContext<FiltersState>({

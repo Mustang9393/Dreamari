@@ -1017,6 +1017,86 @@ standing alone as a blank chart, so removing the overlay does not
 reintroduce the original complaint. Verified live: every Readiness row
 still reads a real, non-zero, non-alarming percentage after the removal.
 
+## Pathways and Student Profile's plan card, reverted to the reference (26 Sept 2026)
+
+Direct instruction, continuing the same content-audit thread: "Take out
+all the additional stuff we did for parity with dreamari's plan etc. We
+want the content and everything to match the replit, just the UX and UI
+enhancements of our current v2 version." Confirmed and widened the next
+day: "do that sweep and revert anything that isn't in the reference
+replit. We want v1 its content design and shown better like we have in
+v2." The Milestone Tracker's own content was already fixed by the two
+entries directly above; the remaining two pieces of "The bridge to the
+student app" section (above) still substituted Dreamari-app data for the
+reference's own content:
+
+- **Pathways are the reference's seven career tracks again**, not Build's
+  fifteen interest worlds. `src/lib/counselorRoster.ts`: `CAREER_TRACKS`
+  is `REFERENCE_TRACKS` verbatim; `buildReferenceRoster()` uses each
+  seeded row's own `careerTrack` directly (no more `TRACK_TO_WORLDS`
+  spread onto a Build world); the live student's `careerTrack` is the
+  reference family their first Build interest maps onto
+  (`WORLD_TO_TRACK`, kept -- a real Dreamari session can't have declared
+  a fictional reference track directly), or "Undeclared". `familyOfWorld`
+  removed (dead once the substitution was gone; confirmed zero
+  consumers). Overview's pathway bar reverted from `WORLD_COLORS` (each
+  world's own hue elsewhere in the student app) to `PATHWAY_SEQUENCE`, the
+  seven-hue spectral order already built for exactly seven tracks.
+- **Overview's "My Plan by grade" panel removed.** Built on the student
+  app's own My Plan steps (`PlanMap.tsx`'s `planGradeSummary`), it had no
+  reference equivalent at all -- v1's Overview has exactly five panels
+  (Student Status, Postsecondary Plans, Career Pathways, Career Readiness,
+  Academic Readiness), and the last two were already legitimately reshaped
+  into the Readiness card without content loss. Readiness now spans the
+  full row alone.
+- **Student Profile's "Grade N My Plan" card replaced with a v2-styled
+  port of the reference's actual "Plan Progress" section.** The bridge
+  card was per-grade, per-student, broken out by season, sourced from
+  `studentSignals.ts`'s `planReadings`, with Approve actions. The
+  reference's own section is much thinner: a fixed, generic, same-for-
+  every-student 4-item list (`counselorProfileData.ts`'s
+  `PLAN_PROGRESS_3MO`: College Application Essays, FAFSA Submission,
+  Recommendation Letter Request, Transcript Submission) under a
+  3mo/6mo/12mo `Segmented` tab, where only 3mo shows real items and
+  6mo/12mo show the reference's own placeholder sentence. Ported
+  verbatim, restyled with v2's glass-card/HoverBeam language.
+- **`v2/PlanMap.tsx` trimmed to just `Ring`** (a pure SVG progress ring,
+  no data dependency); `planGradeSummary`, `SeasonStrip` and
+  `planMapCells`, along with their `GRADE_PLANS`/`studentSignals.ts`
+  imports, removed once Overview and the (already-reverted) Milestone
+  Tracker stopped calling them.
+
+**Kept, on purpose, as legitimate v2 additions rather than "parity with
+Dreamari's plan" content** (confirmed by re-reading Maisha's original
+rule -- "content" means the specific data points, not "no new
+capability"): the Fall/Winter/Spring season grouping on the Milestone
+Tracker (a presentation choice over the reference's own flat list,
+documented in the entry above, not a content change -- confirmed with the
+user directly: "wasnt there for maisha's version right?" -- yes, kept as
+a UX enhancement); the Casefile mocks and Productivity Suite's Group
+Message (both mocked from the SchooLinks staff dashboard on Usman's own
+suggestion, a reorg discussion, not a Dreamari-plan substitution -- see
+the casefile section directly below); the five role-shell screens
+(Counselors, Readiness, Reports, Schools, School Impact) v1 has no
+equivalent of; and `signalsFor`'s engagement tiles, which were never a
+content substitution, just this dashboard's version of the reference's
+own "Platform Engagement" section reading from real localStorage instead
+of a canned reference number.
+
+**Not touched, per direct instruction ("dont work on v3"):** v3, a frozen
+snapshot from before this whole content-audit thread, still calls its own
+copies of the now-changed functions. Since `counselorRoster.ts` is shared
+rather than forked, v3's pathway bar now also receives the reference's
+seven track names instead of Build's fifteen worlds -- its own
+`WORLD_COLORS` lookup no longer matches any of them and falls back to a
+single blue for every segment. Cosmetic only: v3's "My Plan by grade"
+panel and its own Milestone Tracker still work, unchanged.
+
+Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all
+passed clean. Browser-verified Overview, Student Profile (both Plan
+Progress tab states) and the Milestone Tracker in v2, plus v1 and v3 for
+regressions.
+
 ## Student Profile casefile mocks (v2, 25 Sept 2026)
 
 Built on request from the SchooLinks staff dashboard, DEMO-ONLY
