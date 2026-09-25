@@ -41,3 +41,16 @@ export const GLASS_INSET = {
 export function glowBackdrop(color: string, opacity = 0.35): string {
   return `radial-gradient(60% 60% at 30% 20%, color-mix(in srgb, ${color} ${Math.round(opacity * 100)}%, transparent), transparent 70%)`;
 }
+
+/** One blue family for composition. Area carries the value; a gentle
+ * count-based tint reinforces it without introducing categorical colors.
+ * Highlights are identical in direction and do not change tile geometry. */
+export function pathwayTileSurface(share: number, active = false) {
+  const strength = Math.round(24 + Math.min(1, Math.max(0, share)) * 110);
+  return {
+    background: `linear-gradient(145deg, color-mix(in srgb, var(--foreground) ${active ? 15 : 7}%, transparent), transparent 55%), linear-gradient(160deg, color-mix(in srgb, var(--primary) ${active ? 64 : strength}%, var(--glass-surface-2)), color-mix(in srgb, var(--primary) ${active ? 38 : Math.round(strength * 0.55)}%, var(--card)))`,
+    borderColor: "color-mix(in srgb, var(--primary) 20%, var(--card))",
+    boxShadow: `inset 0 1px 0 color-mix(in srgb, var(--foreground) ${active ? 36 : 13}%, transparent), inset 1px 0 0 color-mix(in srgb, var(--foreground) 5%, transparent)${active ? ", inset 0 0 32px color-mix(in srgb, var(--primary) 28%, transparent)" : ""}`,
+    color: "var(--foreground)",
+  };
+}
