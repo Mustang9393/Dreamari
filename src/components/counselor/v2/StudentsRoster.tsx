@@ -17,6 +17,8 @@ import { Listbox } from "@/components/app/Listbox";
 import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCOPE_COUNSELOR_TO_CASELOAD, counselorFor, myCounselor } from "@/lib/counselorOrg";
+import { planReadings } from "@/lib/studentSignals";
+import { X } from "lucide-react";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar } from "../chips";
@@ -102,7 +104,7 @@ const PAGE_SIZE = 20;
 
 export function StudentsRoster() {
   const router = useRouter();
-  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter } = useCounselorFilters();
+  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter } = useCounselorFilters();
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
@@ -122,6 +124,9 @@ export function StudentsRoster() {
     if (planFilter === "Undecided") list = list.filter((s) => s.postsecondaryIntent === "Undecided");
     if (intentFilter !== "All") list = list.filter((s) => s.postsecondaryIntent === intentFilter);
     if (showCounselor && counselorFilter !== "All") list = list.filter((s) => counselorFor(s).id === counselorFilter);
+    // From the Milestone Tracker: only the students who have not done this
+    // My Plan step (the counselor's actual to-do list for it).
+    if (stepFilter) list = list.filter((s) => s.grade === stepFilter.grade && planReadings(s).some((r) => r.step.id === stepFilter.id && r.status !== "done" && r.status !== "not-tracked"));
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((s) => s.name.toLowerCase().includes(q) || s.careerTrack.toLowerCase().includes(q));
     const dir = sortDir === "asc" ? 1 : -1;
@@ -131,7 +136,7 @@ export function StudentsRoster() {
       if (sortKey === "lastActive") return a.lastActive.localeCompare(b.lastActive) * dir;
       return priorityRank(a, b) * dir;
     });
-  }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, sortKey, sortDir]);
+  }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, stepFilter, sortKey, sortDir]);
 
   const pageCount = Math.max(1, Math.ceil(roster.length / PAGE_SIZE));
   const effectivePage = Math.min(page, pageCount - 1);
@@ -161,6 +166,11 @@ export function StudentsRoster() {
           {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}{pageCount > 1 ? ` · showing ${effectivePage * PAGE_SIZE + 1} to ${effectivePage * PAGE_SIZE + pageRows.length}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
+          {stepFilter && (
+            <button type="button" onClick={() => setStepFilter(null)} className="flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--foreground)" }}>
+              Not done: {stepFilter.title} <X className="h-[13px] w-[13px]" aria-hidden />
+            </button>
+          )}
           {showCounselor && (
             <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className={PICKER} style={pickerStyle} />
           )}

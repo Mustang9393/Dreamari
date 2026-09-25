@@ -38,15 +38,18 @@ export const REFERENCE_VIEWS: CounselorView[] = [
 ];
 
 export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
+  // Student Progress and Productivity Suite left the menus on 25 Sept 2026
+  // (Usman): the tracker now covers every My Plan step with a CSV export,
+  // so Progress' nine reports were the same numbers again, and drafts are
+  // "pick a student, then generate", which belongs on the student's
+  // profile. Both routes still resolve for old links.
   "School Counselor": [
     { view: "overview" },
     { view: "students" },
     { view: "milestones" },
     { view: "review-queue" },
-    { view: "progress" },
     { view: "connect" },
     { view: "insights" },
-    { view: "productivity" },
     { view: "impact" },
     { view: "settings" },
   ],
@@ -56,10 +59,8 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "students" },
     { view: "milestones" },
     { view: "review-queue" },
-    { view: "progress" },
     { view: "connect" },
     { view: "insights" },
-    { view: "productivity" },
     { view: "school-impact" },
     { view: "settings" },
   ],
@@ -105,8 +106,13 @@ export function menuForRole(role: CounselorRole | ""): RoleMenuItem[] {
   return ROLE_MENUS[roleOrDefault(role)];
 }
 
+/** Screens a role can open by URL but that are not in its menu. */
+const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {
+  "School Counselor": ["progress", "productivity"],
+  "Lead Counselor": ["progress", "productivity"],
+};
 export function roleHasView(role: CounselorRole | "", view: CounselorView): boolean {
-  return menuForRole(role).some((item) => item.view === view);
+  return menuForRole(role).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
 }
 
 /** The Students view doubles as the Student Profile drill-down

@@ -140,6 +140,55 @@ bottom."
   one of the three seeded counselors falls back to the A-H caseload, and
   the Students toolbar says whose caseload is showing.
 
+## The bridge to the student app, 25 Sept 2026 (latest)
+
+Usman: "the student app in general, and My Plan in particular, should
+define what the counselor dashboard shows." Direct instruction: "find
+ways to bring things from the Dreamari app into this dashboard, things in
+the app that aren't being tracked here."
+
+- **`src/lib/studentSignals.ts` is the bridge.** One module reads every
+  store the student app writes (profile, picks, saved careers and
+  colleges, resume and its versions, report history, play and glossary
+  progress, dream score, career exploration, stage) into one shape, and
+  derives the status of every My Plan step for the student's grade
+  (`gradePlanData.ts`): in-app steps auto-complete from real actions,
+  counselor-verified steps read the counselor's decisions, student-
+  reported steps say "not tracked yet" until the backend persists My
+  Plan's checkboxes. Seeded students get the same shape from the
+  reference's per-student counts. Alternative: keep two vocabularies (the
+  roster's eleven milestones and My Plan's steps). That is what made the
+  tracker and the profile disagree with the student's own plan.
+- **Milestone Tracker is My Plan by grade.** Rows are the grade's steps
+  by season, each a stacked status bar, each opening Students filtered to
+  the students who have not done it (the shared `stepFilter`, a removable
+  "Not done: [step]" chip). The SchooLinks demo's best screen is this
+  drill-through. CSV of the grid replaces Student Progress' reports.
+- **Student Profile shows the student's My Plan** by season, with how
+  each step is tracked (auto / you verify / student reports), its status
+  and progress, and Approve on steps awaiting the counselor, recorded in
+  the same review store as the queue. "On Dreamari" tiles read the real
+  signals. The Drafts card (the Productivity Suite's four tools) sits on
+  the profile, per Usman.
+- **Pathways are Build's fifteen interest worlds**, not the reference's
+  seven families. Seeded students are spread deterministically from each
+  family onto the worlds it covers (`TRACK_TO_WORLDS`); the live
+  student's pathway is their first Build interest by name. The families
+  remain behind the scenes for the reference's cluster and Top 5 tables.
+  Overview's bar shows the six largest worlds plus Other.
+- **A career report shared with the counselor is a submission.** The live
+  student's "Shared with counselor" report version puts Career Report in
+  Pending Review, so it reaches the Review Queue and the tracker; a report
+  only saved or printed reads Completed.
+- **Insights' saved careers are computed** from every student's top
+  matches plus the live student's real picks. Majors, simulations by
+  career and colleges by id stay the reference's lists until the app
+  records them.
+- **Menus consolidate (Usman):** Student Progress and Productivity Suite
+  leave the School Counselor and Lead Counselor menus; both routes still
+  resolve. Overview, Milestone Tracker and Insights remain as the three
+  analytics screens, each answering a different question.
+
 ## Cross-cutting, 25 Sept 2026 (late)
 
 - **A manual option beside every AI-generated thing** (direct instruction,
@@ -153,6 +202,16 @@ bottom."
   comes first, and why"), by direct instruction: the attention strip's
   Critical / High / Medium ranking, the roster's priority sort, the
   tracker's focus score, the queue's due-date order, and so on.
+- **Portraits are hand-matched to names** (`src/lib/counselorRosterPortraits.ts`).
+  First pass hashed first names (every "Aisha" got one face); second pass
+  assigned by roster position (no repeats nearby, but faces no longer
+  matched the names: "genders are wrong, races are wrong"). Now each of the
+  120 names is classed by gender and likely background and drawn from the
+  matching group of the 48-portrait set, walked in order so repeats are as
+  far apart as the set allows (at most six names share a portrait; there
+  are 22 white masculine names and five such portraits). Unmatched names
+  fall back to a deterministic pick. Alternative: generate more portraits;
+  out of scope for this pass and noted as the real fix.
 - **Every v2 screen has an (i) at the top right that opens the screen's
   change note as an overlay** (`v2/changeNotes.ts`: what changed, why,
   what makes it better), by direct instruction. First placed beside the
@@ -484,6 +543,31 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
   (`src/components/app/chrome.tsx`'s `Wordmark`), not a hand-drawn "D"
   square -- this dashboard is a Dreamari product like every other screen.
 
+### 2026-09-25: School year map and Reviews approved (v2 Overview)
+
+- **The Academic Readiness bars are gone; the school year map sits
+  there.** The bars measured "% approved" for College List and FAFSA,
+  which the reference marks Not Applicable in Grades 9-11, so three of
+  four grade columns rendered empty (direct report: "i see empty graphs
+  in overview"). The map (`v2/PlanMap.tsx`) shows every grade's My Plan
+  by season with a completion ring per cell and opens the Milestone
+  Tracker at that grade. Alternative: keep the bars and hide
+  Not-Applicable series per grade; a grouped chart whose series change
+  per column is unreadable. Alternative: copy SchooLinks' Scope &
+  Sequence indicator grid; rejected on instruction ("don't make it too
+  similar to SchooLinks"), and Dreamari's plans differ per grade, so the
+  shared axis is time, not indicators.
+- **Career Readiness became Reviews approved** (Career Report and
+  Academic Plan only). Both exist at every grade and both are the
+  counselor's own decisions, so the chart answers "how much of my review
+  work is done per grade". Resume dropped: it has no Grade 9 step.
+- **Seeded mid-year progress, v2 only** (`src/lib/counselorSeedProgress.ts`,
+  DEMO-ONLY, applied in `counselorReviews.ts`). The captured reference had
+  Grade 9 with zero approved reports or plans and Grade 10 with zero
+  approved resumes; the overlay moves a deterministic share forward and
+  never touches Overdue, Changes Requested or Pending Review. v1 reads
+  the untouched roster.
+
 ## Students (roster)
 
 **25 Sept 2026, v2 rebuilt on the budget above** (the first pass in the
@@ -776,6 +860,17 @@ kept as history.
     card widths would jump between grade tabs; the shared-row hero keeps
     sidekick size constant across all four tabs and the hero still the
     largest thing on the page.
+
+### 2026-09-25: School year map on top (v2)
+
+- **The map leads the tracker and is its navigator.** Four grades by
+  three seasons, a ring per cell, the active grade highlighted; picking a
+  cell selects that grade for the hero and the step list below. The
+  segmented grade control stays for keyboard and screen-reader users.
+  Alternative: a separate "School" screen for the map; the tracker is
+  where a counselor acts on a step, and the map is how they choose which
+  grade, so they belong together. Alternative: per-step rings like
+  SchooLinks; 30-plus rings on one screen is the wall the map avoids.
 
 ## Review Queue (v2)
 

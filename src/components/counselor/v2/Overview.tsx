@@ -16,6 +16,7 @@ import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } f
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { BLUE_3, NEUTRAL_SLICE, PATHWAY_SEQUENCE, PRIMARY, TARGET_LINE } from "../palette";
 import { GLASS_INSET } from "../surfaces";
+import { PlanMap } from "./PlanMap";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "#33C78C",
@@ -284,7 +285,7 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
 
 export function Overview() {
   const router = useRouter();
-  const { gradeFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
+  const { gradeFilter, setGradeFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
   // Local to this page, not the shared context -- distinct from the donut
   // click-throughs on purpose (direct instruction: this one "cross-filters
   // the whole Overview page", the donuts navigate to Students instead).
@@ -292,12 +293,17 @@ export function Overview() {
   const togglePathway = (label: string) => setPathwayFilter((cur) => (cur === label ? null : label));
 
   const reviewed = useReviewedRoster();
+  const topSix = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of reviewed) counts.set(s.careerTrack, (counts.get(s.careerTrack) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => k);
+  }, [reviewed]);
   const roster = useMemo(() => {
     let all = reviewed;
     if (gradeFilter !== "All Grades") all = all.filter((s) => s.grade === gradeFilter);
-    if (pathwayFilter) all = all.filter((s) => s.careerTrack === pathwayFilter);
+    if (pathwayFilter) all = pathwayFilter === "Other" ? all.filter((s) => !topSix.includes(s.careerTrack)) : all.filter((s) => s.careerTrack === pathwayFilter);
     return all;
-  }, [reviewed, gradeFilter, pathwayFilter]);
+  }, [reviewed, gradeFilter, pathwayFilter, topSix]);
 
   const goToStudents = (status?: StatusRosterFilter, plan?: PlanRosterFilter) => {
     if (status) setStatusFilter(status);
@@ -315,7 +321,11 @@ export function Overview() {
 
   const pathwayCounts = new Map<string, number>();
   for (const s of roster) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
-  const topPathways = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 7);
+  // Fifteen Build worlds are too many for one bar: the six largest, then
+  // "Other" (dataviz rule: fold the tail, never a ninth hue).
+  const ranked = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const rest = ranked.slice(6).reduce((n, [, v]) => n + v, 0);
+  const topPathways: [string, number][] = rest > 0 ? [...ranked.slice(0, 6), ["Other", rest]] : ranked.slice(0, 7);
   // Seven distinct hues in spectral order, assigned by rank (palette.ts).
   // History: a seven-hue set that reused status colors; a single-hue ramp
   // that blended neighbours; three cluster hues that repeated ("please
@@ -389,37 +399,27 @@ export function Overview() {
         </div>
       </div>
 
+      {/* The school-year map and the reviews chart. The map replaced the
+         "Academic Readiness" bars, whose College List and FAFSA series were
+         "Not Applicable" for Grades 9-11 and rendered as empty columns
+         (direct report, 25 Sept 2026: "i see empty graphs in overview").
+         The reviews chart keeps the two milestones every grade has and
+         the counselor personally approves. */}
       <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
         <HoverBeam strength={0.6} className="h-full">
-          {/* No `aside` here -- an aside sits inline next to the title
-             until it doesn't fit, and "Academic Readiness" (longer title,
-             identical subtitle text) wrapped to a second line while
-             "Career Readiness" didn't, so the two cards' header dividers
-             landed at different heights (direct report, with a screenshot:
-             "the headers are different heights"). A subtitle below the
-             divider, structurally identical in both cards, can't do that
-             regardless of title or subtitle length. */}
-          <Panel id="career-readiness" title="Career Readiness" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
+          <Panel id="plan-map" title="School year map" className="h-full">
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>My Plan steps done, by grade and season. A cell opens the Milestone Tracker.</p>
+            <PlanMap roster={reviewed} chevrons={false} onPick={(g) => { setGradeFilter(g); router.push("/counselor?view=milestones"); }} />
+          </Panel>
+        </HoverBeam>
+        <HoverBeam strength={0.6} className="h-full">
+          <Panel id="reviews-approved" title="Reviews approved" className="h-full">
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students whose Career Report and Academic Plan you approved</p>
             <BarChart barStyle="solid"
               groups={grades.map((g) => `Gr. ${g}`)}
               series={[
                 { label: "Career Report", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Career Report")) },
-                { label: "Resume", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "Resume")) },
-              ]}
-              targetLine={{ value: 80, label: "Target", color: TARGET_LINE_COLOR }}
-            />
-          </Panel>
-        </HoverBeam>
-        <HoverBeam strength={0.6} className="h-full">
-          <Panel id="academic-readiness" title="Academic Readiness" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
-            <BarChart barStyle="solid"
-              groups={grades.map((g) => `Gr. ${g}`)}
-              series={[
-                { label: "Academic Plan", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Academic Plan")) },
-                { label: "College List", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "College List")) },
-                { label: "Financial Aid / FAFSA", accent: READINESS_SERIES[2], values: grades.map((g) => pctApproved(g, "Financial Aid")) },
+                { label: "Academic Plan", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "Academic Plan")) },
               ]}
               targetLine={{ value: 80, label: "Target", color: TARGET_LINE_COLOR }}
             />

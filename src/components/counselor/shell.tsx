@@ -50,7 +50,7 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
 export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: string }> = {
   overview: { title: "Overview", subtitle: "Welcome back. Here's your caseload at a glance." },
   students: { title: "Students", subtitle: "View and manage your student caseload" },
-  milestones: { title: "Milestone Tracker", subtitle: "Track completion of required milestones by grade level" },
+  milestones: { title: "Milestone Tracker", subtitle: "Every My Plan step for a grade, and who has not done it" },
   "review-queue": { title: "Review Queue", subtitle: "Review and approve student submissions" },
   progress: { title: "Student Progress", subtitle: `Generate and export student readiness reports for ${DEMO_SCHOOL}` },
   connect: { title: "Counselor Connect", subtitle: "Communicate with students and manage announcements" },
@@ -93,6 +93,10 @@ type FiltersState = {
    *  Review Queue and Milestone Tracker for the roles that see counselors,
    *  and set by the Counselors screen's click-through. */
   counselorFilter: string; setCounselorFilter: (c: string) => void;
+  /** A My Plan step id (gradePlanData.ts) plus its title: Students then
+   *  shows only the students who have not done it. Set by the Milestone
+   *  Tracker's rows; cleared by the chip on Students. */
+  stepFilter: { id: string; title: string; grade: 9 | 10 | 11 | 12 } | null; setStepFilter: (f: { id: string; title: string; grade: 9 | 10 | 11 | 12 } | null) => void;
 };
 const CounselorFiltersContext = createContext<FiltersState>({
   gradeFilter: "All Grades", setGradeFilter: () => {},
@@ -100,6 +104,7 @@ const CounselorFiltersContext = createContext<FiltersState>({
   statusFilter: "All", setStatusFilter: () => {},
   planFilter: "All", setPlanFilter: () => {},
   counselorFilter: "All", setCounselorFilter: () => {},
+  stepFilter: null, setStepFilter: () => {},
 });
 export function useCounselorFilters(): FiltersState {
   return useContext(CounselorFiltersContext);
@@ -252,6 +257,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   const [statusFilter, setStatusFilter] = useState<StatusRosterFilter>("All");
   const [planFilter, setPlanFilter] = useState<PlanRosterFilter>("All");
   const [counselorFilter, setCounselorFilter] = useState("All");
+  const [stepFilter, setStepFilter] = useState<{ id: string; title: string; grade: 9 | 10 | 11 | 12 } | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const { title, subtitle: subtitleRaw } = VIEW_TITLES[active];
@@ -270,7 +276,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   const orgLabel = version === "v2" && account.role === "District Administrator" ? DISTRICT_NAME : DEMO_SCHOOL;
 
   return (
-    <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter }}>
+    <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
       {/* marketing-v2 defines --primary, --card, --foreground, and every
          other token used across this dashboard (see marketing/tokens.css,
          scoped to .marketing-v2, not root). This wrapper only had

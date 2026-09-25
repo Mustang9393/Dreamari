@@ -64,17 +64,25 @@ function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra
 const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
 const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 
-export function ProductivitySuite() {
+/** The four draft tools for ONE student, embedded on the Student Profile
+ *  (Usman, 25 Sept 2026: "pick a student, then generate something belongs
+ *  inside the student profile"). The page below keeps the picker for old
+ *  links. */
+export function DraftTools({ student }: { student: CounselorStudent }) {
+  return <ProductivitySuite fixedStudent={student} />;
+}
+
+export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorStudent } = {}) {
   const roster = useReviewedRoster();
   const [toolId, setToolId] = useState<ToolId>("recommendation-letter");
-  const [studentId, setStudentId] = useState("");
+  const [studentId, setStudentId] = useState(fixedStudent?.id ?? "");
   const [letterType, setLetterType] = useState("");
   const [draft, setDraft] = useState<string | null>(null);
   const [savedTo, setSavedTo] = useState<string | null>(null);
   const router = useRouter();
   const tool = TOOLS.find((t) => t.id === toolId)!;
   const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
-  const student = roster.find((s) => s.id === studentId);
+  const student = fixedStudent ?? roster.find((s) => s.id === studentId);
   // The attention tool is a real list, not a paragraph: the roster ranked
   // the same way the Overview ranks it, each row opening the profile.
   const attention = [...roster].filter((s) => s.status !== "On Track").sort(attentionRank).slice(0, 10);
@@ -111,7 +119,7 @@ export function ProductivitySuite() {
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={TOOLS.map((t) => ({ key: t.id, label: t.label }))} />
+      <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={TOOLS.filter((t) => !fixedStudent || t.id !== "attention").map((t) => ({ key: t.id, label: t.label }))} />
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
@@ -141,7 +149,7 @@ export function ProductivitySuite() {
             </ul>
           ) : (
           <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:items-end lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-            {(
+            {!fixedStudent && (
               <label className="flex min-w-0 flex-col gap-[4px]">
                 <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Student</span>
                 <Listbox ariaLabel="Student" value={studentId} onChange={setStudentId} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
