@@ -105,7 +105,6 @@ export function MilestoneTracker() {
   // narrowed to a caseload.
   const overallDone = scopedToCounselor ? (rows.length ? Math.round(rows.reduce((a, r) => a + r.donePct, 0) / rows.length) : 0) : curriculumAvgDone(grade);
   const awaiting = rows.reduce((a, r) => a + r.counts["awaiting-review"], 0);
-  const notStarted = rows.reduce((a, r) => a + r.counts["not-started"], 0);
 
   const openNotDone = (r: Row) => {
     setGradeFilter(grade);
@@ -145,35 +144,51 @@ export function MilestoneTracker() {
         <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No Grade {grade} students{showCounselor && counselorFilter !== "All" ? " on this counselor's caseload" : ""}.</p>
       ) : (
         <>
-          {/* The Replit's summary banner, as one line. */}
-          <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
-          <div className="flex flex-col gap-[4px]">
-            <p className="text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
-              {students.length} students · {rows.length} milestones · <span style={{ color: PRIMARY }}>{overallDone}% done</span> on average
-              {awaiting > 0 && <span style={{ color: "var(--muted-foreground)" }}> · {awaiting} need attention</span>}
-              {notStarted > 0 && <span style={{ color: "var(--muted-foreground)" }}> · {notStarted} not started</span>}
-            </p>
-            <p className="text-[12.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Focus: {curriculumFocus(grade)}</p>
-          </div>
-          <CardLink onClick={openAll}>All Grade {grade} students</CardLink>
-          </div>
-
+          {/* One card, two halves, instead of a sentence of stats above a
+             wide card with its actions stranded at the far edge (direct
+             feedback: "This is bad layout... the text blocks under the tab
+             component: its just lots of words"). Left: the grade, as the
+             Replit's own three numbers. Right: the milestone furthest
+             behind, its ring, and its two actions right beside it. */}
           <HoverBeam strength={0.7} className="h-full">
-            <div className="group relative flex flex-wrap items-center justify-between gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
+            <div className="group relative grid grid-cols-1 overflow-hidden rounded-[var(--radius-lg)] border md:grid-cols-2" style={GLASS_CARD_HERO}>
               <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.22) }} />
-              <span className="relative flex items-center gap-[var(--space-4)]">
-                <SegmentedRing size={72} stroke={8} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
-                  <span className="text-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
-                </SegmentedRing>
-                <span className="flex flex-col gap-[3px]">
-                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Furthest behind</span>
-                  <span className="text-[16px] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</span>
+              <div className="relative flex flex-col gap-[var(--space-4)] p-[var(--space-5)]">
+                <span className="flex items-start justify-between gap-[10px]">
+                  <span className="flex flex-col gap-[3px]">
+                    <h2 className="text-[16px] font-bold" style={{ color: "var(--foreground)" }}>Grade {grade}</h2>
+                    <span className="text-[12.5px] leading-[17px] font-medium" style={{ color: "var(--muted-foreground)" }}>{curriculumFocus(grade)}</span>
+                  </span>
+                  <CardLink onClick={openAll}>Students</CardLink>
                 </span>
-              </span>
-              <span className="relative flex flex-wrap gap-[8px]">
-                {focus.total - focus.counts.done > 0 && <CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink>}
-                {focus.counts["awaiting-review"] > 0 && <CardLink onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }}>Review {focus.counts["awaiting-review"]}</CardLink>}
-              </span>
+                <span className="flex flex-wrap gap-x-[var(--space-8)] gap-y-[var(--space-3)]">
+                  {[
+                    { value: String(students.length), label: "students" },
+                    { value: String(rows.length), label: "milestones" },
+                    { value: `${overallDone}%`, label: "avg. done" },
+                  ].map((x) => (
+                    <span key={x.label} className="flex flex-col gap-[2px]">
+                      <span className="text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.value}</span>
+                      <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.label}</span>
+                    </span>
+                  ))}
+                </span>
+              </div>
+              <div className="relative flex flex-col gap-[var(--space-3)] border-t p-[var(--space-5)] md:border-t-0 md:border-l" style={{ borderColor: "var(--glass-border)" }}>
+                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Furthest behind</span>
+                <span className="flex items-center gap-[var(--space-4)]">
+                  <SegmentedRing size={64} stroke={7} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
+                    <span className="text-[15px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
+                  </SegmentedRing>
+                  <span className="flex min-w-0 flex-col gap-[8px]">
+                    <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</span>
+                    <span className="flex flex-wrap gap-[8px]">
+                      {focus.total - focus.counts.done > 0 && <CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink>}
+                      {focus.counts["awaiting-review"] > 0 && <CardLink onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }}>Review {focus.counts["awaiting-review"]}</CardLink>}
+                    </span>
+                  </span>
+                </span>
+              </div>
             </div>
           </HoverBeam>
 
