@@ -50,7 +50,7 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
 export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: string }> = {
   overview: { title: "Overview", subtitle: "Welcome back. Here's your caseload at a glance." },
   students: { title: "Students", subtitle: "View and manage your student caseload" },
-  milestones: { title: "Milestone Tracker", subtitle: "Every My Plan step for a grade, and who has not done it" },
+  milestones: { title: "Milestone Tracker", subtitle: "Track completion of required milestones by grade level" },
   "review-queue": { title: "Review Queue", subtitle: "Review and approve student submissions" },
   progress: { title: "Student Progress", subtitle: `Generate and export student readiness reports for ${DEMO_SCHOOL}` },
   connect: { title: "Counselor Connect", subtitle: "Communicate with students and manage announcements" },
@@ -420,10 +420,14 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                      main page titles ... there is so much copy on every
                      screen"). Every v2 screen already states its purpose in
                      its hero card or its (i) note, so the caption only ever
-                     repeated the title in longer words ("Milestone Tracker"
-                     / "Every My Plan step for a grade, and who has not done
-                     it"). v1 keeps the reference's subtitle line untouched --
-                     it stays a 1:1 port of the Replit, copy included. */}
+                     repeated the title in longer words. v1 keeps the
+                     reference's subtitle line untouched -- it stays a 1:1
+                     port of the Replit, copy included. (26 Sept 2026: this
+                     Milestone Tracker subtitle had been overwritten during
+                     the since-reverted "My Plan" bridge pass and never
+                     restored when the content itself was reverted -- caught
+                     by a direct visual side-by-side check, not a code
+                     read. Restored to the reference's original wording.) */}
                   {version === "v1" && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{subtitle}</p>}
                 </div>
               )}

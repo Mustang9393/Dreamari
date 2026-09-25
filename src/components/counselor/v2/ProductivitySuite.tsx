@@ -31,20 +31,35 @@
 // desktop left rail is gone -- it spent 228px on five names and still
 // left the draft in a plain dark textarea that read as a form field, not
 // a document. The chip row (previously mobile-only) is now the one
-// switcher at every width, and the freed space goes to the draft, which
-// now renders on the same realistic "paper" surface (`PAPER_VARS`) the
-// Milestone Tracker/Review Queue's document previews already use, so a
-// letter reads like a letter instead of a `<textarea>` in a dark card.
+// switcher at every width, and the freed space goes to the draft.
 // "Camera tracking," per the resume builder, means the live preview pans
 // to what the counselor is doing -- there's one draft, not fielded
 // sections to pan between, so the equivalent here is the page scrolling
 // itself into view and flashing once when a new draft lands, instead of
 // silently repainting off-screen.
-
-import { useEffect, useRef, useState } from "react";
-import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check } from "lucide-react";
+//
+// 26 Sept 2026, same day, a fourth pass on the preview itself (direct
+// feedback: "resume builder has actual proper fonts, better designed
+// template by default... the current preview doesnt read as editable but
+// it is inline"; then: "Use actual letter formats and design for the
+// previews... based on context and relevance"). Honest read on the third
+// pass: it put every tool on the SAME generic serif page, which is a
+// letter's shape, not a brief's or a plan's, and gave no visual signal
+// that the page was live text, not print. Fixed both per document type:
+// - Recommendation Letter gets a real letterhead (school, date,
+//   right-aligned) and a real close (a cursive auto-signature in Dancing
+//   Script, not typed characters, then the counselor's typed name and
+//   role) as STATIC chrome; only the body paragraph is the editable
+//   textarea, so the letter reads like a letter, not a form.
+// - The three briefs/plans get a memo header (title, student, date) --
+//   not a letter's date-and-salutation shape, since they aren't letters.
+// - The editable region itself now says so: a small pencil + "Click to
+//   edit" mark at rest, and a visible (if quiet) dashed rule around the
+//   text, gone once it has focus -- flat print has neither.
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check, Pencil } from "lucide-react";
 import { BatchComposer } from "./Batch";
-import { CAREER_TRACKS } from "@/lib/counselorRoster";
+import { CAREER_TRACKS, DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -58,6 +73,11 @@ import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { ScrollChips } from "../chips";
 import { Segmented } from "@/components/connect/viz";
 import { PAPER_VARS } from "./DocumentPreview";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+
+function fmtToday(): string {
+  return new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
 
@@ -84,17 +104,42 @@ function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra
   const open = student ? MILESTONE_KEYS.filter((k) => ["Not Started", "Overdue", "Changes Requested", "In Progress", "Pending Review"].includes(student.milestones[k])).slice(0, 3) : [];
   switch (toolId) {
     case "recommendation-letter":
-      return `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"},\n\nIt is my privilege to recommend ${name} for ${extra ? `this ${extra.toLowerCase()} opportunity` : "this opportunity"}. ${first} is a Grade ${student?.grade ?? ""} student on the ${student?.careerTrack ?? "career"} pathway whose top career match is ${top}. ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required milestones this year${approved.length ? `, including ${approved.slice(0, 2).join(" and ")}` : ""}, and is working toward ${student?.postsecondaryIntent === "Undecided" || !student ? "a postsecondary plan" : student.postsecondaryIntent}.\n\n[Add one specific example, then sign.]`;
+      return `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"},\n\nIt is my privilege to recommend ${name} for ${extra ? `this ${extra.toLowerCase()} opportunity` : "this opportunity"}. ${first} is a Grade ${student?.grade ?? ""} student on the ${student?.careerTrack ?? "career"} pathway whose top career match is ${top}. ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required milestones this year${approved.length ? `, including ${approved.slice(0, 2).join(" and ")}` : ""}, and is working toward ${student?.postsecondaryIntent === "Undecided" || !student ? "a postsecondary plan" : student.postsecondaryIntent}.\n\n[Add one specific example.]`;
     case "student-brief":
-      return `Meeting brief: ${name}\n\nStatus: ${student?.status ?? "unknown"} · roadmap ${student?.roadmapPct ?? 0}% · ${approved.length} of ${student?.milestoneCount ?? 11} milestones done.\nPathway: ${student?.careerTrack ?? "undeclared"} · top match ${top}.\nOpen items: ${open.length ? open.join(", ") : "none"}.\nTalking points: what went well, the one milestone to finish next, confirm the postsecondary plan (${student?.postsecondaryIntent ?? "not set"}).`;
+      return `Status: ${student?.status ?? "unknown"} · roadmap ${student?.roadmapPct ?? 0}% · ${approved.length} of ${student?.milestoneCount ?? 11} milestones done.\nPathway: ${student?.careerTrack ?? "undeclared"} · top match ${top}.\nOpen items: ${open.length ? open.join(", ") : "none"}.\nTalking points: what went well, the one milestone to finish next, confirm the postsecondary plan (${student?.postsecondaryIntent ?? "not set"}).`;
     case "parent-brief":
-      return `Family conference: ${name}\n\n${first} is a Grade ${student?.grade ?? ""} student exploring ${student?.careerTrack ?? "careers"}, with ${top} as a top match. Progress this year: ${approved.length} of ${student?.milestoneCount ?? 11} required milestones complete.\nWhat is next: ${open.length ? open.join(", ") : "keeping pace"}.\nHow the family can help: a regular time each week for ${first} to work on the plan, and a conversation about ${student?.postsecondaryIntent === "Undecided" || !student ? "postsecondary options" : student.postsecondaryIntent}.`;
+      return `${first} is a Grade ${student?.grade ?? ""} student exploring ${student?.careerTrack ?? "careers"}, with ${top} as a top match. Progress this year: ${approved.length} of ${student?.milestoneCount ?? 11} required milestones complete.\nWhat is next: ${open.length ? open.join(", ") : "keeping pace"}.\nHow the family can help: a regular time each week for ${first} to work on the plan, and a conversation about ${student?.postsecondaryIntent === "Undecided" || !student ? "postsecondary options" : student.postsecondaryIntent}.`;
     case "success-plan":
-      return `Success plan: ${name}\n\nGoal: back on pace in 4 to 6 weeks.\nFinish first: ${open[0] ?? "the next milestone"}.\nThen: ${open.slice(1).join(", ") || "review the roadmap"}.\nCheck-in: weekly, 10 minutes, one action each time.\nSupport: ${student?.careerTrack ?? "pathway"} resources on Dreamari, and financial aid guidance if applicable.`;
+      return `Goal: back on pace in 4 to 6 weeks.\nFinish first: ${open[0] ?? "the next milestone"}.\nThen: ${open.slice(1).join(", ") || "review the roadmap"}.\nCheck-in: weekly, 10 minutes, one action each time.\nSupport: ${student?.careerTrack ?? "pathway"} resources on Dreamari, and financial aid guidance if applicable.`;
     case "attention":
     case "group-message":
       return "";
   }
+}
+
+const TOOL_MEMO_TITLE: Partial<Record<ToolId, string>> = {
+  "student-brief": "Meeting Brief",
+  "parent-brief": "Family Conference",
+  "success-plan": "Success Plan",
+};
+
+// A small monogram crest, not a photo of a real school -- direct
+// feedback: "make the letterhead much more like an actual one from a
+// school with a logo etc." Initials from DEMO_SCHOOL's own name so it
+// stays correct if the demo school ever changes, a shield outline being
+// the one shape that reads as "school crest" at a glance rather than a
+// generic company logo.
+function schoolInitials(name: string): string {
+  return name.split(" ").filter((w) => /^[A-Z]/.test(w)).map((w) => w[0]).join("").slice(0, 3) || name.slice(0, 2).toUpperCase();
+}
+function SchoolCrest({ size = 40 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className="flex-none">
+      <path d="M20 2 L36 8 V19 C36 29 29 35 20 38 C11 35 4 29 4 19 V8 Z" fill="none" stroke="#5B6CF9" strokeWidth="1.6" />
+      <path d="M20 2 L36 8 V19 C36 29 29 35 20 38 Z" fill="#5B6CF9" opacity="0.12" />
+      <text x="20" y="24" textAnchor="middle" fontSize="13" fontWeight="800" fontFamily="var(--font-display, ui-sans-serif)" fill="#5B6CF9">{schoolInitials(DEMO_SCHOOL)}</text>
+    </svg>
+  );
 }
 
 const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
@@ -110,6 +155,7 @@ export function DraftTools({ student }: { student: CounselorStudent }) {
 
 export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorStudent } = {}) {
   const roster = useReviewedRoster();
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const [toolId, setToolId] = useState<ToolId>("recommendation-letter");
   const [studentId, setStudentId] = useState(fixedStudent?.id ?? "");
   const [letterType, setLetterType] = useState("");
@@ -165,10 +211,10 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
     setSavedTo(null);
     const name = student?.name ?? "";
     const skeleton: Record<ToolId, string> = {
-      "recommendation-letter": `To whom it may concern,\n\n${name ? `I am writing to recommend ${name}` : "I am writing to recommend "}${letterType ? ` for a ${letterType.toLowerCase()} opportunity` : ""}.\n\n\n\nSincerely,\n`,
-      "student-brief": `Meeting brief${name ? `: ${name}` : ""}\n\nStatus:\nRecent activity:\nOpen items:\nTalking points:\n`,
-      "parent-brief": `Family conference${name ? `: ${name}` : ""}\n\nProgress this year:\nWhat is next:\nHow the family can help:\n`,
-      "success-plan": `Success plan${name ? `: ${name}` : ""}\n\nGoal:\nFinish first:\nThen:\nCheck-in:\nSupport:\n`,
+      "recommendation-letter": `To whom it may concern,\n\n${name ? `I am writing to recommend ${name}` : "I am writing to recommend "}${letterType ? ` for a ${letterType.toLowerCase()} opportunity` : ""}.\n\n\n`,
+      "student-brief": `Status:\nRecent activity:\nOpen items:\nTalking points:\n`,
+      "parent-brief": `Progress this year:\nWhat is next:\nHow the family can help:\n`,
+      "success-plan": `Goal:\nFinish first:\nThen:\nCheck-in:\nSupport:\n`,
       attention: "",
       "group-message": "",
     };
@@ -302,28 +348,66 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 </span>
               </div>
               {/* The same realistic-paper surface the document previews
-                 use elsewhere (PAPER_VARS), not a dark textarea -- a
-                 letter reads like a letter. Still a real, editable
-                 textarea underneath; only the surface changed. The
-                 border flashes once when a new draft lands (the "camera"
-                 this single-page tool has to pan to). */}
+                 use elsewhere (PAPER_VARS), not a dark textarea -- but the
+                 chrome around the editable text now matches what this
+                 document actually is (direct feedback: "use actual letter
+                 formats and design for the previews... based on context
+                 and relevance"): a letterhead and a signed close for the
+                 letter, a memo header for the three briefs/plans. Only
+                 the body is the editable textarea; the border flashes
+                 once when a new draft lands (the "camera" this
+                 single-page tool has to pan to). */}
               <div
                 ref={pageRef}
                 className="rounded-[2px] p-[4px] transition-[box-shadow] duration-300"
                 style={{ ...PAPER_VARS, background: "var(--paper)", boxShadow: flash ? "0 0 0 2px var(--primary), 0 12px 32px -12px rgba(0,0,0,0.4)" : "0 12px 32px -12px rgba(0,0,0,0.4)" }}
               >
-                <div className="mb-[10px] flex items-center justify-between border-b px-[8px] pt-[4px] pb-[10px]" style={{ borderColor: "var(--rule)" }}>
-                  <span className="text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--ink-faint)" }}>{tool.label}</span>
-                  {student && <span className="text-[10.5px] font-semibold" style={{ color: "var(--ink-faint)" }}>{student.name} · Grade {student.grade}</span>}
+                {toolId === "recommendation-letter" ? (
+                  <div className="flex flex-col gap-[10px] px-[8px] pt-[4px] pb-[14px]">
+                    <div className="flex items-center justify-between gap-[12px] border-b-[3px] pb-[10px]" style={{ borderColor: "#5B6CF9" }}>
+                      <div className="flex items-center gap-[10px]">
+                        <SchoolCrest />
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-[16px] font-extrabold tracking-[0.01em]" style={{ color: "var(--ink)", fontFamily: "var(--font-display, ui-sans-serif)" }}>{DEMO_SCHOOL}</span>
+                          <span className="text-[10.5px] font-semibold" style={{ color: "var(--ink-faint)" }}>Office of School Counseling</span>
+                        </div>
+                      </div>
+                      <span className="text-right text-[10.5px] leading-tight font-semibold" style={{ color: "var(--ink-faint)" }}>1200 Lincoln Avenue<br />Springfield, IL 62701</span>
+                    </div>
+                    <span className="text-[11.5px] font-semibold" style={{ color: "var(--ink-faint)" }}>{fmtToday()}</span>
+                  </div>
+                ) : (
+                  <div className="mb-[10px] flex items-center justify-between border-b px-[8px] pt-[4px] pb-[10px]" style={{ borderColor: "var(--rule)" }}>
+                    <span className="text-[13px] font-bold" style={{ color: "var(--ink)" }}>{TOOL_MEMO_TITLE[toolId]}</span>
+                    <span className="text-[10.5px] font-semibold" style={{ color: "var(--ink-faint)" }}>{student ? `${student.name} · Grade ${student.grade} · ` : ""}{fmtToday()}</span>
+                  </div>
+                )}
+
+                {/* The editable region says so, at rest -- a quiet dashed
+                   rule and a pencil mark, neither of which a flat printed
+                   page would have; both fade once the text has focus. */}
+                <div className="group/edit relative">
+                  <textarea
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    rows={toolId === "recommendation-letter" ? 10 : 12}
+                    aria-label="Draft"
+                    className="w-full resize-y rounded-[4px] border border-dashed px-[8px] py-[8px] text-[13.5px] leading-[21px] outline-none focus:border-solid"
+                    style={{ background: "transparent", color: "var(--ink)", borderColor: "color-mix(in srgb, var(--ink-faint) 35%, transparent)", fontFamily: "var(--font-serif, ui-serif, Georgia, serif)" }}
+                  />
+                  <span className="pointer-events-none absolute top-[6px] right-[10px] flex items-center gap-[4px] text-[10.5px] font-semibold opacity-70 transition-opacity group-focus-within/edit:opacity-0" style={{ color: "var(--ink-faint)" }}>
+                    <Pencil className="h-[11px] w-[11px]" aria-hidden /> Click to edit
+                  </span>
                 </div>
-                <textarea
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  rows={12}
-                  aria-label="Draft"
-                  className="w-full resize-y px-[8px] pb-[8px] text-[13.5px] leading-[21px] outline-none"
-                  style={{ background: "transparent", color: "var(--ink)", fontFamily: "var(--font-serif, ui-serif, Georgia, serif)" }}
-                />
+
+                {toolId === "recommendation-letter" && (
+                  <div className="flex flex-col gap-[2px] px-[8px] pt-[18px]">
+                    <span className="text-[13px]" style={{ color: "var(--ink)" }}>Sincerely,</span>
+                    <span className="text-[30px] leading-[1.1]" style={{ color: "var(--ink)", fontFamily: "'Dancing Script', cursive" }}>{account.name || "Your Counselor"}</span>
+                    <span className="text-[12.5px] font-bold" style={{ color: "var(--ink)" }}>{account.name || "Your Counselor"}</span>
+                    <span className="text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>{account.role || "School Counselor"} · {DEMO_SCHOOL}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

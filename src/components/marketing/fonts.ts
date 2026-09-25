@@ -17,6 +17,10 @@
 // added for Explore's Top-5 rail. Rozha One (Arts, Media & Sport), Merriweather
 // 700 (Teaching & Education) and Zain 900 (Counseling & Social Work) complete
 // the set for the app Home/Explore poster rails, straight from the Figma
-// Career Poster Card variants. All verified live on Google Fonts.
+// Career Poster Card variants. Dancing Script is the Counselor Dashboard's
+// auto-signature on a generated recommendation letter (26 Sept 2026: "have
+// it look like an actual signed signature not typed text") -- a real
+// cursive face, not a CSS italic/skew trick on the body font. All verified
+// live on Google Fonts.
 export const FONT_STYLESHEET_HREF =
-  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Viaoda+Libre&family=Source+Code+Pro:wght@600&family=Nunito:wght@700&family=Science+Gothic:wght@700&family=ZCOOL+XiaoWei&family=Sekuya&family=Lora:wght@700&family=Fraunces:opsz,wght@9..144,700&family=Heebo:wght@700&family=Rozha+One&family=Merriweather:wght@700&family=Zain:wght@900&display=swap";
+  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Viaoda+Libre&family=Source+Code+Pro:wght@600&family=Nunito:wght@700&family=Science+Gothic:wght@700&family=ZCOOL+XiaoWei&family=Sekuya&family=Lora:wght@700&family=Fraunces:opsz,wght@9..144,700&family=Heebo:wght@700&family=Rozha+One&family=Merriweather:wght@700&family=Zain:wght@900&family=Dancing+Script:wght@600;700&display=swap";

@@ -14469,3 +14469,15 @@ The "camera" equivalent for this screen: there's one draft page, not fielded sec
 `DraftTools` (the same component embedded on Student Profile, `fixedStudent` set) inherits all of this for free since it's the same component.
 
 Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the chip row and paper preview on the Productivity Suite page and Student Profile's embedded Drafts card, and confirmed the two non-draft tools (Group Message, Students Needing Attention) are unaffected. Not pushed; awaiting explicit go-ahead per this project's push rule.
+
+## 2026-09-26 · Productivity Suite: real letter/memo templates, signature, school letterhead
+
+Continuing the same-day preview redesign. Direct feedback in sequence: "resume builder has actual proper fonts, better designed template by default... the current preview doesnt read as editable but it is inline" -> "Use actual letter formats and design for the previews of everything in productivity suite based on context and relevance" -> "Add signature automatically. Have it look like an actual signed signature not typed text" -> "Make the letterhead much more like an actual one from a school with a logo etc."
+
+Honest read on the prior pass, stated to the user before changing anything: putting every tool on the same generic serif page gave the Recommendation Letter a letter's shape but gave the three briefs/plans that same letter shape too, and nothing signaled the page was live text rather than print.
+
+- **Recommendation Letter** gets real letterhead chrome (a shield-monogram crest built from the school's own initials, school name, "Office of School Counseling," and a plausible address, under a colored rule) and a real close: "Sincerely," then an auto-signature in Dancing Script (a genuine cursive Google Font, added to the shared `FONT_STYLESHEET_HREF` in `marketing/fonts.ts` -- the established `<link>` pattern, not `next/font/google`, which is documented in that same file as the thing that broke the Vercel build once already), then the signed-in counselor's typed name and role below it. Only the body paragraph is the editable textarea; the letterhead and signature are static chrome pulled from `counselorAccount`/`DEMO_SCHOOL`.
+- **The three briefs/plans** get a memo header instead (bold title, student, date) -- not letter chrome, since they aren't letters. Their generated text no longer repeats its own title line now that the chrome provides it.
+- **The editable region now says it's editable**: a quiet dashed border and a small pencil "Click to edit" mark at rest, both fading on focus -- flat print has neither.
+
+Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified the Recommendation Letter (letterhead, cursive signature, editable affordance) and Student Success Plan (memo header, no signature block). Not pushed; awaiting explicit go-ahead per this project's push rule.
