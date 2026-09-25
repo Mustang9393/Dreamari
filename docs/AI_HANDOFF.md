@@ -14532,3 +14532,18 @@ Reversed the previous fix (expand-on-click "Other") after direct clarification: 
 Considered the two-column layout floated in the same message ("Maybe we can have a 2 column grid so the card doesnt get too long") and recommended against it: this exact legend already has a documented, direct-reported failure from an earlier pass ("Tried a 2-column legend twice... This isnt fixed") -- several world names ("Counseling & Social Work," "Personal Care & Community Services," "Fixing Machines & Engines") wrap and stagger in a half-width column at any reasonable card size. Single column stays; the card is simply taller now, which is the honest trade for "no career reads as lesser."
 
 Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean. Browser-verified all of the caseload's real worlds render individually with their own Build colors. Not pushed; awaiting explicit go-ahead per this project's push rule.
+
+## 2026-09-26 · Overview: equal donut rings, tablet 2-up, Career Pathways still unresolved
+
+**Student Status and Postsecondary Plans now share one ring size** (132px/15px stroke, previously 152/17 vs 108/13) now that they sit in an equal-width 2-column row rather than the old wide-hero/narrow-sidekick split -- direct instruction: "if student progress and post secondary plans are the equal width, their graphs can be of the same size too." `hero` still controls the glow/tint surface treatment, just not ring geometry.
+
+**The 2-column donut row now activates on tablet**, not just desktop widths (`@[520px]:grid-cols-2`, down from `@[900px]`) -- direct instruction: "on tablet or smaller screens student progress and post secondary plans can sit side by side."
+
+**Career Pathways is still unresolved, several attempts rejected the same day, worth reading before touching it again:**
+1. Single stacked bar + vertical legend (the original v1-matching design) -- correctly reported as "extremely overpopulated" at 15 real Build worlds vs. the reference's own 7 tracks this was built for.
+2. Wrapping chip cloud (every world equal size, no folding) -- direct feedback: "the current chip thing doesnt help... why are we limiting ourselves to a donut or a bar graph."
+3. Ranked full-width bars (this dashboard's own Insights-screen pattern, "Ranked lists as full-width bars," reused here with each world's own color) -- direct feedback: "the legend text can be a lot smaller and there needs to be a better graphical model... I dont like this new one either."
+
+Researched before a fourth attempt (not just reasoning from priors): for 7-15 flat categories, published dataviz guidance (Luzmo's chart-type guide, consistent with the classic Cleveland-McGill graphical-perception ranking) still recommends horizontal bars over treemaps/bubbles specifically because bar LENGTH is read more accurately than treemap/bubble AREA, and pie/donut is only recommended below ~5 categories. Treemaps are built for genuine nested hierarchy, which these 15 sibling worlds don't have. Relayed this to the user with two concrete next options -- (a) same bar-list model, executed smaller/tighter, in a 2-column grid instead of one full-width column, or (b) a treemap mockup despite the accuracy tradeoff, if "reads as a proper chart" matters more here than strict precision -- and awaiting their pick before building again. The code currently on disk is attempt #3 (ranked full-width bars), left in place uncommitted-as-final since the user does not like it; do not treat it as the resolved design.
+
+Validation: `tsc --noEmit`, targeted `eslint` and `npm run build` all passed clean for the ring-size and breakpoint changes. Not pushed; awaiting explicit go-ahead per this project's push rule.

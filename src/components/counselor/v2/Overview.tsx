@@ -108,8 +108,12 @@ function DeltaChip({ pts }: { pts: number }) {
 // there's exactly one thing the eye lands on first.
 export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, rows, hero, heroTint, aside }: { title: string; /** one muted line under the title, for a reading that has no trend delta */ caption?: string; centerPct: number; centerLabel: string; deltaPts?: number; rows: { label: string; value: number; color: string; onClick?: () => void }[]; hero?: boolean; heroTint?: string; /** the card's way in, a CardLink, visible at rest */ aside?: React.ReactNode }) {
   const surface = hero ? { ...GLASS_CARD_HERO, borderColor: heroTint ? `color-mix(in srgb, ${heroTint} 38%, var(--glass-border))` : GLASS_CARD_HERO.borderColor } : GLASS_CARD;
-  const ringSize = hero ? 152 : 108;
-  const ringStroke = hero ? 17 : 13;
+  // Student Status and Postsecondary Plans sit in an equal-width 2-column
+  // row now (both cards the same width), so their rings should read the
+  // same size too (direct instruction, 26 Sept 2026) -- `hero` still
+  // controls the glow/tint surface treatment, just not ring geometry.
+  const ringSize = 132;
+  const ringStroke = 15;
   // A quiet version of the same glow, not just a flat plain box -- "no
   // upgrade at all" was a fair read of a sidekick card that got resized but
   // kept every pixel of its old self. Low enough opacity it never competes
@@ -177,7 +181,7 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
 // click-throughs, which land on the Roster). The stacked bar's own
 // segments are the click targets too, not just the legend rows, since
 // they're already visually "the thing you'd click."
-function PathwaysCard({ total, topPathways, colors, activePathway, onToggle, onOpen }: { total: number; topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
+function PathwaysCard({ topPathways, colors, activePathway, onToggle, onOpen }: { topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
       <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
@@ -190,39 +194,51 @@ function PathwaysCard({ total, topPathways, colors, activePathway, onToggle, onO
             </button>
           )}
         </div>
-        <div className="relative flex flex-1 flex-col justify-center gap-[var(--space-5)]">
-          <span className="flex h-[18px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)", boxShadow: "0 6px 16px -6px rgba(0,0,0,0.5)" }}>
-            {topPathways.map(([label, value], i) => {
-              const pct = total > 0 ? (value / total) * 100 : 0;
-              if (pct <= 0) return null;
-              const dim = activePathway !== null && activePathway !== label;
+        {/* A stacked bar plus a vertical legend was built for the
+           reference's own 7 tracks; at 15 real Build worlds the bar
+           became 15 slivers too thin to read and the legend a 15-row
+           column, both correctly reported as overpopulated. A chip cloud
+           tried next didn't hold up either (direct feedback: "the
+           current chip thing doesnt help. We need a proper graphical
+           representation... why are we limiting ourselves to a donut or
+           a bar graph"). Landed on the ranked full-width bar this
+           dashboard's own Insights screen already uses for the same
+           shape of problem (many named categories, one count each,
+           "Ranked lists as full-width bars" per its own change note) --
+           proven readable for far more names than this ("Fixing Machines
+           & Engines" and friends already survive it there), each bar
+           scaled to the largest pathway (not the total) so the spread
+           between a caseload's biggest and smallest pathways is easy to
+           read at a glance, and each bar keeps its own world's color so
+           the identity this dashboard color-codes everywhere else
+           doesn't disappear into one uniform gradient. */}
+        <ol className="relative flex flex-1 flex-col justify-center gap-[6px]">
+          {(() => {
+            const max = Math.max(1, ...topPathways.map(([, v]) => v));
+            return topPathways.map(([label, value], i) => {
+              const active = activePathway === label;
+              const dim = activePathway !== null && !active;
+              const color = colors[i % colors.length];
               return (
-                <button
-                  key={label} type="button" onClick={() => onToggle(label)} title={`${label}: ${value}`}
-                  aria-pressed={activePathway === label}
-                  className="h-full flex-none cursor-pointer first:rounded-l-full last:rounded-r-full [&:not(:last-child)]:shadow-[inset_-2px_0_0_var(--card)]"
-                  style={{ width: `${pct}%`, background: colors[i % colors.length], opacity: dim ? 0.35 : 1, transition: "opacity 120ms ease" }}
-                />
+                <li key={label}>
+                  <button
+                    type="button"
+                    onClick={() => onToggle(label)}
+                    aria-pressed={active}
+                    className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] transition-opacity"
+                    style={{ opacity: dim ? 0.45 : 1 }}
+                  >
+                    <span className="relative flex h-[26px] min-w-0 flex-1 items-center rounded-[6px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
+                      <span aria-hidden className="absolute inset-y-0 left-0 rounded-[6px] transition-[width]" style={{ width: `${(value / max) * 100}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 45%, transparent), ${color})`, boxShadow: active ? `0 0 0 2px ${color}` : "none" }} />
+                      <span className="relative truncate px-[10px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
+                    </span>
+                    <span className="w-[26px] flex-none text-right text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
+                  </button>
+                </li>
               );
-            })}
-          </span>
-          {/* Tried a 2-column legend twice already (mobile wrap, then a
-             wider card still wrapping/staggering) -- several of these
-             world names ("Counseling & Social Work", "Personal Care &
-             Community Services", "Fixing Machines & Engines") just don't
-             fit a half-width column with a right-aligned number at any
-             reasonable card size (direct report, with a screenshot: "This
-             isnt fixed"). Single column, proven to hold up everywhere --
-             now showing every one of the caseload's real Build worlds,
-             not a folded "Other" (direct feedback: "i dont want certian
-             careers reading like theya re lesser than the ones
-             prominently listed"). */}
-          <div className="flex flex-col gap-[4px]">
-            {topPathways.map(([label, value], i) => (
-              <StatRow key={label} label={label} value={value} color={colors[i % colors.length]} active={activePathway === label} onClick={() => onToggle(label)} />
-            ))}
-          </div>
-        </div>
+            });
+          })()}
+        </ol>
       </div>
     </HoverBeam>
   );
@@ -399,41 +415,43 @@ export function Overview() {
          establishes -- so `@container` wraps a plain div and the grid
          classes live one level down. */}
       <div className="@container">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] @[1100px]:grid-cols-12">
-        <div className="@[1100px]:col-span-5">
-          <DonutCard
-            title="Student Status"
-            centerPct={onTrackPct}
-            centerLabel="on track"
-            deltaPts={2}
-            hero
-            heroTint={heroTint}
-            aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
-            rows={[
-              { label: "On Track", value: onTrack, color: STATUS_COLORS["On Track"], onClick: () => goToStudents("On Track") },
-              { label: "Needs Attention", value: needsAttention, color: STATUS_COLORS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
-              { label: "At Risk", value: atRisk, color: STATUS_COLORS["At Risk"], onClick: () => goToStudents("At Risk") },
-            ]}
-          />
-        </div>
-        <div className="@[1100px]:col-span-4">
-          <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
-        </div>
-        <div className="@[1100px]:col-span-3">
-          <DonutCard
-            title="Postsecondary Plans"
-            centerPct={(withPlan / total) * 100}
-            centerLabel="have a plan"
-            deltaPts={4}
-            aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
-            rows={[
-              { label: "With Plan", value: withPlan, color: PRIMARY, onClick: () => goToStudents(undefined, "With Plan") },
-              { label: "Undecided", value: undecided, color: NEUTRAL_SLICE, onClick: () => goToStudents(undefined, "Undecided") },
-            ]}
-          />
-        </div>
+      <div className="grid grid-cols-1 gap-[var(--space-4)] @[520px]:grid-cols-2">
+        <DonutCard
+          title="Student Status"
+          centerPct={onTrackPct}
+          centerLabel="on track"
+          deltaPts={2}
+          hero
+          heroTint={heroTint}
+          aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
+          rows={[
+            { label: "On Track", value: onTrack, color: STATUS_COLORS["On Track"], onClick: () => goToStudents("On Track") },
+            { label: "Needs Attention", value: needsAttention, color: STATUS_COLORS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
+            { label: "At Risk", value: atRisk, color: STATUS_COLORS["At Risk"], onClick: () => goToStudents("At Risk") },
+          ]}
+        />
+        <DonutCard
+          title="Postsecondary Plans"
+          centerPct={(withPlan / total) * 100}
+          centerLabel="have a plan"
+          deltaPts={4}
+          aside={<CardLink onClick={() => goToStudents()}>Students</CardLink>}
+          rows={[
+            { label: "With Plan", value: withPlan, color: PRIMARY, onClick: () => goToStudents(undefined, "With Plan") },
+            { label: "Undecided", value: undecided, color: NEUTRAL_SLICE, onClick: () => goToStudents(undefined, "Undecided") },
+          ]}
+        />
       </div>
       </div>
+
+      {/* Its own full-width row, not a third column squeezed beside the
+         two donuts -- direct question, 26 Sept 2026: "do we need to go 2
+         in a row and then move career pathways graph to its own row
+         instead?" At 15 real Build worlds this card needs real width to
+         wrap its chips into just a few rows rather than many; a 1/3-width
+         column left it both cramped and, before the chip redesign, the
+         tallest thing on the page by far. */}
+      <PathwaysCard topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
 
       {/* Reviews approved chart. A "My Plan by grade" panel briefly lived
          here, driven by the student app's own My Plan steps rather than
