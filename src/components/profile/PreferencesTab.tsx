@@ -57,6 +57,14 @@ export function PreferencesTab() {
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const [saved] = useSavedCareers();
   const [open, setOpen] = useState<SectionId | null>(null);
+  // The reference's Save confirmation: a banner above the rows, gone on its
+  // own after a few seconds, same copy.
+  const [savedNote, setSavedNote] = useState(false);
+  useEffect(() => {
+    if (!savedNote) return;
+    const t = window.setTimeout(() => setSavedNote(false), 4000);
+    return () => window.clearTimeout(t);
+  }, [savedNote]);
   // Careers the student already named elsewhere come first in the picker.
   const namedCareers = useMemo(() => Array.from(new Set([...picks.ids.map(titleFor), ...Array.from(saved).map(titleFor)])), [picks.ids, saved]);
   const updated = prefs.updatedAt ? new Date(prefs.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
@@ -74,6 +82,11 @@ export function PreferencesTab() {
         </div>
       </div>
 
+      {savedNote && (
+        <div role="status" className="flex items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[13px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--color-feedback-success) 45%, var(--glass-border))", background: "color-mix(in srgb, var(--color-feedback-success) 10%, transparent)", color: "var(--foreground)" }}>
+          <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} /> Saved. Your recommendations will update.
+        </div>
+      )}
       <div className="flex flex-col gap-[var(--space-3)]">
         {SECTIONS.map((s) => {
           const summary = summaryFor(s.id, prefs);
@@ -92,25 +105,25 @@ export function PreferencesTab() {
                 </span>
                 <span className="truncate text-[13px] font-medium" style={{ color: summary ? "var(--muted-foreground)" : "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>{summary || "Not set yet"}</span>
               </span>
-              <span className="flex flex-none items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>Edit <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /></span>
+              <span className="flex flex-none items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><span className="hidden sm:inline">Edit</span> <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /></span>
             </button>
             </HoverBeam>
           );
         })}
       </div>
 
-      {open && <SectionEditor id={open} prefs={prefs} namedCareers={namedCareers} onClose={() => setOpen(null)} />}
+      {open && <SectionEditor id={open} prefs={prefs} namedCareers={namedCareers} onClose={() => setOpen(null)} onSaved={() => setSavedNote(true)} />}
     </div>
   );
 }
 
 // ---------------------------------------------------------------- editors ----
 
-function SectionEditor({ id, prefs, namedCareers, onClose }: { id: SectionId; prefs: Preferences; namedCareers: string[]; onClose: () => void }) {
+function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: SectionId; prefs: Preferences; namedCareers: string[]; onClose: () => void; onSaved: () => void }) {
   const [draft, setDraft] = useState<Preferences>(prefs);
   const patch = (next: Partial<Preferences>) => setDraft((d) => ({ ...d, ...next }));
   const patchJobs = (next: Partial<JobPrefs>) => setDraft((d) => ({ ...d, jobs: { ...d.jobs, ...next } }));
-  const save = () => { writePreferences(draft); onClose(); };
+  const save = () => { writePreferences(draft); onClose(); onSaved(); };
   const section = SECTIONS.find((s) => s.id === id)!;
   const firstCareer = draft.careers[0] ?? namedCareers[0];
   const suggest = useMemo(() => O.suggestionsFor(firstCareer), [firstCareer]);
