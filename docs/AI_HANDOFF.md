@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: batch sends, the Readiness card, the spec as a Google Doc
+
+Three asks: "I should be able to select more than one student and send stuff. Of course not recommendation letters etc because they need to be personalised, is this already considered?"; "why did we remove career readiness and academic readiness? ... we need a concrete reason"; the persona and interaction model as a shareable document, "a Google Doc not like a Claude document", with "all the state stuff" folded in.
+
+**Batch sends (was not there).** Before this, the only many-at-once paths were an announcement to a grade audience and a post in a Connect group. Now: tick boxes on every Students row and card, a "N selected" bar, and one composer (`v2/Batch.tsx`) for a message, a reminder or a to-do with a due date, with templates and "write your own"; the same composer sits behind a new Group Message tool in the Productivity Suite with an audience by grade, status and pathway. Sends are recorded locally (`counselorCasefile.ts`, `addSend`); a to-do lands on each student's own list. Letters and briefs never offer a batch. States documented in `docs/COUNSELOR_V2_STATES.md`.
+
+**Readiness card.** Maisha's Career Readiness and Academic Readiness bars split five milestones over four grade columns, but Resume starts in Grade 10 and College List and FAFSA in Grade 12, so three of five series were Not Applicable for Grades 9-11 and rendered as empty columns (the reason they came out). The five measures are back as one row each over the grades they apply to, with a target tick and the grades named, opening the tracker at the first applicable grade. Same footprint, nothing empty.
+
+**The spec, shareable.** `Counselor Dashboard v2: persona, interaction model and spec` (Google Doc in the user's Drive): persona, interaction model (the loop, six verbs, step ownership, permissions), use cases, journeys, rules, data, every state per screen, acceptance, decisions log, open questions. Feedback responses stay out of it (Slack). A Claude doc with the earlier draft exists and is superseded.
+
 ### 2026-09-25 Preferences: the Slack spec in full, and a design pass
 
 **Why:** direct instruction after the reference port ("incorporate all his notes, his replit might be just a quick example... do a considered enhancement and aesthetic pass, and whatever you recommend"). The reference had merged and dropped items from the spec; the spec is the source now.
