@@ -27,7 +27,7 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { Segmented, SegmentedRing } from "@/components/connect/viz";
 import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -201,12 +201,28 @@ export function MilestoneTracker() {
                     </ul>
                   </div>
                 </div>
-                <div className="flex flex-col gap-[6px] sm:max-w-[420px] sm:border-l sm:pl-[var(--space-8)]" style={{ borderColor: "var(--glass-border)" }}>
+                <div className="flex flex-col gap-[12px] sm:max-w-[420px] sm:border-l sm:pl-[var(--space-8)]" style={{ borderColor: "var(--glass-border)" }}>
                   <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Focus first</span>
                   <Verdict band={focus.counts["not-started"] / Math.max(1, focus.total) >= 0.5 ? "missed" : focus.counts["not-started"] > 0 || focus.counts["awaiting-review"] > 0 ? "near" : "met"}>
                     {focus.total - focus.counts.done === 0 ? "Everyone is done" : `${focus.total - focus.counts.done} of ${focus.total} students still need this${focus.counts["awaiting-review"] ? `, ${focus.counts["awaiting-review"]} waiting on you` : ""}`}
                   </Verdict>
-                  <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{WINDOW_TITLE[focus.window]} checkpoint · {focus.classification}</span>
+                  {/* The season/classification caption here didn't support
+                     the title above it -- direct question: "was it
+                     supposed to support the title?". Replaced with a
+                     terse tag ("dont put the whole ass sentence there...
+                     1 word or 2 thats all") that is itself the CTA
+                     (direct feedback: "there should be ctas to lead them
+                     to take those actions") -- straight to the Review
+                     Queue, grade-scoped, where Approve/Request Changes
+                     actually happen. A plain text link, not a bordered
+                     CardLink pill -- direct feedback ("looks ugly"): a
+                     boxed chip broke the rhythm of the plain text above
+                     it in this narrow stacked column. */}
+                  {focus.counts["awaiting-review"] > 0 && (
+                    <button type="button" onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }} className="dm-quiet group/cta flex w-fit cursor-pointer items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>
+                      Awaiting review <Go kind="open" className="transition-transform group-hover/cta:translate-x-[2px]" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -266,11 +282,13 @@ export function MilestoneTracker() {
               const toReview = list.reduce((a, r) => a + r.counts["awaiting-review"], 0);
               return (
                 <div className="flex flex-col gap-[var(--space-4)]">
-                  <div className="flex flex-wrap items-center justify-between gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                    <button type="button" onClick={() => setOpenWindow(null)} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
-                      <ChevronLeft className="h-4 w-4" aria-hidden /> Back
-                    </button>
-                    <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{WINDOW_TITLE[openWindow]} · {list.length} checkpoint{list.length === 1 ? "" : "s"} · {seasonDone}% done{toReview ? ` · ${toReview} to review` : ""}</span>
+                  {/* The Back button felt redundant once the tiles above
+                     already do that job (a different tile switches
+                     straight to it; the active tile closes it) -- direct
+                     feedback: "the back button now feels redundant." The
+                     season's own summary takes its place instead. */}
+                  <div className="flex flex-wrap items-center gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+                    <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{WINDOW_TITLE[openWindow]} · {list.length} checkpoint{list.length === 1 ? "" : "s"} · {seasonDone}% done{toReview ? ` · ${toReview} to review` : ""}</span>
                   </div>
                   <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
                     {STATES.map((st) => (

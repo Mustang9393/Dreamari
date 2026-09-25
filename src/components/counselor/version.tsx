@@ -1,8 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
-import { COUNSELOR_ROLES, counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, writeCounselorAccount, type CounselorRole } from "@/lib/counselorAccount";
-import { roleOrDefault } from "./roles";
+import { createContext, useContext, useEffect, useState } from "react";
 
 // DEMO-ONLY: which build of the Counselor Dashboard is showing. v1 is the
 // screen-by-screen port of the Replit reference plus the three passes
@@ -43,15 +41,24 @@ export type CounselorVersion = "v1" | "v2" | "v3";
 // exactly as they did before.
 const V3_ENABLED = false;
 
+// Hidden the same way, same day, direct instruction ("Hide v1"): v1's own
+// files, CounselorApp's V1View, RoutedView's REFERENCE_VIEWS gating, all
+// completely untouched. The dock's first pill is gone and `?v=1` / a
+// stale stored "v1" both resolve to v2 instead; the default version
+// (unset, no URL param) is v2 for the same reason. Flip back to `true`
+// to bring the pill and the v1 default back exactly as they were.
+const V1_ENABLED = false;
+const DEFAULT_VERSION: CounselorVersion = V1_ENABLED ? "v1" : "v2";
+
 const STORAGE_KEY = "dreamari:counselor-version";
 
 // `ready` flips once the real value has been read after mount. Anything
 // that would redirect based on the version (CounselorApp's role-gated view
-// check) waits for it: the pre-hydration render always says v1, and a
-// v2-only view opened by URL must not be bounced to Overview on that
+// check) waits for it: the pre-hydration render always says DEFAULT_VERSION,
+// and a v2-only view opened by URL must not be bounced to Overview on that
 // placeholder value.
 const CounselorVersionContext = createContext<{ version: CounselorVersion; ready: boolean; setVersion: (v: CounselorVersion) => void }>({
-  version: "v1",
+  version: DEFAULT_VERSION,
   ready: false,
   setVersion: () => {},
 });
@@ -64,7 +71,8 @@ function readStored(): CounselorVersion | null {
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
     if (v === "v3") return V3_ENABLED ? "v3" : null;
-    return v === "v2" || v === "v1" ? v : null;
+    if (v === "v1") return V1_ENABLED ? "v1" : null;
+    return v === "v2" ? v : null;
   } catch {
     return null;
   }
@@ -72,21 +80,22 @@ function readStored(): CounselorVersion | null {
 
 function syncUrl(version: CounselorVersion) {
   const url = new URL(window.location.href);
-  if (version === "v1") url.searchParams.delete("v");
-  else url.searchParams.set("v", version === "v3" ? "3" : "2");
+  if (version === DEFAULT_VERSION) url.searchParams.delete("v");
+  else url.searchParams.set("v", version === "v3" ? "3" : version === "v1" ? "1" : "2");
   window.history.replaceState(window.history.state, "", url.toString());
 }
 
 export function CounselorVersionProvider({ children }: { children: React.ReactNode }) {
-  // Server and first client render always say v1 (localStorage/URL are
-  // client-only), then the real value is read once after mount -- same
-  // hydration-safe shape CounselorApp uses for its own signed-in gate.
-  const [version, setVersionState] = useState<CounselorVersion>("v1");
+  // Server and first client render always say DEFAULT_VERSION
+  // (localStorage/URL are client-only), then the real value is read once
+  // after mount -- same hydration-safe shape CounselorApp uses for its
+  // own signed-in gate.
+  const [version, setVersionState] = useState<CounselorVersion>(DEFAULT_VERSION);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const param = new URLSearchParams(window.location.search).get("v");
-    const fromUrl: CounselorVersion | null = param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? "v2" : param === "1" ? "v1" : null;
-    const next = fromUrl ?? readStored() ?? "v1";
+    const fromUrl: CounselorVersion | null = param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? "v2" : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
+    const next = fromUrl ?? readStored() ?? DEFAULT_VERSION;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);
     setReady(true);
@@ -141,39 +150,22 @@ function Pills<K extends string>({ label, options, value, onChange }: { label: s
   );
 }
 
-// DEMO-ONLY: short labels for the role switcher pill. The real role names
-// (Settings' dropdown) are long; the pill is a demo control, not the
-// product's vocabulary.
-const ROLE_PILL_LABELS: Record<CounselorRole, string> = {
-  "School Counselor": "Counselor",
-  "Lead Counselor": "Lead",
-  "School Administrator": "School admin",
-  "District Administrator": "District",
-};
-
 // The dock itself. Fixed, bottom-center, out of the way of every real
-// control; pointer-events only on the pills so the full-width dock never
-// blocks clicks on the page around it. On v2 a second pill switches the
-// signed-in role: it writes the same account record Settings' Role dropdown
-// writes (src/lib/counselorAccount.ts), so the two never disagree and the
-// sidebar re-renders from one source. DEMO-ONLY, like the version pill: a
-// real account has one role, and this is how a demo shows all four without
-// four sign-ins (same idea as Connect's role switcher).
+// control; pointer-events only on the pill so the full-width dock never
+// blocks clicks on the page around it.
+//
+// 26 Sept 2026: the role switcher that used to live here as a second pill
+// row moved to the sidebar's own profile-name footer (direct instruction:
+// "Make the user role switcher accessible from the profile name thing in
+// the footer of the side menu as a menu that pops up when you click
+// there") -- see `SidebarAccount` in shell.tsx. Hiding v1 the same day
+// left this dock with only one control, so the pointer-events-only,
+// bottom-center dock is now just the version pill.
 export function CounselorVersionChip() {
   const { version, setVersion } = useCounselorVersion();
-  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const role = roleOrDefault(account.role);
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-3 z-20 flex flex-wrap justify-center gap-[6px] px-4">
-      <Pills label="Dashboard version" options={[{ key: "v1", label: "v1" }, { key: "v2", label: "v2" }, ...(V3_ENABLED ? [{ key: "v3", label: "v3" }] : [])] as { key: CounselorVersion; label: string }[]} value={version} onChange={setVersion} />
-      {version === "v2" && (
-        <Pills
-          label="Signed-in role"
-          options={COUNSELOR_ROLES.map((r) => ({ key: r, label: ROLE_PILL_LABELS[r] }))}
-          value={role}
-          onChange={(r) => writeCounselorAccount({ role: r })}
-        />
-      )}
+      <Pills label="Dashboard version" options={[...(V1_ENABLED ? [{ key: "v1", label: "v1" }] : []), { key: "v2", label: "v2" }, ...(V3_ENABLED ? [{ key: "v3", label: "v3" }] : [])] as { key: CounselorVersion; label: string }[]} value={version} onChange={setVersion} />
     </div>
   );
 }

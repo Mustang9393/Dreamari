@@ -331,7 +331,12 @@ export function ReviewQueue() {
                   <>
                     <div className="relative flex flex-col gap-[6px]">
                       <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>From {selected.student.name.split(" ")[0]}</span>
-                      <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] leading-[21px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{selected.message}</p>
+                      {/* Solid, not glass -- direct feedback: "more solid
+                         background with more prominent text so it stand
+                         out more." This is the one thing the student
+                         actually said; it shouldn't read as quiet as the
+                         chrome around it. */}
+                      <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[15px] leading-[22px] font-medium" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--foreground)" }}>{selected.message}</p>
                       <AttachmentCard item={selected} open={previewOpen} onOpen={() => setPreviewOpen(true)} onClose={() => setPreviewOpen(false)} />
                     </div>
 
