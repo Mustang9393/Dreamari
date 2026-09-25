@@ -6,7 +6,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronRight, TrendingDown, TrendingUp } from "lucide-react";
 import { SegmentedRing, BarChart } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -16,7 +16,7 @@ import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } f
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { BLUE_3, NEUTRAL_SLICE, PATHWAY_SEQUENCE, PRIMARY, TARGET_LINE } from "../palette";
 import { GLASS_INSET } from "../surfaces";
-import { PlanMap } from "./PlanMap";
+import { planGradeSummary } from "./PlanMap";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "#33C78C",
@@ -335,6 +335,8 @@ export function Overview() {
 
   const grades = [9, 10, 11, 12];
   const gradeStudents = (g: number) => roster.filter((s) => s.grade === g);
+  const gradeSummary = useMemo(() => planGradeSummary(reviewed), [reviewed]);
+  const gradeVerdictColor = gradeSummary.length === 0 ? STATUS_COLORS["On Track"] : gradeSummary[0].donePct >= 80 ? STATUS_COLORS["On Track"] : gradeSummary[0].donePct >= 50 ? STATUS_COLORS["Needs Attention"] : STATUS_COLORS["At Risk"];
   const pctApproved = (g: number, key: string) => {
     const students = gradeStudents(g);
     if (students.length === 0) return 0;
@@ -399,17 +401,45 @@ export function Overview() {
         </div>
       </div>
 
-      {/* The school-year map and the reviews chart. The map replaced the
-         "Academic Readiness" bars, whose College List and FAFSA series were
-         "Not Applicable" for Grades 9-11 and rendered as empty columns
-         (direct report, 25 Sept 2026: "i see empty graphs in overview").
-         The reviews chart keeps the two milestones every grade has and
-         the counselor personally approves. */}
+      {/* My Plan by grade and the reviews chart. This row replaced the
+         "Academic Readiness" bars, whose College List and FAFSA series
+         were "Not Applicable" for Grades 9-11 and rendered as empty
+         columns (direct report, 25 Sept 2026: "i see empty graphs in
+         overview"). The full school year map (grade by season) lives on
+         the Milestone Tracker only ("let's not show the grid in two
+         places"); here it is one line per grade, the glance version,
+         and each line opens the tracker at that grade. */}
       <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
         <HoverBeam strength={0.6} className="h-full">
-          <Panel id="plan-map" title="School year map" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>My Plan steps done, by grade and season. A cell opens the Milestone Tracker.</p>
-            <PlanMap roster={reviewed} chevrons={false} onPick={(g) => { setGradeFilter(g); router.push("/counselor?view=milestones"); }} />
+          <Panel id="plan-by-grade" title="My Plan by grade" className="h-full">
+            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Steps done this year. A grade opens the Milestone Tracker.</p>
+            {gradeSummary.length > 0 && (
+              <p className="flex items-center gap-[8px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: gradeVerdictColor, boxShadow: `0 0 8px ${gradeVerdictColor}` }} />
+                <span>Grade {gradeSummary[0].grade} has the most room to grow</span>
+              </p>
+            )}
+            <ul className="flex flex-col gap-[6px]">
+              {gradeSummary.map((g) => (
+                <li key={g.grade}>
+                  <button type="button" onClick={() => { setGradeFilter(g.grade); router.push("/counselor?view=milestones"); }} className="dm-quiet group/row flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left" style={GLASS_INSET}>
+                    <span className="flex items-baseline justify-between gap-[10px]">
+                      <span className="flex min-w-0 items-baseline gap-[8px]">
+                        <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>Grade {g.grade}</span>
+                        <span className="truncate text-[11.5px] font-semibold" style={{ color: g.awaiting > 0 ? PRIMARY : "var(--muted-foreground)" }}>{g.awaiting > 0 ? `${g.awaiting} pending your review` : g.notDone > 0 ? `${g.notDone} of ${g.students} still have steps to do` : "everyone is done"}</span>
+                      </span>
+                      <span className="flex flex-none items-center gap-[6px]">
+                        <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{g.donePct}%</span>
+                        <ChevronRight aria-hidden className="h-[14px] w-[14px] transition-transform group-hover/row:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
+                      </span>
+                    </span>
+                    <span className="block h-[6px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
+                      <span className="block h-full rounded-full" style={{ width: `${g.donePct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${PRIMARY} 55%, transparent), ${PRIMARY})` }} />
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
           </Panel>
         </HoverBeam>
         <HoverBeam strength={0.6} className="h-full">

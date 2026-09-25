@@ -545,8 +545,15 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
 
 ### 2026-09-25: School year map and Reviews approved (v2 Overview)
 
-- **The Academic Readiness bars are gone; the school year map sits
-  there.** The bars measured "% approved" for College List and FAFSA,
+- **Progressive disclosure (25 Sept 2026, later the same day).** The
+  school year map moved to the Milestone Tracker only ("let's not show
+  the grid in two places"); the Overview shows "My Plan by grade", one
+  line per grade that opens the tracker. Alternative: keep the map here
+  and drop it from the tracker; the tracker is where the counselor acts
+  on a step, and the Lead Counselor's Overview has no map at all, so the
+  tracker is the one place both counselor roles reach it.
+- **The Academic Readiness bars are gone; the school year map sat
+  there first, now the grade lines do.** The bars measured "% approved" for College List and FAFSA,
   which the reference marks Not Applicable in Grades 9-11, so three of
   four grade columns rendered empty (direct report: "i see empty graphs
   in overview"). The map (`v2/PlanMap.tsx`) shows every grade's My Plan
@@ -863,6 +870,11 @@ kept as history.
 
 ### 2026-09-25: School year map on top (v2)
 
+- **Seasons are accordions (25 Sept 2026).** One season open at a time,
+  the Focus first step's season by default, each closed season keeping
+  its summary in the header, the same shape as the student's own My Plan.
+  Alternative: all three seasons open (the previous build); nine rows of
+  bars at once was "everything thrown at the user".
 - **The map leads the tracker and is its navigator.** Four grades by
   three seasons, a ring per cell, the active grade highlighted; picking a
   cell selects that grade for the hero and the step list below. The

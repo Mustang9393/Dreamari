@@ -7,6 +7,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { Disclosure } from "./Disclosure";
 import { Listbox } from "@/components/app/Listbox";
 import { readCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES, type CounselorRole } from "@/lib/counselorAccount";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -47,7 +48,22 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
+// A card that opens on demand: profile stays open (it is what Settings is
+// for), the four below carry their summary in the header (progressive
+// disclosure, 25 Sept 2026).
+function Section({ id, title, summary, open, onToggle, children }: { id: string; title: string; summary: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
+    <HoverBeam strength={0.6} className="h-full">
+      <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+        <Disclosure id={id} variant="card" title={title} summary={summary} open={open} onToggle={onToggle}>{children}</Disclosure>
+      </div>
+    </HoverBeam>
+  );
+}
+
 export function Settings() {
+  const [section, setSection] = useState<string | null>(null);
+  const toggle = (id: string) => setSection((s) => (s === id ? null : id));
   const [account, setAccount] = useState(() => readCounselorAccount());
   const [draft, setDraft] = useState(account);
   const [saved, setSaved] = useState(false);
@@ -97,11 +113,9 @@ export function Settings() {
         </div>
       </HoverBeam>
 
-      <HoverBeam strength={0.6} className="h-full">
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          {/* Only the chosen role's permissions: the reference listed all
-             four roles' lists at once, three of which are not the reader's. */}
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>What {draft.role || "this role"} can do</h2>
+      {/* Only the chosen role's permissions: the reference listed all
+         four roles' lists at once, three of which are not the reader's. */}
+      <Section id="permissions" title={`What ${draft.role || "this role"} can do`} summary={`${(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).length} permissions`} open={section === "permissions"} onToggle={() => toggle("permissions")}>
           <ul className="flex flex-col gap-[6px]">
             {(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).map((item) => (
               <li key={item} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
@@ -109,12 +123,9 @@ export function Settings() {
               </li>
             ))}
           </ul>
-        </div>
-      </HoverBeam>
+      </Section>
 
-      <HoverBeam strength={0.6} className="h-full">
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Notification Preferences</h2>
+      <Section id="notifications" title="Notification Preferences" summary={`${Object.values(notifications).filter(Boolean).length} of ${NOTIFICATIONS.length} on`} open={section === "notifications"} onToggle={() => toggle("notifications")}>
           <div className="flex flex-col gap-[2px]">
             {NOTIFICATIONS.map((n) => (
               <div key={n.id} className="flex items-center justify-between gap-[var(--space-4)] border-b py-[12px] last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -126,12 +137,9 @@ export function Settings() {
               </div>
             ))}
           </div>
-        </div>
-      </HoverBeam>
+      </Section>
 
-      <HoverBeam strength={0.6} className="h-full">
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{draft.role === "School Counselor" || draft.role === "" ? "Caseload" : draft.role === "District Administrator" ? "District" : "School"}</h2>
+      <Section id="caseload" title={draft.role === "School Counselor" || draft.role === "" ? "Caseload" : draft.role === "District Administrator" ? "District" : "School"} summary={`${roster.length} students · ${pendingReviews} pending reviews`} open={section === "caseload"} onToggle={() => toggle("caseload")}>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <div className="flex flex-col items-center gap-[2px] text-center">
               <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{roster.length}</span>
@@ -147,12 +155,9 @@ export function Settings() {
             </div>
           </div>
           <Link href="/counselor?view=students" className="dm-quiet flex h-9 w-fit cursor-pointer items-center self-center rounded-[var(--radius-sm)] border px-[16px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>View All Students</Link>
-        </div>
-      </HoverBeam>
+      </Section>
 
-      <HoverBeam strength={0.6} className="h-full">
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Academic Year Settings</h2>
+      <Section id="year" title="Academic Year Settings" summary="2026-2027 · Aug 11 to Jun 11" open={section === "year"} onToggle={() => toggle("year")}>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Current Academic Year</span>
@@ -167,8 +172,7 @@ export function Settings() {
               <input type="date" defaultValue="2027-06-11" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
           </div>
-        </div>
-      </HoverBeam>
+      </Section>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { CAREER_TRACKS } from "@/lib/counselorRoster";
 import { HOME_ENGAGEMENT, SCHOOL_TARGETS, TARGET_LABELS, homeSchoolSnapshot, readinessMetrics, targetBand, type TargetKey } from "@/lib/counselorOrg";
 import { READINESS_SERIES, TARGET_LINE_COLOR } from "./Overview";
 import { BAND_COLORS, MetricRow, OverviewCard, SeeLink, Stat, Verdict } from "./overviewShared";
+import { ShowAll } from "./Disclosure";
 
 const GRADES = [9, 10, 11, 12];
 const READINESS_TARGETS: TargetKey[] = ["seniorPlan", "fafsa", "plansOnFile", "onTrack"];
@@ -27,6 +28,9 @@ export function OverviewSchoolAdmin() {
   const roster = useMemo(() => (gradeFilter === "All Grades" ? reviewed : reviewed.filter((s) => s.grade === gradeFilter)), [reviewed, gradeFilter]);
   const school = useMemo(() => homeSchoolSnapshot(roster), [roster]);
   const [cut, setCut] = useState<Cut>("pathway");
+  // Lowest five open, the rest behind Show all: fifteen pathway rows was
+  // the tallest card on the page and the ones below target come first.
+  const [allGroups, setAllGroups] = useState(false);
 
   const rows = READINESS_TARGETS.map((key) => {
     const seniorsOnly = key === "seniorPlan" || key === "fafsa";
@@ -102,8 +106,9 @@ export function OverviewSchoolAdmin() {
               <Verdict band={gapBand}>{gapBand === "met" ? "Every group is on target" : `${lowest.k} is lowest`}</Verdict>
             )}
             <div className="flex flex-col gap-[8px]">
-              {groups.map(({ k, m }) => <MetricRow key={k} label={k} note={String(m.students)} value={m.onTrackPct} target={SCHOOL_TARGETS.onTrack} />)}
+              {(allGroups ? groups : groups.slice(0, 5)).map(({ k, m }) => <MetricRow key={k} label={k} note={String(m.students)} value={m.onTrackPct} target={SCHOOL_TARGETS.onTrack} />)}
             </div>
+            <ShowAll total={groups.length} shown={5} open={allGroups} onToggle={() => setAllGroups((v) => !v)} />
           </OverviewCard>
         </div>
       </div>

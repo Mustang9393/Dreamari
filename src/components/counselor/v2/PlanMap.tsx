@@ -68,6 +68,30 @@ export function planMapCells(roster: CounselorStudent[]): MapCell[] {
   return [...cells.values()];
 }
 
+export type GradeSummary = { grade: MapGrade; title: string; students: number; tracked: number; done: number; donePct: number; notDone: number; awaiting: number };
+
+/** One line per grade, for the Overview: steps done across the year and
+ *  how many students still owe something. Lowest share done first. */
+export function planGradeSummary(roster: CounselorStudent[]): GradeSummary[] {
+  const out: GradeSummary[] = GRADE_PLANS.map((p) => ({ grade: p.grade, title: p.title, students: 0, tracked: 0, done: 0, donePct: 0, notDone: 0, awaiting: 0 }));
+  for (const s of roster) {
+    const g = out.find((x) => x.grade === s.grade);
+    if (!g) continue;
+    g.students++;
+    let behind = false;
+    for (const r of planReadings(s)) {
+      if (r.status === "not-tracked") continue;
+      g.tracked++;
+      if (r.status === "done") g.done++;
+      else behind = true;
+      if (r.status === "awaiting-review") g.awaiting++;
+    }
+    if (behind) g.notDone++;
+  }
+  for (const g of out) g.donePct = g.tracked ? Math.round((g.done / g.tracked) * 100) : 0;
+  return out.filter((g) => g.students > 0).sort((a, b) => a.donePct - b.donePct || b.notDone - a.notDone);
+}
+
 function Ring({ pct, size = 38, stroke = 5 }: { pct: number; size?: number; stroke?: number }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;

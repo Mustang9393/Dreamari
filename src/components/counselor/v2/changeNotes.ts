@@ -11,9 +11,9 @@ export type ChangeNote = { changed: string[]; why: string; better: string; /** h
 
 export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   overview: {
-    changed: ["Attention list leads the page, students ranked by severity with the reason", "One hero card, plain glass elsewhere; one blue hue plus status colors", "Pathways are Build's own interest worlds, six largest plus Other, in a fixed spectral order", "School year map: every grade's My Plan by season, a ring per cell, each cell opens the Milestone Tracker", "Reviews approved chart keeps the two milestones every grade has; the old Academic Readiness bars were empty for Grades 9-11", "Every card opens its screen"],
+    changed: ["Attention list leads the page, students ranked by severity with the reason", "One hero card, plain glass elsewhere; one blue hue plus status colors", "Pathways are Build's own interest worlds, six largest plus Other, in a fixed spectral order", "My Plan by grade: one line per grade with steps done and who still owes something; each line opens the Milestone Tracker, where the full school year map lives", "Reviews approved chart keeps the two milestones every grade has; the old Academic Readiness bars were empty for Grades 9-11", "Every card opens its screen"],
     why: "The reference showed three equal donuts, its own seven career families, readiness bars that were blank for three grades, and no way to act.",
-    better: "Worst first, one glance, one click to the student, the whole school year on one grid, and the same pathway names the student chose in Build.",
+    better: "Worst first, one glance, one click to the student, one line per grade that opens the year map, and the same pathway names the student chose in Build.",
     order: "Needs your attention shows At Risk students only, ranked Critical (an overdue or rejected milestone) before High (three or more not started) before Medium, ties by the least-complete roadmap; three rows, See all for the rest. Legends and pathways are ordered by size.",
   },
   students: {
@@ -23,7 +23,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Default sort is priority: At Risk, then Needs Attention, then On Track; within a status the same Critical / High / Medium ranking the Overview uses; ties by the least-complete roadmap.",
   },
   milestones: {
-    changed: ["School year map on top: four grades by three seasons, a completion ring per cell, pick a cell to open that grade", "Rows are the grade's own My Plan steps, Fall / Winter / Spring, the same list the student sees", "Counts come from what students actually did on Dreamari: in-app steps auto-track, steps you verify read your decisions, student-reported steps say not tracked yet", "Every row opens Students filtered to who has not done it", "CSV of the grid; Student Progress' reports are folded in here"],
+    changed: ["School year map on top: four grades by three seasons, a completion ring per cell, pick a cell to open that grade", "Rows are the grade's own My Plan steps, Fall / Winter / Spring, the same list the student sees; one season open at a time, the Focus first season by default, the other seasons keep their summary in the header", "Counts come from what students actually did on Dreamari: in-app steps auto-track, steps you verify read your decisions, student-reported steps say not tracked yet", "Every row opens Students filtered to who has not done it", "CSV of the grid; Student Progress' reports are folded in here"],
     why: "The reference tracked its own list of milestones with fixed numbers that never matched the roster or the student app.",
     better: "One list, the student's and yours, live, and one click from any step to the students who owe it.",
     order: "The map's verdict names the grade and season with the lowest share of steps done. The step with the largest share not started (awaiting review counts half) leads as Focus first; within each season the same order. A step everyone is still working on is not treated as behind.",
@@ -47,7 +47,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Questions: new and follow-up first, then viewed and in progress, then answered; newest first within each. Groups: most recently active first. Announcements: newest first.",
   },
   insights: {
-    changed: ["Recommendations as one number, one subject, one action", "Ranked lists as full-width bars; chart/list toggles removed", "One blue hue"],
+    changed: ["Recommendations as one number, one subject, one action", "Ranked lists as full-width bars; chart/list toggles removed", "One blue hue", "Each list opens with its top five; Show all reveals ten"],
     why: "Twelve lines of advice and four tiny sparkline lists asked for reading, not glancing.",
     better: "The three things to do this semester, then the ranking, in one look.",
     order: "Recommendations are the three largest interest clusters, largest first; ranked lists are by count.",
@@ -71,7 +71,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Outcomes are shown against their target, the one furthest below target named in the verdict; grades and counselors are ranked lowest on-track first.",
   },
   settings: {
-    changed: ["Role is a proper picker and drives the whole dashboard", "Permissions shown for your role only", "Caseload card titled by role"],
+    changed: ["Role is a proper picker and drives the whole dashboard", "Permissions shown for your role only", "Caseload card titled by role", "Profile stays open; permissions, notifications, caseload and academic year fold behind their summary"],
     why: "The reference listed all four roles' permissions to every reader.",
     better: "Your role, your permissions, and the dashboard follows.",
     order: "No ranking on this screen.",

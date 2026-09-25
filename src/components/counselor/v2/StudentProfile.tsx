@@ -25,6 +25,7 @@ import { StatusChip, Avatar } from "../chips";
 import { planReadings, signalsFor, STATUS_LABEL, type StepReading } from "@/lib/studentSignals";
 import { decideReview } from "@/lib/counselorReviews";
 import { DraftTools } from "./ProductivitySuite";
+import { Disclosure } from "./Disclosure";
 import { GLASS_INSET } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 
@@ -97,6 +98,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [openSeason, setOpenSeason] = useState<"fall" | "winter" | "spring" | "none" | null>(null);
+  const [draftsOpen, setDraftsOpen] = useState(false);
 
 
   if (!student) {
@@ -122,6 +125,10 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const readings = planReadings(student, signals);
   const tracked = readings.filter((r) => r.status !== "not-tracked");
   const stepsDone = tracked.filter((r) => r.status === "done").length;
+  // One season open at a time, like the student's own My Plan: by default
+  // the first season with something for the counselor (awaiting review
+  // first, then anything not done), or Fall when the plan is complete.
+  const firstOpen = readings.find((r) => r.status === "awaiting-review")?.window ?? readings.find((r) => r.status !== "done" && r.status !== "not-tracked")?.window ?? "fall";
 
   const engagement = [
     { icon: Sparkles, value: String(signals.dreamScore), label: "Dream Score", accent: "#5B6CF9" },
@@ -221,13 +228,17 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           {(["fall", "winter", "spring"] as const).map((w) => {
             const rows = readings.filter((r) => r.window === w);
             if (rows.length === 0) return null;
+            const isOpen = (openSeason ?? firstOpen) === w;
+            const rowsTracked = rows.filter((r) => r.status !== "not-tracked");
+            const rowsDone = rowsTracked.filter((r) => r.status === "done").length;
+            const waiting = rows.filter((r) => r.status === "awaiting-review").length;
             return (
-              <div key={w} className="flex flex-col gap-[6px]">
-                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{w}</span>
+              <Disclosure key={w} id={`profile-season-${w}`} title={w} open={isOpen} onToggle={() => setOpenSeason(isOpen ? "none" : w)}
+                summary={waiting ? `${waiting} awaiting you · ${rowsDone} of ${rowsTracked.length} done` : rowsTracked.length ? `${rowsDone} of ${rowsTracked.length} done` : "student reports"}>
                 <ul className="flex flex-col gap-[6px]">
                   {rows.map((r) => <PlanStepRow key={r.step.id} r={r} studentId={student.id} />)}
                 </ul>
-              </div>
+              </Disclosure>
             );
           })}
           <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>In-app steps track automatically from what {student.name.split(" ")[0]} does on Dreamari. Steps you verify wait for your approval here or in the Review Queue.</span>
@@ -236,8 +247,12 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <CardHead icon={Sparkles} title="Drafts" accent="#5B6CF9" />
-          <DraftTools student={student} />
+          {/* Collapsed until needed: four tools and a form is the heaviest
+             card on the page and most visits are a status check, not a
+             letter (progressive disclosure, 25 Sept 2026). */}
+          <Disclosure id="profile-drafts" variant="card" title={<CardHead icon={Sparkles} title="Drafts" accent="#5B6CF9" />} summary="Letters, briefs and plans, generated or your own" open={draftsOpen} onToggle={() => setDraftsOpen((v) => !v)}>
+            <DraftTools student={student} />
+          </Disclosure>
         </div>
       </HoverBeam>
 
