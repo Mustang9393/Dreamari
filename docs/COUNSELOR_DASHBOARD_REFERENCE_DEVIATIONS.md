@@ -543,6 +543,31 @@ logged under "Overview" below. The three new ones, 24 Sept 2026:
   (`src/components/app/chrome.tsx`'s `Wordmark`), not a hand-drawn "D"
   square -- this dashboard is a Dreamari product like every other screen.
 
+### 2026-09-25: School year map and Reviews approved (v2 Overview)
+
+- **The Academic Readiness bars are gone; the school year map sits
+  there.** The bars measured "% approved" for College List and FAFSA,
+  which the reference marks Not Applicable in Grades 9-11, so three of
+  four grade columns rendered empty (direct report: "i see empty graphs
+  in overview"). The map (`v2/PlanMap.tsx`) shows every grade's My Plan
+  by season with a completion ring per cell and opens the Milestone
+  Tracker at that grade. Alternative: keep the bars and hide
+  Not-Applicable series per grade; a grouped chart whose series change
+  per column is unreadable. Alternative: copy SchooLinks' Scope &
+  Sequence indicator grid; rejected on instruction ("don't make it too
+  similar to SchooLinks"), and Dreamari's plans differ per grade, so the
+  shared axis is time, not indicators.
+- **Career Readiness became Reviews approved** (Career Report and
+  Academic Plan only). Both exist at every grade and both are the
+  counselor's own decisions, so the chart answers "how much of my review
+  work is done per grade". Resume dropped: it has no Grade 9 step.
+- **Seeded mid-year progress, v2 only** (`src/lib/counselorSeedProgress.ts`,
+  DEMO-ONLY, applied in `counselorReviews.ts`). The captured reference had
+  Grade 9 with zero approved reports or plans and Grade 10 with zero
+  approved resumes; the overlay moves a deterministic share forward and
+  never touches Overdue, Changes Requested or Pending Review. v1 reads
+  the untouched roster.
+
 ## Students (roster)
 
 **25 Sept 2026, v2 rebuilt on the budget above** (the first pass in the
@@ -835,6 +860,17 @@ kept as history.
     card widths would jump between grade tabs; the shared-row hero keeps
     sidekick size constant across all four tabs and the hero still the
     largest thing on the page.
+
+### 2026-09-25: School year map on top (v2)
+
+- **The map leads the tracker and is its navigator.** Four grades by
+  three seasons, a ring per cell, the active grade highlighted; picking a
+  cell selects that grade for the hero and the step list below. The
+  segmented grade control stays for keyboard and screen-reader users.
+  Alternative: a separate "School" screen for the map; the tracker is
+  where a counselor acts on a step, and the map is how they choose which
+  grade, so they belong together. Alternative: per-step rings like
+  SchooLinks; 30-plus rings on one screen is the wall the map avoids.
 
 ## Review Queue (v2)
 

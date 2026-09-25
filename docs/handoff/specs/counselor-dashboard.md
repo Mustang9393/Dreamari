@@ -95,6 +95,12 @@ reach that student.
   text, timestamp.
 - **Org** (`counselorOrg.ts`, seeded): counselors and caseloads, targets,
   sibling schools scaled from the home school.
+- **School year map** (`v2/PlanMap.tsx`): per grade and season, tracked
+  (student, step) pairs, done, done %, students with something still to
+  do, steps awaiting the counselor. Cells open the Milestone Tracker.
+- **Seeded mid-year progress** (`counselorSeedProgress.ts`, DEMO-ONLY,
+  v2 only): deterministic overlay on the captured roster so every grade
+  has done, in-progress and not-started work; delete in production.
 - **Connect**: questions (student, text, category, status), announcements
   (title, audience, body, read %), groups (name, members, posts, feed).
 - Not in the student app yet (backend or product decision): counselor

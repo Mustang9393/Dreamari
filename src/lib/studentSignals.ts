@@ -141,7 +141,11 @@ export function seededSignals(s: CounselorStudent): StudentSignals {
   const m = s.milestones;
   const done = (k: keyof typeof m) => m[k] === "Approved" || m[k] === "Completed";
   const started = (k: keyof typeof m) => m[k] === "In Progress" || m[k] === "Pending Review" || done(k);
-  const catalog = ALL_PROFILE_CAREERS.filter((c) => c.world === s.careerTrack).map((c) => c.id);
+  // The seeded student's Top 3 come from their world's catalog; a world
+  // with no authored profile careers yet falls back to the whole catalog so
+  // a student who the reference says has three matches always has three.
+  const inWorld = ALL_PROFILE_CAREERS.filter((c) => c.world === s.careerTrack).map((c) => c.id);
+  const catalog = inWorld.length >= 3 ? inWorld : [...inWorld, ...ALL_PROFILE_CAREERS.map((c) => c.id).filter((id) => !inWorld.includes(id))];
   return {
     profileBuilt: true,
     avatarSet: true,
@@ -189,7 +193,14 @@ function inAppStatus(step: GradeStep, sig: StudentSignals): { status: StepStatus
   switch (step.id) {
     case "g9-fall-build": return { status: sig.profileBuilt ? "done" : sig.interests.length > 0 ? "in-progress" : "not-started" };
     case "g9-fall-avatar": return { status: sig.avatarSet ? "done" : "not-started" };
-    case "g9-fall-explore": return toward(Math.max(sig.careersSaved, sig.top3.length * 3), 10);
+    // "Explore 10 careers, save your Top 3": every saved career counts, and
+    // each Top 3 pick stands for the careers compared to choose it. Done
+    // only when the Top 3 is actually full.
+    case "g9-fall-explore": {
+      const explored = sig.careersSaved + sig.top3.length * 3;
+      const r = toward(explored, 10);
+      return sig.top3.length < 3 && r.status === "done" ? { status: "in-progress", progress: r.progress } : r;
+    }
     case "g9-winter-play": return toward(sig.simulationsCompleted, 3);
     case "g9-spring-connect": return sig.questionsAsked > 0 ? toward(sig.questionsAsked, 2) : { status: "not-tracked" };
     case "g10-fall-decide": return { status: sig.focusCareer ? "done" : sig.top3.length > 0 ? "in-progress" : "not-started" };

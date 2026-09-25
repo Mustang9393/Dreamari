@@ -28,6 +28,7 @@ import { useCounselorFilters } from "../shell";
 import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 import { OverviewCard, Stat, Verdict } from "./overviewShared";
+import { PlanMap } from "./PlanMap";
 
 type Grade = 9 | 10 | 11 | 12;
 type Row = { id: string; title: string; window: GradeWindow["id"]; kind: StepKind; total: number; counts: Record<StepStatus, number>; donePct: number; behindShare: number; tracked: boolean; deadlineBound: boolean };
@@ -68,7 +69,8 @@ export function MilestoneTracker() {
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
-  const students = useMemo(() => roster.filter((s) => s.grade === grade && (!showCounselor || counselorFilter === "All" || counselorFor(s).id === counselorFilter)), [roster, grade, showCounselor, counselorFilter]);
+  const scoped = useMemo(() => roster.filter((s) => !showCounselor || counselorFilter === "All" || counselorFor(s).id === counselorFilter), [roster, showCounselor, counselorFilter]);
+  const students = useMemo(() => scoped.filter((s) => s.grade === grade), [scoped, grade]);
 
   const rows = useMemo<Row[]>(() => {
     const plan = GRADE_PLANS.find((p) => p.grade === grade)!;
@@ -105,6 +107,12 @@ export function MilestoneTracker() {
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
+      {/* The school-year map leads: all four grades, three seasons, a
+         ring per cell. Picking a cell selects that grade below, so the
+         map is the tracker's navigator, not a second report. */}
+      <OverviewCard title="School year map" unit="My Plan steps done, by grade and season">
+        <PlanMap roster={scoped} activeGrade={grade} onPick={(g) => setGrade(g)} />
+      </OverviewCard>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
         <div className="flex flex-wrap items-center gap-[10px]">
           <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />

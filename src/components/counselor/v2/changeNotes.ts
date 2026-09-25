@@ -11,9 +11,9 @@ export type ChangeNote = { changed: string[]; why: string; better: string; /** h
 
 export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   overview: {
-    changed: ["Attention list leads the page, students ranked by severity with the reason", "One hero card, plain glass elsewhere; one blue hue plus status colors", "Pathways are Build's own interest worlds, six largest plus Other, in a fixed spectral order", "Every card opens its screen"],
-    why: "The reference showed three equal donuts, its own seven career families, and no way to act.",
-    better: "Worst first, one glance, one click to the student, and the same pathway names the student chose in Build.",
+    changed: ["Attention list leads the page, students ranked by severity with the reason", "One hero card, plain glass elsewhere; one blue hue plus status colors", "Pathways are Build's own interest worlds, six largest plus Other, in a fixed spectral order", "School year map: every grade's My Plan by season, a ring per cell, each cell opens the Milestone Tracker", "Reviews approved chart keeps the two milestones every grade has; the old Academic Readiness bars were empty for Grades 9-11", "Every card opens its screen"],
+    why: "The reference showed three equal donuts, its own seven career families, readiness bars that were blank for three grades, and no way to act.",
+    better: "Worst first, one glance, one click to the student, the whole school year on one grid, and the same pathway names the student chose in Build.",
     order: "Needs your attention shows At Risk students only, ranked Critical (an overdue or rejected milestone) before High (three or more not started) before Medium, ties by the least-complete roadmap; three rows, See all for the rest. Legends and pathways are ordered by size.",
   },
   students: {
@@ -23,10 +23,10 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Default sort is priority: At Risk, then Needs Attention, then On Track; within a status the same Critical / High / Medium ranking the Overview uses; ties by the least-complete roadmap.",
   },
   milestones: {
-    changed: ["Rows are the grade's own My Plan steps, Fall / Winter / Spring, the same list the student sees", "Counts come from what students actually did on Dreamari: in-app steps auto-track, steps you verify read your decisions, student-reported steps say not tracked yet", "Every row opens Students filtered to who has not done it", "CSV of the grid; Student Progress' reports are folded in here"],
+    changed: ["School year map on top: four grades by three seasons, a completion ring per cell, pick a cell to open that grade", "Rows are the grade's own My Plan steps, Fall / Winter / Spring, the same list the student sees", "Counts come from what students actually did on Dreamari: in-app steps auto-track, steps you verify read your decisions, student-reported steps say not tracked yet", "Every row opens Students filtered to who has not done it", "CSV of the grid; Student Progress' reports are folded in here"],
     why: "The reference tracked its own list of milestones with fixed numbers that never matched the roster or the student app.",
     better: "One list, the student's and yours, live, and one click from any step to the students who owe it.",
-    order: "The step with the largest share not started (awaiting review counts half) leads as Focus first; within each season the same order. A step everyone is still working on is not treated as behind.",
+    order: "The map's verdict names the grade and season with the lowest share of steps done. The step with the largest share not started (awaiting review counts half) leads as Focus first; within each season the same order. A step everyone is still working on is not treated as behind.",
   },
   "review-queue": {
     changed: ["One item per pending submission, ordered by due date", "Decisions recorded and shared with every screen, with Undo", "Attachment previewed in place; the student's name opens the profile", "Pane opens as a sheet on phones"],
