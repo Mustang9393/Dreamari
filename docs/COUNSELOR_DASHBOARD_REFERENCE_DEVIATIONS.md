@@ -870,6 +870,10 @@ kept as history.
 
 ### 2026-09-25: School year map on top (v2)
 
+- **Hero composition, third pass (25 Sept 2026).** Title without the
+  eyebrow, the ring and its legend under it, the insight alone in the
+  middle behind a hairline, the pill in the corner. Alternative: the
+  ring pushed to the far right; on a 2000px card that opened a void.
 - **Hero is a ring, not a bar (25 Sept 2026).** The Focus first step's
   four states are arcs of one `SegmentedRing` with done % inside and the
   open counts beside it; the verdict is one action line. Alternative:
@@ -907,6 +911,27 @@ kept as history.
   where a counselor acts on a step, and the map is how they choose which
   grade, so they belong together. Alternative: per-step rings like
   SchooLinks; 30-plus rings on one screen is the wall the map avoids.
+
+## Student Profile casefile mocks (v2, 25 Sept 2026)
+
+Built on request from the SchooLinks staff dashboard, DEMO-ONLY
+(`src/lib/counselorCasefile.ts`, `v2/Casefile.tsx`):
+
+- **Plan sign-off**: three parties, student from the Academic Plan
+  milestone, counselor signs here, guardian invited here. Alternative:
+  hide the guardian until an account exists; showing the row is how the
+  product gap gets decided.
+- **To-dos**: counselor-assigned tasks with due dates and an overdue
+  state. Alternative: fold into My Plan steps; a to-do is ad hoc and the
+  counselor's own, a step is curriculum.
+- **Check-ins**, folded: four words from Dreamari activity as a proxy,
+  with the honest line that a real check-in needs a student-side prompt.
+- **Reports, Schedule**: cadence, day, recipients per template; the
+  Scheduled list is what a delivery job would run.
+- **Productivity Suite back in the menus**: the batch workspace (many
+  students, one tool); the profile Drafts card is the one-student
+  version. Alternative: profile only (Usman's note); it made the batch
+  job eight clicks per student.
 
 ## Review Queue (v2)
 

@@ -137,47 +137,45 @@ export function MilestoneTracker() {
           <HoverBeam strength={0.7} className="h-full">
             <div className="group relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
               <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
-              {/* One ring instead of a stacked bar (direct feedback, 25 Sept
-                 2026: "the hero graph can be something else ... simpler,
-                 much more cleaner"): the same completion mark as the
-                 season tiles and the Overview donuts, the four states as
-                 arcs, done in the middle, the counts beside it. */}
-              <div className="relative flex flex-col gap-[var(--space-4)] sm:flex-row sm:items-start sm:justify-between sm:gap-[var(--space-6)]">
-                <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-3)]">
+              {/* Composition (third report, 25 Sept 2026: "Title, lets
+                 remove the eyebrow. Then the graph, then the insight. Stack
+                 the title and the graph with its legend aligned to the side
+                 of the graph. Put the insight in the middle portion
+                 tastefully so it has its own space"): left column is the
+                 title over the ring and its legend; the middle is the
+                 insight alone, behind a hairline; the pill holds the
+                 top-right corner. Phones stack the same order. */}
+              <span className="absolute top-[var(--space-5)] right-[var(--space-5)] z-[1] hidden sm:block"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
+              <div className="relative flex flex-col gap-[var(--space-5)] sm:grid sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-x-[var(--space-8)] sm:pr-[150px]">
+                <div className="flex flex-col gap-[var(--space-4)]">
                   <div className="flex flex-wrap items-start justify-between gap-[8px]">
-                    <span className="flex flex-col gap-[2px]">
-                      <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Focus first · {WINDOW_TITLE[focus.window]} · {KIND_LABEL[focus.kind]}</span>
-                      <h2 className="text-[17px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</h2>
-                    </span>
-                    {/* Phones only: the pill stays with the title. On wider
-                       cards it moves to the hero's top-right corner (below),
-                       direct report 25 Sept 2026: "should be in the top
-                       right corner but currently sits in the middle". */}
+                    <h2 className="text-[18px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</h2>
                     <span className="sm:hidden"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
                   </div>
+                  <div className="flex items-center gap-[var(--space-4)]">
+                    <SegmentedRing size={104} stroke={11} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
+                      <span className="flex flex-col items-center leading-none">
+                        <span className="text-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
+                        <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
+                      </span>
+                    </SegmentedRing>
+                    <ul className="flex flex-col gap-[4px]">
+                      {STATES.filter((st) => st.key !== "done" && focus.counts[st.key] > 0).map((st) => (
+                        <li key={st.key} className="flex items-center gap-[7px] text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>
+                          <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: st.color }} />
+                          <span className="tabular-nums">{focus.counts[st.key]}</span>
+                          <span style={{ color: "var(--muted-foreground)" }}>{st.label.toLowerCase().replace("awaiting your review", "awaiting you")}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-[6px] sm:max-w-[420px] sm:border-l sm:pl-[var(--space-8)]" style={{ borderColor: "var(--glass-border)" }}>
+                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Focus first</span>
                   <Verdict band={focus.counts["not-started"] / Math.max(1, focus.total) >= 0.5 ? "missed" : focus.counts["not-started"] > 0 || focus.counts["awaiting-review"] > 0 ? "near" : "met"}>
                     {focus.total - focus.counts.done === 0 ? "Everyone is done" : `${focus.total - focus.counts.done} of ${focus.total} students still need this${focus.counts["awaiting-review"] ? `, ${focus.counts["awaiting-review"]} waiting on you` : ""}`}
                   </Verdict>
-                </div>
-                <div className="flex flex-none flex-col items-end gap-[var(--space-3)]">
-                  <span className="hidden sm:block"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
-                  <div className="flex items-center gap-[var(--space-4)]">
-                  <SegmentedRing size={104} stroke={11} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
-                    <span className="flex flex-col items-center leading-none">
-                      <span className="text-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
-                      <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
-                    </span>
-                  </SegmentedRing>
-                  <ul className="flex flex-col gap-[4px]">
-                    {STATES.filter((st) => st.key !== "done" && focus.counts[st.key] > 0).map((st) => (
-                      <li key={st.key} className="flex items-center gap-[7px] text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>
-                        <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: st.color }} />
-                        <span className="tabular-nums">{focus.counts[st.key]}</span>
-                        <span style={{ color: "var(--muted-foreground)" }}>{st.label.toLowerCase().replace("awaiting your review", "awaiting you")}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  </div>
+                  <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{WINDOW_TITLE[focus.window]} step · {KIND_LABEL[focus.kind]}</span>
                 </div>
               </div>
             </div>

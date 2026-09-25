@@ -142,3 +142,10 @@ Administrator, DA District Administrator.
 - **Zero and 100%:** bars render at 0 and 100 without overflow; verdicts read "Every ... is on target" when nothing is below target.
 - **Light mode:** every surface, glow, chart gridline, label and nested row uses tokens that flip (`--inset-bg`, `--inset-border`, `--inset-shadow`, `--foreground` mixes); nested rows are always lighter than their card.
 - **Devices:** 12-column heroes stack below 1280px; master-detail panes become a bottom sheet below 1024px; tables become card lists below 1024px; the content column caps at 1400px on wide displays.
+
+## Casefile cards (25 Sept 2026, DEMO-ONLY mocks)
+
+- **Plan sign-off**: always three rows; a party reads Signed / Waiting / Not yet. No empty state.
+- **To-dos**: empty reads "No to-dos yet. What you assign here shows up in [first name]'s My Plan."; overdue rows in the At Risk red; done rows fade with a strikethrough.
+- **Check-ins**: folded by default; the body says the words come from Dreamari activity, not a check-in.
+- **Reports, Scheduled**: empty reads "Nothing scheduled. Use Schedule on a template above."

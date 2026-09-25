@@ -38,6 +38,23 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: feedback re-verified, Productivity Suite back, SchooLinks mocks, the hero recomposed
+
+Direct instruction: "Do not just agree with me ... verify if the suggested directions are optimal for us or not before incorporating. Always justify with reasons"; "mock up stuff from SchooLinks that were not built because it would read as copy. Build them, then we'll see how we can make them not look like a copy"; and a third hero layout note.
+
+**Productivity Suite: partially reversed.** Usman's "pick a student, then generate belongs in the profile" is right for the one-student job (a brief before a meeting, one letter) and wrong for the batch job (ten recommendation letters in a sitting, briefs for the week). Folding it into the profile alone turned the batch job into Students, search, open, expand Drafts, tool, generate, back, repeat. Both entry points now exist: Productivity Suite is back in the School Counselor and Lead Counselor menus as the batch workspace, and the profile keeps the folded Drafts card for the one-student case. `HIDDEN_VIEWS` keeps only Student Progress.
+
+**SchooLinks mocks (DEMO-ONLY, `src/lib/counselorCasefile.ts`, `v2/Casefile.tsx`).** Built as asked, ours in shape, to be judged live:
+- Plan sign-off on the profile: student (from the Academic Plan milestone), you (Sign / Undo), guardian (Invite / Remind; seeded approved for every second student whose plan is approved). Guardian is the party Dreamari does not have; the card makes the gap visible.
+- To-dos on the profile: a task with a due date, overdue in red, done fades, removable. Production: these land in the student's My Plan and inbox.
+- Check-ins on the profile, folded: four words from the student's own activity, with the honest line that a real check-in needs a student-side prompt and alert words. Product decision.
+- Reports: Schedule on every template (weekly or monthly, a day, recipients), a Scheduled list that a delivery job would run. No mail sent.
+Not mocked: course planning and graduation pathways (state-mandated, outside Dreamari); the live activity feed (would be a fourth list on an Overview that is already attention-first).
+
+**Hero, third pass:** title without the eyebrow; the ring with its legend beside it under the title; the insight in its own middle column behind a hairline with a small "Focus first" label and the season and kind under it; the pill in the corner. Verified at 1440, 2000 and 390.
+
+`npx tsc --noEmit -p .` and `npx eslint src/components/counselor/` clean.
+
 ### 2026-09-25 Counselor Dashboard v2: season tiles, world colors for pathways, the drill-down arrow, a ring hero
 
 Seven direct notes in one sitting, each applied at the cause:

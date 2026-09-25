@@ -17,7 +17,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Needs your attention shows At Risk students only, ranked Critical (an overdue or rejected milestone) before High (three or more not started) before Medium, ties by the least-complete roadmap; three rows, See all for the rest. Legends and pathways are ordered by size.",
   },
   students: {
-    changed: ["Six columns instead of thirteen; grade and pathway sit under the name", "Sorted attention first, with the reason under the status", "Status and plan pickers in the toolbar, a counselor column for oversight roles", "Opens pre-filtered from the tracker: Not done: [step]", "Card list on phones, paginated at twenty"],
+    changed: ["Six columns instead of thirteen; grade and pathway sit under the name", "Sorted attention first, with the reason under the status", "Status and plan pickers in the toolbar, a counselor column for oversight roles", "Opens pre-filtered from the tracker: Not done: [step]", "Card list on phones, paginated at twenty", "Profile: Plan sign-off (student, you, guardian), To-dos you assign with due dates, and a folded Check-ins card, mocked from the SchooLinks staff dashboard as demo-only"],
     why: "The reference's 120-row, 13-column table repeated Lincoln High School and Approved on every row and blank-rendered on phones.",
     better: "The students to act on are at the top with why, on any device, and the tracker hands you exactly the ones who owe a step.",
     order: "Default sort is priority: At Risk, then Needs Attention, then On Track; within a status the same Critical / High / Medium ranking the Overview uses; ties by the least-complete roadmap.",
@@ -53,7 +53,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Recommendations are the three largest interest clusters, largest first; ranked lists are by count.",
   },
   productivity: {
-    changed: ["Left the menu; the four draft tools now live on each student's profile as Drafts", "Drafts are built from the student's own plan, editable, with Copy, Download, Save to notes, or Write my own"],
+    changed: ["Left the menu; the four draft tools now live on each student's profile as Drafts", "Drafts are built from the student's own plan, editable, with Copy, Download, Save to notes, or Write my own", "Back in the menu on 25 Sept 2026: this is the batch workspace (many students, one tool); the profile Drafts card is the one-student version"],
     why: "Pick a student, then generate something belongs inside the student profile, not on its own page (Usman).",
     better: "A draft where the student already is, from their own data, with a manual option.",
     order: "Not in the menu.",
@@ -89,7 +89,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Within each target, the grade or school with the lowest value first. Rows that meet the target stay quiet; amber within ten points of target, red beyond.",
   },
   reports: {
-    changed: ["New screen for administrators", "Templates built from live numbers, downloaded as CSV"],
+    changed: ["New screen for administrators", "Templates built from live numbers, downloaded as CSV", "Schedule a template: weekly or monthly, a day, recipients; the list is what a delivery job would run (mocked from the SchooLinks Report Center)"],
     why: "The reference offered a single button that did nothing.",
     better: "A report that reflects today's data, in a format a board can open.",
     order: "Templates in a fixed order; generated reports newest first.",

@@ -50,6 +50,7 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "review-queue" },
     { view: "connect" },
     { view: "insights" },
+    { view: "productivity" },
     { view: "impact" },
     { view: "settings" },
   ],
@@ -61,6 +62,7 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "review-queue" },
     { view: "connect" },
     { view: "insights" },
+    { view: "productivity" },
     { view: "school-impact" },
     { view: "settings" },
   ],
@@ -108,8 +110,8 @@ export function menuForRole(role: CounselorRole | ""): RoleMenuItem[] {
 
 /** Screens a role can open by URL but that are not in its menu. */
 const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {
-  "School Counselor": ["progress", "productivity"],
-  "Lead Counselor": ["progress", "productivity"],
+  "School Counselor": ["progress"],
+  "Lead Counselor": ["progress"],
 };
 export function roleHasView(role: CounselorRole | "", view: CounselorView): boolean {
   return menuForRole(role).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
