@@ -38,6 +38,42 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: Productivity Suite redesigned as an actual workspace
+
+Direct report: "the Productivity Suite is the worst UI right now, lots
+of long copy, not looking like a proper workspace tool. How can we
+improve this?"
+
+Two causes, fixed at the cause:
+
+- **Every tool's full-sentence description is gone.** ("Generate a
+  personalized recommendation letter using each student's career
+  report, resume, assessments, reflections, milestones, activities, and
+  counselor notes.") The icon, the tool's name and its existing 2-6
+  word sub-line already say what it's for; nothing else in this
+  dashboard explains a tool in a paragraph, and this was the one place
+  it still did. `desc` dropped from the `TOOLS` array entirely.
+- **The tool switcher is a left rail at `lg` and up**, not a horizontal
+  row of full tool names: the same quiet-row/tinted-pill/primary-icon
+  language the app's own sidebar nav (`SidebarNav`, shell.tsx) already
+  uses for its own active item, so the Suite reads as a tool with its
+  own tool list rather than a form with a button row above it. Below
+  `lg` it stays the horizontal `ScrollChips` row -- no room for a
+  persistent rail on a phone. Labels stay visible (not icon-only with a
+  tooltip), consistent with the dashboard's own rule that an affordance
+  is visible at rest for older users and touch devices without hover.
+- A draft tool now always shows an editor pane: a dashed empty state
+  ("Generate a draft, or write your own, to fill this in.") before
+  Generate is pressed, so the card never leaves a void under the button
+  row. Group Message and Students Needing Attention don't need it --
+  their own body already fills the space.
+
+Verified live at 1440 (rail, all six tools, empty-state pane) and 390
+(chip row, same empty state), and inside the Student Profile's folded
+Drafts card (the `fixedStudent` path: chip row at that card's width,
+Student picker correctly hidden, same empty state). `npx tsc --noEmit
+-p .` and `npx eslint` clean.
+
 ### 2026-09-25 Counselor Dashboard v2: My Impact tabbed with a compiled print report; every page caption removed
 
 Two direct instructions, addressed together since both are about cutting

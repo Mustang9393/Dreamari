@@ -1116,6 +1116,38 @@ questions, ten groups) is the reference's, verbatim.
   paragraph are one muted line under the button: "A first draft from the
   student's Dreamari data. Review and edit before you use it."
 
+**25 Sept 2026, later the same day, redesigned again** (direct report:
+"the Productivity Suite is the worst UI right now, lots of long copy,
+not looking like a proper workspace tool. How can we improve this?").
+Two causes, both fixed at the cause rather than trimmed further:
+
+- **The one-sentence description above is gone entirely.** The icon,
+  the tool's name and its short sub-line (already 2-6 words, e.g.
+  "Pre-meeting one-pager") already say what the tool is for; a workspace
+  tool does not caption its own toolbar. Alternative: shorten the
+  sentence further; even one clause read as an explainer no other tool
+  in this dashboard carries.
+- **The tool switcher is a left rail at `lg` and up, not a horizontal
+  row of full names.** It is the exact active/inactive language the
+  app's own sidebar nav already uses for its own current item (a quiet
+  row, a tinted pill and a primary-coloured icon when selected, in
+  `SidebarNav`, shell.tsx) -- so the Suite now reads as a tool with its
+  own tool list, the same idiom as the rest of the app, instead of a
+  form with a stack of buttons above it. Below `lg` the horizontal chip
+  row stays: there is no room for a persistent rail on a phone, and nav
+  items compress worse than tool switches do at that width. Alternative:
+  icon-only rail with tooltips; rejected, the older-user/no-hover
+  affordance rule this dashboard already follows elsewhere means the
+  label should stay visible at rest, and six short labels fit a 228px
+  rail without truncating.
+- **A draft tool always shows its editor pane, even before Generate is
+  pressed.** A dashed empty state ("Generate a draft, or write your own,
+  to fill this in.") now occupies the space a blank card used to leave
+  under the button row, so the workspace looks intentional mid-task
+  rather than half-built. Group Message and Students Needing Attention
+  never show it -- their own body (the composer, the ranked list)
+  already fills the card.
+
 ## Platform Engagement (v2)
 
 25 Sept 2026 copy pass only; the reference's numbers are unchanged. Tile

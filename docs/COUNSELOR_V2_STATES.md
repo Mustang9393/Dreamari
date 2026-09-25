@@ -96,6 +96,7 @@ Administrator, DA District Administrator.
 - Data: roster for the student picker and drafts; notes store for Save to notes.
 - Whole-screen empty: "No students to draft for" / "Drafts are built from a student's plan; add students first." CTA Students.
 - In-screen: Students Needing Attention with everyone on track: "Everyone is on track."; Generate is disabled until a student is chosen; Save to notes reads "Saved to notes" after saving.
+- Tool switcher (25 Sept 2026): a left rail at `lg` and up (mirrors the app's own sidebar nav row); the horizontal chip row below `lg`, unchanged. A draft tool with no draft yet shows a dashed empty-state pane ("Generate a draft, or write your own, to fill this in.") instead of empty space; Group Message and Students Needing Attention never show it (their own body already fills the card).
 - Edge: drafts for a student with no matches use "their chosen pathway"; the clipboard call is guarded for browsers without it.
 
 ### Platform Engagement (SA, DA)

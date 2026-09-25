@@ -53,10 +53,10 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Recommendations are the three largest interest clusters, largest first; ranked lists are by count.",
   },
   productivity: {
-    changed: ["Left the menu; the four draft tools now live on each student's profile as Drafts", "Drafts are built from the student's own plan, editable, with Copy, Download, Save to notes, or Write my own", "Back in the menu on 25 Sept 2026: this is the batch workspace (many students, one tool); the profile Drafts card is the one-student version", "Group Message tool: an audience by grade, status or pathway, or students you pick by name; one message, reminder or to-do to all of them; letters and briefs stay one student at a time"],
-    why: "Pick a student, then generate something belongs inside the student profile, not on its own page (Usman).",
-    better: "A draft where the student already is, from their own data, with a manual option.",
-    order: "Not in the menu.",
+    changed: ["Back in the menu on 25 Sept 2026: this is the batch workspace (many students, one tool); the profile Drafts card is the one-student version", "Drafts are built from the student's own plan, editable, with Copy, Download, Save to notes, or Write my own", "Group Message tool: an audience by grade, status or pathway, or students you pick by name; one message, reminder or to-do to all of them; letters and briefs stay one student at a time", "Tool switcher is a left rail on desktop (the same active-row language as the app's own sidebar nav), a chip row on phones; every tool's long description sentence is gone; a dashed empty-state pane fills the space before a draft exists"],
+    why: "Pick a student, then generate something belongs inside the student profile, not on its own page (Usman); reported later the same day as \"the worst UI right now, lots of long copy, not looking like a proper workspace tool.\"",
+    better: "A draft where the student already is, from their own data, with a manual option; the tool itself reads as a workspace, not a form with a paragraph above it.",
+    order: "Tools list top to bottom in the rail/chip row: the four personal drafts, then Group Message, then Students Needing Attention (no student needed).",
   },
   engagement: {
     changed: ["Two-word tile labels; qualifiers moved into muted units", "One blue hue for both series", "District role sees schools compared first"],
