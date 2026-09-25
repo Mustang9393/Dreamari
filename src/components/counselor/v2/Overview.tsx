@@ -194,25 +194,21 @@ function PathwaysCard({ topPathways, colors, activePathway, onToggle, onOpen }: 
             </button>
           )}
         </div>
-        {/* A stacked bar plus a vertical legend was built for the
-           reference's own 7 tracks; at 15 real Build worlds the bar
-           became 15 slivers too thin to read and the legend a 15-row
-           column, both correctly reported as overpopulated. A chip cloud
-           tried next didn't hold up either (direct feedback: "the
-           current chip thing doesnt help. We need a proper graphical
-           representation... why are we limiting ourselves to a donut or
-           a bar graph"). Landed on the ranked full-width bar this
-           dashboard's own Insights screen already uses for the same
-           shape of problem (many named categories, one count each,
-           "Ranked lists as full-width bars" per its own change note) --
-           proven readable for far more names than this ("Fixing Machines
-           & Engines" and friends already survive it there), each bar
-           scaled to the largest pathway (not the total) so the spread
-           between a caseload's biggest and smallest pathways is easy to
-           read at a glance, and each bar keeps its own world's color so
-           the identity this dashboard color-codes everywhere else
-           doesn't disappear into one uniform gradient. */}
-        <ol className="relative flex flex-1 flex-col justify-center gap-[6px]">
+        {/* Attempt #4. A single stacked bar (built for the reference's own
+           7 tracks) became 15 unreadable slivers; a chip cloud "didn't
+           help"; ranked full-width bars (this dashboard's own Insights-
+           screen pattern) were still "just another list" with text too
+           big. Looked at how modern dashboards (Zentra, Boltshift, Orbit,
+           this project's own moodboard) handle a same-size stat grid --
+           a grid of small, equal-size tiles reads as a real dashboard
+           module rather than a list wearing a new skin, and "equal size
+           regardless of value" directly answers "i dont want certian
+           careers reading like theya re lesser" one more time, this time
+           structurally (every tile is literally the same footprint).
+           Magnitude still reads honestly through the number and the
+           tile's own thin base bar, just without forcing a long column
+           or an unreadable single stacked bar. */}
+        <div className="relative grid flex-1 auto-rows-min grid-cols-2 gap-[8px] content-start sm:grid-cols-3">
           {(() => {
             const max = Math.max(1, ...topPathways.map(([, v]) => v));
             return topPathways.map(([label, value], i) => {
@@ -220,25 +216,27 @@ function PathwaysCard({ topPathways, colors, activePathway, onToggle, onOpen }: 
               const dim = activePathway !== null && !active;
               const color = colors[i % colors.length];
               return (
-                <li key={label}>
-                  <button
-                    type="button"
-                    onClick={() => onToggle(label)}
-                    aria-pressed={active}
-                    className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] transition-opacity"
-                    style={{ opacity: dim ? 0.45 : 1 }}
-                  >
-                    <span className="relative flex h-[26px] min-w-0 flex-1 items-center rounded-[6px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-                      <span aria-hidden className="absolute inset-y-0 left-0 rounded-[6px] transition-[width]" style={{ width: `${(value / max) * 100}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 45%, transparent), ${color})`, boxShadow: active ? `0 0 0 2px ${color}` : "none" }} />
-                      <span className="relative truncate px-[10px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-                    </span>
-                    <span className="w-[26px] flex-none text-right text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
-                  </button>
-                </li>
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => onToggle(label)}
+                  aria-pressed={active}
+                  className="dm-quiet relative flex cursor-pointer flex-col gap-[6px] overflow-hidden rounded-[8px] border p-[8px] text-left transition-opacity"
+                  style={{ borderColor: active ? color : "var(--glass-border)", background: "var(--glass-surface-1)", opacity: dim ? 0.45 : 1 }}
+                >
+                  <span className="flex items-center gap-[5px]">
+                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: color }} />
+                    <span className="truncate text-[11px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
+                  </span>
+                  <span className="text-[17px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
+                  <span aria-hidden className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
+                    <span className="block h-full" style={{ width: `${(value / max) * 100}%`, background: color }} />
+                  </span>
+                </button>
               );
             });
           })()}
-        </ol>
+        </div>
       </div>
     </HoverBeam>
   );
