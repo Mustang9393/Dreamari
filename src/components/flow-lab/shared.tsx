@@ -14,9 +14,10 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, FileText, GraduationCap, ImageOff, Info, Loader2, Play, Plus, Route, Sparkles, X } from "lucide-react";
+import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, FileText, GraduationCap, ImageOff, Info, Play, Plus, Route, Sparkles, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { IconTip } from "@/components/app/IconTip";
+import { Working } from "@/components/app/Working";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { careerSlug } from "@/components/career/slug";
 import { matchDetail, REVEAL_STEP, type LabCareer, WORLDS } from "./lab";
@@ -70,14 +71,28 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
     </>
   );
   if (scrollable) {
+    // A genuinely full-bleed sticky bar (`w-full`, no side padding of its
+    // own) with its content re-centered to the same 880px column inside it
+    // -- the same shape DesktopNavigation uses for the site's own top nav.
+    // Card content sits right up against this bar from the very first
+    // scroll pixel here (no hero, no breathing room above the grid), so it
+    // is always frosted rather than fading in on scroll: a bar that is
+    // sometimes transparent right over dense photos is the exact
+    // "scrolling things visible through the header" complaint, and a
+    // narrower bar constrained to the content column (a negative-margin
+    // trick tried first) reads as a floating slab with hard side edges
+    // instead of a real header (direct feedback, 25 Sept 2026: "ugly...
+    // breaking the header treatment"). Same background/blur formula as
+    // FlowLab's own fixed app header immediately above it, and no box
+    // shadow of its own, so together they read as one continuous frosted
+    // band with a single soft edge at the very bottom, not two stacked
+    // bars with a seam.
     return (
-      <section className="relative z-10 flex w-full flex-col items-center px-4 pt-16 pb-24 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
-        <div className="flex w-full max-w-[880px] flex-col">
-          <div className="sticky top-16 z-10 -mx-4 bg-[var(--background)]/95 px-4 pt-1 backdrop-blur-md sm:top-[72px] sm:-mx-6 sm:px-6">
-            {header}
-          </div>
-          {children}
+      <section className="relative z-10 flex w-full flex-col items-center pt-16 pb-24 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
+        <div className="sticky top-16 z-10 w-full sm:top-[72px]" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(20px) saturate(1.6)", WebkitBackdropFilter: "blur(20px) saturate(1.6)" }}>
+          <div className="mx-auto flex w-full max-w-[880px] flex-col px-4 pt-2 pb-2 sm:px-6">{header}</div>
         </div>
+        <div className="flex w-full max-w-[880px] flex-col px-4 sm:px-6">{children}</div>
       </section>
     );
   }
@@ -288,20 +303,47 @@ export function useRevealCount(total: number, resetKey: string): { count: number
   return { count: Math.min(count, total), sentinelRef };
 }
 
+// The card-scale version of the app's own scroll-reveal (SchoolsIllustrations.tsx's
+// `rise`/`VIEW`): same ease curve, a lighter lift since a poster card is not
+// a hero section. `whileInView` with `once: true` is what makes a card
+// animate in ONLY the first time it scrolls into view -- already-seen cards
+// re-rendered by a later reveal never replay it (direct feedback, 25 Sept
+// 2026: "when I scroll down things should load in with an animated
+// transition, not just like it was always there").
+const REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
+const revealVariants = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } };
+const REVEAL_VIEWPORT = { once: true, amount: 0.3, margin: "0px 0px -40px 0px" } as const;
+
+function RevealItem({ index, children }: { index: number; children: ReactNode }) {
+  return (
+    <motion.div
+      variants={revealVariants}
+      initial="hidden"
+      whileInView="show"
+      viewport={REVEAL_VIEWPORT}
+      transition={{ duration: 0.45, ease: REVEAL_EASE, delay: (index % REVEAL_STEP) * 0.05 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 /** The grid itself: a plain wrapping grid (Match's own card language, not a
- *  fixed 2x3 viewport) with a sentinel row at the bottom that pulls in the
- *  next REVEAL_STEP as it scrolls into view. */
+ *  fixed 2x3 viewport). Each card animates in the first time it scrolls
+ *  into view; a sentinel row pulls in the next REVEAL_STEP as IT scrolls
+ *  into view, with the app's own `Working` chip while the next batch
+ *  settles (per docs/COMPONENT_STATES_PLAYBOOK.md's loading-state default). */
 export function RevealGrid<T>({ items, resetKey, renderItem }: { items: T[]; resetKey: string; renderItem: (item: T, index: number) => ReactNode }) {
   const { count, sentinelRef } = useRevealCount(items.length, resetKey);
   const shown = items.slice(0, count);
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4">
-        {shown.map((item, i) => renderItem(item, i))}
+        {shown.map((item, i) => <RevealItem key={i} index={i}>{renderItem(item, i)}</RevealItem>)}
       </div>
       {count < items.length && (
         <div ref={sentinelRef} className="flex h-10 flex-none items-center justify-center">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+          <Working label="Loading more" />
         </div>
       )}
     </div>

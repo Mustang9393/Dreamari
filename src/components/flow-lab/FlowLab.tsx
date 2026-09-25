@@ -15,7 +15,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { RotateCcw, ArrowLeft } from "lucide-react";
-import { QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { QuickLinksMenu, Wordmark, useScrolled } from "@/components/app/chrome";
 import { IconTip } from "@/components/app/IconTip";
 import { InfoButton, InfoSheet } from "./notes";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
@@ -41,6 +41,14 @@ export function FlowLab() {
     clearLabState();
     setResetKey((k) => k + 1);
   };
+  // The site's own top-nav frost (chrome.tsx DesktopNavigation): transparent
+  // at rest, a soft blurred surface once the page has scrolled -- never a
+  // flat opaque bar (direct feedback, 25 Sept 2026: "lose the black bars
+  // everywhere... when I scroll down I can see the scrolling away things
+  // through the header"). No border or shadow of its own so it reads as one
+  // continuous frosted band with the screen's own sticky sub-header right
+  // beneath it, not two stacked bars with a seam between them.
+  const scrolled = useScrolled(4);
 
   return (
     <ThemeProvider>
@@ -54,7 +62,14 @@ export function FlowLab() {
         {/* Fixed header, like FlowChrome on Match: wordmark left; right, the
             lab label, the (i) note, and the app's own hamburger so the
             quick links (the demo, other labs) are one tap away. */}
-        <header className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-center justify-between px-4 py-3 sm:px-6">
+        <header
+          className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-center justify-between px-4 py-3 transition-[background-color,backdrop-filter] duration-300 sm:px-6"
+          style={{
+            background: scrolled ? "color-mix(in srgb, var(--background) 70%, transparent)" : "transparent",
+            backdropFilter: scrolled ? "blur(20px) saturate(1.6)" : "none",
+            WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.6)" : "none",
+          }}
+        >
           <div className="pointer-events-auto flex items-center gap-3">
             <IconTip label="Back to the app">
               <Link href="/home" aria-label="Back to the app" className="dm-quiet flex size-9 items-center justify-center rounded-full border backdrop-blur-[10px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--foreground)" }}>

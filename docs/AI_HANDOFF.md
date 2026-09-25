@@ -38,6 +38,22 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Flow Lab: Mini Explore's scroll header fixed for real, scroll-reveal on cards
+
+**Why:** the header/scroll pass in the previous entry shipped broken on first look -- direct reports: "lose the black bars everywhere... when I scroll down I can see the scrolling away things through the header," then, after a first fix attempt, "UGLY. Breaking the header treatment," and "use our loading states we design... let me see them."
+
+**What actually broke:** the sticky sub-header used Tailwind's `bg-[var(--background)]/95` opacity-modifier syntax, which only works on raw RGB-channel custom properties -- `--background` isn't one, so the modifier silently no-opped and rendered fully opaque, a flat black slab with a hard seam against the fixed app header above it. The first attempted fix (`color-mix(...)` + blur) was applied to a bar still sized to the 880px content column via a negative-margin trick, which produced a floating slab with hard LEFT/RIGHT edges instead of a real header.
+
+**The actual fix (`shared.tsx`'s `LabScreen`):** the sticky sub-header is now genuinely full-bleed (`w-full`, no side padding of its own, matching the shape `DesktopNavigation` in `chrome.tsx` uses for the site's real top nav), with its content re-centered to the 880px column *inside* it. It's always frosted (`color-mix(in srgb, var(--background) 78%, transparent)` + `blur(20px) saturate(1.6)`, no box-shadow) rather than scroll-triggered, because cards sit directly against it from the first scroll pixel on this screen -- a bar that's sometimes transparent right over dense photos is exactly the "scrolling things visible through the header" complaint. `FlowLab.tsx`'s own fixed app header keeps the site's real scroll-triggered frost (`useScrolled`, transparent at rest) since it sits above the sub-header, not over card photos directly -- confirmed transparent at scroll 0, frosted once scrolled, no seam against the sub-header below it.
+
+**Scroll-reveal, per direct instruction ("when I scroll down things should load in with an animated transition"):** each `RevealGrid` card is now wrapped in a `motion.div` using the app's own scroll-reveal shape (`SchoolsIllustrations.tsx`'s `rise`/`VIEW`, scaled down for card size: `y: 14`, `duration: 0.45`, same ease curve), `whileInView` with `once: true` so a card animates in only the first time it scrolls into view, never on a re-render of cards already seen.
+
+**Loading state, per direct instruction ("use our loading states we design"):** the infinite-scroll sentinel now shows the app's own `Working` chip (`src/components/app/Working.tsx`) instead of a bare spinner, per `docs/COMPONENT_STATES_PLAYBOOK.md`'s own default ("Skeleton loaders don't exist anywhere in this codebase yet... default to the `Working` chip").
+
+**Also hit and fixed along the way:** a stray `Loader2` import removal left the dev server's cached bundle serving a reference error after the edit; `rm -rf .next` plus a genuinely fresh browser tab (not a re-navigate, which Chrome can serve from its JS cache) cleared it -- the running server was serving clean code the whole time, confirmed via a direct `curl` of the bundle.
+
+**Verified live** on the dedicated dev server for this checkout at 1440 and 375: header transparent at rest, frosted and seamless once scrolled, no hard edges at any width; a card visibly mid-fade-in in a screenshot taken 80ms after a scroll jump, confirming the reveal actually animates; no console errors; no horizontal scroll on phone. `npx tsc --noEmit -p .` clean; `npx eslint` clean on both touched files.
+
 ### 2026-09-25 Flow Lab: dropped v3, reworked v2 on Joshua's review (no pop-ups, no "For You", no "Six more", continuous scroll)
 
 **Why:** Joshua reviewed the built lab in Slack and asked for a simplification pass, then "remove v3. stick to v2." His points, each with a direct fix:
