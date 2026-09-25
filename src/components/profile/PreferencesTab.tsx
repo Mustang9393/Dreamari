@@ -10,7 +10,7 @@
 // icon in a two-column grid, posters for the careers picker, the app's
 // own hover patterns. It must not feel like retaking Build.
 
-import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Activity, BookOpen, Briefcase, Check, ChevronRight, GraduationCap, Minus, Plus, School, SlidersHorizontal, Target, Wrench, X, type LucideIcon } from "lucide-react";
@@ -100,8 +100,6 @@ export function PreferencesTab() {
         {SECTIONS.map((s) => {
           const chips = chipsFor(s.id, prefs);
           const Icon = s.icon;
-          const shown = chips.slice(0, 4);
-          const rest = chips.length - shown.length;
           const justSaved = savedNote === s.id;
           return (
             <HoverBeam key={s.id} strength={0.6} className="min-w-0">
@@ -112,7 +110,7 @@ export function PreferencesTab() {
                 className="dm-tap flex w-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:flex-row sm:items-center sm:gap-[var(--space-5)]"
                 style={{ borderColor: justSaved ? "color-mix(in srgb, var(--color-feedback-success) 55%, var(--glass-border))" : "var(--glass-border)", background: "color-mix(in srgb, var(--card) 85%, transparent)", transition: "border-color 400ms ease" }}
               >
-                <span className="flex items-center gap-[10px] sm:w-[320px] sm:flex-none">
+                <span className="flex items-center gap-[10px] sm:w-[220px] sm:flex-none lg:w-[320px]">
                   <span className="flex size-8 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--accent-subtle)" }}>
                     <Icon className="h-4 w-4" aria-hidden />
                   </span>
@@ -120,18 +118,16 @@ export function PreferencesTab() {
                   {s.optional && <span className="flex-none rounded-full border px-[7px] py-[1px] text-[10px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Optional</span>}
                   <span className="flex flex-none items-center gap-[2px] text-[12.5px] font-semibold sm:hidden" style={{ color: "var(--muted-foreground)" }}>Edit <ChevronRight className="h-4 w-4" aria-hidden /></span>
                 </span>
-                <span className="flex min-w-0 flex-1 flex-wrap items-center gap-[6px]">
-                  {shown.length === 0 ? (
-                    <span className="text-[12.5px] font-medium" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>Not set yet</span>
-                  ) : (
-                    <>
-                      {shown.map((c) => (
-                        <span key={c} className="max-w-full truncate rounded-full border px-[10px] py-[3px] text-[12.5px] leading-[16px] font-medium" style={{ borderColor: CHIP_BORDER, background: "transparent", color: "var(--foreground)" }}>{c}</span>
-                      ))}
-                      {rest > 0 && <span className="rounded-full px-[8px] py-[3px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>+{rest}</span>}
-                    </>
-                  )}
-                </span>
+                {/* As many chips as actually fit this row's width, then "+n":
+                   measured, not guessed by breakpoint, so a card is one line
+                   on any screen (direct reports, 25 Sept 2026: "wraps badly
+                   and gets extremely tall on smaller screens... not just
+                   phone, tablet and small desktop too"). */}
+                {chips.length === 0 ? (
+                  <span className="flex min-w-0 flex-1 text-[12.5px] font-medium" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>Not set yet</span>
+                ) : (
+                  <FitChips chips={chips} />
+                )}
                 {/* The edit affordance, quiet but always there (direct
                    feedback, 25 Sept 2026: "make sure the edit CTA exists,
                    subtly"). */}
@@ -266,6 +262,45 @@ function Text({ label, value, onChange, placeholder, type = "text" }: { label: s
       {label}
       <input type={type} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={INPUT} style={INPUT_STYLE} />
     </label>
+  );
+}
+
+/** One row of chips that never wraps: a hidden copy measures every chip,
+ *  the visible row shows the ones that fit beside a "+n" count, and a
+ *  ResizeObserver re-fits on any width change. */
+function FitChips({ chips }: { chips: string[] }) {
+  const wrapRef = useRef<HTMLSpanElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [count, setCount] = useState(chips.length);
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current;
+    const meas = measureRef.current;
+    if (!wrap || !meas) return;
+    const GAP = 6;
+    const PLUS = 36;
+    const compute = () => {
+      const width = wrap.clientWidth;
+      const widths = Array.from(meas.children).map((c) => (c as HTMLElement).getBoundingClientRect().width);
+      let used = 0;
+      let n = 0;
+      for (let i = 0; i < widths.length; i++) {
+        const tail = i < widths.length - 1 ? GAP + PLUS : 0;
+        if (used + (n ? GAP : 0) + widths[i] + tail <= width) { used += (n ? GAP : 0) + widths[i]; n++; } else break;
+      }
+      setCount(Math.max(1, n));
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [chips]);
+  const chip = (c: string) => <span key={c} className="max-w-[200px] flex-none truncate rounded-full border px-[10px] py-[3px] text-[12.5px] leading-[16px] font-medium" style={{ borderColor: CHIP_BORDER, color: "var(--foreground)" }}>{c}</span>;
+  return (
+    <span ref={wrapRef} className="relative flex min-w-0 flex-1 items-center gap-[6px] overflow-hidden">
+      <span ref={measureRef} aria-hidden className="pointer-events-none invisible absolute top-0 left-0 flex flex-nowrap items-center gap-[6px] whitespace-nowrap">{chips.map(chip)}</span>
+      {chips.slice(0, count).map(chip)}
+      {chips.length > count && <span className="flex-none rounded-full px-[6px] py-[3px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>+{chips.length - count}</span>}
+    </span>
   );
 }
 
