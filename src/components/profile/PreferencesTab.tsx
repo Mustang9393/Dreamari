@@ -81,7 +81,7 @@ export function PreferencesTab() {
         </span>
         <div className="flex min-w-0 flex-col gap-[4px]">
           <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
-          <p className="text-[14.5px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Your interests can change. Update them anytime and Dreamari will adjust your recommendations.</p>
+          <p className="text-[15.5px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Your interests can change. Update them anytime and Dreamari will adjust your recommendations.</p>
           {updated && <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
         </div>
       </div>
@@ -92,7 +92,11 @@ export function PreferencesTab() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
+      {/* Stacked, one per row (direct feedback, 25 Sept 2026: "stacking them
+         is easier on the eyes"): title block left, answers right on wide
+         screens, one under the other on phones. Sizes run strictly top
+         down: page title > subtitle > card title > chips. */}
+      <div className="flex flex-col gap-[var(--space-3)]">
         {SECTIONS.map((s) => {
           const chips = chipsFor(s.id, prefs);
           const Icon = s.icon;
@@ -105,29 +109,30 @@ export function PreferencesTab() {
                 type="button"
                 onClick={() => setOpen(s.id)}
                 aria-label={`${s.title}: ${chips.length ? chips.join(", ") : "not set yet"}. Edit`}
-                className="dm-tap flex h-full w-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left"
+                className="dm-tap flex w-full cursor-pointer flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left sm:flex-row sm:items-center sm:gap-[var(--space-5)]"
                 style={{ borderColor: justSaved ? "color-mix(in srgb, var(--color-feedback-success) 55%, var(--glass-border))" : "var(--glass-border)", background: "color-mix(in srgb, var(--card) 85%, transparent)", transition: "border-color 400ms ease" }}
               >
-                <span className="flex items-center gap-[10px]">
+                <span className="flex items-center gap-[10px] sm:w-[320px] sm:flex-none">
                   <span className="flex size-8 flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--accent-subtle)" }}>
                     <Icon className="h-4 w-4" aria-hidden />
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{s.title}</span>
+                  <span className="min-w-0 flex-1 truncate text-[15px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>{s.title}</span>
                   {s.optional && <span className="flex-none rounded-full border px-[7px] py-[1px] text-[10px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Optional</span>}
-                  <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                  <ChevronRight className="h-4 w-4 flex-none sm:hidden" aria-hidden style={{ color: "var(--muted-foreground)" }} />
                 </span>
-                <span className="flex flex-wrap gap-[6px]">
+                <span className="flex min-w-0 flex-1 flex-wrap items-center gap-[6px]">
                   {shown.length === 0 ? (
-                    <span className="text-[13px] font-medium" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>Not set yet</span>
+                    <span className="text-[12.5px] font-medium" style={{ color: "color-mix(in srgb, var(--muted-foreground) 70%, transparent)" }}>Not set yet</span>
                   ) : (
                     <>
                       {shown.map((c) => (
-                        <span key={c} className="max-w-full truncate rounded-full border px-[10px] py-[3px] text-[12px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{c}</span>
+                        <span key={c} className="max-w-full truncate rounded-full border px-[10px] py-[3px] text-[12.5px] leading-[16px] font-medium" style={{ borderColor: CHIP_BORDER, background: "transparent", color: "var(--foreground)" }}>{c}</span>
                       ))}
-                      {rest > 0 && <span className="rounded-full px-[8px] py-[3px] text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}>+{rest}</span>}
+                      {rest > 0 && <span className="rounded-full px-[8px] py-[3px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>+{rest}</span>}
                     </>
                   )}
                 </span>
+                <ChevronRight className="hidden h-4 w-4 flex-none sm:block" aria-hidden style={{ color: "var(--muted-foreground)" }} />
               </button>
             </HoverBeam>
           );
@@ -176,7 +181,7 @@ function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: Sect
     education: (
       <>
         <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
-          <label className="flex flex-col gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+          <label className="flex flex-col gap-[8px] text-[14.5px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>
             GPA
             <input type="number" min={0} max={5} step={0.01} placeholder="For example, 3.7" value={draft.gpa} onChange={(e) => patch({ gpa: e.target.value })} className={INPUT} style={INPUT_STYLE} />
           </label>
@@ -191,7 +196,7 @@ function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: Sect
         <Multi label="Preferred states" options={O.STATES as string[]} value={draft.states} max={LIMITS.states} onChange={(v) => patch({ states: v })} initial={8} />
         <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
           <Single label="Distance" options={O.DISTANCES} value={draft.distance} onChange={(v) => patch({ distance: v })} />
-          <label className="flex flex-col gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+          <label className="flex flex-col gap-[8px] text-[14.5px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>
             Yearly tuition budget
             <select value={draft.budget} onChange={(e) => patch({ budget: e.target.value })} className={INPUT} style={INPUT_STYLE}>
               <option value="">Choose a budget</option>
@@ -208,7 +213,7 @@ function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: Sect
     ),
     skills: (
       <>
-        {firstCareer && <p className="text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>Suggested for {firstCareer}</p>}
+        {firstCareer && <p className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Suggested for {firstCareer}</p>}
         <Multi label="Skills I have" options={suggest.skills} value={draft.skillsHave} onChange={(v) => patch({ skillsHave: v })} initial={8} />
         <Multi label="Software I know" options={suggest.software} value={draft.softwareKnow} onChange={(v) => patch({ softwareKnow: v })} initial={8} />
         <Multi label="Software I want to learn" options={suggest.software} value={draft.softwareLearn} max={LIMITS.softwareLearn} onChange={(v) => patch({ softwareLearn: v })} initial={8} />
@@ -246,12 +251,15 @@ function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: Sect
 
 // -------------------------------------------------------------- primitives ----
 
+/** Chip and summary-chip outline: readable against the sheet, not the
+ *  near-invisible glass hairline (direct feedback, 25 Sept 2026). */
+const CHIP_BORDER = "color-mix(in srgb, var(--foreground) 24%, transparent)";
 const INPUT = "min-h-[44px] w-full rounded-[var(--radius-md)] border px-[var(--space-3)] text-[14px] font-medium outline-none focus-visible:ring-2";
 const INPUT_STYLE = { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" } as const;
 
 function Text({ label, value, onChange, placeholder, type = "text" }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
   return (
-    <label className="flex flex-col gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+    <label className="flex flex-col gap-[8px] text-[14.5px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>
       {label}
       <input type={type} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={INPUT} style={INPUT_STYLE} />
     </label>
@@ -262,8 +270,8 @@ function GroupLabel({ label, count, max }: { label: string; count?: number; max?
   const full = max !== undefined && count !== undefined && count >= max;
   return (
     <div className="flex items-baseline justify-between gap-[var(--space-3)]">
-      <p className="text-[13px] font-extrabold" style={{ color: "var(--foreground)" }}>{label}</p>
-      {max !== undefined && <span className="text-[12px] font-bold whitespace-nowrap" style={{ color: full ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{count} of {max}</span>}
+      <p className="text-[14.5px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>{label}</p>
+      {max !== undefined && <span className="text-[11.5px] font-semibold whitespace-nowrap" style={{ color: full ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{count} of {max}</span>}
     </div>
   );
 }
@@ -272,8 +280,8 @@ function GroupLabel({ label, count, max }: { label: string; count?: number; max?
  *  app uses (dm-tap), never a brightness change. */
 function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" aria-pressed={on} onClick={onClick} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[14px] py-[8px] text-left text-[13.5px] font-semibold" style={{ borderColor: on ? "color-mix(in srgb, var(--accent-subtle) 70%, transparent)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "color-mix(in srgb, var(--glass-surface-1) 70%, transparent)", color: "var(--foreground)" }}>
-      <span aria-hidden className="h-2 w-2 flex-none rounded-full transition-transform duration-150" style={{ background: on ? "var(--accent-subtle)" : "var(--glass-border)", transform: on ? "scale(1.25)" : "scale(1)" }} />
+    <button type="button" aria-pressed={on} onClick={onClick} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[12px] py-[7px] text-left text-[13px] leading-[16px]" style={{ borderColor: on ? "color-mix(in srgb, var(--accent-subtle) 75%, transparent)" : CHIP_BORDER, background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)", fontWeight: on ? 600 : 500 }}>
+      {on && <span aria-hidden className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />}
       {children}
     </button>
   );
@@ -298,7 +306,7 @@ function Multi({ label, options, value, onChange, max, initial }: { label: strin
   const full = max !== undefined && value.length >= max;
   const toggle = (o: string) => onChange(value.includes(o) ? value.filter((x) => x !== o) : full ? [...value.slice(1), o] : [...value, o]);
   return (
-    <div className="flex flex-col gap-[var(--space-2)]">
+    <div className="flex flex-col gap-[var(--space-3)]">
       <GroupLabel label={label} count={value.length} max={max} />
       <div className="flex flex-wrap gap-[8px]">
         {shown.map((o) => <Chip key={o} on={value.includes(o)} onClick={() => toggle(o)}>{o}</Chip>)}
@@ -310,7 +318,7 @@ function Multi({ label, options, value, onChange, max, initial }: { label: strin
 
 function Single({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
   return (
-    <div className="flex flex-col gap-[var(--space-2)]" role="group" aria-label={label}>
+    <div className="flex flex-col gap-[var(--space-3)]" role="group" aria-label={label}>
       <GroupLabel label={label} />
       <div className="flex flex-wrap gap-[8px]">
         {options.map((o) => <Chip key={o} on={value === o} onClick={() => onChange(value === o ? "" : o)}>{o}</Chip>)}
@@ -387,7 +395,7 @@ function Modal({ title, optional, onCancel, onSave, children }: { title: string;
           </div>
           <button type="button" aria-label="Close editor" onClick={onCancel} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[18px] w-[18px]" aria-hidden /></button>
         </header>
-        <div className="dm-scroll flex min-h-0 flex-1 flex-col gap-[var(--space-5)] overflow-y-auto px-[var(--space-5)] py-[var(--space-5)]">{children}</div>
+        <div className="dm-scroll flex min-h-0 flex-1 flex-col gap-[var(--space-5)] overflow-y-auto px-[var(--space-5)] py-[var(--space-5)] [&>*+*]:border-t [&>*+*]:border-[color:var(--glass-border)] [&>*+*]:pt-[var(--space-5)]">{children}</div>
         <footer className="flex flex-none items-center justify-end gap-[var(--space-3)] border-t px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
           <button type="button" onClick={onCancel} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Cancel</button>
           <button type="button" onClick={onSave} className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> Save</button>
