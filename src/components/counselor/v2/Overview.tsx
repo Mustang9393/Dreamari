@@ -197,8 +197,20 @@ function PathwaysBarChart({ topPathways, colors, activePathway, onToggle }: { to
   }, []);
   const hovered = segments.find((s) => s.label === hoverLabel) ?? null;
   return (
-    <div className="relative flex flex-col gap-[var(--space-4)]">
-      <div className="flex h-[34px] w-full overflow-hidden rounded-[8px]" role="img" aria-label={`Career pathways: ${topPathways.map(([l, v]) => `${l} ${v}`).join(", ")}`}>
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {/* Direct correction on the glass treatment: "revert this is worse.
+         just use flat colors with the glow like in the donuts." Ring/
+         SegmentedRing's own recipe -- flat, fully-saturated per-segment
+         color (no gradient, no frost), plus ONE shared soft blurred glow
+         behind the whole shape (not a glow baked into each segment). Its
+         own small wrapper, sized to the bar's own footprint -- nested one
+         level too high the first time, it inherited the WHOLE
+         chart+legend block's height and washed out as a huge diffuse
+         blob across the entire card instead of sitting behind just the
+         bar. */}
+      <div className="relative">
+        <span aria-hidden className="pointer-events-none absolute inset-[-40%] opacity-60 blur-[16px]" style={{ background: `radial-gradient(ellipse 70% 140% at 50% 50%, color-mix(in srgb, ${(hovered ?? segments[0])?.color ?? "var(--primary)"} 45%, transparent), transparent 70%)` }} />
+        <div className="relative flex h-[30px] w-full overflow-hidden rounded-[8px]" role="img" aria-label={`Career pathways: ${topPathways.map(([l, v]) => `${l} ${v}`).join(", ")}`}>
         {segments.map((seg, i) => {
           const active = activePathway === seg.label;
           const isHover = seg.label === hoverLabel;
@@ -215,29 +227,16 @@ function PathwaysBarChart({ topPathways, colors, activePathway, onToggle }: { to
               aria-pressed={active}
               aria-label={`${seg.label}: ${seg.value}`}
               // No `.dm-quiet` here -- its own `:hover { background: ...
-              // !important }` was overriding this button's colored
-              // gradient on hover, which is what turned every segment
-              // flat gray the moment it was pointed at.
+              // !important }` was overriding this button's colored fill
+              // on hover, which is what turned every segment flat gray
+              // the moment it was pointed at.
               className="h-full cursor-pointer transition-[opacity,filter] duration-150"
               style={{
                 width: `${seg.pct}%`,
-                // Glass, not a solid saturated block -- the color is
-                // mixed WITH transparency (into this dashboard's own
-                // glass-surface tone), backed by a real blur, with a thin
-                // bright inset line along the top standing in for a
-                // glass edge catching light -- the same recipe
-                // GLASS_CARD uses everywhere else on this dashboard, just
-                // tinted per segment (direct instruction: "make the bar
-                // color things itself a glassy surface with gradient
-                // glow... some sort of glass/opacity/frost etc make them
-                // feel light").
-                background: `linear-gradient(180deg, color-mix(in srgb, ${seg.color} 58%, var(--glass-surface-2)) 0%, color-mix(in srgb, ${seg.color} 30%, transparent) 100%)`,
-                backdropFilter: "blur(6px)",
-                WebkitBackdropFilter: "blur(6px)",
-                boxShadow: `inset 0 1px 0 0 color-mix(in srgb, white 32%, transparent)`,
-                opacity: dim ? 0.32 : isHover || active ? 1 : 0.85,
-                borderRight: i < segments.length - 1 ? "1px solid color-mix(in srgb, var(--foreground) 14%, transparent)" : "none",
-                filter: isHover || active ? `drop-shadow(0 0 10px color-mix(in srgb, ${seg.color} 70%, transparent))` : undefined,
+                background: seg.color,
+                opacity: dim ? 0.35 : 1,
+                borderRight: i < segments.length - 1 ? "1px solid var(--card)" : "none",
+                filter: isHover || active ? `drop-shadow(0 0 8px color-mix(in srgb, ${seg.color} 80%, transparent))` : undefined,
               }}
             />
           );
@@ -262,7 +261,8 @@ function PathwaysBarChart({ topPathways, colors, activePathway, onToggle }: { to
           <div className="whitespace-nowrap text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{hovered.label}</div>
           <div className="whitespace-nowrap text-[13px] font-extrabold" style={{ color: "var(--foreground)" }}>{hovered.value} students</div>
         </div>
-      )}
+        )}
+      </div>
       <div className="@container">
         <div className="grid grid-cols-2 gap-x-[22px] gap-y-[5px] @[440px]:grid-cols-3">
           {topPathways.map(([label, value], i) => {
