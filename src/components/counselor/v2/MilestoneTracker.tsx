@@ -104,7 +104,6 @@ export function MilestoneTracker() {
   // what the Replit shows); an average of this counselor's own rows once
   // narrowed to a caseload.
   const overallDone = scopedToCounselor ? (rows.length ? Math.round(rows.reduce((a, r) => a + r.donePct, 0) / rows.length) : 0) : curriculumAvgDone(grade);
-  const awaiting = rows.reduce((a, r) => a + r.counts["awaiting-review"], 0);
 
   const openNotDone = (r: Row) => {
     setGradeFilter(grade);
