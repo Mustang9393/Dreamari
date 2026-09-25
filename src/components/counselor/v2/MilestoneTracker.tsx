@@ -15,7 +15,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
-import { Segmented } from "@/components/connect/viz";
+import { Segmented, SegmentedRing } from "@/components/connect/viz";
 import { Listbox } from "@/components/app/Listbox";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { GRADE_PLANS, type GradeWindow } from "@/components/profile/gradePlanData";
@@ -23,12 +23,12 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { planReadings, KIND_LABEL, type StepKind, type StepStatus } from "@/lib/studentSignals";
-import { CardLink, STATUS_COLORS } from "../chips";
+import { CardLink, Go, STATUS_COLORS } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 import { OverviewCard, Stat, Verdict } from "./overviewShared";
-import { PlanMap } from "./PlanMap";
+import { SeasonStrip } from "./PlanMap";
 import { Disclosure } from "./Disclosure";
 
 type Grade = 9 | 10 | 11 | 12;
@@ -67,16 +67,16 @@ export function MilestoneTracker() {
   const router = useRouter();
   const { gradeFilter, setGradeFilter, counselorFilter, setCounselorFilter, setStepFilter } = useCounselorFilters();
   const [grade, setGradeState] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
-  // Which season is open. null = the Focus first step's season, so the
-  // page opens on what needs the counselor; a pick sticks until the grade
-  // changes (the student's My Plan opens one season at a time the same way).
-  const [openWindow, setOpenWindow] = useState<GradeWindow["id"] | "none" | null>(null);
+  // Which season is open. None by default (direct instruction, 25 Sept
+  // 2026: "do not open any of the accordions ... by default. The three
+  // tiles with the graphs do the job of giving glanceable info"); a tile
+  // or a header opens one season at a time, reset on a grade change.
+  const [openWindow, setOpenWindow] = useState<GradeWindow["id"] | null>(null);
   const setGrade = (g: Grade) => { setGradeState(g); setOpenWindow(null); };
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
-  const scoped = useMemo(() => roster.filter((s) => !showCounselor || counselorFilter === "All" || counselorFor(s).id === counselorFilter), [roster, showCounselor, counselorFilter]);
-  const students = useMemo(() => scoped.filter((s) => s.grade === grade), [scoped, grade]);
+  const students = useMemo(() => roster.filter((s) => s.grade === grade && (!showCounselor || counselorFilter === "All" || counselorFor(s).id === counselorFilter)), [roster, grade, showCounselor, counselorFilter]);
 
   const rows = useMemo<Row[]>(() => {
     const plan = GRADE_PLANS.find((p) => p.grade === grade)!;
@@ -113,12 +113,6 @@ export function MilestoneTracker() {
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      {/* The school-year map leads: all four grades, three seasons, a
-         ring per cell. Picking a cell selects that grade below, so the
-         map is the tracker's navigator, not a second report. */}
-      <OverviewCard title="School year map" unit="My Plan steps done, by grade and season">
-        <PlanMap roster={scoped} activeGrade={grade} onPick={(g) => setGrade(g)} />
-      </OverviewCard>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
         <div className="flex flex-wrap items-center gap-[10px]">
           <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
@@ -143,45 +137,81 @@ export function MilestoneTracker() {
           <HoverBeam strength={0.7} className="h-full">
             <div className="group relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
               <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
-              <div className="relative flex flex-col gap-[var(--space-4)]">
-                <div className="flex flex-wrap items-start justify-between gap-[8px]">
-                  <span className="flex flex-col gap-[2px]">
-                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Focus first · {WINDOW_TITLE[focus.window]} · {KIND_LABEL[focus.kind]}</span>
-                    <h2 className="text-[17px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</h2>
-                  </span>
-                  <CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink>
+              {/* One ring instead of a stacked bar (direct feedback, 25 Sept
+                 2026: "the hero graph can be something else ... simpler,
+                 much more cleaner"): the same completion mark as the
+                 season tiles and the Overview donuts, the four states as
+                 arcs, done in the middle, the counts beside it. */}
+              <div className="relative flex flex-col gap-[var(--space-4)] sm:flex-row sm:items-start sm:justify-between sm:gap-[var(--space-6)]">
+                <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-3)]">
+                  <div className="flex flex-wrap items-start justify-between gap-[8px]">
+                    <span className="flex flex-col gap-[2px]">
+                      <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Focus first · {WINDOW_TITLE[focus.window]} · {KIND_LABEL[focus.kind]}</span>
+                      <h2 className="text-[17px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</h2>
+                    </span>
+                    {/* Phones only: the pill stays with the title. On wider
+                       cards it moves to the hero's top-right corner (below),
+                       direct report 25 Sept 2026: "should be in the top
+                       right corner but currently sits in the middle". */}
+                    <span className="sm:hidden"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
+                  </div>
+                  <Verdict band={focus.counts["not-started"] / Math.max(1, focus.total) >= 0.5 ? "missed" : focus.counts["not-started"] > 0 || focus.counts["awaiting-review"] > 0 ? "near" : "met"}>
+                    {focus.total - focus.counts.done === 0 ? "Everyone is done" : `${focus.total - focus.counts.done} of ${focus.total} students still need this${focus.counts["awaiting-review"] ? `, ${focus.counts["awaiting-review"]} waiting on you` : ""}`}
+                  </Verdict>
                 </div>
-                <Verdict band={focus.counts["not-started"] / Math.max(1, focus.total) >= 0.5 ? "missed" : focus.counts["not-started"] > 0 || focus.counts["awaiting-review"] > 0 ? "near" : "met"}>{outstanding(focus)}</Verdict>
-                <div className="flex items-center gap-[12px]">
-                  <span className="flex-none text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
-                  <StatusBar r={focus} />
+                <div className="flex flex-none flex-col items-end gap-[var(--space-3)]">
+                  <span className="hidden sm:block"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
+                  <div className="flex items-center gap-[var(--space-4)]">
+                  <SegmentedRing size={104} stroke={11} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
+                    <span className="flex flex-col items-center leading-none">
+                      <span className="text-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
+                      <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
+                    </span>
+                  </SegmentedRing>
+                  <ul className="flex flex-col gap-[4px]">
+                    {STATES.filter((st) => st.key !== "done" && focus.counts[st.key] > 0).map((st) => (
+                      <li key={st.key} className="flex items-center gap-[7px] text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>
+                        <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: st.color }} />
+                        <span className="tabular-nums">{focus.counts[st.key]}</span>
+                        <span style={{ color: "var(--muted-foreground)" }}>{st.label.toLowerCase().replace("awaiting your review", "awaiting you")}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  </div>
                 </div>
               </div>
             </div>
           </HoverBeam>
 
           <OverviewCard title={`Grade ${grade} My Plan`} unit={`${rows.length} steps · by season`} aside={<CardLink onClick={openAll}>Students</CardLink>}>
-            <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
-              {STATES.map((s) => (
-                <span key={s.key} className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  <span aria-hidden className="size-[8px] rounded-full" style={{ background: s.color }} />{s.label}
-                </span>
-              ))}
-            </span>
+            {/* The grade's three seasons as rings: the season picker for
+               the list below (the grade itself comes from the tabs above;
+               a four-grade map here was "genuinely confusing"). */}
+            <SeasonStrip roster={students} grade={grade} activeWindow={openWindow} onPick={(w) => setOpenWindow(openWindow === w ? null : w)} />
             {(["fall", "winter", "spring"] as const).map((w) => {
               const list = rows.filter((r) => r.window === w).sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct);
               if (list.length === 0) return null;
               const trackedHere = list.filter((r) => r.tracked);
               const seasonDone = trackedHere.length ? Math.round(trackedHere.reduce((a, r) => a + r.donePct, 0) / trackedHere.length) : 0;
               const toReview = list.reduce((a, r) => a + r.counts["awaiting-review"], 0);
-              const isOpen = (openWindow ?? focus.window) === w;
+              const isOpen = openWindow === w;
               return (
-                <Disclosure key={w} id={`season-${w}`} title={WINDOW_TITLE[w]} open={isOpen} onToggle={() => setOpenWindow(isOpen ? "none" : w)}
+                <Disclosure key={w} id={`season-${w}`} title={WINDOW_TITLE[w]} open={isOpen} onToggle={() => setOpenWindow(isOpen ? null : w)}
                   summary={`${list.length} step${list.length === 1 ? "" : "s"} · ${trackedHere.length ? `${seasonDone}% done` : "student reports"}${toReview ? ` · ${toReview} to review` : ""}`}>
+                  {/* The legend lives inside the open season only (direct
+                     instruction, 25 Sept 2026: "contextual and not above all
+                     of them"). */}
+                  <span className="flex flex-wrap gap-x-[14px] gap-y-[4px]">
+                    {STATES.map((st) => (
+                      <span key={st.key} className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                        <span aria-hidden className="size-[8px] rounded-full" style={{ background: st.color }} />{st.label}
+                      </span>
+                    ))}
+                  </span>
                   <ul className="flex flex-col gap-[6px]">
                     {list.map((r) => (
                       <li key={r.id}>
-                        <button type="button" onClick={() => r.tracked && openNotDone(r)} disabled={!r.tracked} className="dm-quiet flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[14px] py-[10px] text-left disabled:cursor-default" style={GLASS_INSET}>
+                        <button type="button" onClick={() => r.tracked && openNotDone(r)} disabled={!r.tracked} className="dm-quiet group flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[14px] py-[10px] text-left disabled:cursor-default" style={GLASS_INSET}>
                           <span className="flex flex-wrap items-baseline justify-between gap-x-[10px] gap-y-[2px]">
                             <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
                               <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</span>
@@ -190,6 +220,7 @@ export function MilestoneTracker() {
                             <span className="flex flex-none items-baseline gap-[8px]">
                               <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.kind === "in-app" ? "auto" : r.kind === "counselor-verified" ? "you verify" : "student reports"}{r.deadlineBound ? " · deadline" : ""}</span>
                               {r.tracked && <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{r.donePct}% <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span></span>}
+                              {r.tracked && <Go className="self-center" />}
                             </span>
                           </span>
                           {r.tracked && <StatusBar r={r} />}

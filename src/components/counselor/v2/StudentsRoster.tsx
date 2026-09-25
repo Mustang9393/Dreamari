@@ -21,7 +21,7 @@ import { planReadings } from "@/lib/studentSignals";
 import { X } from "lucide-react";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
-import { StatusChip, MilestonesMini, Avatar } from "../chips";
+import { StatusChip, MilestonesMini, Avatar, Go } from "../chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { PRIMARY } from "../palette";
 
@@ -215,7 +215,7 @@ export function StudentsRoster() {
                     <td className="px-[var(--space-4)] py-[10px]"><MilestonesMini milestones={s.milestones} /></td>
                     <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold" style={{ color: s.postsecondaryIntent === "Undecided" ? "var(--muted-foreground)" : "var(--foreground)" }}>{s.postsecondaryIntent}</td>
                     <td className="px-[var(--space-4)] py-[10px] text-[12.5px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fmtDate(s.lastActive)}</td>
-                    <td className="px-[var(--space-4)] py-[10px]"><ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} /></td>
+                    <td className="px-[var(--space-4)] py-[10px]"><Go /></td>
                   </tr>
                 ))}
               </tbody>
@@ -226,7 +226,8 @@ export function StudentsRoster() {
           <ul className="flex flex-col gap-[8px] lg:hidden">
             {pageRows.map((s) => (
               <li key={s.id}>
-                <button type="button" onClick={() => open(s)} className="dm-quiet flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px] text-left" style={GLASS_INSET}>
+                <button type="button" onClick={() => open(s)} className="dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px] pr-[32px] text-left" style={GLASS_INSET}>
+                  <span className="absolute top-[12px] right-[12px]"><Go /></span>
                   <span className="flex items-center justify-between gap-[10px]">
                     <StudentCell s={s} />
                     <StatusChip status={s.status} />

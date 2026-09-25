@@ -38,6 +38,23 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: season tiles, world colors for pathways, the drill-down arrow, a ring hero
+
+Seven direct notes in one sitting, each applied at the cause:
+
+- **"The school year map is genuinely confusing me ... we already have a grade toggle, let's use that."** The four-grade map is gone from the tracker. The grade tabs lead; the selected grade's Fall / Winter / Spring are three tiles (`SeasonStrip` in `v2/PlanMap.tsx`) with a ring, done %, and "N to do / N pending".
+- **"Use the design cues like the fall / winter / spring card visual design we had in the student version where applicable and not distracting"**, then **"avoid the season graphics in the separate accordions and use them on the tiles with the graphs only"**, and **"ensure the animated falling leaves / snow don't encroach ... overlap important text."** The student My Plan's `SeasonScene` (wash, resting marks, falling marks on hover) sits on the three tiles only, held to the tile's right band by `.dm-season-compact` in `app.css` so the numbers stay clear. The accordions are plain.
+- **"Do not open any of the accordions in Grade 9 My Plan by default."** All closed; a tile or a header opens one season; the status legend lives inside the open season only ("contextual and not above all of them"). "Sections are colliding ... keep it roomy" led to the accordion body padding.
+- **"Let pathways use the actual color system we use for the different industries in the dreamari app."** Overview pathways read `WORLD_COLORS` (`src/components/app/worlds.ts`, the Figma Career Poster Card variables, light and dark in tokens.css). `PATHWAY_SEQUENCE` in palette.ts is no longer used by the Overview.
+- **"Whenever something hovers and can be clicked make sure a chevron appears and animates ... maybe another icon if it takes them out of the screen ... is it valuable to have these icons even without hover? Tablet, mobile won't have hover."** Yes, visible at rest: `Go` in `chips.tsx`, always drawn and muted, with the motion on hover only. An arrow out of the corner means the click leaves the screen (attention rows, status and plan legend rows, My Plan by grade, tracker step rows, Students rows and cards, every CardLink pill, a student's name); a chevron means it opens on this screen (Review Queue cards); a turning chevron means it unfolds in place (Connect announcements, accordions). Pathway legend rows filter in place and carry no icon.
+- **"The hero graph can be something else ... simpler, much more cleaner ... with some beauty."** The tracker hero's stacked bar became a segmented ring (`SegmentedRing`, the Overview's own donut), done % in the middle, the three open counts beside it, and the verdict is now the one action line ("15 of 30 students still need this, 1 waiting on you").
+
+Verified in the browser at 1440 with Winter open, and at 390. `npx tsc --noEmit -p .` and `npx eslint src/components/counselor/` clean.
+
+### 2026-09-25 Milestone Tracker: grade tabs first, the grade's seasons as rings
+
+Direct feedback: "The tabs are under the school year map now. The school year map is genuinely confusing me. It doesn't have to be altogether, it can also be based on the toggle we already have, a grade toggle, let's use that." The four-grade map is removed from the tracker; the grade tabs lead the page again, and the selected grade's Fall / Winter / Spring sit as three ring cells at the top of the plan card (`SeasonStrip` in `v2/PlanMap.tsx`), each cell opening that season's accordion below. The Overview keeps its one line per grade. Verified at 1440 and 390; tsc and eslint clean.
+
 ### 2026-09-25 Counselor Dashboard v2: the grid in one place, progressive disclosure everywhere it is logical
 
 Direct feedback on the previous push: "good direction, but let's not show the grid in two places, also try to use progressive disclosure as much as possible wherever logical. For My Plan etc things can be progressively disclosed like we have in the student My Plan, behind accordions. Make sure everything's [not] always thrown at the user at once."

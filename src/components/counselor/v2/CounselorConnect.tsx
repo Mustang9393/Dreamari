@@ -16,7 +16,7 @@ import { Plus, Send, Check, ChevronLeft } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { CardLink } from "../chips";
+import { CardLink, Go } from "../chips";
 import { RankBar } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "@/components/connect/viz";
@@ -122,7 +122,7 @@ function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolea
               <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
               <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{to} · {fmtDate(sent)}</span>
             </span>
-            <span className="flex-none text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{a.read}% <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>read</span></span>
+            <span className="flex flex-none items-center gap-[8px] text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{a.read}% <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>read</span><Go kind="expand" open={open} /></span>
           </span>
           <p className={`text-[13.5px] leading-[19px] ${open ? "" : "line-clamp-1"}`} style={{ color: "var(--foreground)" }}>{a.body}</p>
         </button>

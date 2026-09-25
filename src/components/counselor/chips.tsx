@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
 import { MILESTONE_KEYS, avatarIndexForName, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
 import { studentPortraitSrc, useStudentAvatarSrc } from "@/lib/avatar";
 
@@ -78,6 +78,23 @@ export function MilestonesMini({ milestones }: { milestones: Record<MilestoneKey
 // line up in one column. `min-w-0` on every flex step down to the label is
 // what lets `truncate` actually bite -- a flex child's default min-width is
 // its content's width, which silently defeats truncation until overridden.
+/** The drill-down affordance, visible at rest and animated on hover
+ *  (direct instruction, 25 Sept 2026: "whenever something hovers and can
+ *  be clicked make sure a chevron appears and animates ... maybe another
+ *  icon if it takes them out of the screen ... tablet, mobile won't have
+ *  hover anyway"). Always drawn, muted, so a touch user sees it too.
+ *  "leave": an arrow out of the corner, the click goes to another screen.
+ *  "open": a chevron, it opens something on this screen (a pane).
+ *  "expand": a chevron that turns, it unfolds in place. The parent needs
+ *  the `group` class for the hover motion. */
+export function Go({ kind = "leave", open, className = "" }: { kind?: "leave" | "open" | "expand"; open?: boolean; className?: string }) {
+  const base = `h-[14px] w-[14px] flex-none transition-transform duration-150 ${className}`;
+  const style = { color: "var(--muted-foreground)" };
+  if (kind === "expand") return <ChevronDown aria-hidden className={base} style={{ ...style, transform: open ? "rotate(180deg)" : "none" }} />;
+  if (kind === "open") return <ChevronRight aria-hidden className={`${base} group-hover:translate-x-[3px]`} style={style} />;
+  return <ArrowUpRight aria-hidden className={`${base} group-hover:translate-x-[2px] group-hover:-translate-y-[2px]`} style={style} />;
+}
+
 export function StatRow({ label, value, color, onClick, active }: { label: string; value: number; color: string; onClick?: () => void; active?: boolean }) {
   const row = (
     <>
@@ -85,7 +102,7 @@ export function StatRow({ label, value, color, onClick, active }: { label: strin
         <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: color }} />
         <span className="truncate">{label}</span>
       </span>
-      <span className="flex-none tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
+      <span className="flex flex-none items-center gap-[6px] tabular-nums" style={{ color: "var(--foreground)" }}>{value}{onClick && <Go />}</span>
     </>
   );
   if (!onClick) return <span className="flex items-center justify-between text-[13px] font-semibold">{row}</span>;
@@ -93,7 +110,7 @@ export function StatRow({ label, value, color, onClick, active }: { label: strin
     <button
       type="button"
       onClick={onClick}
-      className="dm-quiet flex w-full cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-[4px] py-[2px] text-[13px] font-semibold"
+      className="dm-quiet group flex w-full cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-[4px] py-[2px] text-[13px] font-semibold"
       style={{ background: active ? `color-mix(in srgb, ${color} 16%, transparent)` : "transparent" }}
     >
       {row}
@@ -173,7 +190,7 @@ export function CardLink({ onClick, children }: { onClick: () => void; children:
       style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}
     >
       {children}
-      <ChevronRight className="h-[14px] w-[14px] transition-transform duration-150 group-hover:translate-x-[3px]" aria-hidden />
+      <ArrowUpRight className="h-[14px] w-[14px] transition-transform duration-150 group-hover:translate-x-[2px] group-hover:-translate-y-[2px] hover:translate-x-[2px]" aria-hidden />
     </button>
   );
 }
@@ -261,14 +278,14 @@ export function StudentLink({ id, name, index, size = 44, children }: { id?: str
     <>
       <Avatar name={name} size={size} index={index} />
       <span className="flex min-w-0 flex-col gap-[2px] text-left">
-        <span className="truncate text-[17px] leading-[1.2] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>
+        <span className="flex min-w-0 items-center gap-[6px]"><span className="truncate text-[17px] leading-[1.2] font-bold" style={{ color: "var(--foreground)" }}>{name}</span>{id && <Go />}</span>
         {children}
       </span>
     </>
   );
   if (!id) return <span className="flex min-w-0 items-center gap-[12px]">{inner}</span>;
   return (
-    <button type="button" onClick={() => router.push(`/counselor?view=students&studentId=${id}`)} className="dm-quiet group/link flex min-w-0 cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] text-left [&_span:first-of-type]:group-hover/link:underline">
+    <button type="button" onClick={() => router.push(`/counselor?view=students&studentId=${id}`)} className="dm-quiet group flex min-w-0 cursor-pointer items-center gap-[12px] rounded-[var(--radius-md)] text-left">
       {inner}
     </button>
   );
