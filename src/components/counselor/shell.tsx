@@ -475,7 +475,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             <div className="flex w-full max-w-[1400px] flex-col gap-[var(--space-4)] [&>*]:shrink-0">
               {showTitle && (
                 <div className="flex flex-col gap-[2px]">
-                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
+                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{(version !== "v1" && menuForRole(account.role).find((item) => item.view === active)?.label) || title}</h1>
                   {/* v2 drops the caption line under every page title (direct
                      feedback, 25 Sept 2026: "Remove all the captions to the
                      main page titles ... there is so much copy on every

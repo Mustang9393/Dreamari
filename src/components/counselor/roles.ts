@@ -38,11 +38,12 @@ export const REFERENCE_VIEWS: CounselorView[] = [
 ];
 
 export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
-  // Student Progress and Productivity Suite left the menus on 25 Sept 2026
-  // (Usman): the tracker now covers every My Plan step with a CSV export,
-  // so Progress' nine reports were the same numbers again, and drafts are
-  // "pick a student, then generate", which belongs on the student's
-  // profile. Both routes still resolve for old links.
+  // "Reports" (26 Sept 2026) consolidates two reference screens a counselor
+  // had lost: Student Progress (nine readiness reports, CSV/PDF) and
+  // Platform Engagement (logins, active students, check-ins by grade), as
+  // two tabs of one screen (v2/CounselorReports.tsx). A v2-vs-Replit audit
+  // found both unreachable for this role, against the standing rule that
+  // content is never removed, only presented better.
   "School Counselor": [
     { view: "overview" },
     { view: "students" },
@@ -51,6 +52,7 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "connect" },
     { view: "insights" },
     { view: "productivity" },
+    { view: "progress", label: "Reports" },
     { view: "impact" },
     { view: "settings" },
   ],
@@ -63,6 +65,7 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "connect" },
     { view: "insights" },
     { view: "productivity" },
+    { view: "progress", label: "Reports" },
     { view: "school-impact" },
     { view: "settings" },
   ],
@@ -109,10 +112,7 @@ export function menuForRole(role: CounselorRole | ""): RoleMenuItem[] {
 }
 
 /** Screens a role can open by URL but that are not in its menu. */
-const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {
-  "School Counselor": ["progress"],
-  "Lead Counselor": ["progress"],
-};
+const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {};
 export function roleHasView(role: CounselorRole | "", view: CounselorView): boolean {
   return menuForRole(role).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
 }
