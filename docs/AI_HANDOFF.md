@@ -38,6 +38,55 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-25 Counselor Dashboard v2: My Impact tabbed with a compiled print report; every page caption removed
+
+Two direct instructions, addressed together since both are about cutting
+copy/load on screen:
+
+**My Impact tabbed.** "For My Impact, we can do the tabbed version and
+have the export just compile everything together when that is needed. So
+its easy on UI load and the report brings everything together when
+exported." Outcomes (the scorecard against district targets) stays
+outside the tabs -- it is the one thing read every visit. Activity &
+Engagement, By Grade (By Grade & Counselor for Lead Counselor's School
+Impact), and ASCA Framework are now `Segmented` tabs (the same control the
+Milestone Tracker's grade picker uses); only the selected one renders on
+screen. Print and Principal report both call `window.print()`; a `hidden
+print:block` container -- built from the exact same section-renderer
+functions the tabs call, so they can never disagree -- stacks every
+section together for that path regardless of which tab was open. Share
+stays unwired (no export service, unchanged).
+
+Then, more broadly: "let's do tabbed UI to reduce cognitive load wherever
+necessary. ONLY wherever necessary." Surveyed the rest of v2 before
+touching anything else: Counselor Connect already tabs Questions /
+Announcements / Groups; Settings already folds four of five cards behind
+a disclosure; the Milestone Tracker already tabs by grade and folds
+seasons; the Student Profile already folds Drafts/Check-ins and opens one
+season at a time; Career + College Insights' four cards work better
+side-by-side (a counselor scans all four categories in one visit) with
+"Show all" rather than a full tab switch; the Overview is deliberately
+never tabbed, since it exists to be scanned whole. No other screen changed.
+
+**Every page caption removed (v2 only).** "Remove all the captions to
+the main page titles in the counselor dashboard. There is so much copy on
+every screen, how do we fix?" The one-line subtitle under every page's
+`<h1>` (`VIEW_TITLES[view].subtitle` in `shell.tsx`, e.g. "Every My Plan
+step for a grade, and who has not done it" under "Milestone Tracker") is
+now v2-only hidden (`version !== "v2"` gate on the single render site);
+v1 keeps the reference's subtitle line exactly as before, since v1 stays
+a byte-for-byte 1:1 port including copy. Every v2 screen already states
+its purpose in its hero card's verdict or its (i) note, so the caption
+was restating the title in longer words on every single screen -- the
+most repeated "extra obvious copy" pattern in the whole dashboard.
+
+Verified live at 1440: My Impact (all three tabs, Counselor scope),
+School Impact (By Grade & Counselor tab, Lead scope), print DOM structure
+(exactly two `print:hidden` and two `hidden print:block` containers), the
+caption gone from Overview/Students/Milestone Tracker/My Impact on v2 and
+still present on v1's My Impact. `npx tsc --noEmit -p .` and `npx eslint`
+clean on every touched file.
+
 ### 2026-09-25 Counselor Dashboard v2: batch sends, the Readiness card, the spec as a Google Doc
 
 Three asks: "I should be able to select more than one student and send stuff. Of course not recommendation letters etc because they need to be personalised, is this already considered?"; "why did we remove career readiness and academic readiness? ... we need a concrete reason"; the persona and interaction model as a shareable document, "a Google Doc not like a Claude document", with "all the state stuff" folded in.

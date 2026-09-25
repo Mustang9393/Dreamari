@@ -65,10 +65,10 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "District view: schools with the lowest active share first.",
   },
   impact: {
-    changed: ["Outcomes against targets as the hero scorecard", "One row of your activity, one of student engagement", "Grades as bars that open the roster; ASCA as three short columns", "Achievements list and compliance summary removed"],
-    why: "The reference stated each number three times across eight sections.",
-    better: "A principal reads whether the period moved the numbers in one screen, with the evidence under it.",
-    order: "Outcomes are shown against their target, the one furthest below target named in the verdict; grades and counselors are ranked lowest on-track first.",
+    changed: ["Outcomes against targets as the hero scorecard, always visible", "Activity & Engagement, By Grade (and Counselor), and ASCA Framework are tabs: one on screen at a time", "Print and Principal report compile every tab together, whichever one is open", "Achievements list and compliance summary removed"],
+    why: "The reference stated each number three times across eight sections; showing all three tabs' worth of cards at once on screen repeated that overload.",
+    better: "A principal reads whether the period moved the numbers in one screen; a counselor viewing it reads one section at a time, and the printed or shared report still has everything.",
+    order: "Outcomes are shown against their target, the one furthest below target named in the verdict; grades and counselors are ranked lowest on-track first; tabs read left to right in the order a counselor would check them.",
   },
   settings: {
     changed: ["Role is a proper picker and drives the whole dashboard", "Permissions shown for your role only", "Caseload card titled by role", "Profile stays open; permissions, notifications, caseload and academic year fold behind their summary"],

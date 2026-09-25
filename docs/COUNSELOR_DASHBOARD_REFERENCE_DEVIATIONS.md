@@ -1160,6 +1160,42 @@ said once.
 - ASCA cards kept as the report's substance, on the inset surface, with
   shorter bullets.
 
+**25 Sept 2026, tabbed** (direct instruction: "for My Impact, we can do
+the tabbed version and have the export just compile everything together
+when that is needed. So its easy on UI load and the report brings
+everything together when exported"; the same day, more generally: "let's
+do tabbed UI to reduce cognitive load wherever necessary. ONLY wherever
+necessary"). Outcomes stays outside the tabs -- it is the one number a
+counselor reads every visit, not a section to page through. Everything
+else (Activity & Engagement, By Grade/Counselor, ASCA) is a `Segmented`
+tab, one rendered at a time, the same tab control the Milestone Tracker's
+grade picker uses. Print and Principal report both call `window.print()`;
+a `hidden print:block` container renders every section stacked together
+for that path, built from the exact same section-renderer functions the
+on-screen tabs call, so the printed/shared report and the screen can
+never show different numbers. Share stays unwired (still no export
+service; unchanged from the earlier pass). A side effect worth noting:
+the reference's "By Grade" and ASCA columns used to share one grid row
+for the School Counselor's report (paired only because they needed a
+second column to fill); now each has its own tab, which also removed the
+one place ASCA was rendered twice for School Impact (once paired with By
+Grade for `mine`-scope logic that never applied to `scope="school"`,
+once again unconditionally below) -- a de-duplication, not a visual bug
+fix, since the second render was already gated correctly.
+
+**Why not tab other screens the same day:** surveyed against the same
+"ONLY wherever necessary" instruction. Counselor Connect already tabs
+Questions / Announcements / Groups. Settings already folds four of its
+five cards behind a disclosure summary. The Milestone Tracker already
+tabs by grade and folds each grade's seasons behind an accordion. The
+Student Profile already folds Drafts and Check-ins and opens one My Plan
+season at a time. Career + College Insights' four cards each open with
+five rows and a "Show all" rather than a full tab switch, because a
+counselor typically wants to glance across all four categories (careers,
+majors, colleges, simulations) in one visit, not pick one. The Overview
+is deliberately never tabbed: it is the one screen meant to be scanned
+whole, attention-first, in a single glance.
+
 ## Settings (v2)
 
 25 Sept 2026 pass. Role is the app's `Listbox` (guardrails: never a

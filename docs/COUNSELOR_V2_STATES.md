@@ -107,7 +107,8 @@ Administrator, DA District Administrator.
 - Data: roster, questions, announcements; targets from `counselorOrg.ts`.
 - Whole-screen empty: "Nothing to report yet" / "Your impact report builds from milestones, reviews and replies over the period." (school: "The school's impact report...").
 - In-screen: seniors-only outcomes with no seniors: "n/a"; a grade with no students is omitted from By grade.
-- Edge: "Reviews average 2.1 days" and the reporting period are fixed copy until the backend supplies them; Print uses the browser; Share and Principal report are not wired (no export service).
+- Tabbed (25 Sept 2026, DEMO-ONLY behavior, permanent structure): Outcomes stays outside the tabs, always visible. "Activity & Engagement", "By Grade" (School Counselor) / "By Grade & Counselor" (Lead Counselor), and "ASCA Framework" are `Segmented` tabs; only the selected one renders on screen. Print and Principal report both call `window.print()`; a `hidden print:block` container (built from the same section renderers as the tabs, so they can't drift apart) stacks every section together for that path regardless of which tab was open on screen. Share remains unwired (no export service).
+- Edge: "Reviews average 2.1 days" and the reporting period are fixed copy until the backend supplies them.
 
 ### Settings (all roles)
 - Data: the account record (`counselorAccount.ts`), roster for the caseload card.
