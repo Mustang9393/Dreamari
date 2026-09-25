@@ -231,7 +231,7 @@ export function MilestoneTracker() {
                     role="tab"
                     aria-selected={active}
                     onClick={() => setOpenWindow(active ? null : w)}
-                    className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[10px] py-[9px] text-left sm:px-[12px]"
+                    className="dm-quiet group flex min-w-0 cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[10px] py-[9px] text-left sm:px-[12px]"
                     style={{ ...GLASS_INSET, ...(active ? { borderColor: `color-mix(in srgb, ${PRIMARY} 55%, var(--glass-border))` } : null) }}
                   >
                     <Ring pct={pct} size={36} stroke={4.5} />
@@ -240,6 +240,11 @@ export function MilestoneTracker() {
                       <span className="text-[15px] leading-[1.1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{pct}%</span>
                       <span className="hidden truncate text-[11px] font-semibold sm:block" style={{ color: needAttn > 0 ? PRIMARY : "var(--muted-foreground)" }}>{needAttn > 0 ? `${needAttn} to review` : notDone > 0 ? `${notDone} to do` : "all done"}</span>
                     </span>
+                    {/* Nothing on the tile read as clickable (direct
+                       report: "they dont read as clickable") -- the same
+                       expand chevron every other opener on this dashboard
+                       carries. */}
+                    <Go kind="expand" open={active} className="hidden sm:block" />
                   </button>
                 );
               })}
