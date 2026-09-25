@@ -4,7 +4,7 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { BarChart, SegmentedRing } from "@/components/connect/viz";
@@ -164,23 +164,98 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
   );
 }
 
-// A donut this size with 7 categories would be mostly hairline slivers,
-// illegible at a glance -- but a set of separate ranked bars was wrong for
-// a different reason (direct correction, 23 Sept 2026): "it's supposed to
-// show how many out of the total number of students... are in different
-// pathways... individually for them to fill up a bar doesn't make sense,
-// we're showing distribution or breakdown." A bar that fills on its own
-// reads as progress toward ITS OWN goal; what this data actually is, is
-// parts of one whole. Fixed with the graph a "distribution" chart actually
-// is: one stacked bar, its own segments sized to each pathway's real share
-// of the roster (all segments together always sum to the full bar), with
-// the ranked legend as the supporting detail below it -- same "graph on
-// top, bigger; other info below" shape as the two ring cards.
-// Clicking a pathway cross-filters the whole Overview page (not a
-// navigation -- direct instruction distinguishes this from the donut
-// click-throughs, which land on the Roster). The stacked bar's own
-// segments are the click targets too, not just the legend rows, since
-// they're already visually "the thing you'd click."
+// Settled 26 Sept 2026 after seven earlier attempts (full history in
+// AI_HANDOFF.md). The first pass at "vertical bars, one chart" went too
+// far the other way -- thick gem-toned columns, a full blurred-rect halo
+// behind every bar, a glossy highlight ellipse, a number over each one --
+// direct correction: "not this... thinner lines, gradients, glowy high
+// points. Cleaner all the bars distribute across the x axis. The legend
+// doing the explanation. under it. NOT CAUSING A MESS." This version is
+// deliberately minimal: a thin gradient-filled bar per pathway (bright at
+// the tip, fading toward the baseline -- this dashboard's own "solid" bar
+// language) with the glow concentrated at ONE point, the tip itself (the
+// same small glowing dot the shared BarChart's solid style already draws
+// at its peak), not a halo around the whole shape. No per-bar number --
+// the compact key below is where the explaining happens.
+function PathwaysBarChart({ topPathways, colors, activePathway, onToggle }: { topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void }) {
+  const gradId = useId().replace(/:/g, "");
+  const max = Math.max(1, ...topPathways.map(([, v]) => v));
+  const n = topPathways.length;
+  const W = 600;
+  const H = 170;
+  const padTop = 14;
+  const padBottom = 10;
+  const plotH = H - padTop - padBottom;
+  const gap = 10;
+  const barW = Math.min(13, (W - gap * (n + 1)) / n);
+  const rowW = barW + gap;
+  const contentW = n * rowW - gap;
+  const startX = (W - contentW) / 2;
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Career pathways: ${topPathways.map(([l, v]) => `${l} ${v}`).join(", ")}`} className="h-auto w-full overflow-visible" style={{ aspectRatio: `${W} / ${H}` }}>
+        <defs>
+          {topPathways.map(([label], i) => {
+            const color = colors[i % colors.length];
+            return (
+              <linearGradient key={label} id={`${gradId}-fill-${i}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity="1" />
+                <stop offset="100%" stopColor={color} stopOpacity="0.12" />
+              </linearGradient>
+            );
+          })}
+        </defs>
+        <line x1={startX - 4} x2={startX + contentW + 4} y1={H - padBottom} y2={H - padBottom} stroke="color-mix(in srgb, var(--foreground) 12%, transparent)" strokeWidth="1" />
+        {topPathways.map(([label, value], i) => {
+          const active = activePathway === label;
+          const dim = activePathway !== null && !active;
+          const color = colors[i % colors.length];
+          const barH = Math.max(4, (value / max) * plotH);
+          const x = startX + i * rowW;
+          const yTop = H - padBottom - barH;
+          return (
+            <g
+              key={label}
+              onClick={() => onToggle(label)}
+              role="button"
+              tabIndex={0}
+              aria-pressed={active}
+              aria-label={`${label}: ${value}`}
+              style={{ cursor: "pointer", opacity: dim ? 0.35 : 1, transition: "opacity 150ms ease" }}
+            >
+              <title>{label}: {value}</title>
+              <rect x={x} y={yTop} width={barW} height={barH} rx={barW / 2} fill={`url(#${gradId}-fill-${i})`} />
+              <circle cx={x + barW / 2} cy={yTop} r={active ? 3 : 2.2} fill={color} style={{ filter: `drop-shadow(0 0 ${active ? 7 : 4}px color-mix(in srgb, ${color} 85%, transparent))` }} />
+            </g>
+          );
+        })}
+      </svg>
+      <div className="@container">
+        <div className="grid grid-cols-2 gap-x-[10px] gap-y-[4px] @[440px]:grid-cols-3">
+          {topPathways.map(([label, value], i) => {
+            const active = activePathway === label;
+            const dim = activePathway !== null && !active;
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => onToggle(label)}
+                aria-pressed={active}
+                className="dm-quiet flex cursor-pointer items-center gap-[5px] rounded-[4px] py-[2px] text-left transition-opacity"
+                style={{ opacity: dim ? 0.45 : 1 }}
+              >
+                <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: colors[i % colors.length] }} />
+                <span className="truncate text-[10.5px] font-semibold" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>{label}</span>
+                <span className="ml-auto flex-none text-[10.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PathwaysCard({ topPathways, colors, activePathway, onToggle, onOpen }: { topPathways: [string, number][]; colors: string[]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
   return (
     <HoverBeam strength={0.7} className="h-full">
@@ -194,44 +269,7 @@ function PathwaysCard({ topPathways, colors, activePathway, onToggle, onOpen }: 
             </button>
           )}
         </div>
-        {/* Direct instruction, 26 Sept 2026: "JUST USE A PIE OR DONUT CHART
-           FOR THE CAREER PATHWAYS> HAVE THE LEGEND BE SMALL LIKE WE DID
-           BEFORE FOR THE RADIAL." SegmentedRing is the same donut every
-           other Overview card already uses (Student Status, Postsecondary
-           Plans) -- same glow/gradient arcs, same "arc length = real share
-           of the total" honesty, no new component. The compact 2-3 column
-           key below is the exact legend built for the (now-removed)
-           radial attempt: small text, dot + label + value, no per-item
-           bar or fill -- just a lookup, since the donut itself is the one
-           graphic carrying the split. */}
-        <div className="relative flex flex-1 flex-col items-center justify-center gap-[var(--space-4)]">
-          <SegmentedRing segments={topPathways.map(([, value], i) => ({ value, color: colors[i % colors.length] }))} size={148} stroke={16}>
-            <span className="flex flex-col items-center">
-              <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{topPathways.reduce((a, [, v]) => a + v, 0)}</span>
-              <span className="text-[9px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>students</span>
-            </span>
-          </SegmentedRing>
-          <div className="grid w-full grid-cols-2 gap-x-[10px] gap-y-[4px] sm:grid-cols-3">
-            {topPathways.map(([label, value], i) => {
-              const active = activePathway === label;
-              const dim = activePathway !== null && !active;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => onToggle(label)}
-                  aria-pressed={active}
-                  className="dm-quiet flex cursor-pointer items-center gap-[5px] rounded-[4px] py-[2px] text-left transition-opacity"
-                  style={{ opacity: dim ? 0.45 : 1 }}
-                >
-                  <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: colors[i % colors.length] }} />
-                  <span className="truncate text-[10.5px] font-semibold" style={{ color: active ? "var(--foreground)" : "var(--muted-foreground)" }}>{label}</span>
-                  <span className="ml-auto flex-none text-[10.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{value}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <PathwaysBarChart topPathways={topPathways} colors={colors} activePathway={activePathway} onToggle={onToggle} />
       </div>
     </HoverBeam>
   );
