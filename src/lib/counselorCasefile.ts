@@ -130,3 +130,23 @@ export function removeSchedule(id: string): ReportSchedule[] {
 export function nextRunLabel(r: ReportSchedule): string {
   return r.cadence === "weekly" ? `Every ${r.day}` : `Monthly on the ${r.day}`;
 }
+
+// ---- Batch sends -------------------------------------------------------------
+
+/** One message, reminder or to-do sent to many students at once (25 Sept
+ *  2026: "I should be able to select more than one student and send
+ *  stuff"). Personal drafts (letters, briefs) stay one student at a time. */
+export type BatchKind = "message" | "reminder" | "todo";
+export type BatchSend = { id: string; kind: BatchKind; text: string; due?: string; studentIds: string[]; audience: string; at: string };
+const SENDS_KEY = "dreamari-counselor-sends";
+
+export function readSends(): BatchSend[] {
+  return read<BatchSend[]>(SENDS_KEY, []);
+}
+export function addSend(input: Omit<BatchSend, "id" | "at">): BatchSend[] {
+  const next = [{ ...input, id: newId(), at: new Date().toISOString() }, ...readSends()].slice(0, 50);
+  write(SENDS_KEY, next);
+  // A to-do sent to many lands on each student's own list too.
+  if (input.kind === "todo" && input.due) for (const id of input.studentIds) addTodo(id, input.text, input.due);
+  return next;
+}

@@ -149,3 +149,10 @@ Administrator, DA District Administrator.
 - **To-dos**: empty reads "No to-dos yet. What you assign here shows up in [first name]'s My Plan."; overdue rows in the At Risk red; done rows fade with a strikethrough.
 - **Check-ins**: folded by default; the body says the words come from Dreamari activity, not a check-in.
 - **Reports, Scheduled**: empty reads "Nothing scheduled. Use Schedule on a template above."
+- **Reports, Scheduled**: empty reads "Nothing scheduled. Use Schedule on a template above."
+
+## Batch sends (25 Sept 2026, DEMO-ONLY)
+
+- **Students, selection**: tick boxes on every row and card; a bar reads "N selected" with one action and Clear; the composer shows the first four avatars, the count and how the set was chosen. Send is disabled until there is text; a to-do also needs a due date (defaults to a week out). After sending the selection clears and one line confirms "Message sent to N students." (or Reminder sent / To-do assigned).
+- **Productivity Suite, Group Message**: audience by grade, status and pathway; no match reads "No students match that audience. Widen a filter."; the composer is the same as on Students. Letters and briefs never offer a batch.
+- **Delivery**: nothing is sent in the prototype; sends are recorded locally (`counselorCasefile.ts`, `readSends`) and a to-do is written to each student's list. Production: the student's inbox and My Plan.

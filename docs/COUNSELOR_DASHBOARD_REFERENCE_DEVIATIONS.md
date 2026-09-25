@@ -928,6 +928,14 @@ Built on request from the SchooLinks staff dashboard, DEMO-ONLY
   with the honest line that a real check-in needs a student-side prompt.
 - **Reports, Schedule**: cadence, day, recipients per template; the
   Scheduled list is what a delivery job would run.
+- **Batch sends (25 Sept 2026)**: tick boxes on Students and a Group
+  Message tool in the Suite, one composer for a message, reminder or
+  to-do. Alternative: batch letters too; rejected on instruction, they
+  are personal. Alternative: only Connect announcements; those reach a
+  grade, not a hand-picked set or a filtered audience.
+- **Readiness card on the Overview (25 Sept 2026)**: Maisha's five
+  readiness measures as one row each over the grades they apply to,
+  replacing two bar charts that rendered empty columns for Grades 9-11.
 - **Productivity Suite back in the menus**: the batch workspace (many
   students, one tool); the profile Drafts card is the one-student
   version. Alternative: profile only (Usman's note); it made the batch
