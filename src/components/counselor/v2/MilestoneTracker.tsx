@@ -142,20 +142,26 @@ export function MilestoneTracker() {
                  much more cleaner"): the same completion mark as the
                  season tiles and the Overview donuts, the four states as
                  arcs, done in the middle, the counts beside it. */}
-              <div className="relative flex flex-col gap-[var(--space-4)] sm:flex-row sm:items-center sm:gap-[var(--space-6)]">
+              <div className="relative flex flex-col gap-[var(--space-4)] sm:flex-row sm:items-start sm:justify-between sm:gap-[var(--space-6)]">
                 <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-3)]">
                   <div className="flex flex-wrap items-start justify-between gap-[8px]">
                     <span className="flex flex-col gap-[2px]">
                       <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Focus first · {WINDOW_TITLE[focus.window]} · {KIND_LABEL[focus.kind]}</span>
                       <h2 className="text-[17px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</h2>
                     </span>
-                    <CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink>
+                    {/* Phones only: the pill stays with the title. On wider
+                       cards it moves to the hero's top-right corner (below),
+                       direct report 25 Sept 2026: "should be in the top
+                       right corner but currently sits in the middle". */}
+                    <span className="sm:hidden"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
                   </div>
                   <Verdict band={focus.counts["not-started"] / Math.max(1, focus.total) >= 0.5 ? "missed" : focus.counts["not-started"] > 0 || focus.counts["awaiting-review"] > 0 ? "near" : "met"}>
                     {focus.total - focus.counts.done === 0 ? "Everyone is done" : `${focus.total - focus.counts.done} of ${focus.total} students still need this${focus.counts["awaiting-review"] ? `, ${focus.counts["awaiting-review"]} waiting on you` : ""}`}
                   </Verdict>
                 </div>
-                <div className="flex flex-none items-center gap-[var(--space-4)]">
+                <div className="flex flex-none flex-col items-end gap-[var(--space-3)]">
+                  <span className="hidden sm:block"><CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink></span>
+                  <div className="flex items-center gap-[var(--space-4)]">
                   <SegmentedRing size={104} stroke={11} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
                     <span className="flex flex-col items-center leading-none">
                       <span className="text-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
@@ -171,6 +177,7 @@ export function MilestoneTracker() {
                       </li>
                     ))}
                   </ul>
+                  </div>
                 </div>
               </div>
             </div>
