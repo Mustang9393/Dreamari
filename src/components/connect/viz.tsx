@@ -198,9 +198,15 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
  *  Meter don't already cover (category-by-series comparisons: readiness by
  *  grade, logins by month). Each series gets its own accent and a swatch in
  *  the legend row below; bars are drawn to `max` (percent charts pass 100,
- *  count charts pass their own ceiling). A missing/zero value in a series
- *  just draws no bar for that slot -- matches the reference's own "Gr. 9"
- *  columns with nothing plotted yet. */
+ *  count charts pass their own ceiling). `NaN` in a series draws no bar for
+ *  that slot -- a category that plain doesn't apply there (e.g. Resume
+ *  before Grade 10). A real, negative-free number, including exactly 0,
+ *  always draws a visible sliver: a genuine "0 of 30 approved" is a fact a
+ *  counselor needs to see, not a gap to render as if the data were simply
+ *  absent (direct report, 26 Sept 2026, real data: "career readiness of
+ *  grade 9 is zero. Dont do that" -- Grade 9 does track Career Report, and
+ *  all 30 students were genuinely still Not Started; the chart had been
+ *  hiding that fact the same way it hides a truly not-applicable grade). */
 export function BarChart({ groups, series, height = 220, max = 100, valueSuffix = "%", barColors, targetLine, barStyle = "segmented" }: { groups: string[]; series: { label: string; accent: string; values: number[] }[]; height?: number; max?: number; valueSuffix?: string; barColors?: string[]; /** a soft, gradient-shaded "target zone" from this value to the top of the chart, with a dashed reference line -- e.g. a district benchmark */ targetLine?: { value: number; label: string; color?: string }; /** "segmented" is the equalizer stack Connect uses; "solid" is one rounded bar with a vertical gradient, bright at the top fading toward the baseline (the Counselor Dashboard's v2 mark). */ barStyle?: "segmented" | "solid" }) {
   const W = 600;
   const H = height;
@@ -362,14 +368,14 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
           const groupX = rawGroupX + clusterOffset;
           const labelCenterX = rawGroupX + groupW / 2;
           if (perGroupColor) {
-            const v = series[0].values[gi] ?? 0;
+            const v = series[0].values[gi] ?? NaN;
             const color = barColors[gi];
             const barX = groupX + barGap;
             const barY = y(v);
             const dim = hover !== null && hover.gi !== gi;
             return (
               <g key={label}>
-                {v > 0 && (
+                {!Number.isNaN(v) && v >= 0 && (
                   <>
                     {renderSegmentedBar({
                       barX, barValueY: barY, color, dim,
@@ -390,8 +396,8 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
           return (
             <g key={label}>
               {series.map((s, si) => {
-                const v = s.values[gi] ?? 0;
-                if (v <= 0) return null;
+                const v = s.values[gi] ?? NaN;
+                if (Number.isNaN(v) || v < 0) return null;
                 const barX = groupX + barGap + si * (barW + barGap);
                 const barY = y(v);
                 const dim = hover !== null && (hover.gi !== gi || hover.si !== si);

@@ -11,10 +11,11 @@ import { BarChart, SegmentedRing } from "@/components/connect/viz";
 import { Panel } from "@/components/connect/ProProfile";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Avatar, CardLink, Go, StatRow } from "../chips";
-import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
+import { attentionReason, attentionSeverity, attentionRank, milestonesForGrade, type CounselorStudent, type AttentionSeverity, type MilestoneKey } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { BLUE_3, NEUTRAL_SLICE, PATHWAY_SEQUENCE, PRIMARY, TARGET_LINE } from "../palette";
+import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "../palette";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import { GLASS_INSET } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
@@ -328,24 +329,33 @@ export function Overview() {
   const ranked = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
   const rest = ranked.slice(6).reduce((n, [, v]) => n + v, 0);
   const topPathways: [string, number][] = rest > 0 ? [...ranked.slice(0, 6), ["Other", rest]] : ranked.slice(0, 7);
-  // A spectral rank order over the reference's seven tracks (palette.ts
-  // PATHWAY_SEQUENCE), largest pathway first; "Other" stays neutral. A
-  // 25 Sept 2026 pass tried coloring each pathway by its matching Build
-  // world instead, reverted the same day along with the Build-world
-  // pathway substitution itself (see counselorRoster.ts) since the
-  // dashboard's pathways are the reference's own seven tracks, not Build's
-  // fifteen worlds.
-  const pathwayColors = topPathways.map(([label], i) => (label === "Other" ? NEUTRAL_SLICE : PATHWAY_SEQUENCE[i % PATHWAY_SEQUENCE.length]));
+  // Each pathway wears the colour its world has everywhere else in the
+  // student app (WORLD_COLORS -- Build, Explore, Career Poster Cards),
+  // not a bespoke sequence invented for this one screen (direct
+  // instruction, 26 Sept 2026: "the nomenclature is wrong for career
+  // pathways and so are the colors. they [should match what's] fixed
+  // across the dreamari app" -- restoring the 25 Sept decision after a
+  // same-day detour through the reference's own seven tracks). "Other"
+  // stays neutral.
+  const pathwayColors = topPathways.map(([label]) => (label === "Other" ? NEUTRAL_SLICE : WORLD_COLORS[label] ?? PRIMARY));
 
   // The reference's own per-grade percentage, verbatim (v1's Overview.tsx):
   // of the grade's students, how many have this milestone Approved. A grade
   // where the milestone doesn't apply yet (e.g. Resume before Grade 10)
   // reads 0 and BarChart draws no bar for that slot, matching the
   // reference's own "nothing plotted yet" columns exactly.
-  const pctApproved = (g: number, key: string) => {
+  const pctApproved = (g: number, key: MilestoneKey) => {
+    // NaN, not 0, for a grade that doesn't track this milestone yet
+    // (Resume before Grade 10, College List/FAFSA before Grade 12) --
+    // BarChart draws nothing for NaN, but draws a real, visible 0% for an
+    // actual zero (direct report, real data: Grade 9's Career Report is
+    // genuinely tracked and genuinely all "Not Started" -- "career
+    // readiness of grade 9 is zero. Dont do that" was about the chart
+    // hiding that real zero as if it were the same kind of gap).
+    if (!milestonesForGrade(g).includes(key)) return NaN;
     const gs = roster.filter((s) => s.grade === g);
-    if (gs.length === 0) return 0;
-    const approved = gs.filter((s) => (s.milestones as Record<string, string>)[key] === "Approved").length;
+    if (gs.length === 0) return NaN;
+    const approved = gs.filter((s) => s.milestones[key] === "Approved").length;
     return (approved / gs.length) * 100;
   };
 
@@ -370,9 +380,24 @@ export function Overview() {
          equality": one card (Student Status) carries the visual weight as
          the wide hero, Postsecondary Plans is the compact simple-data
          sidekick, Career Pathways keeps enough room for its 7-row legend
-         (direct feedback: "no design experimentation... the same cards"). */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-5">
+         (direct feedback: "no design experimentation... the same cards").
+         A viewport-width breakpoint (`lg:`) went 3-across as soon as the
+         BROWSER reached 1024px, but this page's own content column is
+         narrower than the viewport by a fixed ~250px sidebar, so at
+         1024-1400px of actual browser width the row still went 3-across
+         into far less than 1024px of real space -- pathway names and
+         "Postsecondary Plans" itself truncated (direct report with a
+         screenshot: "the viewport that its on now definitely cant do 3
+         in a row"). `@container`/`@[1100px]:` below reads THIS row's own
+         rendered width instead of the browser's, so it goes 3-across only
+         once there's actually room, regardless of sidebar/page chrome.
+         The container and the queried grid must be different elements --
+         an element can't respond to the container query it itself
+         establishes -- so `@container` wraps a plain div and the grid
+         classes live one level down. */}
+      <div className="@container">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] @[1100px]:grid-cols-12">
+        <div className="@[1100px]:col-span-5">
           <DonutCard
             title="Student Status"
             centerPct={onTrackPct}
@@ -388,10 +413,10 @@ export function Overview() {
             ]}
           />
         </div>
-        <div className="lg:col-span-3">
+        <div className="@[1100px]:col-span-4">
           <PathwaysCard total={total} topPathways={topPathways} colors={pathwayColors} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
         </div>
-        <div className="lg:col-span-4">
+        <div className="@[1100px]:col-span-3">
           <DonutCard
             title="Postsecondary Plans"
             centerPct={(withPlan / total) * 100}
@@ -404,6 +429,7 @@ export function Overview() {
             ]}
           />
         </div>
+      </div>
       </div>
 
       {/* Reviews approved chart. A "My Plan by grade" panel briefly lived
