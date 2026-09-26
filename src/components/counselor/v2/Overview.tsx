@@ -8,13 +8,13 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, TrendingDown, TrendingUp } from "lucide-react";
 import { BarChart, SegmentedRing } from "@/components/connect/viz";
-import { Panel } from "@/components/connect/ProProfile";
+import { OverviewCard } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Avatar, CardLink, Go, StatRow } from "../chips";
 import { attentionReason, attentionSeverity, attentionRank, milestonesForGrade, type CounselorStudent, type AttentionSeverity, type MilestoneKey } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE, CHART_STATUS } from "../palette";
+import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE, CHART_STATUS, TREND_UP } from "../palette";
 import { GLASS_INSET, pathwayTileSurface } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
@@ -81,7 +81,10 @@ import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
 function DeltaChip({ pts }: { pts: number }) {
   const up = pts >= 0;
-  const color = up ? STATUS_COLORS["On Track"] : STATUS_COLORS["At Risk"];
+  // Green up (direct feedback, 26 Sept 2026: "trend chips can stay green.
+  // Blue is hard to read on blue"): a trend is text on a blue-tinted card,
+  // so it takes the one color that reads there. Same on Engagement.
+  const color = up ? TREND_UP : CHART_STATUS["Needs Attention"];
   const Icon = up ? TrendingUp : TrendingDown;
   return (
     <span className="flex items-center gap-[3px] text-[11.5px] leading-[15px] font-extrabold tabular-nums" style={{ color }}>
@@ -203,10 +206,20 @@ function PathwaysCard({ topPathways, activePathway, onToggle, onOpen }: { topPat
             {layoutPathways(topPathways).map(({ label, value, x, y, width, height }) => (
               <button key={label} type="button" onClick={() => onToggle(label)} onMouseEnter={() => setHovered(label)} onFocus={() => setFocused(label)} onBlur={() => setFocused(null)}
                 aria-pressed={activePathway === label} aria-label={`${label}: ${value} of ${total} students. ${activePathway === label ? "Clear" : "Filter by"} pathway`}
-                className="absolute flex min-w-0 cursor-pointer flex-col items-start justify-center overflow-hidden border p-[5px] text-left sm:p-[10px] focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--foreground)]"
+                className={`absolute flex min-w-0 cursor-pointer flex-col items-start justify-center overflow-hidden border p-[5px] text-left ${width >= 17 && height >= 9 ? "sm:p-[10px]" : "sm:px-[8px] sm:py-[5px]"} focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--foreground)]`}
                 style={{ ...pathwayTileSurface(total ? value / total : 0, detail?.[0] === label), left: `${x}%`, top: `${y / 40 * 100}%`, width: `${width}%`, height: `${height / 40 * 100}%` }}>
-                {width >= 17 && height >= 9 && <span className="hidden text-[12px] leading-[16px] font-medium sm:block">{label}</span>}
-                <span className="text-[13px] leading-[16px] font-bold tabular-nums sm:text-[18px] sm:leading-[24px]">{value}</span>
+                {/* Named wherever it fits (26 Sept 2026 sweep: tiles showing a
+                   bare "12" or "9" could not be read without hovering). Big
+                   tiles get the full label; mid tiles a smaller two-line
+                   one; only the smallest show just the count. */}
+                {width >= 17 && height >= 9 ? (
+                  <span className="hidden text-[12px] leading-[16px] font-medium sm:block">{label}</span>
+                ) : width >= 9 && height >= 12 ? (
+                  <span className="hidden overflow-hidden text-[10.5px] leading-[13px] font-medium sm:[display:-webkit-box] sm:[-webkit-box-orient:vertical] sm:[-webkit-line-clamp:2]" style={{ overflowWrap: "anywhere" }}>{label}</span>
+                ) : width >= 9 && height >= 7 ? (
+                  <span className="hidden w-full truncate text-[10.5px] leading-[13px] font-medium sm:block">{label}</span>
+                ) : null}
+                <span className={`font-bold tabular-nums ${width >= 17 && height >= 9 ? "text-[13px] leading-[16px] sm:text-[18px] sm:leading-[24px]" : "text-[13px] leading-[16px] sm:text-[15px] sm:leading-[20px]"}`}>{value}</span>
               </button>
             ))}
           </div>
@@ -448,10 +461,12 @@ export function Overview() {
          reference's own two-panel bar-chart form is back, verbatim in
          grouping and grades, wearing v2's "solid" bar style already used
          elsewhere on this dashboard. */}
+      {/* On the shared card (26 Sept 2026 sweep): the Connect Panel these
+         used gave them a 20px title and a divider, bigger than every other
+         card on the page, so two secondary charts outranked the attention
+         card above them. The caption is the card's unit line. */}
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <HoverBeam strength={0.6} className="h-full">
-          <Panel id="career-readiness" title="Career Readiness" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
+        <OverviewCard title="Career Readiness" unit="% approved, by grade">
             <BarChart
               barStyle="solid"
               hideValuesUntilHover
@@ -461,11 +476,8 @@ export function Overview() {
                 { label: "Resume", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "Resume")) },
               ]}
             />
-          </Panel>
-        </HoverBeam>
-        <HoverBeam strength={0.6} className="h-full">
-          <Panel id="academic-readiness" title="Academic Readiness" className="h-full">
-            <p className="-mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>% of students with approved milestones by grade</p>
+        </OverviewCard>
+        <OverviewCard title="Academic Readiness" unit="% approved, by grade">
             <BarChart
               barStyle="solid"
               hideValuesUntilHover
@@ -476,8 +488,7 @@ export function Overview() {
                 { label: "Financial Aid / FAFSA", accent: READINESS_SERIES[2], values: grades.map((g) => pctApproved(g, "Financial Aid")) },
               ]}
             />
-          </Panel>
-        </HoverBeam>
+        </OverviewCard>
       </div>
     </div>
   );

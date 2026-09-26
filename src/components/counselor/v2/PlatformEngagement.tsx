@@ -16,6 +16,7 @@ import { SCHOOL_TARGETS, districtSchools } from "@/lib/counselorOrg";
 import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
+import { TREND_UP } from "../palette";
 
 // DEMO-ONLY: engagement always trends up (direct instruction, 26 Sept
 // 2026: "dont ever show a negative trend for engagement, even for demos.
@@ -75,9 +76,9 @@ function EngagementStat({ icon: StatIcon, value, label, series, delta, prevLabel
         <span className="flex items-baseline gap-[8px]">
           <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
           {typeof delta === "number" && (
-            // Direction in words and an arrow, not green/red: the chart
-            // family stays blue; a fall is still worth reading calmly.
-            <span className="flex items-center gap-[3px] text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: up ? "var(--primary)" : "#F5A623" }}>
+            // Green up, the same as the Overview's trend chips (blue text
+            // on a blue-tinted card is hard to read).
+            <span className="flex items-center gap-[3px] text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: up ? TREND_UP : "#F5A623" }}>
               {up ? <ArrowUpRight className="h-[13px] w-[13px]" aria-hidden /> : <ArrowDownRight className="h-[13px] w-[13px]" aria-hidden />}{up ? "+" : ""}{delta}%
             </span>
           )}

@@ -49,6 +49,11 @@ export const NEUTRAL_SLICE = "#5B6470";
  *  for marks that show quantity. */
 export const CHART_STATUS = { "On Track": PRIMARY, "Needs Attention": "#F5A623", "At Risk": "#E0453C" } as const;
 
+/** An upward trend (a "+2 pts" or "+22%" chip): green, not the chart blue,
+ *  because it is text on a blue-tinted card (direct feedback, 26 Sept 2026:
+ *  "trend chips can stay green. Blue is hard to read on blue"). */
+export const TREND_UP = "#33C78C";
+
 /** Progress stages of one milestone in a chart, furthest along brightest;
  *  red only for overdue. */
 export const CHART_STAGE: Record<string, string> = {

@@ -25,7 +25,7 @@ export type ChangeNote = {
 
 // Applies to every screen, so each note does not repeat it.
 export const SHARED_DECISIONS: Decision[] = [
-  { change: "One blue for every chart; amber and red only where something needs you", why: "The Replit colored each chart differently (green, yellow, purple), so color carried no meaning. Here a warm color always means a problem, and a healthy number never competes with one." },
+  { change: "One blue for every chart; green only for an upward trend; amber and red only where something needs you", why: "The Replit colored each chart differently (green, yellow, purple), so color carried no meaning. Here a warm color always means a problem, green always means growth, and a healthy number never competes with either." },
   { change: "Charts fill in when they appear and morph when you switch a tab or filter", why: "Taken from the Replit, which animates its charts. Movement shows what changed between two views instead of repainting silently." },
   { change: "Progressive disclosure: the answer first, detail one click away", why: "The Replit showed every section at full length at once. Counselors need the answer at a glance and the detail when they act; nothing is deleted, it is layered." },
 ];
