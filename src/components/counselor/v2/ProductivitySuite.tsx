@@ -57,7 +57,7 @@
 //   edit" mark at rest, and a visible (if quiet) dashed rule around the
 //   text, gone once it has focus -- flat print has neither.
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check, Pencil, ShieldCheck } from "lucide-react";
+import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check, Pencil } from "lucide-react";
 import { BatchComposer } from "./Batch";
 import { CAREER_TRACKS, DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { Listbox } from "@/components/app/Listbox";
@@ -70,7 +70,6 @@ import { addNote } from "@/lib/counselorNotes";
 import { Avatar, SelectBox, StatusChip } from "../chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
-import { ScrollChips } from "../chips";
 import { Segmented } from "@/components/connect/viz";
 import { PAPER_VARS } from "./DocumentPreview";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
@@ -81,16 +80,13 @@ function fmtToday(): string {
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
 
-// `uses`: what each draft is built from, the one fact of the reference's
-// long tool descriptions a counselor needs to trust the draft (cut to a
-// single line).
-const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignature; uses?: string }[] = [
-  { id: "recommendation-letter", label: "Recommendation Letter", sub: "College · Scholarship · Internship · Employment", icon: FileSignature, uses: "the student's career report, resume, assessments, reflections, milestones, activities and your notes" },
-  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText, uses: "the student's career interests, milestone progress and what's missing" },
-  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2, uses: "the student's progress, career readiness, academic plan and areas needing attention" },
-  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo, uses: "the student's missing milestones, Dreamari activities, simulations and connections" },
+const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignature }[] = [
+  { id: "recommendation-letter", label: "Recommendation Letter", sub: "College · Scholarship · Internship · Employment", icon: FileSignature },
+  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText },
+  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2 },
+  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo },
   { id: "group-message", label: "Group Message", sub: "One message, reminder or to-do to many students", icon: Megaphone },
-  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle, uses: "engagement, milestones and missing plans across your whole caseload, no student needed" },
+  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle },
 ];
 
 const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
@@ -260,7 +256,30 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
       {/* The one switcher at every width -- the desktop left rail this
          used to have spent 228px on five names and still left the draft
          in a plain textarea; that width now goes to the draft itself. */}
-      <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={visibleTools.map((t) => ({ key: t.id, label: t.label }))} />
+      {/* Every tool visible at once as an icon tile (was a scrolling chip
+         row that cropped the last tool off the edge) -- direct feedback:
+         "it needs better UI". */}
+      <div role="tablist" aria-label="Tool" className="grid shrink-0 grid-cols-2 gap-[8px] sm:grid-cols-3 xl:grid-cols-6">
+        {visibleTools.map((t) => {
+          const on = t.id === toolId;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => { setToolId(t.id); setDraft(null); }}
+              className="dm-quiet flex min-w-0 cursor-pointer flex-col items-start gap-[8px] rounded-[var(--radius-md)] border p-[12px] text-left"
+              style={{ ...GLASS_INSET, borderColor: on ? "color-mix(in srgb, var(--primary) 60%, var(--glass-border))" : GLASS_INSET.borderColor, background: on ? "color-mix(in srgb, var(--primary) 14%, transparent)" : GLASS_INSET.background }}
+            >
+              <span className="flex size-[30px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: on ? "var(--primary)" : "color-mix(in srgb, var(--primary) 16%, transparent)", color: on ? "#fff" : "var(--primary)" }}>
+                <t.icon className="h-[15px] w-[15px]" aria-hidden />
+              </span>
+              <span className="text-[12.5px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{t.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
       <HoverBeam strength={0.6} className="h-full min-w-0 flex-1">
         <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
@@ -268,12 +287,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             <span className="flex items-center gap-[8px]"><tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}</span>
             <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tool.sub}</span>
           </h2>
-          {/* The reference's "You are always in control" banner and its
-             per-tool description, each as one quiet line. */}
-          <p className="-mt-[var(--space-2)] flex items-start gap-[6px] text-[12px] leading-[17px] font-medium" style={{ color: "var(--muted-foreground)" }}>
-            <ShieldCheck aria-hidden className="mt-[1px] h-[13px] w-[13px] flex-none" style={{ color: "var(--primary)" }} />
-            <span>{tool.uses ? `Built from ${tool.uses}. ` : ""}A first draft only: you review, edit and approve before anything is shared.</span>
-          </p>
 
           {toolId === "group-message" ? (
             <div className="flex flex-col gap-[var(--space-3)]">
@@ -477,6 +490,8 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             <div className="flex min-h-[160px] flex-1 flex-col items-center justify-center gap-[6px] rounded-[var(--radius-md)] border border-dashed p-[var(--space-6)] text-center" style={{ borderColor: "var(--glass-border)" }}>
               <Sparkles className="h-[18px] w-[18px]" aria-hidden style={{ color: "var(--muted-foreground)" }} />
               <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Generate a draft, or write your own, to fill this in.</span>
+              {/* The reference's "You are always in control" message, short. */}
+              <span className="text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>Nothing is shared until you approve it.</span>
             </div>
           )}
         </div>

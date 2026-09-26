@@ -10,6 +10,7 @@
 // metadata grid, announcements with plain dates, discussions as a compact
 // list ordered by activity. Data is the reference's, verbatim.
 
+import { SubTabs } from "./SubTabs";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Send, Check, ChevronLeft } from "lucide-react";
@@ -211,7 +212,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-    <Segmented ariaLabel="Question status" value={group} onChange={(k) => { setGroup(k); const next = inGroup(GROUPS.find((g) => g.key === k)!)[0]; if (next) setSelectedId(next.id); }} options={GROUPS.map((g) => ({ key: g.key, label: `${g.label} (${inGroup(g).length})` }))} />
+    <SubTabs ariaLabel="Question status" value={group} onChange={(k) => { setGroup(k); const next = inGroup(GROUPS.find((g) => g.key === k)!)[0]; if (next) setSelectedId(next.id); }} options={GROUPS.map((g) => ({ key: g.key, label: g.label, count: inGroup(g).length }))} />
     <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_minmax(0,1fr)]">
       <div className="flex max-h-[70vh] flex-col gap-[8px] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
         {ordered.length === 0 && <p className="rounded-[var(--radius-md)] border px-[12px] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ ...GLASS_INSET, color: "var(--muted-foreground)" }}>Nothing here right now.</p>}

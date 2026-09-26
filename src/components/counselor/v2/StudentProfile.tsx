@@ -26,6 +26,7 @@ import { StatusChip, MilestoneChip, Avatar, CardLink } from "../chips";
 import { signalsFor } from "@/lib/studentSignals";
 import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
+import { SubTabs } from "./SubTabs";
 import { CheckinsCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
 
@@ -285,7 +286,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           <HoverBeam strength={0.6} className="h-full">
             <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
               <CardHead icon={Target} title="Plan progress" />
-              <Segmented ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
+              <SubTabs ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
               {planTab === "3mo" ? (
                 <ul className="flex flex-col gap-[8px]">
                   {PLAN_PROGRESS_3MO.map((t) => (
