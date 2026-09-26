@@ -29,6 +29,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { Activity, BookOpen, Bookmark, Briefcase, Check, ChevronRight, Compass, GraduationCap, Minus, Plus, School, SlidersHorizontal, Sparkles, Wrench, X, type LucideIcon } from "lucide-react";
 import { LIMITS, preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences, type JobPrefs, type Preferences } from "@/lib/preferences";
@@ -107,6 +108,10 @@ export function PreferencesTab() {
   const savedCareers = useMemo(() => savedIds.map(savedCard), [savedIds]);
   const namedCareers = useMemo(() => savedCareers.map((c) => c.title), [savedCareers]);
   const updated = prefs.updatedAt ? new Date(prefs.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
+  const reduce = useReducedMotion();
+  // One nudge: the first empty section's "Add" glints (the app's text
+  // glint, Explore's "For you"); every other empty row stays plain.
+  const firstEmpty = GROUPS.flatMap((g) => g.ids).find((id) => (id === "saved" ? savedCareers.length === 0 : chipsFor(id, prefs).length === 0));
 
   const row = (id: SectionId) => {
     const sec = SECTIONS[id];
@@ -133,7 +138,7 @@ export function PreferencesTab() {
           {id === "saved" && !empty ? (
             <SavedStrip careers={savedCareers} />
           ) : empty ? (
-            <span className="flex min-w-0 flex-1 items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}><Plus className="h-4 w-4" aria-hidden /> Add</span>
+            <span className="flex min-w-0 flex-1 items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}><Plus className="h-4 w-4" aria-hidden /> <span className={id === firstEmpty ? "dm-text-nudge" : undefined}>Add</span></span>
           ) : (
             <FitChips chips={chips} />
           )}
@@ -159,15 +164,15 @@ export function PreferencesTab() {
         {updated && <p className="pl-[52px] text-[11.5px] sm:pl-0 sm:pt-[10px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
       </div>
 
-      {GROUPS.map((g) => (
-        <section key={g.label} className="flex flex-col gap-[8px]">
+      {GROUPS.map((g, gi) => (
+        <motion.section key={g.label} className="flex flex-col gap-[8px]" initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: reduce ? 0 : gi * 0.07, ease: [0.22, 1, 0.36, 1] }}>
           <h3 className="px-[4px] text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>{g.label}</h3>
           <HoverBeam strength={0.5} className="min-w-0">
             <ul className="flex flex-col divide-y divide-[color:var(--glass-border)] overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 85%, transparent)" }}>
               {g.ids.map(row)}
             </ul>
           </HoverBeam>
-        </section>
+        </motion.section>
       ))}
 
       {/* What saving did, said once, at the moment it is true. */}
@@ -255,6 +260,9 @@ function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: Sect
   const patch = (next: Partial<Preferences>) => setDraft((d) => ({ ...d, ...next }));
   const patchJobs = (next: Partial<JobPrefs>) => setDraft((d) => ({ ...d, jobs: { ...d.jobs, ...next } }));
   const save = () => { writePreferences(draft); onClose(); onSaved(); };
+  // Save wakes up only once something changed: a sheet never asks for a
+  // meaningless save.
+  const dirty = JSON.stringify(draft) !== JSON.stringify(prefs);
   const section = SECTIONS[id];
   const firstCareer = namedCareers[0] ?? draft.careers[0];
   const suggest = useMemo(() => O.suggestionsFor(firstCareer), [firstCareer]);
@@ -338,7 +346,7 @@ function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: Sect
   };
 
   return (
-    <Modal title={section.title} subtitle={`Shapes your ${list(section.shapes)}`} optional={section.optional} onCancel={onClose} onSave={save}>
+    <Modal title={section.title} subtitle={`Shapes your ${list(section.shapes)}`} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty}>
       {body[id as Exclude<SectionId, "saved">]}
     </Modal>
   );
@@ -405,19 +413,29 @@ function GroupLabel({ label, count, max }: { label: string; count?: number; max?
   return (
     <div className="flex items-baseline justify-between gap-[var(--space-3)]">
       <p className="text-[14.5px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>{label}</p>
-      {max !== undefined && <span className="text-[11.5px] font-semibold whitespace-nowrap" style={{ color: full ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{count} of {max}</span>}
+      {/* The limit as dots that fill, not "1 of 3" text: readable at a
+         glance, and visibly full. Short caps only; long ones keep a count. */}
+      {max !== undefined && (max <= 5 ? (
+        <span className="flex items-center gap-[4px]" role="img" aria-label={`${count} of ${max} chosen`}>
+          {Array.from({ length: max }, (_, i) => (
+            <motion.span key={i} animate={{ scale: i < (count ?? 0) ? 1 : 0.8 }} transition={{ type: "spring", stiffness: 500, damping: 24 }} className="block size-[7px] rounded-full" style={{ background: i < (count ?? 0) ? "var(--accent-subtle)" : "color-mix(in srgb, var(--foreground) 18%, transparent)" }} />
+          ))}
+        </span>
+      ) : (
+        <span className="text-[11.5px] font-semibold whitespace-nowrap" style={{ color: full ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{count} of {max}</span>
+      ))}
     </div>
   );
 }
 
 /** Build's chip: the same lift-and-accent hover every tappable card in the
  *  app uses (dm-tap), never a brightness change. */
-function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
+function Chip({ on, onClick, dim = false, children }: { on: boolean; onClick: () => void; /** the group is at its cap and this chip is not picked */ dim?: boolean; children: ReactNode }) {
   return (
-    <button type="button" aria-pressed={on} onClick={onClick} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[12px] py-[7px] text-left text-[13px] leading-[16px]" style={{ borderColor: on ? "color-mix(in srgb, var(--accent-subtle) 75%, transparent)" : CHIP_BORDER, background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)", fontWeight: on ? 600 : 500 }}>
-      {on && <span aria-hidden className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />}
+    <motion.button type="button" aria-pressed={on} onClick={onClick} whileTap={{ scale: 0.95 }} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[12px] py-[7px] text-left text-[13px] leading-[16px] transition-opacity" style={{ borderColor: on ? "color-mix(in srgb, var(--accent-subtle) 75%, transparent)" : CHIP_BORDER, background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)", fontWeight: on ? 600 : 500, opacity: dim ? 0.55 : 1 }}>
+      {on && <motion.span aria-hidden initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 22 }} className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />}
       {children}
-    </button>
+    </motion.button>
   );
 }
 
@@ -443,7 +461,7 @@ function Multi({ label, options, value, onChange, max, initial }: { label: strin
     <div className="flex flex-col gap-[var(--space-3)]">
       <GroupLabel label={label} count={value.length} max={max} />
       <div className="flex flex-wrap gap-[8px]">
-        {shown.map((o) => <Chip key={o} on={value.includes(o)} onClick={() => toggle(o)}>{o}</Chip>)}
+        {shown.map((o) => <Chip key={o} on={value.includes(o)} dim={full && !value.includes(o)} onClick={() => toggle(o)}>{o}</Chip>)}
       </div>
       {initial && options.length > initial && <SeeMore more={more} onToggle={() => setMore((m) => !m)} />}
     </div>
@@ -473,7 +491,8 @@ function Expander({ label, openLabel, children }: { label: string; openLabel: st
   );
 }
 
-function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save", children }: { title: string; /** one line: what this section shapes */ subtitle?: string; optional?: boolean; onCancel: () => void; onSave: () => void; saveLabel?: string; children: ReactNode }) {
+function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save", saveDisabled = false, children }: { title: string; /** one line: what this section shapes */ subtitle?: string; optional?: boolean; onCancel: () => void; onSave: () => void; saveLabel?: string; saveDisabled?: boolean; children: ReactNode }) {
+  const reduce = useReducedMotion();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
     document.addEventListener("keydown", onKey);
@@ -482,8 +501,8 @@ function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save"
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
   }, [onCancel]);
   return createPortal(
-    <div className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(e) => { if (e.target === e.currentTarget) onCancel(); }} role="dialog" aria-modal="true" aria-labelledby="preference-editor-title">
-      <div className="flex max-h-[94dvh] w-full max-w-[760px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:max-h-[88dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}>
+    <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }} className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-end justify-center backdrop-blur-[3px] sm:items-center sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)" }} onPointerUp={(e) => { if (e.target === e.currentTarget) onCancel(); }} role="dialog" aria-modal="true" aria-labelledby="preference-editor-title">
+      <motion.div initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 380, damping: 32 }} className="flex max-h-[94dvh] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:max-h-[88dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}>
         <header className="flex flex-none items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
           <div className="flex min-w-0 flex-col gap-[2px]">
             <span className="flex min-w-0 items-center gap-[8px]">
@@ -498,10 +517,10 @@ function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save"
         <footer className="flex flex-none items-center justify-end gap-[var(--space-3)] border-t px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
           {/* Saved Careers edits in place, so it has one button, not two. */}
           {saveLabel === "Save" && <button type="button" onClick={onCancel} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Cancel</button>}
-          <button type="button" onClick={onSave} className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> {saveLabel}</button>
+          <button type="button" onClick={onSave} disabled={saveDisabled} className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> {saveLabel}</button>
         </footer>
-      </div>
-    </div>,
+      </motion.div>
+    </motion.div>,
     document.body,
   );
 }
