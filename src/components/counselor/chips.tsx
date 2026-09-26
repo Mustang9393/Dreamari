@@ -59,6 +59,22 @@ export function MilestoneChip({ status }: { status: MilestoneStatus }) {
 // segmented-mark language the Overview charts already use, so a
 // counselor can see completion AND spot exactly which stage is stuck
 // (each segment is titled on hover) without opening the student.
+// The strip is a small chart, so it wears the chart stage colors (the
+// Milestone Tracker's rings use the same): approved brightest blue, pending
+// and in progress lighter, not started neutral, red only for overdue or
+// changes requested (26 Sept 2026: "the graph colors can be consistent
+// across the app"). Status chips keep MILESTONE_COLORS.
+const STRIP_COLORS: Record<MilestoneStatus, string> = {
+  Approved: "#5B6CF9",
+  Completed: "#5B6CF9",
+  "Pending Review": "#9BA8FB",
+  "In Progress": "#C9D0FE",
+  "Not Started": "#5B6470",
+  "Changes Requested": "#E0453C",
+  Overdue: "#E0453C",
+  "Not Applicable": "color-mix(in srgb, var(--foreground) 14%, transparent)",
+};
+
 export function MilestonesMini({ milestones }: { milestones: Record<MilestoneKey, MilestoneStatus> }) {
   const approved = MILESTONE_KEYS.filter((k) => milestones[k] === "Approved").length;
   return (
@@ -66,7 +82,7 @@ export function MilestonesMini({ milestones }: { milestones: Record<MilestoneKey
       <span className="text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: "var(--foreground)" }}>{approved}/{MILESTONE_KEYS.length} approved</span>
       <span className="flex gap-[2px]">
         {MILESTONE_KEYS.map((k) => (
-          <span key={k} title={`${k}: ${milestones[k]}`} aria-hidden className="h-[5px] w-[8px] flex-none rounded-[1.5px]" style={{ background: MILESTONE_COLORS[milestones[k]] }} />
+          <span key={k} title={`${k}: ${milestones[k]}`} aria-hidden className="h-[5px] w-[8px] flex-none rounded-[1.5px]" style={{ background: STRIP_COLORS[milestones[k]] }} />
         ))}
       </span>
     </span>

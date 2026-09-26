@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { MetricTile, Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
+import { lastActiveLabel, milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { PLAN_PROGRESS_3MO } from "@/lib/counselorProfileData";
 import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
 import { readNotes, addNote } from "@/lib/counselorNotes";
@@ -32,10 +32,7 @@ import { GLASS_INSET } from "../surfaces";
 
 
 
-function fmtDate(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+const fmtDate = lastActiveLabel;
 
 
 /** What this student needs from the counselor: their own milestones, plus
@@ -173,7 +170,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             <Avatar name={student.name} size={56} index={student.avatarIndex} />
             <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
               <span className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack} · active {fmtDate(student.lastActive)}</span>
+              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack} · active {fmtDate(student.lastActive).toLowerCase()}</span>
             </div>
             <StatusChip status={student.status} />
           </div>
@@ -191,7 +188,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               {student.supportFlagReason && (
                 <li className="flex items-center gap-[8px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
                   <Flag aria-hidden className="h-[13px] w-[13px] flex-none" style={{ color: "#F5A623" }} />
-                  {student.supportFlagReason}
+                  {/* The reference's flag text uses em dashes; shown with a comma (no em dashes in UI copy). */}
+                  {student.supportFlagReason.replace(/\s*[\u2014\u2013]\s*/g, ", ")}
                 </li>
               )}
             </ul>

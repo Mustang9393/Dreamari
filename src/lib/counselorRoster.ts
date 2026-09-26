@@ -62,6 +62,19 @@ export type CareerTrack = (typeof REFERENCE_TRACKS)[number];
 // deterministically from the reference's seven families onto the worlds
 // that family covers.
 export const CAREER_TRACKS = INTEREST_WORLDS.map((w) => w.label);
+
+// "Last active", relative to the reference's own "today" (the newest date
+// in its roster), so the reference's January dates never read as months of
+// inactivity against a dashboard that dates itself in September (26 Sept
+// 2026 sweep). The live student is active "Today". The gaps between
+// students are exactly the reference's.
+const REFERENCE_TODAY = REFERENCE_ROSTER.reduce((max, row) => (row[row.length - 1] > max ? String(row[row.length - 1]) : max), "");
+export function lastActiveLabel(iso: string): string {
+  if (!REFERENCE_TODAY || iso >= REFERENCE_TODAY) return "Today";
+  const days = Math.round((Date.parse(`${REFERENCE_TODAY}T00:00:00`) - Date.parse(`${iso}T00:00:00`)) / 86400000);
+  if (Number.isNaN(days)) return iso;
+  return days <= 0 ? "Today" : days === 1 ? "Yesterday" : `${days} days ago`;
+}
 const TRACK_TO_WORLDS: Record<CareerTrack, string[]> = {
   Technology: ["Tech & Engineering", "Science & Research"],
   Healthcare: ["Health & Medicine"],
@@ -337,7 +350,8 @@ function attentionSignal(s: CounselorStudent): { reason: string; severity: Atten
   const notStarted = MILESTONE_KEYS.filter((k) => s.milestones[k] === "Not Started");
   if (notStarted.length >= 3) return { reason: `${notStarted.length} milestones not started`, severity: "High" };
   if (notStarted.length === 1) return { reason: `${notStarted[0]} not started`, severity: "Medium" };
-  if (notStarted.length > 1) return { reason: `${notStarted[0]} +${notStarted.length - 1} more`, severity: "Medium" };
+  // Says what the "+1" is (26 Sept 2026 sweep: "Resume +1 more" did not say more what).
+  if (notStarted.length > 1) return { reason: `${notStarted[0]} and ${notStarted.slice(1).join(" and ")} not started`, severity: "Medium" };
   if (s.roadmapPct < 30) return { reason: `Roadmap ${s.roadmapPct}% complete`, severity: "Medium" };
   return { reason: "Behind pace for grade", severity: "Medium" };
 }

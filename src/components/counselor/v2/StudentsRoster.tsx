@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { lastActiveLabel } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCOPE_COUNSELOR_TO_CASELOAD, counselorFor, myCounselor } from "@/lib/counselorOrg";
 import { curriculumItemById, statusesForItem } from "@/lib/counselorCurriculum";
@@ -81,10 +82,7 @@ function StatusCell({ s }: { s: CounselorStudent }) {
   );
 }
 
-function fmtDate(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+const fmtDate = lastActiveLabel;
 
 function StudentCell({ s }: { s: CounselorStudent }) {
   return (
