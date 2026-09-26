@@ -230,7 +230,11 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
   draft: string | null; onDraft: (v: string) => void; pageRef?: React.Ref<HTMLDivElement>;
 }) {
   const hint = student ? "Generate a draft, or write your own" : "Choose a student to begin";
-  const signerName = signer.name || "Your Counselor";
+  // The demo counselor when the account has no name saved, the same fallback
+  // the rest of the dashboard uses (My Impact, the shell): "Your Counselor"
+  // printed on a letter, and drawn as its signature, read as broken
+  // (direct report, 26 Sept 2026).
+  const signerName = signer.name.trim() || "Sarah Chen";
   return (
     <div
       ref={pageRef}
