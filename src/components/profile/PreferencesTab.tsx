@@ -33,6 +33,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { Check, ChevronRight, Compass, Minus, Plus, Sparkles, X } from "lucide-react";
 import { COLLEGES } from "@/components/colleges/data";
+import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LIMITS, preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences, type JobPrefs, type Preferences } from "@/lib/preferences";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { useSavedCareers } from "@/lib/savedCareers";
@@ -257,6 +258,9 @@ function ProofBand({ proof }: { proof: Proof }) {
   return (
     <motion.div role="status" initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={reduce ? undefined : { height: 0, opacity: 0 }} transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }} className="overflow-hidden">
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] px-[var(--space-4)] pt-[2px] pb-[14px]">
+        {/* The app's border beam, on while the band is open: a light that
+           travels its edge gives the proof presence without blocking. */}
+        <HoverBeam active strength={0.9} className="min-w-0 flex-1">
         <span className="flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={{ borderColor: "color-mix(in srgb, var(--color-feedback-success) 40%, var(--glass-border))", background: "color-mix(in srgb, var(--color-feedback-success) 10%, transparent)" }}>
           {proof.posters && proof.posters.length > 0 && (
             <span className="flex flex-none -space-x-[10px]" aria-hidden>
@@ -274,6 +278,7 @@ function ProofBand({ proof }: { proof: Proof }) {
             <a href={proof.href} className="dm-solid flex flex-none items-center gap-[2px] rounded-full px-[14px] py-[7px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{proof.cta} <ChevronRight className="h-4 w-4" aria-hidden /></a>
           )}
         </span>
+        </HoverBeam>
       </div>
     </motion.div>
   );
@@ -326,12 +331,15 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
   // A failed save keeps the sheet open with every edit intact, says so in
   // one line, and turns Save into Try again. With a backend this is the
   // write rejecting (network, 5xx); nothing is lost.
+  // The save gets a beat of feedback (the app's ConfirmShimmer sweeps the
+  // button) before the sheet closes, instead of vanishing mid-click.
+  const [confirming, setConfirming] = useState(false);
   const save = () => {
     try {
       if (failSaves) throw new Error("demo save failure");
       writePreferences(draft);
-      onClose();
-      onSaved();
+      setConfirming(true);
+      window.setTimeout(() => { onClose(); onSaved(); }, 380);
     } catch {
       setSaveFailed(true);
     }
@@ -420,7 +428,7 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
   };
 
   return (
-    <Modal title={section.title} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty} saveLabel={saveFailed ? "Try again" : "Save"} error={saveFailed ? "Couldn't save your changes. Your edits are still here." : undefined}>
+    <Modal title={section.title} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty && !confirming} confirming={confirming} saveLabel={saveFailed ? "Try again" : "Save"} error={saveFailed ? "Couldn't save your changes. Your edits are still here." : undefined}>
       {body[id as Exclude<SectionId, "saved">]}
     </Modal>
   );
@@ -565,7 +573,7 @@ function Expander({ label, openLabel, children }: { label: string; openLabel: st
   );
 }
 
-function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save", saveDisabled = false, error, children }: { title: string; /** one line: what this section shapes */ subtitle?: string; optional?: boolean; onCancel: () => void; onSave: () => void; saveLabel?: string; saveDisabled?: boolean; /** a failed save, shown above the footer */ error?: string; children: ReactNode }) {
+function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save", saveDisabled = false, confirming = false, error, children }: { title: string; /** one line: what this section shapes */ subtitle?: string; optional?: boolean; onCancel: () => void; onSave: () => void; saveLabel?: string; saveDisabled?: boolean; /** the save just went through: sweep the button */ confirming?: boolean; /** a failed save, shown above the footer */ error?: string; children: ReactNode }) {
   const reduce = useReducedMotion();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
@@ -596,7 +604,7 @@ function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save"
         <footer className="flex flex-none items-center justify-end gap-[var(--space-3)] border-t px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
           {/* Saved Careers edits in place, so it has one button, not two. */}
           {saveLabel !== "Done" && <button type="button" onClick={onCancel} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Cancel</button>}
-          <button type="button" onClick={onSave} disabled={saveDisabled} className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> {saveLabel}</button>
+          <button type="button" onClick={onSave} disabled={saveDisabled} className="dm-solid relative flex min-h-[44px] cursor-pointer items-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><ConfirmShimmer active={confirming} /><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> {saveLabel}</button>
         </footer>
       </motion.div>
     </motion.div>,
