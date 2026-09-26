@@ -329,7 +329,7 @@ export function PicksTray({ saved, max, onOpen }: { saved: LabCareer[]; max: num
 /** The rank screen's three slots: #1, #2, #3 fill in the order cards are
  *  tapped, and tapping a filled slot clears it. The empty slots show how
  *  ranking works without a sentence explaining it. */
-export function RankSlots({ picks, onClear }: { picks: LabCareer[]; onClear: (id: string) => void }) {
+export function RankSlots({ picks, onClear, incoming, onSwap }: { picks: LabCareer[]; onClear: (id: string) => void; /** a fourth career tapped while all three slots are full */ incoming?: LabCareer | null; onSwap?: (outId: string) => void }) {
   return (
     <div className="grid grid-cols-3 gap-2 sm:gap-3">
       {[0, 1, 2].map((i) => {
@@ -358,7 +358,17 @@ export function RankSlots({ picks, onClear }: { picks: LabCareer[]; onClear: (id
                   </span>
                   <X className="absolute top-1.5 right-1.5 h-3.5 w-3.5 opacity-60 group-hover:opacity-100" aria-hidden style={{ color: "var(--muted-foreground)" }} />
                 </motion.button>
-              ) : (
+              ) : null}
+            </AnimatePresence>
+            {/* A fourth pick never hits a wall ("Remove one first" read as
+               locked in): every slot becomes a swap target instead. */}
+            {c && incoming && (
+              <button type="button" aria-label={`Swap ${incoming.title} in as #${i + 1}`} onClick={() => onSwap?.(c.id)} className="absolute inset-0 z-[2] flex cursor-pointer items-center justify-center rounded-[var(--radius-md)] border-2 border-dashed" style={{ borderColor: "var(--primary)", background: "rgba(5,8,20,0.45)" }}>
+                <span className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11.5px] font-bold text-white" style={{ background: "var(--color-brand-500)" }}><ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Swap in</span>
+              </button>
+            )}
+            <AnimatePresence mode="popLayout">
+              {c ? null : (
                 <motion.div key={`empty-${i}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex h-[68px] w-full items-center justify-center rounded-[var(--radius-md)] border-2 border-dashed sm:h-[76px]" style={{ borderColor: next ? "color-mix(in srgb, var(--primary) 70%, transparent)" : "color-mix(in srgb, var(--foreground) 20%, transparent)", background: next ? "color-mix(in srgb, var(--primary) 8%, transparent)" : "transparent" }}>
                   <span className="text-[22px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: next ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 30%, transparent)" }}>#{i + 1}</span>
                 </motion.div>

@@ -75,9 +75,10 @@ const NOTES = {
     "Scroll for more. The next careers load in on their own.",
     "The button says what it needs: save 3 to rank your top 3.",
   ] },
-  rank: { heading: "Pick your top 3", bullets: [
+  rank: { heading: "Your top 3, for now", bullets: [
     "Your saved careers, with three empty slots above them. Tap a card to fill the next slot: first tap is #1.",
-    "Tap a filled slot to clear it. The back arrow returns to browsing, where Save toggles a career.",
+    "Tap a filled slot to clear it. With all three full, tapping another career offers Swap in on each slot.",
+    "The back arrow returns to browsing, where Save toggles a career.",
     "See my Top 3 sets them; they stay editable on the next screen.",
   ] },
   top3: { heading: "My Top 3 and what happens next", bullets: [
@@ -129,9 +130,20 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
       ? { ...s, saved: s.saved.filter((x) => x !== id), rank: s.rank.filter((x) => x !== id) }
       : s.saved.length >= MAX_SAVED ? s : { ...s, saved: [...s.saved, id] });
   };
+  // A fourth tap with all three slots full offers a swap, never a "remove
+  // one first" wall (26 Sept 2026: ranking "should be obvious and
+  // reassuring that this doesn't lock them in forever").
+  const [incomingRank, setIncomingRank] = useState<string | null>(null);
   const assign = (id: string) => {
-    if (!state.rank.includes(id) && state.rank.length >= 3) setToast("Remove one first to rank this career.");
+    if (!state.rank.includes(id) && state.rank.length >= 3) { setIncomingRank((cur) => (cur === id ? null : id)); return; }
+    setIncomingRank(null);
     setState((s) => s.rank.includes(id) ? { ...s, rank: s.rank.filter((x) => x !== id) } : s.rank.length >= 3 ? s : { ...s, rank: [...s.rank, id] });
+  };
+  const swapRank = (outId: string) => {
+    const inId = incomingRank;
+    if (!inId) return;
+    setIncomingRank(null);
+    setState((s) => ({ ...s, rank: s.rank.map((x) => (x === outId ? inId : x)) }));
   };
 
   if (!hydrated) return null;
@@ -217,7 +229,9 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     const left = need - state.rank.length;
     return (
       <>
-        <LabScreen note={NOTES.rank} title="Pick your top 3" controls={<RankSlots picks={top3} onClear={(id) => assign(id)} />}>
+        {/* "for now" in the heading: the reassurance lives in the line the
+           student is already reading, not in an extra sentence. */}
+        <LabScreen note={NOTES.rank} title="Your top 3, for now" controls={<RankSlots picks={top3} onClear={(id) => assign(id)} incoming={incomingRank ? careerById(incomingRank) ?? null : null} onSwap={swapRank} />}>
           {savedCareers.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-dashed text-center" style={{ borderColor: "var(--glass-border)" }}>
               <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet</p>
