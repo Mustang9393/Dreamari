@@ -14,7 +14,7 @@ import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { useCounselorVersion } from "./version";
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_HOME, type CounselorView } from "./roles";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
-import { CHANGE_NOTES } from "./v2/changeNotes";
+import { CHANGE_NOTES, SHARED_DECISIONS } from "./v2/changeNotes";
 
 // The isolated shell for the Counselor Dashboard -- a genuinely separate
 // product from the student app's own chrome (direct product decision: not a
@@ -268,8 +268,8 @@ function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gr
 function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open: boolean; onToggle: () => void }) {
   if (!CHANGE_NOTES[view]) return null;
   return (
-    <IconTip label="What changed and why">
-      <button type="button" aria-label="What changed and why" aria-expanded={open} onClick={onToggle} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: open ? "var(--primary)" : "var(--foreground)" }}>
+    <IconTip label="Why it looks this way">
+      <button type="button" aria-label="Why it looks this way" aria-expanded={open} onClick={onToggle} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: open ? "var(--primary)" : "var(--foreground)" }}>
         <Info className="h-[18px] w-[18px]" aria-hidden />
       </button>
     </IconTip>
@@ -283,28 +283,65 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+  // Reports holds three of the reference's screens; its note covers all three.
+  const heading = VIEW_HOME[view] === "progress" || view === "progress" ? "Reports" : VIEW_TITLES[view].title;
+  const label = "text-[11px] font-bold tracking-[0.06em] uppercase";
+  // Laid out as the decisions themselves (26 Sept 2026, direct instruction:
+  // "show the final justification of the final designs. Explain what
+  // changed from the replit and why and justify the decisions"): each
+  // change sits with its reason, then what was kept from the reference, so
+  // the reader can check nothing was cut.
   return (
     <div className="fixed inset-0 z-40 flex items-start justify-end p-[var(--space-4)] sm:p-[var(--space-5)]">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(0,0,0,0.45)" }} />
-      <div role="dialog" aria-modal="true" aria-label={`What changed on ${VIEW_TITLES[view].title}`} className="relative mt-[56px] flex max-h-[calc(100dvh-80px)] w-full max-w-[520px] flex-col gap-[var(--space-3)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.6)" }}>
+      <div role="dialog" aria-modal="true" aria-label={`Why ${heading} looks this way`} className="relative mt-[56px] flex max-h-[calc(100dvh-80px)] w-full max-w-[580px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.6)" }}>
         <div className="flex items-start justify-between gap-[8px]">
-          <span className="flex flex-col gap-[2px]">
-            <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>What changed from the reference</span>
-            <span className="text-[16px] font-bold" style={{ color: "var(--foreground)" }}>{VIEW_TITLES[view].title}</span>
+          <span className="flex flex-col gap-[4px]">
+            <span className={label} style={{ color: "var(--primary)" }}>Design rationale</span>
+            <span className="text-[18px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{heading}</span>
+            <span className="text-[13px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{note.summary}</span>
           </span>
           <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[15px] w-[15px]" aria-hidden /></button>
         </div>
-        <ul className="flex flex-col gap-[6px]">
-          {note.changed.map((c) => (
-            <li key={c} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
-              <span aria-hidden className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />{c}
-            </li>
-          ))}
-        </ul>
-        <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Why.</span> {note.why}</p>
-        <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">Better because.</span> {note.better}</p>
-        {note.order && <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}><span className="font-bold">What comes first, and why.</span> {note.order}</p>}
-        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Full reasoning and the alternatives each choice beat: docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md</span>
+
+        <section className="flex flex-col gap-[10px]">
+          <span className={label} style={{ color: "var(--muted-foreground)" }}>What changed from the Replit, and why</span>
+          <ol className="flex flex-col gap-[12px]">
+            {note.decisions.map((d, i) => (
+              <li key={d.change} className="flex gap-[10px]">
+                <span className="flex size-[20px] flex-none items-center justify-center rounded-full text-[11px] font-bold tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>{i + 1}</span>
+                <span className="flex min-w-0 flex-col gap-[3px]">
+                  <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{d.change}</span>
+                  <span className="text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{d.why}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[12px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 3%, transparent)" }}>
+          <span className={`${label} flex items-center gap-[6px]`} style={{ color: "var(--muted-foreground)" }}><Check className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--primary)" }} />Kept from the Replit</span>
+          <span className="text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--foreground)" }}>{note.kept}</span>
+        </section>
+
+        {note.order && (
+          <section className="flex flex-col gap-[4px]">
+            <span className={label} style={{ color: "var(--muted-foreground)" }}>What comes first, and why</span>
+            <span className="text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--foreground)" }}>{note.order}</span>
+          </section>
+        )}
+
+        <section className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+          <span className={label} style={{ color: "var(--muted-foreground)" }}>On every screen</span>
+          <ul className="flex flex-col gap-[8px]">
+            {SHARED_DECISIONS.map((d) => (
+              <li key={d.change} className="flex flex-col gap-[2px]">
+                <span className="text-[12.5px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{d.change}</span>
+                <span className="text-[12px] leading-[17px] font-medium" style={{ color: "var(--muted-foreground)" }}>{d.why}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </div>
   );
