@@ -14676,3 +14676,10 @@ Each commit message carries the full reasoning and the quoted feedback; summary 
 Validation: tsc, eslint, `npm run build` clean on every commit; each screen browser-verified at 1440 and pane width. All pushed to main (fast-forward each time).
 
 Open / next: app-wide data-viz and layout audit the user asked for ("Lets see what we can improve across the app in terms of data viz and cards and layouts and UX") is only partly done (Reports, My Impact, Insights, Milestone Tracker, Productivity covered); still to sweep: Overview, Students, Student Profile, Review Queue, Connect, Settings, and the admin-role screens. Productivity on phones stacks the setup panel above the page (works, not tuned).
+
+## 2026-09-26 · (i) design rationale + app-wide sweep (commits c9e5ee8c to 32c56e8d)
+
+- **(i) panels** now carry the final design rationale per screen (`v2/changeNotes.ts`, new shape: summary, decisions each with its reason, what was kept from the Replit, what comes first) plus shared decisions stated once. Direct instruction: "show the final justification of the final designs. Explain what changed from the replit and why and justify the decisions." Old notes described superseded passes and were replaced. Update the note whenever a screen's design changes.
+- **Sweep fixes:** Overview readiness cards on the shared card header; pathway treemap tiles named where they fit; trend chips green (`palette.ts` TREND_UP; "Blue is hard to read on blue"); Students last-active relative to the reference's own today (`lastActiveLabel`), milestone strip in chart stage colors, two-item reasons named; support-flag em dash shown as a comma in v2; Review Queue list fills the height on desktop; Settings shows the auto signature as it prints.
+- **Checked, no change needed:** Counselor Connect, Student Profile header and tabs.
+- **Not checked this pass:** the admin-role screens (Counselors, Readiness, Reports, Schools, School Impact, the admin Overviews). Checking them means switching the saved role, which is shared with the user's own browser session; do it when the user is not in the pane, and switch back to School Counselor after.
