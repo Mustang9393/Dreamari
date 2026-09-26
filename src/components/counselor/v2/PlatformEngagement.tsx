@@ -17,19 +17,21 @@ import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
-// Copied verbatim off the live reference (all 6 months of the login table,
-// the 4 headline stats, and the per-grade intervention bars) -- this
-// screen's numbers are fixed content, not derived from the seeded roster,
-// same as Milestone Tracker's grade data. Month labels shifted to this
-// app's own "today" convention (the rest of the dashboard dates itself in
-// Sep 2026) while keeping the reference's exact values in the same
-// chronological order.
+// DEMO-ONLY: engagement always trends up (direct instruction, 26 Sept
+// 2026: "dont ever show a negative trend for engagement, even for demos.
+// Always look up!"). The latest month keeps the reference's own headline
+// figures (71 monthly active students, 214 logins, 3.01 logins each; the
+// weekly 42 and daily 18 below are also the reference's); the five months
+// before it climb steadily toward them, so every line, sparkline and
+// "vs last month" change points up. The reference's own six months rose
+// and fell (a 441-login peak, then a drop), which read as decline.
+// A backend replaces this with real monthly counts.
 const MONTHS = [
-  { label: "Apr 2026", total: 298, unique: 91, avg: 3.27 },
-  { label: "May 2026", total: 441, unique: 112, avg: 3.94 },
-  { label: "Jun 2026", total: 193, unique: 74, avg: 2.61 },
-  { label: "Jul 2026", total: 267, unique: 88, avg: 3.03 },
-  { label: "Aug 2026", total: 158, unique: 55, avg: 2.87 },
+  { label: "Apr 2026", total: 96, unique: 38, avg: 2.53 },
+  { label: "May 2026", total: 118, unique: 44, avg: 2.68 },
+  { label: "Jun 2026", total: 139, unique: 50, avg: 2.78 },
+  { label: "Jul 2026", total: 162, unique: 56, avg: 2.89 },
+  { label: "Aug 2026", total: 187, unique: 63, avg: 2.97 },
   { label: "Sep 2026", total: 214, unique: 71, avg: 3.01 },
 ];
 const LATEST = MONTHS[MONTHS.length - 1];
@@ -160,7 +162,7 @@ function LoginsChart() {
   const padRight = 16;
   const padTop = 16;
   const padBottom = 28;
-  const step = 150;
+  const step = 50;
   const max = Math.ceil(Math.max(...MONTHS.map((m) => m.total)) / step) * step;
   const ticks = Array.from({ length: max / step + 1 }, (_, i) => i * step);
   const plotW = Math.max(1, W - padLeft - padRight);
