@@ -22,16 +22,18 @@ import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 // Always look up!"). The latest month keeps the reference's own headline
 // figures (71 monthly active students, 214 logins, 3.01 logins each; the
 // weekly 42 and daily 18 below are also the reference's); the five months
-// before it climb steadily toward them, so every line, sparkline and
-// "vs last month" change points up. The reference's own six months rose
+// before it climb toward them with two small, natural dips (June, August;
+// direct feedback: "have a bit more variation... dont just show a straight
+// line. It can dip a little... and trend upwards"). The latest month is
+// always the highest, so every "vs last month" change is positive. The reference's own six months rose
 // and fell (a 441-login peak, then a drop), which read as decline.
 // A backend replaces this with real monthly counts.
 const MONTHS = [
-  { label: "Apr 2026", total: 96, unique: 38, avg: 2.53 },
-  { label: "May 2026", total: 118, unique: 44, avg: 2.68 },
-  { label: "Jun 2026", total: 139, unique: 50, avg: 2.78 },
-  { label: "Jul 2026", total: 162, unique: 56, avg: 2.89 },
-  { label: "Aug 2026", total: 187, unique: 63, avg: 2.97 },
+  { label: "Apr 2026", total: 104, unique: 41, avg: 2.54 },
+  { label: "May 2026", total: 142, unique: 52, avg: 2.73 },
+  { label: "Jun 2026", total: 131, unique: 49, avg: 2.67 },
+  { label: "Jul 2026", total: 176, unique: 60, avg: 2.93 },
+  { label: "Aug 2026", total: 168, unique: 58, avg: 2.9 },
   { label: "Sep 2026", total: 214, unique: 71, avg: 3.01 },
 ];
 const LATEST = MONTHS[MONTHS.length - 1];
