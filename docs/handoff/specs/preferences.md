@@ -19,41 +19,47 @@ Source: Joshua's Slack spec (25 Sept 2026) and his second pass (26 Sept 2026), p
 
 ## 3. Journeys
 
-Tab open → three groups of rows showing current answers → tap a row → editor sheet → change → Save → sheet closes, the row flashes a check, a toast names what is updating ("Saved. Updating your Explore careers."). It must never feel like retaking Build: one section at a time, current answers pre-filled.
+Tab open → one list of Joshua's eight sections showing current answers → tap a row → editor sheet → change → Save → sheet closes, the row shows a check and opens a band under it showing what changed (for Industries, posters of careers now in Explore and "See them"). It must never feel like retaking Build: one section at a time, current answers pre-filled.
 
 ## 4. Rules
 
 ### Page
 
-- Title "Preferences". Under it, a "Shapes your" strip of four icon chips: Explore, Schools, Play, Career Report (see Decisions). Screen-reader text is Joshua's sentence: "Update your preferences to improve your recommendations as your interests change."
+- Title "Preferences", then Joshua's line verbatim, one line on desktop (balanced wrap on phones): "Update your preferences to improve your recommendations as your interests change." His optional supporting line is left out; the save confirmation shows what changed instead (see Feedback).
 - "Last updated {date}" at the right of the header row (under it on phones), only once a save has happened.
-- Rows are grouped, each group one card with divided rows:
-  - **Your interests:** Industries, Saved Careers, Subjects & Skills, Skills & Software.
-  - **After high school:** Education, College & Trade School.
-  - **Work:** Work Style, Internships & Jobs (badge "Optional").
+- One list, one card with divided rows, in Joshua's order: Industries, Saved Careers, Subjects, Work Style, Education, College & Trade School, Skills & Software, Internship & Job Preferences (badge "Optional"). No icons, no group headers.
 - A row shows its answers as chips that fit on one line, then "+n" (measured, never wraps). Saved Careers shows up to five posters and "N saved".
 - An empty row shows "+ Add" in the accent color and no "Edit". The first empty row's "Add" glints (`dm-text-nudge`); others stay plain.
+
+### Feedback (the "this changes your Dreamari" moment)
+
+Instead of explaining it in copy, each save shows the change:
+
+- Industries: posters of careers now surfacing from the chosen industries, "New in Explore for {industries}", and a "See them" button to `/explore`.
+- College & Trade School: "{n} schools match in {states}" (states and budget applied to the colleges catalog) and "See schools" to `/colleges`.
+- Every other section: "Updating your {areas}" (the "Shapes" column below).
+- It opens as a band directly under the row just edited (green-tinted, inline, not a floating toast; a bottom toast was easy to miss), with a check beside the row's title. It folds away after 7 s. Reduced motion shows and hides it without animating.
 
 ### Sections, fields and limits
 
 Limits are shown as dots that fill (limits of 5 or fewer) or "n of m" (larger). At the cap, unpicked chips dim; tapping another replaces the oldest pick (Build's rule: locking picks out creates friction).
 
-| Section | Fields | Limits | Shapes (editor line and save toast) |
+| Section | Fields | Limits | Shapes (named in the save band) |
 |---|---|---|---|
 | Industries | Industries I'm interested in (the 15 Build worlds) | max 3 | Explore careers, Play and Connect |
 | Saved Careers | Read from the saved-careers store and the Top 3; no picking here | none | Career Report and My Plan |
-| Subjects & Skills | Subjects I enjoy most; Skills I want to build | 5; 5 | Explore careers and Career Report |
-| Skills & Software | Skills I have; Software I know; Software I want to learn. Options are suggested for the student's first saved career (Top 3 #1 first) from the Career Report, career profile and Explore's software list | none; none; 5 | Career Report and My Plan |
+| Subjects | Subjects I enjoy most | 5 | Explore careers and Career Report |
+| Skills & Software | Skills I have; Skills I want to build; Software I know; Software I want to learn. Options are suggested for the student's first saved career (Top 3 #1 first) from the Career Report, career profile and Explore's software list | none; 5; none; none | Career Report and My Plan |
 | Education | GPA (0 to 5, two decimals) and GPA type (Weighted / Unweighted / Not sure); Education pathways I'd consider (Trade / Certificate, 2-Year College, 4-Year College, Graduate / Professional, Not sure) | pathways max 2 | school matches and My Plan |
-| College & Trade School | Preferred states; Distance from home (25 / 50 / 100 miles / Best opportunity); Yearly tuition budget; Campus setting; School size | states 3; campus 2; size 2 | school matches |
-| Work Style | Pace (Fast-paced / Balanced / Steady); Team size; Where I'd like to work | team size 3; environment 3 | Explore careers |
-| Internships & Jobs | Opportunity type (Internship, Summer Job, Part-Time, Apprenticeship, Full-Time); Preferred roles; Preferred work locations; Remote / Hybrid / In-person. Folded under "More job preferences": Graduation year, Availability, Willing to relocate (Yes / Maybe / No), Languages, Certifications / licenses, Portfolio or professional profile | roles 3; locations 3; modes 2 | internship and job matches |
+| College & Trade School | Preferred states; Distance (25 / 50 / 100 miles / Best opportunity); Yearly tuition budget; Campus setting; School size | states 3; campus 2; size 2 | school matches |
+| Work Style | Fast-paced or steady (Fast-paced / Balanced / Steady, as in Joshua's Replit); Preferred team size; Preferred work environment | team size 3; environment 3 | Explore careers |
+| Internship & Job Preferences | Opportunity type (Internship, Summer Job, Part-Time, Apprenticeship, Full-Time); Preferred roles; Preferred work locations; Remote / Hybrid / In-person. Folded under "More job preferences": Graduation year, Availability, Willing to relocate (Yes / Maybe / No), Languages, Certifications / licenses, Portfolio or professional profile | roles 3; locations 3; modes 2 | internship and job matches |
 
 Removed on Joshua's 26 Sept pass: Independent vs team and Structured vs flexible (Work Style); "How much education after high school" (folded into pathways); School Type (Education covers it); Preferred Industries in Jobs (carried over from Industries). The stored fields still exist for old data (see Data) but are not shown or edited.
 
 ### Editor sheet
 
-- Title, and one accent line "Shapes your {areas}" with a sparkle icon.
+- Title only (no explainer line); the save confirmation carries the "what this changes" message.
 - Save is disabled until something changed. Cancel, the X, the backdrop and Escape all close without saving.
 - Saved Careers' sheet has one button, "Done" (edits apply immediately), plus "Find more in Explore" (`/explore`).
 - Motion: backdrop fades; the sheet springs in (slides up on phones); chips spring on tap; the selected dot pops. `prefers-reduced-motion` skips entrances.
@@ -65,7 +71,7 @@ Removed on Joshua's 26 Sept pass: Independent vs team and Structured vs flexible
 - Write-back: saving writes the overlapping answers back to the student profile (`syncToProfile`): industries → Build interests (up to 3), subjects, GPA, states, distance, and pathways → Build's college / trades / both path. Build and Preferences stay one truth.
 - Saved careers: `useSavedCareers()` (`src/lib/savedCareers.ts`), the same store Explore and Match write. Displayed order: Top 3 (ranked) first, then other saves. Removing unsaves in that store.
 - Legacy fields still stored and ignored by the UI: `careers`, `workWith`, `structure`, `educationLevel`, `schoolTypes`, `jobs.industries`. Keep them readable for old data; don't show them.
-- Backend contract (to build): GET the student's preferences (the `Preferences` shape) with the saved-careers list; PUT one section at a time (the sheet saves a whole section). The save toast's "Updating your ..." is a promise that those surfaces re-rank on their next load; it doesn't need a live push.
+- Backend contract (to build): GET the student's preferences (the `Preferences` shape) with the saved-careers list; PUT one section at a time (the sheet saves a whole section). The save band's "Updating your ..." is a promise that those surfaces re-rank on their next load; it doesn't need a live push.
 
 ## 6. States and edge cases (the backend integration contract)
 
@@ -76,7 +82,7 @@ Preview each with `?prefs=` on `/profile?tab=preferences` (DEMO-ONLY, `useDemoPr
 | Loading | Skeleton rows in the three group cards (pulsing icon tile, title bar, chip bar), `aria-busy`. Never a flash of "Add" on every row before answers arrive. | `?prefs=loading` |
 | Empty section | "+ Add" (first empty one glints), no "Edit". | a fresh browser |
 | Save failed | The sheet stays open with every edit kept; a red line above the footer: "Couldn't save your changes. Your edits are still here."; Save becomes "Try again". | `?prefs=error`, then save any change |
-| Saved | Sheet closes; the row's icon becomes a green check and the row tints briefly; toast "Saved. Updating your {areas}." for 4 s (above the bottom nav on phones). | any save |
+| Saved | Sheet closes; the row's icon becomes a green check and the row tints briefly; the proof band under the row (see Feedback), 7 s. | any save |
 | Nothing changed | Save disabled. | open any sheet |
 
 Edge cases:
@@ -92,7 +98,8 @@ Edge cases:
 
 ## Decisions
 
-- **The top sentence is a strip.** Joshua asked for "Update your preferences to improve your recommendations as your interests change." The user asked for the same point without a long sentence kids won't read. The "Shapes your Explore / Schools / Play / Career Report" strip names what the answers change (his own supporting line's list), and his sentence is its screen-reader text. Show both to Joshua if he wants the words back.
-- **Say it at the moment it's true.** Instead of a supporting paragraph, each sheet says what it shapes and each save says what is updating.
-- **Three groups, not eight cards,** so the page reads in three chunks.
-- **Saved Careers is read-only selection.** Per Joshua: "Saved Careers should automatically reflect careers the student has already saved elsewhere. We should not make them select those careers again here."
+- **Content is Joshua's, word for word; only the experience is ours.** Sections, fields, limits and labels follow his two notes. Where his notes repeat a field, it appears once: "Skills I want to build" is listed under both Subjects & Skills and Skills & Software; it lives in Skills & Software (with career-based suggestions), the way his own Replit does it, and the first section is "Subjects". Confirm with Joshua.
+- **Industries max 3 (his note) vs Build's 2 worlds.** Saving 3 writes 3 back to Build's interests; Build must accept 3 on read, or Joshua picks one limit for both. Open question.
+- **The explanation is a moment, not a sentence.** His top line stays verbatim; his optional supporting line is replaced by the save confirmation that shows what changed (posters, a school count). A student learns it by seeing it once.
+- **No icons, one list,** so the page reads as his eight sections and nothing else.
+- **Saved Careers is read-only selection.** Per Joshua: "Saved Careers should automatically reflect careers the student has already saved elsewhere in Dreamari. We should not make them select those careers again here."

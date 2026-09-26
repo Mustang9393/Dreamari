@@ -29,9 +29,10 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { Activity, BookOpen, Bookmark, Briefcase, Check, ChevronRight, Compass, FileText, GraduationCap, Minus, Play, Plus, School, SlidersHorizontal, Sparkles, Wrench, X, type LucideIcon } from "lucide-react";
+import { Check, ChevronRight, Compass, Minus, Plus, Sparkles, X } from "lucide-react";
+import { COLLEGES } from "@/components/colleges/data";
 import { LIMITS, preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences, type JobPrefs, type Preferences } from "@/lib/preferences";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { useSavedCareers } from "@/lib/savedCareers";
@@ -44,28 +45,19 @@ import * as O from "./preferencesOptions";
 
 type SectionId = "industries" | "saved" | "subjects" | "skills" | "education" | "college" | "work" | "jobs";
 
-type Section = { id: SectionId; title: string; icon: LucideIcon; optional?: boolean; /** what this section shapes, said once in its editor and on save */ shapes: string[] };
+type Section = { id: SectionId; title: string; optional?: boolean; /** what this section shapes, said once in its editor and on save */ shapes: string[] };
 const SECTIONS: Record<SectionId, Section> = {
-  industries: { id: "industries", title: "Industries", icon: Compass, shapes: ["Explore careers", "Play", "Connect"] },
-  saved: { id: "saved", title: "Saved Careers", icon: Bookmark, shapes: ["Career Report", "My Plan"] },
-  subjects: { id: "subjects", title: "Subjects & Skills", icon: BookOpen, shapes: ["Explore careers", "Career Report"] },
-  skills: { id: "skills", title: "Skills & Software", icon: Wrench, shapes: ["Career Report", "My Plan"] },
-  education: { id: "education", title: "Education", icon: GraduationCap, shapes: ["school matches", "My Plan"] },
-  college: { id: "college", title: "College & Trade School", icon: School, shapes: ["school matches"] },
-  work: { id: "work", title: "Work Style", icon: Activity, shapes: ["Explore careers"] },
-  jobs: { id: "jobs", title: "Internships & Jobs", icon: Briefcase, optional: true, shapes: ["internship and job matches"] },
+  industries: { id: "industries", title: "Industries", shapes: ["Explore careers", "Play and Connect"] },
+  saved: { id: "saved", title: "Saved Careers", shapes: ["Career Report", "My Plan"] },
+  subjects: { id: "subjects", title: "Subjects", shapes: ["Explore careers", "Career Report"] },
+  work: { id: "work", title: "Work Style", shapes: ["Explore careers"] },
+  education: { id: "education", title: "Education", shapes: ["school recommendations", "My Plan"] },
+  college: { id: "college", title: "College & Trade School", shapes: ["school recommendations"] },
+  skills: { id: "skills", title: "Skills & Software", shapes: ["Career Report", "My Plan"] },
+  jobs: { id: "jobs", title: "Internship & Job Preferences", optional: true, shapes: ["internship and job matches"] },
 };
-const GROUPS: { label: string; ids: SectionId[] }[] = [
-  { label: "Your interests", ids: ["industries", "saved", "subjects", "skills"] },
-  { label: "After high school", ids: ["education", "college"] },
-  { label: "Work", ids: ["work", "jobs"] },
-];
-const SHAPES_STRIP: { label: string; icon: LucideIcon }[] = [
-  { label: "Explore", icon: Compass },
-  { label: "Schools", icon: School },
-  { label: "Play", icon: Play },
-  { label: "Career Report", icon: FileText },
-];
+// Joshua's order (Slack, 25 and 26 Sept 2026), one list, no group headers.
+const ORDER: SectionId[] = ["industries", "saved", "subjects", "work", "education", "college", "skills", "jobs"];
 const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
 
 const shortBudget = (b: string) => b.replace(/\$(\d+),000/, (_, n) => `$${n}K`);
@@ -77,13 +69,32 @@ function chipsFor(id: SectionId, p: Preferences): string[] {
   switch (id) {
     case "industries": return p.industries;
     case "saved": return [];
-    case "subjects": return [...p.subjects, ...p.skillsToBuild];
-    case "skills": return [...p.skillsHave, ...p.softwareKnow, ...p.softwareLearn];
+    case "subjects": return p.subjects;
+    case "skills": return [...p.skillsHave, ...p.skillsToBuild, ...p.softwareKnow, ...p.softwareLearn];
     case "education": return [p.gpa ? `${p.gpa} GPA${p.gpaType && p.gpaType !== "unsure" ? ` ${gpaTypeLabel(p.gpaType).toLowerCase()}` : ""}` : "", ...p.pathways].filter(Boolean);
     case "college": return [...p.states.map(abbr), p.distance, p.budget ? shortBudget(p.budget) : "", ...p.campus, ...p.sizes].filter(Boolean);
     case "work": return [p.pace, ...p.teamSize, ...p.environments].filter(Boolean);
     case "jobs": return [...p.jobs.types, ...p.jobs.roles, ...p.jobs.modes];
   }
+}
+
+/** What a save visibly changed, shown in the confirmation (26 Sept 2026:
+ *  "can't we do something with UI and feedback... to better do this?"):
+ *  the student SEES their recommendations move instead of reading that
+ *  they will. Concrete where the data allows it (Industries: careers now
+ *  surfacing; College: schools that now match); a named update otherwise. */
+type Proof = { text: string; posters?: string[]; href?: string; cta?: string };
+function proofFor(id: SectionId, p: Preferences): Proof {
+  if (id === "industries" && p.industries.length) {
+    const posters = p.industries.flatMap((w) => ALL_CATALOG_CAREERS.filter((c) => c.world === w).slice(0, 2)).slice(0, 3).map((c) => c.photo);
+    return { text: `New in Explore for ${list(p.industries.map((w) => w.split(" & ")[0]))}`, posters, href: "/explore", cta: "See them" };
+  }
+  if (id === "college" && p.states.length) {
+    const max = Number(p.budget.replace(/[^0-9]/g, "")) || Infinity;
+    const n = COLLEGES.filter((c) => p.states.includes(c.stateName) && (c.netPrice === null || c.netPrice <= max)).length;
+    return { text: `${n} ${n === 1 ? "school matches" : "schools match"} in ${list(p.states.map(abbr))}`, href: "/colleges", cta: "See schools" };
+  }
+  return { text: `Updating your ${list(SECTIONS[id].shapes)}` };
 }
 
 /** A saved career as the app shows it: title, poster and world. */
@@ -120,7 +131,7 @@ export function PreferencesTab() {
   const [savedNote, setSavedNote] = useState<SectionId | null>(null);
   useEffect(() => {
     if (!savedNote) return;
-    const t = window.setTimeout(() => setSavedNote(null), 4000);
+    const t = window.setTimeout(() => setSavedNote(null), 7000);
     return () => window.clearTimeout(t);
   }, [savedNote]);
   // Top 3 first, then everything else saved: the careers the student has
@@ -132,16 +143,15 @@ export function PreferencesTab() {
   const reduce = useReducedMotion();
   // One nudge: the first empty section's "Add" glints (the app's text
   // glint, Explore's "For you"); every other empty row stays plain.
-  const firstEmpty = GROUPS.flatMap((g) => g.ids).find((id) => (id === "saved" ? savedCareers.length === 0 : chipsFor(id, prefs).length === 0));
+  const firstEmpty = ORDER.find((id) => (id === "saved" ? savedCareers.length === 0 : chipsFor(id, prefs).length === 0));
 
   const row = (id: SectionId) => {
     const sec = SECTIONS[id];
-    const Icon = sec.icon;
     const chips = chipsFor(id, prefs);
     const empty = id === "saved" ? savedCareers.length === 0 : chips.length === 0;
     const justSaved = savedNote === id;
     return (
-      <li key={id}>
+      <li className="list-none">
         <button
           type="button"
           onClick={() => setOpen(id)}
@@ -149,11 +159,12 @@ export function PreferencesTab() {
           className="dm-quiet group flex w-full cursor-pointer flex-col gap-[10px] px-[var(--space-4)] py-[14px] text-left sm:flex-row sm:items-center sm:gap-[var(--space-5)]"
           style={{ background: justSaved ? "color-mix(in srgb, var(--color-feedback-success) 9%, transparent)" : undefined, transition: "background-color 500ms ease" }}
         >
-          <span className="flex items-center gap-[12px] sm:w-[230px] sm:flex-none lg:w-[280px]">
-            <span className="flex size-9 flex-none items-center justify-center rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--accent-subtle)" }}>
-              {justSaved ? <Check className="h-4 w-4" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} /> : <Icon className="h-[17px] w-[17px]" aria-hidden />}
-            </span>
-            <span className="min-w-0 flex-1 truncate text-[15px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>{sec.title}</span>
+          {/* No icon tiles (26 Sept 2026: "we can lose the icons too"): the
+             title leads; a saved row shows a check beside it for a moment. */}
+          <span className="flex items-center gap-[8px] sm:w-[290px] sm:flex-none">
+            <span className="min-w-0 text-[15px] leading-[20px] font-extrabold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{sec.title}</span>
+            {justSaved && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 20 }} className="flex-none"><Check className="h-4 w-4" strokeWidth={3} aria-label="Saved" style={{ color: "var(--color-feedback-success)" }} /></motion.span>}
+            <span className="flex-1" />
             {sec.optional && <span className="flex-none rounded-full border px-[7px] py-[1px] text-[10px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Optional</span>}
           </span>
           {id === "saved" && !empty ? (
@@ -165,6 +176,7 @@ export function PreferencesTab() {
           )}
           <span className={`hidden flex-none items-center gap-[2px] text-[12.5px] font-semibold transition-colors group-hover:text-[var(--foreground)] ${empty ? "" : "sm:flex"}`} style={{ color: "var(--muted-foreground)" }}>Edit <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-[2px]" aria-hidden /></span>
         </button>
+        <AnimatePresence initial={false}>{justSaved && <ProofBand key="proof" proof={proofFor(id, prefs)} />}</AnimatePresence>
       </li>
     );
   };
@@ -173,60 +185,40 @@ export function PreferencesTab() {
     <div role="tabpanel" id="profile-panel-preferences" aria-labelledby="profile-tab-preferences" className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-start justify-between gap-x-[var(--space-4)] gap-y-[6px]">
         <div className="flex min-w-0 items-start gap-[var(--space-3)]">
-          <span className="flex size-10 flex-none items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)", color: "var(--accent-subtle)" }}>
-            <SlidersHorizontal className="h-[18px] w-[18px]" aria-hidden />
-          </span>
           <div className="flex min-w-0 flex-col gap-[4px]">
             <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
-            {/* Joshua's point, shown instead of said (26 Sept 2026: "can we
-               make that point without kids having to read a long
-               sentence?"). His line asked students to understand that these
-               answers change their Dreamari; this strip names the parts
-               they change, from his own supporting line (Explore careers,
-               schools, games, Career Reports), scannable in a glance. His
-               sentence is the strip's accessible label. */}
-            <p className="sr-only">Update your preferences to improve your recommendations as your interests change.</p>
-            <div aria-hidden className="flex flex-wrap items-center gap-x-[8px] gap-y-[6px] pt-[2px]">
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Shapes your</span>
-              {SHAPES_STRIP.map(({ label, icon: I }) => (
-                <span key={label} className="flex items-center gap-[5px] rounded-full border px-[9px] py-[3px] text-[12px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 35%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--foreground)" }}>
-                  <I className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />{label}
-                </span>
-              ))}
-            </div>
+            {/* Joshua's line, verbatim (Slack, 26 Sept 2026). His optional
+               supporting line is left out: the save confirmation says what
+               is updating at the moment it happens. */}
+            <p className="text-[15px] leading-[21px] [text-wrap:balance]" style={{ color: "var(--muted-foreground)" }}>Update your preferences to improve your recommendations as your interests change.</p>
           </div>
         </div>
-        {updated && <p className="pl-[52px] text-[11.5px] sm:pl-0 sm:pt-[10px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
+        {updated && <p className="text-[11.5px] sm:pt-[10px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
       </div>
 
-      {(!hydrated || demoState === "loading") && GROUPS.map((g) => (
-        <section key={g.label} className="flex flex-col gap-[8px]" aria-busy="true" aria-label={`${g.label}, loading`}>
-          <span className="block h-[10px] w-[120px] animate-pulse rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} />
+      {(!hydrated || demoState === "loading") && (
+        <ul aria-busy="true" aria-label="Preferences, loading" className="flex flex-col divide-y divide-[color:var(--glass-border)] overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 85%, transparent)" }}>
+          {ORDER.map((id) => (
+            <li key={id} className="flex items-center gap-[12px] px-[var(--space-4)] py-[16px]">
+              <span className="size-9 flex-none animate-pulse rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} />
+              <span className="h-[12px] w-[140px] animate-pulse rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} />
+              <span className="ml-auto hidden h-[22px] w-[180px] animate-pulse rounded-full sm:block" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* One list in Joshua's order. The rows fade up in sequence on open. */}
+      {hydrated && demoState !== "loading" && (
+        <HoverBeam strength={0.5} className="min-w-0">
           <ul className="flex flex-col divide-y divide-[color:var(--glass-border)] overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 85%, transparent)" }}>
-            {g.ids.map((id) => (
-              <li key={id} className="flex items-center gap-[12px] px-[var(--space-4)] py-[16px]">
-                <span className="size-9 flex-none animate-pulse rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} />
-                <span className="h-[12px] w-[140px] animate-pulse rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} />
-                <span className="ml-auto hidden h-[22px] w-[180px] animate-pulse rounded-full sm:block" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} />
-              </li>
+            {ORDER.map((id, i) => (
+              <motion.div key={id} initial={reduce ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: reduce ? 0 : i * 0.035, ease: [0.22, 1, 0.36, 1] }}>{row(id)}</motion.div>
             ))}
           </ul>
-        </section>
-      ))}
+        </HoverBeam>
+      )}
 
-      {hydrated && demoState !== "loading" && GROUPS.map((g, gi) => (
-        <motion.section key={g.label} className="flex flex-col gap-[8px]" initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: reduce ? 0 : gi * 0.07, ease: [0.22, 1, 0.36, 1] }}>
-          <h3 className="px-[4px] text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>{g.label}</h3>
-          <HoverBeam strength={0.5} className="min-w-0">
-            <ul className="flex flex-col divide-y divide-[color:var(--glass-border)] overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 85%, transparent)" }}>
-              {g.ids.map(row)}
-            </ul>
-          </HoverBeam>
-        </motion.section>
-      ))}
-
-      {/* What saving did, said once, at the moment it is true. */}
-      <AnimatePresenceToast note={savedNote ? `Saved. Updating your ${list(SECTIONS[savedNote].shapes)}.` : null} />
 
       {open === "saved" ? (
         <SavedEditor careers={savedCareers} topIds={picks.ids} onRemove={(id) => toggleSaved(id)} onClose={() => setOpen(null)} />
@@ -254,15 +246,36 @@ function SavedStrip({ careers }: { careers: { id: string; title: string; photo: 
   );
 }
 
-function AnimatePresenceToast({ note }: { note: string | null }) {
-  if (!note) return null;
-  return createPortal(
-    <div role="status" className="marketing-v2 themeable pointer-events-none fixed inset-x-0 bottom-[88px] z-[70] flex justify-center px-4 lg:bottom-8">
-      <div className="flex items-center gap-[8px] rounded-full border px-[16px] py-[10px] text-[13.5px] font-semibold shadow-lg backdrop-blur-xl motion-safe:animate-[resume-drawer-in_0.2s_ease-out_both]" style={{ borderColor: "color-mix(in srgb, var(--color-feedback-success) 45%, var(--glass-border))", background: "color-mix(in srgb, var(--card) 88%, transparent)", color: "var(--foreground)" }}>
-        <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} /> {note}
+/** What a save changed, opened right under the row just edited (26 Sept
+ *  2026: a floating confirmation at the bottom "appears on a black bar...
+ *  people might not even see it. It needs more presence but not in a way
+ *  that it breaks your flow"). The eye is already on that row when the
+ *  sheet closes, so the proof lands in the eye line, inline, then folds
+ *  away on its own. */
+function ProofBand({ proof }: { proof: Proof }) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div role="status" initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={reduce ? undefined : { height: 0, opacity: 0 }} transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }} className="overflow-hidden">
+      <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] px-[var(--space-4)] pt-[2px] pb-[14px]">
+        <span className="flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={{ borderColor: "color-mix(in srgb, var(--color-feedback-success) 40%, var(--glass-border))", background: "color-mix(in srgb, var(--color-feedback-success) 10%, transparent)" }}>
+          {proof.posters && proof.posters.length > 0 && (
+            <span className="flex flex-none -space-x-[10px]" aria-hidden>
+              {proof.posters.map((src, i) => (
+                <motion.span key={src} initial={reduce ? false : { opacity: 0, y: 6, rotate: -4 }} animate={{ opacity: 1, y: 0, rotate: (i - 1) * 4 }} transition={{ delay: reduce ? 0 : 0.18 + i * 0.08, type: "spring", stiffness: 380, damping: 22 }} className="relative h-[46px] w-[35px] overflow-hidden rounded-[6px] border-2 shadow-md" style={{ borderColor: "var(--card)" }}>
+                  <Image src={src} alt="" fill sizes="35px" className="object-cover" />
+                </motion.span>
+              ))}
+            </span>
+          )}
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="flex items-center gap-[6px] text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}><Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} />{proof.text}</span>
+          </span>
+          {proof.href && (
+            <a href={proof.href} className="dm-solid flex flex-none items-center gap-[2px] rounded-full px-[14px] py-[7px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{proof.cta} <ChevronRight className="h-4 w-4" aria-hidden /></a>
+          )}
+        </span>
       </div>
-    </div>,
-    document.body,
+    </motion.div>
   );
 }
 
@@ -271,7 +284,7 @@ function AnimatePresenceToast({ note }: { note: string | null }) {
  *  where careers live, in Explore. */
 function SavedEditor({ careers, topIds, onRemove, onClose }: { careers: { id: string; title: string; photo: string | null; world: string }[]; topIds: string[]; onRemove: (id: string) => void; onClose: () => void }) {
   return (
-    <Modal title="Saved Careers" subtitle={`Shapes your ${list(SECTIONS.saved.shapes)}`} onCancel={onClose} onSave={onClose} saveLabel="Done">
+    <Modal title="Saved Careers" onCancel={onClose} onSave={onClose} saveLabel="Done">
       {careers.length === 0 ? (
         <p className="text-[14px] font-medium" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet.</p>
       ) : (
@@ -335,24 +348,22 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
       <Multi label="Industries I'm interested in" options={O.INDUSTRY_OPTIONS} value={draft.industries} max={LIMITS.industries} onChange={(v) => patch({ industries: v })} />
     ),
     subjects: (
-      <>
-        <Multi label="Subjects I enjoy most" options={O.SUBJECT_OPTIONS} value={draft.subjects} max={LIMITS.subjects} onChange={(v) => patch({ subjects: v })} />
-        <Multi label="Skills I want to build" options={Array.from(new Set([...O.SKILL_OPTIONS, ...suggest.skills]))} value={draft.skillsToBuild} max={LIMITS.skillsToBuild} onChange={(v) => patch({ skillsToBuild: v })} initial={12} />
-      </>
+      <Multi label="Subjects I enjoy most" options={O.SUBJECT_OPTIONS} value={draft.subjects} max={LIMITS.subjects} onChange={(v) => patch({ subjects: v })} />
     ),
     skills: (
       <>
         {firstCareer && <p className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Suggested for {firstCareer}</p>}
         <Multi label="Skills I have" options={suggest.skills} value={draft.skillsHave} onChange={(v) => patch({ skillsHave: v })} initial={8} />
+        <Multi label="Skills I want to build" options={Array.from(new Set([...suggest.skills, ...O.SKILL_OPTIONS]))} value={draft.skillsToBuild} max={LIMITS.skillsToBuild} onChange={(v) => patch({ skillsToBuild: v })} initial={8} />
         <Multi label="Software I know" options={suggest.software} value={draft.softwareKnow} onChange={(v) => patch({ softwareKnow: v })} initial={8} />
-        <Multi label="Software I want to learn" options={suggest.software} value={draft.softwareLearn} max={LIMITS.softwareLearn} onChange={(v) => patch({ softwareLearn: v })} initial={8} />
+        <Multi label="Software I want to learn" options={suggest.software} value={draft.softwareLearn} onChange={(v) => patch({ softwareLearn: v })} initial={8} />
       </>
     ),
     work: (
       <>
-        <Single label="Pace" options={O.PACE} value={draft.pace} onChange={(v) => patch({ pace: v })} />
-        <Multi label="Team size" options={O.TEAM_SIZE} value={draft.teamSize} max={LIMITS.teamSize} onChange={(v) => patch({ teamSize: v })} />
-        <Multi label="Where I'd like to work" options={O.ENVIRONMENTS} value={draft.environments} max={LIMITS.environments} onChange={(v) => patch({ environments: v })} />
+        <Single label="Fast-paced or steady" options={O.PACE} value={draft.pace} onChange={(v) => patch({ pace: v })} />
+        <Multi label="Preferred team size" options={O.TEAM_SIZE} value={draft.teamSize} max={LIMITS.teamSize} onChange={(v) => patch({ teamSize: v })} />
+        <Multi label="Preferred work environment" options={O.ENVIRONMENTS} value={draft.environments} max={LIMITS.environments} onChange={(v) => patch({ environments: v })} />
       </>
     ),
     education: (
@@ -364,14 +375,14 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
           </label>
           <Single label="GPA type" options={O.GPA_TYPES.map((t) => t.label)} value={gpaTypeLabel(draft.gpaType)} onChange={(label) => patch({ gpaType: O.GPA_TYPES.find((t) => t.label === label)?.id ?? "" })} />
         </div>
-        <Multi label="Education pathways I'd consider" options={O.PATHWAYS} value={draft.pathways} max={LIMITS.pathways} onChange={(v) => patch({ pathways: v })} />
+        <Multi label="Education pathways I would consider" options={O.PATHWAYS} value={draft.pathways} max={LIMITS.pathways} onChange={(v) => patch({ pathways: v })} />
       </>
     ),
     college: (
       <>
         <Multi label="Preferred states" options={O.STATES as string[]} value={draft.states} max={LIMITS.states} onChange={(v) => patch({ states: v })} initial={8} />
         <div className="grid gap-[var(--space-4)] sm:grid-cols-2">
-          <Single label="Distance from home" options={O.DISTANCES} value={draft.distance} onChange={(v) => patch({ distance: v })} />
+          <Single label="Distance" options={O.DISTANCES} value={draft.distance} onChange={(v) => patch({ distance: v })} />
           <label className="flex flex-col gap-[8px] text-[14.5px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)" }}>
             Yearly tuition budget
             <select value={draft.budget} onChange={(e) => patch({ budget: e.target.value })} className={INPUT} style={INPUT_STYLE}>
@@ -409,7 +420,7 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
   };
 
   return (
-    <Modal title={section.title} subtitle={`Shapes your ${list(section.shapes)}`} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty} saveLabel={saveFailed ? "Try again" : "Save"} error={saveFailed ? "Couldn't save your changes. Your edits are still here." : undefined}>
+    <Modal title={section.title} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty} saveLabel={saveFailed ? "Try again" : "Save"} error={saveFailed ? "Couldn't save your changes. Your edits are still here." : undefined}>
       {body[id as Exclude<SectionId, "saved">]}
     </Modal>
   );
