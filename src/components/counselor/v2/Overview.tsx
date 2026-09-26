@@ -14,7 +14,7 @@ import { Avatar, CardLink, Go, StatRow } from "../chips";
 import { attentionReason, attentionSeverity, attentionRank, milestonesForGrade, type CounselorStudent, type AttentionSeverity, type MilestoneKey } from "@/lib/counselorRoster";
 import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "../palette";
+import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE, CHART_STATUS } from "../palette";
 import { GLASS_INSET, pathwayTileSurface } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
@@ -360,10 +360,10 @@ export function Overview() {
   const atRiskStudents = useMemo(() => roster.filter((s) => s.status === "At Risk").sort(attentionRank), [roster]);
 
   const onTrackPct = (onTrack / total) * 100;
-  // The hero card's own color reports the reading, not just the brand's --
-  // a healthy caseload glows the same green as "On Track" everywhere else
-  // in this dashboard, a struggling one would glow amber or red.
-  const heroTint = onTrackPct >= 80 ? STATUS_COLORS["On Track"] : onTrackPct >= 60 ? STATUS_COLORS["Needs Attention"] : STATUS_COLORS["At Risk"];
+  // The hero card's own color reports the reading: a healthy caseload
+  // glows the chart blue (one chart family, 26 Sept 2026), a struggling
+  // one amber or red.
+  const heroTint = onTrackPct >= 80 ? CHART_STATUS["On Track"] : onTrackPct >= 60 ? STATUS_COLORS["Needs Attention"] : STATUS_COLORS["At Risk"];
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
@@ -401,9 +401,9 @@ export function Overview() {
           hero
           heroTint={heroTint}
           rows={[
-            { label: "On Track", value: onTrack, color: STATUS_COLORS["On Track"], onClick: () => goToStudents("On Track") },
-            { label: "Needs Attention", value: needsAttention, color: STATUS_COLORS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
-            { label: "At Risk", value: atRisk, color: STATUS_COLORS["At Risk"], onClick: () => goToStudents("At Risk") },
+            { label: "On Track", value: onTrack, color: CHART_STATUS["On Track"], onClick: () => goToStudents("On Track") },
+            { label: "Needs Attention", value: needsAttention, color: CHART_STATUS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
+            { label: "At Risk", value: atRisk, color: CHART_STATUS["At Risk"], onClick: () => goToStudents("At Risk") },
           ]}
         />
         <DonutCard

@@ -19,6 +19,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { CAREER_TRACKS } from "@/lib/counselorRoster";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
+import { CHART_STAGE, NEUTRAL_SLICE, PRIMARY } from "../palette";
 
 // Each report's chart shape and category set is copied from the reference
 // (all 9 report types clicked through live) -- a genuinely different
@@ -27,13 +28,9 @@ import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 // render no chart at all on the reference -- same here, table only.
 type ChartSpec = { title: string; categories: string[]; colors: string[]; values: (roster: CounselorStudent[]) => number[]; max: number; suffix?: string } | null;
 
-const STATUS_COLORS: Record<string, string> = {
-  approved: "#33C78C",
-  "pending review": "#5B6CF9",
-  "in progress": "#F5A623",
-  "not started": "#5B6470",
-  overdue: "#E0453C",
-};
+// One chart family (palette.ts CHART_STAGE): blue by how far along, red
+// only for overdue.
+const STATUS_COLORS = CHART_STAGE;
 
 function countByStatus(roster: CounselorStudent[], key: MilestoneKey, fold: Partial<Record<MilestoneStatus, string>>): (categories: string[]) => number[] {
   const counts = new Map<string, number>();
@@ -93,7 +90,7 @@ const REPORT_TYPES: ReportType[] = [
           : s.postsecondaryIntent;
         counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
       }
-      const colors = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4"];
+      const colors = [PRIMARY, NEUTRAL_SLICE, "#9BA8FB", "#C9D0FE"];
       return { title: "Postsecondary Plans", categories, colors, values: () => categories.map((c) => counts.get(c) ?? 0), max: Math.max(1, roster.length) };
     },
   },
@@ -108,7 +105,7 @@ const REPORT_TYPES: ReportType[] = [
         roster.filter((s) => s.milestones["Career Report"] === "Changes Requested").length,
         roster.filter((s) => s.milestones["Academic Plan"] === "Changes Requested").length,
       ];
-      const colors = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4", "#2E3BB8"];
+      const colors = [PRIMARY, PRIMARY, PRIMARY, PRIMARY, PRIMARY];
       return { title: "Counselor Review Activity", categories, colors, values: () => values, max: Math.max(4, ...values) };
     },
   },
@@ -117,7 +114,7 @@ const REPORT_TYPES: ReportType[] = [
     chart: (roster) => {
       const grades = [9, 10, 11, 12];
       const values = grades.map((g) => roster.filter((s) => s.grade === g && s.status === "At Risk").length);
-      return { title: "Students Needing Intervention", categories: grades.map((g) => `Grade ${g}`), colors: grades.map(() => "#E0453C"), values: () => values, max: Math.max(4, ...values) };
+      return { title: "Students Needing Intervention", categories: grades.map((g) => `Grade ${g}`), colors: grades.map(() => PRIMARY), values: () => values, max: Math.max(4, ...values) };
     },
   },
 ];
@@ -265,8 +262,8 @@ export function StudentProgress() {
                   </tr>
                   <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
                     <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>On Track</td>
-                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#33C78C" }}>{byGrade(g).filter((s) => s.status === "On Track").length}</td>)}
-                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#33C78C" }}>{roster.filter((s) => s.status === "On Track").length}</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{byGrade(g).filter((s) => s.status === "On Track").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{roster.filter((s) => s.status === "On Track").length}</td>
                   </tr>
                   <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
                     <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>Needs Attention</td>

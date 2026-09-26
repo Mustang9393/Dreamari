@@ -41,4 +41,22 @@ export const NEUTRAL_SLICE = "#5B6470";
  *  lightness band; adjacent CVD separation passes (worst 12.7); the
  *  cyan/green pair is 13.5 on the normal-vision floor (15), which the 2px
  *  segment gaps and the ordered legend are relied on to cover. */
+/** Status inside a CHART (26 Sept 2026, direct feedback: "the graph colors
+ *  can be consistent across the app. Some are green some blue some yellow
+ *  etc"). The healthy state is the chart's own blue, so every chart reads
+ *  as one family; amber and red appear only where something needs the
+ *  counselor. Status chips (chips.tsx) keep their green "On Track"; this is
+ *  for marks that show quantity. */
+export const CHART_STATUS = { "On Track": PRIMARY, "Needs Attention": "#F5A623", "At Risk": "#E0453C" } as const;
+
+/** Progress stages of one milestone in a chart, furthest along brightest;
+ *  red only for overdue. */
+export const CHART_STAGE: Record<string, string> = {
+  approved: PRIMARY,
+  "pending review": "#9BA8FB",
+  "in progress": "#C9D0FE",
+  "not started": NEUTRAL_SLICE,
+  overdue: "#E0453C",
+};
+
 export const PATHWAY_SEQUENCE = ["#5B6CF9", "#22A0D0", "#22B58C", "#E6C93A", "#EA6A2A", "#E25B9E", "#9F4FE6"] as const;

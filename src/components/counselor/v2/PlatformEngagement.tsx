@@ -68,7 +68,8 @@ function smoothPath(pts: { x: number; y: number }[]) {
 }
 
 const TOTAL_COLOR = "#5B6CF9";
-const UNIQUE_COLOR = "#33C78C";
+// Light blue, not the reference's green: one chart family app-wide.
+const UNIQUE_COLOR = "#9BA8FB";
 
 // Rebuilt 26 Sept 2026 (direct feedback: "the logins by month is better in
 // replit... everything in that graph seems squished down"). The old SVG

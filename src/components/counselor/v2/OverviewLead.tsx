@@ -5,6 +5,7 @@
 // and color rules in ./overviewShared.tsx. Counselor split is seeded
 // (src/lib/counselorOrg.ts).
 
+import { CHART_STATUS } from "../palette";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { StatRow } from "../chips";
@@ -86,9 +87,9 @@ export function OverviewLead() {
             centerPct={(school.onTrack / total) * 100}
             centerLabel="on track"
             rows={[
-              { label: "On Track", value: school.onTrack, color: STATUS_COLORS["On Track"], onClick: () => goToStudents("On Track") },
-              { label: "Needs Attention", value: school.needsAttention, color: STATUS_COLORS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
-              { label: "At Risk", value: school.atRisk, color: STATUS_COLORS["At Risk"], onClick: () => goToStudents("At Risk") },
+              { label: "On Track", value: school.onTrack, color: CHART_STATUS["On Track"], onClick: () => goToStudents("On Track") },
+              { label: "Needs Attention", value: school.needsAttention, color: CHART_STATUS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
+              { label: "At Risk", value: school.atRisk, color: CHART_STATUS["At Risk"], onClick: () => goToStudents("At Risk") },
             ]}
           />
         </div>

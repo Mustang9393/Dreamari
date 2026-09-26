@@ -5,12 +5,13 @@
 // schools are SEEDED, scaled from Lincoln (src/lib/counselorOrg.ts,
 // `seeded: true`). Budget and color rules in ./overviewShared.tsx.
 
+import { CHART_STATUS } from "../palette";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_TARGETS, TARGET_LABELS, districtRollup, districtSchools, schoolTargetValue, targetsMet, type TargetBand, type TargetKey } from "@/lib/counselorOrg";
-import { DonutCard, STATUS_COLORS } from "./Overview";
+import { DonutCard } from "./Overview";
 import { BAND_COLORS, InitialsBadge, MetricRow, OverviewCard, SeeLink, Verdict } from "./overviewShared";
 
 const READINESS_TARGETS: TargetKey[] = ["onTrack", "plansOnFile", "seniorPlan", "fafsa"];
@@ -62,9 +63,9 @@ export function OverviewDistrict() {
             centerPct={(district.onTrack / total) * 100}
             centerLabel="on track"
             rows={[
-              { label: "On Track", value: district.onTrack, color: STATUS_COLORS["On Track"] },
-              { label: "Needs Attention", value: district.needsAttention, color: STATUS_COLORS["Needs Attention"] },
-              { label: "At Risk", value: district.atRisk, color: STATUS_COLORS["At Risk"] },
+              { label: "On Track", value: district.onTrack, color: CHART_STATUS["On Track"] },
+              { label: "Needs Attention", value: district.needsAttention, color: CHART_STATUS["Needs Attention"] },
+              { label: "At Risk", value: district.atRisk, color: CHART_STATUS["At Risk"] },
             ]}
           />
         </div>
