@@ -12,7 +12,7 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -107,7 +107,7 @@ export function StudentsRoster() {
   const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter } = useCounselorFilters();
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [page, setPage] = useState(0);
+  const [shown, setShown] = useState(PAGE_SIZE);
   const [intentFilter, setIntentFilter] = useState<PostsecondaryIntent | "All">("All");
   // Roles that oversee counselors see whose caseload each student is on and
   // can narrow to one counselor; a School Counselor sees the school roster
@@ -146,9 +146,11 @@ export function StudentsRoster() {
     });
   }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, stepFilter, sortKey, sortDir]);
 
-  const pageCount = Math.max(1, Math.ceil(roster.length / PAGE_SIZE));
-  const effectivePage = Math.min(page, pageCount - 1);
-  const pageRows = roster.slice(effectivePage * PAGE_SIZE, effectivePage * PAGE_SIZE + PAGE_SIZE);
+  // One way to move through the list: it grows in place (direct feedback:
+  // the bounded, self-scrolling box plus Previous/Next pages "does not read
+  // like a scrollable list... make it intuitive").
+  const pageRows = roster.slice(0, shown);
+  const left = roster.length - pageRows.length;
 
   const toggleSort = (key: SortKey) => {
     if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -171,7 +173,7 @@ export function StudentsRoster() {
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
         <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}{pageCount > 1 ? ` · showing ${effectivePage * PAGE_SIZE + 1} to ${effectivePage * PAGE_SIZE + pageRows.length}` : ""}
+          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
           {stepFilter && (
@@ -192,9 +194,8 @@ export function StudentsRoster() {
         <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students match these filters.</p>
       ) : (
         <>
-          {/* Desktop: the table. Bounded height with its own scroll so the
-             header stays put over 20 rows. */}
-          <div className="hidden max-h-[70vh] overflow-auto rounded-[var(--radius-lg)] border lg:block" style={GLASS_CARD}>
+          {/* Desktop: the table, flowing with the page (no inner scroll box). */}
+          <div className="hidden overflow-hidden rounded-[var(--radius-lg)] border lg:block" style={GLASS_CARD}>
             <table className="w-full border-collapse">
               <thead className="sticky top-0 z-10" style={{ background: "var(--card)" }}>
                 <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
@@ -257,16 +258,10 @@ export function StudentsRoster() {
         </>
       )}
 
-      {pageCount > 1 && (
-        <div className="flex items-center justify-between">
-          <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={effectivePage === 0} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            <ChevronLeft className="h-[14px] w-[14px]" aria-hidden /> Previous
-          </button>
-          <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Page {effectivePage + 1} of {pageCount}</span>
-          <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={effectivePage >= pageCount - 1} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            Next <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
-          </button>
-        </div>
+      {left > 0 && (
+        <button type="button" onClick={() => setShown((n) => n + PAGE_SIZE)} className="dm-quiet mx-auto flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[16px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+          Show {Math.min(PAGE_SIZE, left)} more <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {left} left</span>
+        </button>
       )}
     </div>
   );

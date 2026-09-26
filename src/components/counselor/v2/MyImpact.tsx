@@ -450,7 +450,8 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
             barStyle="solid"
             hideValuesUntilHover
             height={200}
-            groups={GRADES.map((g) => `Gr. ${g}`)}
+            // The Replit's per-grade "27/30 on track" count, on the axis label.
+            groups={GRADES.map((g) => { const gm = grades.find((x) => x.g === g)?.m; return gm ? `Gr. ${g} · ${gm.onTrack}/${gm.students}` : `Gr. ${g}`; })}
             series={[
               { label: "On track", accent: BLUE_3[1], values: GRADES.map((g) => grades.find((x) => x.g === g)?.m.onTrackPct ?? NaN) },
               { label: "Plan completion", accent: BLUE_3[0], values: GRADES.map((g) => { const gr = roster.filter((s) => s.grade === g); return gr.length ? Math.round(gr.reduce((sum, s) => sum + s.roadmapPct, 0) / gr.length) : NaN; }) },
