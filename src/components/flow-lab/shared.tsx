@@ -236,9 +236,11 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
       className="relative flex h-8 cursor-pointer items-center gap-1 rounded-full border-2 px-2.5 text-[12px] font-bold text-white backdrop-blur-md transition-transform active:scale-90"
       style={{ background: selected ? accent : "color-mix(in srgb, var(--background) 60%, transparent)", borderColor: selected ? accent : "rgba(255,255,255,0.55)" }}
     >
-      {nudge && !selected && <span aria-hidden className="pointer-events-none absolute -inset-[3px] animate-ping rounded-full border-2" style={{ borderColor: "rgba(255,255,255,0.7)", animationDuration: "1.8s" }} />}
       {selected ? <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /> : <Bookmark className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />}
-      {selected ? "Saved" : "Save"}
+      {/* The nudge is the app's own text glint (Explore's "For you"),
+         inside the pill: a ring pulsing outside it was clipped by the
+         card's edge (direct report, 26 Sept 2026). */}
+      <span className={nudge && !selected ? "dm-text-nudge" : undefined}>{selected ? "Saved" : "Save"}</span>
     </button>
   ) : control === "rank" ? (
     <span aria-label={label} className="flex size-8 items-center justify-center rounded-full border-2 text-[13px] font-extrabold text-white" style={{ background: accent, borderColor: accent }}>{rank}</span>
@@ -650,6 +652,38 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
   setReplacing: (id: string | null) => void;
 }) {
   const swappable = pool.filter((s) => !top3.some((t) => t.id === s.id));
+  // "You can change these later", shown instead of written (26 Sept 2026:
+  // the CEO wants it said everywhere; the user asked for "a better
+  // solution"): the careers that didn't make it sit on a bench right under
+  // the Top 3, and tapping one turns each pick into a "Swap in here"
+  // target. A lineup with a visible bench reads as changeable. Replace on
+  // #1 glints until the student edits anything.
+  const [incoming, setIncoming] = useState<string | null>(null);
+  const [edited, setEdited] = useState(false);
+  const incomingCareer = incoming ? swappable.find((c) => c.id === incoming) ?? null : null;
+  const swapHere = (c: LabCareer) => incomingCareer && (
+    // A light dim, not a blur: the pick being replaced has to stay readable.
+    <button type="button" aria-label={`Swap ${incomingCareer.title} in for ${c.title}`} onClick={() => { onReplace(c.id, incomingCareer.id); setIncoming(null); setEdited(true); }} className="group/swap absolute inset-0 z-[6] flex cursor-pointer items-center justify-center rounded-[var(--radius-lg)] border-2 border-dashed" style={{ borderColor: "var(--primary)", background: "rgba(5,8,20,0.28)" }}>
+      <span className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold text-white shadow-lg transition-transform group-hover/swap:scale-105" style={{ background: "var(--color-brand-500)" }}>
+        <ArrowLeftRight className="h-4 w-4" aria-hidden /> Swap in here
+      </span>
+    </button>
+  );
+  const bench = swappable.length > 0 && (
+    <div className="flex flex-none items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
+      <span className="flex-none text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Also saved</span>
+      {swappable.map((c) => {
+        const on = incoming === c.id;
+        return (
+          <button key={c.id} type="button" aria-pressed={on} onClick={() => setIncoming(on ? null : c.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-[12px] font-bold whitespace-nowrap" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: "var(--foreground)" }}>
+            <span className="relative size-7 flex-none overflow-hidden rounded-full"><LabPhoto career={c} sizes="28px" className="object-cover" /></span>
+            {c.title}
+            <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
+          </button>
+        );
+      })}
+    </div>
+  );
   const swapList = (c: LabCareer) => (
     <div className="absolute inset-0 z-[6] flex flex-col gap-1 overflow-y-auto rounded-[var(--radius-lg)] border p-2 backdrop-blur-md" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 92%, transparent)" }}>
       <div className="flex items-center justify-between px-1">
@@ -657,23 +691,24 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
         <button type="button" aria-label="Cancel" onClick={() => setReplacing(null)} className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
       </div>
       {swappable.map((p) => (
-        <button key={p.id} type="button" onClick={() => { onReplace(c.id, p.id); setReplacing(null); }} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+        <button key={p.id} type="button" onClick={() => { onReplace(c.id, p.id); setReplacing(null); setEdited(true); }} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
           {p.title} <ChevronRight className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--muted-foreground)" }} />
         </button>
       ))}
     </div>
   );
   const replaceBtn = (c: LabCareer, iconOnly: boolean) => {
+    const glint = !edited && top3[0]?.id === c.id && swappable.length > 0;
     const btn = (
       <button type="button" aria-label={`Replace ${c.title}`} onClick={() => setReplacing(replacing === c.id ? null : c.id)} disabled={swappable.length === 0} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold disabled:cursor-not-allowed disabled:opacity-40 ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-        <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />{!iconOnly && " Replace"}
+        <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />{!iconOnly && <span className={glint ? "dm-text-nudge" : undefined}>Replace</span>}
       </button>
     );
     return iconOnly ? <IconTip label="Replace" className="w-full">{btn}</IconTip> : btn;
   };
   const removeBtn = (c: LabCareer, iconOnly: boolean) => {
     const btn = (
-      <button type="button" aria-label={`Remove ${c.title}`} onClick={() => onRemove(c.id)} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "color-mix(in srgb, #E0453C 45%, transparent)", color: "#E0453C" }}>
+      <button type="button" aria-label={`Remove ${c.title}`} onClick={() => { onRemove(c.id); setEdited(true); }} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "color-mix(in srgb, #E0453C 45%, transparent)", color: "#E0453C" }}>
         <X className="h-3.5 w-3.5" aria-hidden />{!iconOnly && " Remove"}
       </button>
     );
@@ -699,6 +734,7 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
                 <div className="relative min-h-0 flex-1">
                   <LabCard career={c} control="rank" selected rank={i + 1} fill className="absolute inset-0" />
                   {replacing === c.id && swapList(c)}
+                  {swapHere(c)}
                 </div>
                 <CareerActions career={c} />
                 <div className="flex flex-none gap-2">
@@ -739,6 +775,7 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
                     </div>
                   </div>
                   {replacing === c.id && swapList(c)}
+                  {swapHere(c)}
                 </div>
               );
             })}
@@ -749,6 +786,7 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
               </button>
             ))}
           </div>
+          {bench}
         </>
       )}
     </div>

@@ -33,7 +33,7 @@
 // - The bottom bar's tray shows seven slots filling with each save: the
 //   limit is visible, not stated.
 // - The CTA says what it is waiting for: "Save 3 to rank", "Save 2 more",
-//   then "Rank my top 3"; "Pick 2 more", then "Confirm Top 3".
+//   then "Rank my top 3"; "Pick 2 more", then "See my Top 3".
 // - Saved and Rank are one screen: three empty #1 #2 #3 slots above the
 //   saved cards fill in tap order. One step fewer, and ranking shows how it
 //   works.
@@ -78,12 +78,13 @@ const NOTES = {
   rank: { heading: "Pick your top 3", bullets: [
     "Your saved careers, with three empty slots above them. Tap a card to fill the next slot: first tap is #1.",
     "Tap a filled slot to clear it. The back arrow returns to browsing, where Save toggles a career.",
-    "Confirm Top 3 sets them; you can still change them on the next screen.",
+    "See my Top 3 sets them; they stay editable on the next screen.",
   ] },
   top3: { heading: "My Top 3 and what happens next", bullets: [
     "Next step: one recommended action for #1 (the Career Report). Start opens the real report page.",
     "The four icons under each card open the real pages for that career: Report, Pathway, Play, Colleges.",
-    "Replace swaps a pick for anything saved; Remove clears the slot, and the empty slot offers Add from Saved.",
+    "Also saved, under the Top 3: tap one, then Swap in here on the pick it replaces. Replace and Remove on each card do the same from the card.",
+    "A removed pick leaves its numbered slot with Add from Saved.",
     "Explore more and Saved go back to keep editing. Play again restarts the whole flow.",
   ] },
 };
@@ -234,7 +235,8 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
         </LabScreen>
         <BottomBar
           left={<QuietButton ariaLabel="Back to browsing" onClick={() => go("explore")}><ChevronLeft className="h-4 w-4" aria-hidden /></QuietButton>}
-          cta={left > 0 ? `Pick ${left} more` : "Confirm Top 3"}
+          // "See", not "Confirm": a lower-stakes word for a choice that stays editable.
+          cta={left > 0 ? `Pick ${left} more` : "See my Top 3"}
           ctaDisabled={left > 0 || need === 0}
           onCta={() => go("top3")}
         />
