@@ -218,7 +218,9 @@ export function StudentProgress() {
           const tail = chartValues[tailIdx] ?? 0;
           // A readable axis: the largest bar rounded up to the next 10, not
           // the roster size (which gave ticks like 121 / 91 / 61).
-          const niceMax = Math.max(10, Math.ceil(Math.max(...chartValues, 1) / 10) * 10);
+          // A multiple of 20, so the four gridline steps land on round numbers
+          // (25/50/75/100, not 23/45/68/90).
+          const niceMax = Math.max(20, Math.ceil(Math.max(...chartValues, 1) / 20) * 20);
           const cap = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
           return (
             <HoverBeam strength={0.6} className="h-full">

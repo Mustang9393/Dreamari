@@ -6,8 +6,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { LogIn, Users, CalendarDays, TrendingUp } from "lucide-react";
-import { MetricTile } from "@/components/connect/viz";
+import { LogIn, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { useSyncExternalStore } from "react";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
@@ -34,7 +33,70 @@ const MONTHS = [
   { label: "Sep 2026", total: 214, unique: 71, avg: 3.01 },
 ];
 const LATEST = MONTHS[MONTHS.length - 1];
+const PREV = MONTHS[MONTHS.length - 2];
 const WEEKLY_ACTIVE = 42;
+const DAILY_ACTIVE = 18;
+const pctChange = (now: number, before: number) => Math.round(((now - before) / before) * 100);
+
+/** A tiny trend line under a stat: the months' shape, no axes. */
+function Sparkline({ values }: { values: number[] }) {
+  const reduce = useReducedMotion();
+  const id = useId().replace(/:/g, "");
+  const W = 120;
+  const H = 34;
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  const pts = values.map((v, i) => ({ x: (i / (values.length - 1)) * W, y: 3 + (1 - (v - lo) / Math.max(1e-9, hi - lo)) * (H - 6) }));
+  const d = smoothPath(pts);
+  const last = pts[pts.length - 1];
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-[34px] w-full max-w-[140px] overflow-visible" aria-hidden>
+      <defs><linearGradient id={`sp-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={TOTAL_COLOR} stopOpacity="0.3" /><stop offset="100%" stopColor={TOTAL_COLOR} stopOpacity="0" /></linearGradient></defs>
+      <motion.path d={`${d} L${W} ${H} L0 ${H} Z`} fill={`url(#sp-${id})`} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.4 }} />
+      <motion.path d={d} fill="none" stroke={TOTAL_COLOR} strokeWidth="2" strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
+      <circle cx={last.x} cy={last.y} r="3" fill={TOTAL_COLOR} stroke="var(--card)" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function EngagementStat({ icon: StatIcon, value, label, series, delta, prevLabel, share }: { icon: typeof LogIn; value: string; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number } }) {
+  const up = (delta ?? 0) >= 0;
+  const sharePct = share ? Math.round((share.n / Math.max(1, share.of)) * 100) : 0;
+  return (
+    <HoverBeam strength={0.6} className="h-full">
+      <div className="flex h-full flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={TINTED_CARD}>
+        <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <StatIcon className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{label}
+        </span>
+        <span className="flex items-baseline gap-[8px]">
+          <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+          {typeof delta === "number" && (
+            // Direction in words and an arrow, not green/red: the chart
+            // family stays blue; a fall is still worth reading calmly.
+            <span className="flex items-center gap-[3px] text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: up ? "var(--primary)" : "#F5A623" }}>
+              {up ? <ArrowUpRight className="h-[13px] w-[13px]" aria-hidden /> : <ArrowDownRight className="h-[13px] w-[13px]" aria-hidden />}{up ? "+" : ""}{delta}%
+            </span>
+          )}
+        </span>
+        <span className="mt-auto flex items-end justify-between gap-[10px]">
+          {series ? (
+            <>
+              <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>vs {prevLabel}</span>
+              <Sparkline values={series} />
+            </>
+          ) : share ? (
+            <span className="flex w-full flex-col gap-[6px]">
+              <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{sharePct}% of {share.of} students</span>
+              <span className="relative block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }} aria-hidden>
+                <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={{ width: "0%" }} animate={{ width: `${sharePct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${TOTAL_COLOR} 40%, transparent), ${TOTAL_COLOR})` }} />
+              </span>
+            </span>
+          ) : null}
+        </span>
+      </div>
+    </HoverBeam>
+  );
+}
 
 const INTERVENTION_BY_GRADE = [
   { grade: 9, count: 3 },
@@ -182,11 +244,16 @@ export function PlatformEngagement() {
           </div>
         </OverviewCard>
       )}
+      {/* Each stat with its direction (direct feedback, 26 Sept 2026: "no
+         trends signal to see growth"). The two monthly figures have six
+         months of history, so they carry a sparkline and the change from
+         last month; weekly and daily have no history here, so they show
+         their share of the caseload instead of an invented trend. */}
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={LogIn} value={String(LATEST.unique)} label="Active this month" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={Users} value={String(WEEKLY_ACTIVE)} label="Active weekly" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={CalendarDays} value="18" label="Active daily" accent="#5B6CF9" /></div></HoverBeam>
-        <HoverBeam strength={0.6} className="h-full"><div className="flex h-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}><MetricTile icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Logins per student" accent="#5B6CF9" /></div></HoverBeam>
+        <EngagementStat icon={LogIn} value={String(LATEST.unique)} label="Active this month" series={MONTHS.map((m) => m.unique)} prevLabel={PREV.label} delta={pctChange(LATEST.unique, PREV.unique)} />
+        <EngagementStat icon={Users} value={String(WEEKLY_ACTIVE)} label="Active weekly" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={CalendarDays} value={String(DAILY_ACTIVE)} label="Active daily" share={{ n: DAILY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Logins per student" series={MONTHS.map((m) => m.avg)} prevLabel={PREV.label} delta={pctChange(LATEST.avg, PREV.avg)} />
       </div>
 
       <HoverBeam strength={0.6} className="h-full">
