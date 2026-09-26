@@ -152,7 +152,7 @@ export function Settings() {
             <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Signs your recommendation letters. A photo of your signature on plain paper works well.</span>
           </div>
           <div className="flex items-center justify-end gap-[10px]">
-            {saved && <span className="text-[12.5px] font-semibold" style={{ color: "#33C78C" }}>Saved.</span>}
+            {saved && <span className="text-[12.5px] font-semibold" style={{ color: "var(--cd-green)" }}>Saved.</span>}
             <button type="button" onClick={() => setDraft(account)} disabled={!dirty} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
             <button type="button" onClick={save} disabled={!dirty} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Save Changes</button>
           </div>

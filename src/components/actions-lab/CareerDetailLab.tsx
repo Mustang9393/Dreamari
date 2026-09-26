@@ -583,7 +583,7 @@ export function CareerDetailLab({ slug }: { slug: string }) {
                   type="button"
                   onClick={() => router.push(`/play/${career.slug}`)}
                   className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ background: "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-2))", borderColor: "color-mix(in srgb, var(--primary) 45%, transparent)", color: "var(--foreground)" }}
+                  style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
                 >
                   <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
                 </button>

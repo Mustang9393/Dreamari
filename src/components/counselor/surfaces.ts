@@ -7,9 +7,11 @@
 // and every screen picks it up.
 
 export const GLASS_CARD = {
-  background: "linear-gradient(155deg, color-mix(in srgb, var(--primary) 10%, var(--glass-surface-2)) 0%, color-mix(in srgb, var(--card) 92%, transparent) 55%, color-mix(in srgb, var(--primary) 7%, var(--card)) 100%)",
+  // Tints and shadow are variables so light mode can swap them
+  // (globals.css, "Counselor Dashboard light mode"); dark is unchanged.
+  background: "linear-gradient(155deg, color-mix(in srgb, var(--primary) var(--cd-card-tint), var(--glass-surface-2)) 0%, color-mix(in srgb, var(--card) 92%, transparent) 55%, color-mix(in srgb, var(--primary) var(--cd-card-tint-end), var(--card)) 100%)",
   borderColor: "color-mix(in srgb, var(--primary) 22%, var(--glass-border))",
-  boxShadow: "0 24px 60px -30px rgba(0,0,0,0.7), inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 8%, transparent)",
+  boxShadow: "var(--cd-card-shadow), inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 8%, transparent)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
 } as const;
@@ -19,8 +21,8 @@ export const GLASS_CARD = {
  *  tint and a visible glow so it reads as the room's centerpiece. */
 export const GLASS_CARD_HERO = {
   ...GLASS_CARD,
-  background: "linear-gradient(155deg, color-mix(in srgb, var(--primary) 16%, var(--glass-surface-2)) 0%, color-mix(in srgb, var(--card) 90%, transparent) 55%, color-mix(in srgb, var(--primary) 12%, var(--card)) 100%)",
-  boxShadow: "0 28px 70px -28px color-mix(in srgb, var(--primary) 35%, rgba(0,0,0,0.7)), inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent)",
+  background: "linear-gradient(155deg, color-mix(in srgb, var(--primary) var(--cd-hero-tint), var(--glass-surface-2)) 0%, color-mix(in srgb, var(--card) 90%, transparent) 55%, color-mix(in srgb, var(--primary) var(--cd-hero-tint-end), var(--card)) 100%)",
+  boxShadow: "var(--cd-hero-shadow), inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 10%, transparent)",
 } as const;
 
 /** A nested row inside a glass card -- list rows, student rows, chip rows.
@@ -39,7 +41,9 @@ export const GLASS_INSET = {
  *  absolutely-positioned ::before-style sibling behind a big number so it
  *  reads as lit from within, not just colored text. */
 export function glowBackdrop(color: string, opacity = 0.35): string {
-  return `radial-gradient(60% 60% at 30% 20%, color-mix(in srgb, ${color} ${Math.round(opacity * 100)}%, transparent), transparent 70%)`;
+  // Scaled down in light mode (--cd-glow-k), where a full-strength wash
+  // reads as haze over dark text.
+  return `radial-gradient(60% 60% at 30% 20%, color-mix(in srgb, ${color} calc(${Math.round(opacity * 100)}% * var(--cd-glow-k, 1)), transparent), transparent 70%)`;
 }
 
 /** One blue family for composition. Area carries the value; a gentle

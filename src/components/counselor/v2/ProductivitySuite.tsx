@@ -349,7 +349,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             {draft !== null && (
               <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
                 {kind === "recommendation-letter" && draft.includes(EXAMPLE_PLACEHOLDER) && (
-                  <p className="flex items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "#F5A623" }}>
+                  <p className="flex items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--cd-amber)" }}>
                     <Sparkles className="mt-[2px] h-[12px] w-[12px] flex-none" aria-hidden /> Add one specific example where the letter asks for it.
                   </p>
                 )}
@@ -365,7 +365,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
           </div>
 
           {/* The desk: a darker surface so the page reads as paper. */}
-          <div className="flex min-w-0 flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, #000 35%, var(--card))" }}>
+          <div className="flex min-w-0 flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "var(--cd-desk)" }}>
             <div className="flex items-center justify-between gap-[8px]">
               <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DOC_TITLES[kind]} · US Letter</span>
               <FullScreenButton onClick={() => setFull(true)} />

@@ -1245,6 +1245,12 @@ html.light body { background: #f4f7ff; }
    Same mechanical darkening as the marketing scope's light block; author
    real rungs in the token source when the light ramp exists. */
 html.light .marketing-v2.themeable {
+  /* Business & Money: the marketing scope's #825900 read as the muddy
+     mustard the user rejected ("no muddy colors like the business and money
+     accents", 17 Sept 2026; light-mode audit finding 1). The same warm gold
+     the night-token scope already uses (#ad6e00, 4.19:1 on white). */
+  --world-business-money-office: #ad6e00 !important;
+  --amber-400: #ad6e00 !important;
   /* --card is #d8dbe8 against a #f4f7ff page, so every card built on it comes
      out DARKER than the surface it sits on -- the opposite of how a card reads.
      Corrected to white here rather than in marketing/tokens.css, which is a
@@ -1745,4 +1751,52 @@ summary::-webkit-details-marker {
 }
 summary::marker {
   display: none;
+}
+
+/* Counselor Dashboard light mode (26 Sept 2026, direct feedback: "the
+   gradient washes etc on light make things hard to read... some colors,
+   surfaces get muddy"). Every value the dashboard's cards, glows and status
+   colors use is a variable here: the defaults are exactly the dark-mode
+   values (dark is unchanged), html.light swaps in ones that read on white.
+   - Card shadows: the dark 70% black drop reads as a grey smear under white
+     cards; light uses a short, soft, blue-tinted one.
+   - Card tint and hero glows: the primary wash that gives dark cards depth
+     turns lavender haze on white; light keeps a hint of it.
+   - Status and trend colors: the dark-mode green / amber / red are tuned for
+     a near-black ground and fall under 3:1 on white as text; light uses
+     deeper rungs of the same hues (not black-mixed, which goes muddy). */
+:root {
+  --cd-card-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
+  --cd-hero-shadow: 0 28px 70px -28px color-mix(in srgb, var(--primary, #5B6CF9) 35%, rgba(0, 0, 0, 0.7));
+  --cd-card-tint: 10%;
+  --cd-card-tint-end: 7%;
+  --cd-hero-tint: 16%;
+  --cd-hero-tint-end: 12%;
+  --cd-glow-k: 1;
+  --cd-blue-soft: #9BA8FB;
+  --cd-blue-pale: #C9D0FE;
+  --cd-desk: color-mix(in srgb, #000 35%, var(--card));
+  --cd-panel-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.6);
+  --cd-green: #33C78C;
+  --cd-amber: #F5A623;
+  --cd-red: #E0453C;
+}
+html.light {
+  --cd-card-shadow: 0 1px 2px rgba(20, 28, 70, 0.06), 0 10px 28px -16px rgba(20, 28, 70, 0.18);
+  --cd-hero-shadow: 0 1px 2px rgba(20, 28, 70, 0.06), 0 14px 34px -16px color-mix(in srgb, var(--primary, #5B6CF9) 28%, rgba(20, 28, 70, 0.12));
+  --cd-card-tint: 3%;
+  --cd-card-tint-end: 2%;
+  --cd-hero-tint: 6%;
+  --cd-hero-tint-end: 4%;
+  --cd-glow-k: 0.35;
+  --cd-bar-fade: 0.5;
+  /* the chart ramp's two pale blues vanish on white; deeper rungs, same hue */
+  --cd-blue-soft: #7A88F2;
+  --cd-blue-pale: #A4AEF7;
+  /* the document desk: a cool grey ground under the white page, not black mixed into white */
+  --cd-desk: #E4E8F2;
+  --cd-panel-shadow: -12px 0 40px -18px rgba(20, 28, 70, 0.22);
+  --cd-green: #13875A;
+  --cd-amber: #CC7A00; /* h36 s100 l40: amber, not mustard (the 17 Sept "no muddy" rule), 3.3:1 on white */
+  --cd-red: #C9342C;
 }

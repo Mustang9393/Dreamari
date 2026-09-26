@@ -90,7 +90,7 @@ const REPORT_TYPES: ReportType[] = [
           : s.postsecondaryIntent;
         counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
       }
-      const colors = [PRIMARY, NEUTRAL_SLICE, "#9BA8FB", "#C9D0FE"];
+      const colors = [PRIMARY, NEUTRAL_SLICE, "var(--cd-blue-soft)", "var(--cd-blue-pale)"];
       return { title: "Postsecondary Plans", categories, colors, values: () => categories.map((c) => counts.get(c) ?? 0), max: Math.max(1, roster.length) };
     },
   },
@@ -269,13 +269,13 @@ export function StudentProgress() {
                   </tr>
                   <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
                     <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>Needs Attention</td>
-                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#F5A623" }}>{byGrade(g).filter((s) => s.status === "Needs Attention").length}</td>)}
-                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#F5A623" }}>{roster.filter((s) => s.status === "Needs Attention").length}</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--cd-amber)" }}>{byGrade(g).filter((s) => s.status === "Needs Attention").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "var(--cd-amber)" }}>{roster.filter((s) => s.status === "Needs Attention").length}</td>
                   </tr>
                   <tr>
                     <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>At Risk</td>
-                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#E0453C" }}>{byGrade(g).filter((s) => s.status === "At Risk").length}</td>)}
-                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#E0453C" }}>{roster.filter((s) => s.status === "At Risk").length}</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--cd-red)" }}>{byGrade(g).filter((s) => s.status === "At Risk").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "var(--cd-red)" }}>{roster.filter((s) => s.status === "At Risk").length}</td>
                   </tr>
                 </tbody>
               </table>

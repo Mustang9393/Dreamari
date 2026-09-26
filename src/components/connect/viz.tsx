@@ -317,7 +317,10 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
           <defs>
             <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={color} stopOpacity="1" />
-              <stop offset="100%" stopColor={color} stopOpacity="0.12" />
+              {/* The fade to near-transparent gives depth on dark; on a light
+                 ground it washes the bar's base out, so light mode stops
+                 higher (--cd-bar-fade, globals.css). */}
+              <stop offset="100%" stopColor={color} style={{ stopOpacity: "var(--cd-bar-fade, 0.12)" }} />
             </linearGradient>
           </defs>
           {/* No dot at the tip -- a rounded bar with a round marker

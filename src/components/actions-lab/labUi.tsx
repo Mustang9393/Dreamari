@@ -162,7 +162,7 @@ export function LabPill({ children, onClick, icon, primary = false, on = false, 
       whileTap={{ scale: 0.96 }}
       className={`flex cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border font-semibold whitespace-nowrap disabled:cursor-wait ${small ? "min-h-[40px] px-[14px] text-[14px]" : "min-h-[44px] px-[var(--space-5)] text-[15px]"}`}
       style={{
-        background: primary && !on ? "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-2))" : on ? "color-mix(in srgb, var(--primary) 26%, rgba(12,16,35,0.6))" : "rgba(12,16,35,0.55)",
+        background: primary && !on ? "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))" : on ? "color-mix(in srgb, var(--primary) 26%, rgba(12,16,35,0.6))" : "rgba(12,16,35,0.55)",
         borderColor: primary && !on ? "color-mix(in srgb, var(--primary) 45%, transparent)" : on ? "color-mix(in srgb, var(--accent-subtle) 70%, transparent)" : "rgba(255,255,255,0.3)",
         color: "#fff",
       }}

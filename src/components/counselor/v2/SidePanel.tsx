@@ -22,7 +22,7 @@ export function SidePanel({ open, onClose, title, subtitle, children }: { open: 
     <Portal>
       <div className="fixed inset-0 z-[80] flex justify-end">
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)", backdropFilter: "blur(2px)" }} />
-        <aside role="dialog" aria-modal="true" aria-label={title} className="relative flex h-full w-full max-w-[440px] flex-col gap-[var(--space-5)] overflow-y-auto border-l p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "-24px 0 60px -20px rgba(0,0,0,0.6)" }}>
+        <aside role="dialog" aria-modal="true" aria-label={title} className="relative flex h-full w-full max-w-[440px] flex-col gap-[var(--space-5)] overflow-y-auto border-l p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--cd-panel-shadow)" }}>
           <div className="flex items-start justify-between gap-[12px]">
             <span className="flex min-w-0 flex-col gap-[3px]">
               <h2 className="text-[17px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>

@@ -13,23 +13,23 @@ import { studentPortraitSrc, useStudentAvatarSrc } from "@/lib/avatar";
 // than four.
 
 export const STATUS_COLORS: Record<CaseloadStatus, string> = {
-  "On Track": "#33C78C",
-  "Needs Attention": "#F5A623",
-  "At Risk": "#E0453C",
+  "On Track": "var(--cd-green)",
+  "Needs Attention": "var(--cd-amber)",
+  "At Risk": "var(--cd-red)",
 };
 
 export const MILESTONE_COLORS: Record<MilestoneStatus, string> = {
-  Approved: "#33C78C",
+  Approved: "var(--cd-green)",
   "Pending Review": "#5B6CF9",
-  "Changes Requested": "#E0453C",
-  "In Progress": "#F5A623",
+  "Changes Requested": "var(--cd-red)",
+  "In Progress": "var(--cd-amber)",
   "Not Started": "color-mix(in srgb, var(--foreground) 45%, transparent)",
   // The reference's own extra states: student-completed reads as done
   // (same green as Approved), overdue is the one red the dashboard
   // reserves for "act now", and a dash-in-the-reference "not applicable"
   // is the quietest gray of all.
-  Completed: "#33C78C",
-  Overdue: "#E0453C",
+  Completed: "var(--cd-green)",
+  Overdue: "var(--cd-red)",
   "Not Applicable": "color-mix(in srgb, var(--foreground) 22%, transparent)",
 };
 
@@ -67,11 +67,11 @@ export function MilestoneChip({ status }: { status: MilestoneStatus }) {
 const STRIP_COLORS: Record<MilestoneStatus, string> = {
   Approved: "#5B6CF9",
   Completed: "#5B6CF9",
-  "Pending Review": "#9BA8FB",
-  "In Progress": "#C9D0FE",
+  "Pending Review": "var(--cd-blue-soft)",
+  "In Progress": "var(--cd-blue-pale)",
   "Not Started": "#5B6470",
-  "Changes Requested": "#E0453C",
-  Overdue: "#E0453C",
+  "Changes Requested": "var(--cd-red)",
+  Overdue: "var(--cd-red)",
   "Not Applicable": "color-mix(in srgb, var(--foreground) 14%, transparent)",
 };
 

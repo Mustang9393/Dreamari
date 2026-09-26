@@ -179,7 +179,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               {actions.map((a) => (
                 <li key={a.text} className="flex items-center justify-between gap-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
                   <span className="flex items-center gap-[8px]">
-                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: a.alert ? "#E0453C" : "var(--primary)" }} />
+                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: a.alert ? "var(--cd-red)" : "var(--primary)" }} />
                     {a.text}
                   </span>
                   {a.review && <CardLink onClick={() => router.push("/counselor?view=review-queue")}>Review</CardLink>}
@@ -187,7 +187,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               ))}
               {student.supportFlagReason && (
                 <li className="flex items-center gap-[8px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
-                  <Flag aria-hidden className="h-[13px] w-[13px] flex-none" style={{ color: "#F5A623" }} />
+                  <Flag aria-hidden className="h-[13px] w-[13px] flex-none" style={{ color: "var(--cd-amber)" }} />
                   {/* The reference's flag text uses em dashes; shown with a comma (no em dashes in UI copy). */}
                   {student.supportFlagReason.replace(/\s*[\u2014\u2013]\s*/g, ", ")}
                 </li>

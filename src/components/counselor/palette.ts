@@ -13,10 +13,10 @@
 export const PRIMARY = "#5B6CF9";
 
 /** Two or three series side by side (readiness charts). */
-export const BLUE_3 = ["#9BA8FB", "#5B6CF9", "#2E3BB8"] as const;
+export const BLUE_3 = ["var(--cd-blue-soft)", "#5B6CF9", "#2E3BB8"] as const;
 
 /** Up to five categories (report charts). */
-export const BLUE_5 = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4", "#2E3BB8"] as const;
+export const BLUE_5 = ["var(--cd-blue-pale)", "#A0ACFB", "#7683F7", "#4F5DE4", "#2E3BB8"] as const;
 
 /** Up to seven ranked categories (the pathway distribution bar). Ranked by
  *  size, light to dark, so the ramp doubles as the rank. */
@@ -47,21 +47,21 @@ export const NEUTRAL_SLICE = "#5B6470";
  *  as one family; amber and red appear only where something needs the
  *  counselor. Status chips (chips.tsx) keep their green "On Track"; this is
  *  for marks that show quantity. */
-export const CHART_STATUS = { "On Track": PRIMARY, "Needs Attention": "#F5A623", "At Risk": "#E0453C" } as const;
+export const CHART_STATUS = { "On Track": PRIMARY, "Needs Attention": "var(--cd-amber)", "At Risk": "var(--cd-red)" } as const;
 
 /** An upward trend (a "+2 pts" or "+22%" chip): green, not the chart blue,
  *  because it is text on a blue-tinted card (direct feedback, 26 Sept 2026:
  *  "trend chips can stay green. Blue is hard to read on blue"). */
-export const TREND_UP = "#33C78C";
+export const TREND_UP = "var(--cd-green)";
 
 /** Progress stages of one milestone in a chart, furthest along brightest;
  *  red only for overdue. */
 export const CHART_STAGE: Record<string, string> = {
   approved: PRIMARY,
-  "pending review": "#9BA8FB",
-  "in progress": "#C9D0FE",
+  "pending review": "var(--cd-blue-soft)",
+  "in progress": "var(--cd-blue-pale)",
   "not started": NEUTRAL_SLICE,
-  overdue: "#E0453C",
+  overdue: "var(--cd-red)",
 };
 
 export const PATHWAY_SEQUENCE = ["#5B6CF9", "#22A0D0", "#22B58C", "#E6C93A", "#EA6A2A", "#E25B9E", "#9F4FE6"] as const;

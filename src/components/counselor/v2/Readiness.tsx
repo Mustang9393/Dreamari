@@ -57,7 +57,7 @@ export function Readiness() {
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
         <div className="flex flex-wrap gap-[var(--space-6)]">
           <Stat value={`${met} of ${measured.length}`} label="targets met" />
-          {measured.map((r) => <Stat key={r.key} value={`${r.value}%`} label={TARGET_LABELS[r.key]} color={targetBand(r.value, r.target) === "met" ? undefined : targetBand(r.value, r.target) === "near" ? "#F5A623" : "#E0453C"} />)}
+          {measured.map((r) => <Stat key={r.key} value={`${r.value}%`} label={TARGET_LABELS[r.key]} color={targetBand(r.value, r.target) === "met" ? undefined : targetBand(r.value, r.target) === "near" ? "var(--cd-amber)" : "var(--cd-red)"} />)}
         </div>
         {!district && <CardLink onClick={() => router.push("/counselor?view=students")}>Students</CardLink>}
       </div>

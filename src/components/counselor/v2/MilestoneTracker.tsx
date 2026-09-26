@@ -47,7 +47,7 @@ type Row = { id: string; title: string; window: CurriculumWindow; classification
 const STATES: { key: CurriculumStatus; label: string; color: string }[] = [
   { key: "done", label: "Done", color: PRIMARY },
   { key: "awaiting-review", label: "Needs attention", color: BLUE_3[0] },
-  { key: "in-progress", label: "In progress", color: "#C9D0FE" },
+  { key: "in-progress", label: "In progress", color: "var(--cd-blue-pale)" },
   { key: "not-started", label: "Not started", color: NEUTRAL_SLICE },
 ];
 const WINDOW_TITLE: Record<CurriculumWindow, string> = { fall: "Fall", winter: "Winter", spring: "Spring" };

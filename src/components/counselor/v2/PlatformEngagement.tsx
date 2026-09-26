@@ -78,7 +78,7 @@ function EngagementStat({ icon: StatIcon, value, label, series, delta, prevLabel
           {typeof delta === "number" && (
             // Green up, the same as the Overview's trend chips (blue text
             // on a blue-tinted card is hard to read).
-            <span className="flex items-center gap-[3px] text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: up ? TREND_UP : "#F5A623" }}>
+            <span className="flex items-center gap-[3px] text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: up ? TREND_UP : "var(--cd-amber)" }}>
               {up ? <ArrowUpRight className="h-[13px] w-[13px]" aria-hidden /> : <ArrowDownRight className="h-[13px] w-[13px]" aria-hidden />}{up ? "+" : ""}{delta}%
             </span>
           )}
@@ -136,7 +136,7 @@ function smoothPath(pts: { x: number; y: number }[]) {
 
 const TOTAL_COLOR = "#5B6CF9";
 // Light blue, not the reference's green: one chart family app-wide.
-const UNIQUE_COLOR = "#9BA8FB";
+const UNIQUE_COLOR = "var(--cd-blue-soft)";
 
 // Rebuilt 26 Sept 2026 (direct feedback: "the logins by month is better in
 // replit... everything in that graph seems squished down"). The old SVG

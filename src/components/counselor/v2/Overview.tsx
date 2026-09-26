@@ -18,9 +18,9 @@ import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE, CHART_STATUS, TREND_UP } f
 import { GLASS_INSET, pathwayTileSurface } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
-  "On Track": "#33C78C",
-  "Needs Attention": "#F5A623",
-  "At Risk": "#E0453C",
+  "On Track": "var(--cd-green)",
+  "Needs Attention": "var(--cd-amber)",
+  "At Risk": "var(--cd-red)",
 };
 
 // Every student on the attention strip is already "At Risk" -- this is a
@@ -33,7 +33,7 @@ export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
 // severity badges would silently double as a second, confusing status
 // legend.
 const SEVERITY_COLORS: Record<AttentionSeverity, string> = {
-  Critical: "#E0453C",
+  Critical: "var(--cd-red)",
   High: "#E8823C",
   Medium: "#8B93B8",
 };
@@ -57,7 +57,7 @@ const grades: (9 | 10 | 11 | 12)[] = [9, 10, 11, 12];
 // The target/benchmark line needs to read as "not one of the bars" against
 // an all-blue ramp, and "not the status amber" against the rest of the
 // page -- a warm bronze does both: validated clear of "Needs Attention"
-// (`validate_palette.js "#F5A623,#A67C2E" --mode dark` -> ΔE 17.9, passes)
+// (`validate_palette.js "var(--cd-amber),#A67C2E" --mode dark` -> ΔE 17.9, passes)
 // and it's warm/cool-contrasting against every blue bar it sits over.
 export const TARGET_LINE_COLOR = TARGET_LINE;
 
