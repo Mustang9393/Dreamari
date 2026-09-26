@@ -12,7 +12,10 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Lightbulb, PenLine, Plus, X } from "lucide-react";
+import { Lightbulb, Megaphone, PenLine, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { Go } from "../chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { ShowAll } from "./Disclosure";
 import { SubTabs } from "./SubTabs";
@@ -131,9 +134,20 @@ function InterestChart() {
   );
 }
 
+// The reference's four career-fair interests, each tied to the roster
+// pathway (Build world) its students sit in.
+const FAIR_CLUSTERS = [
+  { label: "Technology & Engineering", pathway: "Tech & Engineering" },
+  { label: "Business & Entrepreneurship", pathway: "Business & Finance" },
+  { label: "Healthcare & Nursing", pathway: "Health & Medicine" },
+  { label: "Law & Criminal Justice", pathway: "Law, Safety & Justice" },
+];
+
 type Tile = { pct: number | null; subject: string; actions: string[]; mine?: boolean };
 
 export function CareerCollegeInsights() {
+  const roster = useReviewedRoster();
+  const router = useRouter();
   // The three tiles are Dreamari's suggestions; a counselor can add their
   // own (direct instruction, 25 Sept 2026: a manual option wherever
   // something is AI generated). Session state until a backend stores it.
@@ -207,15 +221,35 @@ export function CareerCollegeInsights() {
               ))}
             </div>
             {/* The reference's career-fair note, as the card's closing
-               suggestion rather than a card of its own: it is one more
-               recommendation, drawn from the same interests. */}
-            <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--inset-border)" }}>
-              <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</span>
-              <span className="flex flex-wrap gap-[6px]">
-                {["Technology & Engineering", "Business & Entrepreneurship", "Healthcare & Nursing", "Law & Criminal Justice"].map((t) => (
-                  <span key={t} className="rounded-full border px-[10px] py-[4px] text-[12px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{t}</span>
-                ))}
+               suggestion. The four interests were pill chips that looked
+               like buttons and did nothing (direct question: "This could
+               be better too right?"); each is now a real action: how many
+               students are in that pathway, and a click opens Group
+               message with that pathway already chosen, to invite them. */}
+            <div className="flex flex-col gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--inset-border)" }}>
+              <span className="flex flex-col gap-[2px]">
+                <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</span>
+                <span className="text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>Invite the students in each pathway</span>
               </span>
+              {/* One per row beside the chart (the column is too narrow for
+                 two without cutting the names), two across when stacked. */}
+              <ul className="grid grid-cols-1 gap-[6px] sm:grid-cols-2 lg:grid-cols-1">
+                {FAIR_CLUSTERS.map((c) => {
+                  const n = roster.filter((st) => st.careerTrack === c.pathway).length;
+                  return (
+                    <li key={c.label}>
+                      <button type="button" onClick={() => router.push(`/counselor?view=productivity&tool=group-message&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] border px-[10px] py-[8px] text-left" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                        <span className="flex size-[26px] flex-none items-center justify-center rounded-[7px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}><Megaphone className="h-[13px] w-[13px]" aria-hidden /></span>
+                        <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                          <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
+                          <span className="text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
+                        </span>
+                        <Go />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           </div>
         </div>

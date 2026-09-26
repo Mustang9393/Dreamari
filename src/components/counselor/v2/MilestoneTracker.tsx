@@ -99,7 +99,10 @@ export function MilestoneTracker() {
     });
   }, [items, scopedToCounselor, gradeRoster, students]);
 
-  const focus = rows.slice().sort((a, b) => b.behindShare - a.behindShare || a.donePct - b.donePct)[0];
+  // Lowest share done first: the card shows "% done", so the pick has to
+  // agree with it (a weighted not-started score had picked a 73% item over
+  // a 70% one). The weighted score only breaks ties.
+  const focus = rows.slice().sort((a, b) => a.donePct - b.donePct || b.behindShare - a.behindShare)[0];
   // The reference's own precomputed grade average when unscoped (exactly
   // what the Replit shows); an average of this counselor's own rows once
   // narrowed to a caseload.
@@ -174,16 +177,43 @@ export function MilestoneTracker() {
                 </span>
               </div>
               <div className="relative flex flex-col gap-[var(--space-3)] border-t p-[var(--space-5)] md:border-t-0 md:border-l" style={{ borderColor: "var(--glass-border)" }}>
+                {/* Recomposed (direct question, 26 Sept 2026: "This can be
+                   composed better right?"): two equal pills ("8 not done",
+                   "Review 2") read as vague twins and left the half empty.
+                   Now one sentence says what is behind and what is waiting
+                   on the counselor, and ONE primary action does the thing
+                   that moves it (review, when there is anything to
+                   review), with the full list as the quiet second. */}
                 <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Furthest behind</span>
-                <span className="flex items-center gap-[var(--space-4)]">
-                  <SegmentedRing size={64} stroke={7} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
-                    <span className="text-[15px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
+                <span className="flex flex-1 items-center gap-[var(--space-5)]">
+                  <SegmentedRing size={96} stroke={9} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
+                    <span className="flex flex-col items-center leading-none">
+                      <span className="text-[20px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
+                      <span className="mt-[3px] text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
+                    </span>
                   </SegmentedRing>
-                  <span className="flex min-w-0 flex-col gap-[8px]">
-                    <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</span>
-                    <span className="flex flex-wrap gap-[8px]">
-                      {focus.total - focus.counts.done > 0 && <CardLink onClick={() => openNotDone(focus)}>{focus.total - focus.counts.done} not done</CardLink>}
-                      {focus.counts["awaiting-review"] > 0 && <CardLink onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }}>Review {focus.counts["awaiting-review"]}</CardLink>}
+                  <span className="flex min-w-0 flex-col gap-[10px]">
+                    <span className="flex flex-col gap-[4px]">
+                      <span className="text-[17px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</span>
+                      <span className="text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>
+                        {focus.total - focus.counts.done} of {focus.total} not done{focus.counts["awaiting-review"] > 0 ? <>, <span className="font-bold" style={{ color: "var(--foreground)" }}>{focus.counts["awaiting-review"]} waiting on your review</span></> : ""}
+                      </span>
+                    </span>
+                    <span className="flex flex-wrap items-center gap-x-[14px] gap-y-[8px]">
+                      {focus.counts["awaiting-review"] > 0 ? (
+                        <button type="button" onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+                          Review {focus.counts["awaiting-review"]}
+                        </button>
+                      ) : focus.total - focus.counts.done > 0 ? (
+                        <button type="button" onClick={() => openNotDone(focus)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+                          See the {focus.total - focus.counts.done}
+                        </button>
+                      ) : null}
+                      {focus.counts["awaiting-review"] > 0 && focus.total - focus.counts.done > 0 && (
+                        <button type="button" onClick={() => openNotDone(focus)} className="dm-quiet flex cursor-pointer items-center gap-[4px] rounded-[var(--radius-sm)] px-[4px] py-[2px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
+                          See all {focus.total - focus.counts.done} not done <Go />
+                        </button>
+                      )}
                     </span>
                   </span>
                 </span>
