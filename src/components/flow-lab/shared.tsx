@@ -16,13 +16,11 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, FileText, GraduationCap, ImageOff, Info, Play, Plus, Route, Sparkles, X } from "lucide-react";
+import { ArrowLeftRight, Bookmark, BookOpen, Check, ChevronLeft, ChevronRight, GraduationCap, ImageOff, Info, Plus, Sparkles, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { IconTip } from "@/components/app/IconTip";
 import { Working } from "@/components/app/Working";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
-import { careerSlug } from "@/components/career/slug";
 import { matchDetail, REVEAL_STEP, type LabCareer, WORLDS } from "./lab";
 
 export const CARD = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
@@ -35,6 +33,9 @@ export const PAGE = 6;
  *  relevant to each screen and their actions too"). */
 export type ScreenNote = { heading: string; bullets: string[] };
 export const LabInfoContext = createContext<(note: ScreenNote | null) => void>(() => {});
+/** The fixed app header's height (py-3 around a 36px row). */
+export const HEADER_H = 60;
+const FROST = { background: "color-mix(in srgb, var(--glass-surface-2) 70%, color-mix(in srgb, var(--background) 45%, transparent))", backdropFilter: "blur(20px) saturate(1.6)", WebkitBackdropFilter: "blur(20px) saturate(1.6)" } as const;
 
 // ---------------------------------------------------------------- layout ----
 
@@ -52,6 +53,7 @@ export const LabInfoContext = createContext<(note: ScreenNote | null) => void>((
  *  card grid below scrolls the ordinary way. */
 export function LabScreen({ title, status, hint, controls, note, scrollable = false, children }: { title: string; status?: string; hint?: string; controls?: ReactNode; note?: ScreenNote; scrollable?: boolean; children: ReactNode }) {
   const setNote = useContext(LabInfoContext);
+
   const noteKey = JSON.stringify(note ?? null);
   useEffect(() => {
     setNote(note ?? null);
@@ -91,10 +93,23 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
     // band with a single soft edge at the very bottom, not two stacked
     // bars with a seam.
     return (
-      <section className="relative z-10 flex w-full flex-col items-center pt-16 pb-24 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
-        <div className="sticky top-16 z-10 w-full sm:top-[72px]" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(20px) saturate(1.6)", WebkitBackdropFilter: "blur(20px) saturate(1.6)" }}>
-          <div className="mx-auto flex w-full max-w-[880px] flex-col px-4 pt-2 pb-2 sm:px-6">{header}</div>
+      // No bands (26 Sept 2026: "I really don't like these black borders on
+      // header and footer... is there no other way?"). The title scrolls
+      // away with the page; only the world tabs stay, pinned as a floating
+      // glass pill under the header's buttons. FlowLab draws a soft
+      // gradient fade behind those buttons instead of a bar.
+      <section className="relative z-10 flex w-full flex-col items-center pt-16 pb-28 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
+        <div className="flex w-full max-w-[880px] flex-col px-4 sm:px-6">
+          <div className="mb-1 flex items-center justify-between gap-3 px-1">
+            <h1 className="text-[17px] font-extrabold whitespace-nowrap uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
+          </div>
+          {hint && <p className="mb-2.5 px-1 text-[12.5px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
         </div>
+        {controls && (
+          <div className="sticky z-10 mb-3 flex w-full max-w-[880px] px-4 sm:px-6" style={{ top: HEADER_H + 4 }}>
+            <div className="flex w-fit max-w-full flex-col gap-2 rounded-[calc(var(--radius-lg)+4px)] border p-1.5" style={{ ...FROST, borderColor: "var(--glass-border)", boxShadow: "0 10px 30px -12px rgba(0,0,0,0.55)" }}>{controls}</div>
+          </div>
+        )}
         <div className="flex w-full max-w-[880px] flex-col px-4 sm:px-6">{children}</div>
       </section>
     );
@@ -112,13 +127,16 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
 /** Match's sticky bar: one status line left, one CTA right. */
 export function BottomBar({ status, cta, onCta, ctaDisabled, left }: { status?: ReactNode; cta: string; onCta: () => void; ctaDisabled?: boolean; left?: ReactNode }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t px-4 py-3" style={{ background: "color-mix(in srgb, var(--background) 94%, transparent)", borderColor: "var(--glass-border)" }}>
-      <div className="flex w-full max-w-[880px] items-center justify-between gap-3">
+    // A floating glass capsule, not a full-width bar (direct feedback, 26
+    // Sept 2026: "I really don't like these black borders on header and
+    // footer"): content scrolls under and around it, like a dock.
+    <div className="pointer-events-none fixed inset-x-0 bottom-3 z-30 flex justify-center px-3 sm:bottom-5">
+      <div className="pointer-events-auto flex w-full max-w-[880px] items-center justify-between gap-3 rounded-full border py-2 pr-2 pl-3 sm:pl-4" style={{ ...FROST, borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -14px rgba(0,0,0,0.6)" }}>
         <div className="flex min-w-0 items-center gap-2">
           {left}
           {typeof status === "string" ? <p className="truncate text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{status}</p> : status}
         </div>
-        <button type="button" onClick={onCta} disabled={ctaDisabled} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-[var(--radius-md)] px-5 text-[14px] font-bold whitespace-nowrap text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--color-brand-500)" }}>
+        <button type="button" onClick={onCta} disabled={ctaDisabled} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-full px-5 text-[14px] font-bold whitespace-nowrap text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--color-brand-500)" }}>
           {cta} <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
         </button>
       </div>
@@ -126,11 +144,11 @@ export function BottomBar({ status, cta, onCta, ctaDisabled, left }: { status?: 
   );
 }
 
-export function Toast({ text }: { text: string | null }) {
+export function Toast({ text, low = false }: { text: string | null; /** a screen with no bottom bar: sit at the bottom edge */ low?: boolean }) {
   return (
     <AnimatePresence>
       {text && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-[var(--radius-md)] border px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap shadow-lg backdrop-blur-xl" style={{ color: "var(--foreground)", background: "var(--glass-surface-3)", borderColor: "var(--glass-border)" }}>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className={`fixed ${low ? "bottom-6" : "bottom-24"} left-1/2 z-40 -translate-x-1/2 rounded-[var(--radius-md)] border px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap shadow-lg backdrop-blur-xl`} style={{ color: "var(--foreground)", background: "var(--glass-surface-3)", borderColor: "var(--glass-border)" }}>
           {text}
         </motion.div>
       )}
@@ -227,21 +245,26 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
   const tip = control === "save" ? (selected ? "Unsave" : "Save") : control === "pick" ? (selected ? "Remove from Top 3" : "Add to Top 3") : `#${rank}`;
   // Save is a labeled pill, not a bare bookmark (26 Sept 2026): with no
   // coachmarks, the control has to say what it does.
+  // The nudge is a soft ripple of light from the pill's edge (a spreading
+  // box-shadow), ~7px, inside the pill's 8px inset so the card's edge never
+  // clips it (direct feedback, 26 Sept 2026: "the pulse on the save
+  // button... I liked that. It was just getting clipped"; a scaling ring
+  // tried next "animated really weirdly").
+  const pulse = nudge && !selected;
   const controlEl = control === "save" ? (
-    <button
+    <motion.button
       type="button"
       aria-pressed={selected}
       aria-label={label}
       onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
+      animate={pulse ? { boxShadow: ["0 0 0 0px rgba(255,255,255,0.55)", "0 0 0 7px rgba(255,255,255,0)", "0 0 0 7px rgba(255,255,255,0)"] } : { boxShadow: "0 0 0 0px rgba(255,255,255,0)" }}
+      transition={pulse ? { duration: 2, times: [0, 0.6, 1], repeat: Infinity, ease: "easeOut" } : { duration: 0.2 }}
       className="relative flex h-8 cursor-pointer items-center gap-1 rounded-full border-2 px-2.5 text-[12px] font-bold text-white backdrop-blur-md transition-transform active:scale-90"
       style={{ background: selected ? accent : "color-mix(in srgb, var(--background) 60%, transparent)", borderColor: selected ? accent : "rgba(255,255,255,0.55)" }}
     >
       {selected ? <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /> : <Bookmark className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />}
-      {/* The nudge is the app's own text glint (Explore's "For you"),
-         inside the pill: a ring pulsing outside it was clipped by the
-         card's edge (direct report, 26 Sept 2026). */}
-      <span className={nudge && !selected ? "dm-text-nudge" : undefined}>{selected ? "Saved" : "Save"}</span>
-    </button>
+      {selected ? "Saved" : "Save"}
+    </motion.button>
   ) : control === "rank" ? (
     <span aria-label={label} className="flex size-8 items-center justify-center rounded-full border-2 text-[13px] font-extrabold text-white" style={{ background: accent, borderColor: accent }}>{rank}</span>
   ) : (
@@ -579,78 +602,36 @@ function Section({ icon, label, children }: { icon: ReactNode; label: string; ch
 
 // ------------------------------------------------------------------ top 3 ----
 
-// The student-facing ladder after a Top 3, in the counselor dashboard's own
-// milestone order (MILESTONE_KEYS in counselorRoster.ts: Career Report ->
-// Career Pathway -> Resume -> College Exploration -> Applications), so
-// "what's next" for the student is the same thing that moves their roadmap
-// on the counselor's screen. Each step opens the real app page for it.
-const LADDER: { key: string; label: string; icon: ReactNode; href: (slug: string) => string }[] = [
-  { key: "report", label: "Career Report", icon: <FileText className="h-3.5 w-3.5" aria-hidden />, href: (slug) => `/career-report?picks=${slug}` },
-  { key: "path", label: "Pathway", icon: <Route className="h-3.5 w-3.5" aria-hidden />, href: (slug) => `/career/${slug}` },
-  { key: "play", label: "Play a day", icon: <Play className="h-3.5 w-3.5" aria-hidden />, href: () => "/play" },
-  { key: "colleges", label: "Colleges", icon: <GraduationCap className="h-3.5 w-3.5" aria-hidden />, href: () => "/colleges" },
-];
-
-/** One recommended next step for #1, then the ladder. Nothing in the lab
- *  records progress, so the recommendation is always the first rung; in
- *  the product it would be the first rung not yet done. */
-function NextStep({ first }: { first: LabCareer }) {
-  const router = useRouter();
-  const slug = careerSlug(first.title);
-  const accent = WORLD_COLORS[first.world] ?? "var(--primary)";
+/** The real My Profile tab row, drawn inert, with Top Three active: after
+ *  ranking, the student lands in their profile (Joshua's note: "only after
+ *  they rank those three do we move them into My Profile (Top Three)").
+ *  Seeing the picks sit in a permanent tab of the profile is what says
+ *  "this lives here, change it any time". The lab never writes to the real
+ *  profile, so the other tabs are shown, not wired. */
+export function ProfileTabs() {
+  const tabs = ["Overview", "Top Three", "My Plan", "Report", "Resume", "Preferences"];
   return (
-    <div className="flex flex-none flex-col gap-2 rounded-[var(--radius-lg)] border p-3" style={{ ...CARD, borderColor: `color-mix(in srgb, ${accent} 45%, var(--glass-border))` }}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex size-9 flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 22%, transparent)`, color: accent }}><Sparkles className="h-4 w-4" aria-hidden /></span>
-          <div className="min-w-0">
-            <p className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Next step</p>
-            <p className="truncate text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>Career Report for {first.title}</p>
-          </div>
-        </div>
-        <PrimaryButton onClick={() => router.push(LADDER[0].href(slug))}>Start <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></PrimaryButton>
-      </div>
-      <ol className="flex flex-wrap items-center gap-1.5" aria-label="Your roadmap">
-        {LADDER.map((step, i) => (
-          <li key={step.key} className="flex items-center gap-1.5">
-            <span className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold whitespace-nowrap" style={{ borderColor: i === 0 ? accent : "var(--glass-border)", background: i === 0 ? `color-mix(in srgb, ${accent} 18%, transparent)` : "transparent", color: i === 0 ? "var(--foreground)" : "var(--muted-foreground)" }}>
-              {step.icon}{step.label}
-            </span>
-            {i < LADDER.length - 1 && <ChevronRight className="h-3 w-3" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
-          </li>
-        ))}
-      </ol>
+    <div className="flex w-full items-center gap-1 overflow-x-auto rounded-[var(--radius-lg)] p-1 [scrollbar-width:none]" style={{ background: "var(--glass-surface-2)" }} aria-label="My Profile sections">
+      {tabs.map((t) => {
+        const on = t === "Top Three";
+        return (
+          <span key={t} aria-current={on ? "page" : undefined} className="flex-1 rounded-[var(--radius-md)] px-3 py-2 text-center text-[13px] font-bold whitespace-nowrap" style={{ background: on ? "var(--color-brand-500)" : "transparent", color: on ? "#fff" : "var(--muted-foreground)" }}>{t}</span>
+        );
+      })}
     </div>
   );
 }
 
-/** Icon-only actions under each Top 3 card, one per rung, each with its
- *  tooltip (icon-only rule). Opens the real page; Back returns to the lab. */
-function CareerActions({ career }: { career: LabCareer }) {
-  const router = useRouter();
-  const slug = careerSlug(career.title);
-  return (
-    <div className="grid grid-cols-4 gap-1.5">
-      {LADDER.map((step) => (
-        <IconTip key={step.key} label={step.label} className="w-full">
-          <button type="button" aria-label={`${step.label}: ${career.title}`} onClick={() => router.push(step.href(slug))} className="dm-quiet flex h-9 w-full cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            {step.icon}
-          </button>
-        </IconTip>
-      ))}
-    </div>
-  );
-}
-
-/** The lab's My Profile > Top 3: Joshua's asks as written (prominent
- *  Explore more and Saved, obvious Remove and Replace), plus the answer to
- *  "what's next": a recommended next step for #1, the ladder, and actions
- *  on every card. Everything fits the viewport, never scrolls (direct
- *  feedback, 25 Sept 2026: "these cards get cropped by the bottom, this
- *  should never happen"): on desktop the three posters take whatever
- *  height is left; on phones the three become compact rows. The swap list
- *  opens as an overlay on the card so it never adds height. */
-export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPool, onRemove, onReplace, replacing, setReplacing }: {
+/** The lab's My Profile > Top Three, cut to what Joshua's note asks for
+ *  (26 Sept 2026, direct feedback on the fuller version: "This is so much
+ *  copy and so confusing"): the three picks side by side, ONE Change
+ *  control per card (swap in a saved career, or remove), and one row under
+ *  them with Saved and Explore more. No next-step card, no icon row, no
+ *  second button per card. A removed pick leaves its numbered slot. Fits
+ *  the viewport, never scrolls; phones get three compact rows. */
+export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPool, onRemove, onReplace, onNext }: {
+  /** the one next step after landing (the Career Report) */
+  onNext: () => void;
   top3: LabCareer[];
   pool: LabCareer[];
   poolLabel: string;
@@ -658,147 +639,87 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
   onOpenPool: () => void;
   onRemove: (id: string) => void;
   onReplace: (outId: string, inId: string) => void;
-  replacing: string | null;
-  setReplacing: (id: string | null) => void;
 }) {
-  const swappable = pool.filter((s) => !top3.some((t) => t.id === s.id));
-  // "You can change these later", shown instead of written (26 Sept 2026:
-  // the CEO wants it said everywhere; the user asked for "a better
-  // solution"): the careers that didn't make it sit on a bench right under
-  // the Top 3, and tapping one turns each pick into a "Swap in here"
-  // target. A lineup with a visible bench reads as changeable. Replace on
-  // #1 glints until the student edits anything.
-  const [incoming, setIncoming] = useState<string | null>(null);
-  const [edited, setEdited] = useState(false);
-  const incomingCareer = incoming ? swappable.find((c) => c.id === incoming) ?? null : null;
-  const swapHere = (c: LabCareer) => incomingCareer && (
-    // A light dim, not a blur: the pick being replaced has to stay readable.
-    <button type="button" aria-label={`Swap ${incomingCareer.title} in for ${c.title}`} onClick={() => { onReplace(c.id, incomingCareer.id); setIncoming(null); setEdited(true); }} className="group/swap absolute inset-0 z-[6] flex cursor-pointer items-center justify-center rounded-[var(--radius-lg)] border-2 border-dashed" style={{ borderColor: "var(--primary)", background: "rgba(5,8,20,0.28)" }}>
-      <span className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-bold text-white shadow-lg transition-transform group-hover/swap:scale-105" style={{ background: "var(--color-brand-500)" }}>
-        <ArrowLeftRight className="h-4 w-4" aria-hidden /> Swap in here
-      </span>
-    </button>
-  );
-  const bench = swappable.length > 0 && (
-    <div className="flex flex-none items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
-      <span className="flex-none text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Also saved</span>
-      {swappable.map((c) => {
-        const on = incoming === c.id;
-        return (
-          <button key={c.id} type="button" aria-pressed={on} onClick={() => setIncoming(on ? null : c.id)} className="dm-quiet flex flex-none cursor-pointer items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-[12px] font-bold whitespace-nowrap" style={{ borderColor: on ? "var(--primary)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: "var(--foreground)" }}>
-            <span className="relative size-7 flex-none overflow-hidden rounded-full"><LabPhoto career={c} sizes="28px" className="object-cover" /></span>
-            {c.title}
-            <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
-          </button>
-        );
-      })}
-    </div>
-  );
-  const swapList = (c: LabCareer) => (
-    <div className="absolute inset-0 z-[6] flex flex-col gap-1 overflow-y-auto rounded-[var(--radius-lg)] border p-2 backdrop-blur-md" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 92%, transparent)" }}>
+  const [changing, setChanging] = useState<string | null>(null);
+  const swappable = pool.filter((p) => !top3.some((t) => t.id === p.id));
+  // The Change menu opens over its own card, so it never adds height.
+  const menu = (c: LabCareer) => changing === c.id && (
+    <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 z-[6] flex flex-col gap-1 overflow-y-auto rounded-[var(--radius-lg)] border p-2 backdrop-blur-md" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 92%, transparent)" }}>
       <div className="flex items-center justify-between px-1">
-        <span className="text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Swap in</span>
-        <button type="button" aria-label="Cancel" onClick={() => setReplacing(null)} className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+        <span className="text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Swap for</span>
+        <button type="button" aria-label="Close" onClick={() => setChanging(null)} className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
       </div>
       {swappable.map((p) => (
-        <button key={p.id} type="button" onClick={() => { onReplace(c.id, p.id); setReplacing(null); setEdited(true); }} className="dm-quiet flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
-          {p.title} <ChevronRight className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+        <button key={p.id} type="button" onClick={() => { onReplace(c.id, p.id); setChanging(null); }} className="dm-quiet flex cursor-pointer items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+          <span className="relative size-7 flex-none overflow-hidden rounded-full"><LabPhoto career={p} sizes="28px" className="object-cover" /></span>
+          <span className="min-w-0 flex-1 truncate">{p.title}</span>
         </button>
       ))}
-    </div>
+      {swappable.length === 0 && <span className="px-2 py-1.5 text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Save more careers to swap one in.</span>}
+      <button type="button" onClick={() => { onRemove(c.id); setChanging(null); }} className="dm-quiet mt-auto flex cursor-pointer items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] font-semibold" style={{ color: "#E0453C" }}>
+        <X className="h-4 w-4" aria-hidden /> Remove from Top 3
+      </button>
+    </motion.div>
   );
-  const replaceBtn = (c: LabCareer, iconOnly: boolean) => {
-    const glint = !edited && top3[0]?.id === c.id && swappable.length > 0;
-    const btn = (
-      <button type="button" aria-label={`Replace ${c.title}`} onClick={() => setReplacing(replacing === c.id ? null : c.id)} disabled={swappable.length === 0} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold disabled:cursor-not-allowed disabled:opacity-40 ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-        <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />{!iconOnly && <span className={glint ? "dm-text-nudge" : undefined}>Replace</span>}
-      </button>
-    );
-    return iconOnly ? <IconTip label="Replace" className="w-full">{btn}</IconTip> : btn;
-  };
-  const removeBtn = (c: LabCareer, iconOnly: boolean) => {
-    const btn = (
-      <button type="button" aria-label={`Remove ${c.title}`} onClick={() => { onRemove(c.id); setEdited(true); }} className={`dm-quiet flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[12.5px] font-bold ${iconOnly ? "w-full" : "flex-1"}`} style={{ borderColor: "color-mix(in srgb, #E0453C 45%, transparent)", color: "#E0453C" }}>
-        <X className="h-3.5 w-3.5" aria-hidden />{!iconOnly && " Remove"}
-      </button>
-    );
-    return iconOnly ? <IconTip label="Remove" className="w-full">{btn}</IconTip> : btn;
-  };
+  const changeBtn = (c: LabCareer) => (
+    <button type="button" aria-label={`Change ${c.title}`} aria-expanded={changing === c.id} onClick={() => setChanging(changing === c.id ? null : c.id)} className="dm-quiet flex h-9 w-full flex-none cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+      <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Change
+    </button>
+  );
+  const empty = (n: number, row: boolean) => (
+    <button key={`empty-${n}`} type="button" onClick={onOpenPool} className={`dm-quiet flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-lg)] border-2 border-dashed p-3 ${row ? "flex-1" : "flex-col"}`} style={{ borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+      <span className="text-[26px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>#{n}</span>
+      <span className="flex items-center gap-1 text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Plus className="h-4 w-4" aria-hidden /> Add from {poolLabel}</span>
+    </button>
+  );
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 px-1">
-      <div className="flex flex-none flex-wrap items-center gap-2">
-        <PrimaryButton onClick={onExploreMore}>Explore more</PrimaryButton>
-        <QuietButton onClick={onOpenPool}><Bookmark className="h-4 w-4" aria-hidden /> {poolLabel} ({pool.length})</QuietButton>
+      {/* Desktop: three columns, the posters take the leftover height. */}
+      <div className="hidden min-h-0 flex-1 grid-cols-3 gap-3 sm:grid">
+        {top3.map((c, i) => (
+          <div key={c.id} className="relative flex min-h-0 flex-col gap-2">
+            <div className="relative min-h-0 flex-1"><LabCard career={c} control="rank" selected rank={i + 1} fill className="absolute inset-0" /></div>
+            {changeBtn(c)}
+            {menu(c)}
+          </div>
+        ))}
+        {Array.from({ length: 3 - top3.length }, (_, k) => empty(top3.length + k + 1, false))}
       </div>
-      {top3.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-dashed p-6 text-center" style={{ borderColor: "var(--glass-border)" }}>
-          <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No picks yet</p>
-        </div>
-      ) : (
-        <>
-          <NextStep first={top3[0]} />
-          {/* Desktop: three columns, the poster takes the leftover height. */}
-          <div className="hidden min-h-0 flex-1 grid-cols-3 gap-3 sm:grid">
-            {top3.map((c, i) => (
-              <div key={c.id} className="flex min-h-0 flex-col gap-2 rounded-[var(--radius-lg)] border p-2.5" style={CARD}>
-                <div className="relative min-h-0 flex-1">
-                  <LabCard career={c} control="rank" selected rank={i + 1} fill className="absolute inset-0" />
-                  {replacing === c.id && swapList(c)}
-                  {swapHere(c)}
-                </div>
-                <CareerActions career={c} />
-                <div className="flex flex-none gap-2">
-                  {replaceBtn(c, false)}
-                  {removeBtn(c, false)}
-                </div>
+      {/* Phone: three compact rows that share the leftover height. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-2 sm:hidden">
+        {top3.map((c, i) => {
+          const accent = WORLD_COLORS[c.world] ?? "var(--primary)";
+          return (
+            <div key={c.id} className="relative flex min-h-0 flex-1 items-center gap-3 rounded-[var(--radius-lg)] border p-2" style={CARD}>
+              <div className="relative aspect-[3/4] h-full max-h-[120px] flex-none overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: accent }}>
+                <LabPhoto career={c} sizes="96px" className="object-cover" />
+                <span className="absolute top-1 left-1 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold text-white" style={{ background: accent }}>{i + 1}</span>
               </div>
-            ))}
-            {/* A removed pick leaves its slot, showing where to refill it
-               (26 Sept 2026: "make it very clear how to remove or replace
-               any Top 3 career"). */}
-            {Array.from({ length: 3 - top3.length }, (_, k) => (
-              <button key={`empty-${k}`} type="button" onClick={onOpenPool} className="dm-quiet flex min-h-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border-2 border-dashed p-4 text-center" style={{ borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
-                <span className="text-[28px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>#{top3.length + k + 1}</span>
-                <span className="flex items-center gap-1 text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Plus className="h-4 w-4" aria-hidden /> Add from {poolLabel}</span>
-              </button>
-            ))}
-          </div>
-          {/* Phone: three compact rows that share the leftover height. */}
-          <div className="flex min-h-0 flex-1 flex-col gap-2 sm:hidden">
-            {top3.map((c, i) => {
-              const accent = WORLD_COLORS[c.world] ?? "var(--primary)";
-              return (
-                <div key={c.id} className="relative flex min-h-0 flex-1 items-stretch gap-2.5 rounded-[var(--radius-lg)] border p-2" style={CARD}>
-                  <div className="relative aspect-[3/4] h-full flex-none overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: accent }}>
-                    <LabPhoto career={c} sizes="96px" className="object-cover" />
-                    <span className="absolute top-1 left-1 flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold text-white" style={{ background: accent }}>{i + 1}</span>
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col justify-between gap-1.5">
-                    <div className="min-w-0">
-                      <p className="truncate text-[15px] leading-tight font-extrabold uppercase" style={{ ...posterTitleFont(c.world), color: "var(--poster-title)" }}>{c.title}</p>
-                      <p className="text-[9.5px] font-semibold tracking-[0.06em] uppercase" style={{ color: accent }}>{c.world}</p>
-                    </div>
-                    <CareerActions career={c} />
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {replaceBtn(c, true)}
-                      {removeBtn(c, true)}
-                    </div>
-                  </div>
-                  {replacing === c.id && swapList(c)}
-                  {swapHere(c)}
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-[15px] leading-tight font-extrabold uppercase" style={{ ...posterTitleFont(c.world), color: "var(--poster-title)" }}>{c.title}</p>
+                  <p className="text-[9.5px] font-semibold tracking-[0.06em] uppercase" style={{ color: accent }}>{c.world}</p>
                 </div>
-              );
-            })}
-            {Array.from({ length: 3 - top3.length }, (_, k) => (
-              <button key={`empty-${k}`} type="button" onClick={onOpenPool} className="dm-quiet flex min-h-0 flex-1 cursor-pointer items-center justify-center gap-3 rounded-[var(--radius-lg)] border-2 border-dashed p-3" style={{ borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
-                <span className="text-[22px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>#{top3.length + k + 1}</span>
-                <span className="flex items-center gap-1 text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Plus className="h-4 w-4" aria-hidden /> Add from {poolLabel}</span>
-              </button>
-            ))}
-          </div>
-          {bench}
-        </>
-      )}
+                {changeBtn(c)}
+              </div>
+              {menu(c)}
+            </div>
+          );
+        })}
+        {Array.from({ length: 3 - top3.length }, (_, k) => empty(top3.length + k + 1, true))}
+      </div>
+      {/* One next step, not a menu (26 Sept 2026: students "did not know
+         what to do after reaching my top 3"; games exist for one career
+         only, so Play can't be the default). The Career Report is the
+         first milestone of My Plan and works for every career, so it is
+         the primary action; Explore more sits beside it as the quieter
+         "keep exploring" nudge; Saved is the small third. The primary
+         glints until used. */}
+      <div className="flex flex-none flex-wrap items-center justify-end gap-2">
+        <QuietButton onClick={onOpenPool}><Bookmark className="h-4 w-4" aria-hidden /> {poolLabel} ({pool.length})</QuietButton>
+        <QuietButton onClick={onExploreMore}>Explore more</QuietButton>
+        {top3.length > 0 && <PrimaryButton onClick={onNext}><span className="dm-text-nudge">Create my Career Report</span> <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden /></PrimaryButton>}
+      </div>
     </div>
   );
 }

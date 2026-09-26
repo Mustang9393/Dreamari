@@ -44,7 +44,7 @@ import { ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
-import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
+import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "explore" | "rank" | "top3";
 type State = {
@@ -65,7 +65,7 @@ const MIN_TO_RANK = 3;
 
 const NOTES = {
   build: { heading: "Build, standing in", bullets: [
-    "Only shown when this browser has no Build answers. In the product these come from Build itself.",
+    "Shown when this browser has no Build answers, and after Restart (prefilled from Build) so a demo can try two worlds. In the product these come from Build itself; the lab never changes the real Build.",
     "Worlds are required; subjects and the college or trades answer sharpen the list.",
   ] },
   explore: { heading: "Save careers you like", bullets: [
@@ -81,20 +81,18 @@ const NOTES = {
     "The back arrow returns to browsing, where Save toggles a career.",
     "See my Top 3 sets them; they stay editable on the next screen.",
   ] },
-  top3: { heading: "My Top 3 and what happens next", bullets: [
-    "Next step: one recommended action for #1 (the Career Report). Start opens the real report page.",
-    "The four icons under each card open the real pages for that career: Report, Pathway, Play, Colleges.",
-    "Also saved, under the Top 3: tap one, then Swap in here on the pick it replaces. Replace and Remove on each card do the same from the card.",
-    "A removed pick leaves its numbered slot with Add from Saved.",
-    "Explore more and Saved go back to keep editing. Play again restarts the whole flow.",
+  top3: { heading: "My Profile: Top Three", bullets: [
+    "Ranking lands here, on the Top Three tab of My Profile, as in the real app. The tab row is shown, not wired: the lab never writes to the real profile.",
+    "Change on a card swaps in any saved career or removes it; a removed pick leaves its numbered slot.",
+    "Create my Career Report is the one next step: the first milestone of My Plan, and it works for every career (games exist for one career only). In the lab it says where it goes rather than opening the real app.",
+    "Explore more (back to browsing) and Saved (back to ranking) sit beside it, quieter. Restart (top right) plays the flow again.",
   ] },
 };
 
-export function V2Flow({ onRestart }: { onRestart: () => void }) {
+export function V2Flow({ askFirst = false }: { askFirst?: boolean }) {
   const [state, setState] = useState<State>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [replacing, setReplacing] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -102,12 +100,14 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     const build = buildSignals();
     // "saved" was its own step before 26 Sept 2026; it is part of Rank now.
     let next = (stored.step as string) === "saved" ? { ...stored, step: "rank" as Step } : stored;
-    if (stored.worlds.length === 0 && build.worlds.length > 0) next = { ...stored, worlds: build.worlds, subjects: build.subjects, path: build.path, fromBuild: true, step: "explore" };
+    if (stored.worlds.length === 0 && build.worlds.length > 0) next = { ...stored, worlds: build.worlds, subjects: build.subjects, path: build.path, fromBuild: true, step: askFirst ? "interests" : "explore" };
     // Default to the strongest (first chosen) world, never a leftover tab.
     if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_ALL) next = { ...next, activeTab: next.worlds[0] ?? "" };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only storage read after mount, same pattern as the counselor version chip
     setState(next);
     setHydrated(true);
+    // Mount-only: askFirst is fixed for this instance (FlowLab remounts on Restart).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (hydrated) writeLabState(state);
@@ -134,6 +134,14 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
   // one first" wall (26 Sept 2026: ranking "should be obvious and
   // reassuring that this doesn't lock them in forever").
   const [incomingRank, setIncomingRank] = useState<string | null>(null);
+  // Set only on the way in from ranking, so the one "change it anytime"
+  // confirmation shows at that moment and not on later visits.
+  const [arrived, setArrived] = useState(false);
+  useEffect(() => {
+    if (!arrived) return;
+    const t = window.setTimeout(() => setArrived(false), 3500);
+    return () => window.clearTimeout(t);
+  }, [arrived]);
   const assign = (id: string) => {
     if (!state.rank.includes(id) && state.rank.length >= 3) { setIncomingRank((cur) => (cur === id ? null : id)); return; }
     setIncomingRank(null);
@@ -252,7 +260,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
           // "See", not "Confirm": a lower-stakes word for a choice that stays editable.
           cta={left > 0 ? `Pick ${left} more` : "See my Top 3"}
           ctaDisabled={left > 0 || need === 0}
-          onCta={() => go("top3")}
+          onCta={() => { setArrived(true); go("top3"); }}
         />
         <Toast text={toast} />
         <AnimatePresence>
@@ -267,7 +275,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
   // ---- My Profile: Top 3 ----
   return (
     <>
-      <LabScreen title="My Top 3" note={NOTES.top3}>
+      <LabScreen title="My Profile" note={NOTES.top3} controls={<ProfileTabs />}>
         <TopThreeScreen
           top3={top3}
           pool={savedCareers}
@@ -276,11 +284,16 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
           onOpenPool={() => go("rank")}
           onRemove={(id) => setState((s) => ({ ...s, rank: s.rank.filter((x) => x !== id) }))}
           onReplace={(outId, inId) => setState((s) => ({ ...s, rank: s.rank.map((x) => (x === outId ? inId : x)) }))}
-          replacing={replacing}
-          setReplacing={setReplacing}
+          // The lab never writes to the real app, and the real report page
+          // saves picks on confirm, so the lab says where this goes instead
+          // of opening it.
+          onNext={() => setToast("In the app, this opens the Career Report for your Top 3.")}
         />
       </LabScreen>
-      <BottomBar status="You can change these anytime." cta="Play again" onCta={onRestart} />
+      {/* "Change it anytime", said once, as a brief toast on arrival: the
+          feedback for the action that just happened, gone in a few
+          seconds. No bottom bar here: Restart is in the header. */}
+      <Toast low text={toast ?? (arrived ? "Saved to My Profile. Change it anytime." : null)} />
     </>
   );
 }

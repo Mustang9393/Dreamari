@@ -15,7 +15,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { RotateCcw, ArrowLeft } from "lucide-react";
-import { QuickLinksMenu, Wordmark, useScrolled } from "@/components/app/chrome";
+import { QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { IconTip } from "@/components/app/IconTip";
 import { InfoButton, InfoSheet } from "./notes";
 import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
@@ -48,7 +48,7 @@ export function FlowLab() {
   // through the header"). No border or shadow of its own so it reads as one
   // continuous frosted band with the screen's own sticky sub-header right
   // beneath it, not two stacked bars with a seam between them.
-  const scrolled = useScrolled(4);
+
 
   return (
     <ThemeProvider>
@@ -59,16 +59,16 @@ export function FlowLab() {
         <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
         <BackgroundSpace />
         <AuroraBackground accent="#2f6bf2" visitedAccents={[]} finale={false} lightning={false} />
+        {/* No header bar (26 Sept 2026: "I really don't like these black
+            borders"): the buttons are glass circles that float on their own,
+            and this soft fade behind them keeps them readable over photos
+            without a hard edge. */}
+        <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-[15] h-[92px]" style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--background) 78%, transparent) 0%, color-mix(in srgb, var(--background) 40%, transparent) 55%, transparent 100%)" }} />
         {/* Fixed header, like FlowChrome on Match: wordmark left; right, the
             lab label, the (i) note, and the app's own hamburger so the
             quick links (the demo, other labs) are one tap away. */}
         <header
           className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-center justify-between px-4 py-3 transition-[background-color,backdrop-filter] duration-300 sm:px-6"
-          style={{
-            background: scrolled ? "color-mix(in srgb, var(--background) 70%, transparent)" : "transparent",
-            backdropFilter: scrolled ? "blur(20px) saturate(1.6)" : "none",
-            WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.6)" : "none",
-          }}
         >
           <div className="pointer-events-auto flex items-center gap-3">
             <IconTip label="Back to the app">
@@ -92,7 +92,11 @@ export function FlowLab() {
         <InfoSheet screen={screenNote} open={infoOpen} onClose={() => setInfoOpen(false)} />
         <LabInfoContext.Provider value={setScreenNote}>
           <div style={{ color: "var(--foreground)" }}>
-            <V2Flow key={resetKey} onRestart={restart} />
+            {/* After Restart, the lab asks its own Build questions first,
+                prefilled from Build, so a demo can pick two worlds without
+                touching the real Build (asked: "is there a reason we're
+                showing only one career world?"). */}
+            <V2Flow key={resetKey} askFirst={resetKey > 0} />
           </div>
         </LabInfoContext.Provider>
       </div>
