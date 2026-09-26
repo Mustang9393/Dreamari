@@ -23,6 +23,20 @@
 // "'EXPLORE MORE' -> 'EXPLORE ALL': this section is really allowing
 // students to browse outside their selected industries" -- renamed, same
 // job (a world picker for everything outside their two).
+//
+// 26 Sept 2026, "we can make things so intuitive without it being text
+// heavy" (Joshua, on coachmarks: "maybe... as needed, case by case"). No
+// coachmarks and no hint lines; the screens teach themselves:
+// - Titles state the task ("Save careers you like", "Pick your top 3").
+// - The card's Save control is a labeled pill, pulsing softly on the first
+//   card until the first save.
+// - The bottom bar's tray shows seven slots filling with each save: the
+//   limit is visible, not stated.
+// - The CTA says what it is waiting for: "Save 3 to rank", "Save 2 more",
+//   then "Rank my top 3"; "Pick 2 more", then "Confirm Top 3".
+// - Saved and Rank are one screen: three empty #1 #2 #3 slots above the
+//   saved cards fill in tap order. One step fewer, and ranking shows how it
+//   works.
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
@@ -30,9 +44,9 @@ import { ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
-import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, QuietButton, RevealGrid, Toast, TopThreeScreen } from "./shared";
+import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
-type Step = "interests" | "explore" | "saved" | "rank" | "top3";
+type Step = "interests" | "explore" | "rank" | "top3";
 type State = {
   step: Step;
   worlds: string[];
@@ -46,31 +60,30 @@ type State = {
 };
 const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", saved: [], rank: [] };
 const EXPLORE_ALL = "Explore all";
+/** Saves needed before ranking: the next screen asks for #1, #2 and #3. */
+const MIN_TO_RANK = 3;
 
 const NOTES = {
   build: { heading: "Build, standing in", bullets: [
     "Only shown when this browser has no Build answers. In the product these come from Build itself.",
     "Worlds are required; subjects and the college or trades answer sharpen the list.",
   ] },
-  explore: { heading: "Mini Explore", bullets: [
+  explore: { heading: "Save careers you like", bullets: [
     "Opens on your strongest world; your second world is the next tab. A chip on each card says why it's there.",
     "Explore all is for browsing outside your two worlds: pick any other industry and browse the same way.",
-    "Tap a card for details. Tap the bookmark to save it, up to 7.",
+    "Tap a card for details. Save adds it to the tray at the bottom, up to 7; the empty slots show how many are left.",
     "Scroll for more. The next careers load in on their own.",
+    "The button says what it needs: save 3 to rank your top 3.",
   ] },
-  saved: { heading: "Saved", bullets: [
-    "Everything you bookmarked, in one place. Tap the bookmark again to remove.",
-    "Rank my top 3 when you're ready; the back arrow returns to Mini Explore.",
-  ] },
-  rank: { heading: "Rank your top 3", bullets: [
-    "Tap + in the order you want them: first tap is #1. Tap again to undo.",
+  rank: { heading: "Pick your top 3", bullets: [
+    "Your saved careers, with three empty slots above them. Tap a card to fill the next slot: first tap is #1.",
+    "Tap a filled slot to clear it. The back arrow returns to browsing, where Save toggles a career.",
     "Confirm Top 3 sets them; you can still change them on the next screen.",
   ] },
   top3: { heading: "My Top 3 and what happens next", bullets: [
     "Next step: one recommended action for #1 (the Career Report). Start opens the real report page.",
-    "The ladder under it is the same order of milestones the counselor dashboard tracks: Career Report, Pathway, Play a day, Colleges.",
     "The four icons under each card open the real pages for that career: Report, Pathway, Play, Colleges.",
-    "Replace swaps a pick for anything in Saved; Remove clears the slot.",
+    "Replace swaps a pick for anything saved; Remove clears the slot, and the empty slot offers Add from Saved.",
     "Explore more and Saved go back to keep editing. Play again restarts the whole flow.",
   ] },
 };
@@ -85,7 +98,8 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
   useEffect(() => {
     const stored = readLabState<State>(EMPTY);
     const build = buildSignals();
-    let next = stored;
+    // "saved" was its own step before 26 Sept 2026; it is part of Rank now.
+    let next = (stored.step as string) === "saved" ? { ...stored, step: "rank" as Step } : stored;
     if (stored.worlds.length === 0 && build.worlds.length > 0) next = { ...stored, worlds: build.worlds, subjects: build.subjects, path: build.path, fromBuild: true, step: "explore" };
     // Default to the strongest (first chosen) world, never a leftover tab.
     if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_ALL) next = { ...next, activeTab: next.worlds[0] ?? "" };
@@ -145,16 +159,15 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     const moreWorld = others.includes(state.moreWorld) ? state.moreWorld : others[0];
     const world = isAll ? moreWorld : state.activeTab;
     const ranked: Ranked[] = rankForStudent(world, signals);
-    const open = openId ? ranked.find((r) => r.career.id === openId) : null;
+    const open = openId ? (ranked.find((r) => r.career.id === openId) ?? (careerById(openId) ? { career: careerById(openId)!, reason: "", score: 0 } as Ranked : null)) : null;
     const openIdx = open ? ranked.indexOf(open) : -1;
+    const setOpenIdFromTray = (id: string) => setOpenId(id);
     return (
       <>
         <LabScreen
           scrollable
           note={NOTES.explore}
-          title="Mini Explore"
-          status={`${state.saved.length} of ${MAX_SAVED}`}
-          hint="Tap a card for details. Tap the bookmark to save it."
+          title="Save careers you like"
           controls={
             <div className="flex flex-col gap-2">
               <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key }))} options={tabs} />
@@ -165,20 +178,26 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
           <RevealGrid
             items={ranked}
             resetKey={world}
-            renderItem={(r) => (
+            renderItem={(r, i) => (
               <LabCard
                 key={r.career.id}
                 career={r.career}
                 control="save"
                 selected={state.saved.includes(r.career.id)}
                 reason={r.reason}
+                nudge={i === 0 && state.saved.length === 0}
                 onToggle={() => toggleSave(r.career.id)}
                 onOpen={() => setOpenId(r.career.id)}
               />
             )}
           />
         </LabScreen>
-        <BottomBar status={state.saved.length === 0 ? `Save up to ${MAX_SAVED}.` : `${state.saved.length} saved.`} cta="Continue" ctaDisabled={state.saved.length === 0} onCta={() => go("saved")} />
+        <BottomBar
+          status={<PicksTray saved={savedCareers} max={MAX_SAVED} onOpen={setOpenIdFromTray} />}
+          cta={state.saved.length === 0 ? `Save ${MIN_TO_RANK} to rank` : state.saved.length < MIN_TO_RANK ? `Save ${MIN_TO_RANK - state.saved.length} more` : "Rank my top 3"}
+          ctaDisabled={state.saved.length < MIN_TO_RANK}
+          onCta={() => go("rank")}
+        />
         <Toast text={toast} />
         <AnimatePresence>
           {open && (
@@ -189,14 +208,15 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
     );
   }
 
-  // ---- Saved / Rank ----
-  if (state.step === "saved" || state.step === "rank") {
-    const ranking = state.step === "rank";
+  // ---- Rank: saved careers and three slots, one screen ----
+  if (state.step === "rank") {
     const open = openId ? savedCareers.find((c) => c.id === openId) : null;
     const openIdx = open ? savedCareers.indexOf(open) : -1;
+    const need = Math.min(3, savedCareers.length);
+    const left = need - state.rank.length;
     return (
       <>
-        <LabScreen note={ranking ? NOTES.rank : NOTES.saved} title={ranking ? "Rank your top 3" : "Saved"} status={ranking ? `${state.rank.length} of 3` : `${savedCareers.length} of ${MAX_SAVED}`} hint={ranking ? "Tap + in the order you want them." : "Tap a card for details. Tap the bookmark to remove it."}>
+        <LabScreen note={NOTES.rank} title="Pick your top 3" controls={<RankSlots picks={top3} onClear={(id) => assign(id)} />}>
           {savedCareers.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-dashed text-center" style={{ borderColor: "var(--glass-border)" }}>
               <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet</p>
@@ -206,27 +226,22 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
                 {savedCareers.map((c) => {
                   const pos = state.rank.indexOf(c.id);
-                  return ranking ? (
-                    <LabCard key={c.id} career={c} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} onToggle={() => assign(c.id)} onOpen={() => setOpenId(c.id)} />
-                  ) : (
-                    <LabCard key={c.id} career={c} control="save" selected onToggle={() => toggleSave(c.id)} onOpen={() => setOpenId(c.id)} />
-                  );
+                  return <LabCard key={c.id} career={c} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} onToggle={() => assign(c.id)} onOpen={() => setOpenId(c.id)} />;
                 })}
               </div>
             </div>
           )}
         </LabScreen>
         <BottomBar
-          left={<QuietButton ariaLabel={ranking ? "Back to Saved" : "Back to Mini Explore"} onClick={() => go(ranking ? "saved" : "explore")}><ChevronLeft className="h-4 w-4" aria-hidden /></QuietButton>}
-          status={ranking ? (state.rank.length === 3 ? "Your Top 3 is set." : "Choose your #1, #2 and #3.") : "Rank when you're ready."}
-          cta={ranking ? "Confirm Top 3" : "Rank my top 3"}
-          ctaDisabled={ranking ? state.rank.length === 0 : savedCareers.length === 0}
-          onCta={() => go(ranking ? "top3" : "rank")}
+          left={<QuietButton ariaLabel="Back to browsing" onClick={() => go("explore")}><ChevronLeft className="h-4 w-4" aria-hidden /></QuietButton>}
+          cta={left > 0 ? `Pick ${left} more` : "Confirm Top 3"}
+          ctaDisabled={left > 0 || need === 0}
+          onCta={() => go("top3")}
         />
         <Toast text={toast} />
         <AnimatePresence>
           {open && (
-            <DetailModal career={open} control={ranking ? "pick" : "save"} selected={ranking ? state.rank.includes(open.id) : true} full={ranking ? state.rank.length >= 3 : false} onToggle={() => (ranking ? assign(open.id) : toggleSave(open.id))} onClose={() => setOpenId(null)} onPrev={openIdx > 0 ? () => setOpenId(savedCareers[openIdx - 1].id) : undefined} onNext={openIdx < savedCareers.length - 1 ? () => setOpenId(savedCareers[openIdx + 1].id) : undefined} />
+            <DetailModal career={open} control="pick" selected={state.rank.includes(open.id)} full={state.rank.length >= 3} onToggle={() => assign(open.id)} onClose={() => setOpenId(null)} onPrev={openIdx > 0 ? () => setOpenId(savedCareers[openIdx - 1].id) : undefined} onNext={openIdx < savedCareers.length - 1 ? () => setOpenId(savedCareers[openIdx + 1].id) : undefined} />
           )}
         </AnimatePresence>
       </>
@@ -242,7 +257,7 @@ export function V2Flow({ onRestart }: { onRestart: () => void }) {
           pool={savedCareers}
           poolLabel="Saved"
           onExploreMore={() => go("explore")}
-          onOpenPool={() => go("saved")}
+          onOpenPool={() => go("rank")}
           onRemove={(id) => setState((s) => ({ ...s, rank: s.rank.filter((x) => x !== id) }))}
           onReplace={(outId, inId) => setState((s) => ({ ...s, rank: s.rank.map((x) => (x === outId ? inId : x)) }))}
           replacing={replacing}

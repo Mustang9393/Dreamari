@@ -7,8 +7,11 @@
 // general design/architecture rule across Dreamari, I want to avoid
 // instructional pop-ups unless absolutely necessary... the interface itself
 // should make the next action obvious through copy, hierarchy, and
-// placement"); the persistent hint line under each header carries that job
-// instead.
+// placement"). 26 Sept 2026: no hint lines either. Each screen teaches
+// itself through its own controls: the title states the task, the Save
+// control says "Save", the bottom tray's empty slots show the limit, the
+// CTA says what it is waiting for ("Save 2 more"), and the rank screen's
+// three empty slots show how ranking works.
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
@@ -107,13 +110,13 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
 }
 
 /** Match's sticky bar: one status line left, one CTA right. */
-export function BottomBar({ status, cta, onCta, ctaDisabled, left }: { status: string; cta: string; onCta: () => void; ctaDisabled?: boolean; left?: ReactNode }) {
+export function BottomBar({ status, cta, onCta, ctaDisabled, left }: { status?: ReactNode; cta: string; onCta: () => void; ctaDisabled?: boolean; left?: ReactNode }) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t px-4 py-3" style={{ background: "color-mix(in srgb, var(--background) 94%, transparent)", borderColor: "var(--glass-border)" }}>
       <div className="flex w-full max-w-[880px] items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           {left}
-          <p className="truncate text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{status}</p>
+          {typeof status === "string" ? <p className="truncate text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{status}</p> : status}
         </div>
         <button type="button" onClick={onCta} disabled={ctaDisabled} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-[var(--radius-md)] px-5 text-[14px] font-bold whitespace-nowrap text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--color-brand-500)" }}>
           {cta} <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
@@ -205,7 +208,7 @@ export type LabControl = "save" | "pick" | "rank";
  *  INSIDE the card. Card click opens the detail modal; the control toggles.
  *  `fill` stretches to a grid cell (Match's six-up); otherwise the poster
  *  ratio. */
-export function LabCard({ career, control, selected, rank, onToggle, onOpen, reason, fill = false, className = "" }: {
+export function LabCard({ career, control, selected, rank, onToggle, onOpen, reason, fill = false, nudge = false, className = "" }: {
   career: LabCareer;
   control: LabControl;
   selected: boolean;
@@ -214,12 +217,30 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
   onOpen?: () => void;
   reason?: string | null;
   fill?: boolean;
+  /** a soft pulse on the Save control, used on the first card until the
+   *  student's first save: motion, not a pop-up */
+  nudge?: boolean;
   className?: string;
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const label = control === "save" ? (selected ? `Unsave ${career.title}` : `Save ${career.title}`) : control === "pick" ? (selected ? `Remove ${career.title} from your Top 3` : `Add ${career.title} to your Top 3`) : `#${rank} ${career.title}`;
   const tip = control === "save" ? (selected ? "Unsave" : "Save") : control === "pick" ? (selected ? "Remove from Top 3" : "Add to Top 3") : `#${rank}`;
-  const controlEl = control === "rank" ? (
+  // Save is a labeled pill, not a bare bookmark (26 Sept 2026): with no
+  // coachmarks, the control has to say what it does.
+  const controlEl = control === "save" ? (
+    <button
+      type="button"
+      aria-pressed={selected}
+      aria-label={label}
+      onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
+      className="relative flex h-8 cursor-pointer items-center gap-1 rounded-full border-2 px-2.5 text-[12px] font-bold text-white backdrop-blur-md transition-transform active:scale-90"
+      style={{ background: selected ? accent : "color-mix(in srgb, var(--background) 60%, transparent)", borderColor: selected ? accent : "rgba(255,255,255,0.55)" }}
+    >
+      {nudge && !selected && <span aria-hidden className="pointer-events-none absolute -inset-[3px] animate-ping rounded-full border-2" style={{ borderColor: "rgba(255,255,255,0.7)", animationDuration: "1.8s" }} />}
+      {selected ? <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /> : <Bookmark className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />}
+      {selected ? "Saved" : "Save"}
+    </button>
+  ) : control === "rank" ? (
     <span aria-label={label} className="flex size-8 items-center justify-center rounded-full border-2 text-[13px] font-extrabold text-white" style={{ background: accent, borderColor: accent }}>{rank}</span>
   ) : (
     <button
@@ -260,7 +281,7 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
           <p className="text-[9px] font-semibold tracking-[0.06em]" style={{ fontFamily: "var(--font-body)", color: accent }}>{career.world}</p>
         </div>
       </div>
-      <div className="pointer-events-none absolute top-2 left-2 z-[1] flex max-w-[calc(100%-56px)] flex-wrap gap-1">
+      <div className={`pointer-events-none absolute top-2 left-2 z-[1] flex flex-wrap gap-1 ${control === "save" ? "max-w-[calc(100%-96px)]" : "max-w-[calc(100%-56px)]"}`}>
         {reason && (
           <span className="truncate rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md" style={{ color: "var(--poster-title)", borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{reason}</span>
         )}
@@ -268,7 +289,82 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
           <span className="rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md" style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{career.salary}</span>
         )}
       </div>
-      <IconTip label={tip} className="absolute top-2 right-2 z-[2]">{controlEl}</IconTip>
+      {control === "save" ? <span className="absolute top-2 right-2 z-[2]">{controlEl}</span> : <IconTip label={tip} className="absolute top-2 right-2 z-[2]">{controlEl}</IconTip>}
+    </div>
+  );
+}
+
+/** The bottom bar's saved tray: one slot per save allowed, filled with the
+ *  saved career's photo. The empty slots ARE the "up to 7" rule, so no
+ *  counter or hint line has to say it. */
+export function PicksTray({ saved, max, onOpen }: { saved: LabCareer[]; max: number; onOpen?: (id: string) => void }) {
+  return (
+    <div className="flex items-center gap-1 sm:gap-1.5" role="img" aria-label={`${saved.length} of ${max} saved`}>
+      {Array.from({ length: max }, (_, i) => {
+        const c = saved[i];
+        return c ? (
+          <motion.button
+            key={c.id}
+            type="button"
+            aria-label={`Open ${c.title}`}
+            onClick={() => onOpen?.(c.id)}
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 420, damping: 22 }}
+            className="relative size-7 flex-none cursor-pointer overflow-hidden rounded-full border-2 sm:size-8"
+            style={{ borderColor: WORLD_COLORS[c.world] ?? "var(--primary)" }}
+          >
+            <LabPhoto career={c} sizes="32px" className="object-cover" />
+          </motion.button>
+        ) : (
+          <span key={`empty-${i}`} aria-hidden className="size-7 flex-none rounded-full border-2 border-dashed sm:size-8" style={{ borderColor: "color-mix(in srgb, var(--foreground) 22%, transparent)" }} />
+        );
+      })}
+    </div>
+  );
+}
+
+/** The rank screen's three slots: #1, #2, #3 fill in the order cards are
+ *  tapped, and tapping a filled slot clears it. The empty slots show how
+ *  ranking works without a sentence explaining it. */
+export function RankSlots({ picks, onClear }: { picks: LabCareer[]; onClear: (id: string) => void }) {
+  return (
+    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      {[0, 1, 2].map((i) => {
+        const c = picks[i];
+        const next = i === picks.length;
+        return (
+          <div key={i} className="relative">
+            <AnimatePresence mode="popLayout">
+              {c ? (
+                <motion.button
+                  key={c.id}
+                  type="button"
+                  aria-label={`#${i + 1} ${c.title}. Tap to clear`}
+                  onClick={() => onClear(c.id)}
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 380, damping: 26 }}
+                  className="group relative flex h-[68px] w-full cursor-pointer items-center gap-2 overflow-hidden rounded-[var(--radius-md)] border-2 p-1.5 pr-2 text-left sm:h-[76px]"
+                  style={{ borderColor: WORLD_COLORS[c.world] ?? "var(--primary)", background: "var(--card)" }}
+                >
+                  <span className="relative aspect-[3/4] h-full flex-none overflow-hidden rounded-[var(--radius-sm)]"><LabPhoto career={c} sizes="56px" className="object-cover" /></span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-[18px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: WORLD_COLORS[c.world] ?? "var(--primary)" }}>#{i + 1}</span>
+                    <span className="line-clamp-2 text-[11.5px] leading-[14px] font-bold" style={{ color: "var(--foreground)" }}>{c.title}</span>
+                  </span>
+                  <X className="absolute top-1.5 right-1.5 h-3.5 w-3.5 opacity-60 group-hover:opacity-100" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                </motion.button>
+              ) : (
+                <motion.div key={`empty-${i}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex h-[68px] w-full items-center justify-center rounded-[var(--radius-md)] border-2 border-dashed sm:h-[76px]" style={{ borderColor: next ? "color-mix(in srgb, var(--primary) 70%, transparent)" : "color-mix(in srgb, var(--foreground) 20%, transparent)", background: next ? "color-mix(in srgb, var(--primary) 8%, transparent)" : "transparent" }}>
+                  <span className="text-[22px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: next ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 30%, transparent)" }}>#{i + 1}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -611,6 +707,15 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
                 </div>
               </div>
             ))}
+            {/* A removed pick leaves its slot, showing where to refill it
+               (26 Sept 2026: "make it very clear how to remove or replace
+               any Top 3 career"). */}
+            {Array.from({ length: 3 - top3.length }, (_, k) => (
+              <button key={`empty-${k}`} type="button" onClick={onOpenPool} className="dm-quiet flex min-h-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border-2 border-dashed p-4 text-center" style={{ borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+                <span className="text-[28px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>#{top3.length + k + 1}</span>
+                <span className="flex items-center gap-1 text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Plus className="h-4 w-4" aria-hidden /> Add from {poolLabel}</span>
+              </button>
+            ))}
           </div>
           {/* Phone: three compact rows that share the leftover height. */}
           <div className="flex min-h-0 flex-1 flex-col gap-2 sm:hidden">
@@ -637,6 +742,12 @@ export function TopThreeScreen({ top3, pool, poolLabel, onExploreMore, onOpenPoo
                 </div>
               );
             })}
+            {Array.from({ length: 3 - top3.length }, (_, k) => (
+              <button key={`empty-${k}`} type="button" onClick={onOpenPool} className="dm-quiet flex min-h-0 flex-1 cursor-pointer items-center justify-center gap-3 rounded-[var(--radius-lg)] border-2 border-dashed p-3" style={{ borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+                <span className="text-[22px] leading-none font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>#{top3.length + k + 1}</span>
+                <span className="flex items-center gap-1 text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Plus className="h-4 w-4" aria-hidden /> Add from {poolLabel}</span>
+              </button>
+            ))}
           </div>
         </>
       )}
