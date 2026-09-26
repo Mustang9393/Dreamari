@@ -241,6 +241,10 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
   className?: string;
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+  // Median pay on the card itself (26 Sept 2026: "we can show median salary
+  // on these match cards too"), from the same sources the detail modal
+  // uses, shortened to "$98K".
+  const pay = shortPay(career.salary ?? matchDetail(career).salary);
   const label = control === "save" ? (selected ? `Unsave ${career.title}` : `Save ${career.title}`) : control === "pick" ? (selected ? `Remove ${career.title} from your Top 3` : `Add ${career.title} to your Top 3`) : `#${rank} ${career.title}`;
   const tip = control === "save" ? (selected ? "Unsave" : "Save") : control === "pick" ? (selected ? "Remove from Top 3" : "Add to Top 3") : `#${rank}`;
   // Save is a labeled pill, not a bare bookmark (26 Sept 2026): with no
@@ -304,15 +308,14 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
           </BorderBeam>
           <p className="line-clamp-3 [overflow-wrap:normal] [word-break:keep-all]" style={{ ...posterTitleFont(career.world), fontSize: 17, lineHeight: 1.15, color: "var(--poster-title)" }}>{career.title.replace(/-/g, "-​")}</p>
           <p className="text-[9px] font-semibold tracking-[0.06em]" style={{ fontFamily: "var(--font-body)", color: accent }}>{career.world}</p>
+          {pay && <p className="text-[11.5px] font-bold normal-case tabular-nums" style={{ fontFamily: "var(--font-body)", color: SUCCESS }}>{pay} median</p>}
         </div>
       </div>
       <div className={`pointer-events-none absolute top-2 left-2 z-[1] flex flex-wrap gap-1 ${control === "save" ? "max-w-[calc(100%-96px)]" : "max-w-[calc(100%-56px)]"}`}>
         {reason && (
           <span className="truncate rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md" style={{ color: "var(--poster-title)", borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{reason}</span>
         )}
-        {career.salary && (
-          <span className="rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md" style={{ color: SUCCESS, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{career.salary}</span>
-        )}
+
       </div>
       {control === "save" ? <span className="absolute top-2 right-2 z-[2]">{controlEl}</span> : <IconTip label={tip} className="absolute top-2 right-2 z-[2]">{controlEl}</IconTip>}
     </div>
@@ -402,6 +405,18 @@ export function RankSlots({ picks, onClear, incoming, onSwap }: { picks: LabCare
       })}
     </div>
   );
+}
+
+/** "$98,340" or "$98,340 per year" -> "$98K"; null when there is no figure. */
+function shortPay(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  // Already short ("$136K median" in Match's deck): keep the "$136K".
+  const k = raw.match(/\$\s*(\d+(?:\.\d+)?)\s*K/i);
+  if (k) return `$${Math.round(Number(k[1]))}K`;
+  const m = raw.replace(/,/g, "").match(/\$?\s*(\d{4,7})/);
+  if (!m) return raw.length <= 10 ? raw : null;
+  const n = Number(m[1]);
+  return n >= 1000 ? `$${Math.round(n / 1000)}K` : `$${n}`;
 }
 
 // ------------------------------------------------------------ continuous ----
