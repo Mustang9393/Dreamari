@@ -149,15 +149,17 @@ function LabDock() {
       {/* Phones and tablets: one chip, a menu on tap. Solid, no backdrop
          blur and a fixed height: iPhone Safari stretched the blurred dock
          into a screen-tall pill over the reel (direct report, 26 Sept 2026). */}
-      <div className="fixed bottom-[92px] left-3 z-[91] flex h-auto flex-col items-start gap-2 lg:hidden">
+      {/* Top left, under the For You / Browse all header: at the bottom it
+         sat on top of the reel's Play Game button. */}
+      <div className="fixed top-[64px] left-3 z-[91] flex h-auto flex-col items-start gap-2 lg:hidden">
+        <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-[11px] font-bold tracking-[0.06em] uppercase shadow-lg" style={{ ...shell, background: "var(--card)", color: "var(--primary)" }}>
+          Lab{network !== "normal" && <span className="normal-case tracking-normal" style={{ color: "var(--foreground)" }}>· {network === "slow" ? "Slow" : "Fails"}</span>}
+        </button>
         {open && (
           <div className="flex h-9 items-center gap-1 rounded-full border p-1 text-[11.5px] font-bold shadow-lg" style={{ ...shell, background: "var(--card)" }}>
             {choices(() => setOpen(false))}
           </div>
         )}
-        <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-[11px] font-bold tracking-[0.06em] uppercase shadow-lg" style={{ ...shell, background: "var(--card)", color: "var(--primary)" }}>
-          Lab{network !== "normal" && <span className="normal-case tracking-normal" style={{ color: "var(--foreground)" }}>· {network === "slow" ? "Slow" : "Fails"}</span>}
-        </button>
       </div>
     </>
   );

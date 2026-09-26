@@ -186,10 +186,14 @@
 /* Shadow kept tight (extends ~4px) so a card lifting inside a padded scroll
    rail isn't sliced off at the rail's edge; the old 12/28px shadow was cut on
    every overflow-x-auto shelf in the app. */
+/* Hover rules only on hover-capable pointers: on a phone a tap would
+   otherwise leave the card "stuck" hovered after the finger lifts. */
+@media (hover: hover) {
 .dm-tap:hover {
   border-color: color-mix(in srgb, var(--accent-subtle) 50%, var(--glass-border)) !important;
   transform: translateY(-1px);
   box-shadow: 0 6px 16px -12px rgb(0 0 0 / 0.85);
+}
 }
 .dm-tap:active {
   transform: translateY(0);
@@ -212,10 +216,12 @@
     border-radius: var(--radius-sm, 8px);
   }
 }
+@media (hover: hover) {
 .dm-quiet:hover {
   background: var(--glass-surface-2) !important;
   color: var(--foreground) !important;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--foreground) 14%, transparent);
+}
 }
 .dm-quiet:active {
   background: color-mix(in srgb, var(--foreground) 12%, transparent) !important;
@@ -230,9 +236,11 @@
   transition: color 140ms ease;
   text-decoration: none;
 }
+@media (hover: hover) {
 .dm-link:hover {
   color: var(--accent-subtle) !important;
   text-decoration: none;
+}
 }
 
 /* A secondary action nested inside a bigger clickable card (Overview's own
@@ -246,17 +254,21 @@
   padding: 4px 8px;
   border-radius: 6px;
 }
+@media (hover: hover) {
 .dm-chip-hover:hover {
   background: color-mix(in srgb, var(--accent-subtle) 14%, transparent);
+}
 }
 
 /* Solid buttons keep their fill and lift instead. */
 .dm-solid {
   transition: filter 140ms ease, transform 140ms ease;
 }
+@media (hover: hover) {
 .dm-solid:hover {
   filter: brightness(1.05);
   transform: translateY(-1px);
+}
 }
 .dm-solid:active {
   transform: translateY(0);

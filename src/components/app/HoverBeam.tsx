@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { BorderBeam } from "border-beam";
+import { isKeyboardFocus } from "./IconTip";
 
 /**
  * Site-wide card hover treatment (direct feedback, 9 Sept 2026): the same
@@ -40,7 +41,7 @@ export function HoverBeam({
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
+      onFocus={(e) => { if (isKeyboardFocus(e.target)) setHovered(true); }}
       onBlur={() => setHovered(false)}
       className={`h-full ${className ?? ""}`}
     >

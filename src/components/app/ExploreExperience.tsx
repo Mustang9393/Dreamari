@@ -3,13 +3,13 @@
  
 
 import Image from "next/image";
-import { motion, useMotionValue, animate as animateValue } from "framer-motion";
+import { motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Minus, Plus, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Check, Heart, Plus, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { useSavedCareers } from "@/lib/savedCareers";
 import { useTop3 } from "@/lib/useTop3";
@@ -624,20 +624,13 @@ function EnvCard({
   // `animateValue(x, target, spring)` directly in `onDragEnd`, every time,
   // regardless of whether `face` changed, removes that ambiguity: there is
   // always an explicit command to move `x` to a real resting position.
-  const carouselTrackRef = useRef<HTMLDivElement | null>(null);
-  const x = useMotionValue(0);
-  const settleAt = useCallback((next: "Summary" | "Details") => {
-    // The track is width:200% of its container (two 50%-wide panels), so
-    // half its OWN rendered width in px is exactly one panel's travel
-    // distance -- measured live rather than assumed, since the card's
-    // real width differs by breakpoint (phone, tablet, the small framed
-    // desktop card).
-    const panelWidth = (carouselTrackRef.current?.offsetWidth ?? 0) / 2;
-    animateValue(x, next === "Summary" ? 0 : -panelWidth, { type: "spring", stiffness: 380, damping: 38 });
-  }, [x]);
-  useEffect(() => {
-    settleAt(face);
-  }, [face, settleAt]);
+  // Update, 26 Sept 2026 (iPhone Safari report: the card sat half way
+  // between Summary and Details, both panels cut off): the resting position
+  // is now a CSS percentage on the track (0% / -50%), not a pixel offset
+  // measured from the track's width. A measurement taken before Safari had
+  // laid the card out gave a wrong offset that stuck; a percentage can't be
+  // wrong. The drag layer still follows the finger in pixels and always
+  // snaps back to 0 (dragSnapToOrigin), so it can never be left stranded.
   const flipFace = useCallback(() => {
     setHasInteracted(true);
     setFace((current) => (current === "Summary" ? "Details" : "Summary"));
@@ -655,17 +648,13 @@ function EnvCard({
   const onCarouselDragEnd = useCallback((_: unknown, info: { offset: { x: number } }) => {
     if (info.offset.x < -SWIPE_COMMIT_PX && face === "Summary") {
       setHasInteracted(true);
-      setFace("Details"); // the effect above settles to it
+      setFace("Details");
     } else if (info.offset.x > SWIPE_COMMIT_PX && face === "Details") {
       setHasInteracted(true);
-      setFace("Summary"); // the effect above settles to it
-    } else {
-      // short of the commit distance, in either direction -- `face` isn't
-      // changing, so the effect above won't re-fire on its own. Explicitly
-      // spring back to wherever this face already rests.
-      settleAt(face);
+      setFace("Summary");
     }
-  }, [face, settleAt]);
+    // short of the commit distance, dragSnapToOrigin springs it back.
+  }, [face]);
 
   return (
     <article
@@ -695,80 +684,6 @@ function EnvCard({
          bottom-anchored as a pair) -- NOT pinned to the top of the card,
          which was a misreading of that flex layout the first time around. */}
       <div className="relative -mx-[var(--space-4)] -mb-[var(--space-4)] flex flex-col">
-        <Coachmark
-          active={showActionsHint}
-          label="Like, hide, or save this career from here."
-          onDismiss={onDismissActionsHint}
-          align="end"
-          spotlight
-        >
-        <div className="flex flex-col items-end gap-[var(--space-4)] px-[var(--space-4)] pb-[var(--space-4)] lg:hidden">
-          <PreferenceButton
-            label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
-            Icon={inTop3 ? Minus : Plus}
-            bare
-            active={inTop3}
-            onClick={() => {
-              onDismissActionsHint();
-              if (inTop3) {
-                setToast(null);
-                const before = removeFromTop3(slug);
-                setUndoRemove(before);
-                return;
-              }
-              setUndoRemove(null);
-              const result = addToTop3(slug);
-              if (result === "added") setToast(top3AddedToast());
-              else if (result === "full") setSwapCandidate(slug);
-            }}
-          />
-          <PreferenceButton
-            label="Like this career"
-            Icon={Heart}
-            bare
-            active={liked}
-            filled={liked}
-            onClick={() => {
-              onDismissActionsHint();
-              const next = !liked;
-              onSetLiked(next);
-              if (next && !tipSeen(LIKE_TIP_KEY)) {
-                setUndoRemove(null);
-                setToast("Saved to what you like. This helps tailor your matches.");
-                markTipSeen(LIKE_TIP_KEY);
-              }
-            }}
-          />
-          <PreferenceButton
-            label="Not for me"
-            Icon={ThumbsDown}
-            bare
-            active={disliked}
-            filled={disliked}
-            onClick={() => {
-              onDismissActionsHint();
-              const next = !disliked;
-              onSetDisliked(next);
-              if (next && !tipSeen(DISLIKE_TIP_KEY)) {
-                setUndoRemove(null);
-                setToast("Noted, we'll show you less like this.");
-                markTipSeen(DISLIKE_TIP_KEY);
-              }
-            }}
-          />
-          <PreferenceButton
-            label={saved ? "Saved" : "Save for later"}
-            Icon={Bookmark}
-            bare
-            active={saved}
-            filled={saved}
-            onClick={() => {
-              onDismissActionsHint();
-              toggleSavedCareer(slug);
-            }}
-          />
-        </div>
-        </Coachmark>
         {swapCandidate && (
           <Top3SwapModal
             incomingId={swapCandidate}
@@ -824,7 +739,7 @@ function EnvCard({
                can't contain another `<button>` (direct instruction, 23 Sept
                2026: real swipe AND click-able chevrons, not just tap). */}
             <div
-              className="flex w-full flex-col gap-[var(--space-2)] text-left"
+              className="relative flex w-full flex-col gap-[var(--space-2)] pr-[60px] text-left lg:pr-0"
               style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
             >
               {/* lg:, not md: -- this 326px cap is for the small FRAMED
@@ -961,12 +876,12 @@ function EnvCard({
                    while dragging (direct instruction: "the slide should
                    move with my finger not just switch... when i swipe");
                    `onDragEnd` (`onCarouselDragEnd` above) always calls
-                   `settleAt` explicitly -- past SWIPE_COMMIT_PX that's a
+                   `setFace` past SWIPE_COMMIT_PX (see the 26 Sept update above: the track rests at 0% / -50%, the drag layer snaps back to 0) -- that's a
                    real face change, short of it (either direction) it's an
                    explicit spring back to the CURRENT face, not a
                    declarative prop hoping to notice nothing changed (that
                    was the literal "gets stuck" bug -- see the comment on
-                   `x`/`settleAt` above). A plain tap (negligible drag
+                   the note above). A plain tap (negligible drag
                    distance) still fires a normal click, which bubbles to
                    flipFace below -- Framer doesn't suppress the click for a
                    drag that never crossed its own activation distance.
@@ -994,13 +909,16 @@ function EnvCard({
                   style={{ outlineColor: "var(--accent-subtle)" }}
                 >
                   <motion.div
-                    ref={carouselTrackRef}
-                    className="flex"
-                    style={{ x, width: "200%", touchAction: "pan-y", cursor: "grab" }}
+                    style={{ touchAction: "pan-y", cursor: "grab" }}
                     drag="x"
+                    dragSnapToOrigin
                     dragElastic={0.22}
                     dragMomentum={false}
                     onDragEnd={onCarouselDragEnd}
+                  >
+                  <div
+                    className="flex transition-transform duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+                    style={{ width: "200%", transform: face === "Summary" ? "translateX(0)" : "translateX(-50%)" }}
                   >
                     <div aria-hidden={face !== "Summary"} className="flex flex-none flex-col gap-[var(--space-2)]" style={{ width: "50%" }}>
                       <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
@@ -1047,9 +965,96 @@ function EnvCard({
                         <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.mainSkills}</span>
                       </div>
                     </div>
+                  </div>
                   </motion.div>
                 </div>
               </div>
+              {/* Phone and tablet actions sit where Instagram Reels and
+                 TikTok put them (direct instruction, 26 Sept 2026: "the
+                 action buttons on the reel... should sit lower, mimic
+                 instagram and tik tok positions"): a column on the right
+                 edge whose bottom lines up with the caption, the caption
+                 making room beside it, the column rising over the photo.
+                 It used to sit ABOVE the whole panel in its own row, and
+                 through the Coachmark's inline-flex wrapper that row could
+                 shrink to the icons' width and land on the LEFT (iPhone
+                 Safari report, same day). Absolute on the right can't. */}
+              <Coachmark
+                active={showActionsHint}
+                label="Like, hide, or save this career from here."
+                onDismiss={onDismissActionsHint}
+                align="end"
+                spotlight
+                wrapperClassName="absolute -right-[6px] bottom-0 z-[2] flex lg:hidden"
+              >
+              <div className="flex flex-col items-center gap-[var(--space-4)]">
+                <PreferenceButton
+                  label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
+                  Icon={inTop3 ? Check : Plus}
+            solid
+                  bare
+                  active={inTop3}
+                  onClick={() => {
+                    onDismissActionsHint();
+                    if (inTop3) {
+                      setToast(null);
+                      const before = removeFromTop3(slug);
+                      setUndoRemove(before);
+                      return;
+                    }
+                    setUndoRemove(null);
+                    const result = addToTop3(slug);
+                    if (result === "added") setToast(top3AddedToast());
+                    else if (result === "full") setSwapCandidate(slug);
+                  }}
+                />
+                <PreferenceButton
+                  label="Like this career"
+                  Icon={Heart}
+                  bare
+                  active={liked}
+                  filled={liked}
+                  onClick={() => {
+                    onDismissActionsHint();
+                    const next = !liked;
+                    onSetLiked(next);
+                    if (next && !tipSeen(LIKE_TIP_KEY)) {
+                      setUndoRemove(null);
+                      setToast("Saved to what you like. This helps tailor your matches.");
+                      markTipSeen(LIKE_TIP_KEY);
+                    }
+                  }}
+                />
+                <PreferenceButton
+                  label="Not for me"
+                  Icon={ThumbsDown}
+                  bare
+                  active={disliked}
+                  filled={disliked}
+                  onClick={() => {
+                    onDismissActionsHint();
+                    const next = !disliked;
+                    onSetDisliked(next);
+                    if (next && !tipSeen(DISLIKE_TIP_KEY)) {
+                      setUndoRemove(null);
+                      setToast("Noted, we'll show you less like this.");
+                      markTipSeen(DISLIKE_TIP_KEY);
+                    }
+                  }}
+                />
+                <PreferenceButton
+                  label={saved ? "Saved" : "Save for later"}
+                  Icon={Bookmark}
+                  bare
+                  active={saved}
+                  filled={saved}
+                  onClick={() => {
+                    onDismissActionsHint();
+                    toggleSavedCareer(slug);
+                  }}
+                />
+              </div>
+              </Coachmark>
             </div>
 
             <div className="flex w-full items-stretch justify-between gap-[var(--space-3)]">
@@ -1278,6 +1283,7 @@ function PreferenceButton({
   bare = false,
   active = false,
   filled = false,
+  solid = false,
   onClick,
 }: {
   label: string;
@@ -1289,6 +1295,12 @@ function PreferenceButton({
       matching Career Detail's exact convention); Top 3's Plus/Minus swap
       icon instead, so it stays false there. */
   filled?: boolean;
+  /** Top 3: when on, a solid accent disc with a white check instead of a
+      tinted outline glyph. A thin blue minus over the photo was nearly
+      invisible (direct report, 26 Sept 2026: "the minus is bad i cant even
+      see it properly"); the disc reads at a glance, like TikTok's follow
+      check, and the label still says tapping removes it. */
+  solid?: boolean;
   onClick?: () => void;
 }) {
   return (
@@ -1315,7 +1327,13 @@ function PreferenceButton({
            behind every icon and read heavier than either app's own
            treatment). The non-bare version already sits on a real glass
            surface, so it doesn't need this. */}
-        <Icon className="h-6 w-6" fill={filled ? "currentColor" : "none"} style={bare ? { filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 1px 5px rgba(0,0,0,0.35))" } : undefined} />
+        {solid && active && bare ? (
+          <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.45)" }}>
+            <Icon className="h-[18px] w-[18px]" strokeWidth={3} style={{ color: "#fff" }} />
+          </span>
+        ) : (
+          <Icon className="h-6 w-6" strokeWidth={solid && active ? 3 : undefined} fill={filled ? "currentColor" : "none"} style={bare ? { filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 1px 5px rgba(0,0,0,0.35))" } : undefined} />
+        )}
       </button>
     </IconTip>
   );
@@ -1599,7 +1617,8 @@ function DesktopPreferenceRail({
     <div className="hidden flex-col items-center gap-[var(--space-6)] lg:flex">
       <PreferenceButton
         label={inTop3 ? "Remove from your Top 3" : "Add to your Top 3"}
-        Icon={inTop3 ? Minus : Plus}
+        Icon={inTop3 ? Check : Plus}
+            solid
         active={inTop3}
         onClick={() => {
           dismissActionsHint();

@@ -15,6 +15,12 @@ import { Portal } from "@/components/profile/CareerReport";
  *  the DOM but painted BEHIND whatever came next (a sheet, the next row):
  *  those neighbours carry their own stacking contexts, so no z-index inside
  *  the header could win. */
+/** Keyboard focus only: Android Chrome focuses a button on tap, and a
+ *  tooltip opened by that tap would linger over the screen afterwards. */
+export function isKeyboardFocus(target: EventTarget) {
+  try { return (target as Element).matches(":focus-visible"); } catch { return true; }
+}
+
 type TipState = { x: number; triggerTop: number; triggerBottom: number; above: boolean };
 
 export function Tip({ label, children, hideFromLg = false, className = "" }: { label: string; children: ReactNode; hideFromLg?: boolean; className?: string }) {
@@ -64,7 +70,7 @@ export function Tip({ label, children, hideFromLg = false, className = "" }: { l
   // landing on top of the salary chip instead of the card's other corner.
   const positioned = /\b(?:absolute|fixed|sticky|static)\b/.test(className);
   return (
-    <span ref={ref} className={`${positioned ? "" : "relative "}flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide} aria-describedby={tip ? id : undefined}>
+    <span ref={ref} className={`${positioned ? "" : "relative "}flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={(e) => { if (isKeyboardFocus(e.target)) show(); }} onBlur={hide} aria-describedby={tip ? id : undefined}>
       {children}
       {tip && (
         <Portal>

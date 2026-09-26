@@ -49,6 +49,23 @@ export default function RootLayout({
             __html: `try{var t=localStorage.getItem("dreamari-theme");var isBuild=location.pathname.startsWith("/flow");if(t==="dark"||(!t&&!isBuild)){document.documentElement.classList.add("dark")}}catch(e){}`,
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            // Touch taps must never spend themselves on hover (direct report,
+            // 26 Sept 2026: "taps on mobile including the bottom navbar are
+            // taking two"). After a tap, iOS Safari fires emulated mouse
+            // events first; if a mouseover/mouseenter handler changes the
+            // page (IconTip mounting its tooltip, HoverBeam lighting its
+            // ring), Safari treats that tap as "hover" and swallows the click,
+            // so the student has to tap again. Stopping those emulated mouse
+            // events for a moment after any touch, before React's root
+            // listeners see them, fixes every JS hover handler in the app at
+            // once, including ones written later. A real mouse or trackpad is
+            // untouched; CSS :hover is unaffected (Tailwind's hover: already
+            // only applies on hover-capable devices).
+            __html: `(function(){var t=0;function m(){t=Date.now()}window.addEventListener("touchstart",m,{capture:true,passive:true});window.addEventListener("touchend",m,{capture:true,passive:true});["mouseover","mouseout","mouseenter","mouseleave","mousemove"].forEach(function(n){window.addEventListener(n,function(e){if(Date.now()-t<1000)e.stopPropagation()},true)})})();`,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <SkipLink />

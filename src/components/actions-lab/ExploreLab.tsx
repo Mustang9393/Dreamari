@@ -15,7 +15,7 @@
  
 
 import Image from "next/image";
-import { motion, useMotionValue, animate as animateValue } from "framer-motion";
+import { motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
@@ -597,20 +597,13 @@ function EnvCard({
   // `animateValue(x, target, spring)` directly in `onDragEnd`, every time,
   // regardless of whether `face` changed, removes that ambiguity: there is
   // always an explicit command to move `x` to a real resting position.
-  const carouselTrackRef = useRef<HTMLDivElement | null>(null);
-  const x = useMotionValue(0);
-  const settleAt = useCallback((next: "Summary" | "Details") => {
-    // The track is width:200% of its container (two 50%-wide panels), so
-    // half its OWN rendered width in px is exactly one panel's travel
-    // distance -- measured live rather than assumed, since the card's
-    // real width differs by breakpoint (phone, tablet, the small framed
-    // desktop card).
-    const panelWidth = (carouselTrackRef.current?.offsetWidth ?? 0) / 2;
-    animateValue(x, next === "Summary" ? 0 : -panelWidth, { type: "spring", stiffness: 380, damping: 38 });
-  }, [x]);
-  useEffect(() => {
-    settleAt(face);
-  }, [face, settleAt]);
+  // Update, 26 Sept 2026 (iPhone Safari report: the card sat half way
+  // between Summary and Details, both panels cut off): the resting position
+  // is now a CSS percentage on the track (0% / -50%), not a pixel offset
+  // measured from the track's width. A measurement taken before Safari had
+  // laid the card out gave a wrong offset that stuck; a percentage can't be
+  // wrong. The drag layer still follows the finger in pixels and always
+  // snaps back to 0 (dragSnapToOrigin), so it can never be left stranded.
   const flipFace = useCallback(() => {
     setHasInteracted(true);
     setFace((current) => (current === "Summary" ? "Details" : "Summary"));
@@ -628,17 +621,13 @@ function EnvCard({
   const onCarouselDragEnd = useCallback((_: unknown, info: { offset: { x: number } }) => {
     if (info.offset.x < -SWIPE_COMMIT_PX && face === "Summary") {
       setHasInteracted(true);
-      setFace("Details"); // the effect above settles to it
+      setFace("Details");
     } else if (info.offset.x > SWIPE_COMMIT_PX && face === "Details") {
       setHasInteracted(true);
-      setFace("Summary"); // the effect above settles to it
-    } else {
-      // short of the commit distance, in either direction -- `face` isn't
-      // changing, so the effect above won't re-fire on its own. Explicitly
-      // spring back to wherever this face already rests.
-      settleAt(face);
+      setFace("Summary");
     }
-  }, [face, settleAt]);
+    // short of the commit distance, dragSnapToOrigin springs it back.
+  }, [face]);
 
   return (
     <article
@@ -671,9 +660,6 @@ function EnvCard({
         {/* Each icon with a one-word label under it, the reel convention
            (a word or count under every icon), so the column teaches itself.
            Same glyphs and order as the career page. */}
-        <div className="flex flex-col items-end gap-[var(--space-3)] px-[var(--space-3)] pb-[var(--space-4)] lg:hidden">
-          <ReelColumn slug={slug} title={career.title} lab={lab} />
-        </div>
 
         {/* Career Details Panel: the whole block, text through the CTA row,
            sits on ONE continuous backdrop -- not a blurred text panel with
@@ -712,7 +698,7 @@ function EnvCard({
                can't contain another `<button>` (direct instruction, 23 Sept
                2026: real swipe AND click-able chevrons, not just tap). */}
             <div
-              className="flex w-full flex-col gap-[var(--space-2)] text-left"
+              className="relative flex w-full flex-col gap-[var(--space-2)] pr-[64px] text-left lg:pr-0"
               style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
             >
               {/* lg:, not md: -- this 326px cap is for the small FRAMED
@@ -849,12 +835,12 @@ function EnvCard({
                    while dragging (direct instruction: "the slide should
                    move with my finger not just switch... when i swipe");
                    `onDragEnd` (`onCarouselDragEnd` above) always calls
-                   `settleAt` explicitly -- past SWIPE_COMMIT_PX that's a
+                   `setFace` past SWIPE_COMMIT_PX (see the 26 Sept update above: the track rests at 0% / -50%, the drag layer snaps back to 0) -- that's a
                    real face change, short of it (either direction) it's an
                    explicit spring back to the CURRENT face, not a
                    declarative prop hoping to notice nothing changed (that
                    was the literal "gets stuck" bug -- see the comment on
-                   `x`/`settleAt` above). A plain tap (negligible drag
+                   the note above). A plain tap (negligible drag
                    distance) still fires a normal click, which bubbles to
                    flipFace below -- Framer doesn't suppress the click for a
                    drag that never crossed its own activation distance.
@@ -882,13 +868,16 @@ function EnvCard({
                   style={{ outlineColor: "var(--accent-subtle)" }}
                 >
                   <motion.div
-                    ref={carouselTrackRef}
-                    className="flex"
-                    style={{ x, width: "200%", touchAction: "pan-y", cursor: "grab" }}
+                    style={{ touchAction: "pan-y", cursor: "grab" }}
                     drag="x"
+                    dragSnapToOrigin
                     dragElastic={0.22}
                     dragMomentum={false}
                     onDragEnd={onCarouselDragEnd}
+                  >
+                  <div
+                    className="flex transition-transform duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+                    style={{ width: "200%", transform: face === "Summary" ? "translateX(0)" : "translateX(-50%)" }}
                   >
                     <div aria-hidden={face !== "Summary"} className="flex flex-none flex-col gap-[var(--space-2)]" style={{ width: "50%" }}>
                       <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
@@ -935,8 +924,15 @@ function EnvCard({
                         <span className="line-clamp-2 text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.98)" }}>{career.mainSkills}</span>
                       </div>
                     </div>
+                  </div>
                   </motion.div>
                 </div>
+              </div>
+              {/* Right edge, bottom-aligned with the caption: the Reels /
+                 TikTok spot (same change as the live reel, 26 Sept 2026). Lifted
+                 10px: the labels made the column crowd the CTA row. */}
+              <div className="absolute -right-[8px] bottom-[10px] z-[2] flex flex-col items-center gap-[10px] lg:hidden">
+                <ReelColumn slug={slug} title={career.title} lab={lab} />
               </div>
             </div>
 
