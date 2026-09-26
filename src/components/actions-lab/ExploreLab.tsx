@@ -1613,7 +1613,7 @@ export function ExploreLab({ initialTab, initialQuery = "" }: { initialTab: "for
   // when I land and dismiss the popup"). Gating the class itself behind
   // splashDone means the animation's own 0.9s starting delay is now
   // measured from dismissal, not from mount.
-  const [splashDone, setSplashDone] = useState(false);
+  const [splashDone, setSplashDone] = useState(true);
   // A 2-step guided tour, not two hints racing each other (direct feedback,
   // 24 Sept 2026: "they should happen in succession"). One shared "seen"
   // flag for the whole tour; `tourStep` decides which half is currently
@@ -1624,8 +1624,9 @@ export function ExploreLab({ initialTab, initialQuery = "" }: { initialTab: "for
   const [tourNotSeen, dismissTour] = useFirstUseHint("explore-tour", { repeatOnReload: true });
   const [tourStep, setTourStep] = useState<"foryou" | "schools">("foryou");
   const advanceTour = () => setTourStep("schools");
-  const showForYouTutorial = tourNotSeen && splashDone && tab === "browse" && tourStep === "foryou";
-  const showSchoolsTutorial = tourNotSeen && splashDone && tourStep === "schools";
+  // Lab: no coachmark tour; the lab shows the no-coachmark proposal.
+  const showForYouTutorial = false;
+  const showSchoolsTutorial = false;
   // Mobile/tablet's own Schools entry point is the graduation-cap icon below
   // -- desktop shows ExploreSectionTabs' text tabs instead, wired the same
   // way further down.
@@ -1648,7 +1649,7 @@ export function ExploreLab({ initialTab, initialQuery = "" }: { initialTab: "for
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
       <AppBackdrop />
-      <FirstVisitSplash surface="explore" onOpenChange={(open) => { if (!open) setSplashDone(true); }} />
+      {/* Lab: no first-visit splash (it covered the reel on phones). */}
 
       {/* forceBlur on For You: that tab's `main` owns its own internal
          scroll (the reel) and never lets the page itself scroll, so the

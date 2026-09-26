@@ -5,7 +5,7 @@
 // sheet (the app's own Top3SwapModal), the lab dock (network mode, reset),
 // and the new controls both lab pages use. See labStore.ts for the rules.
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -122,19 +122,44 @@ function Thumb({ id }: { id: string }) {
 }
 
 /** The lab's only chrome: it says it is the lab, and lets a reviewer set the
- *  network to see loading and failed states, or reset to the real data. */
+ *  network to see loading and failed states, or reset to the real data. On
+ *  phones it is one small "Lab" chip that opens a compact menu (the full
+ *  row across the top of the reel covered the screen, 26 Sept 2026). */
 function LabDock() {
   const { network } = useLab();
+  const [open, setOpen] = useState(false);
   const opts: { key: Network; label: string }[] = [{ key: "normal", label: "Normal" }, { key: "slow", label: "Slow" }, { key: "fail", label: "Fails" }];
-  return (
-    <div className="marketing-v2 themeable fixed top-[68px] right-3 z-[91] flex items-center gap-1 rounded-full border p-1 pl-3 text-[11.5px] font-bold shadow-lg backdrop-blur-xl lg:top-[84px] lg:right-6" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)", color: "var(--foreground)" }}>
-      <span className="mr-1 tracking-[0.08em] uppercase" style={{ color: "var(--primary)" }}>Actions lab</span>
-      <span className="hidden sm:inline" style={{ color: "var(--muted-foreground)" }}>Network</span>
+  const choices = (after?: () => void) => (
+    <>
       {opts.map((o) => (
-        <button key={o.key} type="button" aria-pressed={network === o.key} onClick={() => setNetwork(o.key)} className="cursor-pointer rounded-full px-2.5 py-1" style={{ background: network === o.key ? "var(--primary)" : "transparent", color: network === o.key ? "var(--primary-foreground)" : "var(--foreground)" }}>{o.label}</button>
+        <button key={o.key} type="button" aria-pressed={network === o.key} onClick={() => { setNetwork(o.key); after?.(); }} className="cursor-pointer rounded-full px-2.5 py-1" style={{ background: network === o.key ? "var(--primary)" : "transparent", color: network === o.key ? "var(--primary-foreground)" : "var(--foreground)" }}>{o.label}</button>
       ))}
-      <button type="button" aria-label="Reset the lab to your real saves" title="Reset to your real saves" onClick={resetLab} className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full"><RotateCcw className="h-3.5 w-3.5" aria-hidden /></button>
-    </div>
+      <button type="button" aria-label="Reset the lab to your real saves" title="Reset to your real saves" onClick={() => { resetLab(); after?.(); }} className="dm-quiet flex size-7 cursor-pointer items-center justify-center rounded-full"><RotateCcw className="h-3.5 w-3.5" aria-hidden /></button>
+    </>
+  );
+  const shell = { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 90%, transparent)", color: "var(--foreground)" } as const;
+  return (
+    <>
+      {/* Desktop: the full row. */}
+      <div className="fixed top-[84px] right-6 z-[91] hidden h-9 items-center gap-1 rounded-full border p-1 pl-3 text-[11.5px] font-bold shadow-lg backdrop-blur-xl lg:flex" style={shell}>
+        <span className="mr-1 tracking-[0.08em] uppercase" style={{ color: "var(--primary)" }}>Actions lab</span>
+        <span style={{ color: "var(--muted-foreground)" }}>Network</span>
+        {choices()}
+      </div>
+      {/* Phones and tablets: one chip, a menu on tap. Solid, no backdrop
+         blur and a fixed height: iPhone Safari stretched the blurred dock
+         into a screen-tall pill over the reel (direct report, 26 Sept 2026). */}
+      <div className="fixed bottom-[92px] left-3 z-[91] flex h-auto flex-col items-start gap-2 lg:hidden">
+        {open && (
+          <div className="flex h-9 items-center gap-1 rounded-full border p-1 text-[11.5px] font-bold shadow-lg" style={{ ...shell, background: "var(--card)" }}>
+            {choices(() => setOpen(false))}
+          </div>
+        )}
+        <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-[11px] font-bold tracking-[0.06em] uppercase shadow-lg" style={{ ...shell, background: "var(--card)", color: "var(--primary)" }}>
+          Lab{network !== "normal" && <span className="normal-case tracking-normal" style={{ color: "var(--foreground)" }}>· {network === "slow" ? "Slow" : "Fails"}</span>}
+        </button>
+      </div>
+    </>
   );
 }
 
