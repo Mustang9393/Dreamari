@@ -33,7 +33,6 @@ import { StudentProfileView as StudentProfileViewV2 } from "./v2/StudentProfile"
 import { MilestoneTracker as MilestoneTrackerV2 } from "./v2/MilestoneTracker";
 import { ReviewQueue as ReviewQueueV2 } from "./v2/ReviewQueue";
 import { CounselorConnect as CounselorConnectV2 } from "./v2/CounselorConnect";
-import { CareerCollegeInsights as CareerCollegeInsightsV2 } from "./v2/CareerCollegeInsights";
 import { ProductivitySuite as ProductivitySuiteV2 } from "./v2/ProductivitySuite";
 import { PlatformEngagement as PlatformEngagementV2 } from "./v2/PlatformEngagement";
 import { MyImpact as MyImpactV2 } from "./v2/MyImpact";
@@ -89,7 +88,8 @@ function V2View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "review-queue": return <ReviewQueueV2 />;
       case "progress": return <CounselorReports />;
       case "connect": return <CounselorConnectV2 />;
-      case "insights": return <CareerCollegeInsightsV2 />;
+      // Insights lives inside Reports now; old links land on its tab.
+      case "insights": return <CounselorReports initialTab="insights" />;
       case "productivity": return <ProductivitySuiteV2 />;
       case "engagement": return <PlatformEngagementV2 />;
       case "impact": return <MyImpactV2 />;

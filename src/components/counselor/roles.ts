@@ -38,6 +38,8 @@ export const REFERENCE_VIEWS: CounselorView[] = [
 ];
 
 export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
+  // Career + College Insights moved inside Reports as its middle tab
+  // (26 Sept 2026, direct feedback: "seem like reports to me").
   // "Reports" (26 Sept 2026) consolidates two reference screens a counselor
   // had lost: Student Progress (nine readiness reports, CSV/PDF) and
   // Platform Engagement (logins, active students, check-ins by grade), as
@@ -50,7 +52,6 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "milestones" },
     { view: "review-queue" },
     { view: "connect" },
-    { view: "insights" },
     { view: "productivity" },
     { view: "progress", label: "Reports" },
     { view: "impact" },
@@ -63,7 +64,6 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "milestones" },
     { view: "review-queue" },
     { view: "connect" },
-    { view: "insights" },
     { view: "productivity" },
     { view: "progress", label: "Reports" },
     { view: "school-impact" },

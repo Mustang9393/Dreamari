@@ -198,8 +198,11 @@ function OutcomeTile({ label, value, target, note, toGo, onClick }: { label: str
     <button type="button" onClick={onClick} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[14px] rounded-[var(--radius-md)] border p-[14px] text-left" style={GLASS_INSET}>
       {/* A rate of one caseload reads as a ring (share of a whole), not a
          bar filling toward nothing. */}
-      <Ring pct={value ?? 0} size={68} stroke={7} accent={alert ?? PRIMARY}>
-        <span className="text-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: alert ?? "var(--foreground)" }}>{value === null ? "n/a" : `${value}%`}</span>
+      {/* The ring stays brand blue; being below target is said by the one
+         small "N to go" line (direct feedback: "the my impact has 2 graphs
+         in red, maybe we should soften this and not use so much red"). */}
+      <Ring pct={value ?? 0} size={68} stroke={7} accent={PRIMARY}>
+        <span className="text-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value === null ? "n/a" : `${value}%`}</span>
       </Ring>
       <span className="flex min-w-0 flex-1 flex-col gap-[3px]" style={BODY}>
         <span className="flex items-center justify-between gap-[6px]">

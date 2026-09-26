@@ -10,7 +10,7 @@ import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, DollarSign, GraduationCap, ClipboardList, AlertTriangle } from "lucide-react";
 import { BarChart } from "@/components/connect/viz";
-import { ScrollChips } from "../chips";
+import { SubTabs } from "./SubTabs";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Listbox } from "@/components/app/Listbox";
 import { Stat } from "./overviewShared";
@@ -179,12 +179,11 @@ export function StudentProgress() {
     // space inside its container"). Listbox, not a native select, for the
     // filters, per docs/CROSS_BROWSER_GUARDRAILS.md.
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* All nine reports visible at once as a chip row (direct question:
-         "what would be the best UX?"): a picker hid eight of them behind a
-         click, a side column cost a third of the width. Short labels fit
-         at 1440; on a phone the row bleeds into the gutter and the next
-         chip peeks past the edge. */}
-      <ScrollChips ariaLabel="Report" value={reportId} onChange={setReportId} options={REPORT_TYPES.map((r) => ({ key: r.id, label: r.label }))} />
+      {/* All nine reports visible at once, as underline sub-tabs: this
+         screen sits inside the Reports tabs, and pill chips under pill
+         tabs read as the same control twice (direct instruction: "dont
+         repeat tab components together"). */}
+      <SubTabs ariaLabel="Report" value={reportId} onChange={setReportId} options={REPORT_TYPES.map((r) => ({ key: r.id, label: r.label }))} />
       <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
         <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:flex lg:items-end lg:[&>label]:min-w-[220px]">
           {showCounselor && (

@@ -1,7 +1,15 @@
 "use client";
 
 import { useId, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+
+// Charts animate in and animate between values when a filter changes, the
+// way the Replit reference's charts fill up on view (direct feedback: "the
+// replit animated + loads graphs so they sort of fill up when viewing and
+// they animate and change based on selecting things"). Off entirely for
+// anyone with reduced motion set.
+const CHART_EASE = [0.22, 1, 0.36, 1] as const;
+const CHART_T = { duration: 0.9, ease: CHART_EASE };
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 // Small data-visual primitives for Connect's dashboards (volunteer, partner).
@@ -126,6 +134,7 @@ export function demoSeries(seed: string, days: number, base: number): number[] {
  *  peak labelled, three time labels under it. */
 export function AreaChart({ points, accent, height = 160, labels }: { points: number[]; accent: string; height?: number; labels: [string, string, string] }) {
   const id = useId().replace(/:/g, "");
+  const reduce = useReducedMotion();
   const W = 600;
   const H = height;
   const padX = 8;
@@ -167,7 +176,7 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
           <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="color-mix(in srgb, var(--foreground) 10%, transparent)" strokeWidth="1" />
         ))}
         <path d={area} fill={`url(#fill-${id})`} />
-        <path d={line} fill="none" stroke={`url(#line-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 60%, transparent))` }} />
+        <motion.path d={line} fill="none" stroke={`url(#line-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 60%, transparent))` }} initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.1, ease: CHART_EASE }} />
         <circle cx={x(last)} cy={y(points[last])} r="9" fill={accent} opacity="0.25" />
         <circle cx={x(last)} cy={y(points[last])} r="5" fill={accent} stroke="#0e0c20" strokeWidth="2" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 5px ${accent})` }} />
         {/* Peak called out with a pinned label on a leader line down to a
@@ -283,6 +292,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
   // it could ever visually register. Calling this as a plain function
   // avoids that: React never sees it as its own component boundary.
   const gradId = useId().replace(/:/g, "");
+  const reduce = useReducedMotion();
   function renderSegmentedBar({ barX, barValueY, color, dim, onEnter, onLeave, ariaLabel }: { barX: number; barValueY: number; color: string; dim: boolean; onEnter: () => void; onLeave: () => void; ariaLabel: string }) {
     if (barStyle === "solid") {
       // One bar, one gradient: the series color at full strength at the
@@ -315,7 +325,9 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
              shape (direct reports, more than once: "these look like
              dicks... remove the dot from the top they look like
              condoms"). The rect's own glow is the only "light" now. */}
-          <rect x={barX} y={barValueY} width={barW} height={h} rx={4} fill={`url(#${id})`} style={{ filter: `drop-shadow(0 0 5px color-mix(in srgb, ${color} 55%, transparent))` }} />
+          {/* Position comes only from the animated x/y (framer applies them
+             as a transform on SVG; an x attribute as well would add twice). */}
+          <motion.rect rx={4} fill={`url(#${id})`} style={{ filter: `drop-shadow(0 0 5px color-mix(in srgb, ${color} 55%, transparent))` }} initial={reduce ? false : { x: barX, width: barW, y: baseline, height: 0 }} animate={{ x: barX, width: barW, y: baseline - h, height: h }} transition={CHART_T} />
           <rect
             x={barX} y={padTop} width={barW} height={plotH}
             fill="transparent" style={{ cursor: "pointer" }}
@@ -391,8 +403,13 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
             const barY = y(v);
             const dim = hover !== null && hover.gi !== gi;
             const showValue = !hideValuesUntilHover || hover?.gi === gi;
+            // Keyed by position, not label: switching a report or a filter
+            // morphs each bar from its old height to its new one (the
+            // reference's charts do this, direct feedback 26 Sept 2026: "i
+            // love how when i switch tabs the graphs animate into the next")
+            // instead of remounting it and redrawing from zero.
             return (
-              <g key={label}>
+              <g key={gi}>
                 {!Number.isNaN(v) && v >= 0 && (
                   <>
                     {renderSegmentedBar({
@@ -401,9 +418,9 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
                       onEnter: () => setHover({ gi, si: 0 }), onLeave: () => setHover(null),
                     })}
                     {showValue && (
-                      <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+                      <motion.text initial={reduce ? false : { x: barX + barW / 2, y: baseline - 6, opacity: 0 }} animate={{ x: barX + barW / 2, y: barY - 6, opacity: 1 }} transition={CHART_T} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
                         {Math.round(v)}{valueSuffix}
-                      </text>
+                      </motion.text>
                     )}
                   </>
                 )}
@@ -414,7 +431,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
             );
           }
           return (
-            <g key={label}>
+            <g key={gi}>
               {series.map((s, si) => {
                 const v = s.values[gi] ?? NaN;
                 if (Number.isNaN(v) || v < 0) return null;
@@ -423,16 +440,16 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
                 const dim = hover !== null && (hover.gi !== gi || hover.si !== si);
                 const showValue = !hideValuesUntilHover || (hover?.gi === gi && hover?.si === si);
                 return (
-                  <g key={s.label}>
+                  <g key={si}>
                     {renderSegmentedBar({
                       barX, barValueY: barY, color: s.accent, dim,
                       ariaLabel: `${label}, ${s.label}: ${Math.round(v)}${valueSuffix}`,
                       onEnter: () => setHover({ gi, si }), onLeave: () => setHover(null),
                     })}
                     {showValue && (
-                      <text x={barX + barW / 2} y={barY - 6} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+                      <motion.text initial={reduce ? false : { x: barX + barW / 2, y: baseline - 6, opacity: 0 }} animate={{ x: barX + barW / 2, y: barY - 6, opacity: 1 }} transition={CHART_T} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>
                         {Math.round(v)}{valueSuffix}
-                      </text>
+                      </motion.text>
                     )}
                   </g>
                 );
@@ -491,6 +508,7 @@ export function BarChart({ groups, series, height = 220, max = 100, valueSuffix 
  *  the same "glassy/glow" language the rest of the dashboard uses. */
 export function Ring({ pct, size = 84, stroke = 8, accent, children }: { pct: number; size?: number; stroke?: number; accent: string; children?: React.ReactNode }) {
   const id = useId().replace(/:/g, "");
+  const reduce = useReducedMotion();
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, pct));
@@ -505,7 +523,7 @@ export function Ring({ pct, size = 84, stroke = 8, accent, children }: { pct: nu
           </linearGradient>
         </defs>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
-        <circle
+        <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={r}
@@ -513,7 +531,9 @@ export function Ring({ pct, size = 84, stroke = 8, accent, children }: { pct: nu
           stroke={`url(#ring-grad-${id})`}
           strokeWidth={stroke}
           strokeLinecap="round"
-          strokeDasharray={`${(clamped / 100) * c} ${c}`}
+          initial={reduce ? false : { strokeDasharray: `0 ${c}` }}
+          animate={{ strokeDasharray: `${(clamped / 100) * c} ${c}` }}
+          transition={CHART_T}
           style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 70%, transparent))` }}
         />
       </svg>
@@ -529,6 +549,7 @@ export function Ring({ pct, size = 84, stroke = 8, accent, children }: { pct: nu
  *  Plans, Career Pathways, ...) -- a single green arc next to a 3-color
  *  legend was misleading: only one of the three values was ever drawn. */
 export function SegmentedRing({ segments, size = 92, stroke = 10, children }: { segments: { value: number; color: string }[]; size?: number; stroke?: number; children?: React.ReactNode }) {
+  const reduce = useReducedMotion();
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const total = Math.max(1, segments.reduce((sum, s) => sum + Math.max(0, s.value), 0));
@@ -557,8 +578,8 @@ export function SegmentedRing({ segments, size = 92, stroke = 10, children }: { 
       )}
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 -rotate-90 overflow-visible">
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
-        {arcs.map((a) => (
-          <circle
+        {arcs.map((a, i) => (
+          <motion.circle
             key={a.key}
             cx={size / 2}
             cy={size / 2}
@@ -585,8 +606,9 @@ export function SegmentedRing({ segments, size = 92, stroke = 10, children }: { 
             // rounded pill-ends belong on a single unbroken arc (see
             // Ring, above), not between distinct categories.
             strokeLinecap="butt"
-            strokeDasharray={`${a.arcLen} ${c}`}
-            strokeDashoffset={a.offset}
+            initial={reduce ? false : { strokeDasharray: `0 ${c}`, strokeDashoffset: 0 }}
+            animate={{ strokeDasharray: `${a.arcLen} ${c}`, strokeDashoffset: a.offset }}
+            transition={{ ...CHART_T, delay: i * 0.05 }}
             // Tighter and fainter than before (5px @ 65% -> 3px @ 45%) so
             // the glow's own reach stays inside the now-wider gap instead
             // of bridging it into the next segment's color.

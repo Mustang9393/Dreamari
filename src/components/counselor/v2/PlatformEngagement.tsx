@@ -4,7 +4,8 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
-import { useId } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { LogIn, Users, CalendarDays, TrendingUp } from "lucide-react";
 import { MetricTile } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -42,43 +43,120 @@ const INTERVENTION_BY_GRADE = [
   { grade: 12, count: 3 },
 ];
 
+// Monotone cubic (Fritsch-Carlson) through the points: a smooth curve like
+// the reference's, which never overshoots a month's real value the way a
+// plain Catmull-Rom spline can.
+function smoothPath(pts: { x: number; y: number }[]) {
+  const n = pts.length;
+  if (n < 2) return "";
+  const dx = pts.slice(1).map((p, i) => p.x - pts[i].x);
+  const m = pts.slice(1).map((p, i) => (p.y - pts[i].y) / dx[i]);
+  const t = pts.map((_, i) => (i === 0 ? m[0] : i === n - 1 ? m[n - 2] : m[i - 1] * m[i] <= 0 ? 0 : (m[i - 1] + m[i]) / 2));
+  for (let i = 0; i < n - 1; i++) {
+    if (m[i] === 0) { t[i] = 0; t[i + 1] = 0; continue; }
+    const a = t[i] / m[i];
+    const b = t[i + 1] / m[i];
+    const h = Math.hypot(a, b);
+    if (h > 3) { t[i] = (3 / h) * a * m[i]; t[i + 1] = (3 / h) * b * m[i]; }
+  }
+  let d = `M${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const c = dx[i] / 3;
+    d += ` C${(pts[i].x + c).toFixed(1)} ${(pts[i].y + c * t[i]).toFixed(1)} ${(pts[i + 1].x - c).toFixed(1)} ${(pts[i + 1].y - c * t[i + 1]).toFixed(1)} ${pts[i + 1].x.toFixed(1)} ${pts[i + 1].y.toFixed(1)}`;
+  }
+  return d;
+}
+
+const TOTAL_COLOR = "#5B6CF9";
+const UNIQUE_COLOR = "#33C78C";
+
+// Rebuilt 26 Sept 2026 (direct feedback: "the logins by month is better in
+// replit... everything in that graph seems squished down"). The old SVG
+// stretched a 600x220 drawing to the card with preserveAspectRatio="none",
+// flattening the curve and smearing the text; this one measures its own
+// width and draws at real pixels, 280 tall. From the reference: smooth
+// curves, a labelled y-axis on round steps, a dot on every month, the
+// unique line in its own green so the two series never read as one. Ours
+// adds a soft area under the total, lines that draw in on load, and a
+// hover column that reads all three of the month's numbers at once.
 function LoginsChart() {
+  const reduce = useReducedMotion();
   const id = useId().replace(/:/g, "");
-  const W = 600;
-  const H = 220;
-  const padX = 16;
-  const padTop = 20;
-  const padBottom = 24;
-  const max = Math.max(...MONTHS.map((m) => m.total));
-  const x = (i: number) => padX + (i / (MONTHS.length - 1)) * (W - padX * 2);
-  const y = (v: number) => padTop + (1 - v / max) * (H - padTop - padBottom);
-  const lineFor = (key: "total" | "unique") => MONTHS.map((m, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)} ${y(m[key]).toFixed(1)}`).join(" ");
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [W, setW] = useState(0);
+  const [hover, setHover] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setW(Math.round(e.contentRect.width)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const H = 280;
+  const padLeft = 40;
+  const padRight = 16;
+  const padTop = 16;
+  const padBottom = 28;
+  const step = 150;
+  const max = Math.ceil(Math.max(...MONTHS.map((m) => m.total)) / step) * step;
+  const ticks = Array.from({ length: max / step + 1 }, (_, i) => i * step);
+  const plotW = Math.max(1, W - padLeft - padRight);
+  const plotH = H - padTop - padBottom;
+  const x = (i: number) => padLeft + (i / (MONTHS.length - 1)) * plotW;
+  const y = (v: number) => padTop + (1 - v / max) * plotH;
+  const pts = (key: "total" | "unique") => MONTHS.map((m, i) => ({ x: x(i), y: y(m[key]) }));
+  const totalD = smoothPath(pts("total"));
+  const uniqueD = smoothPath(pts("unique"));
+  const baseline = padTop + plotH;
+  const draw = { duration: 1.1, ease: [0.22, 1, 0.36, 1] as const };
+  const hm = hover !== null ? MONTHS[hover] : null;
+  // Beside the hover line, never on it: centred, it covered the month's own peak.
+  const tipRight = hover !== null && x(hover) > W / 2;
+  const tipLeft = hover !== null ? x(hover) + (tipRight ? -12 : 12) : 0;
 
   return (
-    <figure className="m-0 flex flex-col gap-[10px]">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Total logins and unique student logins by month" className="h-auto w-full overflow-visible" preserveAspectRatio="none" style={{ height: H }}>
-        <defs>
-          <linearGradient id={`pe-total-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#5B6CF9" stopOpacity="0.7" /><stop offset="100%" stopColor="#5B6CF9" /></linearGradient>
-          <linearGradient id={`pe-unique-${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#9BA8FB" stopOpacity="0.7" /><stop offset="100%" stopColor="#9BA8FB" /></linearGradient>
-        </defs>
-        {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-          <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="color-mix(in srgb, var(--foreground) 12%, transparent)" strokeWidth="1" />
-        ))}
-        <path d={lineFor("total")} fill="none" stroke={`url(#pe-total-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(91,108,249,0.5))" }} />
-        <path d={lineFor("unique")} fill="none" stroke={`url(#pe-unique-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: "drop-shadow(0 0 6px rgba(155,168,251,0.5))" }} />
-        {MONTHS.map((m, i) => (
-          <g key={m.label}>
-            <circle cx={x(i)} cy={y(m.total)} r="4.5" fill="#5B6CF9" stroke="var(--card)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-            <circle cx={x(i)} cy={y(m.unique)} r="4.5" fill="#9BA8FB" stroke="var(--card)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-          </g>
-        ))}
-        {MONTHS.map((m, i) => (
-          <text key={m.label} x={x(i)} y={H - 6} textAnchor="middle" style={{ fontSize: 10.5, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{m.label}</text>
-        ))}
-      </svg>
-      <div className="flex flex-wrap gap-x-[16px] gap-y-[4px]">
-        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: "#5B6CF9" }} />Total Logins</span>
-        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-[2px]" style={{ background: "#9BA8FB" }} />Unique Student Logins</span>
+    <figure className="m-0 flex flex-col gap-[12px]">
+      <div ref={wrapRef} className="relative w-full" style={{ height: H }} onMouseLeave={() => setHover(null)}>
+        {W > 0 && (
+          <svg width={W} height={H} role="img" aria-label="Total logins and unique student logins by month" className="block overflow-visible">
+            <defs>
+              <linearGradient id={`pe-area-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={TOTAL_COLOR} stopOpacity="0.28" /><stop offset="100%" stopColor={TOTAL_COLOR} stopOpacity="0" /></linearGradient>
+            </defs>
+            {ticks.map((v) => (
+              <g key={v}>
+                <line x1={padLeft} x2={W - padRight} y1={y(v)} y2={y(v)} stroke="color-mix(in srgb, var(--foreground) 9%, transparent)" strokeWidth="1" strokeDasharray={v === 0 ? undefined : "3 4"} />
+                <text x={padLeft - 10} y={y(v) + 4} textAnchor="end" style={{ fontSize: 11, fontWeight: 600, fill: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{v}</text>
+              </g>
+            ))}
+            {hover !== null && <line x1={x(hover)} x2={x(hover)} y1={padTop} y2={baseline} stroke="color-mix(in srgb, var(--foreground) 22%, transparent)" strokeWidth="1" />}
+            <motion.path d={`${totalD} L${x(MONTHS.length - 1).toFixed(1)} ${baseline} L${padLeft} ${baseline} Z`} fill={`url(#pe-area-${id})`} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.5 }} />
+            <motion.path d={totalD} fill="none" stroke={TOTAL_COLOR} strokeWidth="2.5" strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={draw} style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${TOTAL_COLOR} 55%, transparent))` }} />
+            <motion.path d={uniqueD} fill="none" stroke={UNIQUE_COLOR} strokeWidth="2.5" strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ ...draw, delay: 0.1 }} style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${UNIQUE_COLOR} 45%, transparent))` }} />
+            {MONTHS.map((m, i) => (
+              <g key={m.label}>
+                {(["total", "unique"] as const).map((k) => (
+                  <motion.circle key={k} cx={x(i)} cy={y(m[k])} r={hover === i ? 6 : 4.5} fill={k === "total" ? TOTAL_COLOR : UNIQUE_COLOR} stroke="var(--card)" strokeWidth="2" initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: reduce ? 0 : 0.2 + (i / (MONTHS.length - 1)) * 0.9 }} />
+                ))}
+                <text x={x(i)} y={H - 6} textAnchor={i === 0 ? "start" : i === MONTHS.length - 1 ? "end" : "middle"} style={{ fontSize: 11.5, fontWeight: 600, fill: hover === i ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{m.label}</text>
+                {/* One hover column per month, the full plot height, so the
+                   pointer doesn't have to find a 9px dot. */}
+                <rect x={x(i) - plotW / (MONTHS.length - 1) / 2} y={padTop} width={plotW / (MONTHS.length - 1)} height={plotH} fill="transparent" onMouseEnter={() => setHover(i)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} tabIndex={0} aria-label={`${m.label}: ${m.total} total logins, ${m.unique} unique students, ${m.avg.toFixed(2)} logins each`} style={{ cursor: "pointer", outline: "none" }} />
+              </g>
+            ))}
+          </svg>
+        )}
+        {hm && (
+          <div className={`pointer-events-none absolute top-[8px] flex flex-col ${tipRight ? "-translate-x-full" : ""} gap-[4px] rounded-[var(--radius-sm)] border px-[10px] py-[8px] text-[12px] font-semibold whitespace-nowrap`} style={{ left: tipLeft, background: "var(--popover, var(--card))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 8px 24px rgba(0,0,0,0.35)" }}>
+            <span className="font-bold">{hm.label}</span>
+            <span className="flex items-center gap-[6px]"><span aria-hidden className="size-[8px] rounded-full" style={{ background: TOTAL_COLOR }} />{hm.total} total logins</span>
+            <span className="flex items-center gap-[6px]"><span aria-hidden className="size-[8px] rounded-full" style={{ background: UNIQUE_COLOR }} />{hm.unique} unique students</span>
+            <span style={{ color: "var(--muted-foreground)" }}>{hm.avg.toFixed(2)} logins each</span>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-wrap justify-center gap-x-[18px] gap-y-[4px]">
+        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: TOTAL_COLOR }} />Total Logins</span>
+        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: UNIQUE_COLOR }} />Unique Student Logins</span>
       </div>
     </figure>
   );
