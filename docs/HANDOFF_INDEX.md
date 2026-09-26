@@ -55,7 +55,7 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 | Profile: Top Three | specs/top-three.md | Locked (Play CTA routes to IB only, by instruction) |
 | Profile: My Plan (roadmap) | specs/my-plan.md | Locked for finance careers; other careers placeholder |
 | Profile: Career Report | specs/career-report.md | Locked |
-| Profile: Preferences | none yet (Joshua's Slack spec, 25 Sept 2026, ported from dceeai.replit.app/my-profile#preferences) | Built (`src/components/profile/PreferencesTab.tsx`, store `src/lib/preferences.ts`): seeds from Build and the Top 3, writes overlapping answers back to the student profile |
+| Profile: Preferences | specs/preferences.md | Built, in review with Joshua (26 Sept 2026 pass applied). Every section, field, limit, state (loading, empty, save failed, saved) and edge case is in the spec; `?prefs=loading|error` previews the states |
 | Profile: Resume | none yet | Built (`src/components/resume/`, `ResumeExperience`) -- no locked spec written yet, so treat behaviour/copy in `src/` as current-but-unreviewed, not as a source of truth to build further on without checking with Joshua |
 | Play | specs/play.md | Locked (IB simulation is the only playable) |
 | Explore | specs/explore.md | Locked |

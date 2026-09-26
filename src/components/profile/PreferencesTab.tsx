@@ -31,7 +31,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalS
 import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { Activity, BookOpen, Bookmark, Briefcase, Check, ChevronRight, Compass, GraduationCap, Minus, Plus, School, SlidersHorizontal, Sparkles, Wrench, X, type LucideIcon } from "lucide-react";
+import { Activity, BookOpen, Bookmark, Briefcase, Check, ChevronRight, Compass, FileText, GraduationCap, Minus, Play, Plus, School, SlidersHorizontal, Sparkles, Wrench, X, type LucideIcon } from "lucide-react";
 import { LIMITS, preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences, type JobPrefs, type Preferences } from "@/lib/preferences";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { useSavedCareers } from "@/lib/savedCareers";
@@ -59,6 +59,12 @@ const GROUPS: { label: string; ids: SectionId[] }[] = [
   { label: "Your interests", ids: ["industries", "saved", "subjects", "skills"] },
   { label: "After high school", ids: ["education", "college"] },
   { label: "Work", ids: ["work", "jobs"] },
+];
+const SHAPES_STRIP: { label: string; icon: LucideIcon }[] = [
+  { label: "Explore", icon: Compass },
+  { label: "Schools", icon: School },
+  { label: "Play", icon: Play },
+  { label: "Career Report", icon: FileText },
 ];
 const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
 
@@ -89,8 +95,23 @@ function savedCard(id: string): { id: string; title: string; photo: string | nul
 }
 
 
+// Loading: the server render has no answers, so until the client has
+// read them the rows show skeletons, never a flash of "Add" on every row.
+// With a backend this is the fetch in flight. DEMO-ONLY: `?prefs=loading`
+// holds this state and `?prefs=error` makes every save fail, so each can
+// be reviewed (docs/handoff/specs/preferences.md, States).
+const noopSubscribe = () => () => {};
+function useDemoPrefsState(): "loading" | "error" | null {
+  return useSyncExternalStore(noopSubscribe, () => {
+    const v = new URLSearchParams(window.location.search).get("prefs");
+    return v === "loading" || v === "error" ? v : null;
+  }, () => null);
+}
+
 export function PreferencesTab() {
   const prefs = useSyncExternalStore(subscribePreferences, preferencesSnapshot, serverPreferencesSnapshot);
+  const hydrated = useSyncExternalStore(noopSubscribe, () => true, () => false);
+  const demoState = useDemoPrefsState();
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const [saved, toggleSaved] = useSavedCareers();
   const [open, setOpen] = useState<SectionId | null>(null);
@@ -157,14 +178,43 @@ export function PreferencesTab() {
           </span>
           <div className="flex min-w-0 flex-col gap-[4px]">
             <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
-            {/* Joshua's line (Slack, 26 Sept 2026), verbatim. */}
-            <p className="max-w-[560px] text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>Update your preferences to improve your recommendations as your interests change.</p>
+            {/* Joshua's point, shown instead of said (26 Sept 2026: "can we
+               make that point without kids having to read a long
+               sentence?"). His line asked students to understand that these
+               answers change their Dreamari; this strip names the parts
+               they change, from his own supporting line (Explore careers,
+               schools, games, Career Reports), scannable in a glance. His
+               sentence is the strip's accessible label. */}
+            <p className="sr-only">Update your preferences to improve your recommendations as your interests change.</p>
+            <div aria-hidden className="flex flex-wrap items-center gap-x-[8px] gap-y-[6px] pt-[2px]">
+              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Shapes your</span>
+              {SHAPES_STRIP.map(({ label, icon: I }) => (
+                <span key={label} className="flex items-center gap-[5px] rounded-full border px-[9px] py-[3px] text-[12px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 35%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 10%, transparent)", color: "var(--foreground)" }}>
+                  <I className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--accent-subtle)" }} />{label}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         {updated && <p className="pl-[52px] text-[11.5px] sm:pl-0 sm:pt-[10px]" style={{ color: "var(--muted-foreground)", opacity: 0.8 }}>Last updated {updated}</p>}
       </div>
 
-      {GROUPS.map((g, gi) => (
+      {(!hydrated || demoState === "loading") && GROUPS.map((g) => (
+        <section key={g.label} className="flex flex-col gap-[8px]" aria-busy="true" aria-label={`${g.label}, loading`}>
+          <span className="block h-[10px] w-[120px] animate-pulse rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} />
+          <ul className="flex flex-col divide-y divide-[color:var(--glass-border)] overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 85%, transparent)" }}>
+            {g.ids.map((id) => (
+              <li key={id} className="flex items-center gap-[12px] px-[var(--space-4)] py-[16px]">
+                <span className="size-9 flex-none animate-pulse rounded-[var(--radius-md)]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} />
+                <span className="h-[12px] w-[140px] animate-pulse rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} />
+                <span className="ml-auto hidden h-[22px] w-[180px] animate-pulse rounded-full sm:block" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+
+      {hydrated && demoState !== "loading" && GROUPS.map((g, gi) => (
         <motion.section key={g.label} className="flex flex-col gap-[8px]" initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: reduce ? 0 : gi * 0.07, ease: [0.22, 1, 0.36, 1] }}>
           <h3 className="px-[4px] text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>{g.label}</h3>
           <HoverBeam strength={0.5} className="min-w-0">
@@ -181,7 +231,7 @@ export function PreferencesTab() {
       {open === "saved" ? (
         <SavedEditor careers={savedCareers} topIds={picks.ids} onRemove={(id) => toggleSaved(id)} onClose={() => setOpen(null)} />
       ) : open ? (
-        <SectionEditor id={open} prefs={prefs} namedCareers={namedCareers} onClose={() => setOpen(null)} onSaved={() => setSavedNote(open)} />
+        <SectionEditor id={open} prefs={prefs} namedCareers={namedCareers} failSaves={demoState === "error"} onClose={() => setOpen(null)} onSaved={() => setSavedNote(open)} />
       ) : null}
     </div>
   );
@@ -255,11 +305,24 @@ function SavedEditor({ careers, topIds, onRemove, onClose }: { careers: { id: st
 
 // ---------------------------------------------------------------- editors ----
 
-function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: SectionId; prefs: Preferences; namedCareers: string[]; onClose: () => void; onSaved: () => void }) {
+function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, onSaved }: { id: SectionId; prefs: Preferences; namedCareers: string[]; /** DEMO-ONLY: ?prefs=error */ failSaves?: boolean; onClose: () => void; onSaved: () => void }) {
+  const [saveFailed, setSaveFailed] = useState(false);
   const [draft, setDraft] = useState<Preferences>(prefs);
   const patch = (next: Partial<Preferences>) => setDraft((d) => ({ ...d, ...next }));
   const patchJobs = (next: Partial<JobPrefs>) => setDraft((d) => ({ ...d, jobs: { ...d.jobs, ...next } }));
-  const save = () => { writePreferences(draft); onClose(); onSaved(); };
+  // A failed save keeps the sheet open with every edit intact, says so in
+  // one line, and turns Save into Try again. With a backend this is the
+  // write rejecting (network, 5xx); nothing is lost.
+  const save = () => {
+    try {
+      if (failSaves) throw new Error("demo save failure");
+      writePreferences(draft);
+      onClose();
+      onSaved();
+    } catch {
+      setSaveFailed(true);
+    }
+  };
   // Save wakes up only once something changed: a sheet never asks for a
   // meaningless save.
   const dirty = JSON.stringify(draft) !== JSON.stringify(prefs);
@@ -346,7 +409,7 @@ function SectionEditor({ id, prefs, namedCareers, onClose, onSaved }: { id: Sect
   };
 
   return (
-    <Modal title={section.title} subtitle={`Shapes your ${list(section.shapes)}`} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty}>
+    <Modal title={section.title} subtitle={`Shapes your ${list(section.shapes)}`} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty} saveLabel={saveFailed ? "Try again" : "Save"} error={saveFailed ? "Couldn't save your changes. Your edits are still here." : undefined}>
       {body[id as Exclude<SectionId, "saved">]}
     </Modal>
   );
@@ -491,7 +554,7 @@ function Expander({ label, openLabel, children }: { label: string; openLabel: st
   );
 }
 
-function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save", saveDisabled = false, children }: { title: string; /** one line: what this section shapes */ subtitle?: string; optional?: boolean; onCancel: () => void; onSave: () => void; saveLabel?: string; saveDisabled?: boolean; children: ReactNode }) {
+function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save", saveDisabled = false, error, children }: { title: string; /** one line: what this section shapes */ subtitle?: string; optional?: boolean; onCancel: () => void; onSave: () => void; saveLabel?: string; saveDisabled?: boolean; /** a failed save, shown above the footer */ error?: string; children: ReactNode }) {
   const reduce = useReducedMotion();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
@@ -514,9 +577,14 @@ function Modal({ title, subtitle, optional, onCancel, onSave, saveLabel = "Save"
           <button type="button" aria-label="Close editor" onClick={onCancel} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[18px] w-[18px]" aria-hidden /></button>
         </header>
         <div className="dm-scroll flex min-h-0 flex-1 flex-col gap-[var(--space-5)] overflow-y-auto px-[var(--space-5)] py-[var(--space-5)] [&>*+*]:border-t [&>*+*]:border-[color:var(--glass-border)] [&>*+*]:pt-[var(--space-5)]">{children}</div>
+        {error && (
+          <p role="alert" className="flex flex-none items-center gap-[8px] border-t px-[var(--space-5)] py-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--color-feedback-error, #E0453C) 10%, transparent)", color: "var(--foreground)" }}>
+            <X className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--color-feedback-error, #E0453C)" }} /> {error}
+          </p>
+        )}
         <footer className="flex flex-none items-center justify-end gap-[var(--space-3)] border-t px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
           {/* Saved Careers edits in place, so it has one button, not two. */}
-          {saveLabel === "Save" && <button type="button" onClick={onCancel} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Cancel</button>}
+          {saveLabel !== "Done" && <button type="button" onClick={onCancel} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Cancel</button>}
           <button type="button" onClick={onSave} disabled={saveDisabled} className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> {saveLabel}</button>
         </footer>
       </motion.div>
