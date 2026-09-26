@@ -37,7 +37,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
 import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound } from "lucide-react";
-import { BarChart, Ring, Segmented, SegmentedRing } from "@/components/connect/viz";
+import { motion, useReducedMotion } from "framer-motion";
+import { Ring, Segmented, SegmentedRing } from "@/components/connect/viz";
 import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { readCounselorAccount } from "@/lib/counselorAccount";
@@ -146,6 +147,7 @@ function ListRow({ label, value, dot, onClick }: { label: string; value: string;
 /** A rate or a comparison: short label, value, one thin bar. `muted`
  *  draws the bar in the neutral (a benchmark, not a result). */
 function BarRow({ label, value, pct, muted, tick }: { label: string; value: string; pct: number; muted?: boolean; /** a benchmark tick, as % of the bar */ tick?: number }) {
+  const reduce = useReducedMotion();
   const color = muted ? NEUTRAL_SLICE : PRIMARY;
   return (
     <li className="flex flex-col gap-[5px]">
@@ -154,21 +156,54 @@ function BarRow({ label, value, pct, muted, tick }: { label: string; value: stri
         <span className="flex-none font-bold tabular-nums" style={{ color: muted ? "var(--muted-foreground)" : "var(--foreground)" }}>{value}</span>
       </span>
       <span className="relative block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} aria-hidden>
-        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(0, Math.min(100, pct))}%`, background: muted ? color : `linear-gradient(90deg, color-mix(in srgb, ${color} 35%, transparent), ${color})` }} />
+        <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${Math.max(0, Math.min(100, pct))}%` }} transition={FILL} style={{ background: muted ? color : `linear-gradient(90deg, color-mix(in srgb, ${color} 35%, transparent), ${color})` }} />
         {typeof tick === "number" && <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${tick}% - 1px)`, background: TARGET_LINE }} />}
       </span>
     </li>
   );
 }
 
-/** Parts of one whole: a single bar, one segment per category. */
-function CompositionBar({ parts }: { parts: { label: string; value: number; color: string }[] }) {
-  const sum = parts.reduce((a, p) => a + p.value, 0) || 1;
+// The shared fill-in motion for this page's bars (same curve as viz.tsx).
+const FILL = { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const };
+
+/** Counts of different things, ranked: one row per item, the bar scaled to
+ *  the largest. Replaced a single composition bar where Career Drops
+ *  (7,293) left the other four as slivers you could not read. */
+function RankedBars({ parts }: { parts: { label: string; value: number; color: string }[] }) {
+  const reduce = useReducedMotion();
+  const top = Math.max(1, ...parts.map((p) => p.value));
   return (
-    <span className="flex h-[12px] w-full gap-[2px] overflow-hidden rounded-full" role="img" aria-label={parts.map((p) => `${p.label} ${p.value}`).join(", ")}>
-      {parts.filter((p) => p.value > 0).map((p) => <span key={p.label} className="h-full" style={{ width: `${(p.value / sum) * 100}%`, background: p.color }} />)}
-    </span>
+    <ul className="flex flex-col gap-[10px]">
+      {parts.map((p, i) => (
+        <li key={p.label} className="grid grid-cols-[minmax(0,9.5rem)_1fr_auto] items-center gap-[12px] text-[12.5px]" style={BODY}>
+          <span className="truncate font-medium" style={{ color: "var(--foreground)" }}>{p.label}</span>
+          <span className="relative block h-[8px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
+            <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${Math.max(2, (p.value / top) * 100)}%` }} transition={{ ...FILL, delay: reduce ? 0 : i * 0.05 }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${p.color} 40%, transparent), ${p.color})`, boxShadow: `0 0 8px color-mix(in srgb, ${p.color} 45%, transparent)` }} />
+          </span>
+          <span className="min-w-[3.5rem] text-right font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{p.value.toLocaleString("en-US")}</span>
+        </li>
+      ))}
+    </ul>
   );
+}
+
+/** One of the counselor's own activity figures as a small tile: an
+ *  optional ring (a rate), the number, a label and a note. */
+function WorkTile({ value, label, note, ring, onClick }: { value: string; label: string; note?: string; ring?: React.ReactNode; onClick?: () => void }) {
+  const body = (
+    <>
+      {ring}
+      <span className="flex min-w-0 flex-col gap-[2px]" style={BODY}>
+        <span className="text-[22px] leading-[1.05] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+        <span className="flex items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{label}{onClick && <Go />}</span>
+        {note && <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
+      </span>
+    </>
+  );
+  const cls = "flex min-w-0 items-center gap-[12px] rounded-[var(--radius-md)] border p-[12px] text-left";
+  return onClick
+    ? <button type="button" onClick={onClick} className={`dm-quiet cursor-pointer ${cls}`} style={GLASS_INSET}>{body}</button>
+    : <div className={cls} style={GLASS_INSET}>{body}</div>;
 }
 
 /** A summary card: its one headline/chart always, its details folded (and
@@ -362,45 +397,41 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   );
 
   // ---- Activity tab: what the counselor did, and what students did.
+  // "Your work" is the reference's own four figures as four tiles, all
+  // visible (26 Sept 2026 review: the question response rate is one of the
+  // reference's four headline numbers and had been folded behind Details).
   const renderActivity = () => (
     <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-      <SummaryCard
-        id="impact-work"
-        title={scope === "school" ? "Counselor work" : "Your work"}
-        details={<>
-          <ListRow label="Pending review" value={String(plansPending)} />
-          <ListRow label={`Questions answered (${responseRatePct}%)`} value={`${respondedQuestions} of ${QUESTIONS.length}`} />
-          <ListRow label="Announcements sent" value={String(ANNOUNCEMENTS.length)} />
-          <ListRow label={`Support flags active (${monitoredPct}% of caseload)`} value={String(monitored)} />
-        </>}
-      >
-        {/* Plans reviewed split by outcome: parts of one total, a donut. */}
-        <span className="flex items-center gap-[var(--space-5)]">
-          <SegmentedRing segments={[{ value: plansApproved, color: PRIMARY }, { value: plansChanges, color: BLUE_3[0] }]} size={96} stroke={11}>
-            <span className="flex flex-col items-center leading-none">
-              <span className="text-[20px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{plansReviewed}</span>
-              <span className="text-[10px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>reviewed</span>
-            </span>
-          </SegmentedRing>
-          <ul className="flex min-w-0 flex-1 flex-col">
-            <ListRow label="Approved" value={String(plansApproved)} dot={PRIMARY} />
-            <ListRow label="Changes requested" value={String(plansChanges)} dot={BLUE_3[0]} />
-            <ListRow label="Avg turnaround (standard 5)" value="2.1 days" />
-          </ul>
-        </span>
-      </SummaryCard>
-      <SummaryCard
-        id="impact-engagement"
-        title="Student engagement"
-        unit={scope === "school" ? "school-wide" : "your caseload"}
-        details={<>{actions.map((a) => <ListRow key={a.label} label={a.label} value={a.value.toLocaleString("en-US")} dot={a.color} />)}</>}
-      >
+      <OverviewCard title={scope === "school" ? "Counselor work" : "Your work"} unit="avg review 2.1 days · standard 5">
+        <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
+          <WorkTile
+            value={String(plansReviewed)}
+            label="Plans reviewed"
+            note={`${plansApproved} approved · ${plansChanges} changes · ${plansPending} pending`}
+            ring={<SegmentedRing segments={[{ value: plansApproved, color: PRIMARY }, { value: plansChanges, color: BLUE_3[0] }]} size={48} stroke={6} />}
+            onClick={() => router.push("/counselor?view=review-queue")}
+          />
+          <WorkTile
+            value={`${respondedQuestions}/${QUESTIONS.length}`}
+            label="Questions answered"
+            note={`${responseRatePct}% response rate`}
+            ring={<Ring pct={responseRatePct} size={48} stroke={6} accent={PRIMARY} />}
+            onClick={() => router.push("/counselor?view=connect")}
+          />
+          <WorkTile value={String(ANNOUNCEMENTS.length)} label="Announcements sent" note="school-wide" />
+          <WorkTile
+            value={String(monitored)}
+            label="Support flags active"
+            note={`${monitoredPct}% of caseload monitored`}
+            ring={<Ring pct={monitoredPct} size={48} stroke={6} accent={PRIMARY} />}
+            onClick={() => router.push("/counselor?view=students")}
+          />
+        </div>
+      </OverviewCard>
+      <OverviewCard title="Student engagement" unit={scope === "school" ? "school-wide" : "your caseload"}>
         <Headline value={totalActions.toLocaleString("en-US")} label="actions on Dreamari" />
-        <CompositionBar parts={actions} />
-        <span className="flex flex-wrap gap-x-[12px] gap-y-[4px] text-[11.5px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>
-          {actions.map((a) => <span key={a.label} className="flex items-center gap-[5px]"><span aria-hidden className="size-[7px] rounded-full" style={{ background: a.color }} />{a.label}</span>)}
-        </span>
-      </SummaryCard>
+        <RankedBars parts={actions} />
+      </OverviewCard>
     </div>
   );
 
@@ -445,22 +476,38 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
           </ul>
         </span>
       </OverviewCard>
-      {/* One grouped column chart for the grade split: on-track rate and
-         plan completion per grade, the 80% target as a line. */}
+      {/* The grade split as four rows, the reference's own shape ("27/30
+         on track · 44% avg completion"), ours with a ring for the on-track
+         rate and a bar for plan completion (no target drawn: plan completion has none of its own). Was a
+         grouped column chart with the numbers hidden until hover, which
+         took longer to read than the reference's plain rows. Each row opens
+         that grade's students. */}
       <div className="xl:col-span-2">
-        <OverviewCard title="By grade" unit={`${overallAvgCompletion}% plan completion overall`} aside={<CardLink onClick={() => router.push("/counselor?view=students")}>Students</CardLink>}>
-          <BarChart
-            barStyle="solid"
-            hideValuesUntilHover
-            height={200}
-            // The Replit's per-grade "27/30 on track" count, on the axis label.
-            groups={GRADES.map((g) => { const gm = grades.find((x) => x.g === g)?.m; return gm ? `Gr. ${g} · ${gm.onTrack}/${gm.students}` : `Gr. ${g}`; })}
-            series={[
-              { label: "On track", accent: BLUE_3[1], values: GRADES.map((g) => grades.find((x) => x.g === g)?.m.onTrackPct ?? NaN) },
-              { label: "Plan completion", accent: BLUE_3[0], values: GRADES.map((g) => { const gr = roster.filter((s) => s.grade === g); return gr.length ? Math.round(gr.reduce((sum, s) => sum + s.roadmapPct, 0) / gr.length) : NaN; }) },
-            ]}
-            targetLine={{ value: SCHOOL_TARGETS.onTrack, label: "On-track target" }}
-          />
+        <OverviewCard title="By grade" unit={`${overallAvgCompletion}% plan completion overall`}>
+          <ul className="grid grid-cols-1 gap-[10px] md:grid-cols-2">
+            {GRADES.map((g) => {
+              const gm = grades.find((x) => x.g === g)?.m;
+              if (!gm) return null;
+              const gr = roster.filter((s) => s.grade === g);
+              const completion = gr.length ? Math.round(gr.reduce((sum, s) => sum + s.roadmapPct, 0) / gr.length) : 0;
+              return (
+                <li key={g}>
+                  <button type="button" onClick={() => { setGradeFilter(g as 9 | 10 | 11 | 12); router.push("/counselor?view=students"); }} className="dm-quiet flex w-full min-w-0 cursor-pointer items-center gap-[14px] rounded-[var(--radius-md)] border p-[12px] text-left" style={GLASS_INSET}>
+                    <Ring pct={gm.onTrackPct} size={52} stroke={6} accent={PRIMARY}>
+                      <span className="text-[12.5px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{gm.onTrackPct}%</span>
+                    </Ring>
+                    <span className="flex min-w-0 flex-1 flex-col gap-[6px]">
+                      <span className="flex items-baseline justify-between gap-[8px]" style={BODY}>
+                        <span className="flex items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>Grade {g}<Go /></span>
+                        <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{gm.onTrack}/{gm.students} on track</span>
+                      </span>
+                      <ul><BarRow label="Plan completion" value={`${completion}%`} pct={completion} /></ul>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
           {scope === "school" && (
             <ul className="flex flex-col border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
               {byCounselor.map(({ c, m: cm }) => <ListRow key={c.id} label={`${c.name} · ${c.range}`} value={`${cm.onTrackPct}% on track`} onClick={() => { setCounselorFilter(c.id); router.push("/counselor?view=students"); }} />)}
