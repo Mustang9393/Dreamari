@@ -36,7 +36,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
-import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound } from "lucide-react";
+import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound, CheckCircle2 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Ring, Segmented, SegmentedRing } from "@/components/connect/viz";
 import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
@@ -47,7 +47,6 @@ import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 import { OverviewCard, Verdict, alertColor } from "./overviewShared";
 import { CardLink, Go } from "../chips";
 import { GLASS_INSET } from "../surfaces";
-import { Disclosure } from "./Disclosure";
 import { BLUE_3, BLUE_5, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "../palette";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, TARGET_LABELS, counselorFor, readinessMetrics, targetBand, type TargetKey } from "@/lib/counselorOrg";
 const GRADES = [9, 10, 11, 12];
@@ -206,22 +205,6 @@ function WorkTile({ value, label, note, ring, onClick }: { value: string; label:
     : <div className={cls} style={GLASS_INSET}>{body}</div>;
 }
 
-/** A summary card: its one headline/chart always, its details folded (and
- *  always open in print). */
-function SummaryCard({ id, title, unit, children, details }: { id: string; title: string; unit?: string; children: React.ReactNode; details: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <OverviewCard title={title} unit={unit}>
-      {children}
-      <div className="mt-auto print:hidden">
-        <Disclosure id={id} title="Details" open={open} onToggle={() => setOpen((v) => !v)}>
-          <ul className="flex flex-col">{details}</ul>
-        </Disclosure>
-      </div>
-      <ul className="hidden flex-col print:flex">{details}</ul>
-    </OverviewCard>
-  );
-}
 
 // One outcome as a glanceable tile: the percentage is the headline, the
 // target and the counts drop to a single muted line, and the tile itself
@@ -444,24 +427,25 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
   ];
   const renderReadiness = () => (
     <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-      <SummaryCard
-        id="impact-readiness"
-        title="Milestones approved"
-        details={<>{milestoneRings.map((r) => <ListRow key={r.label} label={r.label} value={r.count} />)}</>}
-      >
-        {/* Four independent rates of the same caseload: small multiples of
-           one ring each, so they compare at a glance. */}
-        <div className="grid grid-cols-2 gap-[var(--space-4)] sm:grid-cols-4">
+      {/* Bigger rings with each count under its label (direct feedback,
+         26 Sept 2026: "This card has room for the charts to be bigger"):
+         the card stretches to the Pathways card beside it, and the counts
+         that sat behind Details now fill that room. */}
+      <OverviewCard title="Milestones approved">
+        <div className="grid flex-1 grid-cols-2 place-content-center gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
           {milestoneRings.map((r) => (
-            <span key={r.label} className="flex flex-col items-center gap-[8px] text-center">
-              <Ring pct={r.pct} size={72} stroke={7} accent={PRIMARY}>
-                <span className="text-[16px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+            <span key={r.label} className="flex flex-col items-center gap-[10px] text-center">
+              <Ring pct={r.pct} size={112} stroke={10} accent={PRIMARY}>
+                <span className="text-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
               </Ring>
-              <span className="text-[12px] leading-[15px] font-semibold" style={{ ...BODY, color: "var(--foreground)" }}>{r.label}</span>
+              <span className="flex flex-col gap-[2px]" style={BODY}>
+                <span className="text-[13px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }}>{r.label}</span>
+                <span className="text-[12px] font-medium tabular-nums" style={{ color: "var(--muted-foreground)" }}>{r.count}</span>
+              </span>
             </span>
           ))}
         </div>
-      </SummaryCard>
+      </OverviewCard>
       <OverviewCard title="Postsecondary pathways" unit={`${m.withPlan} of ${m.students} declared`}>
         {/* Parts of one caseload: a donut, with its key beside it. */}
         <span className="flex flex-wrap items-center gap-[var(--space-5)]">
@@ -518,22 +502,47 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
     </div>
   );
 
-  // One tile per ASCA domain: its headline number, then its practices.
+  // One card per ASCA domain (26 Sept 2026, direct feedback: "The asca
+  // cards can be better too"): the domain's measured practices as rings or
+  // count badges of one size, so the three cards line up, then any
+  // practice with no number as a checked line.
+  const RING = 64;
   const renderAsca = () => (
     <OverviewCard title="ASCA National Model" unit="4th edition">
-      <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-[10px] md:grid-cols-3">
         {ASCA({ total: roster.length, academicPlanPct, careerReportPct, withPlanPct: m.withPlanPct, monitored, responseRatePct, atRiskCount }).map((col) => (
-          <div key={col.title} className="flex flex-col gap-[12px] rounded-[var(--radius-md)] border p-[14px]" style={GLASS_INSET}>
+          <div key={col.title} className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={GLASS_INSET}>
             <span className="flex items-center gap-[8px]">
               <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)" }}>
                 <col.icon className="h-[15px] w-[15px]" style={{ color: "var(--primary)" }} />
               </span>
-              <span className="text-[13px] font-bold" style={{ ...BODY, color: "var(--foreground)" }}>{col.title}</span>
+              <span className="text-[13.5px] font-bold" style={{ ...BODY, color: "var(--foreground)" }}>{col.title}</span>
             </span>
-            <Headline value={col.value} label={col.label} />
-            <ul className="flex flex-col gap-[4px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-              {col.practices.map((pr) => <li key={pr} className="text-[12px] leading-[16px] font-medium" style={{ ...BODY, color: "var(--muted-foreground)" }}>{pr}</li>)}
-            </ul>
+            <div className={`grid gap-[8px] ${col.metrics.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+              {col.metrics.map((mt) => (
+                <span key={mt.label} className="flex flex-col items-center gap-[8px] text-center">
+                  {mt.kind === "ring" ? (
+                    <Ring pct={mt.pct} size={RING} stroke={7} accent={PRIMARY}>
+                      <span className="text-[15px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{mt.pct}%</span>
+                    </Ring>
+                  ) : (
+                    <span className="flex flex-none items-center justify-center rounded-full" style={{ width: RING, height: RING, background: "color-mix(in srgb, var(--primary) 14%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent)" }}>
+                      <span className="text-[17px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{mt.value}</span>
+                    </span>
+                  )}
+                  <span className="text-[11.5px] leading-[14px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>{mt.label}</span>
+                </span>
+              ))}
+            </div>
+            {col.practices.length > 0 && (
+              <ul className="mt-auto flex flex-col gap-[6px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+                {col.practices.map((pr) => (
+                  <li key={pr} className="flex items-center gap-[6px] text-[12px] font-medium" style={{ ...BODY, color: "var(--foreground)" }}>
+                    <CheckCircle2 aria-hidden className="h-[14px] w-[14px] flex-none" style={{ color: "var(--primary)" }} />{pr}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         ))}
       </div>
@@ -673,10 +682,14 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
 
 // Every item v1's ASCA alignment cards listed, grouped under one headline
 // per domain.
-function ASCA(d: { total: number; academicPlanPct: number; careerReportPct: number; withPlanPct: number; monitored: number; responseRatePct: number; atRiskCount: number }) {
+type AscaMetric = { kind: "ring"; pct: number; label: string } | { kind: "count"; value: number; label: string };
+// Each domain's three reference practices: the measured ones as rings (a
+// rate) or count badges (a headcount), the unmeasured one as a checked
+// practice. Every reference fact stays; none of it is a sentence any more.
+function ASCA(d: { total: number; academicPlanPct: number; careerReportPct: number; withPlanPct: number; monitored: number; responseRatePct: number; atRiskCount: number }): { icon: typeof BookOpen; title: string; metrics: AscaMetric[]; practices: string[] }[] {
   return [
-    { icon: BookOpen, title: "Academic", value: `${d.academicPlanPct}%`, label: "four-year plans approved", practices: [`All ${d.total} students supported`, "Course selection, credit monitoring"] },
-    { icon: Briefcase, title: "Career", value: `${d.careerReportPct}%`, label: "career reports complete", practices: [`${d.withPlanPct}% declared a pathway`, "Simulations and assessments"] },
-    { icon: Heart, title: "Social-emotional", value: String(d.monitored), label: "students monitored", practices: [`${d.responseRatePct}% of questions answered`, `${d.atRiskCount} at-risk students flagged`] },
+    { icon: BookOpen, title: "Academic", metrics: [{ kind: "ring", pct: d.academicPlanPct, label: "4-year plans approved" }, { kind: "count", value: d.total, label: "students supported" }], practices: ["Course selection and credit monitoring"] },
+    { icon: Briefcase, title: "Career", metrics: [{ kind: "ring", pct: d.careerReportPct, label: "career reports complete" }, { kind: "ring", pct: d.withPlanPct, label: "declared a pathway" }], practices: ["Simulations and assessments on Dreamari"] },
+    { icon: Heart, title: "Social-emotional", metrics: [{ kind: "count", value: d.monitored, label: "monitored for support" }, { kind: "ring", pct: d.responseRatePct, label: "questions answered" }, { kind: "count", value: d.atRiskCount, label: "at-risk flagged" }], practices: [] },
   ];
 }

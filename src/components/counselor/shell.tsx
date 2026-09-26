@@ -12,7 +12,7 @@ import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { useCounselorVersion } from "./version";
-import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, type CounselorView } from "./roles";
+import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_HOME, type CounselorView } from "./roles";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 import { CHANGE_NOTES } from "./v2/changeNotes";
 
@@ -123,10 +123,12 @@ function useNavItems(): { view: CounselorView; label: string; icon: typeof Layou
 
 function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?: () => void }) {
   const items = useNavItems();
+  // v1 still lists Insights itself; v2 shows it inside Reports.
+  const home = items.some((i) => i.view === active) ? active : (VIEW_HOME[active] ?? active);
   return (
     <nav aria-label="Counselor Dashboard" className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-[var(--space-3)] py-[var(--space-4)]">
       {items.map((item) => {
-        const on = item.view === active;
+        const on = item.view === home;
         const Icon = item.icon;
         return (
           <Link
@@ -475,7 +477,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             <div className="flex w-full max-w-[1400px] flex-col gap-[var(--space-4)] [&>*]:shrink-0">
               {showTitle && (
                 <div className="flex flex-col gap-[2px]">
-                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{(version !== "v1" && menuForRole(account.role).find((item) => item.view === active)?.label) || title}</h1>
+                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{(version !== "v1" && menuForRole(account.role).find((item) => item.view === (VIEW_HOME[active] ?? active))?.label) || title}</h1>
                   {/* v2 drops the caption line under every page title (direct
                      feedback, 25 Sept 2026: "Remove all the captions to the
                      main page titles ... there is so much copy on every

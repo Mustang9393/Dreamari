@@ -112,7 +112,17 @@ export function menuForRole(role: CounselorRole | ""): RoleMenuItem[] {
 }
 
 /** Screens a role can open by URL but that are not in its menu. */
-const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {};
+// Insights moved inside Reports (26 Sept 2026) but its old URL still opens
+// it, on the Reports "Career + college" tab (Overview's Career Pathways
+// links there).
+const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {
+  "School Counselor": ["insights"],
+  "Lead Counselor": ["insights"],
+};
+
+/** A hidden view shown inside another menu item's screen: the sidebar
+ *  highlights, and the page is titled, as that item. */
+export const VIEW_HOME: Partial<Record<CounselorView, CounselorView>> = { insights: "progress" };
 export function roleHasView(role: CounselorRole | "", view: CounselorView): boolean {
   return menuForRole(role).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
 }

@@ -11,9 +11,12 @@
 // is the reference's, verbatim.
 
 import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Lightbulb, PenLine, Plus, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { ShowAll } from "./Disclosure";
+import { SubTabs } from "./SubTabs";
+import { Ring } from "@/components/connect/viz";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
 // Each recommendation as a number, a subject and its actions -- the
@@ -53,40 +56,76 @@ const TOP_COLLEGES = [
   { emoji: "💚", name: "Michigan State University", count: 12 }, { emoji: "🦅", name: "Georgia State University", count: 11 },
 ];
 
-// A real horizontal bar chart: the bar spans the row, the label sits on
-// it, the count is pinned right. Ten short bars beside a label column read
-// as decoration; one bar per row reads as the chart it is.
-function RankedList({ items }: { items: { name: string; count: number }[] }) {
-  const max = Math.max(...items.map((i) => i.count));
-  return (
-    <ol className="flex flex-col gap-[6px]">
-      {items.map((item, i) => (
-        <li key={item.name} className="flex items-center gap-[10px]">
-          <span className="w-[18px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
-          <span className="relative flex h-[28px] min-w-0 flex-1 items-center rounded-[6px]" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
-            <span aria-hidden className="absolute inset-y-0 left-0 rounded-[6px]" style={{ width: `${(item.count / max) * 100}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent), color-mix(in srgb, var(--primary) 85%, transparent))" }} />
-            <span className="relative truncate px-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</span>
-          </span>
-          <span className="w-[28px] flex-none text-right text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-// Five rows open, the rest behind "Show all" (progressive disclosure, 25
-// Sept 2026): four cards of ten bars each was forty bars on one screen,
-// and the question a counselor brings here is answered by the top few.
+// The four ranked lists as ONE chart with four lenses (26 Sept 2026,
+// direct feedback: "this page has the most ugliest bunch of graphs" and
+// "seem like reports"). Four identical cards of fat blue bars were forty
+// bars on one screen asking the same question four ways; one card with
+// sub-tabs asks it once, and switching lens morphs each bar to its new
+// length (bars keyed by rank, not name), the reference-style motion the
+// user asked for ("i love how when i switch tabs the graphs animate into
+// the next"). Brightness follows rank so the leader reads first without a
+// second color. All ten per list stay one click away (Show all).
+type Lens = "careers" | "simulations" | "majors" | "colleges";
+const LENSES: { key: Lens; label: string; unit: string; items: { name: string; count: number }[] }[] = [
+  { key: "careers", label: "Saved careers", unit: "students saved it", items: TOP_SAVED_CAREERS },
+  { key: "simulations", label: "Simulations", unit: "students ran it", items: TOP_SIMULATIONS },
+  { key: "majors", label: "Majors", unit: "students saved it", items: TOP_MAJORS },
+  { key: "colleges", label: "Colleges", unit: "students saved it", items: TOP_COLLEGES },
+];
+const MORPH = { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const };
 const SHOWN = 5;
-function RankCard({ title, items }: { title: string; items: { name: string; count: number }[] }) {
+
+function InterestChart() {
+  const reduce = useReducedMotion();
+  const [lens, setLens] = useState<Lens>("careers");
   const [all, setAll] = useState(false);
-  const visible = all ? items : items.slice(0, SHOWN);
+  const current = LENSES.find((l) => l.key === lens)!;
+  // All ten on a wide screen, where the card stands beside the
+  // recommendations and has the height; five plus Show all below that.
+  const items = current.items;
+  // A shared scale across lenses would flatten the smaller lists; each lens
+  // scales to its own leader, rounded up so the top bar never touches the end.
+  const max = Math.ceil(Math.max(...current.items.map((i) => i.count)) / 10) * 10;
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title} <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>top {visible.length}</span></h2>
-        <RankedList items={visible} />
-        <ShowAll total={items.length} shown={SHOWN} open={all} onToggle={() => setAll((v) => !v)} />
+        <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>What students are into</h2>
+          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>top {current.items.length} · {current.unit}</span>
+        </div>
+        <SubTabs ariaLabel="Lens" value={lens} onChange={(k) => setLens(k)} options={LENSES.map((l) => ({ key: l.key, label: l.label }))} />
+        <ol className="flex flex-col gap-[12px]">
+          {items.map((item, i) => {
+            const lead = i === 0;
+            // Rank as brightness: the leader at full strength, the rest
+            // stepping down to a quiet floor.
+            const strength = lead ? 100 : Math.max(38, 78 - i * 6);
+            return (
+              <li key={i} className={`flex-col gap-[6px] ${all || i < SHOWN ? "flex" : "hidden lg:flex"}`}>
+                <span className="flex items-baseline justify-between gap-[12px] text-[13px]">
+                  <span className="flex min-w-0 items-baseline gap-[10px]">
+                    <span className="w-[16px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: lead ? "var(--primary)" : "var(--muted-foreground)" }}>{i + 1}</span>
+                    <motion.span key={item.name} initial={reduce ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: reduce ? 0 : i * 0.03 }} className="truncate font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</motion.span>
+                  </span>
+                  <span className="flex-none font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
+                </span>
+                <span className="relative ml-[26px] block h-[8px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
+                  <motion.span
+                    className="absolute inset-y-0 left-0 rounded-full"
+                    initial={reduce ? false : { width: "0%" }}
+                    animate={{ width: `${(item.count / max) * 100}%` }}
+                    transition={{ ...MORPH, delay: reduce ? 0 : i * 0.03 }}
+                    style={{
+                      background: `linear-gradient(90deg, color-mix(in srgb, var(--primary) ${Math.round(strength * 0.4)}%, transparent), color-mix(in srgb, var(--primary) ${strength}%, transparent))`,
+                      boxShadow: lead ? "0 0 10px color-mix(in srgb, var(--primary) 55%, transparent)" : undefined,
+                    }}
+                  />
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+        <div className="lg:hidden"><ShowAll total={current.items.length} shown={SHOWN} open={all} onToggle={() => setAll((v) => !v)} /></div>
       </div>
     </HoverBeam>
   );
@@ -105,7 +144,9 @@ export function CareerCollegeInsights() {
   const [action, setAction] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
-    <div className="flex flex-col gap-[var(--space-5)]">
+    // Side by side on a wide screen: what to do (left), what students are
+    // into (right), one glance each, instead of a report's long scroll.
+    <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       {/* The screen's hero: what the data suggests doing. One stat, one
          action per column; the reference's two further actions per stat
          were a paragraph each on every visit. */}
@@ -133,7 +174,7 @@ export function CareerCollegeInsights() {
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-1">
               {/* One left edge for all three lines (direct feedback: the
                  number and its text "read like two different anchors"). */}
               {tiles.map((r) => (
@@ -144,9 +185,14 @@ export function CareerCollegeInsights() {
                       <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[12px] w-[12px]" aria-hidden /></button>
                     </>
                   ) : (
-                    <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                    <span className="flex items-center gap-[12px]">
+                      <Ring pct={r.pct ?? 0} size={52} stroke={6} accent="var(--primary)">
+                        <span className="text-[13px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                      </Ring>
+                      <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of students {r.subject}</span>
+                    </span>
                   )}
-                  <span className="text-[12.5px] font-semibold" style={{ color: r.mine ? "var(--foreground)" : "var(--muted-foreground)" }}>{r.subject}</span>
+                  {r.mine && <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>{r.subject}</span>}
                   <span className="mt-[6px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.actions[0]}</span>
                   {r.actions.length > 1 && (
                     expanded.has(r.subject) ? (
@@ -160,28 +206,25 @@ export function CareerCollegeInsights() {
                 </div>
               ))}
             </div>
+            {/* The reference's career-fair note, as the card's closing
+               suggestion rather than a card of its own: it is one more
+               recommendation, drawn from the same interests. */}
+            <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--inset-border)" }}>
+              <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</span>
+              <span className="flex flex-wrap gap-[6px]">
+                {["Technology & Engineering", "Business & Entrepreneurship", "Healthcare & Nursing", "Law & Criminal Justice"].map((t) => (
+                  <span key={t} className="rounded-full border px-[10px] py-[4px] text-[12px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{t}</span>
+                ))}
+              </span>
+            </div>
           </div>
         </div>
       </HoverBeam>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        {/* The reference's own list, so it agrees with the "43% saved
-           Investment Banker" headline above it (a computed list from each
-           student's top matches had Investment Banker nowhere in it). */}
-        <RankCard title="Saved careers" items={TOP_SAVED_CAREERS} />
-        <RankCard title="Careers explored in simulations" items={TOP_SIMULATIONS} />
-        <RankCard title="Saved majors" items={TOP_MAJORS} />
-        <RankCard title="Saved colleges" items={TOP_COLLEGES} />
-      </div>
+      {/* Saved careers is the reference's own list, so it agrees with the
+         "43% saved Investment Banker" headline above it. */}
+      <InterestChart />
 
-      <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</span>
-        <span className="flex flex-wrap gap-[8px]">
-          {["Technology & Engineering", "Business & Entrepreneurship", "Healthcare & Nursing", "Law & Criminal Justice"].map((t) => (
-            <span key={t} className="rounded-full border px-[10px] py-[4px] text-[12px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{t}</span>
-          ))}
-        </span>
-      </div>
     </div>
   );
 }
