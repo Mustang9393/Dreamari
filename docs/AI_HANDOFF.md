@@ -14659,3 +14659,20 @@ Follow-ups on the restore pass: "make sure all the graphs make sense for the dat
 - **Consolidation:** secondary facts (pending review, question counts, announcements, support-flag %, milestone counts, per-action counts) are folded behind each card's Details toggle; print opens them all.
 
 Validation: tsc, eslint, build clean; all four tabs browser-verified at 1280px and pane width.
+
+## 2026-09-26 · Reports, charts, Insights, Productivity workspace (commits 2ab0405d to 9d17f74a)
+
+Each commit message carries the full reasoning and the quoted feedback; summary here.
+
+- **Reports** = Student progress | Career + college | Engagement. "Readiness reports" was renamed because the user read it as missing ("Student progress is the thing i am most worried about"). Verified against the Replit report by report: all 9 reports, their categories, pathway filter, CSV/PDF and Summary by Grade are present. Insights moved inside Reports ("seem like reports to me"); `?view=insights` is a hidden view that highlights Reports (`roles.ts` `VIEW_HOME`).
+- **Chart motion** (`connect/viz.tsx`): rings sweep, bars grow, lines draw on load; bars keyed by position so switching a report/filter/lens morphs them ("i love how when i switch tabs the graphs animate into the next"). SVG gotcha: framer's `x`/`y` on SVG are transforms, so animated rects carry no `x` attribute.
+- **One chart color family** (`palette.ts` `CHART_STATUS`, `CHART_STAGE`): blue for data, amber/red only for problems. Status chips keep green; Career Pathways keeps its rainbow by explicit decision.
+- **Engagement** always trends up with small natural dips; latest month = the Replit's headline (71 / 214 / 3.01). DEMO-ONLY. Stat tiles have sparklines and "vs last month". Logins chart rebuilt at real pixel size (was a stretched viewBox, "squished").
+- **My Impact**: Your work as four tiles (response rate visible again), engagement as ranked bars, by-grade rows, 112px milestone rings with counts, ASCA as rings/count badges.
+- **Career + college**: one "What students are into" chart with four lens sub-tabs; recommendations with rings beside it; career-fair interests are invites into Group message (`?tool=group-message&pathway=`).
+- **Milestone Tracker**: Furthest behind recomposed (one sentence, one primary action) and fixed to pick the lowest % done.
+- **Productivity Suite** is a workspace: modes Documents | Group message | Needs attention; setup panel with a Document picker, Built from card and actions; a real US Letter page (`v2/DocumentDesk.tsx`, 816x1056 scaled, Source Serif 4) with letterhead or memo header, full screen at print size, and iframe printing of the page alone. Drafts use light markup (# heading, - bullet, **bold**) rendered on the page, raw on click. Needs attention rows open a drafted success plan or brief; "Message all".
+
+Validation: tsc, eslint, `npm run build` clean on every commit; each screen browser-verified at 1440 and pane width. All pushed to main (fast-forward each time).
+
+Open / next: app-wide data-viz and layout audit the user asked for ("Lets see what we can improve across the app in terms of data viz and cards and layouts and UX") is only partly done (Reports, My Impact, Insights, Milestone Tracker, Productivity covered); still to sweep: Overview, Students, Student Profile, Review Queue, Connect, Settings, and the admin-role screens. Productivity on phones stacks the setup panel above the page (works, not tuned).
