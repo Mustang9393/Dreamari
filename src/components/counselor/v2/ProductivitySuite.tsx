@@ -57,7 +57,7 @@
 //   edit" mark at rest, and a visible (if quiet) dashed rule around the
 //   text, gone once it has focus -- flat print has neither.
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check, Pencil } from "lucide-react";
+import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check, Pencil, ShieldCheck } from "lucide-react";
 import { BatchComposer } from "./Batch";
 import { CAREER_TRACKS, DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { Listbox } from "@/components/app/Listbox";
@@ -81,13 +81,16 @@ function fmtToday(): string {
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
 
-const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignature }[] = [
-  { id: "recommendation-letter", label: "Recommendation Letter", sub: "College · Scholarship · Internship · Employment", icon: FileSignature },
-  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText },
-  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2 },
-  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo },
+// `uses`: what each draft is built from, the one fact of the reference's
+// long tool descriptions a counselor needs to trust the draft (cut to a
+// single line).
+const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignature; uses?: string }[] = [
+  { id: "recommendation-letter", label: "Recommendation Letter", sub: "College · Scholarship · Internship · Employment", icon: FileSignature, uses: "the student's career report, resume, assessments, reflections, milestones, activities and your notes" },
+  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText, uses: "the student's career interests, milestone progress and what's missing" },
+  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2, uses: "the student's progress, career readiness, academic plan and areas needing attention" },
+  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo, uses: "the student's missing milestones, Dreamari activities, simulations and connections" },
   { id: "group-message", label: "Group Message", sub: "One message, reminder or to-do to many students", icon: Megaphone },
-  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle },
+  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle, uses: "engagement, milestones and missing plans across your whole caseload, no student needed" },
 ];
 
 const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
@@ -265,6 +268,12 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             <span className="flex items-center gap-[8px]"><tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}</span>
             <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tool.sub}</span>
           </h2>
+          {/* The reference's "You are always in control" banner and its
+             per-tool description, each as one quiet line. */}
+          <p className="-mt-[var(--space-2)] flex items-start gap-[6px] text-[12px] leading-[17px] font-medium" style={{ color: "var(--muted-foreground)" }}>
+            <ShieldCheck aria-hidden className="mt-[1px] h-[13px] w-[13px] flex-none" style={{ color: "var(--primary)" }} />
+            <span>{tool.uses ? `Built from ${tool.uses}. ` : ""}A first draft only: you review, edit and approve before anything is shared.</span>
+          </p>
 
           {toolId === "group-message" ? (
             <div className="flex flex-col gap-[var(--space-3)]">
