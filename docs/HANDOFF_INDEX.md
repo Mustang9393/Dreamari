@@ -57,7 +57,8 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 | Profile: Career Report | specs/career-report.md | Locked |
 | Profile: Preferences | specs/preferences.md | Built, in review with Joshua (26 Sept 2026 pass applied). Every section, field, limit, state (loading, empty, save failed, saved) and edge case is in the spec; `?prefs=loading|error` previews the states |
 | Profile: Resume | none yet | Built (`src/components/resume/`, `ResumeExperience`) -- no locked spec written yet, so treat behaviour/copy in `src/` as current-but-unreviewed, not as a source of truth to build further on without checking with Joshua |
-| Play | specs/play.md | Locked (IB simulation is the only playable) |
+| Play | specs/play.md | Locked (IB and Registered Nurse are playable) |
+| Play SOP: scaling simulations and Glossary Games to every career | handoff/play-sop/README.md | Reference (read before building any new career game; chapter 6 lists open decisions) |
 | Explore | specs/explore.md | Locked |
 | Connect (student, events, professional profile, volunteer dashboard) | specs/connect.md | Locked |
 | Dream Score (XP) | specs/dream-score.md | Locked for Build; later milestones unspecified |
