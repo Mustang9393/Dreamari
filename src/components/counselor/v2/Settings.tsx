@@ -118,7 +118,13 @@ export function Settings() {
                   // eslint-disable-next-line @next/next/no-img-element -- a user-uploaded data: URL, not an optimizable static asset
                   <img src={draft.signatureDataUrl} alt="Your signature" className="max-h-full max-w-full object-contain p-[6px]" />
                 ) : (
-                  <span className="text-[11.5px] font-semibold" style={{ color: "#9a9aa0" }}>No signature uploaded</span>
+                  // What letters use until one is uploaded, shown as it
+                  // prints (26 Sept 2026 sweep) instead of "No signature
+                  // uploaded" plus two lines explaining the fallback.
+                  <span className="flex flex-col items-center leading-none">
+                    <span style={{ fontFamily: "'Dancing Script', cursive", fontSize: 24, color: "#1a1a1a" }}>{draft.name || "Your name"}</span>
+                    <span className="mt-[4px] text-[9.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "#9a9aa0" }}>Auto signature</span>
+                  </span>
                 )}
               </div>
               <span className="flex items-center gap-[8px]">
@@ -143,7 +149,7 @@ export function Settings() {
                 )}
               </span>
             </div>
-            <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Used on generated recommendation letters. A photo of your signature on plain paper works well; without one, letters use an auto-generated signature instead.</span>
+            <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Signs your recommendation letters. A photo of your signature on plain paper works well.</span>
           </div>
           <div className="flex items-center justify-end gap-[10px]">
             {saved && <span className="text-[12.5px] font-semibold" style={{ color: "#33C78C" }}>Saved.</span>}

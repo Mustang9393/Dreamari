@@ -304,7 +304,11 @@ export function ReviewQueue() {
          the list's height, which left the actions floating far below a
          short submission (direct feedback, 25 Sept 2026). */}
       <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_minmax(0,1fr)]">
-        <div className="flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
+        {/* The list fills the height under the header on desktop, like a
+           mail client's (26 Sept 2026 sweep: a 70vh cap ended the list
+           mid-screen with empty page below it). Thin scrollbar per
+           docs/CROSS_BROWSER_GUARDRAILS.md. */}
+        <div className="flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] [scrollbar-width:thin] lg:max-h-[calc(100dvh-190px)]">
           {pending.length === 0 ? (
             <div className="rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--muted-foreground)" }}>
               Nothing here right now.
