@@ -21,6 +21,8 @@
 // auto-signature on a generated recommendation letter (26 Sept 2026: "have
 // it look like an actual signed signature not typed text") -- a real
 // cursive face, not a CSS italic/skew trick on the body font. All verified
-// live on Google Fonts.
+// live on Google Fonts. Source Serif 4 is the Counselor Dashboard's
+// document face (letters, briefs, plans on a US Letter page, 26 Sept 2026:
+// "Better fonts, official fonts... more of an editorial style").
 export const FONT_STYLESHEET_HREF =
-  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Viaoda+Libre&family=Source+Code+Pro:wght@600&family=Nunito:wght@700&family=Science+Gothic:wght@700&family=ZCOOL+XiaoWei&family=Sekuya&family=Lora:wght@700&family=Fraunces:opsz,wght@9..144,700&family=Heebo:wght@700&family=Rozha+One&family=Merriweather:wght@700&family=Zain:wght@900&family=Dancing+Script:wght@600;700&display=swap";
+  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Viaoda+Libre&family=Source+Code+Pro:wght@600&family=Nunito:wght@700&family=Science+Gothic:wght@700&family=ZCOOL+XiaoWei&family=Sekuya&family=Lora:wght@700&family=Fraunces:opsz,wght@9..144,700&family=Heebo:wght@700&family=Rozha+One&family=Merriweather:wght@700&family=Zain:wght@900&family=Dancing+Script:wght@600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap";
