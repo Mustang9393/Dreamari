@@ -24,7 +24,6 @@ import { Avatar, DetailPane, STATUS_COLORS, StudentLink } from "../chips";
 import { getRoster } from "@/lib/counselorRoster";
 import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
 import { BLUE_3 } from "../palette";
-import { Stat } from "./overviewShared";
 
 function fmtDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -188,9 +187,22 @@ function StatusPill({ status }: { status: QuestionStatus }) {
 
 function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, QuestionStatus>; setStatus: (id: string, s: QuestionStatus) => void }) {
   const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
-  // Unanswered first, then by date within each state.
-  const ordered = [...QUESTIONS].sort((a, b) => STATUS_STYLE[statusOf(a.id)].rank - STATUS_STYLE[statusOf(b.id)].rank || b.date.localeCompare(a.date));
-  const [selectedId, setSelectedId] = useState(ordered[0].id);
+  // The three counts that used to sit above the tabs as big numbers are
+  // now this list's own filter: the number and the list it counts are the
+  // same control (was: a stat row, a tab badge and a pill on every card all
+  // saying the same thing).
+  const GROUPS: { key: "reply" | "progress" | "answered"; label: string; statuses: QuestionStatus[] }[] = [
+    { key: "reply", label: "Need a reply", statuses: ["new", "follow-up"] },
+    { key: "progress", label: "In progress", statuses: ["viewed", "in-progress"] },
+    { key: "answered", label: "Answered", statuses: ["responded", "resolved"] },
+  ];
+  const [group, setGroup] = useState<"reply" | "progress" | "answered">("reply");
+  const inGroup = (g: (typeof GROUPS)[number]) => QUESTIONS.filter((q) => g.statuses.includes(statusOf(q.id)));
+  const current = GROUPS.find((g) => g.key === group)!;
+  const ordered = inGroup(current).sort((a, b) => STATUS_STYLE[statusOf(a.id)].rank - STATUS_STYLE[statusOf(b.id)].rank || b.date.localeCompare(a.date));
+  // A pill only earns its place when it tells cards in this list apart.
+  const mixed = new Set(ordered.map((q) => statusOf(q.id))).size > 1;
+  const [selectedId, setSelectedId] = useState(() => ordered[0]?.id ?? QUESTIONS[0].id);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [response, setResponse] = useState("");
   const selected = QUESTIONS.find((q) => q.id === selectedId)!;
@@ -198,8 +210,11 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   const answered = selectedStatus === "responded" || selectedStatus === "resolved";
 
   return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+    <Segmented ariaLabel="Question status" value={group} onChange={(k) => { setGroup(k); const next = inGroup(GROUPS.find((g) => g.key === k)!)[0]; if (next) setSelectedId(next.id); }} options={GROUPS.map((g) => ({ key: g.key, label: `${g.label} (${inGroup(g).length})` }))} />
     <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_minmax(0,1fr)]">
       <div className="flex max-h-[70vh] flex-col gap-[8px] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
+        {ordered.length === 0 && <p className="rounded-[var(--radius-md)] border px-[12px] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ ...GLASS_INSET, color: "var(--muted-foreground)" }}>Nothing here right now.</p>}
         {ordered.map((q) => {
           const on = selectedId === q.id;
           return (
@@ -219,7 +234,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
                     <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {q.grade} · {q.tag} · {fmtDate(q.date)}</span>
                   </span>
                 </span>
-                <StatusPill status={statusOf(q.id)} />
+                {mixed && <StatusPill status={statusOf(q.id)} />}
               </span>
               <p className="line-clamp-2 text-[12.5px] leading-[17px]" style={{ color: "var(--foreground)" }}>{q.question}</p>
             </button>
@@ -270,6 +285,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
         </div>
       </HoverBeam>
       </DetailPane>
+    </div>
     </div>
   );
 }
@@ -391,18 +407,11 @@ export function CounselorConnect() {
           value={tab}
           onChange={setTab}
           options={[
-            { key: "questions", label: "Questions", badge: open.length || undefined },
+            { key: "questions", label: "Questions", badge: needsYou || undefined },
             { key: "announcements", label: "Announcements" },
             { key: "discussions", label: "Groups" },
           ]}
         />
-        {tab === "questions" && (
-          <div className="flex gap-[var(--space-6)]">
-            <Stat value={String(needsYou)} label="need a reply" color={needsYou > 0 ? STATUS_COLORS["Needs Attention"] : undefined} />
-            <Stat value={String(open.length - needsYou)} label="in progress" />
-            <Stat value={String(QUESTIONS.length - open.length)} label="answered" />
-          </div>
-        )}
         {tab === "announcements" && !composing && (
           <button type="button" onClick={() => setComposing(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
             <Plus className="h-[14px] w-[14px]" aria-hidden /> New announcement
