@@ -178,7 +178,7 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
         <path d={area} fill={`url(#fill-${id})`} />
         <motion.path d={line} fill="none" stroke={`url(#line-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 60%, transparent))` }} initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.1, ease: CHART_EASE }} />
         <circle cx={x(last)} cy={y(points[last])} r="9" fill={accent} opacity="0.25" />
-        <circle cx={x(last)} cy={y(points[last])} r="5" fill={accent} stroke="#0e0c20" strokeWidth="2" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 5px ${accent})` }} />
+        <circle cx={x(last)} cy={y(points[last])} r="5" fill={accent} stroke="var(--card)" strokeWidth="2" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 5px ${accent})` }} />
         {/* Peak called out with a pinned label on a leader line down to a
            dot on the curve, not a bare number floating over the line --
            same device the Orbit reference uses for its own peak markers. */}
@@ -193,8 +193,8 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
               {/* peak already has its own dot when it's also the latest
                  point (the end-dot above); a distinct in-between peak gets
                  one of its own, on the leader line down to the curve. */}
-              {peak !== last && <circle cx={px} cy={py} r="4" fill={accent} stroke="#0e0c20" strokeWidth="1.5" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 4px ${accent})` }} />}
-              <rect x={cx - 22} y={boxY} width="44" height="18" rx="5" fill="#0e0c20" stroke="rgba(255,255,255,0.14)" />
+              {peak !== last && <circle cx={px} cy={py} r="4" fill={accent} stroke="var(--card)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 4px ${accent})` }} />}
+              <rect x={cx - 22} y={boxY} width="44" height="18" rx="5" fill="var(--card)" stroke="var(--glass-border)" />
               <text x={cx} y={boxY + 12.5} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: "var(--foreground)", fontFamily: "var(--font-body)" }}>{max}</text>
             </g>
           );
@@ -525,7 +525,7 @@ export function Ring({ pct, size = 84, stroke = 8, accent, children }: { pct: nu
             <stop offset="100%" stopColor={accent} stopOpacity="1" />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--foreground) 11%, transparent)" strokeWidth={stroke} />
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -580,7 +580,7 @@ export function SegmentedRing({ segments, size = 92, stroke = 10, children }: { 
         <span aria-hidden className="absolute inset-[-14%] rounded-full opacity-60 blur-[16px]" style={{ background: `radial-gradient(circle, color-mix(in srgb, ${arcs[0].color} 45%, transparent), transparent 70%)` }} />
       )}
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 -rotate-90 overflow-visible">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--foreground) 11%, transparent)" strokeWidth={stroke} />
         {arcs.map((a, i) => (
           <motion.circle
             key={a.key}
@@ -631,7 +631,7 @@ export function Meter({ value, max, accent, label }: { value: number; max: numbe
   const pct = Math.max(0, Math.min(100, Math.round((value / Math.max(1, max)) * 100)));
   return (
     <span className="flex items-center gap-[8px]" aria-label={`${label ? label + ": " : ""}${value} of ${max}`}>
-      <span className="relative block h-[7px] w-[72px] overflow-hidden rounded-[4px]" style={{ background: "rgba(255,255,255,0.1)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)" }} aria-hidden>
+      <span className="relative block h-[7px] w-[72px] overflow-hidden rounded-[4px]" style={{ background: "color-mix(in srgb, var(--foreground) 11%, transparent)", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.15)" }} aria-hidden>
         <span
           className="absolute inset-y-0 left-0 rounded-[4px]"
           style={{ width: `${pct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 70%, transparent), ${accent})`, boxShadow: `0 0 8px color-mix(in srgb, ${accent} 65%, transparent)` }}

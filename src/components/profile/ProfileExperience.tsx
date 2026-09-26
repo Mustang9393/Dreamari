@@ -549,7 +549,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
              carried over from an earlier, content-only version of this
              card. */}
           <div className="relative flex min-h-[192px] flex-col justify-end gap-[var(--space-4)] p-[var(--space-4)] pt-[56px] sm:min-h-[208px] sm:gap-[var(--space-5)] sm:p-[var(--space-5)] sm:pt-[60px]">
-            <div className="absolute top-[var(--space-4)] right-[var(--space-4)] flex max-w-[calc(100%-32px)] flex-wrap items-center justify-end gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
+            {/* data-night-scene: this cluster always sits on dark glass over
+               the cover photo, so it keeps the dark UI tokens in light mode
+               too (Saved and Settings used --muted-foreground, which turned
+               dark grey on the dark pill; 26 Sept 2026). */}
+            <div data-night-scene className="absolute top-[var(--space-4)] right-[var(--space-4)] flex max-w-[calc(100%-32px)] flex-wrap items-center justify-end gap-[6px] rounded-[var(--radius-md)] p-[2px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", textShadow: "none" }}>
               <span className="relative">
                 <button
                   type="button"

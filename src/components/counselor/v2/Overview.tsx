@@ -295,7 +295,10 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
                     <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
                     <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.careerTrack}</span>
                   </span>
-                  <span className="flex flex-none items-center gap-[10px] text-[12.5px] font-semibold">
+                  {/* Under the name on phones, beside it from sm: at 375px the
+                     reason took the row and cut names to "Omar H..." (26 Sept
+                     2026 phone check). */}
+                  <span className="flex w-full items-center gap-[10px] pl-[44px] text-[12.5px] font-semibold sm:w-auto sm:flex-none sm:pl-0">
                     <span style={{ color: "var(--foreground)" }}>{attentionReason(s)}</span>
                     {!oneSeverity && <span className="text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={{ color }}>{severity}</span>}
                     <Go className="opacity-0 transition-opacity group-hover:opacity-100" />

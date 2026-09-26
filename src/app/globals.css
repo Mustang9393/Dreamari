@@ -1800,3 +1800,12 @@ html.light {
   --cd-amber: #CC7A00; /* h36 s100 l40: amber, not mustard (the 17 Sept "no muddy" rule), 3.3:1 on white */
   --cd-red: #C9342C;
 }
+
+/* Tailwind v4 draws a divide-x / divide-y with no color in currentColor:
+   a soft line on dark, a hard ink rule between cards in light (seen between
+   Profile's Career Report and Resume tiles, 26 Sept 2026; ~20 places in
+   Profile, Connect and the marketing pages). In light mode dividers default
+   to the app's hairline; inline colors still win. Dark is unchanged. */
+html.light .marketing-v2 [class*="divide-"] > * {
+  border-color: var(--glass-border);
+}

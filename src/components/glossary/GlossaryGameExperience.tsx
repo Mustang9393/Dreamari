@@ -93,10 +93,12 @@ const MASTERY_TARGET = 2;
 // mode, swap to the marketing-v2 scope's own foreground/background pair,
 // which is already correctly inverted per theme (light mode: near-black on
 // near-white) -- no new tokens, just picking the right existing one per mode.
+// The accent fill in both themes: the game's ground is the dark starfield
+// either way, so the light theme's ink button read as a black slab on a dark
+// scene (26 Sept 2026 light pass). `theme` is kept for the call sites.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function primaryCtaColors(theme: GlobalTheme) {
-  return theme === "light"
-    ? { background: "var(--foreground)", color: "var(--background)" }
-    : { background: "var(--glossary-accent)", color: "#05070f" };
+  return { background: "var(--glossary-accent)", color: "#05070f" };
 }
 
 // Term icons are a semantic slug from the content template (its Icon column
@@ -325,7 +327,10 @@ function TopBar({
   topBarRef: React.RefObject<HTMLElement | null>;
 }) {
   return (
-    <header ref={topBarRef} className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
+    // data-night-scene: the game's ground is always the dark starfield, so its
+    // top bar keeps the dark tokens in light mode (Back, streak and XP had
+    // turned dark grey on the dark scene).
+    <header ref={topBarRef} data-night-scene className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>

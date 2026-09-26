@@ -2015,6 +2015,12 @@ function Hud({
 }) {
   return (
     <header className="relative z-20 flex flex-none flex-col gap-[8px] px-3 pt-3 sm:px-5 sm:pt-4">
+      {/* A soft fade from the page ground behind the HUD, plus a text
+         shadow on the title: over a bright office scene the title and level
+         line had nothing under them (light-mode audit finding 4, both
+         themes). A gradient, not a bar, so the scene still reads edge to
+         edge. */}
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[150%]" style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--background) 72%, transparent) 0%, color-mix(in srgb, var(--background) 38%, transparent) 55%, transparent 100%)" }} />
       <div className="flex items-center gap-[var(--space-3)]">
         <span className="flex flex-none items-center gap-[6px]">
           {/* Always available, mid-level or not -- the per-beat back chevron
@@ -2044,7 +2050,7 @@ function Hud({
             </IconTip>
           )}
         </span>
-        <span className="min-w-0 flex-1">
+        <span className="min-w-0 flex-1" style={{ textShadow: "0 1px 3px color-mix(in srgb, var(--background) 85%, transparent)" }}>
           <span className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
           </span>
