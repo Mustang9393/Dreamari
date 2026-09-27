@@ -35,6 +35,7 @@ import { OverlaysSection } from "./sections/Overlays";
 import { GameSection } from "./sections/Game";
 import { FeaturesSection } from "./sections/Features";
 import { StatesGallerySection } from "./sections/StatesGallery";
+import { InteractionsSection } from "./sections/Interactions";
 
 const SECTIONS = [
   { id: "foundations", label: "Foundations", Body: FoundationsSection },
@@ -46,6 +47,7 @@ const SECTIONS = [
   { id: "overlays", label: "Overlays", Body: OverlaysSection },
   { id: "game", label: "Game UI", Body: GameSection },
   { id: "features", label: "Feature modules", Body: FeaturesSection },
+  { id: "interactions", label: "Interactions and motion", Body: InteractionsSection },
   { id: "states", label: "States gallery", Body: StatesGallerySection },
 ] as const;
 
@@ -365,7 +367,7 @@ function LabPage({ mounted }: { mounted: boolean }) {
               Component library
             </h1>
             <p className="max-w-[64ch] text-[14.5px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>
-              Every reusable piece of Dreamari with its states. Built from docs/handoff/COMPONENT_INVENTORY.md. Where a state is missing, you see the playbook default so the gap is visible.
+              Every reusable piece of Dreamari with its states. Built from docs/handoff/COMPONENT_INVENTORY.md. Every state is built into the real app; each cell names the file and, for screen states, the live URL.
             </p>
             <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[6px] text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
               <span className="inline-flex items-center gap-[6px]">
@@ -375,7 +377,7 @@ function LabPage({ mounted }: { mounted: boolean }) {
                 <KindBadge kind="built" /> exists in code today
               </span>
               <span className="inline-flex items-center gap-[6px]">
-                <KindBadge kind="proposed" /> dashed cell, playbook default
+                <span className="font-semibold" style={{ color: "var(--foreground)" }}>?state=</span> any state can be seen live on the real screen
               </span>
             </div>
           </div>

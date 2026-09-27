@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles } from "lucide-react";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { makeId, upsertVersion, type ResumeData, type ResumeVersion } from "@/lib/resume";
+import { ErrorView } from "@/components/app/states";
 import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATES } from "./data";
 import { CARD_CLASS, Field, INSET, selectedRowStyle, TextInput, WizardFooter } from "./ui";
 
@@ -219,7 +220,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
         >
           <Sparkles className="h-4 w-4" aria-hidden /> {matching ? "Matching…" : "Match to This Job"}
         </button>
-        {matchError && <p className="text-[12px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t read that job description. Try again in a moment.</p>}
+        {matchError && <ErrorView variant="inline" message="Couldn't read that job description. Try again in a moment." onRetry={matchToJob} />}
         {(draft.targetPosition || draft.targetCompany) && (
           <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             Target: <span style={{ color: "var(--foreground)" }}>{[draft.targetPosition, draft.targetCompany].filter(Boolean).join(" at ")}</span>

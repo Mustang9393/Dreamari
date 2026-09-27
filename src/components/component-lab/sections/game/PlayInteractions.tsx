@@ -42,7 +42,7 @@ import type {
   RevealBeat,
   SliderBeat,
 } from "@/components/play/types";
-import { ForcedFocus, noop, Specimen, StateCell, StateGrid } from "../../kit";
+import { noop, Specimen, StateCell, StateGrid } from "../../kit";
 
 const GAME_BG = "#070914";
 
@@ -357,7 +357,7 @@ export function PlayInteractionsGroup() {
           <StateCell label="Risky (picked)" surface="game" note="Level 2/3 content still authors risky/acceptable tiers alongside best/wrong."><OptionButton index={2} label="Get inside information on the rival" tier="risky" picked onClick={noop} /></StateCell>
           <StateCell label="Dimmed (another option picked)" surface="game" note="Every unpicked option once one locks in, real prop dimmed."><OptionButton index={1} label="A shoe designer" dimmed onClick={noop} /></StateCell>
           <StateCell label="Compact" surface="game" note="Tighter row for a preview that has to leave the scene most of the room, real prop compact."><OptionButton index={0} label="An investment bank" compact onClick={noop} /></StateCell>
-          <StateCell label="Focus (proposed ring)" surface="game" kind="proposed" note="The app has almost no focus-visible styling; this is the proposed app-wide ring."><ForcedFocus><OptionButton index={0} label="An investment bank" onClick={noop} /></ForcedFocus></StateCell>
+          <StateCell label="Focus" surface="game" note="Tab to it: the app-wide :focus-visible ring in globals.css (27 Sept 2026)."><OptionButton index={0} label="An investment bank" onClick={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 

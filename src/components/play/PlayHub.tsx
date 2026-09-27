@@ -8,12 +8,13 @@ import { NextStepBanner } from "@/components/app/NextStepBanner";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronRight, BookOpen, Film, Lock, Play, Zap } from "lucide-react";
 
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { hasGlossary } from "@/components/glossary/data";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
@@ -340,7 +341,18 @@ function FeaturedRow({
   const [trailerSim, setTrailerSim] = useState<Simulation | null>(null);
   const featured = candidates.find((c) => c.id === featuredId) ?? candidates[0];
   const sectionRef = useRef<HTMLElement>(null);
-  if (!featured) return null;
+  const router = useRouter();
+  // Wired 27 Sept 2026: this used to render nothing at all (no candidates
+  // means no featured card), which read as a broken page rather than a
+  // deliberate state -- see src/lib/surfaceStates.ts row 52.
+  if (!featured) {
+    return (
+      <section data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
+        <RowTitle label="Career Simulations" sub="Experience the job before you choose it." active={active} />
+        <SurfaceState id={52} isEmpty onEmptyAction={() => router.push("/explore")}>{null}</SurfaceState>
+      </section>
+    );
+  }
 
   return (
     <section ref={sectionRef} data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
@@ -880,7 +892,17 @@ function HeroShelfRow({
   const [featuredId, setFeaturedId] = useState<string | undefined>(items[0]?.id);
   const featured = items.find((item) => item.id === featuredId) ?? items[0];
   const sectionRef = useRef<HTMLElement>(null);
-  if (!featured) return null;
+  const router = useRouter();
+  // Wired 27 Sept 2026, same gap as FeaturedRow above: a row with 0 items
+  // used to render nothing at all.
+  if (!featured) {
+    return (
+      <section data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
+        <RowTitle label={label} sub={sub} active={active} />
+        <SurfaceState id={52} isEmpty onEmptyAction={() => router.push("/explore")}>{null}</SurfaceState>
+      </section>
+    );
+  }
   return (
     <section ref={sectionRef} data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
       <RowTitle label={label} sub={sub} active={active} />

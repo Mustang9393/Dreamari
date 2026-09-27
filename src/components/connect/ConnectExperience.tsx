@@ -28,6 +28,8 @@ import { AttCommunityView as AttCommunityViewV1 } from "./att/v1/AttCommunityVie
 import type { AttVersion } from "./att/VersionChip";
 import { ATT_ID } from "./att/attData";
 import { MentorshipTab } from "./mentorship/MentorshipTab";
+import { EmptyView } from "@/components/app/states";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 // Resource cards on an event board: one icon and one chip per file kind.
 const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: string }> = {
@@ -44,7 +46,6 @@ import {
   EVENT_THREADS,
   INSIGHTS,
   PROS,
-  STARTER_PROMPTS,
   THREADS,
   type Community,
   type EventBoard,
@@ -2353,20 +2354,23 @@ function HomeView({
             )}
           </div>
           {/* Symmetric grid, every tile equal weight: three across, two
-             centered beneath. */}
-          <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
-            {searched.map((c, index) => (
-              <div key={c.id}>
-                <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0} />
-              </div>
-            ))}
-            {!q && (
-              <div>
-                <LaunchVoteCard />
-              </div>
-            )}
-          </div>
-          {q && searched.length === 0 && <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>No community matches &ldquo;{query}&rdquo; yet. Vote for it below when the search is cleared.</p>}
+             centered beneath. Surface 42, wrapped 27 Sept 2026 the same way
+             as every other fixed-data surface, so a search with no matches
+             (the only way this is ever actually empty) is a real state. */}
+          <SurfaceState id={42} isEmpty={searched.length === 0} onEmptyAction={() => setQuery("")}>
+            <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
+              {searched.map((c, index) => (
+                <div key={c.id}>
+                  <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0} />
+                </div>
+              ))}
+              {!q && (
+                <div>
+                  <LaunchVoteCard />
+                </div>
+              )}
+            </div>
+          </SurfaceState>
         </section>
       )}
 
@@ -2392,6 +2396,9 @@ function HomeView({
              last or next event date (the name already says company and
              city, so neither repeats), the three counts a paying nonprofit
              wants to see at a glance, then the lockup and one solid button. */}
+          {/* Bug fix, 27 Sept 2026: a search that matched no event used to
+             leave this whole tab blank -- the grid just rendered empty. */}
+          {searchedEvents.length === 0 && <EmptyView tier={5} query={query} cta="Clear search" onAction={() => setQuery("")} />}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searchedEvents.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
@@ -2786,19 +2793,15 @@ function BoardView({
             placeholder="What do you want to ask?"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
-          {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
-          {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
-          {threads.length === 0 && (
-            <Card>
-              <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
-              <ul className="mt-[8px] flex flex-col gap-[6px]">
-                {STARTER_PROMPTS.map((p) => (
-                  <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
-                ))}
-              </ul>
-            </Card>
-          )}
+          {/* Surface 40, 27 Sept 2026: wrapped in SurfaceState (fixed data,
+             so status stays "ready") the same way every other fixed-data
+             surface is -- loading/slow/error/offline are now real, reviewable
+             states (?state=loading&surface=40 etc.), not just a possibility. */}
+          <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
+            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+            {threads.map((t) => <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
+          </SurfaceState>
         </div>
       )}
       {tab === "insights" && (
@@ -2808,11 +2811,11 @@ function BoardView({
         // on every card").
         <div className="relative flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
           <InsightMark color={communityAccent(community)} />
-          {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
-          {insights.map((i) => <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
-          {insights.length === 0 && (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
-          )}
+          {/* Surface 41, same wrap (27 Sept 2026). */}
+          <SurfaceState id={41} isEmpty={insights.length === 0}>
+            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {insights.map((i) => <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
+          </SurfaceState>
         </div>
       )}
       {tab === "updates" && (

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, GripVertical, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { makeId, removeExperience, upsertExperience, type ExperienceType, type ResumeExperience } from "@/lib/resume";
+import { ErrorView } from "@/components/app/states";
 import { EXPERIENCE_QUESTIONS, EXPERIENCE_TYPES } from "./data";
 import { Field, ResumeModal, TextInput } from "./ui";
 import { IconTip } from "@/components/app/IconTip";
@@ -245,7 +246,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
           <Field label={q4.label} htmlFor={`exp-q-${q4.key}`}>
             <TextInput id={`exp-q-${q4.key}`} value={answers[q4.key] ?? ""} onChange={(v) => setAnswers({ ...answers, [q4.key]: v })} placeholder={q4.placeholder} />
           </Field>
-          {genError && <p className="text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t generate bullets. Try again, or write your own.</p>}
+          {genError && <ErrorView variant="inline" message="Couldn't generate bullets. Try again, or write your own." onRetry={generate} />}
           <div className="flex items-center justify-between gap-[var(--space-3)] pt-[var(--space-2)]">
             <button type="button" onClick={() => setSub("questions1")} className="dm-tap flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               <ChevronLeft className="h-4 w-4" aria-hidden /> Back

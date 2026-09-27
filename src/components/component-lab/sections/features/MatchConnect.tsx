@@ -10,7 +10,8 @@
 // of those are repeated below.
 
 import { useState } from "react";
-import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, NotRendered, Reveal, noop, EDGE } from "../../kit";
+import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, NotRendered, LiveRoute, Reveal, noop, EDGE } from "../../kit";
+import { SurfaceStateView } from "@/components/app/SurfaceState";
 
 // Match: shared.tsx pieces not already covered in Surfaces/Overlays.
 import { LabScreen, PrimaryButton, QuietButton, ChipRow, InterestPicker, Field, ProfileTabs, RevealGrid } from "@/components/flow-lab/shared";
@@ -88,8 +89,8 @@ export function MatchConnectModules() {
 
       <Specimen name="MiniExploreMatch" file="src/components/match-lab/MiniExploreMatch.tsx" purpose="The live Match screen: Build hands off to world tabs of careers, the student saves up to three, then ranks and lands on Profile's Top Three." when="The Match tab today.">
         <StateGrid>
-          <StateCell label="Default">
-            <NotRendered reason="Writes the picks store and navigates to /profile on finish." see="src/components/match-lab/MiniExploreMatch.tsx" />
+          <StateCell label="Default" pad={false} minH={440}>
+            <LiveRoute href="/match-grid" height={440} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -97,23 +98,23 @@ export function MatchConnectModules() {
       <Specimen name="MatchGrid" file="src/components/match-lab/MatchGrid.tsx" purpose="The dormant six-card grid Match used before Mini Explore replaced it: every career visible at once, a corner select control, a detail modal." when="Not linked anywhere live; kept for comparison.">
         <StateGrid>
           <StateCell label="Default">
-            <NotRendered reason="Writes the picks store and navigates to /profile on finish." see="src/components/match-lab/MatchGrid.tsx" />
+            <NotRendered reason="No route mounts this component anymore (unlike MatchLab, which still has /match-lab) -- there is no live page to load, so this stays a stand-in rather than a LiveRoute." see="src/components/match-lab/MatchGrid.tsx" />
           </StateCell>
         </StateGrid>
       </Specimen>
 
       <Specimen name="MatchLab" file="src/components/match-lab/MatchLab.tsx" purpose="The original swipe-deck Match prototype (v3): like/pass gestures, a manage sheet for reordering saves." when="Not linked anywhere live; kept for comparison.">
         <StateGrid>
-          <StateCell label="Default">
-            <NotRendered reason="Writes the picks store and navigates to /profile on finish." see="src/components/match-lab/MatchLab.tsx" />
+          <StateCell label="Default" pad={false} minH={440}>
+            <LiveRoute href="/match-lab" height={440} />
           </StateCell>
         </StateGrid>
       </Specimen>
 
       <Specimen name="V2Flow" file="src/components/flow-lab/V2Flow.tsx" purpose="The Flow Lab's own BUILD -> MINI EXPLORE -> SAVED -> RANK -> MY PROFILE walkthrough, replayable and isolated from the real demo." when="Prototyping the Match flow end to end, isolated from the live app.">
         <StateGrid>
-          <StateCell label="Default">
-            <NotRendered reason="Writes its own dreamari:flowlab:* keys and calls onFinish/navigates when a run completes." see="src/components/flow-lab/V2Flow.tsx" />
+          <StateCell label="Default" pad={false} minH={440}>
+            <LiveRoute href="/flow-lab" height={440} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -165,11 +166,11 @@ export function MatchConnectModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Match grid (proposed states)" file="src/components/match-lab/MatchGrid.tsx" purpose="States the live grid doesn't implement yet: a world with no careers, the grid loading, and a load failure." when="A student picks a world with nothing in the catalog yet, or the catalog fetch is slow/fails.">
+      <Specimen name="Match grid states" file="src/components/flow-lab/V2Flow.tsx" purpose="Surface 17: a world with no careers used to render a blank grid. Mini Explore now wraps it in SurfaceState, which also makes loading/error forceable for review even though the prototype has no real fetch." when="A student picks a world with nothing in the catalog yet (real empty); loading/error are the review-only ?state= switch.">
         <StateGrid>
-          <StateCell label="Empty world" kind="proposed"><ProposedEmpty tier={1} heading="No careers in this world yet" line="Try another world, or explore everything." cta="Explore all" /></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="cards" /></StateCell>
-          <StateCell label="Error" kind="proposed"><ProposedError verb="load this world's careers" fallback="try another world" /></StateCell>
+          <StateCell label="Empty world" note="Live: /match-grid?state=empty&surface=17"><ProposedEmpty tier={1} heading="Nothing to match yet" line="This world doesn't have careers loaded yet." cta="Choose another world" /></StateCell>
+          <StateCell label="Loading" note="Live: /match-grid?state=loading&surface=17"><ProposedLoading shape="cards" /></StateCell>
+          <StateCell label="Error" note="Live: /match-grid?state=error&surface=17"><ProposedError verb="load this world" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -205,7 +206,7 @@ export function MatchConnectModules() {
             <StateCell label="Helpful, 0"><HelpfulPill onClick={noop} pressed={false} count={0} /></StateCell>
             <StateCell label="Helpful, off"><HelpfulPill onClick={noop} pressed={false} count={12} /></StateCell>
             <StateCell label="Helpful, on"><HelpfulPill onClick={noop} pressed count={13} /></StateCell>
-            <StateCell label="Helpful, large count" note="Renders {count} as-is, no k/m compacting built; a viral answer prints the full number."><HelpfulPill onClick={noop} pressed={false} count={1240} /></StateCell>
+            <StateCell label="Helpful, large count" note="Fixed 27 Sept 2026: compacts to 1.2K now (formatCount), with the exact 1,240 in the accessible label."><HelpfulPill onClick={noop} pressed={false} count={1240} /></StateCell>
             <StateCell label="Status: awaiting"><StatusChip state="awaiting" /></StateCell>
             <StateCell label="Status: routed"><StatusChip state="routed" /></StateCell>
             <StateCell label="Status: answered"><StatusChip state="answered" /></StateCell>
@@ -246,25 +247,28 @@ export function MatchConnectModules() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="Connect feed states (proposed)" file="src/components/connect/ConnectExperience.tsx" purpose="States the question/insight feed doesn't implement yet: loading, a failed fetch, and a board with nothing posted." when="A board's feed while data is loading, after a failed load, or before its first question.">
+        <Specimen name="Connect feed states" file="src/components/connect/ConnectExperience.tsx" purpose="Surfaces 40/41: a board's Questions and Posts (Insights) tabs, wrapped in SurfaceState 27 Sept 2026 -- loading/slow/error/offline are now real, reviewable states (the fixed-data pattern: status stays ready in the prototype, ?state= forces the rest for review) rather than merely possible." when="A board's feed while data is loading, after a failed load, or before its first question/post.">
           <StateGrid>
-            <StateCell label="Loading" kind="proposed"><ProposedLoading shape="list" /></StateCell>
-            <StateCell label="Error" kind="proposed"><ProposedError verb="load this feed" fallback="try again in a moment" /></StateCell>
-            <StateCell label="No questions yet" kind="proposed"><ProposedEmpty tier={1} heading="No questions yet" line="Be the first to ask this community something." cta="Ask a question" /></StateCell>
+            <StateCell label="Questions: loading" note="Force live: /connect?board=tech-engineering&state=loading&surface=40"><SurfaceStateView id={40} state="loading" /></StateCell>
+            <StateCell label="Questions: error" note="Force live: /connect?board=tech-engineering&state=error&surface=40"><SurfaceStateView id={40} state="error" onRetry={noop} /></StateCell>
+            <StateCell label="Questions: empty" note="Real code: BoardView's threads.length === 0 branch. Every seeded community already has questions, so today's data can't reach it on its own -- force live: /connect?board=tech-engineering&state=empty&surface=40"><SurfaceStateView id={40} state="empty" onEmptyAction={noop} /></StateCell>
+            <StateCell label="Posts: loading" note="Force live: /connect?board=tech-engineering&filter=insights&state=loading&surface=41"><SurfaceStateView id={41} state="loading" /></StateCell>
+            <StateCell label="Posts: error" note="Force live: /connect?board=tech-engineering&filter=insights&state=error&surface=41"><SurfaceStateView id={41} state="error" onRetry={noop} /></StateCell>
+            <StateCell label="Posts: empty" note="Force live: /connect?board=tech-engineering&filter=insights&state=empty&surface=41"><SurfaceStateView id={41} state="empty" /></StateCell>
           </StateGrid>
         </Specimen>
 
-        <Specimen name="Thread & events (proposed)" file="src/components/connect/ConnectExperience.tsx" purpose="A thread with no answers yet, and an events tab with nothing on it yet." when="A freshly-asked question before anyone answers; a student who hasn't joined any event board.">
+        <Specimen name="Thread & events" file="src/components/connect/ConnectExperience.tsx" purpose="A thread with no answers yet, and an events search with no matches." when="A freshly-asked question before anyone answers; an events search that matches nothing.">
           <StateGrid>
-            <StateCell label="No answers yet" kind="proposed"><ProposedEmpty tier={3} line="No answers yet. Pros usually reply within a couple of days." /></StateCell>
-            <StateCell label="No events yet" kind="proposed"><ProposedEmpty tier={1} heading="No events yet" line="Events from your communities show up here once you join one." cta="Browse communities" /></StateCell>
+            <StateCell label="No answers yet" note="Real code: ThreadView's thread.responses.length === 0 branch. Every seeded thread already has an answer, so today's data can't force it live."><ProposedEmpty tier={3} line="No answer yet. Sent to verified pros; usually answered within a couple of days." /></StateCell>
+            <StateCell label="No events match search" note="Live: /connect?tab=events, then search for something with no matches (fixed 27 Sept 2026 -- this used to render a blank tab)."><ProposedEmpty tier={5} query="robotics club" line="Try a shorter word, or clear the search." cta="Clear search" /></StateCell>
           </StateGrid>
         </Specimen>
 
         <Specimen name="AttCommunityView" file="src/components/connect/att/AttCommunityView.tsx" purpose="The AT&T Connected Learning Centers community: student/volunteer/enterprise views over opportunities, learn modules, a poll and a pulse." when="A community with its own dedicated experience layered over the generic Connect board.">
           <StateGrid>
-            <StateCell label="Default">
-              <NotRendered reason="Writes the resume store from the Learn modules' skill hand-off." see="src/components/connect/att/AttCommunityView.tsx" />
+            <StateCell label="Default" pad={false} minH={440}>
+              <LiveRoute href="/connect?board=att-connected-learning-centers" height={440} />
             </StateCell>
           </StateGrid>
         </Specimen>
@@ -280,18 +284,18 @@ export function MatchConnectModules() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="PollCard (not rendered)" file="src/components/connect/att/AttCommunityView.tsx" purpose="A biweekly poll on the AT&T Home tab: vote, see results, and a next-module suggestion." when="AttCommunityView's Home tab pulse.">
+        <Specimen name="PollCard" file="src/components/connect/att/AttCommunityView.tsx" purpose="A biweekly poll on the AT&T Home tab: vote, see results, and a next-module suggestion." when="AttCommunityView's Home tab pulse.">
           <StateGrid>
-            <StateCell label="Default">
-              <NotRendered reason="Voting calls flyXp(), which awards real Dream Score XP (src/lib/dreamScore), no prop lets the lab intercept that click." see="src/components/connect/att/AttCommunityView.tsx" />
+            <StateCell label="Default" pad={false} minH={440} note="Same live page as AttCommunityView above (Home tab, scroll to the pulse); LiveRoute's iframe is inert, so voting here never fires the real flyXp() Dream Score award.">
+              <LiveRoute href="/connect?board=att-connected-learning-centers" height={440} />
             </StateCell>
           </StateGrid>
         </Specimen>
 
         <Specimen name="MentorshipTab" file="src/components/connect/mentorship/MentorshipTab.tsx" purpose="1:1 and group mentorship: program tiles, a chat dock, meeting requests, a year plan, and separate mentor/enterprise views." when="Connect's Mentorship tab.">
           <StateGrid>
-            <StateCell label="Default">
-              <NotRendered reason="Sets the global inbox context and plays a message tone on mount (src/lib/inbox)." see="src/components/connect/mentorship/MentorshipTab.tsx" />
+            <StateCell label="Default" pad={false} minH={440}>
+              <LiveRoute href="/connect?tab=mentorship" height={440} />
             </StateCell>
           </StateGrid>
         </Specimen>
@@ -307,10 +311,10 @@ export function MatchConnectModules() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="ChatDock (not rendered)" file="src/components/connect/mentorship/MentorshipTab.tsx" purpose="The mentor/mentee message dock: minimised chip, open panel, full screen." when="Any mentorship program, once matched.">
+        <Specimen name="ChatDock" file="src/components/connect/mentorship/MentorshipTab.tsx" purpose="The mentor/mentee message dock: minimised chip, open panel, full screen." when="Any mentorship program, once matched.">
           <StateGrid>
-            <StateCell label="Default">
-              <NotRendered reason="Every control (open/minimise/close) calls setDock() from src/lib/inbox, a global store outside the lab's own state." see="src/components/connect/mentorship/MentorshipTab.tsx" />
+            <StateCell label="Default" pad={false} minH={440} note="Same live page as MentorshipTab above; the dock opens automatically once matched.">
+              <LiveRoute href="/connect?tab=mentorship" height={440} />
             </StateCell>
           </StateGrid>
         </Specimen>

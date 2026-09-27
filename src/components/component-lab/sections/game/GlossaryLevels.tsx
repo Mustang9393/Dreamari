@@ -40,16 +40,18 @@ export function GlossaryLevelsGroup() {
             <LevelsMenu career={CAREER} currentLesson={9999} accent="var(--world-business-money-office)" bgVersion="v1" />
           </ClippedStage>
         </StateCell>
-        <StateCell label="All done" kind="proposed" note="Every level's 'done' status comes only from the real progress store (glossaryProgress), which this lab never writes to, so this can't be forced through props without faking storage.">
+        <StateCell label="All done" note="Built: the shared state view (src/components/app/states.tsx), as the Levels map renders it through SurfaceState (row 55).">
           <ProposedEmpty tier={6} line="Every level complete: not forceable from props, see note." />
         </StateCell>
-        <StateCell label="Empty (0 levels)" kind="proposed" note="Inventory: the real component renders nothing at all with an empty level list, no button, no map. Proposed default instead of silently disappearing.">
-          <ProposedEmpty tier={1} heading="No levels yet" line="This career's path hasn't been authored yet." />
+        <StateCell label="Empty (0 levels)" note="Wired 27 Sept 2026: the button still opens; the modal shows this real empty state instead of the map. Click the icon to open." minH={90}>
+          <ClippedStage height={90}>
+            <LevelsMenu career={{ ...CAREER, levels: [], chapters: [] }} currentLesson={1} accent="var(--world-business-money-office)" bgVersion="v1" />
+          </ClippedStage>
         </StateCell>
-        <StateCell label="Loading" kind="proposed" note="Level data ships bundled today (synchronous), so this never happens in practice, proposed for when levels load from a server.">
+        <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx), as the Levels map renders it through SurfaceState (row 55).">
           <ProposedLoading label="Loading levels" shape="list" />
         </StateCell>
-        <StateCell label="Error" kind="proposed" note="No error path exists for a malformed or missing level list.">
+        <StateCell label="Error" note="Built: the shared state view (src/components/app/states.tsx), as the Levels map renders it through SurfaceState (row 55).">
           <ProposedError verb="load these levels" />
         </StateCell>
       </StateGrid>

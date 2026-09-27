@@ -8,7 +8,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Info } from "lucide-react";
-import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedNotFound, NotRendered, EDGE, MONO, noop, Inert, LiveRoute } from "../../kit";
+import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, EDGE, MONO, noop, Inert, LiveRoute } from "../../kit";
 
 import { ALL_PROFILE_CAREERS, STUDENT } from "@/components/profile/data";
 import {
@@ -300,8 +300,8 @@ export function ProfileCareerCollegesModules() {
 
       <Specimen name="PreferencesTab" file="src/components/profile/PreferencesTab.tsx" purpose="Interests, subjects and school info a student sets once and reuses across Build, Match and Schools." when="Profile's Preferences tab.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="Writes preferences to the real store on every section save. Its loading/error looks are demo query-param branches baked inside the component, not separable pure pieces." see="?prefs=loading / ?prefs=error on /profile" />
+          <StateCell label="In the app">
+            <LiveRoute href="/profile?tab=preferences" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -329,10 +329,10 @@ export function ProfileCareerCollegesModules() {
 
       <Specimen name="CareerExplorationBody" file="src/components/profile/CareerExploration.tsx" purpose="A career's logged experiences: job shadows, projects, conversations." when="Profile's per-career exploration log.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="Adding, editing or removing a logged experience writes it to the real store." see="src/components/profile/CareerExploration.tsx" />
+          <StateCell label="In the app">
+            <LiveRoute href="/profile" device="desktop" height={380} />
           </StateCell>
-          <StateCell label="Empty (described)" kind="proposed" note="The real component's own copy.">
+          <StateCell label="Empty (described)" note="Already built (real copy, standing in here since the live component writes on interaction): 'Nothing added yet -- log a job shadow, project, or conversation.'">
             <ProposedEmpty tier={3} line="Nothing added yet, log a job shadow, project, or conversation." />
           </StateCell>
         </StateGrid>
@@ -340,32 +340,32 @@ export function ProfileCareerCollegesModules() {
 
       <Specimen name="ReflectionCard" file="src/components/profile/CareerReport.tsx" purpose="A short student reflection attached to the report, saved locally." when="Career Report's own tab.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="Writes the reflection to a stored key on save." see="src/components/profile/CareerReport.tsx" />
+          <StateCell label="In the app">
+            <LiveRoute href="/career-report" device="desktop" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
 
       <Specimen name="CareerReportView" file="src/components/profile/CareerReport.tsx" purpose="The full Report surface: tabs for Report, Share, Counselor Review, Download and History, wrapping CareerReportDocument." when="Profile's Report tab.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="Share and Print write real report history, and History's own tab reads it back. The document it wraps is CareerReportDocument, shown above." see="src/components/profile/CareerReport.tsx" />
+          <StateCell label="In the app">
+            <LiveRoute href="/career-report" device="desktop" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
 
       <Specimen name="MyPlanTab, GradePlanCard" file="src/components/profile/ProfileExperience.tsx" purpose="The grade-by-grade Fall/Winter/Spring plan for a student's #1 career." when="Profile's Plan tab.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="GradePlanCard writes the real stage store on interaction." see="src/components/profile/ProfileExperience.tsx" />
+          <StateCell label="In the app">
+            <LiveRoute href="/profile" device="desktop" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
 
       <Specimen name="SettingsView" file="src/components/profile/ProfileExperience.tsx" purpose="Account, privacy and danger-zone settings, prototype stubs." when="Profile's Settings section.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="Its own account actions can navigate the window directly." see="src/components/profile/ProfileExperience.tsx" />
+          <StateCell label="In the app">
+            <LiveRoute href="/profile" device="desktop" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -456,8 +456,8 @@ export function ProfileCareerCollegesModules() {
 
       <Specimen name="ForYouSchools" file="src/components/colleges/ForYouSchools.tsx" purpose="For you: schools matched to the student's #1 career, route and GPA, with Target/Safety/Reach bands." when="Explore Schools' default view.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="Writes the GPA-sort toggle and any hidden schools straight to localStorage on interaction. Its pure pieces, Menu and WhySheet, render below." see="src/components/colleges/ForYouSchools.tsx" />
+          <StateCell label="In the app">
+            <LiveRoute href="/colleges" device="desktop" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -479,18 +479,20 @@ export function ProfileCareerCollegesModules() {
           <StateCell label="CompareSheet, 2 schools">
             <CompareSheetDemo />
           </StateCell>
-          <StateCell label="CompareSheet, empty" kind="proposed" note="Nothing built yet for opening Compare with nothing flagged.">
-            <ProposedEmpty tier={3} line="Add a school to compare it here." />
+          <StateCell label="CompareSheet, empty" note="Built 27 Sept 2026: the compare bar's own button needs 2 picks to open this, but the sheet now defends itself with a real empty tier 3 instead of a blank table.">
+            <Overlay label="Open compare">{(close) => <CompareSheet colleges={[]} onClose={close} />}</Overlay>
           </StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="College grid, detail: proposed gaps" file="src/components/colleges/CollegesExperience.tsx, CollegeDetailExperience.tsx" purpose="States neither the grid nor the detail page has built yet." when="Search/filter with no matches, and College Detail while loading, failing or pointed at a school that doesn't exist.">
+      <Specimen name="College grid, detail" file="src/components/colleges/CollegesExperience.tsx, CollegeDetailExperience.tsx" purpose="Search/filter with no matches, and College Detail pointed at a school that doesn't exist." when="Explore Schools' grid, and every /colleges/[slug] page.">
         <StateGrid min={240}>
-          <StateCell label="Grid, no matches" kind="proposed"><ProposedEmpty tier={5} query="marine biology" /></StateCell>
-          <StateCell label="Detail, loading" kind="proposed"><ProposedLoading label="Loading this school" shape="cards" /></StateCell>
-          <StateCell label="Detail, error" kind="proposed"><ProposedError verb="load this school" fallback="try Browse all" /></StateCell>
-          <StateCell label="Detail, not found (404)" kind="proposed" note="A removed or renamed school id, or an out-of-date link."><ProposedNotFound what="school" /></StateCell>
+          <StateCell label="Grid, no matches" note="Built 27 Sept 2026: names every active quick pick, tray filter and search term, with a real Clear filters action.">
+            <ProposedEmpty tier={5} query="in-state, under $15K a year, 4-year schools" line="Try a shorter name, a city, or clear a filter." cta="Clear filters" />
+          </StateCell>
+          <StateCell label="Detail, loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading label="Loading this school" shape="cards" /></StateCell>
+          <StateCell label="Detail, error" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedError verb="load this school" fallback="try Browse all" /></StateCell>
+          <StateCell label="Detail, not found (404)" note="Built 27 Sept 2026: an unknown school id now renders the real NotFoundView, live at this URL."><LiveRoute href="/colleges/this-school-does-not-exist" /></StateCell>
         </StateGrid>
       </Specimen>
     </>

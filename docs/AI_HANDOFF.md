@@ -14853,3 +14853,18 @@ Open / next: app-wide data-viz and layout audit the user asked for ("Lets see wh
 **Validation.** `npx tsc --noEmit -p .` and eslint on the lab: clean. Playwright on real Chrome and WebKit at 1366x768 @1.25 and 375x812: no horizontal overflow, no console errors (the only 400s are the intentional broken-image demos), localStorage and sessionStorage unchanged, zero `/api` requests, section index scrolls and highlights, theme toggle flips without persisting.
 
 **Next.** Build the global pieces first (shared Skeleton, error boundary + route `error.tsx`/`not-found.tsx`/`loading.tsx`, offline banner, focus ring), then port per-surface states from the lab. Add a Specimen whenever a new component lands.
+
+## 2026-09-27 · Every state built into the real app; lab is built-only
+
+**Why.** Direct instruction on the Component Lab: "DO not have anything proposed not built yet. BUILD EVERYTHING", and "if long text breaks layout badly, then it should have an intentional fix and design". The user chose to go all-in this week rather than split the build.
+
+**What.**
+- `src/components/app/states.tsx` (state views), `src/components/app/SurfaceState.tsx` (one wrapper per data-backed surface: real `status`/`isEmpty` in production, slow after 4s and offline automatic; `?state=loading|slow|error|empty|notfound|offline[&surface=n]` to review in the demo), `src/lib/surfaceStates.ts` (each surface's copy, shared with the lab).
+- All 62 surfaces wired. Surfaces that used to render nothing when empty now show a real empty state: Explore rails and Trending, Routes, Career Report, New from following, Levels map, Play hub rows, Match with an empty world. Unknown career / college ids show the 404.
+- App-wide: `src/app/not-found.tsx`, `src/app/error.tsx` (first error boundary), offline banner in the root layout, zero-specificity `:focus-visible` ring in `globals.css`.
+- Real fixes the lab surfaced: Profile Top 3 stacks on tablet (3 columns crushed the cards); NextStepBanner keeps readable text with long copy; Locker card footer stacks instead of overlapping; RankBody and TermFlipCard no longer overlap text; Top3SwapModal closes on Escape; SidePanel uses `dm-scroll`; disabled props on MarketingButton, PrimaryCta/QuietCta, ToolbarButton, SelectBox, Toggle (+ `pending`); Button `loading`; reduced-motion guards on HoverBeam, stars, fireworks; toasts stack; Connect counts singularise and compact; Dream Score shimmers instead of flashing 0; video and music load failures have real states.
+- Lab: device previews (iframe, true breakpoints), smart grid spans, component search, full Glossary game in all four themes, a new Interactions and motion section (flows, gestures, transitions with real timings, sound triggers), and `LiveRoute` cells that load the real page (inert) where a component can only be seen in context.
+
+**Validation.** tsc and eslint clean. Every main route (home, explore, career, colleges, college detail, profile, connect, play, simulation, resume, counselor, flow lab) renders with no state view by default, so the demo is unchanged with its data; `?state=` switches states. Lab passes in real Chrome and WebKit at 1366x768 @1.25 and 375x812: no overflow, no console errors, no storage writes, no `/api` calls.
+
+**Left, by design.** A few lab cells still explain rather than render live, each with the reason: Coachmark (switched off app-wide by `COACHMARKS_ENABLED`), FlowChrome (writes its intro flag on mount), the dormant MatchGrid (no route), SearchTrigger at the lab's top level (global Cmd+K listener; it is live inside its Reveal).

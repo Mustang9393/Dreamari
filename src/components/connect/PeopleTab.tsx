@@ -9,6 +9,7 @@ import { demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/c
 import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
 import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 /** "Active daily/weekly/bi-weekly/monthly" -- the same activeDaysAgo the
  *  ranking already scores on, read out loud (the Replit reference's own
@@ -454,7 +455,11 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
   const shownWorlds = WORLDS.slice(0, 6);
 
   return (
-    <>
+    // Surface 43, wrapped 27 Sept 2026 the same way as every other
+    // fixed-data surface: the seeded PROS list is never actually empty, so
+    // this mostly makes loading/error/offline real and reviewable
+    // (?state=...&surface=43) rather than adding a reachable empty state.
+    <SurfaceState id={43} isEmpty={PROS.length === 0} what="professional">
       {/* "Find a professional" itself heads the shared search box one
          level up (ConnectExperience's HomeView), not here -- no second
          row of career chips repeating it either (direct feedback, Joshua
@@ -496,6 +501,6 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
       </SectionSurface>
 
       <NewFromFollowing follows={follows} />
-    </>
+    </SurfaceState>
   );
 }

@@ -12,6 +12,7 @@ import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordma
 import { HeaderActions } from "@/components/app/Inbox";
 import { DISPLAY, PANEL } from "@/components/career/CareerDetailExperience";
 import { EmptyView } from "@/components/app/states";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, SchoolCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
@@ -495,9 +496,7 @@ export function CompareSheet({ colleges, onClose }: { colleges: College[]; onClo
           {/* Surface 16: the compare bar's own button needs 2 picks to open
              this, but the sheet defends itself anyway (27 Sept 2026, states
              pass) so opening it with nothing flagged is never a blank table. */}
-          {colleges.length === 0 ? (
-            <EmptyView tier={3} line="Add a school to compare it here." />
-          ) : (
+          <SurfaceState id={16} isEmpty={colleges.length === 0}>
           <table className="w-full border-collapse text-left text-[13px]" style={{ minWidth: 120 + colleges.length * 190 }}>
             <thead>
               <tr>
@@ -519,7 +518,7 @@ export function CompareSheet({ colleges, onClose }: { colleges: College[]; onClo
               ))}
             </tbody>
           </table>
-          )}
+          </SurfaceState>
         </div>
       </div>
     </div>,

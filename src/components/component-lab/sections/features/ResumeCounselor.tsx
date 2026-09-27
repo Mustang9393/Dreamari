@@ -13,7 +13,7 @@
 // "Preparing..." at src/components/resume/ExportChecklistModal.tsx:68, no
 // built error yet), SidePanel, DetailPane and DocumentDesk.
 
-import { SubHead, Specimen, StateGrid, StateCell, NotRendered, ProposedLoading, ProposedError, ProposedEmpty, ClippedStage, EDGE, noop, MONO, Inert } from "../../kit";
+import { SubHead, Specimen, StateGrid, StateCell, LiveRoute, ProposedLoading, ProposedError, ClippedStage, EDGE, noop, MONO, Inert } from "../../kit";
 
 import { ResumeDocument } from "@/components/resume/ResumeDocument";
 import { TemplateGallery } from "@/components/resume/TemplateGallery";
@@ -23,6 +23,8 @@ import { EmptyStateAdd } from "@/components/resume/wizardSteps";
 import { SAMPLE_RESUME_DATA } from "@/components/resume/data";
 import { EMPTY_RESUME, type ResumeData, type ResumeVersion, type ATSCheckResult } from "@/lib/resume";
 import { fingerprintFor } from "@/lib/resumeAts";
+import { SurfaceStateView } from "@/components/app/SurfaceState";
+import { EmptyView } from "@/components/app/states";
 
 import { MetricRow, InitialsBadge } from "@/components/counselor/v2/overviewShared";
 import { DeltaChip } from "@/components/counselor/v2/Overview";
@@ -142,15 +144,15 @@ export function ResumeCounselorModules() {
 
       <Specimen name="JobMatchPanel, TailorScreen, ExperienceModal" file="src/components/resume/JobMatchPanel.tsx, src/components/resume/TailorScreen.tsx, src/components/resume/ExperienceModal.tsx" purpose="AI-assisted resume steps: match skills to a pasted job description, tailor a whole version to it, and generate bullet lines for an experience entry." when="Choose & Tailor and any experience entry's 'Generate Lines'.">
         <StateGrid min={260}>
-          <StateCell label="JobMatchPanel"><NotRendered reason="Calls the real POST /api/resume-job-match on click." see="src/components/resume/JobMatchPanel.tsx:60" /></StateCell>
+          <StateCell label="JobMatchPanel live" note="Loads on click, inert (no clicks reach the real POST). Open a saved version, then Job Match."><LiveRoute href="/resume-builder?view=list" /></StateCell>
           <StateCell label="JobMatchPanel loading" kind="built" note="Built, see src/components/resume/JobMatchPanel.tsx:132."><ProposedLoading shape="button" label="Finding matches" /></StateCell>
-          <StateCell label="JobMatchPanel error" kind="built" note="Exact copy, see src/components/resume/JobMatchPanel.tsx:134."><p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t match this job. Try again in a moment.</p></StateCell>
-          <StateCell label="TailorScreen"><NotRendered reason="Calls the real POST /api/resume-tailor on click." see="src/components/resume/TailorScreen.tsx:69" /></StateCell>
+          <StateCell label="JobMatchPanel error" kind="built" note="Now the shared inline error view, exact copy kept. See src/components/resume/JobMatchPanel.tsx:134."><ProposedError variant="inline" message="Couldn't match this job. Try again in a moment." /></StateCell>
+          <StateCell label="TailorScreen live" note="Loads on click, inert. Choose & Tailor."><LiveRoute href="/resume-builder?view=tailor" /></StateCell>
           <StateCell label="TailorScreen loading" kind="built" note="Built, see src/components/resume/TailorScreen.tsx:218."><ProposedLoading shape="button" label="Matching" /></StateCell>
-          <StateCell label="TailorScreen error" kind="built" note="Exact copy, see src/components/resume/TailorScreen.tsx:222."><p className="text-center text-[12px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t read that job description. Try again in a moment.</p></StateCell>
-          <StateCell label="ExperienceModal"><NotRendered reason="Calls the real POST /api/resume-bullets on click." see="src/components/resume/ExperienceModal.tsx:22" /></StateCell>
+          <StateCell label="TailorScreen error" kind="built" note="Now the shared inline error view, exact copy kept. See src/components/resume/TailorScreen.tsx:222."><ProposedError variant="inline" message="Couldn't read that job description. Try again in a moment." /></StateCell>
+          <StateCell label="ExperienceModal live" note="Loads on click, inert. Wizard step 3, Add/Edit an experience entry."><LiveRoute href="/resume-builder?view=wizard" /></StateCell>
           <StateCell label="ExperienceModal loading" kind="built" note="Built, see src/components/resume/ExperienceModal.tsx:260."><ProposedLoading shape="button" label="Generating" /></StateCell>
-          <StateCell label="ExperienceModal error" kind="built" note="Exact copy, see src/components/resume/ExperienceModal.tsx:248."><p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t generate bullets. Try again, or write your own.</p></StateCell>
+          <StateCell label="ExperienceModal error" kind="built" note="Now the shared inline error view, exact copy kept. See src/components/resume/ExperienceModal.tsx:248."><ProposedError variant="inline" message="Couldn't generate bullets. Try again, or write your own." /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -160,7 +162,7 @@ export function ResumeCounselorModules() {
           <StateCell label="Result (built)" note="version.atsCheck populated ahead of time; no network involved."><ATSCheckPanel resume={SAMPLE_RESUME_DATA} version={mkVersion({ atsCheck: mkAts(78, 70) })} onClose={noop} /></StateCell>
           <StateCell label="Stale result (built)" note="analyzedFor no longer matches the resume's fingerprint; shows the 'has changed since' banner."><ATSCheckPanel resume={SAMPLE_RESUME_DATA} version={mkVersion({ atsCheck: mkAts(60, null, "stale-fingerprint") })} onClose={noop} /></StateCell>
           <StateCell label="Checking (built loading)" kind="built" note="The Run button's own label swap; can't force live without a real network call. See src/components/resume/ATSCheckPanel.tsx:89."><ProposedLoading shape="button" label="Checking" /></StateCell>
-          <StateCell label="Error (built)" kind="built" note="Exact copy, see src/components/resume/ATSCheckPanel.tsx:91."><p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t run the check right now. Try again in a moment.</p></StateCell>
+          <StateCell label="Error (built)" kind="built" note="Now the shared inline error view, exact copy kept. See src/components/resume/ATSCheckPanel.tsx:91."><ProposedError variant="inline" message="Couldn't run the check right now. Try again in a moment." /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -169,14 +171,17 @@ export function ResumeCounselorModules() {
           <StateCell label="Add Education"><EmptyStateAdd label="Add Education" onAdd={noop} /></StateCell>
           <StateCell label="Add Experience"><EmptyStateAdd label="Add Experience" onAdd={noop} /></StateCell>
         </StateGrid>
-        <NotRendered reason="The wizard steps themselves (PersonalInfoStep, EducationStep, ExperienceStep, SkillsStep, CertificationsStep, ReviewStep) call writeResume directly on save; only this file-local, pure sub-component was pulled out and exported." see="src/components/resume/wizardSteps.tsx" />
+        <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
+          The wizard steps themselves (PersonalInfoStep, EducationStep, ExperienceStep, SkillsStep, CertificationsStep, ReviewStep) call <code style={MONO}>writeResume</code> directly on save, so only this file-local, pure sub-component is rendered above. See it live below.
+        </p>
+        <LiveRoute href="/resume-builder?view=wizard" />
       </Specimen>
 
       <Specimen name="Resume versions list" file="src/components/resume/ResumeExperience.tsx" purpose="The Resume tab's 'Your Resumes' grid of VersionCards." when="The Resume tab, once at least one resume exists.">
         <StateGrid>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="cards" /></StateCell>
-          <StateCell label="Error" kind="proposed"><ProposedError verb="load your resumes" /></StateCell>
-          <StateCell label="Empty" kind="proposed" note="A built zero-resumes state already exists (ResumeExperience.tsx:326, 'Create My Resume'); not rendered here since the full component reads the live resume store and writes on click."><ProposedEmpty tier={4} heading="No resumes yet" line="Build your first resume and it shows up here." cta="Create My Resume" /></StateCell>
+          <StateCell label="Loading" kind="built" note="SurfaceStateView, the exact same safe/pure state renderer ResumeExperience now uses -- no store read or write. See it forced live: /resume-builder?view=list&state=loading&surface=32."><SurfaceStateView id={32} state="loading" what="resume" /></StateCell>
+          <StateCell label="Error" kind="built" note="See it forced live: /resume-builder?view=list&state=error&surface=32."><SurfaceStateView id={32} state="error" what="resume" /></StateCell>
+          <StateCell label="Empty" kind="built" note="The real zero-resumes screen keeps its own bespoke design (ResumeExperience.tsx:326, sparkle + 'Create My Resume', a first-run screen worth its own polish) rather than this generic tier; this is what ?state=empty&surface=32 forces for review of the shared contract."><SurfaceStateView id={32} state="empty" what="resume" onEmptyAction={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -187,7 +192,7 @@ export function ResumeCounselorModules() {
 
       <Specimen name="CounselorShell" file="src/components/counselor/shell.tsx" purpose="The counselor dashboard's nav rail, top bar and page frame." when="Every counselor v2 screen.">
         <StateGrid>
-          <StateCell label="Default"><NotRendered reason="Reads the App Router's pathname/searchParams and useCounselorFilters context; needs the real router to switch screens (?view=overview|students|career-college|impact|...) and each screen's own ?state=loading|empty|error preview (see counselor/v2/states.tsx, covered in Feedback)." see="src/components/counselor/shell.tsx:352" /></StateCell>
+          <StateCell label="Default" note="Loads on click, inert. Reads the App Router's pathname/searchParams and useCounselorFilters context, so it needs the real router, not a mock."><LiveRoute href="/counselor?view=overview" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -236,24 +241,25 @@ export function ResumeCounselorModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Proposed gaps: DrillPanel, roster filter, Principal Report" file="src/components/counselor/v2/Drill.tsx, src/components/counselor/v2/StudentsRoster.tsx, src/components/counselor/v2/CounselorImpact.tsx" purpose="Three counselor states with no built loading/error/empty treatment yet." when="A drill-down mid-fetch or empty, a roster filter with no matches, or a Principal Report being generated.">
+      <Specimen name="DrillPanel, roster filter, My Impact / Principal Report" file="src/components/counselor/v2/Drill.tsx, src/components/counselor/v2/StudentsRoster.tsx, src/components/counselor/v2/CounselorImpact.tsx" purpose="Three counselor states, now wired through SurfaceState (27 Sept 2026: COMPONENT_INVENTORY rows 59, 61, 62)." when="A drill-down with nothing authored, a roster filter with no matches, or My Impact/the district report for a school with no data yet.">
         <StateGrid min={240}>
-          <StateCell label="DrillPanel"><NotRendered reason="A SidePanel that opens with router-driven state; navigates on open/close." see="src/components/counselor/v2/Drill.tsx:58" /></StateCell>
-          <StateCell label="DrillPanel loading" kind="proposed"><ProposedLoading shape="list" /></StateCell>
-          <StateCell label="DrillPanel error" kind="proposed"><ProposedError verb="load this breakdown" /></StateCell>
-          <StateCell label="DrillPanel empty" kind="proposed"><ProposedEmpty tier={3} line="Nothing to break down yet." /></StateCell>
-          <StateCell label="Roster filter, no match" kind="proposed"><ProposedEmpty tier={5} query="valedictorian" /></StateCell>
-          <StateCell label="Principal Report loading" kind="proposed"><ProposedLoading shape="chip" label="Preparing the report" /></StateCell>
-          <StateCell label="Principal Report error" kind="proposed"><ProposedError verb="build this report" /></StateCell>
+          <StateCell label="DrillPanel live" note="Loads on click, inert. Open any stat tile on My Impact to drill in."><LiveRoute href="/counselor?view=impact" /></StateCell>
+          <StateCell label="DrillPanel loading" kind="built" note="SurfaceState id=59 inside DrillPanel; force live with &state=loading&surface=59."><SurfaceStateView id={59} state="loading" /></StateCell>
+          <StateCell label="DrillPanel error" kind="built" note="Force live with &state=error&surface=59."><SurfaceStateView id={59} state="error" /></StateCell>
+          <StateCell label="DrillPanel empty" kind="built" note="Real condition: a drill with no lead/stats/rows/items/students/action authored. Force live with &state=empty&surface=59."><SurfaceStateView id={59} state="empty" /></StateCell>
+          <StateCell label="Roster filter, no match" kind="built" note="Real EmptyView tier 5, names the actual active filters and offers Clear filters -- see src/components/counselor/v2/StudentsRoster.tsx."><EmptyView tier={5} query="Grade 12, At Risk" line="Try a different grade, status, or clear everything below." cta="Clear filters" onAction={noop} /></StateCell>
+          <StateCell label="My Impact loading" kind="built" note="SurfaceState id=62 wraps the whole screen; force live with /counselor?view=impact&state=loading&surface=62."><SurfaceStateView id={62} state="loading" /></StateCell>
+          <StateCell label="My Impact error" kind="built" note="Force live with /counselor?view=impact&state=error&surface=62."><SurfaceStateView id={62} state="error" /></StateCell>
+          <StateCell label="My Impact / district report, no data" kind="built" note="Real condition: caseload 0. Force live with /counselor?view=impact&state=empty&surface=62."><SurfaceStateView id={62} state="empty" onEmptyAction={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Write-on-interaction and navigation, not rendered" file="src/components/counselor/v2/Casefile.tsx, ReviewQueue.tsx, Batch.tsx, Settings.tsx" purpose="Every other counselor v2 piece named in the brief that writes real storage or navigates.">
+      <Specimen name="Write-on-interaction and navigation, live only" file="src/components/counselor/v2/Casefile.tsx, ReviewQueue.tsx, Batch.tsx, Settings.tsx" purpose="Every other counselor v2 piece named in the brief that writes real storage or navigates -- loads on click, inert, so nothing here ever fires those writes.">
         <StateGrid min={240}>
-          <StateCell label="Casefile cards"><NotRendered reason="PlanSignoffCard, TodosCard and CheckinsCard call the real writeSignoff/addTodo/toggleTodo/removeTodo casefile storage on click." see="src/components/counselor/v2/Casefile.tsx:41" /></StateCell>
-          <StateCell label="ReviewQueue"><NotRendered reason="Approves/requests changes on real reviewed-roster storage." see="src/components/counselor/v2/ReviewQueue.tsx:237" /></StateCell>
-          <StateCell label="BatchComposer"><NotRendered reason="Sends a batch action against the selected students' real records." see="src/components/counselor/v2/Batch.tsx:40" /></StateCell>
-          <StateCell label="Settings"><NotRendered reason="Saves the counselor account via writeCounselorAccount." see="src/components/counselor/v2/Settings.tsx:64" /></StateCell>
+          <StateCell label="Casefile cards" note="PlanSignoffCard, TodosCard and CheckinsCard call the real writeSignoff/addTodo/toggleTodo/removeTodo casefile storage on click. Open any student's profile."><LiveRoute href="/counselor?view=students" /></StateCell>
+          <StateCell label="ReviewQueue" note="Approves/requests changes on real reviewed-roster storage."><LiveRoute href="/counselor?view=review-queue" /></StateCell>
+          <StateCell label="BatchComposer" note="Sends a batch action against the selected students' real records. Pick students, then message all."><LiveRoute href="/counselor?view=connect" /></StateCell>
+          <StateCell label="Settings" note="Saves the counselor account via writeCounselorAccount. Also where Toggle's new disabled/pending props and SelectBox's new disabled prop live."><LiveRoute href="/counselor?view=settings" /></StateCell>
         </StateGrid>
       </Specimen>
     </>

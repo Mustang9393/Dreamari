@@ -90,10 +90,11 @@ function StackedToastDemo() {
   return (
     <Reveal label="Show two toasts" clip={false}>
       {shown ? (
-        // Both mount at once to show the built stacking behaviour: same
-        // fixed bottom slot, so a second toast lands flush on the first
-        // rather than offsetting above it -- there is no stack/offset
-        // logic today, only ever one toast expected on screen at a time.
+        // Both mount at once to show the real stacking behaviour
+        // (useToastStack, Toast.tsx, added 27 Sept 2026): each instance
+        // claims a slot in mount order and offsets by a gap instead of
+        // overlapping in the same fixed slot, newest (UndoToast here) on
+        // top with the higher z-index.
         <>
           <Toast message="Added to your Top 3" onClose={noop} duration={60000} />
           <UndoToast message="Removed from Top 3" onUndo={noop} onClose={() => setShown(false)} duration={60000} />
@@ -169,8 +170,8 @@ export function FeedbackSection() {
           <StateCell label="Toast (success)" minH={160}><ToastDemo /></StateCell>
           <StateCell label="UndoToast" minH={160}><UndoToastDemo /></StateCell>
           <StateCell label="Long message" note="max-w-[420px] with no truncation built; a long message just wraps to more lines." minH={160}><LongToastDemo /></StateCell>
-          <StateCell label="Stacked" note="Both share the same fixed bottom-24/bottom-8 slot; a second toast lands on top of the first rather than offsetting above it, because only one toast is ever expected on screen at once." minH={200}><StackedToastDemo /></StateCell>
-          <StateCell label="Error toast" kind="proposed" note="By rule, errors are inline text, never a toast (Toast/UndoToast above are success/undo only). This is only a proposed look for the day that changes, same shell, danger tint on the border and dot instead of a new component." minH={160}>
+          <StateCell label="Stacked" kind="built" note="Fixed 27 Sept 2026 (direct report + screenshot: two toasts overlapped): each instance now claims a slot in mount order via useToastStack and offsets by a gap, newest on top." minH={200}><StackedToastDemo /></StateCell>
+          <StateCell label="Error toast" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL." minH={160}>
             <div className="flex max-w-[320px] items-center gap-[14px] rounded-[14px] border px-[16px] py-[12px] text-[14px] font-semibold" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--color-feedback-danger, #ff6b6b) 45%, var(--glass-border))", color: "var(--foreground)" }}>
               <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: "var(--color-feedback-danger, #ff6b6b)" }} />
               <span className="min-w-0 flex-1">Couldn&apos;t save. Try again.</span>

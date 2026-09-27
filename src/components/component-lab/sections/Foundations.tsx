@@ -491,7 +491,7 @@ export function FoundationsSection() {
                 </div>
               </HoverBeam>
             </StateCell>
-            <StateCell label="Forced active" note="Reduced motion gap: neither this component nor the border-beam package it wraps checks prefers-reduced-motion, unlike ConfirmShimmer/PlayBurst/GestureHint below (all motion-safe:) or Confetti/AuroraBackground (both check matchMedia in JS). Since this is the app's default hover treatment for nearly every card, that's the widest-reaching motion gap in this section.">
+            <StateCell label="Forced active" kind="built" note="Reduced motion (fixed 27 Sept 2026): HoverBeam now checks useReducedMotion (framer-motion) itself and swaps the spinning border-beam ring for a static drop-shadow glow, same active/hover/focus state, no rotation.">
               <HoverBeam active className="block">
                 <div className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
                   Career card
@@ -544,14 +544,25 @@ export function FoundationsSection() {
 
         <Specimen name="GestureHint" file="src/components/flow/GestureHint.tsx" purpose="A small animated touch point that teaches a swipe or scroll direction by showing it, not describing it in a sentence." when="The first time a screen depends on a gesture the student might not try on their own.">
           <StateGrid min={140}>
+            {/* GestureHint has no surface of its own -- it's always laid over
+               a real card/photo in the app. A bare card-like block behind it
+               here (added 27 Sept 2026: the cell read as empty without one)
+               isn't inventing new markup, just giving the touch point
+               something to sit on so it's visible. */}
             <StateCell label="Left">
-              <GestureHint direction="left" />
+              <div className="relative flex h-[100px] w-full items-center justify-center rounded-[var(--radius-md)] border" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+                <GestureHint direction="left" />
+              </div>
             </StateCell>
             <StateCell label="Right">
-              <GestureHint direction="right" />
+              <div className="relative flex h-[100px] w-full items-center justify-center rounded-[var(--radius-md)] border" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+                <GestureHint direction="right" />
+              </div>
             </StateCell>
             <StateCell label="Up (scroll)" note="Reduced motion: every direction's loop is motion-safe:, so the hint holds its resting position instead of looping, a static hint still points the right way, it just doesn't move.">
-              <GestureHint direction="up" />
+              <div className="relative flex h-[100px] w-full items-center justify-center rounded-[var(--radius-md)] border" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+                <GestureHint direction="up" />
+              </div>
             </StateCell>
           </StateGrid>
         </Specimen>
@@ -597,12 +608,12 @@ export function FoundationsSection() {
                 <PlayBackdrop />
               </Reveal>
             </StateCell>
-            <StateCell label="StarsBackground" minH={200} note="Reduced motion gap: the star field's scroll (a framer-motion animate: { y: [0, -2000] } loop) has no motion-safe guard or matchMedia check, so it runs continuously even under prefers-reduced-motion.">
+            <StateCell label="StarsBackground" kind="built" minH={200} note="Reduced motion (fixed 27 Sept 2026): checks useReducedMotion and freezes each star layer's scroll loop on one still frame instead of animating y: [0, -2000] continuously.">
               <Reveal label="Play" height={200}>
                 <StarsBackground starColor="#ffffff" />
               </Reveal>
             </StateCell>
-            <StateCell label="FireworksBackground" minH={200} note="Reduced motion gap, and the CPU-heaviest of this row: a requestAnimationFrame canvas loop with no motion-safe guard or matchMedia check at all, unlike Vortex and AuroraBackground next to it.">
+            <StateCell label="FireworksBackground" kind="built" minH={200} note="Reduced motion (fixed 27 Sept 2026): checks useReducedMotion and draws one static burst instead of the continuous requestAnimationFrame launch loop, the same still-frame pattern as Vortex.">
               <Reveal label="Play" height={200}>
                 <FireworksBackground population={0.6} />
               </Reveal>

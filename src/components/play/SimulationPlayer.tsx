@@ -10,6 +10,7 @@ import { ChevronRight, Briefcase, ChevronLeft, FastForward, FileText, Home, Musi
 
 import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
+import { ErrorView, LoadingView } from "@/components/app/states";
 
 import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO } from "./expressions";
 import { locationFor } from "./locations";
@@ -34,7 +35,7 @@ import {
   useTypewriter,
   type Resolve,
 } from "./interactions";
-import { musicMutedSnapshot, playMusic, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicMuted } from "./music";
+import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
   mutedSnapshot,
@@ -204,6 +205,23 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
   const scene = sceneFor(level, index, beat);
+  // Wired 27 Sept 2026: a real loading view for the level's first paint,
+  // gated on the actual scene image finishing (or, for a moodlit "none"
+  // scene with no photo, resolving the moment that's known) -- not a fake
+  // timer. Deliberately one-shot per mount (this component remounts per
+  // level via the page's own `key={level.id}`): later beats swap scenes via
+  // the "sticky art" rule above, and that swap must never bring this
+  // overlay back over gameplay already in progress.
+  const [sceneReady, setSceneReady] = useState(false);
+  const sceneReadyOnce = useRef(false);
+  const markSceneReady = useCallback(() => {
+    if (sceneReadyOnce.current) return;
+    sceneReadyOnce.current = true;
+    setSceneReady(true);
+  }, []);
+  useEffect(() => {
+    if (scene.mode === "none") markSceneReady();
+  }, [scene.mode, markSceneReady]);
   const sceneHost = useRef<HTMLDivElement>(null);
   const sceneOffset = useScenePointer();
   // Character height is set in real pixels, not a CSS percentage: a
@@ -494,7 +512,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             className="absolute inset-0 transition-[filter] duration-500"
             style={{ filter: dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined }}
           >
-            <SceneLayers src={scene.src} alt={scene.alt} />
+            <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
           </div>
         ) : (
           <div className="absolute inset-0">
@@ -505,6 +523,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
               mobileFocal={scene.mobileFocal}
               offset={sceneOffset}
               dimmed={dimmed}
+              onReady={markSceneReady}
             />
             {/* A card or the review is never staged (see BeatStage's own
                `stageable`), so it is always in its "revealed" state -- the
@@ -553,6 +572,18 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           </div>
         )}
       </div>
+
+      {/* The level's first paint: gone the instant the scene's own image
+         reports loaded (see markSceneReady above), never a fixed delay.
+         Sits above the (still-mounting) scene/HUD rather than replacing
+         them, so there is nothing to re-mount once it clears. */}
+      {!sceneReady && (
+        <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center" style={{ background: "var(--background)" }}>
+          <div className="w-full max-w-[240px] px-4">
+            <LoadingView label="Loading level" shape="chip" />
+          </div>
+        </div>
+      )}
 
       {/* Center-stage vignette: only on a standalone interactive screen, the
          same moment the backdrop blurs and desaturates -- darkens the
@@ -794,7 +825,7 @@ function AmbientBackdrop({ mood, accent }: { mood: Mood; accent: string }) {
   );
 }
 
-function SceneLayers({ src, alt }: { src: string; alt: string }) {
+function SceneLayers({ src, alt, onReady }: { src: string; alt: string; onReady?: () => void }) {
   // One sharp cover layer, every breakpoint -- mobile used to stack two
   // blurred copies behind a smaller centered one to avoid cropping a wide
   // image's sides, but the blurred edges read as a visible defect rather
@@ -809,6 +840,7 @@ function SceneLayers({ src, alt }: { src: string; alt: string }) {
       priority
       sizes="100vw"
       className="object-cover object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both]"
+      onLoad={onReady}
     />
   );
 }
@@ -838,6 +870,7 @@ function LocationBackdrop({
   mobileFocal,
   offset,
   dimmed,
+  onReady,
 }: {
   src: string;
   alt: string;
@@ -849,6 +882,7 @@ function LocationBackdrop({
    *  with them. Never true for a card, review, or a beat still being read;
    *  those want the room clear so the character standing in it reads. */
   dimmed?: boolean;
+  onReady?: () => void;
 }) {
   const filter = dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
   return (
@@ -861,6 +895,7 @@ function LocationBackdrop({
         sizes="100vw"
         className="object-cover transition-[filter] duration-500 sm:hidden"
         style={{ objectPosition: `${mobileFocal.x * 100}% ${mobileFocal.y * 100}%`, filter }}
+        onLoad={onReady}
       />
       <Image
         src={src}
@@ -874,6 +909,7 @@ function LocationBackdrop({
           transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(1.03)`,
           filter,
         }}
+        onLoad={onReady}
       />
     </>
   );
@@ -2120,8 +2156,20 @@ export function Hud({
           })}
         </span>
       </div>
+      <MusicFailedPill />
     </header>
   );
+}
+
+/** A quiet pill for when the track itself failed to load (a bad/missing
+ *  file, a network hiccup) -- distinct from the music simply being muted,
+ *  and never blocking play: the level keeps going with no music rather
+ *  than stalling on a failed asset. Wired 27 Sept 2026, see music.ts's own
+ *  `failed` state and src/lib/surfaceStates.ts row 53. */
+function MusicFailedPill() {
+  const failed = useSyncExternalStore(subscribeMusicFailed, musicFailedSnapshot, serverMusicFailedSnapshot);
+  if (!failed) return null;
+  return <ErrorView pill="Music" message="Music didn't load" onRetry={retryMusic} />;
 }
 
 /** Music on/off -- deliberately its own button, independent from the sound

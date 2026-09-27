@@ -92,10 +92,10 @@ export function SimulationPiecesGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Missing states" file="src/components/play/SimulationPlayer.tsx" purpose="Inventory gap: no built loading state while a level's beats/art load, and no built error state for a failed audio/asset load." when="A slow connection between the hub and a level's first beat. The whole-surface version of this gap is also cataloged as States gallery #53.">
+      <Specimen name="Level load / audio failure" file="src/components/play/SimulationPlayer.tsx" purpose="Wired 27 Sept 2026: a real loading view gates the level's first scene image (gone the instant it reports loaded, not a fake timer), and a track that fails to load shows this quiet retry pill instead of the game just staying silent with no explanation." when="Level loading: opening any simulation, until its first scene image is ready. Audio failed: a music track's <audio> element fires a real error event. Whole-surface loading/error is also cataloged as States gallery #53.">
         <StateGrid min={260}>
-          <StateCell label="Level loading" kind="proposed"><ProposedLoading label="Loading level" shape="chip" /></StateCell>
-          <StateCell label="Audio failed" kind="proposed"><ProposedError verb="load the level audio" pill="Music" /></StateCell>
+          <StateCell label="Level loading" note="Live: open any simulation (e.g. /play/investment-banking) -- this shows for the instant before the first scene image finishes loading."><ProposedLoading label="Loading level" shape="chip" /></StateCell>
+          <StateCell label="Audio failed" note="Exact real call (Hud's MusicFailedPill): <ErrorView pill=&quot;Music&quot; onRetry={retryMusic} />, shown when the &lt;audio&gt; element's own error event fires."><ProposedError pill="Music" /></StateCell>
         </StateGrid>
       </Specimen>
 

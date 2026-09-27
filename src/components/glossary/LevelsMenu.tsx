@@ -37,6 +37,7 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore, type CSSPrope
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, ChartNoAxesColumnIncreasing, Lock, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
+import { EmptyView } from "@/components/app/states";
 import { Portal } from "@/components/profile/CareerReport";
 import type { PlayBgVersion } from "@/components/play/PlayVersionChip";
 import type { GlossaryCareer, GlossaryChapter, GlossaryLevel } from "./data";
@@ -517,7 +518,60 @@ export function LevelsMenu({ career, currentLesson, accent, bgVersion }: { caree
     document.querySelector(`[data-level="${selected}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
   }, [selected, open, reduce]);
 
-  if (career.levels.length === 0) return null;
+  // Wired 27 Sept 2026: this used to return null with 0 levels -- not just
+  // the map empty, the whole button vanished, so there was no way to even
+  // discover the Levels feature existed for such a career. The button
+  // stays; opening it shows this real tier-1 empty instead of the map. See
+  // src/lib/surfaceStates.ts row 55.
+  if (career.levels.length === 0) {
+    return (
+      <>
+        <IconTip label="Levels" off={open}>
+          <button
+            ref={buttonRef}
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label="Levels"
+            aria-haspopup="dialog"
+            className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
+            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          >
+            <ChartNoAxesColumnIncreasing className="h-[17px] w-[17px]" strokeWidth={2.5} aria-hidden />
+          </button>
+        </IconTip>
+        <Portal>
+          <AnimatePresence>
+            {open && (
+              <motion.div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                <button type="button" aria-label="Close levels" tabIndex={-1} onClick={close} className="absolute inset-0 cursor-default" style={{ background: "rgba(3,5,15,0.7)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }} />
+                <motion.div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby={titleId}
+                  initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={reduce ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                  className="relative flex w-full max-w-[420px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]"
+                  style={{ background: "#0d0b1a", borderColor: "rgba(255,255,255,0.1)", color: "#fff" }}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 id={titleId} className="text-[20px] leading-[1.15] font-black uppercase" style={{ fontFamily: "var(--font-display)" }}>Levels</h2>
+                    <IconTip label="Close">
+                      <button ref={closeRef} type="button" onClick={close} aria-label="Close" className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.05)", color: "#fff" }}>
+                        <X className="h-[16px] w-[16px]" aria-hidden />
+                      </button>
+                    </IconTip>
+                  </div>
+                  <EmptyView tier={1} heading="No levels yet" line="This theme's levels are still being built." cta="Choose another theme" onAction={close} />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Portal>
+      </>
+    );
+  }
   const skin = skinFor(bgVersion, accent);
   const status = (level: GlossaryLevel): Status => {
     const lesson = career.lessons.find((l) => l.lessonNumber === level.number);

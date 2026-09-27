@@ -6,7 +6,7 @@ import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession }
 import { ArrowRight, Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
-import { useForcedState, SurfaceStateView } from "@/components/app/SurfaceState";
+import { useForcedState, SurfaceStateView, type SurfaceStatus } from "@/components/app/SurfaceState";
 import { readStudentProfile } from "@/lib/studentProfile";
 import { STUDENT } from "@/components/profile/data";
 import { downloadDocx } from "./resumeExport";
@@ -314,6 +314,16 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
   const { toast } = useResumeToast();
   const [confirmDelete, setConfirmDelete] = useState<ResumeVersion | null>(null);
   const tagColorNudge = useTagColorNudge();
+  // COMPONENT_INVENTORY row 32: this list reads localStorage synchronously
+  // (there is no real load to fail), so `?state=loading|error&surface=32`
+  // is the only way loading/error are ever seen here -- real usage is
+  // always "ready" or the genuine zero-resumes case below, which keeps its
+  // own bespoke design rather than the generic empty tile (27 Sept 2026:
+  // that zero state is a first-run screen every new student sees, and its
+  // sparkle + "Create My Resume" CTA is the better-designed, already-built
+  // treatment -- see the report for why it wasn't swapped for the
+  // registry's generic tier).
+  const forced = useForcedState(32);
 
   const startBuilding = () => {
     startFreshFromStudentProfile();
@@ -323,6 +333,12 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
   };
 
   const versions = [...resume.versions].sort((a, b) => b.updatedAt - a.updatedAt);
+
+  if (forced) {
+    // useForcedState never actually returns "ready" (FORCEABLE excludes
+    // it) -- the cast just narrows past the shared type's wider surface.
+    return <SurfaceStateView id={32} state={forced as Exclude<SurfaceStatus, "ready">} what="resume" onEmptyAction={startBuilding} />;
+  }
 
   if (versions.length === 0) {
     return (

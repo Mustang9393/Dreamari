@@ -33,9 +33,9 @@ export function ChartsSection() {
           <StateCell label="Sparse data"><AreaChart points={[10, 24]} accent="var(--primary)" labels={["Jan", "", "Feb"]} /></StateCell>
           <StateCell label="All zeros"><AreaChart points={[0, 0, 0, 0, 0, 0]} accent="var(--primary)" labels={["Jan", "Mar", "Jun"]} /></StateCell>
           <StateCell label="Extreme values" note="One outlier month dwarfs the rest of the trend."><AreaChart points={[12, 14, 15, 13, 780, 16]} accent="var(--primary)" labels={["Jan", "Jun", "Dec"]} /></StateCell>
-          <StateCell label="Empty" kind="proposed"><ProposedEmpty tier={3} line="No activity for this period yet." /></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="list" /></StateCell>
-          <StateCell label="Error" kind="proposed"><ProposedError verb="load this chart" /></StateCell>
+          <StateCell label="Empty" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedEmpty tier={3} line="No activity for this period yet." /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="list" /></StateCell>
+          <StateCell label="Error" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedError verb="load this chart" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -59,9 +59,9 @@ export function ChartsSection() {
           <StateCell label="Long labels" note="Long group names; maxBarWidth caps how thick each bar grows so many categories still fit.">
             <ConnectBarChart groups={["School counselors", "District administrators", "Volunteer professionals"]} series={[{ label: "Answered", accent: "var(--primary)", values: [62, 74, 68] }]} maxBarWidth={22} />
           </StateCell>
-          <StateCell label="Empty" kind="proposed"><ProposedEmpty tier={3} line="No data for this period yet." /></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="list" /></StateCell>
-          <StateCell label="Error" kind="proposed"><ProposedError verb="load this chart" /></StateCell>
+          <StateCell label="Empty" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedEmpty tier={3} line="No data for this period yet." /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="list" /></StateCell>
+          <StateCell label="Error" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedError verb="load this chart" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -78,7 +78,7 @@ export function ChartsSection() {
           <StateCell label="MetricTile"><MetricTile icon={Users} value="1,286" label="Students reached" delta={12} accent="var(--primary)" /></StateCell>
           <StateCell label="MetricTile, negative delta"><MetricTile icon={Users} value="640" label="Students reached" delta={-6} accent="var(--primary)" /></StateCell>
           <StateCell label="MetricTile, large number"><MetricTile icon={Users} value="1.2M" label="Students reached" delta={4} accent="var(--primary)" /></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="chip" /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="chip" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -93,7 +93,7 @@ export function ChartsSection() {
           <StateCell label="RangeBar, extreme" note="Range pinned near the ceiling."><RangeBar label="SAT (middle 50%)" lo={1560} hi={1600} max={1600} note="of students who submitted scores" /></StateCell>
           <StateCell label="Ladder"><Ladder rows={[{ label: "Under $30,000", value: 16343 }, { label: "$30,000 to $48,000", value: 16210, top: true }, { label: "Over $110,000", value: 35016 }]} ceiling={40000} format={(n) => `$${n.toLocaleString("en-US")}`} /></StateCell>
           <StateCell label="Ladder, long label"><Ladder rows={[{ label: "Under $30,000, first generation students", value: 16343, note: "of students who reported income and are first in their family to attend college" }]} ceiling={40000} format={(n) => `$${n.toLocaleString("en-US")}`} /></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="chip" /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="chip" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -108,8 +108,8 @@ export function ChartsSection() {
           <StateCell label="GoalTrack, over target" note="logged exceeds target; the bar and pace tick both clamp at 100%."><GoalTrack logged={14} target={10} pace={9} accent="var(--primary)" unit="hours" /></StateCell>
           <StateCell label="Histogram"><Histogram values={[2, 5, 8, 3]} labels={["0-1", "2-3", "4-5", "6+"]} accent="var(--primary)" ariaLabel="Meetings completed distribution" /></StateCell>
           <StateCell label="ShareBar"><ShareBar parts={[{ label: "On track", value: 62 }, { label: "Needs attention", value: 24 }, { label: "At risk", value: 14 }]} accent="var(--primary)" /></StateCell>
-          <StateCell label="Empty" kind="proposed"><ProposedEmpty tier={3} line="No pairs logged yet." /></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="list" /></StateCell>
+          <StateCell label="Empty" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedEmpty tier={3} line="No pairs logged yet." /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="list" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -121,8 +121,8 @@ export function ChartsSection() {
           <StateCell label="Sparse data" note="One real figure; every other state falls back to the typical pay with a small seeded spread." pad={false} minH={220}>
             <PayMap typical="$52,000/year" rows={[{ state: "Ohio", pay: "$54,000" }]} accent="var(--primary)" seed="welder" />
           </StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="document" /></StateCell>
-          <StateCell label="Error" kind="proposed"><ProposedError verb="load pay by state" /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="document" /></StateCell>
+          <StateCell label="Error" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedError verb="load pay by state" /></StateCell>
         </StateGrid>
       </Specimen>
 

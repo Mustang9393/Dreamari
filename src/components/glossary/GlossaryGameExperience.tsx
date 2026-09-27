@@ -20,6 +20,7 @@ import { QuickLinksMenu } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
+import { SurfaceState } from "@/components/app/SurfaceState";
 // Sourced from glossaryThemeSound, not sound.ts directly, so every
 // playCorrect/playWrong/playSelect/playSweep call already scattered
 // through this file (a dozen-plus question-type renderers) picks up
@@ -313,7 +314,7 @@ function DemoStepControls({ onReload, onStepBack, stepBackDisabled }: { onReload
   );
 }
 
-function TopBar({
+export function TopBar({
   onBack,
   topBarRef,
   career,
@@ -399,7 +400,7 @@ function DemoControlsDock({
 // ---------------------------------------------------------------------------
 // Screen: Intro ("Meet {Company}")
 
-function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () => void }) {
+export function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () => void }) {
   const { theme } = useGlobalTheme();
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)] text-center">
@@ -446,7 +447,7 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
 // ---------------------------------------------------------------------------
 // Screen: Lesson intro (company value meter + word chips)
 
-function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStart: () => void }) {
+export function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStart: () => void }) {
   const { theme } = useGlobalTheme();
   const pct = Math.round((lesson.companyValue / lesson.nextCompanyValue) * 100);
   return (
@@ -549,8 +550,26 @@ export function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: G
   );
   const face = (side: "front" | "back") => (
     <div
-      className={`flex overflow-hidden rounded-[var(--radius-lg)] border text-left ${side === "back" ? "absolute inset-0" : ""}`}
-      style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)", backfaceVisibility: "hidden", transform: side === "back" ? "rotateY(180deg)" : undefined }}
+      className="flex overflow-hidden rounded-[var(--radius-lg)] border text-left"
+      style={{
+        background: "var(--card)",
+        borderColor: "var(--glass-border)",
+        boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)",
+        backfaceVisibility: "hidden",
+        transform: side === "back" ? "rotateY(180deg)" : undefined,
+        // Both faces share the same grid cell instead of front-in-flow /
+        // back-absolute-inset-0: a grid track auto-sizes to its TALLEST
+        // item, so the card is always at least as tall as whichever face's
+        // content (a long example vs. a short definition, or the reverse)
+        // actually needs. The old absolute-inset-0 back face only ever
+        // borrowed its height from the front face, so a taller back face
+        // overflowed the shorter front's box -- its own overflow-hidden
+        // clipped it mid-line rather than growing to fit, which read as
+        // text running into whatever sat below the card (found by the
+        // lab's automated overlap check, 27 Sept 2026; fixed here so this
+        // holds at any width, not just the one the check happened to try).
+        gridArea: "1 / 1",
+      }}
     >
       {rings}
       <span className="flex min-w-0 flex-1 flex-col items-center justify-center gap-[clamp(calc(6px*var(--glossary-shell-scale)),calc(1.8*var(--glossary-shell-scale)*1dvh),calc(16px*var(--glossary-shell-scale)))] p-[clamp(calc(14px*var(--glossary-shell-scale)),calc(3.2*var(--glossary-shell-scale)*1dvh),calc(24px*var(--glossary-shell-scale)))]">
@@ -606,8 +625,7 @@ export function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: G
         </filter>
       </svg>
       <motion.div
-        className="relative"
-        style={{ transformStyle: "preserve-3d" }}
+        style={{ display: "grid", transformStyle: "preserve-3d" }}
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ duration: reduced ? 0 : 0.5, ease: [0.4, 0, 0.2, 1] }}
       >
@@ -618,7 +636,7 @@ export function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: G
   );
 }
 
-function UnlockScreen({
+export function UnlockScreen({
   lesson,
   index,
   onUnlock,
@@ -702,7 +720,7 @@ function UnlockScreen({
   );
 }
 
-function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLesson; onStartPractice: () => void }) {
+export function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLesson; onStartPractice: () => void }) {
   const { theme } = useGlobalTheme();
   // "All N terms unlocked!" with a trophy is a milestone that arrived with no
   // sound and no motion. Same level-up sweep + burst the lesson's own finish
@@ -834,7 +852,7 @@ export function OptionList({ options, correctIndex, picked, onPick }: { options:
 // treatment where relevant" allowance). Same options/correctIndex/onPick
 // contract as OptionList, just laid out as one bordered sheet with divided
 // rows instead of separately boxed buttons -- no interaction change.
-function DocumentOptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
+export function DocumentOptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
   const revealed = picked !== null;
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-[var(--radius-md)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
@@ -867,7 +885,7 @@ function DocumentOptionList({ options, correctIndex, picked, onPick }: { options
   );
 }
 
-function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "typeTerm" }>; onAnswer: (r: AnswerResult) => void }) {
+export function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "typeTerm" }>; onAnswer: (r: AnswerResult) => void }) {
   const [value, setValue] = useState("");
   const [checked, setChecked] = useState<boolean | null>(null);
 
@@ -933,7 +951,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
   );
 }
 
-function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void }) {
+export function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void }) {
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [pickedLeft, setPickedLeft] = useState<string | null>(null);
   const [wrongFlash, setWrongFlash] = useState<string | null>(null);
@@ -1093,7 +1111,7 @@ function MatchUpCard({ question, onAnswer }: { question: Extract<GlossaryQuestio
   );
 }
 
-function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "sortBuckets" }>; onAnswer: (r: AnswerResult) => void }) {
+export function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "sortBuckets" }>; onAnswer: (r: AnswerResult) => void }) {
   const [placed, setPlaced] = useState<Record<string, string>>({});
   const [picked, setPicked] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
@@ -1191,7 +1209,7 @@ function SortBucketsCard({ question, onAnswer }: { question: Extract<GlossaryQue
   );
 }
 
-function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "profitBuilder" }>; onAnswer: (r: AnswerResult) => void }) {
+export function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "profitBuilder" }>; onAnswer: (r: AnswerResult) => void }) {
   const [values, setValues] = useState<string[]>(() => question.steps.map(() => ""));
   const [checked, setChecked] = useState(false);
   const allFilled = values.every((v) => v.trim() !== "");
@@ -1270,7 +1288,7 @@ function shuffleStable<T>(items: T[], seed: string): T[] {
   return arr;
 }
 
-function QuestionScreen({
+export function QuestionScreen({
   question,
   onAnswer,
 }: {
@@ -1441,7 +1459,7 @@ export function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: 
 // ---------------------------------------------------------------------------
 // Power Play
 
-function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
+export function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
   return (
     <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center" style={{ background: "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 65%)" }}>
       <DreamyFace pose="idea" size={112} />
@@ -1465,7 +1483,7 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
   );
 }
 
-function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
+export function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
   const gaps = lesson.powerPlay.answers.length;
   const [values, setValues] = useState<string[]>(() => lesson.powerPlay.answers.map(() => ""));
   const [checked, setChecked] = useState(false);
@@ -1904,6 +1922,12 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
   // own world color) is what makes Aviation/Healthcare/Tech pick up their
   // own accent instead of Finance's amber.
   const accent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
+  // Wired 27 Sept 2026: a lesson authored with no terms or no questions
+  // can't actually be played (Unlock has nothing to unlock, the main loop
+  // has nothing to ask) -- rather than let the game run into a blank
+  // screen partway through, this shows the real error state up front. See
+  // src/lib/surfaceStates.ts row 54.
+  const lessonBroken = lesson.terms.length === 0 || lesson.questions.length === 0;
 
   return (
     <div
@@ -2091,6 +2115,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         dockRef={dockRef}
       />
 
+      <SurfaceState id={54} status={lessonBroken ? "error" : "ready"} what="lesson" onRetry={exitToCareer}>
       {screen === "question" && (
         // An earlier pass shrunk this status strip down (direct feedback:
         // "make the progress bar info smaller / less dominant") -- since
@@ -2207,6 +2232,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
           />
         )}
       </main>
+      </SurfaceState>
 
       {showStreak !== null && <StreakModal streak={showStreak} onDismiss={() => setShowStreak(null)} />}
     </div>

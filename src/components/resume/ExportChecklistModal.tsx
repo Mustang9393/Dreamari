@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Download, Printer } from "lucide-react";
 import type { ResumeData } from "@/lib/resume";
 import { downloadDocx } from "./resumeExport";
+import { ErrorView } from "@/components/app/states";
 import { CARD_CLASS, INSET, ResumeModal } from "./ui";
 
 // Confirmed live against the reference (20 Sept 2026): its own "Export"
@@ -24,7 +25,22 @@ export function ExportChecklistModal({ resume, onClose }: { resume: ResumeData; 
   const [checked, setChecked] = useState<boolean[]>(() => CONFIRMATIONS.map(() => false));
   const allChecked = checked.every(Boolean);
   const [downloading, setDownloading] = useState(false);
+  // COMPONENT_INVENTORY row 38: downloadDocx (the docx package's dynamic
+  // import + Packer.toBlob) had no failure path at all before -- a reject
+  // there just left the button stuck on "Preparing…" forever. 27 Sept 2026.
+  const [downloadError, setDownloadError] = useState(false);
   const toggle = (i: number) => setChecked((c) => c.map((v, idx) => (idx === i ? !v : v)));
+  const download = async () => {
+    setDownloading(true);
+    setDownloadError(false);
+    try {
+      await downloadDocx(resume);
+    } catch {
+      setDownloadError(true);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <ResumeModal title="Review Before Exporting" onClose={onClose}>
@@ -48,6 +64,7 @@ export function ExportChecklistModal({ resume, onClose }: { resume: ResumeData; 
         ))}
       </div>
       <p className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Check what file type the employer wants. If they don&apos;t say, .docx usually works best.</p>
+      {downloadError && <ErrorView variant="inline" message="Couldn't prepare the download. Try again, or export a PDF instead." onRetry={download} />}
       <div className="flex flex-wrap items-center justify-end gap-[var(--space-3)]">
         <button
           type="button"
@@ -60,7 +77,7 @@ export function ExportChecklistModal({ resume, onClose }: { resume: ResumeData; 
         </button>
         <button
           type="button"
-          onClick={async () => { setDownloading(true); try { await downloadDocx(resume); } finally { setDownloading(false); } }}
+          onClick={download}
           disabled={!allChecked || downloading}
           className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
           style={{ background: "var(--primary)" }}

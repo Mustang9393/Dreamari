@@ -6,6 +6,7 @@
 // this section writes to them. FlowChrome and CounselorShell are described
 // rather than rendered live -- see their own notes below for why.
 
+import { useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
 import {
   DesktopNavigation,
@@ -19,7 +20,24 @@ import {
 } from "@/components/app/chrome";
 import { HeaderActions, NavIconButton, NotificationsButton } from "@/components/app/Inbox";
 import { SkipLink } from "@/components/app/SkipLink";
-import { Section, Specimen, StateGrid, StateCell, NotRendered, ClippedStage, noop } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, NotRendered, LiveRoute, ClippedStage, noop } from "../kit";
+
+// SkipLink is sr-only until :focus (a real CSS pseudo-class, not
+// :focus-visible), so calling .focus() programmatically on mount shows the
+// exact same visible state a real Tab press would, without needing a
+// keyboard event in the lab (added 27 Sept 2026: the cell looked empty
+// before anyone tabbed to it).
+function SkipLinkDemo() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.querySelector<HTMLAnchorElement>("a")?.focus();
+  }, []);
+  return (
+    <div ref={ref}>
+      <SkipLink />
+    </div>
+  );
+}
 
 export function NavigationSection() {
   return (
@@ -120,7 +138,7 @@ export function NavigationSection() {
         when="Any full-screen focus flow, in place of the normal top nav."
       >
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
+          <StateCell label="In the app">
             <NotRendered
               reason="Its mount effect writes a real localStorage flag (dreamari:dream-score:intro-seen) whenever the live Dream Score is already above zero when it first mounts, which this lab can't rule out."
               see="src/components/app/FlowChrome.tsx"
@@ -131,8 +149,11 @@ export function NavigationSection() {
 
       <Specimen name="SkipLink" file="src/components/app/SkipLink.tsx" purpose="A keyboard-only shortcut straight to <main>, skipping the header and nav." when="Once, near the top of every page's markup.">
         <StateGrid min={220}>
-          <StateCell label="Focus to see it" note="sr-only until focused; Tab to it to see the visible pill.">
+          <StateCell label="Unfocused (sr-only)" note="Tab to it: the pill only shows on :focus. Empty here on purpose -- this is the real, correct hidden state.">
             <SkipLink />
+          </StateCell>
+          <StateCell label="Focused" kind="built" pad={false} minH={90} note="Programmatically focused on mount (a real .focus() call, the same `:focus` state a Tab press produces), so the pill shows without needing a keyboard event in this lab. ClippedStage contains its focus:fixed positioning to this cell instead of the real page corner.">
+            <ClippedStage height={90}><SkipLinkDemo /></ClippedStage>
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -144,11 +165,8 @@ export function NavigationSection() {
         when="Wraps every /counselor screen; not part of the student app's own chrome by design."
       >
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered
-              reason="A full second product shell (sticky h-dvh sidebar, mobile drawer, its own topbar) sized for a real viewport, not a lab cell; it also reads the live counselor account store. useCounselorFilters() itself is just a context read: gradeFilter/setGradeFilter, search/setSearch, statusFilter/setStatusFilter, planFilter/setPlanFilter, counselorFilter/setCounselorFilter, and stepFilter/setStepFilter, all no-op-defaulted outside a CounselorShell."
-              see="src/components/counselor/shell.tsx"
-            />
+          <StateCell label="Live at /counselor" kind="built" note="A full second product shell (sticky h-dvh sidebar, mobile drawer, its own topbar) needs a real viewport, not a lab cell -- LiveRoute renders the real page at true desktop width in a scaled, inert iframe instead of describing it. useCounselorFilters() itself is just a context read: gradeFilter/setGradeFilter, search/setSearch, statusFilter/setStatusFilter, planFilter/setPlanFilter, counselorFilter/setCounselorFilter, and stepFilter/setStepFilter, all no-op-defaulted outside a CounselorShell.">
+            <LiveRoute href="/counselor" device="desktop" height={480} />
           </StateCell>
         </StateGrid>
       </Specimen>

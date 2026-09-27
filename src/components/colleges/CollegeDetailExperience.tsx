@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { ArrowUpRight, ChevronDown, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -14,6 +13,7 @@ import { Donut } from "./viz";
 import { EXTRA } from "./extra";
 import { Segmented } from "@/components/connect/viz";
 import { NotFoundView } from "@/components/app/states";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, four facts, then folded sections in the order a student needs
@@ -158,6 +158,8 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
       </MobileHeaderShell>
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]">
+        {/* Surface 15: loading / slow / error / offline are real states of this page (review with ?state=). 27 Sept 2026. */}
+        <SurfaceState id={15} what="school">
 
         {/* header: the photo runs behind the whole card on phones; from md it
            sits on the right half and fades into the panel toward the text */}
@@ -597,6 +599,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             {d?.sample && <Row label="Prototype note" note="headline figures are real; detail is sample data until the live feed is wired in" value="Sample" last />}
           </div>
         )}
+        </SurfaceState>
       </main>
 
       <MobileNav active="Explore" />

@@ -1889,7 +1889,17 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
               <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full text-[11.5px] font-extrabold tabular-nums" style={{ background: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
                 {slot(index) + 1}
               </span>
-              <span className="min-w-0 flex-1 text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
+              {/* truncate: the slide-to-reorder math (offset/slot above)
+                 assumes every row is the SAME height (drag.height, measured
+                 once off whichever row a drag starts from) -- a long label
+                 wrapping to a second line made THAT row taller than the
+                 others, so the uniform per-row translateY step no longer
+                 matched its real height and it visually overlapped its
+                 neighbor mid-drag (found by the lab's automated overlap
+                 check, 27 Sept 2026). One line, always, keeps every row's
+                 real height equal to what the drag math already assumes,
+                 at any width. */}
+              <span className="min-w-0 flex-1 truncate text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
               <span className="flex flex-none gap-[4px]" onPointerDown={(event) => event.stopPropagation()}>
                 {/* 36px, not the original 30px -- a real repeatedly-tapped
                    control mid-simulation (mobile audit, 9 Sept 2026). */}

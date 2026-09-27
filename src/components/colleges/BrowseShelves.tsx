@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { COLLEGES, type College } from "./data";
 import { SchoolCard } from "./shared";
 import { HOME_STATE, pathwayFor, programMatcher, offersProgram } from "./pathway";
-import { EmptyView } from "@/components/app/states";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 // Browse all, at rest (no search, no filters): shelves by the questions a
 // student actually asks, so the long tail has shape. Each school appears on
@@ -74,11 +74,8 @@ export function BrowseShelves({
   // Surface 12: every shelf came back empty (would be a real content gap,
   // not something this catalog hits today) -- real empty instead of a blank
   // page (27 Sept 2026, states pass).
-  if (shelves.length === 0) {
-    return <EmptyView tier={2} heading="No schools to show yet" line="This shelf doesn't have schools loaded yet." cta="See all schools" onAction={() => router.push("/colleges")} />;
-  }
-
   return (
+    <SurfaceState id={12} isEmpty={shelves.length === 0} onEmptyAction={() => router.push("/colleges")}>
     <div className="flex flex-col gap-[44px]">
       {shelves.map((shelf) => (
         <section key={shelf.key} className="flex flex-col gap-[var(--space-4)]">
@@ -98,5 +95,6 @@ export function BrowseShelves({
         </section>
       ))}
     </div>
+    </SurfaceState>
   );
 }

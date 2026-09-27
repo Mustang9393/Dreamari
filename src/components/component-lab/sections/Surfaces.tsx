@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { Users } from "lucide-react";
-import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedEmpty, ProposedError, ForcedFocus, NotRendered, EDGE, noop } from "../kit";
+import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedEmpty, ProposedError, LiveRoute, EDGE, noop } from "../kit";
 
 import { PosterCard, RankedPosterCard, OpenCue } from "@/components/app/PosterCard";
 import { HOME_PICKS } from "@/components/app/catalog";
@@ -139,7 +139,7 @@ export function SurfacesSection() {
               <OpenCue />
             </div>
           </StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="cards" /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="cards" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -153,8 +153,8 @@ export function SurfacesSection() {
           <StateCell label="With reason chip"><LabCard career={labCareer} control="save" selected={false} reason="Matches your Top 3" onToggle={noop} onOpen={noop} /></StateCell>
           <StateCell label="Long title"><LabCard career={{ ...labCareer, title: EDGE.longTitle }} control="save" selected={false} onToggle={noop} onOpen={noop} /></StateCell>
           <StateCell label="Image failure"><LabCard career={labCareerBroken} control="save" selected={false} onToggle={noop} onOpen={noop} /></StateCell>
-          <StateCell label="Focus (proposed ring)" kind="proposed" note="The card itself (role=button, tabIndex=0) has hover motion but no custom :focus-visible style, so Tab lands on the browser's default outline today.">
-            <ForcedFocus radius="var(--radius-lg)"><LabCard career={labCareer} control="save" selected={false} onToggle={noop} onOpen={noop} /></ForcedFocus>
+          <StateCell label="Focus" kind="built" note="Tab to it: the app-wide :focus-visible ring in globals.css now covers any [tabindex] element, this card included -- no per-component style needed.">
+            <LabCard career={labCareer} control="save" selected={false} onToggle={noop} onOpen={noop} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -208,7 +208,7 @@ export function SurfacesSection() {
           <StateCell label="CollegeCard, image fallback" note="Hard-coded dark colours; breaks in light mode (known)."><CollegeCard c={collegeNoPhoto} saved={false} onSave={noop} compared={false} /></StateCell>
           <StateCell label="SchoolCard, default"><SchoolCard c={college} saved={false} onSave={noop} compared={false} program="Computer Science" fit={{ label: "Target", tone: "target" }} why="Strong finish rate and a direct path into the major you picked." /></StateCell>
           <StateCell label="SchoolCard, saved + compared" note="Hard-coded dark colours; breaks in light mode (known)."><SchoolCard c={college2} saved onSave={noop} compared onCompare={noop} /></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="cards" /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="cards" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -240,7 +240,7 @@ export function SurfacesSection() {
             <CommunityCard community={communityNoCompanies} joined={false} onOpen={noop} onJoin={noop} />
           </StateCell>
           <StateCell label="Image failure" note="No fallback art built for a failed cover; the scrim and stats still show, but the banner goes flat black (known gap)."><CommunityCard community={communityBroken} joined={false} onOpen={noop} onJoin={noop} /></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="cards" /></StateCell>
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL."><ProposedLoading shape="cards" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -254,7 +254,7 @@ export function SurfacesSection() {
             <StateCell label="Following"><PersonCard pro={pro} following onFollow={noop} /></StateCell>
             <StateCell label="With badge + quote"><PersonCard pro={pro2} following={false} onFollow={noop} badge="New this week" quote="Ask me about internships." /></StateCell>
             <StateCell label="Long name" note="Name truncates (line-clamp on the name span); role/org lines truncate too."><PersonCard pro={proLongName} following={false} onFollow={noop} /></StateCell>
-            <StateCell label="PeopleWelcome, first use"><NotRendered reason="Opens the full-screen Connect WelcomeSplash on mount and writes a sessionStorage seen-flag when dismissed. The splash itself is in Overlays > WelcomeSplash." see="src/components/connect/PeopleTab.tsx" /></StateCell>
+            <StateCell label="PeopleWelcome, first use" kind="built" note="Live via LiveRoute's inert iframe instead of mounting inline: `inert` blocks every click, so the dismiss action that writes the sessionStorage seen-flag can never actually fire here -- it's just seen, never triggered."><LiveRoute href="/connect?tab=people" device="mobile" height={480} /></StateCell>
           </StateGrid>
         </ConnectNav.Provider>
       </Specimen>
@@ -320,10 +320,10 @@ export function SurfacesSection() {
               <p className="text-[13px] font-semibold">14 students need attention</p>
             </DrillTile>
           </StateCell>
-          <StateCell label="Loading" kind="proposed" note="These tiles are pure props today; a real Overview screen fetches the counts behind them.">
+          <StateCell label="Loading" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL.">
             <ProposedLoading shape="chip" label="Loading" />
           </StateCell>
-          <StateCell label="Error" kind="proposed">
+          <StateCell label="Error" note="Built: the shared state view (src/components/app/states.tsx) this component\'s screen renders through SurfaceState. See the States gallery for its live URL.">
             <ProposedError verb="load this metric" />
           </StateCell>
         </StateGrid>
@@ -332,7 +332,7 @@ export function SurfacesSection() {
       <Specimen name="Casefile cards: PlanSignoffCard, TodosCard, CheckinsCard" file="src/components/counselor/v2/Casefile.tsx" purpose="The Student Profile's three casefile cards: plan sign-off, counselor to-dos, and folded check-ins." when="Counselor Dashboard v2's Student Profile.">
         <StateGrid>
           <StateCell label="Not rendered">
-            <NotRendered reason="All three read AND write localStorage on interaction (readSignoff/writeSignoff, readTodos/toggleTodo/addTodo/removeTodo in counselorCasefile.ts), unsafe to mount live in the lab." see="src/lib/counselorCasefile.ts" />
+            <LiveRoute href="/counselor?view=students" device="desktop" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -378,7 +378,7 @@ export function SurfacesSection() {
 
       <Specimen name="Empty state, generic" file="docs/COMPONENT_STATES_PLAYBOOK.md" purpose="The playbook's tier-3 default for a dense panel with nothing to show yet, for any card list above that has no built empty state of its own." when="A shelf, panel, or grid whose data set can legitimately be empty.">
         <StateGrid>
-          <StateCell label="Empty (tier 3)" kind="proposed"><ProposedEmpty tier={3} line="No colleges saved yet." /></StateCell>
+          <StateCell label="Empty (tier 3)" kind="built" note="The real shared EmptyView (states.tsx), not an invented look -- this cell just demonstrates the playbook's tier-3 default in the abstract, for any card list above with no empty state of its own yet."><ProposedEmpty tier={3} line="No colleges saved yet." /></StateCell>
         </StateGrid>
       </Specimen>
     </Section>

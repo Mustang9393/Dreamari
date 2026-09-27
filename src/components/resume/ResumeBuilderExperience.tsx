@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { BadgeCheck, Check, ChevronLeft, Download, Expand, FileText, ListOrdered, Maximize2, MoreHorizontal, Pencil, Wand2, X, type LucideIcon } from "lucide-react";
 import { atsIsStale, runAtsCheck } from "@/lib/resumeAts";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { useScrolled } from "@/components/app/chrome";
 import { DreamyGuide } from "@/components/build/DreamyGuide";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
@@ -802,6 +803,13 @@ function ResumeBuilderInner() {
                 ) : undefined
               }
             />
+            {/* COMPONENT_INVENTORY row 39: each step's own list (Education,
+               Experience, Certifications) is a local array with no real
+               load to fail -- this just gives the wizard a real
+               loading/error contract to preview via `?state=&surface=39`,
+               and keeps every step's own already-built empty state
+               (EmptyStateAdd) exactly as it renders today otherwise. */}
+            <SurfaceState id={39} what="section">
             {stepIndex === 0 && <PersonalInfoStep resume={resume} onNext={() => { react(); award(0, true); goToStep(1); }} onFieldFocus={setActiveField} />}
             {stepIndex === 1 && <EducationStep resume={resume} onNext={() => { react(); award(1, resume.education.length > 0); goToStep(2); }} showToast={showToast} onFieldFocus={setActiveField} />}
             {stepIndex === 2 && (
@@ -901,6 +909,7 @@ function ResumeBuilderInner() {
                 }}
               />
             )}
+            </SurfaceState>
           </div>
         </div>
 

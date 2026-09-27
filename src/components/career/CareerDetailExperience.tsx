@@ -25,7 +25,8 @@ import { UndoToast } from "@/components/app/UndoToast";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "./PayMap";
-import { EmptyView, NotFoundView } from "@/components/app/states";
+import { NotFoundView } from "@/components/app/states";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
@@ -859,19 +860,20 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   <PayRows rows={vm.payByState.best} accent={accent} />
                 </div>
               </div>
-            ) : [...(vm.payByState.yourStates ?? []), ...vm.payByState.best].length === 0 ? (
+            ) : (
               // Surface 10 (Pay map): no real state figures for this career,
               // so the map would render nothing but synthesized guesses --
-              // real empty instead (27 Sept 2026, states pass).
-              <EmptyView tier={3} line="No pay data for this location yet." />
-            ) : (
-              <PayMap
-                typical={vm.typicalPay}
-                rows={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best]}
-                yourState={vm.payByState.yourStates?.[0]?.state}
-                accent={accent}
-                seed={career.slug}
-              />
+              // real empty instead of a misleadingly-filled map (27 Sept
+              // 2026, states pass).
+              <SurfaceState id={10} isEmpty={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best].length === 0}>
+                <PayMap
+                  typical={vm.typicalPay}
+                  rows={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best]}
+                  yourState={vm.payByState.yourStates?.[0]?.state}
+                  accent={accent}
+                  seed={career.slug}
+                />
+              </SurfaceState>
             )}
           </Section>
         )}
@@ -969,22 +971,20 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            linked, leaving a dead gap between the tabs and the page's end --
            a real empty tier 2 instead (27 Sept 2026, states pass). */}
         <Section title="Careers like this one">
-          {similar.length > 0 ? (
-            /* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own
+          <SurfaceState id={11} isEmpty={similar.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
+            {/* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own
                md:px-8 so the rail bleeds to the true edge and re-pads back to
                the same content line, the same convention every other card
                rail in the app uses (Home, College Detail's Similar Schools).
                Zeroing the margin/padding on desktop, as this rail used to,
                left no trailing space for the last card to fade into --
-               it just hard-clipped at the container edge (16 Sept 2026). */
+               it just hard-clipped at the container edge (16 Sept 2026). */}
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
                 <PosterCard key={c.title} career={c} onClick={() => router.push(`/career/${careerSlug(c.title)}`)} />
               ))}
             </div>
-          ) : (
-            <EmptyView tier={2} heading="No similar careers yet" line="Related careers show up here once they're linked." cta="Explore careers" onAction={() => router.push("/explore?tab=browse")} />
-          )}
+          </SurfaceState>
         </Section>
 
         {openFact === "degree" && vm.details?.degree && (

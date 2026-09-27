@@ -139,7 +139,7 @@ export function ErrorView({ verb = "load this", fallback, pill, variant = "card"
       <div className="flex justify-center">
         <button type="button" onClick={act} className="dm-quiet inline-flex cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[4px] text-[11.5px] font-bold" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 88%, transparent)" }}>
           <span aria-hidden className="size-[6px] rounded-full" style={{ background: ERROR_INK }} />
-          {pill} didn&apos;t finish · <RotateCcw className="h-3 w-3" aria-hidden /> Retry
+          {message ?? `${pill} didn't finish`} · <RotateCcw className="h-3 w-3" aria-hidden /> Retry
         </button>
       </div>
     );

@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 import { Download, Pencil } from "lucide-react";
-import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ProposedError, ProposedDisabled, EDGE, noop } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ProposedError, EDGE, noop } from "../kit";
 
 import { Button } from "@/components/ui/Button";
 import { MarketingButton } from "@/components/marketing/Button";
@@ -340,7 +340,7 @@ export function ControlsSection() {
         <StateGrid>
           <StateCell label="Unchecked"><SelectBoxDemo startChecked={false} /></StateCell>
           <StateCell label="Checked"><SelectBoxDemo startChecked /></StateCell>
-          <StateCell label="Disabled" kind="proposed" note="No disabled prop; every caller can currently toggle every row."><ProposedDisabled><SelectBox checked={false} label="Include archived students" onChange={noop} /></ProposedDisabled></StateCell>
+          <StateCell label="Disabled" note="Real disabled prop (27 Sept 2026)."><SelectBox checked={false} label="Include archived students" onChange={noop} disabled /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -348,15 +348,9 @@ export function ControlsSection() {
         <StateGrid>
           <StateCell label="Off"><ToggleDemo startOn={false} /></StateCell>
           <StateCell label="On"><ToggleDemo startOn /></StateCell>
-          <StateCell label="Disabled off" kind="proposed" note="No disabled prop; every setting row can currently be flipped."><ProposedDisabled><Toggle on={false} onChange={noop} /></ProposedDisabled></StateCell>
-          <StateCell label="Disabled on" kind="proposed"><ProposedDisabled><Toggle on onChange={noop} /></ProposedDisabled></StateCell>
-          <StateCell label="Pending / saving" kind="proposed" note="A setting save is instant today (writeCounselorAccount, synchronous); proposed thumb-spinner for the day it round-trips to a backend.">
-            <div className="relative flex h-[24px] w-[42px] flex-none items-center rounded-full border" style={{ background: "var(--primary)", borderColor: "var(--primary)" }}>
-              <span className="absolute flex size-[18px] items-center justify-center rounded-full bg-white" style={{ left: 21, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
-                <span className="block size-[10px] animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: "var(--primary)" }} aria-hidden />
-              </span>
-            </div>
-          </StateCell>
+          <StateCell label="Disabled off" note="Real disabled prop (27 Sept 2026)."><Toggle on={false} onChange={noop} disabled /></StateCell>
+          <StateCell label="Disabled on"><Toggle on onChange={noop} disabled /></StateCell>
+          <StateCell label="Pending / saving" note="Real pending prop (27 Sept 2026): spinner in the thumb, not clickable while a save is in flight."><Toggle on onChange={noop} pending /></StateCell>
         </StateGrid>
         <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>File-local in counselor/v2/Settings.tsx; only the <code>export</code> keyword was added so it could render here.</p>
       </Specimen>
@@ -387,7 +381,7 @@ export function ControlsSection() {
           <StateCell label="PrimaryCta"><PrimaryCta onClick={noop}>Ask a question</PrimaryCta></StateCell>
           <StateCell label="QuietCta"><QuietCta onClick={noop}>Follow</QuietCta></StateCell>
           <StateCell label="QuietCta done" note="Click to toggle."><QuietCtaDoneDemo /></StateCell>
-          <StateCell label="Disabled" kind="proposed" note="Neither takes a disabled prop; every Connect CTA today is always clickable."><ProposedDisabled><PrimaryCta onClick={noop}>Ask a question</PrimaryCta></ProposedDisabled></StateCell>
+          <StateCell label="Disabled" note="Real disabled prop on PrimaryCta and QuietCta (27 Sept 2026)."><PrimaryCta onClick={noop} disabled>Ask a question</PrimaryCta></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -433,7 +427,7 @@ export function ControlsSection() {
           <StateCell label="ToolbarButton"><ToolbarButton label="Export" onClick={noop}><Download className="h-4 w-4" aria-hidden /></ToolbarButton></StateCell>
           <StateCell label="ToolbarButton icon-only"><ToolbarButton label="Edit sections" onClick={noop} iconOnly><Pencil className="h-4 w-4" aria-hidden /></ToolbarButton></StateCell>
           <StateCell label="ToolbarButton success tone" kind="built" note="tone=&quot;success&quot;, the Approve action's own green tint; not shown before."><ToolbarButton label="Approve" onClick={noop} tone="success"><Download className="h-4 w-4" aria-hidden /></ToolbarButton></StateCell>
-          <StateCell label="ToolbarButton disabled" kind="proposed" note="No disabled prop on ToolbarButton; every toolbar action is always clickable today."><ProposedDisabled><ToolbarButton label="Export" onClick={noop}><Download className="h-4 w-4" aria-hidden /></ToolbarButton></ProposedDisabled></StateCell>
+          <StateCell label="ToolbarButton disabled" note="Real disabled prop (27 Sept 2026)."><ToolbarButton label="Export" onClick={noop} disabled><Download className="h-4 w-4" aria-hidden /></ToolbarButton></StateCell>
         </StateGrid>
       </Specimen>
 

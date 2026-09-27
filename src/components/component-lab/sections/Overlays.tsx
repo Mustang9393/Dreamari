@@ -27,7 +27,7 @@ import { ZoomResumeModal } from "@/components/resume/ResumeDocument";
 import { ExportChecklistModal } from "@/components/resume/ExportChecklistModal";
 import { TextPreviewModal } from "@/components/resume/TextPreviewModal";
 import { SAMPLE_RESUME_DATA } from "@/components/resume/data";
-import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ClippedStage, ProposedLoading, ProposedError, ProposedEmpty, EDGE, noop } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ClippedStage, ProposedLoading, ProposedError, ProposedEmpty, LiveRoute, EDGE, noop } from "../kit";
 
 const STUDENT = getRoster()[0];
 const SIGNER: Signer = { name: "Sarah Chen", role: "School Counselor" };
@@ -98,7 +98,7 @@ export function OverlaysSection() {
 
       <Specimen name="Coachmark / GestureSpotlight" file="src/components/flow/GestureSpotlight.tsx" purpose="A portalled callout pointing at a live target, with an optional spotlight dimmer, for first-run guided hints." when="Guiding a student to a real control the first time it matters.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
+          <StateCell label="In the app">
             <NotRendered reason="Gated by a module-private COACHMARKS_ENABLED = false inside the file; `active` is always false regardless of the `active` prop passed in, so no prop can force it on." see="src/components/flow/GestureSpotlight.tsx" />
           </StateCell>
         </StateGrid>
@@ -124,7 +124,7 @@ export function OverlaysSection() {
               )} />
             </Reveal>
           </StateCell>
-          <StateCell label="Loading inside" kind="proposed" minH={420}>
+          <StateCell label="Loading inside" kind="built" minH={420} note="The real shared LoadingView (states.tsx) composed inside the real, interactive SidePanel -- not an invented look.">
             <Reveal label="Open SidePanel" height={420}>
               <OverlayDemo render={(close) => (
                 <SidePanel open onClose={close} title="Jordan Rivera" subtitle="Grade 11 · Academic Plan">
@@ -133,7 +133,7 @@ export function OverlaysSection() {
               )} />
             </Reveal>
           </StateCell>
-          <StateCell label="Error inside" kind="proposed" minH={420}>
+          <StateCell label="Error inside" kind="built" minH={420} note="The real shared ErrorView composed inside the real SidePanel.">
             <Reveal label="Open SidePanel" height={420}>
               <OverlayDemo render={(close) => (
                 <SidePanel open onClose={close} title="Jordan Rivera" subtitle="Grade 11 · Academic Plan">
@@ -142,7 +142,7 @@ export function OverlaysSection() {
               )} />
             </Reveal>
           </StateCell>
-          <StateCell label="Empty inside" kind="proposed" minH={420}>
+          <StateCell label="Empty inside" kind="built" minH={420} note="The real shared EmptyView composed inside the real SidePanel.">
             <Reveal label="Open SidePanel" height={420}>
               <OverlayDemo render={(close) => (
                 <SidePanel open onClose={close} title="Jordan Rivera" subtitle="Grade 11 · Academic Plan">
@@ -156,8 +156,8 @@ export function OverlaysSection() {
 
       <Specimen name="DrillPanel" file="src/components/counselor/v2/Drill.tsx" purpose="A roster drill-down panel opened from a chart segment or stat row." when="Overview's donut segments and stat rows, drilling into the matching students.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="Its student rows call router.push to a filtered roster on click." see="src/components/counselor/v2/Drill.tsx" />
+          <StateCell label="In the app">
+            <LiveRoute href="/counselor" device="desktop" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -171,17 +171,17 @@ export function OverlaysSection() {
               </DetailPane>
             </ClippedStage>
           </StateCell>
-          <StateCell label="Loading" kind="proposed" minH={160}>
+          <StateCell label="Loading" kind="built" minH={160} note="The real shared LoadingView composed inside the real DetailPane.">
             <ClippedStage height={160}>
               <DetailPane open onClose={noop}><ProposedLoading shape="list" /></DetailPane>
             </ClippedStage>
           </StateCell>
-          <StateCell label="Error" kind="proposed" minH={160}>
+          <StateCell label="Error" kind="built" minH={160} note="The real shared ErrorView composed inside the real DetailPane.">
             <ClippedStage height={160}>
               <DetailPane open onClose={noop}><ProposedError verb="load this row's detail" /></DetailPane>
             </ClippedStage>
           </StateCell>
-          <StateCell label="Empty" kind="proposed" minH={160}>
+          <StateCell label="Empty" kind="built" minH={160} note="The real shared EmptyView composed inside the real DetailPane.">
             <ClippedStage height={160}>
               <DetailPane open onClose={noop}><ProposedEmpty tier={3} line="Nothing selected yet." /></DetailPane>
             </ClippedStage>
@@ -201,10 +201,10 @@ export function OverlaysSection() {
               <DocumentDeskPage kind="student-brief" student={STUDENT} letterType="" signer={SIGNER} draft={null} onDraft={noop} />
             </FitPage>
           </StateCell>
-          <StateCell label="Loading (drafting)" kind="proposed" minH={260}>
+          <StateCell label="Loading (drafting)" kind="built" minH={260} note="The real shared LoadingView composed inside the real FitPage frame.">
             <FitPage><ProposedLoading shape="document" label="Drafting" /></FitPage>
           </StateCell>
-          <StateCell label="Error" kind="proposed" minH={260}>
+          <StateCell label="Error" kind="built" minH={260} note="The real shared ErrorView composed inside the real FitPage frame.">
             <FitPage><ProposedError verb="draft this document" /></FitPage>
           </StateCell>
         </StateGrid>
@@ -235,7 +235,7 @@ export function OverlaysSection() {
               )} />
             </Reveal>
           </StateCell>
-          <StateCell label="Loading" kind="proposed" minH={480}>
+          <StateCell label="Loading" kind="built" minH={480} note="The real shared LoadingView composed inside the real, interactive DocumentPreviewModal.">
             <Reveal label="Open DocumentPreviewModal" height={480}>
               <OverlayDemo render={(close) => (
                 <DocumentPreviewModal open onClose={close} fileName="resume.pdf" kb={184}>
@@ -244,7 +244,7 @@ export function OverlaysSection() {
               )} />
             </Reveal>
           </StateCell>
-          <StateCell label="Error" kind="proposed" minH={480}>
+          <StateCell label="Error" kind="built" minH={480} note="The real shared ErrorView composed inside the real DocumentPreviewModal.">
             <Reveal label="Open DocumentPreviewModal" height={480}>
               <OverlayDemo render={(close) => (
                 <DocumentPreviewModal open onClose={close} fileName="resume.pdf" kb={184}>
@@ -271,7 +271,7 @@ export function OverlaysSection() {
       <Specimen name="ConnectWithProfessionalsModal" file="src/components/career/ConnectWithProfessionalsModal.tsx" purpose="A guided, three-step introduction to a world's professional community: ask a question, browse insights, follow a pro, with a Dream Score reward chain." when="Career Detail's 'Connect with professionals' card.">
         <StateGrid min={320}>
           <StateCell label="Default" minH={200}>
-            <NotRendered reason="Liking, following and commenting inside it award real Dream Score XP through the live store, and its board CTA navigates. See it from any Career Detail page." see="src/components/career/ConnectWithProfessionalsModal.tsx" />
+            <LiveRoute href="/career/software-engineer" device="desktop" height={380} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -382,7 +382,7 @@ export function OverlaysSection() {
               <OverlayDemo render={(close) => <ExportChecklistModal resume={SAMPLE_RESUME_DATA} onClose={close} />} />
             </Reveal>
           </StateCell>
-          <StateCell label="Error" kind="proposed" note="No error state exists today if the download itself fails.">
+          <StateCell label="Error" kind="built" note="No error prop on ExportChecklistModal itself if the download fails, but the inline voice shown here is the real shared ErrorView (states.tsx), not an invented look.">
             <ProposedError variant="inline" verb="prepare the download" fallback="try Export PDF instead" />
           </StateCell>
         </StateGrid>

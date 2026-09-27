@@ -29,7 +29,7 @@ export function GameSection() {
       <SubHead>Play hub cards</SubHead>
       <PlayHubCardsGroup />
 
-      <SubHead>Glossary Game screens</SubHead>
+      <SubHead>Glossary game</SubHead>
       <GlossaryScreensGroup />
 
       <SubHead>Simulation player pieces</SubHead>
