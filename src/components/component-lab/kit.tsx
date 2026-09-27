@@ -6,9 +6,11 @@
 // the playbook's proposed defaults (docs/COMPONENT_STATES_PLAYBOOK.md) for
 // any state the real component doesn't implement yet.
 
-import { useState, type CSSProperties, type ReactNode } from "react";
-import { AlertCircle, ArrowLeft, ArrowRight, Clock3, CloudOff, Compass, LoaderCircle, Lock, Plus, RotateCcw, SearchX, Sparkles, WifiLow, WifiOff, type LucideIcon } from "lucide-react";
+import { createContext, useCallback, useContext, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { AlertCircle, ArrowLeft, ArrowRight, Clock3, CloudOff, Compass, LoaderCircle, Lock, Maximize2, Plus, RotateCcw, SearchX, Sparkles, WifiLow, WifiOff, type LucideIcon } from "lucide-react";
 import { Working } from "@/components/app/Working";
+import { IconTip } from "@/components/app/IconTip";
 
 export const noop = () => {};
 export const MONO: CSSProperties = { fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" };
@@ -41,17 +43,57 @@ export function SubHead({ children }: { children: ReactNode }) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Lab-wide view state. `grid` is the header's Adaptive / One per row choice.
+// `solo` is set only inside the full-screen preview's iframe
+// (/component-lab?solo=<id>): the whole lab tree renders hidden and the one
+// Specimen or StateCell whose id matches portals itself into `soloRoot`, so
+// the iframe's own width drives every media query exactly like a device.
+
+export type LabView = { grid: "auto" | "wide"; solo: string | null; soloRoot: HTMLElement | null; openPreview: (id: string, title: string) => void };
+export const LabViewContext = createContext<LabView>({ grid: "auto", solo: null, soloRoot: null, openPreview: noop });
+const ScopeContext = createContext<{ id: string; target: boolean }>({ id: "lab", target: false });
+
+export function slug(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+/** Names the cells inside it for the full-screen preview, for groups of
+ *  StateCells that aren't wrapped in a Specimen (the States gallery rows). */
+export function LabScope({ name, children }: { name: string; children: ReactNode }) {
+  const view = useContext(LabViewContext);
+  const id = slug(name);
+  if (view.solo && view.solo === id && view.soloRoot) return createPortal(<ScopeContext.Provider value={{ id, target: true }}>{children}</ScopeContext.Provider>, view.soloRoot);
+  return <ScopeContext.Provider value={{ id, target: false }}>{children}</ScopeContext.Provider>;
+}
+
+function ExpandButton({ id, title }: { id: string; title: string }) {
+  const { openPreview } = useContext(LabViewContext);
+  return (
+    <IconTip label="Full-screen preview">
+      <button type="button" aria-label={`Full-screen preview: ${title}`} onClick={() => openPreview(id, title)} className="dm-quiet flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+        <Maximize2 className="h-[13px] w-[13px]" aria-hidden />
+      </button>
+    </IconTip>
+  );
+}
+
 /** One component: name, where it lives, what it's for, when to reach for it,
  *  then its states. `file` is relative to the repo root. */
 export function Specimen({ name, file, purpose, when, children }: { name: string; file: string; purpose: string; when?: string; children: ReactNode }) {
-  return (
-    <article className="flex flex-col gap-[var(--space-3)]">
+  const view = useContext(LabViewContext);
+  const id = slug(name);
+  const article = (
+    <article id={`spec-${id}`} data-spec={name} className="flex scroll-mt-[136px] flex-col gap-[var(--space-3)] lg:scroll-mt-[80px]">
       <header className="flex flex-col gap-[4px]">
-        <div className="flex flex-wrap items-baseline gap-x-[var(--space-3)] gap-y-[2px]">
-          <h4 className="text-[16px] leading-[22px] font-bold">{name}</h4>
-          <code className="min-w-0 text-[11.5px] leading-[16px] break-all" style={{ ...MONO, ...MUTED }}>
-            {file}
-          </code>
+        <div className="flex items-start justify-between gap-[var(--space-3)]">
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-[var(--space-3)] gap-y-[2px]">
+            <h4 className="text-[16px] leading-[22px] font-bold">{name}</h4>
+            <code className="min-w-0 text-[11.5px] leading-[16px] break-all" style={{ ...MONO, ...MUTED }}>
+              {file}
+            </code>
+          </div>
+          {!view.solo && <ExpandButton id={id} title={name} />}
         </div>
         <p className="max-w-[72ch] text-[13.5px] leading-[20px]">{purpose}</p>
         {when && (
@@ -63,12 +105,19 @@ export function Specimen({ name, file, purpose, when, children }: { name: string
       {children}
     </article>
   );
+  if (view.solo) {
+    if (view.solo === id && view.soloRoot) return createPortal(<ScopeContext.Provider value={{ id, target: true }}>{article}</ScopeContext.Provider>, view.soloRoot);
+    return <ScopeContext.Provider value={{ id, target: false }}>{children}</ScopeContext.Provider>;
+  }
+  return <ScopeContext.Provider value={{ id, target: false }}>{article}</ScopeContext.Provider>;
 }
 
-/** Responsive grid of state cells. `min` is each cell's minimum width. */
+/** Responsive grid of state cells. `min` is each cell's minimum width;
+ *  the header's "One per row" gives every cell the full column. */
 export function StateGrid({ children, min = 240 }: { children: ReactNode; min?: number }) {
+  const { grid } = useContext(LabViewContext);
   return (
-    <div className="grid gap-[var(--space-3)]" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${min}px), 1fr))` }}>
+    <div className="grid gap-[var(--space-3)]" style={{ gridAutoFlow: "row dense", gridTemplateColumns: grid === "wide" ? "minmax(0, 1fr)" : `repeat(auto-fill, minmax(min(100%, ${min}px), 1fr))` }}>
       {children}
     </div>
   );
@@ -78,17 +127,77 @@ export type CellKind = "built" | "proposed";
 
 /** One state of one component. `kind="proposed"` marks a playbook default
  *  that is NOT implemented in the real component yet. */
+/** A ClippedStage inside a cell calls this: full-screen layers (nav bars,
+ *  docked panels, backdrops) always get the whole row. */
+const CellFullContext = createContext<(() => void) | null>(null);
+
+/** How many grid columns a cell needs. The content never renders narrower
+ *  than its own min-content width, so if it overflows at one column that
+ *  overflow IS its real minimum: span just enough columns to fit it, and
+ *  let `grid-auto-flow: dense` backfill the gap with small cells. */
+function useSmartSpan(enabled: boolean) {
+  const figRef = useRef<HTMLElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const need = useRef(0);
+  const [full, setFull] = useState(false);
+  const [span, setSpan] = useState(1);
+  const requestFull = useCallback(() => setFull(true), []);
+  useLayoutEffect(() => {
+    const fig = figRef.current;
+    const body = bodyRef.current;
+    const grid = fig?.parentElement;
+    if (!enabled || !fig || !body || !grid) return;
+    const measure = () => {
+      const cs = getComputedStyle(grid);
+      const tracks = cs.gridTemplateColumns.split(" ").map(parseFloat).filter((n) => n > 0);
+      const cols = tracks.length || 1;
+      const track = tracks[0] || fig.clientWidth;
+      const gap = parseFloat(cs.columnGap) || 0;
+      if (body.scrollWidth > body.clientWidth + 1) need.current = Math.max(need.current, body.scrollWidth + 2);
+      let n = 1;
+      if (full) n = cols;
+      else while (n < cols && n * track + (n - 1) * gap < need.current) n++;
+      setSpan(n);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(grid);
+    ro.observe(body);
+    if (body.firstElementChild) ro.observe(body.firstElementChild);
+    return () => ro.disconnect();
+  }, [enabled, full]);
+  return { figRef, bodyRef, span, requestFull };
+}
+
+/** One state of one component. `kind="proposed"` marks a playbook default
+ *  that is NOT implemented in the real component yet. */
 export function StateCell({ label, kind = "built", note, children, pad = true, minH = 120, surface = "card" }: { label: string; kind?: CellKind; note?: ReactNode; children: ReactNode; pad?: boolean; minH?: number; surface?: "card" | "page" | "game" }) {
+  const view = useContext(LabViewContext);
+  const scope = useContext(ScopeContext);
+  const id = `${scope.id}--${slug(label)}`;
   const proposed = kind === "proposed";
   const bg = surface === "page" ? "var(--background)" : surface === "game" ? "#070914" : "color-mix(in srgb, var(--card) 70%, transparent)";
+  const soloHidden = !!view.solo && !scope.target;
+  const { figRef, bodyRef, span, requestFull } = useSmartSpan(!soloHidden);
+  if (soloHidden) {
+    if (view.solo !== id || !view.soloRoot) return null;
+    return createPortal(<div style={{ background: surface === "game" ? bg : undefined }}>{children}</div>, view.soloRoot);
+  }
   return (
-    <figure className="m-0 flex min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: proposed ? "color-mix(in srgb, var(--primary) 45%, transparent)" : "var(--border)", borderStyle: proposed ? "dashed" : "solid" }}>
-      <figcaption className="flex flex-wrap items-center gap-[6px] border-b px-[var(--space-3)] py-[8px]" style={{ borderColor: "var(--border)" }}>
-        <StateChip>{label}</StateChip>
-        <KindBadge kind={kind} />
+    <figure ref={figRef} className="m-0 flex min-w-0 flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ gridColumn: span > 1 ? `span ${span}` : undefined, borderColor: proposed ? "color-mix(in srgb, var(--primary) 45%, transparent)" : "var(--border)", borderStyle: proposed ? "dashed" : "solid" }}>
+      <figcaption className="flex items-center gap-[6px] border-b px-[var(--space-3)] py-[6px]" style={{ borderColor: "var(--border)" }}>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-[6px]">
+          <StateChip>{label}</StateChip>
+          <KindBadge kind={kind} />
+        </div>
+        {!view.solo && <ExpandButton id={id} title={`${scope.id.replace(/-/g, " ")} · ${label}`} />}
       </figcaption>
-      <div className={`relative flex min-w-0 flex-1 items-center justify-center ${pad ? "p-[var(--space-4)]" : ""}`} style={{ minHeight: minH, background: bg }}>
-        <div className="w-full min-w-0">{children}</div>
+      {/* Scrolls sideways only as a last resort (a one-column phone grid):
+          a component never renders narrower than its own min-content. */}
+      <div ref={bodyRef} className={`dm-scroll relative flex min-w-0 flex-1 items-center overflow-x-auto ${pad ? "p-[var(--space-4)]" : ""}`} style={{ minHeight: minH, background: bg }}>
+        <div className="w-full min-w-min">
+          <CellFullContext.Provider value={requestFull}>{children}</CellFullContext.Provider>
+        </div>
       </div>
       {note && (
         <p className="border-t px-[var(--space-3)] py-[8px] text-[12px] leading-[17px]" style={{ ...MUTED, borderColor: "var(--border)" }}>
@@ -155,6 +264,8 @@ export function Reveal({ label = "Open", closeLabel = "Close", children, clip = 
  *  position:fixed descendants, so fixed layers (backdrops, bottom navs,
  *  toasts) stay inside it. Portals still escape to <body>. */
 export function ClippedStage({ children, height = 360 }: { children: ReactNode; height?: number }) {
+  const requestFull = useContext(CellFullContext);
+  useLayoutEffect(() => requestFull?.(), [requestFull]);
   return (
     <div className="relative w-full overflow-hidden rounded-[var(--radius-md)] border" style={{ height, transform: "translateZ(0)", borderColor: "var(--border)", background: "var(--background)" }}>
       {children}

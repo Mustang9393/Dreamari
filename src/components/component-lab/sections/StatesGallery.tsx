@@ -22,7 +22,7 @@
 import { useState } from "react";
 import { PicksTray } from "@/components/flow-lab/shared";
 import { LoadingState, ErrorState, EmptyState } from "@/components/counselor/v2/states";
-import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedSlow, ProposedOffline, ProposedNotFound, ProposedLocked, noop, MONO } from "../kit";
+import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedSlow, ProposedOffline, ProposedNotFound, ProposedLocked, LabScope, noop, MONO } from "../kit";
 
 const MUTED = { color: "var(--muted-foreground)" } as const;
 
@@ -356,6 +356,7 @@ function NotFoundCell({ row }: { row: SurfaceRow }) {
 
 function SurfaceBlock({ row }: { row: SurfaceRow }) {
   return (
+    <LabScope name={`${row.n} ${row.surface}`}>
     <article className="flex flex-col gap-[var(--space-2)]">
       <header className="flex flex-col gap-[2px]">
         <div className="flex flex-wrap items-baseline gap-x-[var(--space-2)] gap-y-[2px]">
@@ -380,6 +381,7 @@ function SurfaceBlock({ row }: { row: SurfaceRow }) {
         <NotFoundCell row={row} />
       </StateGrid>
     </article>
+    </LabScope>
   );
 }
 
