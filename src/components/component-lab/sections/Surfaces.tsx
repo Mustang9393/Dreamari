@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { Users } from "lucide-react";
-import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedEmpty, NotRendered, EDGE, noop } from "../kit";
+import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedEmpty, ProposedError, ForcedFocus, NotRendered, EDGE, noop } from "../kit";
 
 import { PosterCard, RankedPosterCard, OpenCue } from "@/components/app/PosterCard";
 import { HOME_PICKS } from "@/components/app/catalog";
@@ -93,9 +93,11 @@ const badges: CardBadge[] = [{ label: "Target", tone: "target" }];
 const community = COMMUNITIES[0];
 const communityLongName = { ...community, name: EDGE.longTitle };
 const communityBroken = { ...community, photo: EDGE.brokenImage };
+const communityNoCompanies = { ...community, centers: undefined, professionalsFrom: [] };
 
 const pro = PROS[0];
 const pro2 = PROS[1];
+const proLongName = { ...pro, name: EDGE.longName };
 
 // A minimal, self-contained Composer so this Specimen doesn't need a parent
 // form's state.
@@ -125,6 +127,9 @@ export function SurfacesSection() {
           <StateCell label="Hover / focus" note="Hover or Tab to it: OpenCue's centered chevron and dim.">
             <PosterCard career={career} onClick={noop} />
           </StateCell>
+          <StateCell label="Pressed" note="Click and hold (mousedown): the shared .dm-tap:active rule (globals.css) drops the hover lift back to translateY(0) with no shadow.">
+            <PosterCard career={career} onClick={noop} />
+          </StateCell>
           <StateCell label="Salary chip"><PosterCard career={{ ...career, salary: "$96K" }} onClick={noop} /></StateCell>
           <StateCell label="Long title" note="Two fixed sizes only: 24px, or 19px when the longest word or a third line would overflow."><PosterCard career={longCareer} onClick={noop} /></StateCell>
           <StateCell label="Image failure" note="Built-in fallback: a world-tinted gradient with a muted ImageOff icon."><PosterCard career={brokenCareer} onClick={noop} /></StateCell>
@@ -148,6 +153,9 @@ export function SurfacesSection() {
           <StateCell label="With reason chip"><LabCard career={labCareer} control="save" selected={false} reason="Matches your Top 3" onToggle={noop} onOpen={noop} /></StateCell>
           <StateCell label="Long title"><LabCard career={{ ...labCareer, title: EDGE.longTitle }} control="save" selected={false} onToggle={noop} onOpen={noop} /></StateCell>
           <StateCell label="Image failure"><LabCard career={labCareerBroken} control="save" selected={false} onToggle={noop} onOpen={noop} /></StateCell>
+          <StateCell label="Focus (proposed ring)" kind="proposed" note="The card itself (role=button, tabIndex=0) has hover motion but no custom :focus-visible style, so Tab lands on the browser's default outline today.">
+            <ForcedFocus radius="var(--radius-lg)"><LabCard career={labCareer} control="save" selected={false} onToggle={noop} onOpen={noop} /></ForcedFocus>
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -189,6 +197,12 @@ export function SurfacesSection() {
       <Specimen name="CollegeCard, SchoolCard" file="src/components/colleges/shared.tsx" purpose="College Explore's two card sizes: a poster-style grid card, and the fuller school card with a programme, fit chips, and a Why this school? disclosure." when="CollegeCard for compact grids; SchoolCard for shelves that carry a programme match.">
         <StateGrid>
           <StateCell label="CollegeCard, default"><CollegeCard c={college} saved={false} onSave={noop} compared={false} /></StateCell>
+          <StateCell label="CollegeCard, hover / focus" note="Hover or Tab to it: shares PosterCard's poster-card hover/focus-visible rules (globals.css) plus dm-tap's outline.">
+            <CollegeCard c={college} saved={false} onSave={noop} compared={false} />
+          </StateCell>
+          <StateCell label="CollegeCard, pressed" note="Click and hold: dm-tap:active drops the lift, no shadow.">
+            <CollegeCard c={college} saved={false} onSave={noop} compared={false} />
+          </StateCell>
           <StateCell label="CollegeCard, saved + compared"><CollegeCard c={college} saved onSave={noop} compared onCompare={noop} /></StateCell>
           <StateCell label="CollegeCard, badges + stats"><CollegeCard c={college2} saved={false} onSave={noop} compared={false} badges={badges} stats subline="Computer Science" /></StateCell>
           <StateCell label="CollegeCard, image fallback" note="Hard-coded dark colours; breaks in light mode (known)."><CollegeCard c={collegeNoPhoto} saved={false} onSave={noop} compared={false} /></StateCell>
@@ -215,11 +229,18 @@ export function SurfacesSection() {
       <Specimen name="CommunityCard" file="src/components/connect/CommunityCard.tsx" purpose="A Connect community: banner art, three stat tiles, the companies its pros come from, one action." when="Connect's community shelves and grids.">
         <StateGrid>
           <StateCell label="Not joined" note="Hard-coded dark colours; breaks in light mode (known)."><CommunityCard community={community} joined={false} onOpen={noop} onJoin={noop} /></StateCell>
+          <StateCell label="Hover / focus" note="Hover or Tab to it: dm-tap's lift plus the whole-card tap target scaling in on hover.">
+            <CommunityCard community={community} joined={false} onOpen={noop} onJoin={noop} />
+          </StateCell>
           <StateCell label="Joined"><CommunityCard community={community} joined onOpen={noop} onJoin={noop} /></StateCell>
           <StateCell label="Featured"><CommunityCard community={community} joined={false} onOpen={noop} onJoin={noop} featured /></StateCell>
           <StateCell label="Compact row"><CommunityCard community={community} joined onOpen={noop} onJoin={noop} compact /></StateCell>
           <StateCell label="Long name"><CommunityCard community={communityLongName} joined={false} onOpen={noop} onJoin={noop} /></StateCell>
+          <StateCell label="Sparse data (0 companies)" note="professionalsFrom: [] and no centers: the third stat tile falls back to a bare 0 Companies, and the marks row renders nothing (no built empty treatment for the row itself).">
+            <CommunityCard community={communityNoCompanies} joined={false} onOpen={noop} onJoin={noop} />
+          </StateCell>
           <StateCell label="Image failure" note="No fallback art built for a failed cover; the scrim and stats still show, but the banner goes flat black (known gap)."><CommunityCard community={communityBroken} joined={false} onOpen={noop} onJoin={noop} /></StateCell>
+          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="cards" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -227,8 +248,12 @@ export function SurfacesSection() {
         <ConnectNav.Provider value={MOCK_CONNECT_NAV}>
           <StateGrid>
             <StateCell label="Not following"><PersonCard pro={pro} following={false} onFollow={noop} /></StateCell>
+            <StateCell label="Hover / focus" note="Hover or Tab to it: HoverBeam's ring plus dm-tap's own lift on the inner card.">
+              <PersonCard pro={pro} following={false} onFollow={noop} />
+            </StateCell>
             <StateCell label="Following"><PersonCard pro={pro} following onFollow={noop} /></StateCell>
             <StateCell label="With badge + quote"><PersonCard pro={pro2} following={false} onFollow={noop} badge="New this week" quote="Ask me about internships." /></StateCell>
+            <StateCell label="Long name" note="Name truncates (line-clamp on the name span); role/org lines truncate too."><PersonCard pro={proLongName} following={false} onFollow={noop} /></StateCell>
             <StateCell label="PeopleWelcome, first use"><NotRendered reason="Opens the full-screen Connect WelcomeSplash on mount and writes a sessionStorage seen-flag when dismissed. The splash itself is in Overlays > WelcomeSplash." see="src/components/connect/PeopleTab.tsx" /></StateCell>
           </StateGrid>
         </ConnectNav.Provider>
@@ -265,8 +290,12 @@ export function SurfacesSection() {
           <StateGrid>
             <StateCell label="ProfileCard"><ProfileCard id="about" title="About" first><p className="text-[13px]">{pro.story}</p></ProfileCard></StateCell>
             <StateCell label="Panel"><ConnectPanel id="ask" title="Ask Me Anything"><p className="text-[13px]">Panel content.</p></ConnectPanel></StateCell>
-            <StateCell label="PanelRow"><ul><PanelRow onClick={noop} label="Open thread"><p className="text-[13px] font-semibold">How did you break into tech?</p></PanelRow></ul></StateCell>
+            <StateCell label="PanelRow" note="Hover or Tab to it: dm-quiet's built hover/focus-visible."><ul><PanelRow onClick={noop} label="Open thread"><p className="text-[13px] font-semibold">How did you break into tech?</p></PanelRow></ul></StateCell>
             <StateCell label="SignalRow"><SignalRow views={12400} likes={860} saves={210} comments={34} accent="var(--primary)" /></StateCell>
+            <StateCell label="SignalRow, all zero"><SignalRow views={0} likes={0} saves={0} comments={0} accent="var(--primary)" /></StateCell>
+            <StateCell label="SignalRow, singular" note="formatCount doesn't inflect the label: 1 Views / 1 Likes read the same as many (known copy gap, not fixed here).">
+              <SignalRow views={1} likes={1} saves={1} comments={1} accent="var(--primary)" />
+            </StateCell>
             <StateCell label="PeopleToFollow"><PeopleToFollow follows={{}} onFollow={noop} limit={3} /></StateCell>
             <StateCell label="NewFromFollowing, empty" note="Renders null with nothing followed; this cell is intentionally empty."><NewFromFollowing follows={{}} /></StateCell>
             <StateCell label="NewFromFollowing"><NewFromFollowing follows={{ [pro.id]: true, [pro2.id]: true }} /></StateCell>
@@ -279,6 +308,9 @@ export function SurfacesSection() {
           <StateCell label="OverviewCard, hero" note="Hero glow.">
             <OverviewCard title="On-track students" hero tint="var(--primary)"><p className="text-[28px] font-extrabold">86%</p></OverviewCard>
           </StateCell>
+          <StateCell label="OverviewCard, hover / focus" note="Hover or Tab to it: HoverBeam's ring wraps every card, not just hero ones.">
+            <OverviewCard title="On-track students"><p className="text-[28px] font-extrabold">86%</p></OverviewCard>
+          </StateCell>
           <StateCell label="DonutCard">
             <DonutCard title="Postsecondary plans" centerPct={62} centerLabel="4-year" rows={[{ label: "4-year", value: 62, color: "var(--primary)" }, { label: "2-year", value: 24, color: "#7dd3fc" }, { label: "Workforce", value: 14, color: "#f5c04e" }]} />
           </StateCell>
@@ -287,6 +319,12 @@ export function SurfacesSection() {
             <DrillTile onOpen={noop} label="At-risk students">
               <p className="text-[13px] font-semibold">14 students need attention</p>
             </DrillTile>
+          </StateCell>
+          <StateCell label="Loading" kind="proposed" note="These tiles are pure props today; a real Overview screen fetches the counts behind them.">
+            <ProposedLoading shape="chip" label="Loading" />
+          </StateCell>
+          <StateCell label="Error" kind="proposed">
+            <ProposedError verb="load this metric" />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -332,7 +370,7 @@ export function SurfacesSection() {
         <StateGrid>
           <StateCell label="Avatar, with portrait"><CounselorAvatar name="Maria Gonzalez" index={2} /></StateCell>
           <StateCell label="Avatar, initials fallback" note="No roster index: falls back to initials."><CounselorAvatar name={EDGE.longName} /></StateCell>
-          <StateCell label="StudentLink" note="Navigates on click (opens the student's profile); safe to render, just don't click it in the lab.">
+          <StateCell label="StudentLink" note="Navigates on click (opens the student's profile); safe to render, just don't click it in the lab. Hover or Tab to it: dm-quiet's built hover/focus-visible.">
             <StudentLink id="student-1" name="Maria Gonzalez" index={2}><span className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>Grade 11 · On track</span></StudentLink>
           </StateCell>
         </StateGrid>

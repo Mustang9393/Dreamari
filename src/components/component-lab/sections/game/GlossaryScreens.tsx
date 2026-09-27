@@ -85,7 +85,7 @@ export function GlossaryScreensGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Error (missing)" file="src/components/glossary/GlossaryGameExperience.tsx" purpose="Inventory gap: no error state exists for a lesson that fails to load or a question that can't be scored." when="A network hiccup or malformed lesson mid-game.">
+      <Specimen name="Error (missing)" file="src/components/glossary/GlossaryGameExperience.tsx" purpose="Inventory gap: no error state exists for a lesson that fails to load or a question that can't be scored." when="A network hiccup or malformed lesson mid-game. Whole-surface loading/error is also cataloged as States gallery #54.">
         <StateGrid min={260}>
           <StateCell label="Proposed error" kind="proposed"><ProposedError verb="load this lesson" /></StateCell>
         </StateGrid>

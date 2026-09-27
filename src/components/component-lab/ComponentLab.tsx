@@ -143,7 +143,7 @@ export function ComponentLab() {
               href={`#${s.id}`}
               onClick={go(s.id)}
               aria-current={active === s.id ? "true" : undefined}
-              className="dm-chip-hover shrink-0 rounded-full border px-[12px] py-[5px] text-[12.5px] font-semibold whitespace-nowrap"
+              className="shrink-0 rounded-full border px-[12px] py-[5px] text-[12.5px] font-semibold whitespace-nowrap transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
               style={active === s.id ? { borderColor: "var(--primary)", background: "var(--primary)", color: "#fff" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
             >
               {s.label}

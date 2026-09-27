@@ -202,8 +202,10 @@ export function MatchConnectModules() {
 
         <Specimen name="HelpfulPill / StatusChip" file="src/components/connect/ConnectExperience.tsx" purpose="HelpfulPill is the thumbs-up count toggle every card/row uses; StatusChip shows a question's awaiting/routed/answered/resolved state." when="Any question or insight row.">
           <StateGrid>
+            <StateCell label="Helpful, 0"><HelpfulPill onClick={noop} pressed={false} count={0} /></StateCell>
             <StateCell label="Helpful, off"><HelpfulPill onClick={noop} pressed={false} count={12} /></StateCell>
             <StateCell label="Helpful, on"><HelpfulPill onClick={noop} pressed count={13} /></StateCell>
+            <StateCell label="Helpful, large count" note="Renders {count} as-is, no k/m compacting built; a viral answer prints the full number."><HelpfulPill onClick={noop} pressed={false} count={1240} /></StateCell>
             <StateCell label="Status: awaiting"><StatusChip state="awaiting" /></StateCell>
             <StateCell label="Status: routed"><StatusChip state="routed" /></StateCell>
             <StateCell label="Status: answered"><StatusChip state="answered" /></StateCell>
@@ -237,7 +239,7 @@ export function MatchConnectModules() {
 
         <Specimen name="AskSheet / ReportSheet / JoinSheet / EventCodeSheet" file="src/components/connect/ConnectExperience.tsx" purpose="Connect's four bottom/center sheets: ask a question, report content, join a community's ground rules, and redeem an event code." when="Ask (every board), Report (any post/comment overflow), Join (a community's first visit), Event code (a private event board).">
           <StateGrid min={260}>
-            <StateCell label="Ask a question" pad={false} minH={140}><Reveal label="Open AskSheet" height={520}><AskSheet onClose={noop} onPost={noop} onOpenThread={noop} /></Reveal></StateCell>
+            <StateCell label="Ask a question" pad={false} minH={140} note="Real, typed-in states not forceable by props: under 12 characters shows a hint, a phone number or email blocks posting with a warning, and a title matching an existing answered thread surfaces a 'maybe this already has an answer' suggestion. Type into the field to see them."><Reveal label="Open AskSheet" height={520}><AskSheet onClose={noop} onPost={noop} onOpenThread={noop} /></Reveal></StateCell>
             <StateCell label="Report" pad={false} minH={140}><Reveal label="Open ReportSheet" height={420}><ReportSheet onClose={noop} onSubmit={noop} /></Reveal></StateCell>
             <StateCell label="Join community" pad={false} minH={140}><Reveal label="Open JoinSheet" height={480}><JoinSheet community={COMMUNITY} onClose={noop} onJoin={noop} /></Reveal></StateCell>
             <StateCell label="Event code" pad={false} minH={140}><Reveal label="Open EventCodeSheet" height={420}><EventCodeSheet event={EVENT} onClose={noop} onRedeemed={noop} /></Reveal></StateCell>

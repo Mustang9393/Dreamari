@@ -6,6 +6,7 @@
 // this section writes to them. FlowChrome and CounselorShell are described
 // rather than rendered live -- see their own notes below for why.
 
+import { Bell } from "lucide-react";
 import {
   DesktopNavigation,
   MobileHeaderShell,
@@ -16,9 +17,9 @@ import {
   QuickLinksPanel,
   Wordmark,
 } from "@/components/app/chrome";
-import { HeaderActions, NotificationsButton } from "@/components/app/Inbox";
+import { HeaderActions, NavIconButton, NotificationsButton } from "@/components/app/Inbox";
 import { SkipLink } from "@/components/app/SkipLink";
-import { Section, Specimen, StateGrid, StateCell, NotRendered, ClippedStage } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, NotRendered, ClippedStage, noop } from "../kit";
 
 export function NavigationSection() {
   return (
@@ -40,10 +41,10 @@ export function NavigationSection() {
         when="Every top-level student page (Home, Explore, Play, Connect, Profile), lg and up."
       >
         <StateGrid min={440}>
-          <StateCell label="Home active" minH={110} note="Desktop only (lg and up); hidden below that width by the component's own className.">
+          <StateCell label="Home active" minH={110} note="Desktop only (lg and up); hidden below that width by the component's own className. Hover or Tab to a tab, the avatar, or the bell: each is dm-quiet's built hover/focus-visible.">
             <ClippedStage height={110}><DesktopNavigation active="Home" /></ClippedStage>
           </StateCell>
-          <StateCell label="Connect active, forceBlur" minH={110} note="forceBlur keeps the frosted pill on even when the page's own content owns scrolling (e.g. Explore's reel never moves window.scrollY).">
+          <StateCell label="Connect active, forceBlur" minH={110} note="forceBlur keeps the frosted pill on even when the page's own content owns scrolling (e.g. Explore's reel never moves window.scrollY). The nav avatar is a procedurally generated image (useStudentAvatarSrc) with no name text and no onError fallback, so no long-name or broken-avatar state applies here.">
             <ClippedStage height={110}><DesktopNavigation active="Connect" forceBlur /></ClippedStage>
           </StateCell>
         </StateGrid>
@@ -64,7 +65,7 @@ export function NavigationSection() {
               </MobileHeaderShell>
             </ClippedStage>
           </StateCell>
-          <StateCell label="MobileNav, Home active" minH={140} note="Fixed bottom bar; contained here by ClippedStage's transform.">
+          <StateCell label="MobileNav, Home active" minH={140} note="Fixed bottom bar; contained here by ClippedStage's transform. Hover or Tab to a tab: dm-quiet's built hover/focus-visible.">
             <ClippedStage height={140}><MobileNav active="Home" /></ClippedStage>
           </StateCell>
           <StateCell label="MobileNav, Play active" minH={140}>
@@ -83,6 +84,9 @@ export function NavigationSection() {
           <StateCell label="hideDemoLinks=false" note="The bottom row is the app's real theme toggle (useGlobalTheme). Clicking it flips the whole app's stored theme, so it isn't click-tested here.">
             <QuickLinksPanel hideDemoLinks={false} />
           </StateCell>
+          <StateCell label="QuickLinksMenu, real trigger" note="The actual hamburger button and its own open/close popover, not just the panel in place. Click to open; click outside, scroll, or Escape all close it for real.">
+            <QuickLinksMenu />
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -99,6 +103,13 @@ export function NavigationSection() {
           <StateCell label="HeaderActions">
             <HeaderActions />
           </StateCell>
+          <StateCell label="Badge, 1" note="NotificationsButton has no prop to force a count (it reads useVisibleNotifications' live store); NavIconButton, the file-local piece that draws the badge, is rendered directly here instead (export added, no behaviour changed).">
+            <NavIconButton label="Notifications" onClick={noop} badge={1}><Bell className="h-5 w-5" aria-hidden /></NavIconButton>
+          </StateCell>
+          <StateCell label="Badge, 9+" note="Anything over 9 prints as 9+, the same treatment a 99+ count would get.">
+            <NavIconButton label="Notifications" onClick={noop} badge={23}><Bell className="h-5 w-5" aria-hidden /></NavIconButton>
+          </StateCell>
+          <StateCell label="Dot, no count"><NavIconButton label="Notifications" onClick={noop} dot><Bell className="h-5 w-5" aria-hidden /></NavIconButton></StateCell>
         </StateGrid>
       </Specimen>
 

@@ -9,8 +9,10 @@ over both.
 
 **Why this exists.** Chandu asked for a component-library lab showing every
 element with all its states (empty, error, loading). With the week's usage
-budget low, this document comes first. The live lab page is planned after
-the 1 Oct usage reset and will be built from this inventory. The gap analysis
+budget low, this document came first. The live lab now exists at
+`/component-lab` (hamburger > Component library), built from this file:
+every component below with every state, and each missing state designed
+as a proposed default. The gap analysis
 below is the part to act on: most states a real backend needs are not
 defined anywhere yet.
 

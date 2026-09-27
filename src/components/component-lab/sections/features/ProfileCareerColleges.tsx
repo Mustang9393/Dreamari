@@ -8,7 +8,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Info } from "lucide-react";
-import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, NotRendered, EDGE, MONO, noop, Inert } from "../../kit";
+import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedNotFound, NotRendered, EDGE, MONO, noop, Inert } from "../../kit";
 
 import { ALL_PROFILE_CAREERS, STUDENT } from "@/components/profile/data";
 import {
@@ -235,6 +235,7 @@ export function ProfileCareerCollegesModules() {
         <StateGrid min={260}>
           <StateCell label="RouteRow, unselected"><RouteRow route={IB.routes[1]} selected={false} onOpen={noop} onSelect={noop} /></StateCell>
           <StateCell label="RouteRow, selected + recommended"><RouteRow route={IB.routes[1]} selected onOpen={noop} onSelect={noop} /></StateCell>
+          <StateCell label="RouteRow, hover / focus" note="Hover or Tab to it to see the state."><RouteRow route={IB.routes[1]} selected={false} onOpen={noop} onSelect={noop} /></StateCell>
           <StateCell label="CompareTable" pad={false} minH={220}><CompareTable routes={IB.routes} selectedId={IB.routes[0].id} /></StateCell>
         </StateGrid>
       </Specimen>
@@ -248,6 +249,14 @@ export function ProfileCareerCollegesModules() {
             note="Reads the real saved-careers/colleges/videos stores (safe, read-only in this empty state). If this browser already has saved schools, careers or videos, switching shelves would show their real save/unsave buttons, which do write on click."
           >
             <Inert><LockerTab locker={[]} top3Count={0} addToTop3={noop} onClose={noop} /></Inert>
+          </StateCell>
+          <StateCell
+            label="Careers shelf, populated (many)"
+            minH={220}
+            pad={false}
+            note="Inert: the real unsave/add-to-Top-3 controls on each card write on click."
+          >
+            <Inert><LockerTab locker={[IB, NURSE, PILOT]} top3Count={1} addToTop3={noop} onClose={noop} /></Inert>
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -375,6 +384,9 @@ export function ProfileCareerCollegesModules() {
           >
             <ProposedEmpty tier={6} />
           </StateCell>
+          <StateCell label="Not found (404)" kind="proposed" note="No slug in the catalog: a removed career or an out-of-date link. Not built.">
+            <ProposedNotFound what="career" />
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -473,11 +485,12 @@ export function ProfileCareerCollegesModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="College grid, detail: proposed gaps" file="src/components/colleges/CollegesExperience.tsx, CollegeDetailExperience.tsx" purpose="Three states neither the grid nor the detail page has built yet." when="Search/filter with no matches, and College Detail while loading or failing.">
+      <Specimen name="College grid, detail: proposed gaps" file="src/components/colleges/CollegesExperience.tsx, CollegeDetailExperience.tsx" purpose="States neither the grid nor the detail page has built yet." when="Search/filter with no matches, and College Detail while loading, failing or pointed at a school that doesn't exist.">
         <StateGrid min={240}>
           <StateCell label="Grid, no matches" kind="proposed"><ProposedEmpty tier={5} query="marine biology" /></StateCell>
           <StateCell label="Detail, loading" kind="proposed"><ProposedLoading label="Loading this school" shape="cards" /></StateCell>
           <StateCell label="Detail, error" kind="proposed"><ProposedError verb="load this school" fallback="try Browse all" /></StateCell>
+          <StateCell label="Detail, not found (404)" kind="proposed" note="A removed or renamed school id, or an out-of-date link."><ProposedNotFound what="school" /></StateCell>
         </StateGrid>
       </Specimen>
     </>

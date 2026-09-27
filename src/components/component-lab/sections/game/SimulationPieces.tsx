@@ -92,7 +92,7 @@ export function SimulationPiecesGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Missing states" file="src/components/play/SimulationPlayer.tsx" purpose="Inventory gap: no built loading state while a level's beats/art load, and no built error state for a failed audio/asset load." when="A slow connection between the hub and a level's first beat.">
+      <Specimen name="Missing states" file="src/components/play/SimulationPlayer.tsx" purpose="Inventory gap: no built loading state while a level's beats/art load, and no built error state for a failed audio/asset load." when="A slow connection between the hub and a level's first beat. The whole-surface version of this gap is also cataloged as States gallery #53.">
         <StateGrid min={260}>
           <StateCell label="Level loading" kind="proposed"><ProposedLoading label="Loading level" shape="chip" /></StateCell>
           <StateCell label="Audio failed" kind="proposed"><ProposedError verb="load the level audio" pill="Music" /></StateCell>

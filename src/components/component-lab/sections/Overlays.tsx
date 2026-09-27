@@ -27,7 +27,7 @@ import { ZoomResumeModal } from "@/components/resume/ResumeDocument";
 import { ExportChecklistModal } from "@/components/resume/ExportChecklistModal";
 import { TextPreviewModal } from "@/components/resume/TextPreviewModal";
 import { SAMPLE_RESUME_DATA } from "@/components/resume/data";
-import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ClippedStage, ProposedError, noop } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ClippedStage, ProposedLoading, ProposedError, ProposedEmpty, EDGE, noop } from "../kit";
 
 const STUDENT = getRoster()[0];
 const SIGNER: Signer = { name: "Sarah Chen", role: "School Counselor" };
@@ -88,7 +88,7 @@ export function OverlaysSection() {
 
       <Specimen name="WelcomeSplash" file="src/components/app/WelcomeSplash.tsx" purpose="The full-screen welcome modal: Dreamy, a scene-specific line, one CTA." when="A host screen's own open state (FirstVisitSplash wraps this for the storage-backed first-visit case; this is the modal itself).">
         <StateGrid min={320}>
-          <StateCell label="Default" minH={420}>
+          <StateCell label="Default" minH={420} note="No Escape or backdrop dismiss built (there is no backdrop click target and no keydown listener): the one CTA is deliberately the only way through.">
             <Reveal label="Open WelcomeSplash" height={420}>
               <OverlayDemo render={(close) => <WelcomeSplash surface="play" open onDone={close} />} />
             </Reveal>
@@ -106,11 +106,47 @@ export function OverlaysSection() {
 
       <Specimen name="SidePanel" file="src/components/counselor/v2/SidePanel.tsx" purpose="A right-hand slide-in detail panel: Portal, a click-outside backdrop, Escape to close." when="A card's full breakdown in the Counselor Dashboard (Review Queue, Milestone Tracker rows, etc.).">
         <StateGrid min={320}>
-          <StateCell label="Default" minH={420}>
+          <StateCell label="Default" minH={420} note="Escape and the backdrop click both really close it (real keydown listener + a backdrop button, not just the X). Its own content area is overflow-y-auto without the shared dm-scroll class (house rule gap, not fixed here).">
             <Reveal label="Open SidePanel" height={420}>
               <OverlayDemo render={(close) => (
                 <SidePanel open onClose={close} title="Jordan Rivera" subtitle="Grade 11 · Academic Plan">
                   <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Panel content goes here.</p>
+                </SidePanel>
+              )} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Long content (scroll)" minH={420}>
+            <Reveal label="Open SidePanel" height={420}>
+              <OverlayDemo render={(close) => (
+                <SidePanel open onClose={close} title="Jordan Rivera" subtitle="Grade 11 · Academic Plan">
+                  {Array.from({ length: 10 }, (_, i) => <p key={i} className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>{EDGE.longBody}</p>)}
+                </SidePanel>
+              )} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Loading inside" kind="proposed" minH={420}>
+            <Reveal label="Open SidePanel" height={420}>
+              <OverlayDemo render={(close) => (
+                <SidePanel open onClose={close} title="Jordan Rivera" subtitle="Grade 11 · Academic Plan">
+                  <ProposedLoading shape="list" />
+                </SidePanel>
+              )} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Error inside" kind="proposed" minH={420}>
+            <Reveal label="Open SidePanel" height={420}>
+              <OverlayDemo render={(close) => (
+                <SidePanel open onClose={close} title="Jordan Rivera" subtitle="Grade 11 · Academic Plan">
+                  <ProposedError verb="load this student's plan" />
+                </SidePanel>
+              )} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Empty inside" kind="proposed" minH={420}>
+            <Reveal label="Open SidePanel" height={420}>
+              <OverlayDemo render={(close) => (
+                <SidePanel open onClose={close} title="Jordan Rivera" subtitle="Grade 11 · Academic Plan">
+                  <ProposedEmpty tier={3} line="Nothing logged for this student yet." />
                 </SidePanel>
               )} />
             </Reveal>
@@ -135,6 +171,21 @@ export function OverlaysSection() {
               </DetailPane>
             </ClippedStage>
           </StateCell>
+          <StateCell label="Loading" kind="proposed" minH={160}>
+            <ClippedStage height={160}>
+              <DetailPane open onClose={noop}><ProposedLoading shape="list" /></DetailPane>
+            </ClippedStage>
+          </StateCell>
+          <StateCell label="Error" kind="proposed" minH={160}>
+            <ClippedStage height={160}>
+              <DetailPane open onClose={noop}><ProposedError verb="load this row's detail" /></DetailPane>
+            </ClippedStage>
+          </StateCell>
+          <StateCell label="Empty" kind="proposed" minH={160}>
+            <ClippedStage height={160}>
+              <DetailPane open onClose={noop}><ProposedEmpty tier={3} line="Nothing selected yet." /></DetailPane>
+            </ClippedStage>
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -150,12 +201,18 @@ export function OverlaysSection() {
               <DocumentDeskPage kind="student-brief" student={STUDENT} letterType="" signer={SIGNER} draft={null} onDraft={noop} />
             </FitPage>
           </StateCell>
+          <StateCell label="Loading (drafting)" kind="proposed" minH={260}>
+            <FitPage><ProposedLoading shape="document" label="Drafting" /></FitPage>
+          </StateCell>
+          <StateCell label="Error" kind="proposed" minH={260}>
+            <FitPage><ProposedError verb="draft this document" /></FitPage>
+          </StateCell>
         </StateGrid>
       </Specimen>
 
       <Specimen name="FullScreenDocument" file="src/components/counselor/v2/DocumentDesk.tsx" purpose="The document's own full-screen, dark-chrome viewer: zoom, print, an optional Share menu." when="A document's 'Full screen' button (FullScreenButton).">
         <StateGrid min={320}>
-          <StateCell label="Default" minH={480} note="onPrint is a no-op here; for real it calls printDocumentPage(...), which opens the system print dialog. Not clicked in this lab.">
+          <StateCell label="Default" minH={480} note="onPrint is a no-op here; for real it calls printDocumentPage(...), which opens the system print dialog. Not clicked in this lab. Escape and its own Close button both really close it.">
             <Reveal label="Open FullScreenDocument" height={480}>
               <OverlayDemo render={(close) => (
                 <FullScreenDocument open onClose={close} title="Recommendation Letter" onPrint={noop} share={[{ label: "Copy link", icon: Share2, onClick: noop }]}>
@@ -169,11 +226,29 @@ export function OverlaysSection() {
 
       <Specimen name="DocumentPreviewModal" file="src/components/counselor/v2/DocumentPreview.tsx" purpose="A centered, realistic PDF-viewer chrome around a milestone attachment's rendered page. Its own DocumentPage export clashes by name with DocumentDesk's, imported here as DocumentPreviewPage." when="A milestone attachment opened from Review Queue or a roster row.">
         <StateGrid min={320}>
-          <StateCell label="Default" minH={480}>
+          <StateCell label="Default" minH={480} note="Escape and the backdrop click both really close it.">
             <Reveal label="Open DocumentPreviewModal" height={480}>
               <OverlayDemo render={(close) => (
                 <DocumentPreviewModal open onClose={close} fileName="resume.pdf" kb={184}>
                   <DocumentPreviewPage student={STUDENT} milestone="Resume" />
+                </DocumentPreviewModal>
+              )} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Loading" kind="proposed" minH={480}>
+            <Reveal label="Open DocumentPreviewModal" height={480}>
+              <OverlayDemo render={(close) => (
+                <DocumentPreviewModal open onClose={close} fileName="resume.pdf" kb={184}>
+                  <ProposedLoading shape="document" label="Loading preview" />
+                </DocumentPreviewModal>
+              )} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Error" kind="proposed" minH={480}>
+            <Reveal label="Open DocumentPreviewModal" height={480}>
+              <OverlayDemo render={(close) => (
+                <DocumentPreviewModal open onClose={close} fileName="resume.pdf" kb={184}>
+                  <ProposedError verb="open this file" />
                 </DocumentPreviewModal>
               )} />
             </Reveal>
@@ -183,7 +258,7 @@ export function OverlaysSection() {
 
       <Specimen name="Top3SwapModal" file="src/components/career/Top3SwapModal.tsx" purpose="Top 3 is full: pick one saved career to swap out for the incoming one. Pure, no store reads or writes of its own." when="Career Detail's '+' action once the student's Top 3 already has three.">
         <StateGrid min={320}>
-          <StateCell label="Default" minH={360}>
+          <StateCell label="Default" minH={360} note="Closes on a backdrop click (onPointerUp checks the target), but has no Escape-key handler, unlike every other overlay in this section (gap, not fixed here).">
             <Reveal label="Open Top3SwapModal" height={360}>
               <OverlayDemo render={(close) => (
                 <Top3SwapModal incomingId="marine-biologist" currentIds={["software-engineer", "registered-nurse", "product-designer"]} onConfirm={close} onCancel={close} />
@@ -203,7 +278,7 @@ export function OverlaysSection() {
 
       <Specimen name="DetailModal" file="src/components/flow-lab/shared.tsx" purpose="The Flow Lab's in-place career detail: photo, what you'd do, good fit if, school and path, then Save / Add to Top 3." when="Tapping a card in any Flow Lab screen.">
         <StateGrid min={320}>
-          <StateCell label="Default" minH={480}>
+          <StateCell label="Default" minH={480} note="Escape, the backdrop click, and Left/Right arrow (onPrev/onNext) all really work here.">
             <Reveal label="Open DetailModal" height={480}>
               <OverlayDemo render={(close) => <DetailModal career={LAB_CATALOG[0]} control="save" selected={false} full={false} onToggle={noop} onClose={close} />} />
             </Reveal>
@@ -211,6 +286,11 @@ export function OverlaysSection() {
           <StateCell label="Selected, full" minH={480}>
             <Reveal label="Open DetailModal" height={480}>
               <OverlayDemo render={(close) => <DetailModal career={LAB_CATALOG[1]} control="pick" selected full onToggle={noop} onClose={close} />} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Long content (scroll)" minH={480} note="Its own scroll container is flow-scroll, not the shared dm-scroll class every other overlay uses (gap, not fixed here). Three real sections (What You'd Do / Good Fit If You Like / School & Path) plus the chip row already push most careers past the 480px frame here.">
+            <Reveal label="Open DetailModal" height={480}>
+              <OverlayDemo render={(close) => <DetailModal career={LAB_CATALOG[2]} control="save" selected={false} full={false} onToggle={noop} onClose={close} />} />
             </Reveal>
           </StateCell>
         </StateGrid>
@@ -221,6 +301,15 @@ export function OverlaysSection() {
           <StateCell label="Default" minH={420}>
             <Reveal label="Open TopThreeScreen" height={420}>
               <TopThreeScreen top3={LAB_CATALOG.slice(0, 3)} pool={LAB_CATALOG.slice(0, 8)} poolLabel="Saved" onExploreMore={noop} onOpenPool={noop} onRemove={noop} onReplace={noop} onNext={noop} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Fewer than 3 (empty slots)" minH={420} note="Built empty-slot treatment: a dashed #N tile that opens the pool, no invented copy.">
+            <Reveal label="Open TopThreeScreen" height={420}>
+              <TopThreeScreen top3={LAB_CATALOG.slice(0, 1)} pool={LAB_CATALOG.slice(0, 8)} poolLabel="Saved" onExploreMore={noop} onOpenPool={noop} onRemove={noop} onReplace={noop} onNext={noop} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Empty pool, changing" minH={420} note="Click a card's Change control: built fallback line when nothing else is saved to swap in ('Save more careers to swap one in.')."><Reveal label="Open TopThreeScreen" height={420}>
+              <TopThreeScreen top3={LAB_CATALOG.slice(0, 3)} pool={LAB_CATALOG.slice(0, 3)} poolLabel="Saved" onExploreMore={noop} onOpenPool={noop} onRemove={noop} onReplace={noop} onNext={noop} />
             </Reveal>
           </StateCell>
         </StateGrid>
@@ -255,11 +344,20 @@ export function OverlaysSection() {
 
       <Specimen name="ResumeModal" file="src/components/resume/ui.tsx" purpose="The shared resume popup chrome: a full-screen overlay by default, or an inline in-place swap for the document toolbar's own panels." when="Every Add/Edit flow in the Resume Builder (ExperienceModal, SkillsPicker, ExportChecklistModal, TextPreviewModal, etc. all wrap this).">
         <StateGrid min={280}>
-          <StateCell label="overlay" minH={280}>
+          <StateCell label="overlay" minH={280} note="Escape and the backdrop click both really close it; its own content area already carries dm-scroll.">
             <Reveal label="Open ResumeModal" height={280}>
               <OverlayDemo render={(close) => (
                 <ResumeModal title="Add certification" onClose={close}>
                   <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>A wizard step&apos;s fields render here.</p>
+                </ResumeModal>
+              )} />
+            </Reveal>
+          </StateCell>
+          <StateCell label="Long content (scroll)" minH={280}>
+            <Reveal label="Open ResumeModal" height={280}>
+              <OverlayDemo render={(close) => (
+                <ResumeModal title="Add certification" onClose={close}>
+                  {Array.from({ length: 8 }, (_, i) => <p key={i} className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>{EDGE.longBody}</p>)}
                 </ResumeModal>
               )} />
             </Reveal>

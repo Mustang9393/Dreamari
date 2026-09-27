@@ -491,7 +491,7 @@ export function FoundationsSection() {
                 </div>
               </HoverBeam>
             </StateCell>
-            <StateCell label="Forced active">
+            <StateCell label="Forced active" note="Reduced motion gap: neither this component nor the border-beam package it wraps checks prefers-reduced-motion, unlike ConfirmShimmer/PlayBurst/GestureHint below (all motion-safe:) or Confetti/AuroraBackground (both check matchMedia in JS). Since this is the app's default hover treatment for nearly every card, that's the widest-reaching motion gap in this section.">
               <HoverBeam active className="block">
                 <div className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
                   Career card
@@ -503,7 +503,7 @@ export function FoundationsSection() {
 
         <Specimen name="ConfirmShimmer" file="src/components/flow/ConfirmShimmer.tsx" purpose="A one-shot white sweep across a row, confirming a pick was saved." when="Right after a selection is confirmed (Build's option rows).">
           <StateGrid min={180}>
-            <StateCell label="Sweep">
+            <StateCell label="Sweep" note="Reduced motion: the sweep is motion-safe:animate-[...], so it simply doesn't run under prefers-reduced-motion, no fallback needed for a one-shot decorative confirm.">
               <Replayable>
                 {(n) => (
                   <div className="relative overflow-hidden rounded-[var(--radius-md)] border p-[var(--space-3)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
@@ -518,7 +518,7 @@ export function FoundationsSection() {
 
         <Specimen name="PlayBurst" file="src/components/play/PlayBurst.tsx" purpose="A particle burst behind a correct answer or unlock moment in Play." when="A rewarding in-game moment, nonce bumped on each occurrence.">
           <StateGrid min={180}>
-            <StateCell label="Burst" note="Click Replay to fire it." minH={140}>
+            <StateCell label="Burst" note="Click Replay to fire it. Reduced motion: both animations are motion-safe:, so the burst is silently skipped rather than replaced with a static flash." minH={140}>
               <Replayable>
                 {(n) => (
                   <div className="relative h-[110px] w-full overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: "var(--border)", background: "#070914" }}>
@@ -532,7 +532,7 @@ export function FoundationsSection() {
 
         <Specimen name="Confetti" file="src/components/flow/aurora/Confetti.tsx" purpose="Canvas confetti behind a big milestone (Build/Match finales)." when="A finale or milestone screen, sparingly.">
           <StateGrid min={180}>
-            <StateCell label="Active" minH={200} note="Colours are literal hex, copied from --primary/--accent-subtle/--color-feedback-success: this component's prop type only takes hex strings, not var().">
+            <StateCell label="Active" minH={200} note="Colours are literal hex, copied from --primary/--accent-subtle/--color-feedback-success: this component's prop type only takes hex strings, not var(). Reduced motion: checks matchMedia('(prefers-reduced-motion: reduce)') itself and skips the canvas loop entirely, same real guard as AuroraBackground and Vortex below.">
               <Reveal label="Play" height={200}>
                 <div className="relative h-full w-full" style={{ background: "var(--background)" }}>
                   <Confetti active colors={["#2f6bf2", "#3894ff", "#33c78c"]} />
@@ -550,7 +550,7 @@ export function FoundationsSection() {
             <StateCell label="Right">
               <GestureHint direction="right" />
             </StateCell>
-            <StateCell label="Up (scroll)">
+            <StateCell label="Up (scroll)" note="Reduced motion: every direction's loop is motion-safe:, so the hint holds its resting position instead of looping, a static hint still points the right way, it just doesn't move.">
               <GestureHint direction="up" />
             </StateCell>
           </StateGrid>
@@ -587,32 +587,32 @@ export function FoundationsSection() {
           when="One per surface: AppBackdrop behind every standard tab, PlayBackdrop behind gameplay, Aurora/BackgroundSpace behind Build and Match. Each mounts only on click, one at a time."
         >
           <StateGrid min={220}>
-            <StateCell label="AppBackdrop" minH={200}>
+            <StateCell label="AppBackdrop" minH={200} note="Reduced motion: N/A. Purely static gradients plus one static SVG image, nothing here animates.">
               <Reveal label="Play" height={200}>
                 <AppBackdrop />
               </Reveal>
             </StateCell>
-            <StateCell label="PlayBackdrop" minH={200}>
+            <StateCell label="PlayBackdrop" minH={200} note="Reduced motion: its one animation, the entrance bloom, is motion-safe: (the rest of the surface is static gradients).">
               <Reveal label="Play" height={200}>
                 <PlayBackdrop />
               </Reveal>
             </StateCell>
-            <StateCell label="StarsBackground" minH={200}>
+            <StateCell label="StarsBackground" minH={200} note="Reduced motion gap: the star field's scroll (a framer-motion animate: { y: [0, -2000] } loop) has no motion-safe guard or matchMedia check, so it runs continuously even under prefers-reduced-motion.">
               <Reveal label="Play" height={200}>
                 <StarsBackground starColor="#ffffff" />
               </Reveal>
             </StateCell>
-            <StateCell label="FireworksBackground" minH={200}>
+            <StateCell label="FireworksBackground" minH={200} note="Reduced motion gap, and the CPU-heaviest of this row: a requestAnimationFrame canvas loop with no motion-safe guard or matchMedia check at all, unlike Vortex and AuroraBackground next to it.">
               <Reveal label="Play" height={200}>
                 <FireworksBackground population={0.6} />
               </Reveal>
             </StateCell>
-            <StateCell label="Vortex" minH={200}>
+            <StateCell label="Vortex" minH={200} note="Reduced motion: built correctly. Checks prefers-reduced-motion and, when set, renders one still canvas frame in the field's own colours and density instead of looping requestAnimationFrame, the pattern the other canvases above should follow.">
               <Reveal label="Play" height={200}>
                 <Vortex containerClassName="h-full w-full" particleCount={250} />
               </Reveal>
             </StateCell>
-            <StateCell label="AuroraBackground + BackgroundSpace" minH={200} note="Needs ThemeProvider; re-syncs <html>'s theme class from its own localStorage key on mount, which can momentarily override the lab's own unpersisted toggle while this is open.">
+            <StateCell label="AuroraBackground + BackgroundSpace" minH={200} note="Needs ThemeProvider; re-syncs <html>'s theme class from its own localStorage key on mount, which can momentarily override the lab's own unpersisted toggle while this is open. Reduced motion: AuroraBackground checks matchMedia itself (built); BackgroundSpace underneath it is static gradients, N/A.">
               <Reveal label="Play" height={200}>
                 <ThemeProvider>
                   <BackgroundSpace />

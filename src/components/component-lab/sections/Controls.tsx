@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 import { Download, Pencil } from "lucide-react";
-import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ProposedLoading, ProposedError, EDGE, noop } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ProposedLoading, ProposedError, ProposedDisabled, EDGE, noop } from "../kit";
 
 import { Button } from "@/components/ui/Button";
 import { MarketingButton } from "@/components/marketing/Button";
@@ -165,7 +165,7 @@ function SaveButtonDemo({ startOn }: { startOn: boolean }) {
   return <SaveButton on={on} onToggle={() => setOn((v) => !v)} />;
 }
 
-function OptionButtonDemo({ tier, picked, revealed, disabled, label = "Registered nurse" }: { tier?: "best" | "wrong"; picked?: boolean; revealed?: boolean; disabled?: boolean; label?: string }) {
+function OptionButtonDemo({ tier, picked, revealed, disabled, dimmed, compact, label = "Registered nurse" }: { tier?: "best" | "wrong"; picked?: boolean; revealed?: boolean; disabled?: boolean; dimmed?: boolean; compact?: boolean; label?: string }) {
   const [clicked, setClicked] = useState(Boolean(picked));
   return (
     <OptionButton
@@ -176,6 +176,8 @@ function OptionButtonDemo({ tier, picked, revealed, disabled, label = "Registere
       tier={tier}
       revealed={revealed}
       disabled={disabled}
+      dimmed={dimmed}
+      compact={compact}
     />
   );
 }
@@ -191,11 +193,11 @@ const RESUME_STATE_OPTIONS: ListboxOption[] = [
   { value: "ba", label: "Bachelor's degree" },
 ];
 
-function ResumeFieldDemo({ invalid }: { invalid?: boolean }) {
+function ResumeFieldDemo({ invalid, disabled, readOnly }: { invalid?: boolean; disabled?: boolean; readOnly?: boolean }) {
   const [value, setValue] = useState(invalid ? "" : "Software Engineering Intern");
   return (
     <ResumeField label="Job title" htmlFor="lab-resume-title" required>
-      <TextInput id="lab-resume-title" value={value} onChange={setValue} placeholder="e.g. Barista" invalid={invalid} />
+      <TextInput id="lab-resume-title" value={value} onChange={setValue} placeholder="e.g. Barista" invalid={invalid} disabled={disabled} readOnly={readOnly} />
     </ResumeField>
   );
 }
@@ -222,6 +224,9 @@ export function ControlsSection() {
           <StateCell label="Secondary"><Button variant="secondary" onClick={noop}>Cancel</Button></StateCell>
           <StateCell label="Quiet"><Button variant="quiet" onClick={noop}>Skip</Button></StateCell>
           <StateCell label="Disabled"><Button disabled onClick={noop}>Save</Button></StateCell>
+          <StateCell label="Compact size" note="A third real size (default/compact/large); only default and large were shown before."><Button size="compact" onClick={noop}>Save</Button></StateCell>
+          <StateCell label="Large size"><Button size="large" onClick={noop}>Save</Button></StateCell>
+          <StateCell label="Hover / focus" note="Hover or Tab to it. The ring comes from app.css's universal :focus-visible rule (real <button>), not a per-component style."><Button onClick={noop}>Save</Button></StateCell>
           <StateCell label="Long label" note="Wraps to the button's width; no truncation built."><Button onClick={noop}>{EDGE.longTitle}</Button></StateCell>
           <StateCell label="Loading" kind="proposed"><ProposedLoading shape="button" label="Saving" /></StateCell>
         </StateGrid>
@@ -233,6 +238,8 @@ export function ControlsSection() {
           <StateCell label="Ghost"><MarketingButton variant="ghost" onClick={noop}>Learn more</MarketingButton></StateCell>
           <StateCell label="Solid"><MarketingButton variant="solid" onClick={noop}>Get started</MarketingButton></StateCell>
           <StateCell label="Outline"><MarketingButton variant="outline" onClick={noop}>See plans</MarketingButton></StateCell>
+          <StateCell label="Hover / focus" note="Hover or Tab to it. It's a real <button>, so the app-wide focus ring applies; the hover lift/scale is this component's own transition."><MarketingButton variant="primary" onClick={noop}>Start Journey</MarketingButton></StateCell>
+          <StateCell label="Disabled" kind="proposed" note="disabled passes straight through to the <button>, but no VARIANT_STYLE branch dims it: an unclickable button today looks identical to a live one. Proposed a 40% opacity treatment, matching Button/PrimaryButton's own disabled dimming."><ProposedDisabled><MarketingButton variant="primary" onClick={noop} disabled>Start Journey</MarketingButton></ProposedDisabled></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -242,6 +249,16 @@ export function ControlsSection() {
           <StateCell label="Selected"><ListboxDemo /></StateCell>
           <StateCell label="Disabled trigger"><Listbox value="cs" onChange={noop} options={LISTBOX_OPTIONS} ariaLabel="Interest" disabled /></StateCell>
           <StateCell label="Open / disabled option" note="Click to open. Nursing is disabled in this list."><ListboxDemo /></StateCell>
+          <StateCell label="No options" note="Options resolve empty (e.g. a filter with nothing left); the panel opens to a blank list, no messaging built for it."><Listbox value="" onChange={noop} options={[]} ariaLabel="Interest" placeholder="Select an interest…" /></StateCell>
+          <StateCell label="Many options" note="Click to open: the panel scrolls (dm-scroll) past MAX_HEIGHT instead of growing past the viewport." minH={140}>
+            <Listbox
+              value="cs"
+              onChange={noop}
+              ariaLabel="State"
+              options={Array.from({ length: 24 }, (_, i) => ({ value: String(i), label: `Option ${i + 1}` }))}
+            />
+          </StateCell>
+          <StateCell label="Long option label" note="A single option wider than the trigger; the panel widens to MAX_WIDTH and truncates instead of wrapping."><Listbox value="" onChange={noop} options={[{ value: "long", label: EDGE.longTitle }]} ariaLabel="Interest" placeholder="Select an interest…" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -252,6 +269,7 @@ export function ControlsSection() {
           <StateCell label="Today" note="Click to open and see today ringed in the grid."><DatePickerDemo initial={new Date().toISOString().slice(0, 10)} /></StateCell>
           <StateCell label="Disabled"><DatePicker value="2010-05-14" onChange={noop} disabled /></StateCell>
         </StateGrid>
+        <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>No min/max props: every caller lets any day be picked, so there is no real out-of-range/disabled-day state to show.</p>
       </Specimen>
 
       <Specimen name="ForYouBrowseToggle" file="src/components/app/ExploreExperience.tsx" purpose="The Explore reel/grid switch." when="Top of Explore, above the For You reel or Browse All grid.">
@@ -278,6 +296,7 @@ export function ControlsSection() {
         <StateGrid>
           <StateCell label="Closed"><MarketingDisclosureDemo startOpen={false} /></StateCell>
           <StateCell label="Open"><MarketingDisclosureDemo startOpen /></StateCell>
+          <StateCell label="Long title" note="Title wraps; the chevron stays pinned via flex-none."><MarketingDisclosure id="lab-marketing-disclosure-long" title={EDGE.longTitle} open={false} onToggle={noop} size="sm"><p /></MarketingDisclosure></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -293,18 +312,27 @@ export function ControlsSection() {
       <Specimen name="Segmented" file="src/components/connect/viz.tsx" purpose="Segmented tab control with optional unread-count badges." when="A top-level filter inside a Connect panel.">
         <StateGrid>
           <StateCell label="Selected, with badges"><SegmentedDemo /></StateCell>
+          <StateCell label="No badge / one option" note="badge is only rendered when truthy; a single-option Segmented still renders, just with nothing to switch between."><Segmented ariaLabel="Roster filter" value="active" onChange={noop} options={[{ key: "active", label: "Active" }]} /></StateCell>
+          <StateCell label="99+ badge" note="Badge has no cap; a triple-digit count widens the pill instead of being capped at 99+."><Segmented ariaLabel="Roster filter" value="active" onChange={noop} options={[{ key: "active", label: "Active", badge: 128 }, { key: "saved", label: "Saved" }]} /></StateCell>
+          <StateCell label="Overflow (many options, scroll)" note="overflow-x-auto on the tablist; no visual fade cue at the scroll edge (ScrollChips below has one, Segmented doesn't)." minH={80}>
+            <Segmented ariaLabel="Roster filter" value="opt3" onChange={noop} options={Array.from({ length: 8 }, (_, i) => ({ key: `opt${i}`, label: `Option ${i + 1}` }))} />
+          </StateCell>
         </StateGrid>
       </Specimen>
 
       <Specimen name="SubTabs" file="src/components/counselor/v2/SubTabs.tsx" purpose="Plain-text second-level tabs, no container, for a filter nested inside a Segmented tab." when="Never stacked directly on top of another tab row of the same weight.">
         <StateGrid>
           <StateCell label="Selected, with count"><SubTabsDemo /></StateCell>
+          <StateCell label="99+ count" note="count is a plain tabular-nums span; a triple-digit value isn't abbreviated."><SubTabs ariaLabel="Connect filter" value="questions" onChange={noop} options={[{ key: "questions", label: "Questions", count: 128 }, { key: "announcements", label: "Announcements" }]} /></StateCell>
         </StateGrid>
       </Specimen>
 
       <Specimen name="ScrollChips" file="src/components/counselor/chips.tsx" purpose="A horizontally scrolling row of filter chips." when="A filter row with more options than comfortably fit on one line.">
         <StateGrid>
           <StateCell label="Selected"><ScrollChipsDemo /></StateCell>
+          <StateCell label="Many options (scrolls, edge fade)" note="Built: the left/right gradient fades toggle as you scroll, reading the container's own scrollLeft.">
+            <ScrollChips ariaLabel="Status filter" value="opt4" onChange={noop} options={Array.from({ length: 10 }, (_, i) => ({ key: `opt${i}`, label: `Filter ${i + 1}` }))} />
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -312,6 +340,7 @@ export function ControlsSection() {
         <StateGrid>
           <StateCell label="Unchecked"><SelectBoxDemo startChecked={false} /></StateCell>
           <StateCell label="Checked"><SelectBoxDemo startChecked /></StateCell>
+          <StateCell label="Disabled" kind="proposed" note="No disabled prop; every caller can currently toggle every row."><ProposedDisabled><SelectBox checked={false} label="Include archived students" onChange={noop} /></ProposedDisabled></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -319,6 +348,15 @@ export function ControlsSection() {
         <StateGrid>
           <StateCell label="Off"><ToggleDemo startOn={false} /></StateCell>
           <StateCell label="On"><ToggleDemo startOn /></StateCell>
+          <StateCell label="Disabled off" kind="proposed" note="No disabled prop; every setting row can currently be flipped."><ProposedDisabled><Toggle on={false} onChange={noop} /></ProposedDisabled></StateCell>
+          <StateCell label="Disabled on" kind="proposed"><ProposedDisabled><Toggle on onChange={noop} /></ProposedDisabled></StateCell>
+          <StateCell label="Pending / saving" kind="proposed" note="A setting save is instant today (writeCounselorAccount, synchronous); proposed thumb-spinner for the day it round-trips to a backend.">
+            <div className="relative flex h-[24px] w-[42px] flex-none items-center rounded-full border" style={{ background: "var(--primary)", borderColor: "var(--primary)" }}>
+              <span className="absolute flex size-[18px] items-center justify-center rounded-full bg-white" style={{ left: 21, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
+                <span className="block size-[10px] animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: "var(--primary)" }} aria-hidden />
+              </span>
+            </div>
+          </StateCell>
         </StateGrid>
         <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>File-local in counselor/v2/Settings.tsx; only the <code>export</code> keyword was added so it could render here.</p>
       </Specimen>
@@ -329,6 +367,9 @@ export function ControlsSection() {
           <StateCell label="At max (3 of 3), rest disabled"><ChipRowDemo atMax /></StateCell>
           <StateCell label="InterestPicker"><InterestPickerDemo /></StateCell>
           <StateCell label="Field wrapper"><FlowField label="Worlds"><InterestPickerDemo /></FlowField></StateCell>
+          <StateCell label="Many options (wraps)" note="flex-wrap, no scroll container; a long option list just grows the row's height." minH={140}>
+            <ChipRow ariaLabel="Worlds" max={3} value={["tech"]} onChange={noop} options={[{ key: "tech", label: "Tech & Engineering" }, { key: "health", label: "Health & Medicine" }, { key: "business", label: "Business" }, { key: "arts", label: "Arts & Media" }, { key: "law", label: "Law & Government" }, { key: "science", label: "Science & Research" }, { key: "trades", label: "Skilled Trades" }]} />
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -346,6 +387,7 @@ export function ControlsSection() {
           <StateCell label="PrimaryCta"><PrimaryCta onClick={noop}>Ask a question</PrimaryCta></StateCell>
           <StateCell label="QuietCta"><QuietCta onClick={noop}>Follow</QuietCta></StateCell>
           <StateCell label="QuietCta done" note="Click to toggle."><QuietCtaDoneDemo /></StateCell>
+          <StateCell label="Disabled" kind="proposed" note="Neither takes a disabled prop; every Connect CTA today is always clickable."><ProposedDisabled><PrimaryCta onClick={noop}>Ask a question</PrimaryCta></ProposedDisabled></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -369,10 +411,13 @@ export function ControlsSection() {
       <Specimen name="OptionButton" file="src/components/play/interactions.tsx" purpose="Simulation/Glossary answer choice, with locked, correct and wrong marking." when="Play beats: Choice, Bucket, Cards and similar.">
         <StateGrid>
           <StateCell label="Default"><OptionButtonDemo /></StateCell>
+          <StateCell label="Hover / focus" note="Hover or Tab to it. Real <button>, so the app-wide focus ring applies."><OptionButtonDemo /></StateCell>
           <StateCell label="Locked (disabled)"><OptionButtonDemo disabled /></StateCell>
           <StateCell label="Correct" note="Click to toggle picked."><OptionButtonDemo tier="best" picked /></StateCell>
           <StateCell label="Wrong" note="Click to toggle picked."><OptionButtonDemo tier="wrong" picked /></StateCell>
           <StateCell label="Revealed (right answer shown after a wrong pick)"><OptionButtonDemo revealed label={EDGE.longTitle} /></StateCell>
+          <StateCell label="Dimmed (an option ruled out elsewhere in the beat)" note="dimmed prop, e.g. options excluded by a prior pick."><OptionButtonDemo dimmed /></StateCell>
+          <StateCell label="Compact (preview density)"><OptionButtonDemo compact /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -381,9 +426,14 @@ export function ControlsSection() {
           <StateCell label="Default"><ResumeFieldDemo /></StateCell>
           <StateCell label="Invalid" kind="built" note="TextInput's own invalid prop reddens the border."><ResumeFieldDemo invalid /></StateCell>
           <StateCell label="Inline field error" kind="proposed" note="No built error message under the field yet; this is the playbook's inline-error voice."><ResumeFieldDemo invalid /><div className="mt-[6px]"><ProposedError variant="inline" verb="save this field" /></div></StateCell>
+          <StateCell label="Disabled" kind="built" note="TextInput spreads ...rest onto the &lt;input&gt;, so the native disabled prop already works; nothing in FIELD_STYLE dims it beyond the browser default."><ResumeFieldDemo disabled /></StateCell>
+          <StateCell label="Read-only" kind="built" note="Same passthrough as disabled, via the native readOnly attribute."><ResumeFieldDemo readOnly /></StateCell>
+          <StateCell label="Long value" note="No overflow handling; a value longer than the field just scrolls inside the native input."><ResumeField label="Job title" htmlFor="lab-resume-title-long" required><TextInput id="lab-resume-title-long" value={EDGE.longTitle} onChange={noop} placeholder="e.g. Barista" /></ResumeField></StateCell>
           <StateCell label="SelectInput" note="Built on Listbox, not a native &lt;select&gt;, confirmed not the cross-browser-flagged control."><ResumeSelectDemo /></StateCell>
           <StateCell label="ToolbarButton"><ToolbarButton label="Export" onClick={noop}><Download className="h-4 w-4" aria-hidden /></ToolbarButton></StateCell>
           <StateCell label="ToolbarButton icon-only"><ToolbarButton label="Edit sections" onClick={noop} iconOnly><Pencil className="h-4 w-4" aria-hidden /></ToolbarButton></StateCell>
+          <StateCell label="ToolbarButton success tone" kind="built" note="tone=&quot;success&quot;, the Approve action's own green tint; not shown before."><ToolbarButton label="Approve" onClick={noop} tone="success"><Download className="h-4 w-4" aria-hidden /></ToolbarButton></StateCell>
+          <StateCell label="ToolbarButton disabled" kind="proposed" note="No disabled prop on ToolbarButton; every toolbar action is always clickable today."><ProposedDisabled><ToolbarButton label="Export" onClick={noop}><Download className="h-4 w-4" aria-hidden /></ToolbarButton></ProposedDisabled></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -395,7 +445,7 @@ export function ControlsSection() {
 
       <Specimen name="SearchTrigger / GlobalSearch" file="src/components/app/GlobalSearch.tsx" purpose="The Cmd+K search trigger and the full-screen results overlay it opens." when="Every app header.">
         <StateGrid min={320}>
-          <StateCell label="Trigger and overlay" note="SearchTrigger's Cmd+K listener and GlobalSearch's scroll lock only run while this Reveal is open, so they never fire for the rest of the lab. Click the icon to open the overlay; Escape or the backdrop closes it (and the scroll lock with it)." minH={180}>
+          <StateCell label="Trigger and overlay" note="SearchTrigger's Cmd+K listener and GlobalSearch's scroll lock only run while this Reveal is open, so they never fire for the rest of the lab. Click the icon, then: idle shows the door links and Try suggestions (built), typing a real term shows grouped results, and typing gibberish (e.g. &quot;zzzzz&quot;) shows the built no-results line, all in the same live overlay. Escape or the backdrop closes it (and the scroll lock with it)." minH={180}>
             <Reveal label="Open search demo" clip={false}>
               <GlobalSearchDemo />
             </Reveal>

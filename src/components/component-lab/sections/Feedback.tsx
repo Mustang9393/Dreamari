@@ -2,13 +2,15 @@
 
 // DEMO-ONLY: Component Lab section, "Feedback and loading". Every shared
 // piece the app uses to say "this is happening", "this worked", "this is
-// how far along you are", or "this needs attention" -- plus, at the end,
-// the global gaps docs/handoff/COMPONENT_INVENTORY.md flags: nothing built
-// anywhere for a skeleton, an error boundary, an offline banner or an
-// error toast.
+// how far along you are", or "this needs attention". The app-wide surface
+// states (skeleton, error boundary, offline, 404, locked, session expired)
+// live in the States gallery section now, so they aren't repeated here --
+// this file stays scoped to toast/progress/status tones and the one real
+// gap in that scope: the app has no error-toast pattern (Toast/UndoToast
+// below are success/undo only).
 
 import { useState } from "react";
-import { Section, Specimen, StateGrid, StateCell, Reveal, ClippedStage, ProposedLoading, EDGE, noop } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, Reveal, ClippedStage, noop } from "../kit";
 
 import { Working } from "@/components/app/Working";
 import { Toast } from "@/components/app/Toast";
@@ -65,6 +67,39 @@ function UndoToastDemo() {
         <UndoToast message="Removed from Top 3" onUndo={noop} onClose={() => setShown(false)} duration={60000} />
       ) : (
         <p className="p-[var(--space-4)] text-center text-[13px]" style={{ color: "var(--muted-foreground)" }}>Dismissed. Reopen with Close / Show undo toast above.</p>
+      )}
+    </Reveal>
+  );
+}
+
+function LongToastDemo() {
+  const [shown, setShown] = useState(true);
+  return (
+    <Reveal label="Show toast" clip={false}>
+      {shown ? (
+        <Toast message="Added Registered Nurse, Software Engineer and Aerospace Engineering Technician to your Top 3" onClose={() => setShown(false)} duration={60000} />
+      ) : (
+        <p className="p-[var(--space-4)] text-center text-[13px]" style={{ color: "var(--muted-foreground)" }}>Dismissed. Reopen with Close / Show toast above.</p>
+      )}
+    </Reveal>
+  );
+}
+
+function StackedToastDemo() {
+  const [shown, setShown] = useState(true);
+  return (
+    <Reveal label="Show two toasts" clip={false}>
+      {shown ? (
+        // Both mount at once to show the built stacking behaviour: same
+        // fixed bottom slot, so a second toast lands flush on the first
+        // rather than offsetting above it -- there is no stack/offset
+        // logic today, only ever one toast expected on screen at a time.
+        <>
+          <Toast message="Added to your Top 3" onClose={noop} duration={60000} />
+          <UndoToast message="Removed from Top 3" onUndo={noop} onClose={() => setShown(false)} duration={60000} />
+        </>
+      ) : (
+        <p className="p-[var(--space-4)] text-center text-[13px]" style={{ color: "var(--muted-foreground)" }}>Dismissed. Reopen with Close / Show two toasts above.</p>
       )}
     </Reveal>
   );
@@ -133,6 +168,14 @@ export function FeedbackSection() {
         <StateGrid>
           <StateCell label="Toast (success)" minH={160}><ToastDemo /></StateCell>
           <StateCell label="UndoToast" minH={160}><UndoToastDemo /></StateCell>
+          <StateCell label="Long message" note="max-w-[420px] with no truncation built; a long message just wraps to more lines." minH={160}><LongToastDemo /></StateCell>
+          <StateCell label="Stacked" note="Both share the same fixed bottom-24/bottom-8 slot; a second toast lands on top of the first rather than offsetting above it, because only one toast is ever expected on screen at once." minH={200}><StackedToastDemo /></StateCell>
+          <StateCell label="Error toast" kind="proposed" note="By rule, errors are inline text, never a toast (Toast/UndoToast above are success/undo only). This is only a proposed look for the day that changes, same shell, danger tint on the border and dot instead of a new component." minH={160}>
+            <div className="flex max-w-[320px] items-center gap-[14px] rounded-[14px] border px-[16px] py-[12px] text-[14px] font-semibold" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--color-feedback-danger, #ff6b6b) 45%, var(--glass-border))", color: "var(--foreground)" }}>
+              <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: "var(--color-feedback-danger, #ff6b6b)" }} />
+              <span className="min-w-0 flex-1">Couldn&apos;t save. Try again.</span>
+            </div>
+          </StateCell>
         </StateGrid>
       </Specimen>
 
@@ -146,6 +189,7 @@ export function FeedbackSection() {
       <Specimen name="SparkBar" file="src/components/flow/SparkBar.tsx" purpose="The app's one animated progress fill: transitions, a particle spark on gain, and an idle flicker so it never reads as dead." when="Any percent-complete bar (Build's PhaseProgress, Resume's WizardProgress, Match Lab's picks).">
         <StateGrid>
           <StateCell label="0%"><SparkBar percent={0} fill="var(--primary)" glow="var(--primary)" height={6} idle={false} /></StateCell>
+          <StateCell label="Tiny value (1%)" note="min defaults to 0, so a real 1% renders as a hairline sliver; no visual floor is enforced by default."><SparkBar percent={1} fill="var(--primary)" glow="var(--primary)" height={6} idle={false} /></StateCell>
           <StateCell label="40%"><SparkBar percent={40} fill="var(--primary)" glow="var(--primary)" height={6} idle={false} /></StateCell>
           <StateCell label="100%"><SparkBar percent={100} fill="var(--primary)" glow="var(--primary)" height={6} idle={false} /></StateCell>
           <StateCell label="Idle flicker" note="Fires an unprompted flicker after ~10-18s of no page activity while the bar is visible and incomplete."><SparkBar percent={65} fill="var(--primary)" glow="var(--primary)" height={6} idle memoryKey="lab-idle-demo" /></StateCell>
@@ -201,6 +245,7 @@ export function FeedbackSection() {
           <StateCell label="MetricRow: near"><MetricRow label="On-track students" value={70} target={75} /></StateCell>
           <StateCell label="MetricRow: missed"><MetricRow label="On-track students" value={48} target={75} /></StateCell>
           <StateCell label="Stat"><Stat value="92%" label="Milestones approved" /></StateCell>
+          <StateCell label="Stat, large number" note="value is a plain string; whatever formatting (1.2k, commas) is the caller's job, not Stat's."><Stat value="1,240" label="Students served" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -208,7 +253,8 @@ export function FeedbackSection() {
         <StateGrid min={280}>
           <StateCell label="Loading"><LoadingState /></StateCell>
           <StateCell label="Error"><ErrorState onRetry={noop} /></StateCell>
-          <StateCell label="Empty"><EmptyState view="overview" /></StateCell>
+          <StateCell label="Empty, with CTA"><EmptyState view="overview" /></StateCell>
+          <StateCell label="Empty, no CTA" note="Not every SCREEN_EMPTY entry has a cta (e.g. students); the button is conditional, not always there."><EmptyState view="students" /></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -224,29 +270,6 @@ export function FeedbackSection() {
       <Specimen name="LiveRegion" file="src/components/app/LiveRegion.tsx" purpose="One polite screen-reader announcement channel for the whole app: announce(message) speaks it, nothing changes visually." when="Any state change that only shows up visually otherwise (a save, an unlock, a score change).">
         <StateGrid>
           <StateCell label="Announce" note="Visually hidden (sr-only). Turn on a screen reader, or inspect the DOM node this renders, to hear/see the announcement fire."><LiveRegionDemo /></StateCell>
-        </StateGrid>
-      </Specimen>
-
-      <Specimen name="Global gaps" file="docs/handoff/COMPONENT_INVENTORY.md" purpose="Nothing exists yet for these anywhere in the app (lines 51-57): no shared skeleton component, no error boundary fallback, no offline handling, and no error-toast pattern. Proposed defaults from the states playbook, not real components." when="Every data-backed surface eventually needs a loading and a failure treatment; today only 8 of 62 have one.">
-        <StateGrid>
-          <StateCell label="Skeleton: cards" kind="proposed"><ProposedLoading shape="cards" /></StateCell>
-          <StateCell label="Skeleton: list" kind="proposed"><ProposedLoading shape="list" /></StateCell>
-          <StateCell label="Error boundary fallback" kind="proposed" note="ErrorReporter only logs today; a thrown component blanks the screen with nothing in its place.">
-            <div className="flex flex-col items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-center" style={{ borderColor: "var(--border)" }}>
-              <p className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>Something went wrong. Try again.</p>
-              <button type="button" onClick={noop} className="dm-quiet mt-[2px] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Retry</button>
-            </div>
-          </StateCell>
-          <StateCell label="Offline banner" kind="proposed" note="No navigator.onLine check exists anywhere in the app yet.">
-            <p className="text-center text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>You&apos;re offline. Changes will sync when you reconnect.</p>
-          </StateCell>
-          <StateCell label="Error toast" kind="proposed" note="Toasts today are success/undo only (Toast, UndoToast above); by rule, errors are inline text, never a toast. This is only a proposed look for the day that changes.">
-            <div className="flex max-w-[320px] items-center gap-[10px] rounded-[14px] border px-[14px] py-[10px] text-[13px] font-semibold" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--color-feedback-danger, #ff6b6b) 45%, var(--glass-border))", color: "var(--foreground)" }}>
-              <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: "var(--color-feedback-danger, #ff6b6b)" }} />
-              <span className="min-w-0 flex-1">Couldn&apos;t save. Try again.</span>
-            </div>
-          </StateCell>
-          <StateCell label="Long label edge case" note="EDGE.longBody, wherever a proposed empty/error line has to hold real copy."><p className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{EDGE.longBody}</p></StateCell>
         </StateGrid>
       </Specimen>
     </Section>

@@ -54,7 +54,7 @@ function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]
 }
 
 /** The nav's round icon button, the same 40px as the hamburger. */
-function NavIconButton({ label, open, onClick, badge, dot, children }: { label: string; open?: boolean; onClick: () => void; badge?: number; dot?: boolean; children: ReactNode }) {
+export function NavIconButton({ label, open, onClick, badge, dot, children }: { label: string; open?: boolean; onClick: () => void; badge?: number; dot?: boolean; children: ReactNode }) {
   return (
     <IconTip label={label}>
       <button
