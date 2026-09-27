@@ -285,7 +285,7 @@ function DateTile({ month, day, size = "md" }: { month: string; day: number; siz
   );
 }
 /** "Closes Jan 31" as a short chip. */
-function DeadlineChip({ month, day, soon = false }: { month: string; day: number; soon?: boolean }) {
+export function DeadlineChip({ month, day, soon = false }: { month: string; day: number; soon?: boolean }) {
   const tone = soon ? "var(--world-business-money-office)" : "var(--foreground)";
   return (
     <span className="inline-flex items-center gap-[5px] rounded-full border px-[8px] py-[2px] text-[11.5px] leading-[15px] font-bold whitespace-nowrap" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: tone }}>
@@ -333,7 +333,7 @@ function Signals({ id, className = "" }: { id: string; className?: string }) {
   );
 }
 
-function OpportunityCard({ item, saved, onSave, onOpen, showKind = true }: { item: Opportunity; saved: boolean; onSave: () => void; onOpen: () => void; /** false inside a section whose heading already names the kind */ showKind?: boolean }) {
+export function OpportunityCard({ item, saved, onSave, onOpen, showKind = true }: { item: Opportunity; saved: boolean; onSave: () => void; onOpen: () => void; /** false inside a section whose heading already names the kind */ showKind?: boolean }) {
   const d = D.REPLIT_ONLY ? undefined : D.OPPORTUNITY_DETAILS[item.id];
   // Four things, not eight (direct feedback, 18 Sept 2026: "so super
   // cluttered, minimize the components"): the kind, the title, one line
@@ -722,7 +722,7 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity, prog
   );
 }
 
-function ModuleCard({ m, pct, onOpen }: { m: D.LearnModule; pct: number; onOpen: () => void }) {
+export function ModuleCard({ m, pct, onOpen }: { m: D.LearnModule; pct: number; onOpen: () => void }) {
   const done = pct >= 100;
   const picks = useContext(PicksCtx);
   const fits = !!m.world && picks.some((c) => c.world === m.world);

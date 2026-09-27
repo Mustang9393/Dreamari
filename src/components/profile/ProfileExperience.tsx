@@ -1121,7 +1121,7 @@ function MoreFactsAccordion({ facts }: { facts: { label: string; value: string }
   );
 }
 
-function Top3Tab({
+export function Top3Tab({
   top3, focusId, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onOpenCompare, onGoReport, showTour, onTourDone,
 }: {
   top3: string[];
@@ -1457,7 +1457,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // PosterCard is never actually imported into this file. Same shared
 // world-tinted-gradient-plus-muted-`ImageOff` pattern as everywhere else
 // this session.
-function ProfilePhoto({ career, sizes, className, style }: { career: ProfileCareer; sizes: string; className: string; style?: CSSProperties }) {
+export function ProfilePhoto({ career, sizes, className, style }: { career: ProfileCareer; sizes: string; className: string; style?: CSSProperties }) {
   const [failed, setFailed] = useState(false);
   if (failed) {
     const worldColor = WORLD_COLORS[career.world] ?? "var(--muted-foreground)";
@@ -1568,7 +1568,7 @@ function currentPlanWindowId(): "fall" | "winter" | "spring" {
   return "fall";
 }
 
-function OverviewTabV2({
+export function OverviewTabV2({
   focus, top3Careers, onGoTop3, onGoPlan, onGoReport, onGoResume, onGoLocker, seasonOverride, tourStep, onTourNext,
 }: {
   focus: ProfileCareer | null;
@@ -1918,7 +1918,7 @@ function CompareChart({ title, better, unit, rows, selectedId }: { title: string
 // tasks. Two tabs, named so they cannot be confused with each other
 // ("Routes" vs "My Plan" rather than the old "Path" vs "Plan").
 
-function RoutesTab({
+export function RoutesTab({
   focus, chosenRoute, setRouteChoice, savedMajors, onToggleMajor, onGoPlan,
 }: {
   focus: ProfileCareer | null;
@@ -1972,7 +1972,7 @@ function MyPlanTab({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCareer
 // The pitch, fit, student life and payoff detail moves into a modal, because
 // on a list the only job is "which of these do I want to look at".
 
-function RouteRow({ route, selected, onOpen, onSelect }: {
+export function RouteRow({ route, selected, onOpen, onSelect }: {
   route: ProfileCareer["routes"][number];
   selected: boolean;
   onOpen: () => void;
@@ -2680,7 +2680,7 @@ function FactRow({ label, value }: { label: string; value: string }) {
 
 // The Replit "Compare All Paths" table: every category side by side, each
 // cell a value plus its benefit tag.
-function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"]; selectedId: string }) {
+export function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"]; selectedId: string }) {
   const rows: { label: string; value: (route: ProfileCareer["routes"][number]) => string; tag: (route: ProfileCareer["routes"][number]) => string | undefined }[] = [
     { label: "Time to graduate", value: (route) => route.duration, tag: (route) => routeDetail(route.id)?.tags.time },
     { label: "Total cost", value: (route) => route.cost.split(",")[0], tag: (route) => routeDetail(route.id)?.tags.cost },
@@ -2721,7 +2721,7 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
 
 // ---- Locker tab: rich poster grid ----
 
-function SchoolsShelf() {
+export function SchoolsShelf() {
   const [saved, toggleSaved] = useSavedColleges();
   const colleges = [...saved].map((slug) => collegeBySlug(slug)).filter((c): c is NonNullable<typeof c> => !!c);
   if (colleges.length === 0) {
@@ -2755,7 +2755,7 @@ function SchoolsShelf() {
   );
 }
 
-function VideosShelf() {
+export function VideosShelf() {
   const [saved, toggleSaved] = useSavedVideos();
   const videos = COMPANY_VIDEOS.filter((v) => saved.has(v.video));
   if (videos.length === 0) {
@@ -2795,7 +2795,7 @@ function VideosShelf() {
   );
 }
 
-function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void }) {
+export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void }) {
   // The locker holds everything a student saves across Dreamari, grouped
   // into the four categories students actually save (direct feedback, 16
   // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside

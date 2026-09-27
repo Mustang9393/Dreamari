@@ -37,7 +37,7 @@ import { IconTip } from "@/components/app/IconTip";
 // something tappable (direct feedback, 16 Sept 2026: "needs to read more
 // like a button... some sort of surface and a + leading").
 // ---------------------------------------------------------------------------
-function EmptyStateAdd({ label, onAdd }: { label: string; onAdd: () => void }) {
+export function EmptyStateAdd({ label, onAdd }: { label: string; onAdd: () => void }) {
   return (
     <button
       type="button"

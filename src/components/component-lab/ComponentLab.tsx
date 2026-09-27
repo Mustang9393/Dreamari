@@ -16,7 +16,7 @@
 // its own, plays audio on mount or calls /api/*. The theme toggle applies
 // the class without persisting. Reached from the hamburger's lab links.
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowLeft, Moon, Sun } from "lucide-react";
 import { QuickLinksMenu } from "@/components/app/chrome";
@@ -49,7 +49,7 @@ const SECTIONS = [
 ] as const;
 
 /** Which section is under the reading line (a band ~25% down the viewport). */
-function useScrollSpy(ids: readonly string[]) {
+function useScrollSpy(ids: readonly string[], ready: boolean) {
   const [active, setActive] = useState(ids[0]);
   useEffect(() => {
     const els = ids.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => !!el);
@@ -62,15 +62,32 @@ function useScrollSpy(ids: readonly string[]) {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, [ids]);
+  }, [ids, ready]);
   return active;
 }
 
 const IDS = SECTIONS.map((s) => s.id);
 
+// Sections render on the client only. Several real components are
+// intentionally non-deterministic (ChoiceBody shuffles its options, stores
+// are read from localStorage), which would mismatch server HTML; the lab
+// has nothing worth server-rendering anyway.
+const noopSubscribe = () => () => {};
+function useMounted() {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+}
+
 export function ComponentLab() {
   const { theme } = useGlobalTheme();
-  const active = useScrollSpy(IDS);
+  const mounted = useMounted();
+  const active = useScrollSpy(IDS, mounted);
+
+  // Deep links (/component-lab#states): the sections mount after hydration,
+  // so the browser's own jump to the hash has nothing to land on yet.
+  useEffect(() => {
+    if (!mounted || !location.hash) return;
+    document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: "start" });
+  }, [mounted]);
 
   // Keep the active chip in view in the mobile row as the page scrolls.
   useEffect(() => {
@@ -176,9 +193,7 @@ export function ComponentLab() {
               </span>
             </div>
           </div>
-          {SECTIONS.map(({ id, Body }) => (
-            <Body key={id} />
-          ))}
+          {mounted ? SECTIONS.map(({ id, Body }) => <Body key={id} />) : <p className="py-[var(--space-10)] text-center text-[13px]" style={{ color: "var(--muted-foreground)" }}>Loading the library…</p>}
         </main>
       </div>
     </div>

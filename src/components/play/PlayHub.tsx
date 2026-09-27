@@ -603,7 +603,7 @@ function CoverPhoto({ src, world, sizes, className }: { src?: string; world?: st
   return <Image src={src} alt="" fill sizes={sizes} className={className} onError={() => setFailed(true)} />;
 }
 
-function RowCard({
+export function RowCard({
   candidate,
   active = false,
   large = false,
@@ -738,7 +738,7 @@ function RowCard({
  *  2026): a play glyph on a real simulation, a lock on a coming-soon one.
  *  Purely visual (aria-hidden) -- the whole-card link or select button
  *  underneath is the control. */
-function CornerBadge({ kind, large, faded = false }: { kind: "play" | "lock"; large: boolean; faded?: boolean }) {
+export function CornerBadge({ kind, large, faded = false }: { kind: "play" | "lock"; large: boolean; faded?: boolean }) {
   const size = large ? "size-[52px] sm:size-[64px] md:size-[72px]" : "size-[44px] md:size-[52px]";
   const glyph = large ? "h-[22px] w-[22px] sm:h-[26px] sm:w-[26px] md:h-[30px] md:w-[30px]" : "h-[18px] w-[18px] md:h-[22px] md:w-[22px]";
   return (
@@ -931,7 +931,7 @@ function HeroShelfRow({
  *  badge on the cards fanned out behind the front one (direct feedback, 21
  *  Sept 2026: Glossary Games/In the works get the same phone stack Career
  *  Simulations already had, not the compact rail shrunk down further). */
-function HeroShelfCard({ item, large = false, active = false, onSelect, deck = false, front = true }: { item: HeroItem; large?: boolean; active?: boolean; onSelect?: () => void; deck?: boolean; front?: boolean }) {
+export function HeroShelfCard({ item, large = false, active = false, onSelect, deck = false, front = true }: { item: HeroItem; large?: boolean; active?: boolean; onSelect?: () => void; deck?: boolean; front?: boolean }) {
   const tier = deck || large ? "hero" : active ? "side" : "compact";
   const compactWord = hasLongWord(item.title);
   const titleSize =

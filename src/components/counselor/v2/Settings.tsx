@@ -33,7 +33,7 @@ function fieldStyle(): React.CSSProperties {
   return { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" };
 }
 
-function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
       type="button"

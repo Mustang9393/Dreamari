@@ -230,7 +230,7 @@ function PartnerLockup({ tile, height }: { tile: D.ProgramTile; height: number }
  *  scrim, progressive blur, the partner's mark), kept visibly distinct: a
  *  mentorship-kind eyebrow, the partner's own lockup where they have one,
  *  and a single frosted status line instead of three stat tiles. */
-function ProgramTile({ tile, onOpen }: { tile: D.ProgramTile; onOpen: () => void }) {
+export function ProgramTile({ tile, onOpen }: { tile: D.ProgramTile; onOpen: () => void }) {
   const yours = tile.state === "yours";
   const stateTone = yours ? GOOD : tile.state === "enrolling" ? accent : "rgba(255,255,255,0.7)";
   const stateLabel = yours ? "Your program" : tile.state === "enrolling" ? "Enrolling" : "Coming soon";
@@ -675,7 +675,7 @@ function downloadIcs(m: D.MeetingRequest) {
 /** A meeting request inside the thread: named, with an agenda, a time and
  *  a place. The receiver accepts or declines here; either side can add it
  *  to their calendar once it is accepted. */
-function MeetingCard({ m, mine, onDecide, onToast }: { m: D.MeetingRequest; mine: boolean; onDecide: (status: "accepted" | "declined") => void; onToast: (t: string) => void }) {
+export function MeetingCard({ m, mine, onDecide, onToast }: { m: D.MeetingRequest; mine: boolean; onDecide: (status: "accepted" | "declined") => void; onToast: (t: string) => void }) {
   const tone = m.status === "accepted" ? GOOD : m.status === "declined" ? "var(--muted-foreground)" : accent;
   return (
     <div className="flex w-[300px] max-w-full flex-col gap-[10px] rounded-[18px] border p-[14px]" style={{ background: "var(--glass-surface-2)", borderColor: `color-mix(in srgb, ${tone} 45%, var(--glass-border))`, boxShadow: "0 14px 32px -22px rgba(0,0,0,0.6)" }}>

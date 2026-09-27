@@ -512,7 +512,7 @@ function GroupLabel({ label, count, max }: { label: string; count?: number; max?
 
 /** Build's chip: the same lift-and-accent hover every tappable card in the
  *  app uses (dm-tap), never a brightness change. */
-function Chip({ on, onClick, dim = false, children }: { on: boolean; onClick: () => void; /** the group is at its cap and this chip is not picked */ dim?: boolean; children: ReactNode }) {
+export function Chip({ on, onClick, dim = false, children }: { on: boolean; onClick: () => void; /** the group is at its cap and this chip is not picked */ dim?: boolean; children: ReactNode }) {
   return (
     <motion.button type="button" aria-pressed={on} onClick={onClick} whileTap={{ scale: 0.95 }} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[12px] py-[7px] text-left text-[13px] leading-[16px] transition-opacity" style={{ borderColor: on ? "color-mix(in srgb, var(--accent-subtle) 75%, transparent)" : CHIP_BORDER, background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)", fontWeight: on ? 600 : 500, opacity: dim ? 0.55 : 1 }}>
       {on && <motion.span aria-hidden initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 22 }} className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />}

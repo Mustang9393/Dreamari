@@ -27,7 +27,7 @@ function scoreTone(value: number) {
 // clearer pattern already established elsewhere that this card's own
 // badge had drifted from (direct feedback: "there was a better way these
 // badges were shown before").
-function ScoreBadge({ category, label, value }: { category: string; label: string; value: number }) {
+export function ScoreBadge({ category, label, value }: { category: string; label: string; value: number }) {
   const tone = scoreTone(value);
   return (
     <div className="flex items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
@@ -185,7 +185,7 @@ function StatusTags({ version }: { version: ResumeVersion }) {
 // badges exactly as they rendered, the four icon actions, Open), just
 // reflowed for a card: status tags up top, identity, scores, then a
 // footer row for actions instead of one continuous horizontal line.
-function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete, tagNudge = false }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void; /** show the tag-color sparkle nudge on this card's dot */ tagNudge?: boolean }) {
+export function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete, tagNudge = false }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void; /** show the tag-color sparkle nudge on this card's dot */ tagNudge?: boolean }) {
   const [downloading, setDownloading] = useState(false);
   const ats = version.atsCheck;
   // Stored as "NW — Needs Work"; only the plain-English half is ever shown.

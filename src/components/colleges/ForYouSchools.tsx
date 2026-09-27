@@ -340,7 +340,7 @@ function stateCode(stateName: string): string {
 
 // ---- text dropdowns for the breadcrumb ------------------------------------
 
-function Menu({ label, sub, open, onToggle, disabled, big, children }: { label: string; sub?: string; open: boolean; onToggle: () => void; disabled?: boolean; big?: boolean; children: React.ReactNode }) {
+export function Menu({ label, sub, open, onToggle, disabled, big, children }: { label: string; sub?: string; open: boolean; onToggle: () => void; disabled?: boolean; big?: boolean; children: React.ReactNode }) {
   const subEl = sub ? <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span> : null;
   if (disabled) return <span className="whitespace-nowrap" style={{ color: "var(--foreground)" }}>{label}{subEl}</span>;
   return (
@@ -359,7 +359,7 @@ function Menu({ label, sub, open, onToggle, disabled, big, children }: { label: 
     </span>
   );
 }
-function MenuItem({ label, sub, on, onClick }: { label: string; sub?: string; on: boolean; onClick: () => void }) {
+export function MenuItem({ label, sub, on, onClick }: { label: string; sub?: string; on: boolean; onClick: () => void }) {
   return (
     <li role="none">
       <button type="button" role="menuitemradio" aria-checked={on} onClick={onClick} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[12px] py-[9px] text-left text-[14px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: on ? `color-mix(in srgb, ${ACCENT} 18%, transparent)` : "transparent" }}>
@@ -439,7 +439,7 @@ function Select({ value, options, onChange, ariaLabel }: { value: string; option
   );
 }
 
-function WhySheet({ onClose, onEdit, career, route, program, gpaLabel, place }: {
+export function WhySheet({ onClose, onEdit, career, route, program, gpaLabel, place }: {
   onClose: () => void;
   onEdit: () => void;
   career: string;

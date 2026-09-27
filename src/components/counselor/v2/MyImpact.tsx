@@ -146,7 +146,7 @@ function ListRow({ label, value, dot, onClick }: { label: string; value: string;
 
 /** A rate or a comparison: short label, value, one thin bar. `muted`
  *  draws the bar in the neutral (a benchmark, not a result). */
-function BarRow({ label, value, pct, muted, tick }: { label: string; value: string; pct: number; muted?: boolean; /** a benchmark tick, as % of the bar */ tick?: number }) {
+export function BarRow({ label, value, pct, muted, tick }: { label: string; value: string; pct: number; muted?: boolean; /** a benchmark tick, as % of the bar */ tick?: number }) {
   const reduce = useReducedMotion();
   const color = muted ? NEUTRAL_SLICE : PRIMARY;
   return (

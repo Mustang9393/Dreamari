@@ -1390,7 +1390,7 @@ function useCountUp(value: number) {
  *  count-up/down between values, a pop when it changes, and the floating
  *  +5/-3 delta. The same ring language as the countdown clock, so the
  *  HUD's two dials read as one family. */
-function ScoreGauge({ reputation, band, delta, accent, demo = false, hideBand = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean; hideBand?: boolean }) {
+export function ScoreGauge({ reputation, band, delta, accent, demo = false, hideBand = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean; hideBand?: boolean }) {
   // Spotlight demo (direct feedback): while a beat is EXPLAINING the score,
   // the gauge acts out a worked example -- nudging up 5, back, down 3,
   // back -- with an arrow calling the eye to it, so "that number in the
@@ -1629,7 +1629,7 @@ function renderTappableLine(line: string, tokens: { token: string; entry: LexEnt
   return nodes;
 }
 
-function DialogueBox({
+export function DialogueBox({
   speaker,
   portrait,
   setup,
@@ -1984,7 +1984,7 @@ function TappableScore({ reputation, band, delta, accent, hideBand = false }: { 
   );
 }
 
-function Hud({
+export function Hud({
   simulation,
   level,
   reputation,
@@ -2176,7 +2176,7 @@ function MuteToggle() {
  *  so urgency is felt rather than present the whole time a beat is timed.
  *  SILENT, per direct instruction: no per-second tick sound -- the ring and
  *  the pulse carry the urgency on their own. */
-function Clock({ remaining, total }: { remaining: number; total: number }) {
+export function Clock({ remaining, total }: { remaining: number; total: number }) {
   const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
   const radius = 18;
@@ -2217,7 +2217,7 @@ function Clock({ remaining, total }: { remaining: number; total: number }) {
 // sentence, then the skill chips and the score -- nothing else. The
 // sentence is the Why line for the option the student actually chose
 // (result.why); the beat-level feedback body is no longer shown.
-function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; result: Result; reputation: number; onNext: () => void }) {
+export function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; result: Result; reputation: number; onNext: () => void }) {
   const good = result.delta > 0;
   const color = good ? "var(--color-feedback-success)" : result.delta <= -6 ? "var(--destructive)" : "var(--world-building-construction)";
   const cta = "feedbackCta" in beat ? beat.feedbackCta : "Continue";
@@ -2321,7 +2321,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
 
 // ---------------------------------------------------------------- the ending
 
-function EndingCard({
+export function EndingCard({
   ending,
   reputation,
   band,

@@ -44,7 +44,7 @@ export function DrillTile({ onOpen, label, className = "", style, children }: { 
   );
 }
 
-function DrillBar({ pct }: { pct: number }) {
+export function DrillBar({ pct }: { pct: number }) {
   const reduce = useReducedMotion();
   return (
     <span className="relative block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>

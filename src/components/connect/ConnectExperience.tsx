@@ -183,7 +183,7 @@ function proById(id: string) {
 // build the page around), same family as every other whole-route empty
 // state this session, with the one thing those id-driven views actually
 // need: a real way back, since the header's own back button isn't there.
-function ConnectNotFound({ onBack, backLabel = "Back" }: { onBack: () => void; backLabel?: string }) {
+export function ConnectNotFound({ onBack, backLabel = "Back" }: { onBack: () => void; backLabel?: string }) {
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
@@ -397,7 +397,7 @@ function agoMinutes(postedAgo: string): number {
 // feedback, 8 Sept 2026: don't clone the whole row, just the one real signal
 // that "this is a live control"). This feed has no downvote, so the pill
 // carries just the thumbs-up and its count.
-function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed: boolean; count: number }) {
+export function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed: boolean; count: number }) {
   return (
     <button
       type="button"
@@ -411,7 +411,7 @@ function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed
   );
 }
 
-function StatusChip({ state }: { state: Thread["state"] }) {
+export function StatusChip({ state }: { state: Thread["state"] }) {
   return (
     <span className="inline-flex items-center gap-[5px] text-[11px] leading-[15px] font-semibold" style={{ color: STATE_COLOR[state] }}>
       {state === "awaiting" ? <Clock className="h-3 w-3" aria-hidden /> : state === "routed" ? <ChevronRight className="h-3 w-3" aria-hidden /> : <CheckCircle2 className="h-3 w-3" aria-hidden />}
@@ -818,7 +818,7 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 // has come back yet, the quoted bold question as the card's heading, a chip
 // row for the asker's grade and country, then likes · views · comments, with
 // the time at the top right.
-function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   // Display count for the demo (data.ts `comments`), falling back to the
   // real list; the thread itself may hold fewer. Direct feedback.
   const comments = thread.comments ?? thread.responses.length;
@@ -896,7 +896,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
 // and their company chip, the insight's title line, then likes and comments
 // -- and the whole row OPENS: title and comment count both land on the
 // insight's own thread, where the conversation lives.
-function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   const nav = useContext(ConnectNav);
   return (
@@ -1014,7 +1014,7 @@ function CompactRow({ onOpen, avatarName, title, meta, state, helpful, comments 
   );
 }
 
-function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () => void }) {
+export function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () => void }) {
   const comments = thread.comments ?? thread.responses.length;
   return (
     <CompactRow
@@ -1029,7 +1029,7 @@ function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () =>
   );
 }
 
-function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOpen: () => void }) {
+export function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOpen: () => void }) {
   const pro = proById(insight.proId);
   return <CompactRow onOpen={onOpen} avatarName={pro.name} title={insight.title} meta={`${pro.name} · ${pro.role} · ${insight.postedAgo}`} helpful={insight.helpful} comments={insight.replies.length} />;
 }
@@ -1080,7 +1080,7 @@ function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, count, co
   );
 }
 
-function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const comments = thread.comments ?? thread.responses.length;
   const answered = thread.state === "answered" || thread.state === "resolved";
   return (
@@ -1108,7 +1108,7 @@ function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful 
   );
 }
 
-function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   return (
     <AlignedRow
@@ -1204,7 +1204,7 @@ function ActionChip({ children, onClick, pressed, label }: { children: React.Rea
   );
 }
 
-function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const comments = thread.comments ?? thread.responses.length;
   return (
     <RailRow
@@ -1226,7 +1226,7 @@ function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: 
   );
 }
 
-function RailInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function RailInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   return (
     <RailRow
@@ -1882,7 +1882,7 @@ type AskedQuestion = { id: string; title: string; boardId: string };
 /** The signed-in student's own questions: the seeded ones Jordan asked plus
  *  anything posted this session. One row each: what happened to it, then the
  *  question. The panel's aside is the way into Saved. */
-function YourQuestions({ asked, onOpenThread, savedCount, onDeleteAsked }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; savedCount: number; onDeleteAsked?: (id: string) => void }) {
+export function YourQuestions({ asked, onOpenThread, savedCount, onDeleteAsked }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; savedCount: number; onDeleteAsked?: (id: string) => void }) {
   const nav = useContext(ConnectNav);
   const mine = ALL_THREADS.filter((t) => t.handle === "Jordan");
   const empty = asked.length === 0 && mine.length === 0;
@@ -1958,7 +1958,7 @@ const STOP = new Set(["what", "does", "have", "with", "that", "this", "your", "f
 /** The one place to ask from the landing. Type the question; it picks the
  *  community from your words (changeable), shows a question that was already
  *  answered when there is one, and keeps contact details out. */
-function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPost: (title: string, boardId: string) => void; onOpenThread: (id: string) => void }) {
+export function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPost: (title: string, boardId: string) => void; onOpenThread: (id: string) => void }) {
   const worlds = useStudentWorlds();
   const [text, setText] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
@@ -2158,7 +2158,7 @@ function FollowingFeedView({ follows, onBack, backLabel = "Back" }: { follows: F
 const REPORT_REASONS = ["Shares personal contact details", "Unkind or bullying", "Not about careers or school", "Something else"];
 
 /** Report, made visible (safety by design): pick why, send, done. */
-function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (reason: string) => void }) {
+export function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (reason: string) => void }) {
   const [reason, setReason] = useState<string | null>(null);
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="report-title">
@@ -3545,7 +3545,7 @@ function seededReactions(id: string): number[] {
 
 /** The like button grown up: 👍 plus tap-to-react emoji, the same
  *  vocabulary as the GIFs in the threads. One row, one shape, everywhere. */
-function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; liked: boolean; onLike: (id: string) => void }) {
+export function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; liked: boolean; onLike: (id: string) => void }) {
   const [mine, setMine] = useState<Record<string, boolean>>({});
   const seeds = seededReactions(id);
   const chip = "dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[11.5px] leading-[15px] font-semibold transition-transform duration-150 active:scale-90";
@@ -3644,7 +3644,7 @@ function AnswerRow({ r, rid, threadId, threadTitle, collapsed, onToggleCollapse,
 /** A comment under an insight or thread: avatar, name + role chip, the
  *  line itself, then a working like button and the time. `likes` is the
  *  seeded count; the toggle adds the student's own on top. */
-function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt, collapsed, onToggleCollapse }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string; collapsed?: boolean; onToggleCollapse?: () => void }) {
+export function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt, collapsed, onToggleCollapse }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
   const nav = useContext(ConnectNav);
   // a professional's face and name open their profile; students have none
@@ -3714,7 +3714,7 @@ function focusReplyComposer() {
   window.setTimeout(() => box?.querySelector("textarea")?.focus(), 350);
 }
 
-function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
+export function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
   const [text, setText] = useState("");
   const blocked = CONTACT_INFO.test(text);
   // Unlike InlineAsk (only mounted once a reader taps "Ask" -- the tap
@@ -3910,7 +3910,7 @@ function InsightThreadView({
 // ——— Ask flow (handoff 11) ———
 
 
-function JoinSheet({ community, onClose, onJoin }: { community: Community; onClose: () => void; onJoin: () => void }) {
+export function JoinSheet({ community, onClose, onJoin }: { community: Community; onClose: () => void; onJoin: () => void }) {
   const [agreed, setAgreed] = useState(false);
   const perks = [
     { title: "Ask verified professionals", body: `People from ${community.professionalsFrom.slice(0, 2).join(" and ")} answer questions here.` },
@@ -3964,7 +3964,7 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
 
 // ——— event code redemption (handoff 9) ———
 
-function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onClose: () => void; onRedeemed: () => void }) {
+export function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onClose: () => void; onRedeemed: () => void }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);

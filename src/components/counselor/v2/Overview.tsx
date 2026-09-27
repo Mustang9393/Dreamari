@@ -80,7 +80,7 @@ import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 // distribution or breakdown"). The ring or stacked bar above is the
 // distribution chart; the legend only names and counts each slice.
 
-function DeltaChip({ pts }: { pts: number }) {
+export function DeltaChip({ pts }: { pts: number }) {
   const up = pts >= 0;
   // Green up (direct feedback, 26 Sept 2026: "trend chips can stay green.
   // Blue is hard to read on blue"): a trend is text on a blue-tinted card,

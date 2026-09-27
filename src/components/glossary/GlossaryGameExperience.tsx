@@ -190,7 +190,7 @@ function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | 
   );
 }
 
-function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong" }) {
+export function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong" }) {
   // Neutral used to be var(--glass-surface-1) -- a translucent glass panel
   // that read fine over the game's old plain dark backdrop, but got lost
   // once that backdrop became a busy, colorful animated background (direct
@@ -504,7 +504,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
  *  content swap -- "still have the tap to flip functionality" -- with the
  *  same graphic on both faces and the ring-bound page identity carried
  *  through on each side. */
-function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: GlossaryTerm }) {
+export function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: GlossaryTerm }) {
   const [flipped, setFlipped] = useState(false);
   const reduced = useReducedMotion();
   const rings = (
@@ -790,7 +790,7 @@ const CORRECT_COLOR = "var(--world-food-farming-nature)";
 
 type AnswerResult = { correct: boolean; creditedTermIds: string[] };
 
-function OptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
+export function OptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
   // Gap bumped 12px -> 16px: the card/text around this got scaled up
   // ("lets scale up the question+answer content") but this gap didn't
   // move with it, so at the new size the option borders read as touching
@@ -1368,7 +1368,7 @@ function QuestionScreen({
 // tapping the backdrop: StreakModal is an optional celebratory toast,
 // this is the required checkpoint before advancing, so the button stays
 // the only way through.
-function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; text: string; onNext: () => void; isLast: boolean }) {
+export function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; text: string; onNext: () => void; isLast: boolean }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}>
       <div
@@ -1402,7 +1402,7 @@ function FeedbackPanel({ correct, text, onNext, isLast }: { correct: boolean; te
   );
 }
 
-function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => void }) {
+export function StreakModal({ streak, onDismiss }: { streak: number; onDismiss: () => void }) {
   // A streak award with a party Dreamy and "On fire!" had no sound or motion
   // beyond the modal appearing. The correct-answer chime it just earned, plus a
   // burst, so it lands as the bonus it is.
@@ -1568,7 +1568,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
   );
 }
 
-function MasteryLoadingScreen({ fact }: { fact: string | null }) {
+export function MasteryLoadingScreen({ fact }: { fact: string | null }) {
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-5)] px-5 py-[var(--space-10)] text-center">
       <DreamyFace pose="idea" size={112} />
@@ -1584,7 +1584,7 @@ function MasteryLoadingScreen({ fact }: { fact: string | null }) {
   );
 }
 
-function CompleteScreen({
+export function CompleteScreen({
   lesson,
   masteredCount,
   onContinue,

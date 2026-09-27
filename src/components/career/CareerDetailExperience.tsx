@@ -197,7 +197,7 @@ export function Section({ id, title, action, children }: { id?: string; title: s
 // Not wrapped in the same bordered `Section` panel real content uses --
 // deliberately lighter, so it reads as "nothing here yet," not "here's
 // real content in a panel that happens to be short."
-function TabComingSoon({ title, career }: { title: string; career: string }) {
+export function TabComingSoon({ title, career }: { title: string; career: string }) {
   return (
     <div className="flex flex-col items-center gap-[var(--space-2)] px-[var(--space-5)] py-[var(--space-10)] text-center">
       <Sparkles className="h-6 w-6" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -247,7 +247,7 @@ export function DotList({ items, accent, leading }: { items: string[]; accent: s
 // Three compact rows first: number, title, pay, and a bar under the title
 // showing how far up the pay climb this rung sits. The paragraph and the
 // "What you do" / "To get here" lines open per rung on tap.
-function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: string; open: boolean; onToggle: () => void }) {
+export function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: string; open: boolean; onToggle: () => void }) {
   const hasDetail = !!rung.description || rung.whatYouDo.length > 0 || rung.toGetHere.length > 0;
   return (
     <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -301,7 +301,7 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
 // graphs). State on the left, the figure on the right; a label like "more
 // than usual" stays plain text, a pay figure gets the accent gradient. ----
 
-function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
+export function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
   // Custom-designed edge case, 22 Sept 2026: a `payByState` object can
   // exist (so the tab doesn't fall back to TabComingSoon) while its own
   // `best` array is empty -- a partial-content gap one level down, same
@@ -339,7 +339,7 @@ function factKey(label: string): keyof FactDetails | null {
 // Rendered through a portal at the body and positioned from the icon's own
 // rect, so no panel, blur layer or overflow can clip it; clamped to the
 // viewport with a 16px margin. Closes on a tap anywhere else or Escape.
-function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null; children: React.ReactNode; onClose: () => void }) {
+export function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null; children: React.ReactNode; onClose: () => void }) {
   const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
   useEffect(() => {
     const place = () => {
@@ -393,7 +393,7 @@ function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null
 
 // The degree sheet: the three door questions, the note, the "not the only
 // route" line, and how people in the job actually finished, as bars.
-function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; onClose: () => void }) {
+export function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();

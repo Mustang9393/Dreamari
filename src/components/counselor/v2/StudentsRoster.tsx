@@ -46,7 +46,7 @@ type SortKey = "name" | "roadmapPct" | "status" | "lastActive";
 const PICKER = "flex h-9 min-w-[150px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
 const pickerStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 
-function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }: { label: string; keyName?: SortKey; sortKey: SortKey; sortDir: "asc" | "desc"; onSort: (k: SortKey) => void; className?: string }) {
+export function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }: { label: string; keyName?: SortKey; sortKey: SortKey; sortDir: "asc" | "desc"; onSort: (k: SortKey) => void; className?: string }) {
   const on = keyName !== undefined && sortKey === keyName;
   return (
     <th className={`px-[var(--space-4)] py-[var(--space-3)] text-left text-[11.5px] font-bold tracking-[0.04em] uppercase ${className}`} style={{ color: "var(--muted-foreground)" }}>

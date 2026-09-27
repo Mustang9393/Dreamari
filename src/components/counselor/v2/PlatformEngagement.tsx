@@ -45,7 +45,7 @@ const DAILY_ACTIVE = 18;
 const pctChange = (now: number, before: number) => Math.round(((now - before) / before) * 100);
 
 /** A tiny trend line under a stat: the months' shape, no axes. */
-function Sparkline({ values }: { values: number[] }) {
+export function Sparkline({ values }: { values: number[] }) {
   const reduce = useReducedMotion();
   const id = useId().replace(/:/g, "");
   const W = 120;
@@ -183,7 +183,7 @@ const VIEWS: { key: EngagementView; label: string }[] = [{ key: "day", label: "D
 
 /** Logins by site: total logins and unique students per part of the app,
  *  two bars a row, one scale. */
-function SiteBars({ sites }: { sites: YearData["bySite"] }) {
+export function SiteBars({ sites }: { sites: YearData["bySite"] }) {
   const reduce = useReducedMotion();
   const max = Math.ceil(Math.max(...sites.map((s) => s.total)) / 100) * 100;
   return (
@@ -220,7 +220,7 @@ function SiteBars({ sites }: { sites: YearData["bySite"] }) {
 // unique line in its own green so the two series never read as one. Ours
 // adds a soft area under the total, lines that draw in on load, and a
 // hover column that reads all three of the month's numbers at once.
-function LoginsChart({ data }: { data: Point[] }) {
+export function LoginsChart({ data }: { data: Point[] }) {
   const MONTHS = data;
   const reduce = useReducedMotion();
   const id = useId().replace(/:/g, "");

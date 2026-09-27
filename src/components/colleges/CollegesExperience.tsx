@@ -375,7 +375,7 @@ function Option({ on, onToggle, children, count, radio = false }: { on: boolean;
   );
 }
 
-function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filters; set: (p: Partial<Filters>) => void; count: number; onClose: () => void; onClear: () => void }) {
+export function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filters; set: (p: Partial<Filters>) => void; count: number; onClose: () => void; onClear: () => void }) {
   const [statesOpen, setStatesOpen] = useState(false);
   if (typeof document === "undefined") return null;
   return createPortal(
@@ -456,7 +456,7 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
 
 // ---- compare: the same pinned-first-column table as the Career Report ----
 
-function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () => void }) {
+export function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () => void }) {
   if (typeof document === "undefined") return null;
   const rows: { label: string; get: (c: College) => string }[] = [
     { label: "Cost for a year, after grants", get: (c) => (c.netPrice === null ? "Not published" : money(c.netPrice)) },
