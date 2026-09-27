@@ -38,6 +38,29 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-27 Levels map: v1 board path, dots get the constellation, polish; simulation music toggle fixed
+
+- **Layout swap**, from Chandu: "the dots version deserves the constellation one more... the dots seem very basic and normal right now when everything else has a different layout".
+  - v3 dots now uses the constellation, since points joined by lines is literally the dot backdrop.
+  - v1 got a new board-game path suited to its cosy Dreamy style: big pressable buttons on an S-curve, dotted steps between them, a bobbing "Playing" bubble, and a ribbon banner per difficulty.
+  - The plain transit-line map is gone.
+- **Polish**, from Chandu: "make sure the interactions, pulses, animations, layout are better and expertly composed".
+  - Both styles: the current level pulses, a travelling cue runs toward the next level, and labels brighten on hover and select.
+  - v1: buttons lift on hover and sink onto their edge when pressed, and a sheen sweeps the open banner.
+  - v3: twinkling stars, a slowly turning hexagon marker, and hairlines out from each banner.
+  - All versions: arrow keys step through the levels, the selected level scrolls into view, and the bottom card crossfades between levels.
+  - Every animation respects reduced motion.
+- **Simulation music toggle fixed** (`setMusicMuted` and `playMusic` in `src/components/play/music.ts`). Chandu reported: "the music toggles still dont work in the simulations. when I toggle on and off nothing happens."
+  - **Cause:** the toggle only set `el.muted`. That isn't a reliable off switch once the element is routed through Web Audio for the muffle filter. Safari keeps playing, and in Chrome a track muted at page load autoplays silently, so the context stays suspended and turning it back on is heard by no one.
+  - **Fix:** a real pause/resume from the toggle's own click, which also resumes the audio context. A muted track now loads without starting.
+  - **The sound-effects toggle was not affected:** every effect checks `isMuted()` each time it plays.
+- **Tested in real Chrome and in WebKit (Safari's engine) with Playwright:**
+  - Windows-style 1366x768 at 125% scaling, and a 375px phone.
+  - All four level maps: no sideways scroll, arrow keys work, no console errors.
+  - Music with music off at load under real autoplay rules: on plays, off pauses, on plays again.
+  - The sound toggle writes its store.
+  - Windows itself can't be run from this Mac: the scaling and viewport cases are emulated, and the guardrail rules (styled scrollbars, no native controls, no positioning math) hold for the new UI.
+
 ### 2026-09-27 Play purpose lines, Glossary Game Levels map, full-screen game themes
 
 - **Play page subtitles** (`RowTitle` in `PlayHub.tsx`), from Joshua: "add a short purpose statement under each section title... small, subtle subtitles". Career Simulations: "Experience the job before you choose it." Glossary Games: "Learn the language you'll hear in classes, use in job interviews, and need on the job."

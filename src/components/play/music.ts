@@ -112,6 +112,8 @@ export function playMusic(track: MusicTrack, simId?: string): void {
   current = src;
   audio.src = src;
   audio.currentTime = 0;
+  // Muted: load the track but don't start it; unmuting starts it (below).
+  if (isMusicMuted()) return;
   audio.play().catch(() => {
     // Blocked autoplay (no user gesture yet). Reset `current` so the retry
     // is not swallowed by the same-src check, and arm a one-shot gesture
@@ -165,7 +167,32 @@ export function setMusicMuted(muted: boolean): void {
   } catch {
     // Nothing to do: the toggle still works for this session.
   }
-  if (el) el.muted = muted;
+  // A real pause/resume, not just `el.muted` (27 Sept 2026, reported: "the
+  // music toggles still dont work in the simulations. when I toggle on and
+  // off nothing happens"). Once the element is routed through Web Audio
+  // (createMediaElementSource, for the muffle filter), `muted` is not a
+  // reliable off switch: Safari keeps sending the element's sound into the
+  // graph, and in Chrome a track that was muted at page load autoplays
+  // silently, so the gesture retry never arms and the context stays
+  // suspended; unmuting then only flips a flag nobody hears. The toggle's
+  // own click is a user gesture, so resuming the context and calling
+  // play() here is allowed on every browser. Same approach as the Glossary
+  // Game's working toggle (glossaryThemeSound.ts stops and starts the loop).
+  if (el) {
+    el.muted = muted;
+    if (muted) el.pause();
+    else if (wanted) {
+      if (audioCtx && audioCtx.state !== "running") void audioCtx.resume();
+      if (!current) {
+        current = trackSrc(wanted.track, wanted.simId);
+        el.src = current;
+      }
+      el.play().catch(() => {
+        current = null;
+        armGestureRetry();
+      });
+    }
+  }
   for (const listener of musicMuteListeners) listener();
 }
 
