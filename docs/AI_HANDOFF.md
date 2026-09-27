@@ -46,7 +46,7 @@ tokens above, in both modes).
   - It started as a dropdown, then became a modal: "more graphic".
   - Text came out: "DO NOT MAKE THE MODAL SO TEXT HEAVY... THINK OF VIDEO GAMES".
   - Three side-by-side columns became one path, because the columns read as three equal lists rather than a climb.
-  - Tiers became chapters, with difficulty as the signal bars: "chapters instead of difficulty level and the difficulty be a signal for the chapters".
+  - Tiers became chapters, with difficulty as the signal bars: "chapters instead of difficulty level and the difficulty be a signal for the chapters". Each chapter is labelled by its difficulty, not "Chapter 1/2/3": "instead of chapter 1,2,3, say beginner intermediate etc in the modals".
   - Each background version got its own pattern: "the pattern, style, everything can differ".
 - **What each version shows:**
   - **v1:** a constellation path, the reference Chandu liked most.

@@ -192,7 +192,6 @@ type Row = { level: GlossaryLevel; status: Status };
 type Chap = GlossaryChapter & { rows: Row[] };
 type MapProps = { chapters: Chap[]; skin: Skin; selected: number; onSelect: (n: number) => void };
 const rowLabel = (r: Row) => `Level ${r.level.number}, ${r.level.title}, unlocks ${r.level.unlocks}${r.status === "locked" ? ", locked" : r.status === "done" ? ", completed" : ", playing now"}`;
-const pad = (n: number) => String(n).padStart(2, "0");
 
 // ---- v1 stars: the constellation path (Chandu's favourite reference) ----
 
@@ -230,7 +229,7 @@ function StarMap({ chapters, skin, selected, onSelect }: MapProps) {
         <div key={g.number} className="absolute left-1/2 z-[1] flex -translate-x-1/2 -translate-y-1/2 items-center gap-2.5 px-4 py-2" style={{ top: g.y, ...skin.gate }}>
           <SignalBars lit={g.number} color={skin.lit} size={16} />
           <span className="flex flex-col leading-tight">
-            <span className="text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: skin.muted }}>Chapter {g.number}</span>
+            <span className="text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: skin.muted }}>{g.tier}</span>
             <span className="text-[13.5px] font-extrabold whitespace-nowrap" style={{ fontFamily: skin.display }}>{g.name}</span>
           </span>
         </div>
@@ -263,7 +262,7 @@ function PixelGrid({ chapters, skin, selected, onSelect }: MapProps) {
         <section key={c.number} className="flex flex-col gap-3">
           <div className="flex items-center gap-2.5 border-b-2 pb-2" style={{ borderColor: "#ff3daa66" }}>
             <SignalBars lit={c.number} color={skin.lit} size={16} square />
-            <span className="text-[10px] leading-[1.4] uppercase" style={{ fontFamily: skin.display }}>CH {pad(c.number)} <span style={{ color: skin.muted }}>{c.name}</span></span>
+            <span className="text-[10px] leading-[1.4] uppercase" style={{ fontFamily: skin.display }}>{c.tier} <span style={{ color: skin.muted }}>{c.name}</span></span>
           </div>
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">
             {c.rows.map((r, k) => {
@@ -307,12 +306,11 @@ function DotLine({ chapters, skin, selected, onSelect }: MapProps) {
         {chapters.map((c) => (
           <li key={c.number} className="flex flex-col">
             <div className="flex items-center gap-3 py-3">
-              <span className="relative z-[1] flex size-[38px] flex-none items-center justify-center rounded-full border-2 text-[13px] font-bold" style={{ borderColor: skin.lit, background: "#0b0b0c", color: skin.lit }}>{c.number}</span>
+              <span className="relative z-[1] flex size-[38px] flex-none items-center justify-center rounded-full border-2" style={{ borderColor: skin.lit, background: "#0b0b0c" }}><SignalBars lit={c.number} color={skin.lit} size={16} /></span>
               <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                <span className="text-[10.5px] font-semibold tracking-[0.12em] uppercase" style={{ color: skin.muted }}>Chapter {c.number}</span>
+                <span className="text-[10.5px] font-semibold tracking-[0.12em] uppercase" style={{ color: skin.muted }}>{c.tier}</span>
                 <span className="text-[15px] font-bold">{c.name}</span>
               </span>
-              <SignalBars lit={c.number} color={skin.lit} size={16} />
             </div>
             <ol className="flex flex-col">
               {c.rows.map((r) => {
@@ -365,7 +363,7 @@ function EpisodeCards({ chapters, skin, selected, onSelect }: MapProps) {
           >
             <div className="relative flex flex-col items-center gap-2 px-4 pt-5 pb-4 text-center" style={{ background: `linear-gradient(180deg, ${unlocked ? "oklch(0.8 0.17 75 / 0.22)" : "rgba(255,79,216,0.14)"}, transparent)` }}>
               <SignalBars lit={c.number} color={skin.lit} size={22} />
-              <span className="text-[11px] font-bold tracking-[0.2em] uppercase" style={{ color: skin.muted }}>Chapter {pad(c.number)}</span>
+              <span className="text-[11px] font-bold tracking-[0.2em] uppercase" style={{ color: skin.muted }}>{c.tier}</span>
               <span className="text-[19px] leading-[1.1] font-black uppercase italic" style={{ fontFamily: skin.display, textShadow: skin.titleShadow }}>{c.name}</span>
               {!unlocked && <span className="absolute top-3 right-3 flex size-8 items-center justify-center rounded-full border" style={{ borderColor: `${pink}99`, boxShadow: `0 0 12px ${pink}88`, color: pink }}><Lock className="h-3.5 w-3.5" aria-label="Locked chapter" /></span>}
             </div>
