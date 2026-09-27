@@ -1889,3 +1889,13 @@ html.light {
 html.light .marketing-v2 [class*="divide-"] > * {
   border-color: var(--glass-border);
 }
+
+/* App-wide keyboard focus ring (27 Sept 2026). The Component Lab audit
+   found almost no component styled :focus-visible, so keyboard users got
+   the browser default or nothing. Zero specificity via :where(), so any
+   component that designs its own focus treatment still wins. Mouse and
+   touch never see it (focus-visible only). */
+:where(a, button, [role="button"], [role="tab"], [role="option"], [role="switch"], [role="checkbox"], input, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--primary, #2f6bf2);
+  outline-offset: 2px;
+}
