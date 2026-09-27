@@ -38,6 +38,38 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-27 Play purpose lines, Glossary Game Levels map, full-screen game themes
+
+- **Play page subtitles** (`RowTitle` in `PlayHub.tsx`), from Joshua: "add a short purpose statement under each section title... small, subtle subtitles". Career Simulations: "Experience the job before you choose it." Glossary Games: "Learn the language you'll hear in classes, use in job interviews, and need on the job."
+- **Glossary Game intro:** the "Hi, I'm Dreamy! Let's get started." screen is removed (Chandu: "we can remove this page"). Meet Dream Sneakers now goes straight to the lesson intro.
+- **Levels button and map** (`LevelsMenu.tsx`), from Joshua: "a small Levels button/icon... near the sound controls... three ascending bars... make it immediately clear that the game goes much deeper... see the names of the upcoming levels, even if those levels are still locked". It went through several rounds with Chandu the same day:
+  - It started as a dropdown, then became a modal: "more graphic".
+  - Text came out: "DO NOT MAKE THE MODAL SO TEXT HEAVY... THINK OF VIDEO GAMES".
+  - Three side-by-side columns became one path, because the columns read as three equal lists rather than a climb.
+  - Tiers became chapters, with difficulty as the signal bars: "chapters instead of difficulty level and the difficulty be a signal for the chapters".
+  - Each background version got its own pattern: "the pattern, style, everything can differ".
+- **What each version shows:**
+  - **v1:** a constellation path, the reference Chandu liked most.
+  - **v2 CRT:** a pixel tile grid.
+  - **v3 dots:** a transit-line map.
+  - **v4 synth:** neon chapter cards.
+  - All four share a HUD bar (a segmented progress bar and "1/17") and a bottom card for the selected level that shows its words, so the details only appear on demand.
+- **Level data** (`IB_LEVELS` in `data.ts`), transcribed from Joshua's Replit screenshot:
+  - It covers levels 1 to 17: titles, words, goals, unlock values, and minutes by tier.
+  - The screenshot says 20 lessons, so **levels 18 to 20 still need names**.
+  - The chapter names (The Startup / Scaling Up / The Big Leagues) are **placeholders** for Joshua to confirm.
+  - Only level 1 is playable; the map shows the path and does not start other levels.
+- **Whole-screen themes** (`.play-crt` extended; `.play-dots` and `.play-synth` are new, in `globals.css`), from Chandu: "ensure the entire UI changes to match the game themes... the HUD, the header icons etc". The header controls (`[data-game-header]`), the question HUD (`[data-game-hud]`) and the cards now follow v2, v3 and v4. v1 is unchanged.
+  - `IconTip` gained an optional `off` prop, so the Levels tooltip hides while its modal is open.
+- **Profile Top Three banner** now reads "Explore hundreds of careers and save the ones that interest you.", a direct copy change from Chandu.
+- **Verified in the browser:**
+  - Play subtitles.
+  - The intro skip.
+  - All four level maps.
+  - Themed header and HUD on the question screen in v2, v3 and v4.
+  - The v1 map at 375px, with no sideways scroll.
+  - tsc and eslint are clean.
+
 ### 2026-09-27 Match is now Joshua's simplified Mini Explore
 
 - **Why:** Joshua (Slack): "simplify the current Match / Mini Explore flow and reduce the amount of information students have to process", so a low-effort student can "complete Build, save one career, and immediately leave with a Profile and Career Report". "This can replace the current 'MATCH' and be in the actual demo." Chandu: "just change the match flow dont change what happens after".

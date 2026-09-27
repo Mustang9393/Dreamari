@@ -1182,6 +1182,86 @@ body {
   animation: crt-cursor-blink 1s steps(1) infinite;
 }
 
+/* ---- Glossary Game: the whole screen follows the background version ----
+   27 Sept 2026, direct instruction: "ensure the entire UI changes to match
+   the game themes as well, not just the modal and the central content but
+   the HUD, the header icons etc too." v1 stays the shipped look; v2/v3/v4
+   each re-skin the header controls ([data-game-header]: Back, Levels,
+   music, sound, streak, XP, bell, menu) and the question HUD
+   ([data-game-hud]) with the same palette and shapes as their backdrop
+   and their Levels map (LevelsMenu.tsx skinFor). Compound selectors for
+   the same bundle-order reason as .marketing-v2.play-crt above. */
+
+/* v2 CRT: square, pixel face, magenta rims with a hard pixel shadow. */
+.marketing-v2.play-crt [data-game-header] .rounded-full,
+.marketing-v2.play-crt [data-game-hud] .rounded-full {
+  border-radius: 0;
+}
+.marketing-v2.play-crt [data-game-header] :is(button, a).rounded-full.border,
+.marketing-v2.play-crt [data-game-header] .size-9 {
+  background: #050805;
+  border-color: rgba(255, 61, 170, 0.7);
+  box-shadow: 3px 3px 0 rgba(255, 61, 170, 0.35);
+}
+.marketing-v2.play-crt [data-game-header] :is(button, span) {
+  font-family: var(--font-display);
+  font-size: 10px;
+}
+.marketing-v2.play-crt [data-game-hud] {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+.marketing-v2.play-crt [data-game-hud] span {
+  font-size: 9px;
+}
+/* The answer-letter badges and any other round chip in the game body go
+   blocky too, same "retro blocky pixelated" rule as the radius tokens. */
+.marketing-v2.play-crt main .rounded-full {
+  border-radius: 0;
+}
+
+/* v3 dots: quiet and minimal. Near-black surfaces, hairline rims, no glow. */
+.marketing-v2.play-dots {
+  --card: #111113;
+  --speech-bubble-bg: #111113;
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-surface-1: rgba(255, 255, 255, 0.03);
+  --glass-surface-2: rgba(255, 255, 255, 0.08);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+}
+.marketing-v2.play-dots [data-game-header] :is(button, a).rounded-full.border,
+.marketing-v2.play-dots [data-game-header] .size-9 {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+
+/* v4 synthwave: violet glass, hot-pink neon rims, amber highlights. */
+.marketing-v2.play-synth {
+  --card: rgba(24, 12, 44, 0.9);
+  --speech-bubble-bg: rgba(24, 12, 44, 0.92);
+  --glass-border: rgba(255, 79, 216, 0.45);
+  --glass-surface-1: rgba(40, 18, 72, 0.65);
+  --glass-surface-2: rgba(255, 79, 216, 0.14);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+}
+.marketing-v2.play-synth [data-game-header] :is(button, a).rounded-full.border,
+.marketing-v2.play-synth [data-game-header] .size-9 {
+  background: rgba(40, 18, 72, 0.65);
+  border-color: rgba(255, 79, 216, 0.6);
+  box-shadow: 0 0 12px -2px rgba(255, 79, 216, 0.6);
+}
+.marketing-v2.play-synth main :is(h1, h2) {
+  text-shadow: 0 0 18px rgba(255, 79, 216, 0.55);
+}
+.marketing-v2.play-synth [data-game-hud] .rounded-full {
+  box-shadow: 0 0 10px -3px rgba(255, 79, 216, 0.7);
+}
+
 /* Marketing Explore "Browse All" rails: seamless marquee (content doubled,
    track slides half its width). Hover pauses; reduced-motion disables. */
 @keyframes mkt-rail-drift {

@@ -189,6 +189,7 @@ export function PlayHub() {
             active={activeRow === "glossary"}
             hoverProps={rowHoverProps("glossary")}
             label="Glossary Games"
+            sub="Learn the language you'll hear in classes, use in job interviews, and need on the job."
             items={GLOSSARY_GAMES.map((game) => {
               const playable = hasGlossary(game.careerSlug);
               return {
@@ -258,6 +259,25 @@ const SIDE_W = "sm:w-[212px] md:w-[269px] lg:w-[304px]";
 // Netflix's row headers are bold, bright and readable -- not micro-labels.
 const ROW_HEADER = "text-[15px] font-extrabold tracking-[0.06em] uppercase sm:text-[17px]";
 
+/** A row's title with its one-line purpose under it (Joshua, Slack, 27 Sept
+ *  2026: "add a short purpose statement under each section title on the
+ *  Play page so students, counselors, and colleges immediately understand
+ *  why these games are valuable... small, subtle subtitles"). Body size,
+ *  muted, below the heading's size so the hierarchy holds. */
+function RowTitle({ label, sub, active }: { label: string; sub?: string; active: boolean }) {
+  return (
+    <div className="flex flex-col gap-[2px]">
+      <h2
+        className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
+        style={{ color: active ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
+      >
+        {label}
+      </h2>
+      {sub && <p className="text-[13px] leading-[18px] font-medium sm:text-[14px] sm:leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{sub}</p>}
+    </div>
+  );
+}
+
 // Same two-tier title sizing rule as Browse's PosterCard (24 standard, one
 // fixed compact step when the longest word is 10+ chars so CONTROLLER-length
 // words never clip), scaled per breakpoint since these cards grow with the
@@ -325,12 +345,7 @@ function FeaturedRow({
   return (
     <section ref={sectionRef} data-row-id="simulations" className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
       {trailerSim?.trailer && <TrailerFlow simulation={trailerSim} onDone={() => setTrailerSim(null)} />}
-      <h2
-        className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
-        style={{ color: active ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
-      >
-        Career Simulations
-      </h2>
+      <RowTitle label="Career Simulations" sub="Experience the job before you choose it." active={active} />
       {/* Phones: a swipeable stack, matching the JioHotstar "For You" deck
          the CEO recorded (10 Sept 2026) -- one tall poster in front, the
          next two fanned out behind it to the right, swipe left to advance.
@@ -848,12 +863,14 @@ const COMPACT_W = "w-[267px] sm:w-[302px] md:w-[347px]";
 function HeroShelfRow({
   rowId,
   label,
+  sub,
   items,
   active,
   hoverProps,
 }: {
   rowId: string;
   label: string;
+  sub?: string;
   items: HeroItem[];
   active: boolean;
   /** onMouseEnter/onMouseLeave that let a real mouse hover claim focus
@@ -866,12 +883,7 @@ function HeroShelfRow({
   if (!featured) return null;
   return (
     <section ref={sectionRef} data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
-      <h2
-        className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
-        style={{ color: active ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
-      >
-        {label}
-      </h2>
+      <RowTitle label={label} sub={sub} active={active} />
       {/* Phones: the same swipeable stack Career Simulations uses, not a
          shrunk-further version of the desktop rail (direct feedback, 21
          Sept 2026, after seeing this row on phone: "its messed up lets use

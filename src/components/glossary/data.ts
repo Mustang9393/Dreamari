@@ -100,12 +100,63 @@ export type GlossaryLesson = {
   facts: string[];
 };
 
+/** One level on the game's full path, authored or not. Shown in the
+ *  Levels panel so the depth is visible at a glance (Joshua, Slack, 27
+ *  Sept 2026: "make it immediately clear that the game goes much deeper
+ *  than the current beginner terms... see the names of the upcoming
+ *  levels, even if those levels are still locked"). A level with a
+ *  matching `lessons` entry is playable; the rest are the roadmap. */
+export type GlossaryLevel = {
+  number: number;
+  title: string;
+  tier: "Beginner" | "Intermediate" | "Advanced";
+  words: string[];
+  goal: string;
+  /** the company value this level unlocks */
+  unlocks: string;
+  minutes: number;
+};
+
+/** Levels are grouped into chapters of the example company's story; the
+ *  tier becomes the chapter's difficulty, shown as the signal-bars icon lit
+ *  1/2/3 bars (27 Sept 2026, Chandu: "have it be chapters instead of
+ *  difficulty level and the difficulty be a signal for the chapters"). */
+export type GlossaryChapter = { number: number; name: string; tier: GlossaryLevel["tier"] };
+
 export type GlossaryCareer = {
   careerSlug: string;
   careerTitle: string;
   world: string;
   lessons: GlossaryLesson[];
+  levels: GlossaryLevel[];
+  chapters: GlossaryChapter[];
 };
+
+// Investment Banking's path, transcribed from Joshua's lesson-list
+// screenshot (Slack, 27 Sept 2026). His header says 20 lessons; the
+// screenshot shows the first 17, so 18-20 are still to be named.
+// Minutes by tier, as the screenshot shows them: 4 / 5 / 6.
+const MINUTES: Record<GlossaryLevel["tier"], number> = { Beginner: 4, Intermediate: 5, Advanced: 6 };
+const lvl = (number: number, tier: GlossaryLevel["tier"], title: string, words: string, goal: string, unlocks: string): GlossaryLevel => ({ number, tier, title, words: words.split(" · "), goal, unlocks, minutes: MINUTES[tier] });
+const IB_LEVELS: GlossaryLevel[] = [
+  lvl(1, "Beginner", "Business Basics", "Company · Product · Service · Customer · Profit", "Launch Dream Sneakers", "$10K"),
+  lvl(2, "Beginner", "Investing Basics", "Investor · Capital · Risk · Return · Ownership", "Meet your first investor", "$50K"),
+  lvl(3, "Beginner", "Money In, Money Out", "Revenue · Cost · Profit · Margin · Loss", "Review your first sales report", "$120K"),
+  lvl(4, "Beginner", "Ways to Invest", "Stock · Bond · Shareholder · Lender · Interest", "Choose how to raise money", "$250K"),
+  lvl(5, "Beginner", "Deal Basics", "Deal · Client · Pitch · Mandate · Advisor", "Prepare your first funding pitch", "$500K"),
+  lvl(6, "Beginner", "Banking Team Roles", "Analyst · Associate · VP · Director · Managing Director", "Build your finance team", "$1M"),
+  lvl(7, "Intermediate", "IPO Basics", "IPO · Underwriter · Prospectus · Roadshow · Listing", "Learn the path to going public", "$3M"),
+  lvl(8, "Intermediate", "Mergers & Acquisitions", "Merger · Acquisition · Target · Acquirer · Due Diligence", "Explore buying a smaller sneaker brand", "$5M"),
+  lvl(9, "Intermediate", "Equity vs. Debt", "Equity · Debt · Dilution · Repayment · Collateral", "Choose your growth funding path", "$10M"),
+  lvl(10, "Intermediate", "Pitch Decks & Financial Models", "Pitch Deck · Financial Model · Assumptions · Forecast · Sensitivity", "Build your investor deck", "$25M"),
+  lvl(11, "Intermediate", "EBITDA & Operating Performance", "EBITDA · Depreciation · Amortization · Operating Performance · Earnings", "Prove the business is performing", "$50M"),
+  lvl(12, "Intermediate", "Valuation Basics", "Valuation · Multiple · Comparable Company · Market Value · Enterprise Value", "Find out what Dream Sneakers is worth", "$100M"),
+  lvl(13, "Intermediate", "Enterprise Value", "Enterprise Value · Equity Value · Debt · Cash · Purchase Price", "Understand the full price of the company", "$250M"),
+  lvl(14, "Intermediate", "Cash Flow and Leverage", "Cash Flow · Free Cash Flow · Leverage · Debt Burden · Interest Expense", "Manage money and debt responsibly", "$500M"),
+  lvl(15, "Advanced", "Public Offerings and Dilution", "Public Offering · Dilution · New Shares · Existing Shareholders · Capital Raise", "Raise major growth capital", "$1B"),
+  lvl(16, "Advanced", "Discounted Cash Flow", "DCF · Future Cash Flow · Discount Rate · Present Value · Terminal Value", "Value future growth", "$3B"),
+  lvl(17, "Advanced", "Buy-Side vs. Sell-Side", "Buy-Side · Sell-Side · Investment Bank · Hedge Fund · Private Equity", "Choose your role in a major deal", "$5B"),
+];
 
 // Icon is a semantic slug (matching the xlsx's plain-word Icon column --
 // "building", "sneaker", "palette", "shopping bags", "money bag" -- not a
@@ -265,6 +316,15 @@ const GLOSSARY_CAREERS: Record<string, GlossaryCareer> = {
     careerTitle: "Investment Banking",
     world: "Business & Finance",
     lessons: [FIN_LESSON_1],
+    levels: IB_LEVELS,
+    // Chapter names are placeholders (ours, not the Replit's), drawn from
+    // the levels' own goals: launching the company, growing it, then the
+    // billion-dollar deals. Joshua to confirm or rename.
+    chapters: [
+      { number: 1, name: "The Startup", tier: "Beginner" },
+      { number: 2, name: "Scaling Up", tier: "Intermediate" },
+      { number: 3, name: "The Big Leagues", tier: "Advanced" },
+    ],
   },
 };
 

@@ -1156,7 +1156,7 @@ function Top3Tab({
          feedback, 11 Sept 2026): beam ring, one line, one CTA into Explore,
          dismissable and remembered. */}
       <NextStepBanner
-        text="More career matches are waiting."
+        text="Explore hundreds of careers and save the ones that interest you."
         ctaLabel="Explore"
         href="/explore"
         Icon={Compass}

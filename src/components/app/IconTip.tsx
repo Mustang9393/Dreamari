@@ -23,7 +23,7 @@ export function isKeyboardFocus(target: EventTarget) {
 
 type TipState = { x: number; triggerTop: number; triggerBottom: number; above: boolean };
 
-export function Tip({ label, children, hideFromLg = false, className = "" }: { label: string; children: ReactNode; hideFromLg?: boolean; className?: string }) {
+export function Tip({ label, children, hideFromLg = false, className = "", off = false }: { label: string; children: ReactNode; hideFromLg?: boolean; className?: string; /** suppress the bubble, e.g. while the control's own panel is open over it */ off?: boolean }) {
   const [tip, setTip] = useState<TipState | null>(null);
   const ref = useRef<HTMLSpanElement>(null);
   const bubbleRef = useRef<HTMLSpanElement>(null);
@@ -70,9 +70,9 @@ export function Tip({ label, children, hideFromLg = false, className = "" }: { l
   // landing on top of the salary chip instead of the card's other corner.
   const positioned = /\b(?:absolute|fixed|sticky|static)\b/.test(className);
   return (
-    <span ref={ref} className={`${positioned ? "" : "relative "}flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={(e) => { if (isKeyboardFocus(e.target)) show(); }} onBlur={hide} aria-describedby={tip ? id : undefined}>
+    <span ref={ref} className={`${positioned ? "" : "relative "}flex flex-none ${className}`} onMouseEnter={show} onMouseLeave={hide} onFocus={(e) => { if (isKeyboardFocus(e.target)) show(); }} onBlur={hide} aria-describedby={tip && !off ? id : undefined}>
       {children}
-      {tip && (
+      {tip && !off && (
         <Portal>
           <span
             ref={bubbleRef}
@@ -100,6 +100,6 @@ export function Tip({ label, children, hideFromLg = false, className = "" }: { l
 
 /** Wrap any icon-only control in this so its label shows as a tooltip on
  *  hover and keyboard focus -- the icon alone is never the whole affordance. */
-export function IconTip({ label, children, className = "" }: { label: string; children: ReactNode; className?: string }) {
-  return <Tip label={label} className={className}>{children}</Tip>;
+export function IconTip({ label, children, className = "", off = false }: { label: string; children: ReactNode; className?: string; off?: boolean }) {
+  return <Tip label={label} className={className} off={off}>{children}</Tip>;
 }

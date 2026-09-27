@@ -47,6 +47,7 @@ import {
 } from "./progress";
 import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion, GlossaryTerm } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
+import { LevelsMenu } from "./LevelsMenu";
 
 // Glossary Game — built from the Replit reference at /ib-glossary-game plus
 // the DreamAri_Glossary_Content_Template_v1.xlsx schema, then reskinned into
@@ -74,7 +75,6 @@ import { SparkBar } from "@/components/flow/SparkBar";
 
 type Screen =
   | "intro"
-  | "dreamyIntro"
   | "lessonIntro"
   | "unlock"
   | "unlockComplete"
@@ -157,7 +157,7 @@ function TermIcon({ icon, className }: { icon: string; className?: string }) {
 
 // Custom-designed edge case, 22 Sept 2026: no onError handling, and this
 // is the single most-repeated unguarded image in Play -- Intro,
-// DreamyIntro, LessonIntro, Unlock, FeedbackPanel, StreakModal,
+// LessonIntro, Unlock, FeedbackPanel, StreakModal,
 // PowerPlayIntro, MasteryLoading and Complete all render it. Same class
 // as Build's already-fixed DreamySprite/QuestionSprite gap (a bundled
 // static asset, lower real risk than a per-record photo, but the widest
@@ -316,8 +316,16 @@ function DemoStepControls({ onReload, onStepBack, stepBackDisabled }: { onReload
 function TopBar({
   onBack,
   topBarRef,
+  career,
+  currentLesson,
+  accent,
+  bgVersion,
 }: {
   onBack: () => void;
+  career: GlossaryCareer;
+  currentLesson: number;
+  accent: string;
+  bgVersion: PlayBgVersion;
   // Measured by the parent (see topBarSpace) so the height-overflow guard
   // in --glossary-shell-scale knows exactly how much real vertical space
   // this bar takes -- its rendered height isn't quite as fixed across
@@ -330,7 +338,7 @@ function TopBar({
     // data-night-scene: the game's ground is always the dark starfield, so its
     // top bar keeps the dark tokens in light mode (Back, streak and XP had
     // turned dark grey on the dark scene).
-    <header ref={topBarRef} data-night-scene className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
+    <header ref={topBarRef} data-night-scene data-game-header className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
@@ -342,6 +350,7 @@ function TopBar({
          of real UI), per direct feedback 22 Sept 2026: "it gets confused
          with actual UI" sitting up here next to Music/Mute/the hamburger. */}
       <div className="flex items-center gap-[var(--space-2)]">
+        <LevelsMenu career={career} currentLesson={currentLesson} accent={accent} bgVersion={bgVersion} />
         <MusicToggle />
         <MuteToggle />
         <HeaderActions><QuickLinksMenu /></HeaderActions>
@@ -430,42 +439,9 @@ function IntroScreen({ lesson, onNext }: { lesson: GlossaryLesson; onNext: () =>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Screen: Dreamy's onboarding line
-
-function DreamyIntroScreen({ onStart }: { onStart: () => void }) {
-  const { theme } = useGlobalTheme();
-  return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] px-5 py-[var(--space-5)]">
-      {/* Dreamy overlaps down from above the bubble's top edge only -- no
-         side padding compensating for him, so the bubble itself stays a
-         plain full-width, centered box. Padding the bubble sideways to
-         "make room" for him was shifting the bubble (and its text)
-         off-center on mobile, where this wrapper is close to the full
-         viewport width and the shift reads as a real layout bug. */}
-      <div className="relative w-full max-w-[calc(520px*var(--glossary-shell-scale))] pt-8">
-        <span className="absolute -top-8 left-5 z-10">
-          <DreamyFace pose="happy" size={64} />
-        </span>
-        <SpeechBubble>Hi, I&apos;m Dreamy! Let&apos;s get started.</SpeechBubble>
-      </div>
-      {/* This wrapper's only child is the CTA button below, so it carries
-         the same 560px CTA cap as every other button in this file (see
-         IntroScreen's "Next" button for the full reasoning) rather than
-         growing with the shell scale the way a real content card would. */}
-      <div className="flex w-full max-w-[min(calc(520px*var(--glossary-shell-scale)),560px)] flex-col gap-[var(--space-3)]">
-        <button
-          type="button"
-          onClick={onStart}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
-          style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}
-        >
-          Start Learning Finance <ChevronRight className="h-4 w-4" aria-hidden />
-        </button>
-      </div>
-    </div>
-  );
-}
+// (The "Hi, I'm Dreamy! Let's get started." screen that sat between Meet
+// {Company} and the lesson intro was removed 27 Sept 2026, direct
+// instruction: "we can remove this page". One tap less before the words.)
 
 // ---------------------------------------------------------------------------
 // Screen: Lesson intro (company value meter + word chips)
@@ -1852,11 +1828,8 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
   function stepBack() {
     setPendingResult(null);
     switch (screen) {
-      case "dreamyIntro":
-        setScreen("intro");
-        return;
       case "lessonIntro":
-        setScreen("dreamyIntro");
+        setScreen("intro");
         return;
       case "unlock":
         if (unlockIndex > 0) setUnlockIndex((i) => i - 1);
@@ -1934,7 +1907,11 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
 
   return (
     <div
-      className={`marketing-v2 themeable relative flex min-h-dvh w-full flex-col ${bgVersion === "v2" ? "play-crt" : ""}`}
+      // One theme scope per background version (globals.css): v2 CRT, v3
+      // dots, v4 synthwave re-skin the whole game, header and HUD included,
+      // not just the backdrop (27 Sept 2026: "ensure the entire UI changes
+      // to match the game themes as well... the HUD, the header icons etc").
+      className={`marketing-v2 themeable relative flex min-h-dvh w-full flex-col ${bgVersion === "v2" ? "play-crt" : bgVersion === "v3" ? "play-dots" : bgVersion === "v4" ? "play-synth" : ""}`}
       style={{
         "--glossary-accent": accent,
         // Root-cause fix for "the game shell doesn't grow proportionally on
@@ -2104,7 +2081,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         className="pointer-events-none fixed inset-0 z-0"
         style={{ background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 30%, transparent), transparent 65%)" }}
       />
-      <TopBar onBack={() => router.back()} topBarRef={topBarRef} />
+      <TopBar onBack={() => router.back()} topBarRef={topBarRef} career={career} currentLesson={lesson.lessonNumber} accent={accent} bgVersion={bgVersion} />
       <DemoControlsDock
         bgVersion={bgVersion}
         onBgVersion={pickBgVersion}
@@ -2121,7 +2098,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         // career simulation HUD sizes" (21 Sept 2026): text sized to match
         // SimulationPlayer's own Hud (13px title line, 11px secondary
         // line, src/components/play/SimulationPlayer.tsx's `Hud`).
-        <div className="relative z-10 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-col gap-[6px] px-5 pt-[var(--space-2)] md:px-8">
+        <div data-game-hud className="relative z-10 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-col gap-[6px] px-5 pt-[var(--space-2)] md:px-8">
           <div className="flex items-center justify-between text-[13px] font-extrabold" style={{ color: "var(--muted-foreground)" }}>
             <span>{lesson.title}</span>
             <span>
@@ -2188,8 +2165,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
          quietly eats into from below -- see dockSpace's own comment above. */}
       <main className="relative z-0 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[calc(var(--space-4)+var(--demo-dock-space,0px))] md:px-8">
 
-        {screen === "intro" && <IntroScreen lesson={lesson} onNext={() => setScreen("dreamyIntro")} />}
-        {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => setScreen("lessonIntro")} />}
+        {screen === "intro" && <IntroScreen lesson={lesson} onNext={() => setScreen("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => setScreen("unlock")} />}
         {screen === "unlock" &&
           (unlockIndex < lesson.terms.length ? (
