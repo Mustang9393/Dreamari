@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 // Global theme: ONE source of truth for every surface (landing, app chrome,
@@ -9,6 +10,30 @@ import { useCallback, useEffect, useSyncExternalStore } from "react";
 // target chosen-light without colliding with the pre-hydration default state,
 // which has neither class and must render dark).
 const STORAGE_KEY = "dreamari-theme";
+
+// The Counselor Dashboard keeps its own theme choice and defaults to LIGHT
+// (27 Sept 2026, direct instruction: "lets default to the light mode for
+// this one only since Maisha prefers this for demo"). It is information
+// heavy and demoed on projectors; the student app keeps its dark default
+// and its own saved choice, so toggling one never flips the other.
+const COUNSELOR_KEY = "dreamari-theme:counselor";
+function isCounselorPath(pathname: string) {
+  return pathname === "/counselor" || pathname.startsWith("/counselor/");
+}
+function keyFor(pathname: string) {
+  return isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
+}
+/** The theme a page should open in: the saved choice for its surface, or
+ *  that surface's default (light on the Counselor Dashboard, dark elsewhere). */
+function themeFor(pathname: string): GlobalTheme {
+  try {
+    const saved = localStorage.getItem(keyFor(pathname));
+    if (saved === "light" || saved === "dark") return saved;
+  } catch {
+    // fall through to the default
+  }
+  return isCounselorPath(pathname) ? "light" : "dark";
+}
 
 export type GlobalTheme = "light" | "dark";
 
@@ -23,7 +48,7 @@ export function setGlobalTheme(theme: GlobalTheme, persist = false) {
   applyTheme(theme);
   if (persist) {
     try {
-      localStorage.setItem(STORAGE_KEY, theme);
+      localStorage.setItem(keyFor(location.pathname), theme);
     } catch {
       // private browsing etc.
     }
@@ -32,7 +57,7 @@ export function setGlobalTheme(theme: GlobalTheme, persist = false) {
 
 export function hasSavedTheme(): boolean {
   try {
-    const v = localStorage.getItem(STORAGE_KEY);
+    const v = localStorage.getItem(keyFor(location.pathname));
     return v === "light" || v === "dark";
   } catch {
     return false;
@@ -55,7 +80,7 @@ export function useGlobalTheme() {
     const next: GlobalTheme = currentTheme() === "dark" ? "light" : "dark";
     applyTheme(next);
     try {
-      localStorage.setItem(STORAGE_KEY, next);
+      localStorage.setItem(keyFor(location.pathname), next);
     } catch {
       // private browsing etc. — theme just won't persist
     }
@@ -63,18 +88,14 @@ export function useGlobalTheme() {
   return { theme, toggle };
 }
 
-// Mounted once in the root layout: applies the stored choice (dark default)
-// on every page, so app/landing surfaces are themed even where the flow's
-// ThemeProvider never mounts.
+// Mounted once in the root layout: applies the saved choice for the page's
+// surface (dark default; light on the Counselor Dashboard) on every page,
+// and again on client-side navigation, so moving between the student app
+// and the dashboard switches to each one's own theme.
 export function ThemeBoot() {
+  const pathname = usePathname();
   useEffect(() => {
-    let theme: GlobalTheme = "dark";
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === "light") theme = "light";
-    } catch {
-      // fall through to dark
-    }
-    applyTheme(theme);
-  }, []);
+    applyTheme(themeFor(pathname ?? location.pathname));
+  }, [pathname]);
   return null;
 }

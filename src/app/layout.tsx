@@ -45,8 +45,9 @@ export default function RootLayout({
             // Defaults to dark everywhere except the build flow ("/flow"), which defaults
             // to light — unless the user has explicitly toggled a preference before (and
             // that choice was saved), which always wins regardless of route. Not driven
-            // by system preference.
-            __html: `try{var t=localStorage.getItem("dreamari-theme");var isBuild=location.pathname.startsWith("/flow");if(t==="dark"||(!t&&!isBuild)){document.documentElement.classList.add("dark")}}catch(e){}`,
+            // by system preference. The Counselor Dashboard keeps its own saved choice
+            // and defaults to light (theme.tsx, 27 Sept 2026).
+            __html: `try{var p=location.pathname;var c=p==="/counselor"||p.indexOf("/counselor/")===0;var t=localStorage.getItem(c?"dreamari-theme:counselor":"dreamari-theme");var isBuild=p.startsWith("/flow");if(t==="dark"||(!t&&!isBuild&&!c)){document.documentElement.classList.add("dark")}else if(c){document.documentElement.classList.add("light")}}catch(e){}`,
           }}
         />
         <script

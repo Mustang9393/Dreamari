@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-27 Counselor Dashboard opens in light mode
+
+- **Why:** direct instruction: "lets default to the light mode for this one only since Maisha prefers this for demo."
+- **How:** the dashboard keeps its own saved theme (`dreamari-theme:counselor`) and defaults to light. The student app keeps `dreamari-theme` with its dark default, so toggling one never flips the other. Implemented in the pre-paint script in `src/app/layout.tsx` and in `ThemeBoot` / `useGlobalTheme` (`src/components/app/theme.tsx`), which now re-apply on client navigation. Verified: with the student app saved as dark, `/counselor` opens light and `/home` stays dark.
+
 ### 2026-09-27 Counselor Dashboard v2: drill-downs, win tiles, simpler recommendations and top-10 lists
 
 - **Why:** after the My Impact clean-up Chandu asked for depth behind every number: "we'll need drill down for more details if we considerably reduced clutter", "Offer drilldown capability of EVERY SINGLE CARD that can afford it". He also wanted notable achievements "not so wordy", recommendation cards "much easier to scan", and a rethink of the top-10 lists ("Maybe having a bar for each doesnt make sense?").
