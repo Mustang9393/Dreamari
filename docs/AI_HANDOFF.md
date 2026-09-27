@@ -38,6 +38,24 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-27 Match is now Joshua's simplified Mini Explore
+
+- **Why:** Joshua (Slack): "simplify the current Match / Mini Explore flow and reduce the amount of information students have to process", so a low-effort student can "complete Build, save one career, and immediately leave with a Profile and Career Report". "This can replace the current 'MATCH' and be in the actual demo." Chandu: "just change the match flow dont change what happens after".
+- **Cards** (`LabCard`): only Learn more, the title and "Fits..." at the bottom. Salary removed ("inconsistent across careers"), and the world label under the title removed ("the tab at the top already communicates this"). The chip also lost its "· College" suffix: Joshua's examples are "Fits Mathematics / Fits Business / Fits Tech & Engineering", and the longer chip truncated at 375px. The college/trades answer still orders the list.
+- **Saving:** max 3 (`MAX_SAVED`), a 3-slot tray, Continue from 1 save. One save goes straight to Top Three as #1. Two or three saves rank that many (`RankSlots slots`), then continue.
+- **Demo:** `/match-grid` now renders `MiniExploreMatch`, which is V2Flow with `onFinish`: no lab storage, and the same `writePicks` + `/profile?picks=...&tab=top3&welcome=1` handoff the grid used. Profile is untouched. `MatchGrid.tsx` is dormant.
+- **Catch, decided with Chandu:** Profile only knows the demo's own careers. He chose the full catalog, as in Joshua's notes, "but make sure the demo careers appear first... investment banking is going to be the focus". So there are two DEMO-ONLY helpers in `lab.ts`:
+  - `demoFirst` sorts the demo careers to the top of their world, Investment Banking first.
+  - `demoPicks` hands off any career Profile can't show as the next unused demo career, keeping the count. Saving only Animator lands as Investment Banking #1 with two open slots.
+- **Flow Lab** gets the same card and save changes. It still ends on its own Top Three mock.
+- **Verified in the browser:**
+  - 1 save of an unknown career → `picks=investment-banking`.
+  - 2 saves ranked → `picks=game-designer,software-engineer` in rank order.
+  - A 4th save is refused.
+  - Phone width: no horizontal scroll, chips fit.
+  - No console errors; tsc and eslint are clean.
+- **Next:** production should let Profile resolve every catalog career and delete `demoFirst` / `demoPicks`.
+
 ### 2026-09-27 My Impact: section index, reporting periods, quieter ASCA
 
 - **Why:** Maisha: "I don't think this needs so many tabs". Chandu asked whether we had a better suggestion for counselors; we proposed three things and he said "build all 3".

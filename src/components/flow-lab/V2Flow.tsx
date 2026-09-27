@@ -37,13 +37,24 @@
 // - Saved and Rank are one screen: three empty #1 #2 #3 slots above the
 //   saved cards fill in tap order. One step fewer, and ranking shows how it
 //   works.
+//
+// 27 Sept 2026 (Joshua, Slack: "simplify the current Match / Mini Explore
+// flow and reduce the amount of information students have to process"),
+// and this flow replaced the demo's Match (see MiniExploreMatch.tsx):
+// - Cards say only title, Learn more and "Fits..." (shared.tsx LabCard).
+// - Three saves, not seven, and the tray shows three slots.
+// - Continue after ONE save: "reduce friction and make it easier for the
+//   low-effort student to complete Build, save one career, and immediately
+//   leave with a Profile and Career Report". One save skips ranking and
+//   lands on Top Three with #1 filled; two saves rank #1 and #2; three rank
+//   all three.
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
-import { MAX_SAVED, buildSignals, careerById, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
+import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "explore" | "rank" | "top3";
@@ -60,8 +71,6 @@ type State = {
 };
 const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", saved: [], rank: [] };
 const EXPLORE_ALL = "Explore all";
-/** Saves needed before ranking: the next screen asks for #1, #2 and #3. */
-const MIN_TO_RANK = 3;
 
 const NOTES = {
   build: { heading: "Build, standing in", bullets: [
@@ -71,13 +80,14 @@ const NOTES = {
   explore: { heading: "Save careers you like", bullets: [
     "Opens on your strongest world; your second world is the next tab. A chip on each card says why it's there.",
     "Explore all is for browsing outside your two worlds: pick any other industry and browse the same way.",
-    "Tap a card for details. Save adds it to the tray at the bottom, up to 7; the empty slots show how many are left.",
+    "Each card says three things: the career, Learn more, and why it fits you.",
+    "Tap a card for details. Save adds it to the tray at the bottom, up to 3; the empty slots show how many are left.",
     "Scroll for more. The next careers load in on their own.",
-    "The button says what it needs: save 3 to rank your top 3.",
+    "One save is enough to continue: it goes straight to your Top Three as #1. Two or three saves are ranked first.",
   ] },
   rank: { heading: "Your top 3, for now", bullets: [
-    "Your saved careers, with three empty slots above them. Tap a card to fill the next slot: first tap is #1.",
-    "Tap a filled slot to clear it. With all three full, tapping another career offers Swap in on each slot.",
+    "Your saved careers, with one empty slot above them per save (two saves, two slots). Tap a card to fill the next slot: first tap is #1.",
+    "Tap a filled slot to clear it.",
     "The back arrow returns to browsing, where Save toggles a career.",
     "See my Top 3 sets them; they stay editable on the next screen.",
   ] },
@@ -89,14 +99,18 @@ const NOTES = {
   ] },
 };
 
-export function V2Flow({ askFirst = false }: { askFirst?: boolean }) {
+/** `onFinish` makes this the demo's Match (MiniExploreMatch.tsx): no lab
+ *  storage, demo careers first, and the ranked picks go to the caller,
+ *  which hands them to the real Profile. Without it, the Flow Lab. */
+export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onFinish?: (ids: string[]) => void }) {
+  const demo = !!onFinish;
   const [state, setState] = useState<State>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = readLabState<State>(EMPTY);
+    const stored = demo ? EMPTY : readLabState<State>(EMPTY);
     const build = buildSignals();
     // "saved" was its own step before 26 Sept 2026; it is part of Rank now.
     let next = (stored.step as string) === "saved" ? { ...stored, step: "rank" as Step } : stored;
@@ -110,8 +124,8 @@ export function V2Flow({ askFirst = false }: { askFirst?: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    if (hydrated) writeLabState(state);
-  }, [state, hydrated]);
+    if (hydrated && !demo) writeLabState(state);
+  }, [state, hydrated, demo]);
   useEffect(() => {
     if (!toast) return;
     const t = window.setTimeout(() => setToast(null), 2200);
@@ -147,6 +161,13 @@ export function V2Flow({ askFirst = false }: { askFirst?: boolean }) {
     setIncomingRank(null);
     setState((s) => s.rank.includes(id) ? { ...s, rank: s.rank.filter((x) => x !== id) } : s.rank.length >= 3 ? s : { ...s, rank: [...s.rank, id] });
   };
+  // One save skips ranking; two or three rank first.
+  const finish = (ids: string[]) => {
+    if (onFinish) { onFinish(ids); return; }
+    setState((s) => ({ ...s, rank: ids }));
+    setArrived(true);
+    go("top3");
+  };
   const swapRank = (outId: string) => {
     const inId = incomingRank;
     if (!inId) return;
@@ -179,7 +200,8 @@ export function V2Flow({ askFirst = false }: { askFirst?: boolean }) {
     const isAll = state.activeTab === EXPLORE_ALL;
     const moreWorld = others.includes(state.moreWorld) ? state.moreWorld : others[0];
     const world = isAll ? moreWorld : state.activeTab;
-    const ranked: Ranked[] = rankForStudent(world, signals);
+    const fit = rankForStudent(world, signals);
+    const ranked: Ranked[] = demo ? demoFirst(fit) : fit;
     const open = openId ? (ranked.find((r) => r.career.id === openId) ?? (careerById(openId) ? { career: careerById(openId)!, reason: "", score: 0 } as Ranked : null)) : null;
     const openIdx = open ? ranked.indexOf(open) : -1;
     const setOpenIdFromTray = (id: string) => setOpenId(id);
@@ -215,9 +237,9 @@ export function V2Flow({ askFirst = false }: { askFirst?: boolean }) {
         </LabScreen>
         <BottomBar
           status={<PicksTray saved={savedCareers} max={MAX_SAVED} onOpen={setOpenIdFromTray} />}
-          cta={state.saved.length === 0 ? `Save ${MIN_TO_RANK} to rank` : state.saved.length < MIN_TO_RANK ? `Save ${MIN_TO_RANK - state.saved.length} more` : "Rank my top 3"}
-          ctaDisabled={state.saved.length < MIN_TO_RANK}
-          onCta={() => go("rank")}
+          cta={state.saved.length === 0 ? "Save a career" : state.saved.length === 1 ? "Continue" : `Rank my top ${state.saved.length}`}
+          ctaDisabled={state.saved.length === 0}
+          onCta={() => (state.saved.length === 1 ? finish(state.saved) : go("rank"))}
         />
         <Toast text={toast} />
         <AnimatePresence>
@@ -233,13 +255,13 @@ export function V2Flow({ askFirst = false }: { askFirst?: boolean }) {
   if (state.step === "rank") {
     const open = openId ? savedCareers.find((c) => c.id === openId) : null;
     const openIdx = open ? savedCareers.indexOf(open) : -1;
-    const need = Math.min(3, savedCareers.length);
+    const need = Math.min(MAX_SAVED, savedCareers.length);
     const left = need - state.rank.length;
     return (
       <>
         {/* "for now" in the heading: the reassurance lives in the line the
            student is already reading, not in an extra sentence. */}
-        <LabScreen note={NOTES.rank} title="Your top 3, for now" controls={<RankSlots picks={top3} onClear={(id) => assign(id)} incoming={incomingRank ? careerById(incomingRank) ?? null : null} onSwap={swapRank} />}>
+        <LabScreen note={NOTES.rank} title={`Your top ${Math.max(need, 1)}, for now`} controls={<RankSlots slots={Math.max(need, 1)} picks={top3} onClear={(id) => assign(id)} incoming={incomingRank ? careerById(incomingRank) ?? null : null} onSwap={swapRank} />}>
           {savedCareers.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-dashed text-center" style={{ borderColor: "var(--glass-border)" }}>
               <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet</p>
@@ -260,7 +282,7 @@ export function V2Flow({ askFirst = false }: { askFirst?: boolean }) {
           // "See", not "Confirm": a lower-stakes word for a choice that stays editable.
           cta={left > 0 ? `Pick ${left} more` : "See my Top 3"}
           ctaDisabled={left > 0 || need === 0}
-          onCta={() => { setArrived(true); go("top3"); }}
+          onCta={() => finish(state.rank)}
         />
         <Toast text={toast} />
         <AnimatePresence>

@@ -220,10 +220,13 @@ function LabPhoto({ career, sizes, className }: { career: LabCareer; sizes: stri
 
 export type LabControl = "save" | "pick" | "rank";
 
-/** The live Match card's language on catalog data: world title face,
- *  world-coloured label, a chip row (the one reason it is here, and the
- *  salary when we have one), the BorderBeam "Learn more", and the control
- *  INSIDE the card. Card click opens the detail modal; the control toggles.
+/** The live Match card's language on catalog data, cut to three things
+ *  (Joshua, Slack, 27 Sept 2026: "the card should only communicate: career
+ *  title, Learn More, Fits..."): the BorderBeam "Learn more", the title in
+ *  its world's face, and the "Fits..." chip at the bottom where the median
+ *  salary sat ("median salary... can feel inconsistent across careers").
+ *  No world label under the title ("the tab at the top already
+ *  communicates this"). The control sits INSIDE the card. Card click opens the detail modal; the control toggles.
  *  `fill` stretches to a grid cell (Match's six-up); otherwise the poster
  *  ratio. */
 export function LabCard({ career, control, selected, rank, onToggle, onOpen, reason, fill = false, nudge = false, className = "" }: {
@@ -241,10 +244,6 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
   className?: string;
 }) {
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
-  // Median pay on the card itself (26 Sept 2026: "we can show median salary
-  // on these match cards too"), from the same sources the detail modal
-  // uses, shortened to "$98K".
-  const pay = shortPay(career.salary ?? matchDetail(career).salary);
   const label = control === "save" ? (selected ? `Unsave ${career.title}` : `Save ${career.title}`) : control === "pick" ? (selected ? `Remove ${career.title} from your Top 3` : `Add ${career.title} to your Top 3`) : `#${rank} ${career.title}`;
   const tip = control === "save" ? (selected ? "Unsave" : "Save") : control === "pick" ? (selected ? "Remove from Top 3" : "Add to Top 3") : `#${rank}`;
   // Save is a labeled pill, not a bare bookmark (26 Sept 2026): with no
@@ -307,24 +306,19 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
             </span>
           </BorderBeam>
           <p className="line-clamp-3 [overflow-wrap:normal] [word-break:keep-all]" style={{ ...posterTitleFont(career.world), fontSize: 17, lineHeight: 1.15, color: "var(--poster-title)" }}>{career.title.replace(/-/g, "-​")}</p>
-          <p className="text-[9px] font-semibold tracking-[0.06em]" style={{ fontFamily: "var(--font-body)", color: accent }}>{career.world}</p>
-          {pay && <p className="text-[11.5px] font-bold normal-case tabular-nums" style={{ fontFamily: "var(--font-body)", color: SUCCESS }}>{pay} median</p>}
+          {reason && (
+            <span className="max-w-full truncate rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold normal-case backdrop-blur-md" style={{ fontFamily: "var(--font-body)", color: "var(--poster-title)", borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{reason}</span>
+          )}
         </div>
-      </div>
-      <div className={`pointer-events-none absolute top-2 left-2 z-[1] flex flex-wrap gap-1 ${control === "save" ? "max-w-[calc(100%-96px)]" : "max-w-[calc(100%-56px)]"}`}>
-        {reason && (
-          <span className="truncate rounded-[var(--radius-sm)] border px-2 py-[3px] text-[10px] font-bold backdrop-blur-md" style={{ color: "var(--poster-title)", borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: "color-mix(in srgb, var(--background) 78%, transparent)" }}>{reason}</span>
-        )}
-
       </div>
       {control === "save" ? <span className="absolute top-2 right-2 z-[2]">{controlEl}</span> : <IconTip label={tip} className="absolute top-2 right-2 z-[2]">{controlEl}</IconTip>}
     </div>
   );
 }
 
-/** The bottom bar's saved tray: one slot per save allowed, filled with the
- *  saved career's photo. The empty slots ARE the "up to 7" rule, so no
- *  counter or hint line has to say it. */
+/** The bottom bar's saved tray: one slot per save allowed (three since 27
+ *  Sept 2026), filled with the saved career's photo. The empty slots ARE
+ *  the limit, so no counter or hint line has to say it. */
 export function PicksTray({ saved, max, onOpen }: { saved: LabCareer[]; max: number; onOpen?: (id: string) => void }) {
   return (
     <div className="flex items-center gap-1 sm:gap-1.5" role="img" aria-label={`${saved.length} of ${max} saved`}>
@@ -355,10 +349,10 @@ export function PicksTray({ saved, max, onOpen }: { saved: LabCareer[]; max: num
 /** The rank screen's three slots: #1, #2, #3 fill in the order cards are
  *  tapped, and tapping a filled slot clears it. The empty slots show how
  *  ranking works without a sentence explaining it. */
-export function RankSlots({ picks, onClear, incoming, onSwap }: { picks: LabCareer[]; onClear: (id: string) => void; /** a fourth career tapped while all three slots are full */ incoming?: LabCareer | null; onSwap?: (outId: string) => void }) {
+export function RankSlots({ picks, onClear, incoming, onSwap, slots = 3 }: { picks: LabCareer[]; onClear: (id: string) => void; /** a fourth career tapped while all three slots are full */ incoming?: LabCareer | null; onSwap?: (outId: string) => void; /** one slot per saved career: two saves rank #1 and #2 (27 Sept 2026) */ slots?: number }) {
   return (
     <div className="grid grid-cols-3 gap-2 sm:gap-3">
-      {[0, 1, 2].map((i) => {
+      {Array.from({ length: slots }, (_, i) => i).map((i) => {
         const c = picks[i];
         const next = i === picks.length;
         return (
@@ -405,18 +399,6 @@ export function RankSlots({ picks, onClear, incoming, onSwap }: { picks: LabCare
       })}
     </div>
   );
-}
-
-/** "$98,340" or "$98,340 per year" -> "$98K"; null when there is no figure. */
-function shortPay(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  // Already short ("$136K median" in Match's deck): keep the "$136K".
-  const k = raw.match(/\$\s*(\d+(?:\.\d+)?)\s*K/i);
-  if (k) return `$${Math.round(Number(k[1]))}K`;
-  const m = raw.replace(/,/g, "").match(/\$?\s*(\d{4,7})/);
-  if (!m) return raw.length <= 10 ? raw : null;
-  const n = Number(m[1]);
-  return n >= 1000 ? `$${Math.round(n / 1000)}K` : `$${n}`;
 }
 
 // ------------------------------------------------------------ continuous ----

@@ -13,13 +13,18 @@ import { careerProfile } from "@/components/career/profiles";
 import { reportV2 } from "@/components/profile/report-data";
 import { resolveCareer } from "@/components/career/data";
 import { careerSlug } from "@/components/career/slug";
+import { ALL_PROFILE_CAREERS, DEMO_TOP3 } from "@/components/profile/data";
 
 // Storage key for the lab's own state -- isolated from every other
 // dreamari:* key in the app, per the isolation rule above.
 const LAB_STATE_KEY = "dreamari:flowlab:v2";
 
-/** Joshua's proposal caps the saved tray at "around 7". */
-export const MAX_SAVED = 7;
+/** Three saves, no more (Joshua, Slack, 27 Sept 2026: "change the current
+ *  7-save system to a maximum of 3 saved careers... to reduce friction and
+ *  make it easier for the low-effort student to complete Build, save one
+ *  career, and immediately leave with a Profile and Career Report"). His
+ *  first proposal capped the tray at "around 7". */
+export const MAX_SAVED = 3;
 /** Cards shown per "page" of continuous scroll (direct feedback, 25 Sept
  *  2026: "show six at a time, and as they scroll, naturally bring in the
  *  next set"). */
@@ -120,18 +125,52 @@ export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
       // is a technician, not an engineer).
       const trades = TRADES_KEYWORDS.some((k) => t.includes(k));
       const college = !trades && COLLEGE_KEYWORDS.some((k) => t.includes(k));
-      let pathFit: string | null = null;
-      if (path === "trades") { score += trades ? 1 : college ? -2 : 0; if (trades) pathFit = "Trades"; }
-      else if (path === "college") { score += college ? 1 : trades ? -2 : 0; if (college) pathFit = "College"; }
-      // The chip is the combination of Build answers that put the card
-      // here: matched subject(s), else the chosen world, plus the path
-      // when it fits ("Mathematics · College", "Tech & Engineering ·
-      // College"). Every card in a chosen world has at least the world.
-      const parts = [...(hits.length ? hits : [world]), ...(pathFit ? [pathFit] : [])];
+      if (path === "trades") score += trades ? 1 : college ? -2 : 0;
+      else if (path === "college") score += college ? 1 : trades ? -2 : 0;
+      // The chip is the Build answer that put the card here: matched
+      // subject(s), else the chosen world. Every card in a chosen world has
+      // at least the world. The path still orders the list but left the
+      // chip on 27 Sept 2026: Joshua's simplified card reads "Fits
+      // Mathematics / Fits Business / Fits Tech & Engineering", and "Fits
+      // Tech & Engineering · College" truncated at phone width.
+      const parts = hits.length ? hits : [world];
       return { career, reason: `Fits ${parts.join(" · ")}`, score, index };
     })
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ career, reason, score }) => ({ career, reason, score }));
+}
+
+// ---- the demo Match (27 Sept 2026) ----
+// DEMO-ONLY: Mini Explore replaced /match-grid in the demo, but Profile's
+// Top Three only knows the demo's own careers (ALL_PROFILE_CAREERS) and was
+// to stay untouched (direct instruction: "just change the match flow dont
+// change what happens after"). So in the demo those careers sort to the top
+// of their world, Investment Banking first ("investment banking is going to
+// be the focus of the demo since we have games etc for it"), and a saved
+// career Profile does not know hands off as a demo career instead ("he
+// would click whatever he clicks on match and they would lead to the demo
+// 3"). Production resolves every catalog career and drops both.
+
+/** The Profile id for a catalog career, or null when Profile cannot show it. */
+export function profileIdFor(career: LabCareer): string | null {
+  const id = careerSlug(career.title);
+  return ALL_PROFILE_CAREERS.some((c) => c.id === id) ? id : null;
+}
+const DEMO_ORDER = [...new Set([...DEMO_TOP3, ...ALL_PROFILE_CAREERS.map((c) => c.id)])];
+/** Demo careers first, Investment Banking before the rest; the student's
+ *  own fit order after that. */
+export function demoFirst(ranked: Ranked[]): Ranked[] {
+  const at = (r: Ranked) => { const id = profileIdFor(r.career); return id ? DEMO_ORDER.indexOf(id) : Infinity; };
+  return [...ranked].sort((a, b) => at(a) - at(b));
+}
+/** The student's ranked picks as Profile ids, same length and order: each
+ *  career Profile knows keeps its place, each one it does not becomes the
+ *  next unused demo career. So one save still lands as one pick with two
+ *  open slots. */
+export function demoPicks(ids: string[]): string[] {
+  const known = ids.map((id) => { const c = careerById(id); return c ? profileIdFor(c) : null; });
+  const spare = DEMO_ORDER.filter((id) => !known.includes(id));
+  return known.map((id) => id ?? spare.shift()!).filter(Boolean);
 }
 
 /** Worlds to offer under "Explore all": neighbours of the chosen worlds
