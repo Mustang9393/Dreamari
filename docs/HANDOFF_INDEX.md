@@ -59,6 +59,7 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 | Profile: Resume | none yet | Built (`src/components/resume/`, `ResumeExperience`) -- no locked spec written yet, so treat behaviour/copy in `src/` as current-but-unreviewed, not as a source of truth to build further on without checking with Joshua |
 | Play | specs/play.md | Locked (IB and Registered Nurse are playable) |
 | Play SOP: scaling simulations and Glossary Games to every career | handoff/play-sop/README.md | Reference (read before building any new career game; chapter 6 lists open decisions) |
+| Component inventory and state gaps: every reusable component, its props and states, mock data, what's unsafe to render; plus which loading/error/empty states are missing (of 62 data-backed surfaces: 54 lack loading, 55 lack error, 46 lack empty) | handoff/COMPONENT_INVENTORY.md | Reference (read before wiring real data into any screen) |
 | Explore | specs/explore.md | Locked |
 | Connect (student, events, professional profile, volunteer dashboard) | specs/connect.md | Locked |
 | Dream Score (XP) | specs/dream-score.md | Locked for Build; later milestones unspecified |
