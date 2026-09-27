@@ -38,6 +38,14 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-27 Counselor Dashboard v2: drill-downs, win tiles, simpler recommendations and top-10 lists
+
+- **Why:** after the My Impact clean-up Chandu asked for depth behind every number: "we'll need drill down for more details if we considerably reduced clutter", "Offer drilldown capability of EVERY SINGLE CARD that can afford it". He also wanted notable achievements "not so wordy", recommendation cards "much easier to scan", and a rethink of the top-10 lists ("Maybe having a bar for each doesnt make sense?").
+- **`v2/Drill.tsx`**: one shared `DrillTile` + `DrillPanel` (on the existing SidePanel). A drill holds the full wording, stats, a breakdown, a checklist, the students it counts (each opens their profile) and one action to the screen where you act.
+- **My Impact**: notable achievements are six win tiles (number, label, comparison bar with the target tick, a three-word delta), and the Replit's sentence opens in each drill. Every headline number, win, pathway row, grade row, readiness milestone, work tile, engagement count and ASCA domain drills. Lists use the Replit's own 120-student roster, so they count the same students as the numbers.
+- **Insights recommendations**: the share, what students did, "Try first" with one idea, and "2 more ideas · the students". The drill has every idea, the pathway's students, and "Message the ... students" (Connect private message).
+- **Top 10 lists**: a first pass as a plain ranked list (rank badge, count and share per row) was "even more difficult to process than before". Now each shows its top five, one number and a slim bar per row, with Show all 10.
+
 ### 2026-09-27 Counselor Dashboard v2: Maisha's review, checked against the live Replit
 
 Every item from Maisha's Slack review, compared with the live Replit (web-app-prototype-maishak.replit.app), not with v1 (direct instruction: "DO NOT EVER COMPARE V1 AND V2, ONLY COMPARE DIRECTLY WITH THE REPLIT").

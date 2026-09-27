@@ -17,8 +17,8 @@ import { useRouter } from "next/navigation";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "../chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { DrillPanel, DrillTile, type Drill } from "./Drill";
 import { ShowAll } from "./Disclosure";
-import { Ring } from "@/components/connect/viz";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
 // Each recommendation as a number, a subject and its actions -- the
@@ -30,9 +30,9 @@ import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../sur
 // too much, that's important... open to you making it visually look
 // better as long as content and comprehension isn't reduced."
 const RECOMMENDATION_TILES = [
-  { pct: 43, subject: "saved Investment Banker", actions: ["Invite a banking professional for a career talk", "Schedule a visit to a financial district campus, trading floor, or investment firm", "Explore a CTE Finance & Business pathway or dual-enrollment finance course"] },
-  { pct: 32, subject: "want to be entrepreneurs", actions: ["Host a local business-owner speaker series", "Connect students to DECA, FBLA, or local small business incubators", "Introduce a pitch competition or school-based enterprise activity"] },
-  { pct: 29, subject: "exploring nursing and healthcare", actions: ["Partner with a clinic for job shadows", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
+  { pct: 43, count: 52, pathway: "Business & Finance", subject: "saved Investment Banker", actions: ["Invite a banking professional for a career talk", "Schedule a visit to a financial district campus, trading floor, or investment firm", "Explore a CTE Finance & Business pathway or dual-enrollment finance course"] },
+  { pct: 32, count: 38, pathway: "Business & Finance", subject: "want to be entrepreneurs", actions: ["Host a local business-owner speaker series", "Connect students to DECA, FBLA, or local small business incubators", "Introduce a pitch competition or school-based enterprise activity"] },
+  { pct: 29, count: 35, pathway: "Health & Medicine", subject: "exploring nursing and healthcare", actions: ["Partner with a clinic for job shadows", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
 ];
 
 const TOP_SAVED_CAREERS = [
@@ -108,22 +108,26 @@ export function RankedBars({ items, limit, all = true }: { items: { name: string
 
 export { TOP_SAVED_CAREERS };
 
-function TopTen({ title, unit, items }: { title: string; unit: string; items: { name: string; count: number }[] }) {
+// Top five, one number each, a slim bar for the ranking, and the rest one
+// click away (27 Sept 2026: a ten-row list with a rank badge and two numbers
+// per row "is even more difficult to process than before"). Five rows read
+// at a glance; the bar lets the eye rank them without reading the numbers;
+// the count is the only figure. "Show all 10" opens the rest in place.
+function TopTen({ title, items }: { title: string; items: { name: string; count: number }[] }) {
   const [all, setAll] = useState(false);
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
         <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
           <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
-          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{unit}</span>
+          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students who saved it</span>
         </div>
-        <RankedBars items={items} all={all} />
-        <div className="lg:hidden"><ShowAll total={items.length} shown={SHOWN} open={all} onToggle={() => setAll((v) => !v)} /></div>
+        <RankedBars items={items} limit={all ? items.length : 5} />
+        <ShowAll total={items.length} shown={5} open={all} onToggle={() => setAll((v) => !v)} />
       </div>
     </HoverBeam>
   );
 }
-
 const FAIR_CLUSTERS = [
   { label: "Technology & Engineering", pathway: "Tech & Engineering" },
   { label: "Business & Entrepreneurship", pathway: "Business & Finance" },
@@ -131,7 +135,7 @@ const FAIR_CLUSTERS = [
   { label: "Law & Criminal Justice", pathway: "Law, Safety & Justice" },
 ];
 
-type Tile = { pct: number | null; subject: string; actions: string[]; mine?: boolean };
+type Tile = { pct: number | null; count?: number; pathway?: string; subject: string; actions: string[]; mine?: boolean };
 
 export function CareerCollegeInsights() {
   const roster = useReviewedRoster();
@@ -144,6 +148,21 @@ export function CareerCollegeInsights() {
   const [subject, setSubject] = useState("");
   const [action, setAction] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+  const [drill, setDrill] = useState<Drill | null>(null);
+  // A recommendation's drill: every idea, the students in the pathway it
+  // is about, and a message to them.
+  const recDrill = (r: Tile): Drill => {
+    const list = roster.filter((st) => st.careerTrack === r.pathway);
+    return {
+      title: `${r.pct}% ${r.subject}`,
+      subtitle: `${r.count} of 120 students`,
+      items: r.actions,
+      itemsLabel: "Ideas",
+      students: list.map((st) => ({ id: st.id, name: st.name, grade: st.grade, avatarIndex: st.avatarIndex, note: st.careerTrack })),
+      studentsLabel: `${list.length} students in ${r.pathway}`,
+      action: { label: `Message the ${r.pathway} students`, onClick: () => { setDrill(null); router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(r.pathway ?? "")}`); } },
+    };
+  };
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       {/* What students saved, first: the two top-10 lists side by side,
@@ -154,8 +173,8 @@ export function CareerCollegeInsights() {
          Sept layout put the recommendations beside one tabbed chart, which
          read as two unrelated columns. */}
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <TopTen title="Top 10 saved careers" unit="students who saved it" items={TOP_SAVED_CAREERS} />
-        <TopTen title="Top 10 saved colleges" unit="students who saved it" items={TOP_COLLEGES.map(({ name, count }) => ({ name, count }))} />
+        <TopTen title="Top 10 saved careers" items={TOP_SAVED_CAREERS} />
+        <TopTen title="Top 10 saved colleges" items={TOP_COLLEGES.map(({ name, count }) => ({ name, count }))} />
       </div>
 
       <HoverBeam strength={0.7} className="h-full">
@@ -182,30 +201,33 @@ export function CareerCollegeInsights() {
                 </div>
               </div>
             )}
-            {/* Three across, every action visible, as the reference shows
-               them: the full-width row has room the old side column did
-               not, so nothing hides behind "+2 more". */}
+            {/* Each recommendation reads in two seconds: the share, what
+               they did, and the one idea to try first (27 Sept 2026: "we
+               can simplify the dreamari recommendation cards too. Make it
+               much more beautiful and much easier to scan"). The other
+               ideas, the students behind the number and a way to message
+               them open in the card's drill. */}
             <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3">
-              {tiles.map((r) => (
-                <div key={r.subject} className="relative flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                  {r.mine ? (
-                    <>
-                      <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your note</span>
-                      <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button>
-                      <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject}</span>
-                    </>
-                  ) : (
-                    <span className="flex items-center gap-[12px]">
-                      <Ring pct={r.pct ?? 0} size={52} stroke={6} accent="var(--primary)">
-                        <span className="text-[13px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
-                      </Ring>
-                      <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>of students {r.subject}</span>
-                    </span>
-                  )}
-                  <ul className="flex flex-col gap-[6px] pl-[14px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}>
-                    {r.actions.map((a) => <li key={a}>{a}</li>)}
-                  </ul>
+              {tiles.map((r) => r.mine ? (
+                <div key={r.subject} className="relative flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                  <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your note</span>
+                  <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button>
+                  <span className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject}</span>
+                  <span className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                 </div>
+              ) : (
+                <DrillTile key={r.subject} onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                  <span className="flex items-baseline gap-[8px]">
+                    <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of students</span>
+                  </span>
+                  <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject.charAt(0).toUpperCase() + r.subject.slice(1)}</span>
+                  <span className="flex flex-col gap-[3px] border-t pt-[10px]" style={{ borderColor: "var(--inset-border)" }}>
+                    <span className="text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--accent-subtle)" }}>Try first</span>
+                    <span className="text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{r.actions[0]}</span>
+                  </span>
+                  <span className="mt-auto pr-[20px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.actions.length - 1} more ideas · the students</span>
+                </DrillTile>
               ))}
             </div>
           </div>
@@ -242,6 +264,7 @@ export function CareerCollegeInsights() {
           </ul>
         </div>
       </HoverBeam>
+      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }

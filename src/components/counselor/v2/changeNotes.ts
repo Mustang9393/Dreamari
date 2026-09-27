@@ -47,8 +47,8 @@ const INSIGHTS_NOTE: ChangeNote = {
   decisions: [
     { change: "Top 10 saved careers and top 10 saved colleges only", why: "Maisha, 27 Sept 2026: \"lets remove simulations and majors ... top 10 saved careers and colleges ... those two are the main things students can save.\"" },
     { change: "The two lists side by side at the top, the recommendations full width below them", why: "Maisha: \"have top 10 saved careers + top 10 saved colleges at the top. Below that have 'Dreamari recommendations for you' like the replit. Side by side doesn't make sense.\" The earlier layout put the recommendations beside one tabbed chart." },
-    { change: "Each recommendation shows its stat as a ring and all of its actions", why: "The full-width row has room, so nothing hides behind \"+2 more\"; the Replit shows every action." },
-    { change: "Lists drawn as ranked bars, the leader lit", why: "Same counts as the Replit's lists; lengths compare faster than numbers alone." },
+    { change: "Each list shows its top five, one number and a slim bar per row, with Show all 10", why: "A ten-row list with a rank badge and two numbers per row was hard to process (27 Sept 2026). Five rows read at a glance and the bar ranks them without reading." },
+    { change: "Each recommendation is the share, what students did, and the one idea to try first; the card opens the rest", why: "Direct feedback: \"simplify the dreamari recommendation cards ... much easier to scan.\" Its drill holds every idea, the students in that pathway and a message to them." },
     { change: "Career-fair interests open a Counselor Connect private message to that pathway's students", why: "The Replit's interest chips looked like buttons and did nothing. Group message now lives in Connect." },
   ],
   kept: "The Replit's top 10 saved careers and colleges, all three recommendations with all nine actions, the career-fair note and its four clusters.",
@@ -141,7 +141,8 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     decisions: [
       { change: "One page, no tabs", why: "Maisha, 27 Sept 2026: \"I don't think this needs so many tabs within it.\"" },
       { change: "Every figure is the Replit's (120 students, 86% on track, 66% with a plan, 33% answered)", why: "Maisha: \"utilize the same numbers as the replit because its standard per actual caseload of counselors.\"" },
-      { change: "Notable achievements near the top, each cut to one line with the number in bold", why: "Maisha: \"Where is the notable achievements portion from the replit? Need this here for a snapshot.\" The Replit's eight sentences keep every number and comparison, without the connecting prose." },
+      { change: "Notable achievements as win tiles: the number, a short label, the comparison drawn as a bar with the target marked", why: "Maisha wanted the snapshot back; direct feedback asked for it \"not so wordy\". The Replit's full sentence opens in each tile's drill." },
+      { change: "Every number, row and card opens a drill: the full wording, the breakdown, the students it counts, and one button to act", why: "Direct instruction: \"we'll need drill down for more details if we considerably reduced clutter\" and \"Offer drilldown capability of EVERY SINGLE CARD that can afford it\"." },
       { change: "Principal report opens on screen, with Print", why: "Maisha: \"Am I able to see the principal report? So I can show during demos.\" Same content as the Replit's report." },
       { change: "No separate District Compliance section; each target sits on the number it judges, with a Met or In progress chip", why: "The Replit stated those three comparisons twice. The full compliance table is in the Principal report." },
       { change: "Counselor activity and student engagement share one card", why: "Both answer \"what happened this period\"; two cards of tiles read as one list split in half." },
