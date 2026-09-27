@@ -13,7 +13,6 @@
 import { SubTabs } from "./SubTabs";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { ArrowUpRight, Plus, Send, Check, ChevronLeft } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { useCounselorFilters } from "../shell";
@@ -24,8 +23,6 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "@/components/connect/viz";
 import { Avatar, DetailPane, SelectBox, STATUS_COLORS, StatusChip, StudentLink } from "../chips";
 import { BatchComposer } from "./Batch";
-import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
 import { CAREER_TRACKS, getRoster } from "@/lib/counselorRoster";
 import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
 import { BLUE_3 } from "../palette";
@@ -449,55 +446,37 @@ function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
   );
 }
 
-// Which of the Connect board photos a group wears, by what it is about, so
-// a counselor's groups look like the student Connect boards they mirror.
-function groupCover(name: string): string {
-  const n = name.toLowerCase();
-  if (/fafsa|scholarship|financial/.test(n)) return "business-money";
-  if (/technolog|trade|technical/.test(n)) return "tech-engineering";
-  if (/health/.test(n)) return "health-medicine";
-  if (/summer|arts|media/.test(n)) return "arts-media";
-  return "teaching-education";
-}
-
-// A group as a board tile, the way the student Connect boards look (27
-// Sept 2026, Maisha: "on the replit you will see I had them in boxes to
-// mirror how the connect boards look like because thats what I was
-// envisioning. It feels more enjoyable to follow and comprehend"). The 26
-// Sept version listed them as one-line rows in a single card, which read
-// as a list to scan rather than places to go. Same photo, blur, scrim and
-// stat tiles as Connect's CommunityCard; the accent is the dashboard's one
-// blue.
+// A group as a box, laid out like a student Connect board (27 Sept 2026,
+// Maisha: "on the replit you will see I had them in boxes to mirror how the
+// connect boards look like ... It feels more enjoyable to follow and
+// comprehend"): the name as the card's title, what it is for, two stat
+// tiles and Open. No board photography (direct instruction the same day:
+// "dont use the imagery in counselor connects boards"); the dashboard's
+// own glass surface instead.
 function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
-  const cover = groupCover(group.name);
   return (
-    <button type="button" onClick={onOpen} className="dm-tap group relative flex h-full min-h-[232px] w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] text-left" style={{ background: "#0e0c20", border: "1px solid color-mix(in srgb, var(--primary) 40%, transparent)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}>
-      <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-        <Image src={PHOTO_COVER[cover]} alt="" fill sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 90vw" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[cover] }} />
-        <CardProgressiveBlur size="40%" />
-        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.88) 38%, rgba(12,16,35,0.5) 62%, rgba(12,16,35,0.14) 82%, transparent 100%), ${cardTopScrim()}` }} />
-      </span>
-      <span className="relative z-10 flex h-full w-full flex-col gap-[6px] p-[var(--space-5)]">
-        <h3 className="text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{group.name}</h3>
-        <span className="mt-auto line-clamp-2 text-[12.5px] leading-[17px] font-medium" style={{ color: "rgba(255,255,255,0.78)" }}>{group.desc}</span>
-        <span className="mt-[8px] flex items-end justify-between gap-[10px]" style={{ textShadow: "none" }}>
+    <HoverBeam strength={0.6} className="h-full">
+      <button type="button" onClick={onOpen} className="group flex h-full min-h-[200px] w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={TINTED_CARD}>
+        <h3 className="text-[17px] leading-[22px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{group.name}</h3>
+        <span className="line-clamp-2 text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{group.desc}</span>
+        <span className="mt-auto flex items-end justify-between gap-[10px] pt-[var(--space-3)]">
           <span className="grid grid-cols-2 gap-[6px]">
             {[{ v: group.members, l: "Members" }, { v: group.posts, l: "Posts" }].map((t) => (
-              <span key={t.l} className="flex min-w-[64px] flex-col items-center rounded-[var(--radius-sm)] px-[8px] py-[6px]" style={{ background: "rgba(255,255,255,0.09)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
-                <span className="text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ color: "#FFFFFF" }}>{t.v}</span>
-                <span className="text-[10.5px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{t.l}</span>
+              <span key={t.l} className="flex min-w-[64px] flex-col items-center rounded-[var(--radius-sm)] border px-[8px] py-[6px]" style={GLASS_INSET}>
+                <span className="text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{t.v}</span>
+                <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.l}</span>
               </span>
             ))}
           </span>
           <span className="flex flex-col items-end gap-[4px]">
-            <span className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Active {fmtDate(group.last)}</span>
-            <span className="flex items-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12.5px] font-bold transition-[filter] duration-200 group-hover:brightness-125" style={{ background: "color-mix(in srgb, var(--primary) 30%, rgba(12,16,35,0.78))", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 50%, rgba(255,255,255,0.18))", color: "#FFFFFF" }}>
+            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Active {fmtDate(group.last)}</span>
+            <span className="flex items-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12.5px] font-bold transition-[filter] duration-200 group-hover:brightness-110" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent)", color: "var(--foreground)" }}>
               Open <ArrowUpRight className="h-[13px] w-[13px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
             </span>
           </span>
         </span>
-      </span>
-    </button>
+      </button>
+    </HoverBeam>
   );
 }
 

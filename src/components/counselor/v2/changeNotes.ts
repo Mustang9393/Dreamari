@@ -108,7 +108,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     summary: "Students' questions first, then announcements and messages, then groups.",
     decisions: [
       { change: "Questions are Needs reply or Answered", why: "Maisha, 27 Sept 2026: \"whats the difference between 'need a reply' and 'in progress'. Seems like the same thing. Lets just keep 'needs reply'.\"" },
-      { change: "Groups as board tiles, like the student Connect boards", why: "Maisha: \"on the replit you will see I had them in boxes to mirror how the connect boards look like ... It feels more enjoyable to follow and comprehend.\" Each tile wears a Connect board photo, the group's name, description and counts." },
+      { change: "Groups as board tiles, like the student Connect boards", why: "Maisha: \"on the replit you will see I had them in boxes to mirror how the connect boards look like ... It feels more enjoyable to follow and comprehend.\" Each box has the group's name, what it is for, member and post counts and Open, on the dashboard's own surface (no board photography)." },
       { change: "One New message button: an Announcement, or a Private message to chosen students", why: "Maisha asked whether the Productivity Suite's Group message duplicated Connect. It did not quite: an announcement is posted for a whole grade, a private message goes only to the students picked by status, pathway or name. Both are outgoing messages, so both start here." },
       { change: "Opens on Questions, with the count that needs you on the tab", why: "The Replit opened on announcements. Unanswered questions are the work." },
     ],
