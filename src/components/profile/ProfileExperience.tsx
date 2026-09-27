@@ -1194,8 +1194,12 @@ export function Top3Tab({
          at 2 selected the grid was forced to 2 columns while 3 things
          (2 cards + Add) actually rendered, and the Add tile wrapped to its
          own row below instead of sitting beside them as an equal-height
-         third column (direct report + screenshot). */}
-      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${(top3.length >= 3 ? 3 : top3.length + 1) === 1 ? "md:grid-cols-1" : (top3.length >= 3 ? 3 : top3.length + 1) === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+         third column (direct report + screenshot).
+         27 Sept 2026: columns start at lg, not md. At tablet widths three
+         cards were crushed (truncated "Learn more", cramped copy; direct
+         report: "the 3 stacked horizontally is just causing problems"), so
+         tablets now stack one card per row at full width. */}
+      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${(top3.length >= 3 ? 3 : top3.length + 1) === 1 ? "lg:grid-cols-1" : (top3.length >= 3 ? 3 : top3.length + 1) === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
       {/* The primary career takes the first card (Joshua, 11 Sept 2026). */}
       {[...top3].sort((a, b) => Number(b === focusId) - Number(a === focusId)).map((id) => {
         const career = careerById(id)!;

@@ -210,7 +210,7 @@ export function StateCell({ label, kind = "built", note, children, pad = true, m
 
 export function StateChip({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full border px-[8px] py-[2px] text-[10.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}>
+    <span className="rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}>
       {children}
     </span>
   );
