@@ -38,6 +38,14 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-27 My Impact: section index, reporting periods, quieter ASCA
+
+- **Why:** Maisha: "I don't think this needs so many tabs". Chandu asked whether we had a better suggestion for counselors; we proposed three things and he said "build all 3".
+- **Sticky section index** (`SectionIndex` in `CounselorImpact.tsx`): pinned under the top bar, with jump links to Achievements, Caseload, Readiness, Your work and ASCA. Scroll-spy lights the section in view. The period picker sits on its right.
+- **Reporting period** (`PERIODS` + `buildView`): Fall 2023 is the Replit's own figures (every derived string equals the Replit's). Spring 2023 and the 2022-23 school year are DEMO-ONLY seeded history, set a little behind so the story climbs. Everything follows the period: the hero line, headline numbers, all eight achievements (the Replit's wording with that period's figures), the grades, pathways, milestones, work, engagement, ASCA, the drills and the Principal report (year, range, issue date, achievements, compliance). Earlier periods' drills show the breakdown without a student list, since there is no student-level history.
+- **ASCA** is last and starts collapsed to its three headline numbers ("Show evidence" expands them). Each domain still drills.
+- Verified: scroll-spy, period switching, ASCA toggle, and the report under 2022-23, still exactly one Letter page.
+
 ### 2026-09-27 Principal report as a real document; all eight achievements on My Impact
 
 - **Why:** direct feedback: "make the principal report much more editorially composed ... add a school x Dreamari branding", "Make sure the principal report has all the content that was in the replit", "Make sure it makes sense for a report to be shared with the principal", "include the profile picture", "lets add a share option".
