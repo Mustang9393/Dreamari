@@ -34,10 +34,10 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { curriculumForGrade, curriculumFocus, curriculumAvgDone, statusesForItem, type CurriculumStatus, type CurriculumWindow } from "@/lib/counselorCurriculum";
+import { curriculumForGrade, curriculumAvgDone, statusesForItem, type CurriculumStatus, type CurriculumWindow } from "@/lib/counselorCurriculum";
 import { CardLink, Go } from "../chips";
 import { useCounselorFilters } from "../shell";
-import { GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
+import { GLASS_CARD } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 import { SidePanel } from "./SidePanel";
 
@@ -99,10 +99,6 @@ export function MilestoneTracker() {
     });
   }, [items, scopedToCounselor, gradeRoster, students]);
 
-  // Lowest share done first: the card shows "% done", so the pick has to
-  // agree with it (a weighted not-started score had picked a 73% item over
-  // a 70% one). The weighted score only breaks ties.
-  const focus = rows.slice().sort((a, b) => a.donePct - b.donePct || b.behindShare - a.behindShare)[0];
   // The reference's own precomputed grade average when unscoped (exactly
   // what the Replit shows); an average of this counselor's own rows once
   // narrowed to a caseload.
@@ -123,11 +119,10 @@ export function MilestoneTracker() {
 
   const selected = rows.find((r) => r.id === selectedId) ?? null;
 
-  // The Replit's own structure, calmer (direct feedback: "Dont show
-  // everything together its too much information to process... Is milestone
-  // tracker too different from replit?"): grade tabs, one summary line, the
-  // one focus card, then a grid of plain milestone cards (name, ring, one
-  // line). Each card's full breakdown and its actions open in a side panel.
+  // The Replit's own structure (27 Sept 2026, Maisha: "keep this part
+  // similar to the replit. That was easier to comprehend"): grade tabs, the
+  // three grade numbers, then one card per milestone with its ring and all
+  // four states counted. Each card's actions open in a side panel.
   // The Fall/Winter/Spring grouping is gone: the reference has no seasons,
   // they were an even three-way split of its list, not real timing.
   return (
@@ -142,100 +137,64 @@ export function MilestoneTracker() {
         </span>
       </div>
 
-      {students.length === 0 || !focus ? (
+      {students.length === 0 || rows.length === 0 ? (
         <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No Grade {grade} students{showCounselor && counselorFilter !== "All" ? " on this counselor's caseload" : ""}.</p>
       ) : (
         <>
-          {/* One card, two halves, instead of a sentence of stats above a
-             wide card with its actions stranded at the far edge (direct
-             feedback: "This is bad layout... the text blocks under the tab
-             component: its just lots of words"). Left: the grade, as the
-             Replit's own three numbers. Right: the milestone furthest
-             behind, its ring, and its two actions right beside it. */}
-          <HoverBeam strength={0.7} className="h-full">
-            <div className="group relative grid grid-cols-1 overflow-hidden rounded-[var(--radius-lg)] border md:grid-cols-2" style={GLASS_CARD_HERO}>
-              <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.22) }} />
-              <div className="relative flex flex-col gap-[var(--space-4)] p-[var(--space-5)]">
-                <span className="flex items-start justify-between gap-[10px]">
-                  <span className="flex flex-col gap-[3px]">
-                    <h2 className="text-[16px] font-bold" style={{ color: "var(--foreground)" }}>Grade {grade}</h2>
-                    <span className="text-[12.5px] leading-[17px] font-medium" style={{ color: "var(--muted-foreground)" }}>{curriculumFocus(grade)}</span>
-                  </span>
-                  <CardLink onClick={openAll}>Students</CardLink>
-                </span>
-                <span className="flex flex-wrap gap-x-[var(--space-8)] gap-y-[var(--space-3)]">
-                  {[
-                    { value: String(students.length), label: "students" },
-                    { value: String(rows.length), label: "milestones" },
-                    { value: `${overallDone}%`, label: "avg. done" },
-                  ].map((x) => (
-                    <span key={x.label} className="flex flex-col gap-[2px]">
-                      <span className="text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.value}</span>
-                      <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.label}</span>
-                    </span>
-                  ))}
-                </span>
-              </div>
-              <div className="relative flex flex-col gap-[var(--space-3)] border-t p-[var(--space-5)] md:border-t-0 md:border-l" style={{ borderColor: "var(--glass-border)" }}>
-                {/* Recomposed (direct question, 26 Sept 2026: "This can be
-                   composed better right?"): two equal pills ("8 not done",
-                   "Review 2") read as vague twins and left the half empty.
-                   Now one sentence says what is behind and what is waiting
-                   on the counselor, and ONE primary action does the thing
-                   that moves it (review, when there is anything to
-                   review), with the full list as the quiet second. */}
-                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Furthest behind</span>
-                <span className="flex flex-1 items-center gap-[var(--space-5)]">
-                  <SegmentedRing size={96} stroke={9} segments={STATES.map((st) => ({ value: focus.counts[st.key], color: st.color }))}>
-                    <span className="flex flex-col items-center leading-none">
-                      <span className="text-[20px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{focus.donePct}%</span>
-                      <span className="mt-[3px] text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
-                    </span>
-                  </SegmentedRing>
-                  <span className="flex min-w-0 flex-col gap-[10px]">
-                    <span className="flex flex-col gap-[4px]">
-                      <span className="text-[17px] leading-[22px] font-bold" style={{ color: "var(--foreground)" }}>{focus.title}</span>
-                      <span className="text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>
-                        {focus.total - focus.counts.done} of {focus.total} not done{focus.counts["awaiting-review"] > 0 ? <>, <span className="font-bold" style={{ color: "var(--foreground)" }}>{focus.counts["awaiting-review"]} waiting on your review</span></> : ""}
-                      </span>
-                    </span>
-                    <span className="flex flex-wrap items-center gap-x-[14px] gap-y-[8px]">
-                      {focus.counts["awaiting-review"] > 0 ? (
-                        <button type="button" onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-                          Review {focus.counts["awaiting-review"]}
-                        </button>
-                      ) : focus.total - focus.counts.done > 0 ? (
-                        <button type="button" onClick={() => openNotDone(focus)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-                          See the {focus.total - focus.counts.done}
-                        </button>
-                      ) : null}
-                      {focus.counts["awaiting-review"] > 0 && focus.total - focus.counts.done > 0 && (
-                        <button type="button" onClick={() => openNotDone(focus)} className="dm-quiet flex cursor-pointer items-center gap-[4px] rounded-[var(--radius-sm)] px-[4px] py-[2px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
-                          See all {focus.total - focus.counts.done} not done <Go />
-                        </button>
-                      )}
-                    </span>
-                  </span>
-                </span>
-              </div>
-            </div>
-          </HoverBeam>
+          {/* The reference's three grade numbers, and nothing else above the
+             cards (27 Sept 2026, Maisha: the "Grade 9/10/11" heading and its
+             explanation "feel repetitive. They are already on that grade's
+             tab so we don't have to say the grade again"; the grade
+             breakdown plus "Furthest behind" hero "makes it more complicated
+             to read ... I would keep this part similar to the replit"). */}
+          <div className="flex flex-wrap items-center gap-x-[var(--space-8)] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={GLASS_CARD}>
+            {[
+              { value: String(students.length), label: "Students" },
+              { value: String(rows.length), label: "Milestones" },
+              { value: `${overallDone}%`, label: "Avg. done" },
+            ].map((x) => (
+              <span key={x.label} className="flex items-baseline gap-[8px]">
+                <span className="text-[24px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.value}</span>
+                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.label}</span>
+              </span>
+            ))}
+            <span className="ml-auto"><CardLink onClick={openAll}>Students</CardLink></span>
+          </div>
 
-          <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 xl:grid-cols-3">
+          {/* One card per milestone, as the reference lays them out: the
+             name and its classification, the ring with "N of M", the four
+             states counted, and the way into the student breakdown. */}
+          <ul className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2 2xl:grid-cols-3">
             {rows.map((r) => (
               <li key={r.id}>
-                <button type="button" onClick={() => setSelectedId(r.id)} className="dm-quiet group flex h-full w-full cursor-pointer items-center gap-[14px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={GLASS_INSET}>
-                  <SegmentedRing size={60} stroke={7} segments={STATES.map((st) => ({ value: r.counts[st.key], color: st.color }))}>
-                    <span className="text-[14px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.donePct}%</span>
-                  </SegmentedRing>
-                  <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                    <span className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</span>
-                    <span className="text-[12px] font-semibold" style={{ color: r.counts["awaiting-review"] > 0 ? PRIMARY : "var(--muted-foreground)" }}>
-                      {r.counts.done} of {r.total}{r.counts["awaiting-review"] > 0 ? ` · ${r.counts["awaiting-review"]} need${r.counts["awaiting-review"] === 1 ? "s" : ""} attention` : ""}
+                <HoverBeam strength={0.6} className="h-full">
+                  <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
+                    <span className="flex flex-col items-start gap-[8px]">
+                      <h3 className="text-[14.5px] leading-[1.25] font-bold" style={{ color: "var(--foreground)" }}>{r.title}</h3>
+                      <span className="rounded-full border px-[9px] py-[2px] text-[11px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{r.classification}</span>
                     </span>
-                  </span>
-                  <Go kind="expand" className="-rotate-90 opacity-0 transition-opacity group-hover:opacity-100" />
-                </button>
+                    <span className="flex justify-center py-[var(--space-2)]">
+                      <SegmentedRing size={132} stroke={14} segments={STATES.map((st) => ({ value: r.counts[st.key], color: st.color }))}>
+                        <span className="flex flex-col items-center leading-none">
+                          <span className="text-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.donePct}%</span>
+                          <span className="mt-[4px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done · {r.counts.done} of {r.total}</span>
+                        </span>
+                      </SegmentedRing>
+                    </span>
+                    <ul className="grid grid-cols-2 gap-[6px]">
+                      {STATES.map((st) => (
+                        <li key={st.key} className="flex items-center justify-between gap-[8px] rounded-[var(--radius-sm)] px-[10px] py-[6px] text-[12px] font-semibold" style={{ background: "var(--inset-bg)", color: "var(--muted-foreground)" }}>
+                          <span className="flex min-w-0 items-center gap-[7px]"><span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: st.color }} /><span className="truncate">{st.label}</span></span>
+                          <b className="tabular-nums" style={{ color: st.key === "awaiting-review" && r.counts[st.key] > 0 ? PRIMARY : "var(--foreground)" }}>{r.counts[st.key]}</b>
+                        </li>
+                      ))}
+                    </ul>
+                    {r.counts["not-tracked"] > 0 && <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.counts["not-tracked"]} not applicable</span>}
+                    <button type="button" onClick={() => setSelectedId(r.id)} className="dm-quiet mt-auto flex w-full cursor-pointer items-center justify-center gap-[4px] rounded-[var(--radius-sm)] border px-[10px] py-[8px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                      View details & student breakdown <Go />
+                    </button>
+                  </div>
+                </HoverBeam>
               </li>
             ))}
           </ul>

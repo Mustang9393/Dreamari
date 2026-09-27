@@ -283,8 +283,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-  // Reports holds three of the reference's screens; its note covers all three.
-  const heading = VIEW_HOME[view] === "progress" || view === "progress" ? "Reports" : VIEW_TITLES[view].title;
+  const heading = VIEW_TITLES[view].title;
   const label = "text-[11px] font-bold tracking-[0.06em] uppercase";
   // Laid out as the decisions themselves (26 Sept 2026, direct instruction:
   // "show the final justification of the final designs. Explain what

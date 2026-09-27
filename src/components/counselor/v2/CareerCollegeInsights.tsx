@@ -18,7 +18,6 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "../chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { ShowAll } from "./Disclosure";
-import { SubTabs } from "./SubTabs";
 import { Ring } from "@/components/connect/viz";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
@@ -41,16 +40,6 @@ const TOP_SAVED_CAREERS = [
   { name: "Registered Nurse", count: 35 }, { name: "Psychologist", count: 31 }, { name: "Marketing Manager", count: 24 },
   { name: "Physician / Doctor", count: 22 }, { name: "Graphic Designer", count: 19 }, { name: "Electrician / Skilled Trade", count: 17 }, { name: "Teacher / Educator", count: 15 },
 ];
-const TOP_SIMULATIONS = [
-  { name: "Software Engineer", count: 89 }, { name: "Nurse / Nursing", count: 76 }, { name: "Entrepreneur", count: 68 },
-  { name: "Criminal Justice / Law", count: 55 }, { name: "Graphic Designer", count: 52 }, { name: "Teacher / Educator", count: 48 },
-  { name: "Investment Banker", count: 45 }, { name: "Physician / Doctor", count: 43 }, { name: "Social Worker", count: 41 }, { name: "Marketing Manager", count: 39 },
-];
-const TOP_MAJORS = [
-  { name: "Computer Science", count: 41 }, { name: "Business Administration", count: 36 }, { name: "Nursing / Health Sciences", count: 33 },
-  { name: "Psychology", count: 29 }, { name: "Criminal Justice", count: 24 }, { name: "Communications / Media", count: 22 },
-  { name: "Engineering", count: 20 }, { name: "Education", count: 18 }, { name: "Finance", count: 16 }, { name: "Art & Design", count: 14 },
-];
 const TOP_COLLEGES = [
   { emoji: "🏫", name: "University of California, Los Angeles (UCLA)", count: 28 }, { emoji: "🏛️", name: "Howard University", count: 24 },
   { emoji: "🗽", name: "New York University (NYU)", count: 22 }, { emoji: "🤘", name: "University of Texas at Austin", count: 19 },
@@ -68,74 +57,73 @@ const TOP_COLLEGES = [
 // user asked for ("i love how when i switch tabs the graphs animate into
 // the next"). Brightness follows rank so the leader reads first without a
 // second color. All ten per list stay one click away (Show all).
-type Lens = "careers" | "simulations" | "majors" | "colleges";
-const LENSES: { key: Lens; label: string; unit: string; items: { name: string; count: number }[] }[] = [
-  { key: "careers", label: "Saved careers", unit: "students saved it", items: TOP_SAVED_CAREERS },
-  { key: "simulations", label: "Simulations", unit: "students ran it", items: TOP_SIMULATIONS },
-  { key: "majors", label: "Majors", unit: "students saved it", items: TOP_MAJORS },
-  { key: "colleges", label: "Colleges", unit: "students saved it", items: TOP_COLLEGES },
-];
+// Only what students can actually save in this version of the app: careers
+// and colleges (27 Sept 2026, Maisha: "lets remove simulations and majors.
+// They should only be able to see top 10 saved careers and colleges since
+// at the current version of the app, those two are the main things
+// students can save"). The reference's simulations and majors lists live on
+// in v1's own copy of this screen.
 const MORPH = { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const };
 const SHOWN = 5;
 
-function InterestChart() {
+/** A ranked list drawn as bars: rank, name, count, one bar per row, the
+ *  leader lit. Shared with the Overview's Career Pathways snapshot so the
+ *  snapshot and the full list read as the same chart. */
+export function RankedBars({ items, limit, all = true }: { items: { name: string; count: number }[]; /** rows to draw; the rest are cut */ limit?: number; /** false: rows past SHOWN hide below lg until "Show all" */ all?: boolean }) {
   const reduce = useReducedMotion();
-  const [lens, setLens] = useState<Lens>("careers");
+  const rows = limit ? items.slice(0, limit) : items;
+  const max = Math.ceil(Math.max(...items.map((i) => i.count)) / 10) * 10;
+  return (
+    <ol className="flex flex-col gap-[12px]">
+      {rows.map((item, i) => {
+        const lead = i === 0;
+        const strength = lead ? 100 : Math.max(38, 78 - i * 6);
+        return (
+          <li key={item.name} className={`flex-col gap-[6px] ${all || i < SHOWN ? "flex" : "hidden lg:flex"}`}>
+            <span className="flex items-baseline justify-between gap-[12px] text-[13px]">
+              <span className="flex min-w-0 items-baseline gap-[10px]">
+                <span className="w-[16px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: lead ? "var(--primary)" : "var(--muted-foreground)" }}>{i + 1}</span>
+                <motion.span initial={reduce ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: reduce ? 0 : i * 0.03 }} className="truncate font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</motion.span>
+              </span>
+              <span className="flex-none font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
+            </span>
+            <span className="relative ml-[26px] block h-[8px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
+              <motion.span
+                className="absolute inset-y-0 left-0 rounded-full"
+                initial={reduce ? false : { width: "0%" }}
+                animate={{ width: `${(item.count / max) * 100}%` }}
+                transition={{ ...MORPH, delay: reduce ? 0 : i * 0.03 }}
+                style={{
+                  background: `linear-gradient(90deg, color-mix(in srgb, var(--primary) ${Math.round(strength * 0.4)}%, transparent), color-mix(in srgb, var(--primary) ${strength}%, transparent))`,
+                  boxShadow: lead ? "0 0 10px color-mix(in srgb, var(--primary) 55%, transparent)" : undefined,
+                }}
+              />
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export { TOP_SAVED_CAREERS };
+
+function TopTen({ title, unit, items }: { title: string; unit: string; items: { name: string; count: number }[] }) {
   const [all, setAll] = useState(false);
-  const current = LENSES.find((l) => l.key === lens)!;
-  // All ten on a wide screen, where the card stands beside the
-  // recommendations and has the height; five plus Show all below that.
-  const items = current.items;
-  // A shared scale across lenses would flatten the smaller lists; each lens
-  // scales to its own leader, rounded up so the top bar never touches the end.
-  const max = Math.ceil(Math.max(...current.items.map((i) => i.count)) / 10) * 10;
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
         <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>What students are into</h2>
-          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>top {current.items.length} · {current.unit}</span>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
+          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{unit}</span>
         </div>
-        <SubTabs ariaLabel="Lens" value={lens} onChange={(k) => setLens(k)} options={LENSES.map((l) => ({ key: l.key, label: l.label }))} />
-        <ol className="flex flex-col gap-[12px]">
-          {items.map((item, i) => {
-            const lead = i === 0;
-            // Rank as brightness: the leader at full strength, the rest
-            // stepping down to a quiet floor.
-            const strength = lead ? 100 : Math.max(38, 78 - i * 6);
-            return (
-              <li key={i} className={`flex-col gap-[6px] ${all || i < SHOWN ? "flex" : "hidden lg:flex"}`}>
-                <span className="flex items-baseline justify-between gap-[12px] text-[13px]">
-                  <span className="flex min-w-0 items-baseline gap-[10px]">
-                    <span className="w-[16px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: lead ? "var(--primary)" : "var(--muted-foreground)" }}>{i + 1}</span>
-                    <motion.span key={item.name} initial={reduce ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: reduce ? 0 : i * 0.03 }} className="truncate font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</motion.span>
-                  </span>
-                  <span className="flex-none font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
-                </span>
-                <span className="relative ml-[26px] block h-[8px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
-                  <motion.span
-                    className="absolute inset-y-0 left-0 rounded-full"
-                    initial={reduce ? false : { width: "0%" }}
-                    animate={{ width: `${(item.count / max) * 100}%` }}
-                    transition={{ ...MORPH, delay: reduce ? 0 : i * 0.03 }}
-                    style={{
-                      background: `linear-gradient(90deg, color-mix(in srgb, var(--primary) ${Math.round(strength * 0.4)}%, transparent), color-mix(in srgb, var(--primary) ${strength}%, transparent))`,
-                      boxShadow: lead ? "0 0 10px color-mix(in srgb, var(--primary) 55%, transparent)" : undefined,
-                    }}
-                  />
-                </span>
-              </li>
-            );
-          })}
-        </ol>
-        <div className="lg:hidden"><ShowAll total={current.items.length} shown={SHOWN} open={all} onToggle={() => setAll((v) => !v)} /></div>
+        <RankedBars items={items} all={all} />
+        <div className="lg:hidden"><ShowAll total={items.length} shown={SHOWN} open={all} onToggle={() => setAll((v) => !v)} /></div>
       </div>
     </HoverBeam>
   );
 }
 
-// The reference's four career-fair interests, each tied to the roster
-// pathway (Build world) its students sit in.
 const FAIR_CLUSTERS = [
   { label: "Technology & Engineering", pathway: "Tech & Engineering" },
   { label: "Business & Entrepreneurship", pathway: "Business & Finance" },
@@ -152,25 +140,31 @@ export function CareerCollegeInsights() {
   // own (direct instruction, 25 Sept 2026: a manual option wherever
   // something is AI generated). Session state until a backend stores it.
   const [tiles, setTiles] = useState<Tile[]>(() => RECOMMENDATION_TILES.map((t) => ({ ...t })));
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [adding, setAdding] = useState(false);
   const [subject, setSubject] = useState("");
   const [action, setAction] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
-    // Side by side on a wide screen: what to do (left), what students are
-    // into (right), one glance each, instead of a report's long scroll.
-    <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      {/* The screen's hero: what the data suggests doing. One stat, one
-         action per column; the reference's two further actions per stat
-         were a paragraph each on every visit. */}
+    <div className="flex flex-col gap-[var(--space-5)]">
+      {/* What students saved, first: the two top-10 lists side by side,
+         then the recommendations they lead to, full width underneath
+         (27 Sept 2026, Maisha: "have top 10 saved careers + top 10 saved
+         colleges at the top. Below that have 'Dreamari recommendations for
+         you' like the replit. Side by side doesn't make sense"). The 26
+         Sept layout put the recommendations beside one tabbed chart, which
+         read as two unrelated columns. */}
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
+        <TopTen title="Top 10 saved careers" unit="students who saved it" items={TOP_SAVED_CAREERS} />
+        <TopTen title="Top 10 saved colleges" unit="students who saved it" items={TOP_COLLEGES.map(({ name, count }) => ({ name, count }))} />
+      </div>
+
       <HoverBeam strength={0.7} className="h-full">
         <div className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
           <div className="relative flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-wrap items-center justify-between gap-[8px]">
               <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Recommended this semester
+                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Dreamari recommendations for you
               </h2>
               {!adding && (
                 <button type="button" onClick={() => setAdding(true)} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
@@ -188,77 +182,66 @@ export function CareerCollegeInsights() {
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-1">
-              {/* One left edge for all three lines (direct feedback: the
-                 number and its text "read like two different anchors"). */}
+            {/* Three across, every action visible, as the reference shows
+               them: the full-width row has room the old side column did
+               not, so nothing hides behind "+2 more". */}
+            <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3">
               {tiles.map((r) => (
-                <div key={r.subject} className="relative flex flex-col gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                <div key={r.subject} className="relative flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
                   {r.mine ? (
                     <>
                       <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your note</span>
-                      <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[12px] w-[12px]" aria-hidden /></button>
+                      <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button>
+                      <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject}</span>
                     </>
                   ) : (
                     <span className="flex items-center gap-[12px]">
                       <Ring pct={r.pct ?? 0} size={52} stroke={6} accent="var(--primary)">
                         <span className="text-[13px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
                       </Ring>
-                      <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of students {r.subject}</span>
+                      <span className="text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>of students {r.subject}</span>
                     </span>
                   )}
-                  {r.mine && <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>{r.subject}</span>}
-                  <span className="mt-[6px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.actions[0]}</span>
-                  {r.actions.length > 1 && (
-                    expanded.has(r.subject) ? (
-                      <ul className="mt-[4px] flex flex-col gap-[4px] pl-[14px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}>
-                        {r.actions.slice(1).map((a) => <li key={a}>{a}</li>)}
-                      </ul>
-                    ) : (
-                      <button type="button" onClick={() => setExpanded((prev) => new Set(prev).add(r.subject))} className="dm-quiet mt-[2px] flex w-fit cursor-pointer items-center text-[11.5px] font-bold" style={{ color: "var(--primary)" }}>+{r.actions.length - 1} more</button>
-                    )
-                  )}
+                  <ul className="flex flex-col gap-[6px] pl-[14px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}>
+                    {r.actions.map((a) => <li key={a}>{a}</li>)}
+                  </ul>
                 </div>
               ))}
-            </div>
-            {/* The reference's career-fair note, as the card's closing
-               suggestion. The four interests were pill chips that looked
-               like buttons and did nothing (direct question: "This could
-               be better too right?"); each is now a real action: how many
-               students are in that pathway, and a click opens Group
-               message with that pathway already chosen, to invite them. */}
-            <div className="flex flex-col gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--inset-border)" }}>
-              <span className="flex flex-col gap-[2px]">
-                <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</span>
-                <span className="text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>Invite the students in each pathway</span>
-              </span>
-              {/* One per row beside the chart (the column is too narrow for
-                 two without cutting the names), two across when stacked. */}
-              <ul className="grid grid-cols-1 gap-[6px] sm:grid-cols-2 lg:grid-cols-1">
-                {FAIR_CLUSTERS.map((c) => {
-                  const n = roster.filter((st) => st.careerTrack === c.pathway).length;
-                  return (
-                    <li key={c.label}>
-                      <button type="button" onClick={() => router.push(`/counselor?view=productivity&tool=group-message&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] border px-[10px] py-[8px] text-left" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                        <span className="flex size-[26px] flex-none items-center justify-center rounded-[7px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}><Megaphone className="h-[13px] w-[13px]" aria-hidden /></span>
-                        <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                          <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
-                          <span className="text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
-                        </span>
-                        <Go />
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
             </div>
           </div>
         </div>
       </HoverBeam>
 
-      {/* Saved careers is the reference's own list, so it agrees with the
-         "43% saved Investment Banker" headline above it. */}
-      <InterestChart />
-
+      {/* The reference's career-fair note, its own card under the
+         recommendations. Each interest is a real action: how many students
+         are in that pathway, and a click opens a Counselor Connect
+         announcement already addressed to them (Group message folded into
+         Connect, 27 Sept 2026). */}
+      <HoverBeam strength={0.6} className="h-full">
+        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <span className="flex flex-col gap-[2px]">
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</h2>
+            <span className="text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>Invite the students in each pathway</span>
+          </span>
+          <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 xl:grid-cols-4">
+            {FAIR_CLUSTERS.map((c) => {
+              const n = roster.filter((st) => st.careerTrack === c.pathway).length;
+              return (
+                <li key={c.label}>
+                  <button type="button" onClick={() => router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                    <span className="flex size-[26px] flex-none items-center justify-center rounded-[7px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}><Megaphone className="h-[13px] w-[13px]" aria-hidden /></span>
+                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                      <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
+                      <span className="text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
+                    </span>
+                    <Go />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </HoverBeam>
     </div>
   );
 }

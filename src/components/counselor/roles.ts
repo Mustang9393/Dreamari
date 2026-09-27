@@ -38,14 +38,13 @@ export const REFERENCE_VIEWS: CounselorView[] = [
 ];
 
 export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
-  // Career + College Insights moved inside Reports as its middle tab
-  // (26 Sept 2026, direct feedback: "seem like reports to me").
-  // "Reports" (26 Sept 2026) consolidates two reference screens a counselor
-  // had lost: Student Progress (nine readiness reports, CSV/PDF) and
-  // Platform Engagement (logins, active students, check-ins by grade), as
-  // two tabs of one screen (v2/CounselorReports.tsx). A v2-vs-Replit audit
-  // found both unreachable for this role, against the standing rule that
-  // content is never removed, only presented better.
+  // Student Progress, Career + College Insights and Platform Engagement
+  // are three menu items again, as in the reference (27 Sept 2026, Maisha:
+  // "I'm not sure if we should call this part 'reports'. I see you've tried
+  // to consolidate certain tabs into one. But they feel different."). The
+  // 26 Sept "Reports" screen held all three as tabs; the reason for it (two
+  // of them had become unreachable for counselors) is still met, because
+  // each is now its own item.
   "School Counselor": [
     { view: "overview" },
     { view: "students" },
@@ -53,7 +52,9 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "review-queue" },
     { view: "connect" },
     { view: "productivity" },
-    { view: "progress", label: "Reports" },
+    { view: "progress" },
+    { view: "insights" },
+    { view: "engagement" },
     { view: "impact" },
     { view: "settings" },
   ],
@@ -65,7 +66,9 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "review-queue" },
     { view: "connect" },
     { view: "productivity" },
-    { view: "progress", label: "Reports" },
+    { view: "progress" },
+    { view: "insights" },
+    { view: "engagement" },
     { view: "school-impact" },
     { view: "settings" },
   ],
@@ -115,14 +118,11 @@ export function menuForRole(role: CounselorRole | ""): RoleMenuItem[] {
 // Insights moved inside Reports (26 Sept 2026) but its old URL still opens
 // it, on the Reports "Career + college" tab (Overview's Career Pathways
 // links there).
-const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {
-  "School Counselor": ["insights"],
-  "Lead Counselor": ["insights"],
-};
+const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {};
 
 /** A hidden view shown inside another menu item's screen: the sidebar
  *  highlights, and the page is titled, as that item. */
-export const VIEW_HOME: Partial<Record<CounselorView, CounselorView>> = { insights: "progress" };
+export const VIEW_HOME: Partial<Record<CounselorView, CounselorView>> = {};
 export function roleHasView(role: CounselorRole | "", view: CounselorView): boolean {
   return menuForRole(role).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
 }

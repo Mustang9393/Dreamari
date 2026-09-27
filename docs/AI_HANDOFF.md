@@ -38,6 +38,23 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-27 Counselor Dashboard v2: Maisha's review, checked against the live Replit
+
+Every item from Maisha's Slack review, compared with the live Replit (web-app-prototype-maishak.replit.app), not with v1 (direct instruction: "DO NOT EVER COMPARE V1 AND V2, ONLY COMPARE DIRECTLY WITH THE REPLIT").
+
+- **Overview**: three cards only, Needs attention (critical) on top, Student Status, Career Pathways ("simplify this further ... Remove everything else"). Student Status now shows progress across all milestones (the Milestone Tracker's own four states, so the two agree). Career Pathways is the top five saved careers as bars with See all 10, which opens Insights ("I don't love the 'career pathways' snapshot ... Either a bar or a pie chart ... top 3-5 careers"). Postsecondary Plans and the two readiness bar charts are gone from the Overview.
+- **Students**: Roadmap and Plan columns removed; the plan filter stays.
+- **Milestone Tracker**: the grade heading and its focus sentence and the "Furthest behind" hero are gone ("repetitive", "complicated to read ... keep this part similar to the replit"). The Replit's three numbers, then one card per checkpoint in the Replit's shape: classification pill, large ring with N of M, the four states as a 2x2 grid, and a details button that opens the side panel.
+- **Counselor Connect**: Questions are "Needs reply" or "Answered" ("Lets just keep 'needs reply'"). Groups are board tiles with Connect's photo, blur and stat treatment ("in boxes to mirror how the connect boards look like"). One "New message" composer offers an Announcement or a Private message.
+- **Group message moved from Productivity to Connect**: Maisha asked whether it duplicated Connect. It does not quite: an announcement is public to a grade, while a private message goes only to students picked by status, pathway or name. Both are outgoing messages, so both now live in Connect. Insights' career-fair invites and Productivity's "Message all" open it already addressed (`?view=connect&compose=1&pathway=` / `&ids=`).
+- **Reports split back** into the Replit's three menu items, Student Progress, Career + College Insights and Platform Engagement ("I'm not sure if we should call this part 'reports' ... they feel different"). `v2/CounselorReports.tsx` is deleted.
+- **Insights**: top 10 saved careers and top 10 saved colleges side by side, then the recommendations full width with every action visible, then the career-fair card. Simulations and majors are removed.
+- **Engagement**: the Replit's picker, read from its code: an academic year (current, 2024-2025, 2023-2024) crossed with Logins by day, month, student or site. By student and by site use the Replit's numbers. By day and by month keep the Replit's labels and scale but climb, per the standing always-up rule for demo engagement. The stat cards follow the chosen year.
+- **My Impact**: one page, no tabs, the Replit's numbers (120 / 86% / 66% / 33% and every section's figures). Notable achievements sits near the top as a snapshot of eight one-line items. The Principal report opens on screen (`CounselorImpact.tsx`: the Replit's summary header, six achievements and the five-row compliance table, with Print). The first pass copied every Replit section; Chandu then asked "WERE WE INSTRUCTED TO REPLICATE THE REPLITS MY IMPACT EXACTLY? ... clean this up and reduce copy and clutter". The page was cut down with every data point kept: the District Compliance section folded into Met / In progress chips on the numbers it judges, activity and engagement share one card, and the prose and footer are gone. Lead Counselor's School Impact keeps the tabbed version.
+- **(i) notes** rewritten for every changed screen, each decision quoting Maisha's line.
+- **Light mode**: answered yes. It is in the header menu (≡ → Light mode), and the new screens were checked in it.
+- Validation: tsc and eslint clean; every screen checked in the browser at 1280-1440 wide, Engagement year/view switching verified against the Replit's 2024-25 site numbers, the report modal verified. Not pushed (show before push).
+
 ### 2026-09-26 Play SOP for Usman: scaling simulations and Glossary Games to every career
 
 - **What:** `docs/handoff/play-sop/` (README plus seven chapters and two intake templates). It is a complete, source-cited description of both Play games as built: data model, player runtime, all 15 beat kinds, the Glossary Game, the hub and entry points, art rules, and the dated decision log. It also has step-by-step checklists for adding a career, content intake formats for Joshua's datasets, and a QA gate. Indexed in `HANDOFF_INDEX.md`.

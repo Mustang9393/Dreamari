@@ -1,6 +1,9 @@
 "use client";
 
-// DEMO-ONLY v2 fork of ../StudentsRoster.tsx. Rebuilt 25 Sept 2026 under the
+// DEMO-ONLY v2 fork of ../StudentsRoster.tsx. 27 Sept 2026: the Roadmap
+// and Plan columns are gone (Maisha: "Remove roadmap column. Remove plan
+// column"); the plan filter stays in the toolbar, and a student's roadmap
+// and plan are still one click away on their profile. Rebuilt 25 Sept 2026 under the
 // v2 budget (skimmable, one hue, color only for state): the student cell
 // carries name, grade and pathway so the table is six columns instead of
 // eight; Status sorts by severity, not alphabet; the two filters are
@@ -24,7 +27,6 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar, Go } from "../chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
-import { PRIMARY } from "../palette";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
@@ -55,18 +57,6 @@ function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }
         </button>
       ) : label}
     </th>
-  );
-}
-
-/** The one blue, sized to the value, the number beside it. */
-function Roadmap({ pct }: { pct: number }) {
-  return (
-    <span className="flex items-center gap-[8px]">
-      <span className="relative block h-[6px] w-[64px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
-        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${PRIMARY} 35%, transparent), ${PRIMARY})` }} />
-      </span>
-      <span className="text-[12.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{pct}%</span>
-    </span>
   );
 }
 
@@ -198,11 +188,9 @@ export function StudentsRoster() {
               <thead className="sticky top-0 z-10" style={{ background: "var(--card)" }}>
                 <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
                   <HeaderCell label="Student" keyName="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                  <HeaderCell label="Roadmap" keyName="roadmapPct" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Status" keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   {showCounselor && <HeaderCell label="Counselor" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />}
                   <HeaderCell label="Milestones" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                  <HeaderCell label="Plan" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Last active" keyName="lastActive" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <th className="w-[44px] px-[var(--space-4)] py-[var(--space-3)]" aria-hidden />
                 </tr>
@@ -216,11 +204,9 @@ export function StudentsRoster() {
                     style={{ borderColor: "var(--glass-border)" }}
                   >
                     <td className="px-[var(--space-4)] py-[10px]"><StudentCell s={s} /></td>
-                    <td className="px-[var(--space-4)] py-[10px]"><Roadmap pct={s.roadmapPct} /></td>
                     <td className="px-[var(--space-4)] py-[10px]"><StatusCell s={s} /></td>
                     {showCounselor && <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{counselorFor(s).name}</td>}
                     <td className="px-[var(--space-4)] py-[10px]"><MilestonesMini milestones={s.milestones} /></td>
-                    <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold" style={{ color: s.postsecondaryIntent === "Undecided" ? "var(--muted-foreground)" : "var(--foreground)" }}>{s.postsecondaryIntent}</td>
                     <td className="px-[var(--space-4)] py-[10px] text-[12.5px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fmtDate(s.lastActive)}</td>
                     <td className="px-[var(--space-4)] py-[10px]"><Go /></td>
                   </tr>
@@ -245,10 +231,7 @@ export function StudentsRoster() {
                       {showCounselor && <span>{counselorFor(s).name}</span>}
                     </span>
                   )}
-                  <span className="flex items-center justify-between gap-[10px]">
-                    <Roadmap pct={s.roadmapPct} />
-                    <MilestonesMini milestones={s.milestones} />
-                  </span>
+                  <MilestonesMini milestones={s.milestones} />
                 </button>
               </li>
             ))}

@@ -36,6 +36,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
+import { CounselorImpact } from "./CounselorImpact";
 import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound, CheckCircle2 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Ring, Segmented, SegmentedRing } from "@/components/connect/viz";
@@ -62,18 +63,18 @@ const GRADES = [9, 10, 11, 12];
 // (CounselorAccount has no photo/cover), so both are a deterministic pick
 // off the counselor's own name -- the same "no backend, seeded pick"
 // convention avatarIndexForName already uses for students.
-const COUNSELOR_HEADSHOTS = ["/images/connect/avatars/pro-rossi.jpg", "/images/connect/avatars/pro-martinez.jpg", "/images/connect/avatars/pro-tanaka.jpg", "/images/connect/avatars/pro-brooks.jpg", "/images/connect/avatars/pro-desai.png", "/images/connect/avatars/pro-cole.jpg"];
+export const COUNSELOR_HEADSHOTS = ["/images/connect/avatars/pro-rossi.jpg", "/images/connect/avatars/pro-martinez.jpg", "/images/connect/avatars/pro-tanaka.jpg", "/images/connect/avatars/pro-brooks.jpg", "/images/connect/avatars/pro-desai.png", "/images/connect/avatars/pro-cole.jpg"];
 // One pinned, vibrant cover rather than a seeded pick (direct instruction:
 // "use a better cover image for sarah chen too. Something vibrant") -- the
 // seeded pool had landed on a dark bokeh shot for Lincoln High.
-const COUNSELOR_COVER = "/images/profile/covers/fluid-paint.webp";
-function seededPick<T>(seed: string, pool: T[]): T {
+export const COUNSELOR_COVER = "/images/profile/covers/fluid-paint.webp";
+export function seededPick<T>(seed: string, pool: T[]): T {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
   return pool[Math.abs(hash) % pool.length];
 }
 
-function CounselorHeadshot({ src, size = 64 }: { src: string; size?: number }) {
+export function CounselorHeadshot({ src, size = 64 }: { src: string; size?: number }) {
   const [failed, setFailed] = useState(false);
   if (failed) {
     return (
@@ -239,7 +240,15 @@ const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College"
 
 // `scope="school"` is the Lead Counselor's School Impact: the same report
 // for the whole school, headed by the school, with a by-counselor card.
+// My Impact is one page in the Replit's order with the Replit's numbers
+// (CounselorImpact.tsx, 27 Sept 2026). This tabbed version stays as the
+// Lead Counselor's School Impact.
 export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
+  if (scope === "mine") return <CounselorImpact />;
+  return <ImpactTabs scope={scope} />;
+}
+
+function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const router = useRouter();
   const { setGradeFilter, setCounselorFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
   const roster = useReviewedRoster();

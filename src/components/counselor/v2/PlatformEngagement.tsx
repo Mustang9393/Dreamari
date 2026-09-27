@@ -8,6 +8,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import { LogIn, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { Segmented } from "@/components/connect/viz";
+import { Listbox } from "@/components/app/Listbox";
+import { RankedBars } from "./CareerCollegeInsights";
 import { useSyncExternalStore } from "react";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -37,8 +40,6 @@ const MONTHS = [
   { label: "Aug 2026", total: 168, unique: 58, avg: 2.9 },
   { label: "Sep 2026", total: 214, unique: 71, avg: 3.01 },
 ];
-const LATEST = MONTHS[MONTHS.length - 1];
-const PREV = MONTHS[MONTHS.length - 2];
 const WEEKLY_ACTIVE = 42;
 const DAILY_ACTIVE = 18;
 const pctChange = (now: number, before: number) => Math.round(((now - before) / before) * 100);
@@ -138,6 +139,78 @@ const TOTAL_COLOR = "#5B6CF9";
 // Light blue, not the reference's green: one chart family app-wide.
 const UNIQUE_COLOR = "var(--cd-blue-soft)";
 
+// Logins the way the Replit offers them (27 Sept 2026, Maisha: "in the
+// replit they had the option to see logins by month, year, day, semester,
+// etc. This is important. The version just has by month and no option to
+// change"). The Replit's picker is an academic year (current, 2024-2025,
+// 2023-2024) crossed with a view: logins by day (seven school days), by
+// month, by student (the ten most active) and by site (the five parts of
+// the app). By student and by site are the Replit's own numbers per year,
+// verbatim. By day and by month keep the Replit's labels and scale but
+// climb to their latest point, the standing rule for demo engagement
+// (direct instruction, 26 Sept 2026: "dont ever show a negative trend for
+// engagement, even for demos. Always look up!"); the current year's months
+// are the ones this screen already showed.
+type Point = { label: string; total: number; unique: number; avg: number };
+const pt = (label: string, total: number, unique: number): Point => ({ label, total, unique, avg: Math.round((total / unique) * 100) / 100 });
+type YearData = { label: string; monthly: Point[]; daily: Point[]; byStudent: { name: string; count: number }[]; bySite: { site: string; total: number; unique: number }[] };
+const ENGAGEMENT_YEARS: Record<"current" | "2024-2025" | "2023-2024", YearData> = {
+  current: {
+    label: "Current academic year",
+    monthly: MONTHS,
+    daily: [pt("Thu 9/17", 38, 26), pt("Fri 9/18", 34, 24), pt("Mon 9/21", 44, 30), pt("Tue 9/22", 47, 32), pt("Wed 9/23", 45, 31), pt("Thu 9/24", 52, 35), pt("Fri 9/25", 58, 38)],
+    byStudent: [{ name: "Aaliyah T.", count: 38 }, { name: "Marcus J.", count: 35 }, { name: "Destiny R.", count: 31 }, { name: "Jordan C.", count: 29 }, { name: "Kayla M.", count: 27 }, { name: "Isaiah W.", count: 24 }, { name: "Brianna L.", count: 22 }, { name: "Elijah P.", count: 21 }, { name: "Sophia G.", count: 19 }, { name: "Nathan B.", count: 17 }],
+    bySite: [{ site: "Career Explorer", total: 623, unique: 98 }, { site: "Academic Planner", total: 389, unique: 84 }, { site: "College Finder", total: 241, unique: 61 }, { site: "Resume Builder", total: 188, unique: 52 }, { site: "Career Simulations", total: 130, unique: 43 }],
+  },
+  "2024-2025": {
+    label: "2024 – 2025",
+    monthly: [pt("Aug 2024", 164, 58), pt("Sep 2024", 188, 63), pt("Oct 2024", 176, 60), pt("Nov 2024", 205, 67), pt("Dec 2024", 198, 65), pt("Jan 2025", 221, 70), pt("Feb 2025", 236, 73), pt("Mar 2025", 229, 72), pt("Apr 2025", 251, 77), pt("May 2025", 268, 81)],
+    daily: [pt("Mon 9/2", 41, 28), pt("Tue 9/3", 46, 31), pt("Wed 9/4", 44, 30), pt("Thu 9/5", 52, 35), pt("Fri 9/6", 49, 33), pt("Mon 9/9", 57, 38), pt("Tue 9/10", 63, 42)],
+    byStudent: [{ name: "Jayla H.", count: 44 }, { name: "Devon A.", count: 41 }, { name: "Amara S.", count: 37 }, { name: "Chris F.", count: 33 }, { name: "Layla N.", count: 30 }, { name: "Malik D.", count: 28 }, { name: "Priya K.", count: 25 }, { name: "Tyler M.", count: 23 }, { name: "Simone V.", count: 21 }, { name: "Ava T.", count: 19 }],
+    bySite: [{ site: "Career Explorer", total: 714, unique: 107 }, { site: "Academic Planner", total: 441, unique: 91 }, { site: "College Finder", total: 278, unique: 70 }, { site: "Resume Builder", total: 203, unique: 58 }, { site: "Career Simulations", total: 149, unique: 47 }],
+  },
+  "2023-2024": {
+    label: "2023 – 2024",
+    monthly: [pt("Aug 2023", 131, 47), pt("Sep 2023", 152, 52), pt("Oct 2023", 146, 50), pt("Nov 2023", 168, 55), pt("Dec 2023", 161, 54), pt("Jan 2024", 183, 59), pt("Feb 2024", 197, 62), pt("Mar 2024", 190, 61), pt("Apr 2024", 209, 66), pt("May 2024", 224, 71)],
+    daily: [pt("Mon 9/4", 33, 23), pt("Tue 9/5", 38, 26), pt("Wed 9/6", 36, 25), pt("Thu 9/7", 43, 29), pt("Fri 9/8", 41, 28), pt("Mon 9/11", 47, 32), pt("Tue 9/12", 52, 35)],
+    byStudent: [{ name: "Marcus B.", count: 40 }, { name: "Zoe C.", count: 36 }, { name: "Andre M.", count: 33 }, { name: "Fatima A.", count: 30 }, { name: "James T.", count: 27 }, { name: "Keisha R.", count: 25 }, { name: "Lucas N.", count: 22 }, { name: "Maya S.", count: 20 }, { name: "Darius W.", count: 18 }, { name: "Emma L.", count: 16 }],
+    bySite: [{ site: "Career Explorer", total: 591, unique: 94 }, { site: "Academic Planner", total: 364, unique: 78 }, { site: "College Finder", total: 218, unique: 57 }, { site: "Resume Builder", total: 167, unique: 44 }, { site: "Career Simulations", total: 112, unique: 38 }],
+  },
+};
+type EngagementYear = keyof typeof ENGAGEMENT_YEARS;
+type EngagementView = "day" | "month" | "student" | "site";
+const VIEWS: { key: EngagementView; label: string }[] = [{ key: "day", label: "Day" }, { key: "month", label: "Month" }, { key: "student", label: "Student" }, { key: "site", label: "Site" }];
+
+/** Logins by site: total logins and unique students per part of the app,
+ *  two bars a row, one scale. */
+function SiteBars({ sites }: { sites: YearData["bySite"] }) {
+  const reduce = useReducedMotion();
+  const max = Math.ceil(Math.max(...sites.map((s) => s.total)) / 100) * 100;
+  return (
+    <figure className="m-0 flex flex-col gap-[14px]">
+      <ul className="flex flex-col gap-[14px]">
+        {sites.map((s, i) => (
+          <li key={s.site} className="flex flex-col gap-[5px]">
+            <span className="flex items-baseline justify-between gap-[12px] text-[13px]">
+              <span className="font-semibold" style={{ color: "var(--foreground)" }}>{s.site}</span>
+              <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}><b style={{ color: "var(--foreground)" }}>{s.total}</b> logins · <b style={{ color: "var(--foreground)" }}>{s.unique}</b> students</span>
+            </span>
+            {([["total", TOTAL_COLOR], ["unique", UNIQUE_COLOR]] as const).map(([k, color]) => (
+              <span key={k} className="relative block h-[7px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
+                <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${(s[k] / max) * 100}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: reduce ? 0 : i * 0.04 }} style={{ background: color }} />
+              </span>
+            ))}
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-wrap justify-center gap-x-[18px] gap-y-[4px]">
+        <span className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] rounded-full" style={{ background: TOTAL_COLOR }} />Total logins</span>
+        <span className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] rounded-full" style={{ background: UNIQUE_COLOR }} />Unique students</span>
+      </div>
+    </figure>
+  );
+}
+
 // Rebuilt 26 Sept 2026 (direct feedback: "the logins by month is better in
 // replit... everything in that graph seems squished down"). The old SVG
 // stretched a 600x220 drawing to the card with preserveAspectRatio="none",
@@ -147,7 +220,8 @@ const UNIQUE_COLOR = "var(--cd-blue-soft)";
 // unique line in its own green so the two series never read as one. Ours
 // adds a soft area under the total, lines that draw in on load, and a
 // hover column that reads all three of the month's numbers at once.
-function LoginsChart() {
+function LoginsChart({ data }: { data: Point[] }) {
+  const MONTHS = data;
   const reduce = useReducedMotion();
   const id = useId().replace(/:/g, "");
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -165,8 +239,9 @@ function LoginsChart() {
   const padRight = 16;
   const padTop = 16;
   const padBottom = 28;
-  const step = 50;
-  const max = Math.ceil(Math.max(...MONTHS.map((m) => m.total)) / step) * step;
+  const peak = Math.max(...MONTHS.map((m) => m.total));
+  const step = [2, 5, 10, 20, 25, 50, 100].find((st) => peak / st <= 5) ?? 100;
+  const max = Math.ceil(peak / step) * step;
   const ticks = Array.from({ length: max / step + 1 }, (_, i) => i * step);
   const plotW = Math.max(1, W - padLeft - padRight);
   const plotH = H - padTop - padBottom;
@@ -186,7 +261,7 @@ function LoginsChart() {
     <figure className="m-0 flex flex-col gap-[12px]">
       <div ref={wrapRef} className="relative w-full" style={{ height: H }} onMouseLeave={() => setHover(null)}>
         {W > 0 && (
-          <svg width={W} height={H} role="img" aria-label="Total logins and unique student logins by month" className="block overflow-visible">
+          <svg width={W} height={H} role="img" aria-label="Total logins and unique student logins" className="block overflow-visible">
             <defs>
               <linearGradient id={`pe-area-${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={TOTAL_COLOR} stopOpacity="0.28" /><stop offset="100%" stopColor={TOTAL_COLOR} stopOpacity="0" /></linearGradient>
             </defs>
@@ -205,7 +280,7 @@ function LoginsChart() {
                 {(["total", "unique"] as const).map((k) => (
                   <motion.circle key={k} cx={x(i)} cy={y(m[k])} r={hover === i ? 6 : 4.5} fill={k === "total" ? TOTAL_COLOR : UNIQUE_COLOR} stroke="var(--card)" strokeWidth="2" initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: reduce ? 0 : 0.2 + (i / (MONTHS.length - 1)) * 0.9 }} />
                 ))}
-                <text x={x(i)} y={H - 6} textAnchor={i === 0 ? "start" : i === MONTHS.length - 1 ? "end" : "middle"} style={{ fontSize: 11.5, fontWeight: 600, fill: hover === i ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{m.label}</text>
+                {(MONTHS.length <= 8 || (MONTHS.length - 1 - i) % 2 === 0) && <text x={x(i)} y={H - 6} textAnchor={i === 0 ? "start" : i === MONTHS.length - 1 ? "end" : "middle"} style={{ fontSize: 11.5, fontWeight: 600, fill: hover === i ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{m.label}</text>}
                 {/* One hover column per month, the full plot height, so the
                    pointer doesn't have to find a 9px dot. */}
                 <rect x={x(i) - plotW / (MONTHS.length - 1) / 2} y={padTop} width={plotW / (MONTHS.length - 1)} height={plotH} fill="transparent" onMouseEnter={() => setHover(i)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} tabIndex={0} aria-label={`${m.label}: ${m.total} total logins, ${m.unique} unique students, ${m.avg.toFixed(2)} logins each`} style={{ cursor: "pointer", outline: "none" }} />
@@ -239,6 +314,11 @@ export function PlatformEngagement() {
   const roster = useReviewedRoster();
   const schools = district ? districtSchools(roster).slice().sort((a, b) => a.activePct - b.activePct) : [];
   const reach = schools.filter((s) => s.activePct >= SCHOOL_TARGETS.activeStudents).length;
+  const [yearKey, setYearKey] = useState<EngagementYear>("current");
+  const [view, setView] = useState<EngagementView>("month");
+  const year = ENGAGEMENT_YEARS[yearKey];
+  const latest = year.monthly[year.monthly.length - 1];
+  const prev = year.monthly[year.monthly.length - 2];
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       {district && (
@@ -255,24 +335,35 @@ export function PlatformEngagement() {
          last month; weekly and daily have no history here, so they show
          their share of the caseload instead of an invented trend. */}
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-        <EngagementStat icon={LogIn} value={String(LATEST.unique)} label="Active this month" series={MONTHS.map((m) => m.unique)} prevLabel={PREV.label} delta={pctChange(LATEST.unique, PREV.unique)} />
+        <EngagementStat icon={LogIn} value={String(latest.unique)} label={yearKey === "current" ? "Active this month" : `Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
         <EngagementStat icon={Users} value={String(WEEKLY_ACTIVE)} label="Active weekly" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
         <EngagementStat icon={CalendarDays} value={String(DAILY_ACTIVE)} label="Active daily" share={{ n: DAILY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={TrendingUp} value={LATEST.avg.toFixed(2)} label="Logins per student" series={MONTHS.map((m) => m.avg)} prevLabel={PREV.label} delta={pctChange(LATEST.avg, PREV.avg)} />
+        <EngagementStat icon={TrendingUp} value={latest.avg.toFixed(2)} label="Logins per student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
       </div>
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by month <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL}, this academic year</span></h2>
-          </span>
-          <LoginsChart />
+          <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
+            <span className="flex flex-col gap-[2px]">
+              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label.toLowerCase()}</h2>
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · {year.label}</span>
+            </span>
+            <span className="flex flex-wrap items-center gap-[8px]">
+              <Segmented ariaLabel="Logins by" value={view} onChange={(k) => setView(k as EngagementView)} options={VIEWS.map((v) => ({ key: v.key, label: v.label }))} />
+              <Listbox ariaLabel="Academic year" value={yearKey} onChange={(v) => setYearKey(v as EngagementYear)} options={(Object.keys(ENGAGEMENT_YEARS) as EngagementYear[]).map((k) => ({ value: k, label: ENGAGEMENT_YEARS[k].label }))} className="flex h-9 min-w-[190px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+            </span>
+          </div>
+          {view === "day" && <LoginsChart key={`day-${yearKey}`} data={year.daily} />}
+          {view === "month" && <LoginsChart key={`month-${yearKey}`} data={year.monthly} />}
+          {view === "student" && <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins</span><RankedBars key={`student-${yearKey}`} items={year.byStudent} /></>}
+          {view === "site" && <SiteBars key={`site-${yearKey}`} sites={year.bySite} />}
         </div>
       </HoverBeam>
 
+      {view === "month" && (
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>By month</h2>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Monthly login summary</h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[480px] border-collapse text-[13px]">
               <thead>
@@ -284,7 +375,7 @@ export function PlatformEngagement() {
                 </tr>
               </thead>
               <tbody>
-                {[...MONTHS].reverse().map((m, i) => (
+                {[...year.monthly].reverse().map((m, i) => (
                   <tr key={m.label} className="border-b last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
                     <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: i === 0 ? "var(--primary)" : "var(--foreground)" }}>{m.label}</td>
                     <td className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{m.total}</td>
@@ -297,6 +388,7 @@ export function PlatformEngagement() {
           </div>
         </div>
       </HoverBeam>
+      )}
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>

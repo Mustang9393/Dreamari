@@ -4,18 +4,20 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, TrendingDown, TrendingUp } from "lucide-react";
-import { BarChart, SegmentedRing } from "@/components/connect/viz";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { SegmentedRing } from "@/components/connect/viz";
 import { OverviewCard } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Avatar, CardLink, Go, StatRow } from "../chips";
-import { attentionReason, attentionSeverity, attentionRank, milestonesForGrade, type CounselorStudent, type AttentionSeverity, type MilestoneKey } from "@/lib/counselorRoster";
-import { useCounselorFilters, type StatusRosterFilter, type PlanRosterFilter } from "../shell";
+import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
+import { curriculumForGrade } from "@/lib/counselorCurriculum";
+import { RankedBars, TOP_SAVED_CAREERS } from "./CareerCollegeInsights";
+import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE, CHART_STATUS, TREND_UP } from "../palette";
-import { GLASS_INSET, pathwayTileSurface } from "../surfaces";
+import { GLASS_INSET } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "var(--cd-green)",
@@ -53,7 +55,6 @@ const SEVERITY_COLORS: Record<AttentionSeverity, string> = {
 // all checks pass. "Series 1" and "series 2" still mean the same shade on
 // every readiness chart.
 export const READINESS_SERIES = [...BLUE_3];
-const grades: (9 | 10 | 11 | 12)[] = [9, 10, 11, 12];
 // The target/benchmark line needs to read as "not one of the bars" against
 // an all-blue ramp, and "not the status amber" against the rest of the
 // page -- a warm bronze does both: validated clear of "Needs Attention"
@@ -166,102 +167,94 @@ export function DonutCard({ title, caption, centerPct, centerLabel, deltaPts, ro
   );
 }
 
-type PathwayTile = { label: string; value: number; x: number; y: number; width: number; height: number };
+// The four checkpoint states, named and colored exactly as the Milestone
+// Tracker names and colors them, so the snapshot here and the tracker it
+// opens read as the same data.
+const MILESTONE_STATES = [
+  { key: "completed", label: "Done", color: PRIMARY },
+  { key: "needsAttention", label: "Needs attention", color: BLUE_3[0] },
+  { key: "inProgress", label: "In progress", color: "var(--cd-blue-pale)" },
+  { key: "notStarted", label: "Not started", color: NEUTRAL_SLICE },
+] as const;
 
-// Balanced binary treemap: partition at the closest half of the count,
-// then split the longer side. Every tile's area is exactly count / total.
-function layoutPathways(rows: [string, number][], x = 0, y = 0, width = 100, height = 40): PathwayTile[] {
-  if (!rows.length) return [];
-  if (rows.length === 1) return [{ label: rows[0][0], value: rows[0][1], x, y, width, height }];
-  const total = rows.reduce((sum, [, value]) => sum + value, 0);
-  let split = 1;
-  let sum = rows[0][1];
-  while (split < rows.length - 1 && Math.abs(sum + rows[split][1] - total / 2) < Math.abs(sum - total / 2)) {
-    sum += rows[split][1];
-    split++;
-  }
-  const share = total > 0 ? sum / total : split / rows.length;
-  return width >= height
-    ? [...layoutPathways(rows.slice(0, split), x, y, width * share, height), ...layoutPathways(rows.slice(split), x + width * share, y, width * (1 - share), height)]
-    : [...layoutPathways(rows.slice(0, split), x, y, width, height * share), ...layoutPathways(rows.slice(split), x, y + height * share, width, height * (1 - share))];
-}
-
-// One rectangular whole, split by student count. Details are progressively disclosed so
-// the overview never requires reading fifteen labels to understand the split.
-function PathwaysCard({ topPathways, activePathway, onToggle, onOpen }: { topPathways: [string, number][]; activePathway: string | null; onToggle: (label: string) => void; onOpen: () => void }) {
-  const total = topPathways.reduce((sum, [, count]) => sum + count, 0);
-  const [hovered, setHovered] = useState<string | null>(null);
-  const [focused, setFocused] = useState<string | null>(null);
-  const detail = topPathways.find(([label]) => label === (hovered ?? focused ?? activePathway));
-
+// Student Status now carries the whole caseload picture in one card: how
+// students stand (the ring) and how far they are through every milestone
+// (the bar), with the way into each (27 Sept 2026, Maisha: "Student status.
+// This can show overall progress snapshot across all milestones"). It
+// replaces three cards that each told part of it: Postsecondary Plans and
+// the two readiness bar charts, which she asked to remove ("Remove
+// everything else ... This will make the overview much cleaner").
+function StudentStatusCard({ onTrack, needsAttention, atRisk, heroTint, milestones, onStatus, onMilestones }: { onTrack: number; needsAttention: number; atRisk: number; heroTint: string; milestones: Record<(typeof MILESTONE_STATES)[number]["key"], number>; onStatus: (s: StatusRosterFilter) => void; onMilestones: () => void }) {
+  const total = onTrack + needsAttention + atRisk || 1;
+  const checkpoints = MILESTONE_STATES.reduce((a, st) => a + milestones[st.key], 0) || 1;
+  const donePct = Math.round((milestones.completed / checkpoints) * 100);
+  const surface = { ...GLASS_CARD_HERO, borderColor: `color-mix(in srgb, ${heroTint} 38%, var(--glass-border))` };
   return (
     <HoverBeam strength={0.7} className="h-full">
-      <div className="group flex min-w-0 flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-        <div className="flex flex-wrap items-center justify-between gap-[8px]">
-          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Career Pathways <span className="ml-[6px] text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>{total} students</span></h2>
-          <CardLink onClick={onOpen}>Insights</CardLink>
+      <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
+        <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(heroTint, 0.3) }} />
+        <div className="relative flex flex-col gap-[2px]">
+          <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Student Status</h2>
+          <DeltaChip pts={2} />
         </div>
-        <figure className="min-w-0" aria-label={`${total} students split across ${topPathways.length} career pathways`}>
-          <div className="relative h-[280px] w-full overflow-hidden rounded-[var(--radius-md)] sm:h-[240px]" style={{ background: "radial-gradient(ellipse at 20% 0%, color-mix(in srgb, var(--primary) 35%, transparent), transparent 70%), var(--card)", boxShadow: "0 12px 36px -20px color-mix(in srgb, var(--primary) 55%, transparent), 0 0 0 1px color-mix(in srgb, var(--primary) 22%, var(--glass-border))" }} onMouseLeave={() => setHovered(null)}>
-            {layoutPathways(topPathways).map(({ label, value, x, y, width, height }) => (
-              <button key={label} type="button" onClick={() => onToggle(label)} onMouseEnter={() => setHovered(label)} onFocus={() => setFocused(label)} onBlur={() => setFocused(null)}
-                aria-pressed={activePathway === label} aria-label={`${label}: ${value} of ${total} students. ${activePathway === label ? "Clear" : "Filter by"} pathway`}
-                className={`absolute flex min-w-0 cursor-pointer flex-col items-start justify-center overflow-hidden border p-[5px] text-left ${width >= 17 && height >= 9 ? "sm:p-[10px]" : "sm:px-[8px] sm:py-[5px]"} focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--foreground)]`}
-                style={{ ...pathwayTileSurface(total ? value / total : 0, detail?.[0] === label), left: `${x}%`, top: `${y / 40 * 100}%`, width: `${width}%`, height: `${height / 40 * 100}%` }}>
-                {/* Named wherever it fits (26 Sept 2026 sweep: tiles showing a
-                   bare "12" or "9" could not be read without hovering). Big
-                   tiles get the full label; mid tiles a smaller two-line
-                   one; only the smallest show just the count. */}
-                {width >= 17 && height >= 9 ? (
-                  <span className="hidden text-[12px] leading-[16px] font-medium sm:block">{label}</span>
-                ) : width >= 9 && height >= 12 ? (
-                  <span className="hidden overflow-hidden text-[10.5px] leading-[13px] font-medium sm:[display:-webkit-box] sm:[-webkit-box-orient:vertical] sm:[-webkit-line-clamp:2]" style={{ overflowWrap: "anywhere" }}>{label}</span>
-                ) : width >= 9 && height >= 7 ? (
-                  <span className="hidden w-full truncate text-[10.5px] leading-[13px] font-medium sm:block">{label}</span>
-                ) : null}
-                <span className={`font-bold tabular-nums ${width >= 17 && height >= 9 ? "text-[13px] leading-[16px] sm:text-[18px] sm:leading-[24px]" : "text-[13px] leading-[16px] sm:text-[15px] sm:leading-[20px]"}`}>{value}</span>
-              </button>
-            ))}
+        <div className="@container relative flex-1">
+          <div className="grid h-full grid-cols-1 gap-[var(--space-5)] @[560px]:grid-cols-2">
+            <div className="flex flex-col items-center justify-center gap-[var(--space-4)]">
+              <SegmentedRing segments={[{ value: onTrack, color: CHART_STATUS["On Track"] }, { value: needsAttention, color: CHART_STATUS["Needs Attention"] }, { value: atRisk, color: CHART_STATUS["At Risk"] }]} size={132} stroke={15}>
+                <span className="flex flex-col items-center">
+                  <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{Math.round((onTrack / total) * 100)}%</span>
+                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>on track</span>
+                </span>
+              </SegmentedRing>
+              <div className="flex w-full flex-col gap-[4px]">
+                <StatRow label="On Track" value={onTrack} color={CHART_STATUS["On Track"]} onClick={() => onStatus("On Track")} />
+                <StatRow label="Needs Attention" value={needsAttention} color={CHART_STATUS["Needs Attention"]} onClick={() => onStatus("Needs Attention")} />
+                <StatRow label="At Risk" value={atRisk} color={CHART_STATUS["At Risk"]} onClick={() => onStatus("At Risk")} />
+              </div>
+            </div>
+            <div className="flex flex-col justify-center gap-[var(--space-4)] border-t pt-[var(--space-5)] @[560px]:border-t-0 @[560px]:border-l @[560px]:pt-0 @[560px]:pl-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
+              <span className="flex items-start justify-between gap-[10px]">
+                <span className="flex flex-col gap-[2px]">
+                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Across all milestones</span>
+                  <span className="flex items-baseline gap-[8px]">
+                    <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{donePct}%</span>
+                    <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
+                  </span>
+                </span>
+                <CardLink onClick={onMilestones}>Milestones</CardLink>
+              </span>
+              <span className="flex h-[10px] w-full overflow-hidden rounded-full" role="img" aria-label={MILESTONE_STATES.map((st) => `${st.label} ${milestones[st.key]}`).join(", ")} style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }}>
+                {MILESTONE_STATES.map((st) => <span key={st.key} className="h-full" style={{ width: `${(milestones[st.key] / checkpoints) * 100}%`, background: st.color }} />)}
+              </span>
+              <div className="flex w-full flex-col gap-[4px]">
+                {MILESTONE_STATES.map((st) => <StatRow key={st.key} label={st.label} value={milestones[st.key]} color={st.color} onClick={onMilestones} />)}
+              </div>
+            </div>
           </div>
-          <figcaption className="mt-[10px] flex min-h-[32px] flex-wrap items-center justify-between gap-x-[12px] gap-y-[4px] text-[12px]" style={{ color: "var(--muted-foreground)" }}>
-            {detail ? <span><span className="font-semibold" style={{ color: "var(--foreground)" }}>{detail[0]}</span> · {detail[1]} of {total} students <span className="tabular-nums">({total ? (detail[1] / total * 100).toFixed(1) : 0}%)</span></span> : <span>{topPathways.length} pathways · area represents student count</span>}
-            {activePathway && <button type="button" onClick={() => onToggle(activePathway)} aria-label={`Clear ${activePathway} filter`} className="dm-quiet cursor-pointer rounded px-[4px] py-[6px] font-semibold" style={{ color: "var(--foreground)" }}>Clear filter ×</button>}
-          </figcaption>
-        </figure>
-        <details className="group/pathways border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-          <summary className="flex min-h-[32px] cursor-pointer items-center justify-between gap-[8px] rounded text-[12px] font-semibold focus-visible:outline-2 focus-visible:outline-[var(--primary)]" style={{ color: "var(--muted-foreground)" }}>
-            <span className="group-open/pathways:hidden">View all pathways</span><span className="hidden group-open/pathways:inline">Hide pathways</span><ChevronDown aria-hidden className="h-[14px] w-[14px] group-open/pathways:rotate-180" />
-          </summary>
-          <ul className="mt-[8px] grid grid-cols-1 gap-x-[32px] md:grid-cols-2">
-            {topPathways.map(([label, value]) => <li key={label}>
-              <button type="button" onClick={() => onToggle(label)} aria-pressed={activePathway === label} className="dm-quiet flex min-h-[44px] w-full cursor-pointer items-center gap-[8px] rounded text-left text-[12px] focus-visible:outline-2 focus-visible:outline-[var(--primary)]" style={{ color: "var(--foreground)" }}>
-                <span aria-hidden className="size-[6px] shrink-0 rounded-full" style={{ background: "var(--primary)" }} /><span className="min-w-0 flex-1" style={{ overflowWrap: "anywhere" }}>{label}</span><strong className="tabular-nums">{value}</strong>
-              </button>
-            </li>)}
-          </ul>
-        </details>
+        </div>
       </div>
     </HoverBeam>
   );
 }
 
-// "Nothing needs your attention" is a real, expected state (a healthy
-// caseload, or a narrow grade/pathway filter with no matches), not an
-// error -- a quiet one-line message, no illustration, matching this app's
-// default empty-state treatment for a filtered list that's just empty.
-//
-// Redesigned per direct feedback: promoted above the donut row (it's the
-// one card that says "act now," so it leads, not trails); the per-student
-// "At Risk" pill was dropped -- every single card in a section titled
-// "needs your attention" is at risk, so the badge repeated the section's
-// own heading six times over without adding information, pure clutter.
-// Bigger avatars and real padding instead, so six names read as a
-// considered row, not a cram of chips.
-// Rebuilt 25 Sept 2026 (direct feedback: "lose the red glow on needs your
-// attention", and the standing budget: skimmable, one line per item, color
-// only where it means something). No glow, no filled red blocks: one row
-// per student on the raised inset surface, the reason in plain text, and
-// the severity as one colored word. Three rows, then "See all".
+// The top five saved careers as bars, the same chart Career + College
+// Insights draws for all ten, with the way to the rest (27 Sept 2026,
+// Maisha: "I don't love the 'career pathways' snapshot. It feels hard to
+// follow ... Either a bar or a pie chart. In the overview maybe they see
+// the top 3-5 careers and then they click the insights button to see
+// all"). Bars, not a pie: ranked counts of this many categories read
+// faster as lengths than as slices. The treemap it replaces (area per
+// pathway, tiles wrapping into rows) asked the reader to compare areas.
+function PathwaysCard({ onOpen }: { onOpen: () => void }) {
+  return (
+    <OverviewCard title="Career Pathways" unit="top saved careers" aside={<CardLink onClick={onOpen}>See all {TOP_SAVED_CAREERS.length}</CardLink>}>
+      <div className="relative flex flex-1 flex-col justify-center">
+        <RankedBars items={TOP_SAVED_CAREERS} limit={5} />
+      </div>
+    </OverviewCard>
+  );
+}
+
 function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; onSeeAll: () => void }) {
   const router = useRouter();
   const shown = students.slice(0, 3);
@@ -315,24 +308,12 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
 
 export function Overview() {
   const router = useRouter();
-  const { gradeFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
-  // Local to this page, not the shared context -- distinct from the donut
-  // click-throughs on purpose (direct instruction: this one "cross-filters
-  // the whole Overview page", the donuts navigate to Students instead).
-  const [pathwayFilter, setPathwayFilter] = useState<string | null>(null);
-  const togglePathway = (label: string) => setPathwayFilter((cur) => (cur === label ? null : label));
-
+  const { gradeFilter, setStatusFilter } = useCounselorFilters();
   const reviewed = useReviewedRoster();
-  const roster = useMemo(() => {
-    let all = reviewed;
-    if (gradeFilter !== "All Grades") all = all.filter((s) => s.grade === gradeFilter);
-    if (pathwayFilter) all = all.filter((s) => s.careerTrack === pathwayFilter);
-    return all;
-  }, [reviewed, gradeFilter, pathwayFilter]);
+  const roster = useMemo(() => (gradeFilter === "All Grades" ? reviewed : reviewed.filter((s) => s.grade === gradeFilter)), [reviewed, gradeFilter]);
 
-  const goToStudents = (status?: StatusRosterFilter, plan?: PlanRosterFilter) => {
-    if (status) setStatusFilter(status);
-    if (plan) setPlanFilter(plan);
+  const goToStudents = (status: StatusRosterFilter) => {
+    setStatusFilter(status);
     router.push("/counselor?view=students");
   };
 
@@ -341,35 +322,16 @@ export function Overview() {
   const needsAttention = roster.filter((s) => s.status === "Needs Attention").length;
   const atRisk = roster.filter((s) => s.status === "At Risk").length;
 
-  const withPlan = roster.filter((s) => s.postsecondaryIntent !== "Undecided").length;
-  const undecided = total - withPlan;
-
-  const pathwayCounts = new Map<string, number>();
-  // Keep the whole grade cohort visible when a pathway filters the other cards.
-  for (const s of reviewed) {
-    if (gradeFilter === "All Grades" || s.grade === gradeFilter) pathwayCounts.set(s.careerTrack, (pathwayCounts.get(s.careerTrack) ?? 0) + 1);
-  }
-  // Keep every original pathway and count, including the smallest groups.
-  const topPathways: [string, number][] = [...pathwayCounts.entries()].sort((a, b) => b[1] - a[1]);
-  // The reference's own per-grade percentage, verbatim (v1's Overview.tsx):
-  // of the grade's students, how many have this milestone Approved. A grade
-  // where the milestone doesn't apply yet (e.g. Resume before Grade 10)
-  // reads 0 and BarChart draws no bar for that slot, matching the
-  // reference's own "nothing plotted yet" columns exactly.
-  const pctApproved = (g: number, key: MilestoneKey) => {
-    // NaN, not 0, for a grade that doesn't track this milestone yet
-    // (Resume before Grade 10, College List/FAFSA before Grade 12) --
-    // BarChart draws nothing for NaN, but draws a real, visible 0% for an
-    // actual zero (direct report, real data: Grade 9's Career Report is
-    // genuinely tracked and genuinely all "Not Started" -- "career
-    // readiness of grade 9 is zero. Dont do that" was about the chart
-    // hiding that real zero as if it were the same kind of gap).
-    if (!milestonesForGrade(g).includes(key)) return NaN;
-    const gs = roster.filter((s) => s.grade === g);
-    if (gs.length === 0) return NaN;
-    const approved = gs.filter((s) => s.milestones[key] === "Approved").length;
-    return (approved / gs.length) * 100;
-  };
+  // Every milestone checkpoint across the grades in view, from the same
+  // curriculum data the Milestone Tracker reads.
+  const milestones = useMemo(() => {
+    const grades = gradeFilter === "All Grades" ? ([9, 10, 11, 12] as const) : ([gradeFilter] as const);
+    const sum = { completed: 0, needsAttention: 0, inProgress: 0, notStarted: 0 };
+    for (const g of grades) for (const item of curriculumForGrade(g)) {
+      sum.completed += item.completed; sum.needsAttention += item.needsAttention; sum.inProgress += item.inProgress; sum.notStarted += item.notStarted;
+    }
+    return sum;
+  }, [gradeFilter]);
 
   // Worst first, not roster order -- direct instruction: "rate by severity
   // so counselor knows what to give attention first."
@@ -381,117 +343,24 @@ export function Overview() {
   // one amber or red.
   const heroTint = onTrackPct >= 80 ? CHART_STATUS["On Track"] : onTrackPct >= 60 ? STATUS_COLORS["Needs Attention"] : STATUS_COLORS["At Risk"];
 
+  // Three cards, in the order Maisha set (27 Sept 2026): needs attention
+  // (critical) at the top, student status, career pathways. Each one opens
+  // the fuller picture on its own screen ("I also like how each snapshot
+  // on the overview leads to a broader picture by a click to a different
+  // tab"): the attention list to Students, status and milestones to
+  // Students and the Milestone Tracker, pathways to Career + College
+  // Insights.
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      {/* Leads the page, not the donut row -- direct instruction: this is
-         the one card that says "act now," everything else is read-only
-         context underneath it. */}
       <AttentionStrip students={atRiskStudents} onSeeAll={() => goToStudents("At Risk")} />
-
-      {/* Asymmetric 12-col grid, not three equal boxes -- "dominance over
-         equality": one card (Student Status) carries the visual weight as
-         the wide hero, Postsecondary Plans is the compact simple-data
-         sidekick, Career Pathways keeps enough room for its 7-row legend
-         (direct feedback: "no design experimentation... the same cards").
-         A viewport-width breakpoint (`lg:`) went 3-across as soon as the
-         BROWSER reached 1024px, but this page's own content column is
-         narrower than the viewport by a fixed ~250px sidebar, so at
-         1024-1400px of actual browser width the row still went 3-across
-         into far less than 1024px of real space -- pathway names and
-         "Postsecondary Plans" itself truncated (direct report with a
-         screenshot: "the viewport that its on now definitely cant do 3
-         in a row"). `@container`/`@[1100px]:` below reads THIS row's own
-         rendered width instead of the browser's, so it goes 3-across only
-         once there's actually room, regardless of sidebar/page chrome.
-         The container and the queried grid must be different elements --
-         an element can't respond to the container query it itself
-         establishes -- so `@container` wraps a plain div and the grid
-         classes live one level down. */}
+      {/* Reads this row's own width, not the browser's: the sidebar takes
+         ~250px, so a viewport breakpoint went two-across into too little
+         room (26 Sept 2026 report). */}
       <div className="@container">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] @[520px]:grid-cols-2">
-        <DonutCard
-          title="Student Status"
-          centerPct={onTrackPct}
-          centerLabel="on track"
-          deltaPts={2}
-          hero
-          heroTint={heroTint}
-          rows={[
-            { label: "On Track", value: onTrack, color: CHART_STATUS["On Track"], onClick: () => goToStudents("On Track") },
-            { label: "Needs Attention", value: needsAttention, color: CHART_STATUS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
-            { label: "At Risk", value: atRisk, color: CHART_STATUS["At Risk"], onClick: () => goToStudents("At Risk") },
-          ]}
-        />
-        <DonutCard
-          title="Postsecondary Plans"
-          centerPct={(withPlan / total) * 100}
-          centerLabel="have a plan"
-          deltaPts={4}
-          rows={[
-            { label: "With Plan", value: withPlan, color: PRIMARY, onClick: () => goToStudents(undefined, "With Plan") },
-            { label: "Undecided", value: undecided, color: NEUTRAL_SLICE, onClick: () => goToStudents(undefined, "Undecided") },
-          ]}
-        />
-      </div>
-      </div>
-
-      {/* Its own full-width row, not a third column squeezed beside the
-         two donuts -- direct question, 26 Sept 2026: "do we need to go 2
-         in a row and then move career pathways graph to its own row
-         instead?" At 15 real Build worlds this card needs real width to
-         wrap its chips into just a few rows rather than many; a 1/3-width
-         column left it both cramped and, before the chip redesign, the
-         tallest thing on the page by far. */}
-      <PathwaysCard topPathways={topPathways} activePathway={pathwayFilter} onToggle={togglePathway} onOpen={() => router.push("/counselor?view=insights")} />
-
-      {/* Reviews approved chart. A "My Plan by grade" panel briefly lived
-         here, driven by the student app's own My Plan steps rather than
-         the reference's curriculum; removed in the 25 Sept 2026 content
-         reversion (direct instruction: "take out all the additional stuff
-         we did for parity with dreamari's plan... match the replit") since
-         it had no reference equivalent. The full school year map (grade by
-         season) lives on the Milestone Tracker, which this card still
-         links to. */}
-      {/* Career Readiness and Academic Readiness, the reference's own two
-         charts, restored 26 Sept 2026 (direct feedback: "refer v1, I dont
-         think these are the same graphs... one tile seems missing" -- a
-         same-day pass had merged both into one five-row list, reasoning
-         that Resume/College List/FAFSA don't apply until later grades and
-         would render as "empty columns"; BarChart already draws no bar at
-         all for a 0%/not-applicable slot -- confirmed against v1's own
-         live charts above, Grade 9's Resume column is simply blank, not an
-         ugly empty bar -- so that reasoning no longer holds and the
-         reference's own two-panel bar-chart form is back, verbatim in
-         grouping and grades, wearing v2's "solid" bar style already used
-         elsewhere on this dashboard. */}
-      {/* On the shared card (26 Sept 2026 sweep): the Connect Panel these
-         used gave them a 20px title and a divider, bigger than every other
-         card on the page, so two secondary charts outranked the attention
-         card above them. The caption is the card's unit line. */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <OverviewCard title="Career Readiness" unit="% approved, by grade">
-            <BarChart
-              barStyle="solid"
-              hideValuesUntilHover
-              groups={grades.map((g) => `Gr. ${g}`)}
-              series={[
-                { label: "Career Report", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Career Report")) },
-                { label: "Resume", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "Resume")) },
-              ]}
-            />
-        </OverviewCard>
-        <OverviewCard title="Academic Readiness" unit="% approved, by grade">
-            <BarChart
-              barStyle="solid"
-              hideValuesUntilHover
-              groups={grades.map((g) => `Gr. ${g}`)}
-              series={[
-                { label: "Academic Plan", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Academic Plan")) },
-                { label: "College List", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "College List")) },
-                { label: "Financial Aid / FAFSA", accent: READINESS_SERIES[2], values: grades.map((g) => pctApproved(g, "Financial Aid")) },
-              ]}
-            />
-        </OverviewCard>
+        <div className="grid grid-cols-1 gap-[var(--space-4)] @[980px]:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+          <StudentStatusCard onTrack={onTrack} needsAttention={needsAttention} atRisk={atRisk} heroTint={heroTint} milestones={milestones} onStatus={goToStudents} onMilestones={() => router.push("/counselor?view=milestones")} />
+          <PathwaysCard onOpen={() => router.push("/counselor?view=insights")} />
+        </div>
       </div>
     </div>
   );

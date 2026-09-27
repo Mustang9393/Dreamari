@@ -58,20 +58,17 @@
 //   text, gone once it has focus -- flat print has neither.
 import { useRef, useState, useSyncExternalStore } from "react";
 import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, Printer } from "lucide-react";
-import { BatchComposer } from "./Batch";
-import { CAREER_TRACKS } from "@/lib/counselorRoster";
 import { Listbox } from "@/components/app/Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Copy, Save, PenLine } from "lucide-react";
 import { MILESTONE_KEYS, attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
 import { addNote } from "@/lib/counselorNotes";
-import { Avatar, SelectBox, StatusChip } from "../chips";
+import { Avatar, StatusChip } from "../chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { Segmented } from "@/components/connect/viz";
 import { DOC_TITLES, DocumentPage, plainText, FitPage, FullScreenButton, FullScreenDocument, printDocumentPage, type DocKind } from "./DocumentDesk";
-import { SubTabs } from "./SubTabs";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 
 
@@ -185,7 +182,7 @@ export function DraftTools({ student }: { student: CounselorStudent }) {
   return <ProductivitySuite fixedStudent={student} />;
 }
 
-type Mode = "documents" | "group-message" | "attention";
+type Mode = "documents" | "attention";
 const DOC_KINDS: DocKind[] = ["recommendation-letter", "student-brief", "parent-brief", "success-plan"];
 
 // 26 Sept 2026, a fifth pass (direct feedback: "Productivity suite still
@@ -196,8 +193,11 @@ const DOC_KINDS: DocKind[] = ["recommendation-letter", "student-brief", "parent-
 //   workflow (pick a student, generate, edit a page) with four templates,
 //   so the template is a choice inside the setup panel, next to the
 //   student and the letter type (asked: "can they just be a drop down or
-//   something just like letter type is"). Group message and Needs
-//   attention are different workflows and stay their own modes.
+//   something just like letter type is"). Needs attention is a different
+//   workflow and stays its own mode. Group message moved to Counselor
+//   Connect as its private-message option (27 Sept 2026, Maisha: "idk if
+//   this is necessary because they can technically send group messages
+//   via the counselor connect").
 // - A workspace shape: a setup panel on the left (who, what, generate,
 //   what the draft was built from, what to do with it) and a desk on the
 //   right holding a real US Letter page (DocumentDesk.tsx), with a full
@@ -210,8 +210,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const params = useSearchParams();
-  const initialPathway = params.get("pathway");
-  const [mode, setMode] = useState<Mode>(!fixedStudent && params.get("tool") === "group-message" ? "group-message" : "documents");
+  const [mode, setMode] = useState<Mode>(!fixedStudent && params.get("tool") === "attention" ? "attention" : "documents");
   const [kind, setKind] = useState<DocKind>("recommendation-letter");
   const [studentId, setStudentId] = useState(fixedStudent?.id ?? "");
   const [letterType, setLetterType] = useState("");
@@ -224,19 +223,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
   const student = fixedStudent ?? roster.find((s) => s.id === studentId);
   const attention = [...roster].filter((s) => s.status !== "On Track").sort(attentionRank).slice(0, 10);
-  // Group message audience: grade, status, pathway, any combination.
-  const [gGrade, setGGrade] = useState("All");
-  const [gStatus, setGStatus] = useState("All");
-  const [gPathway, setGPathway] = useState(initialPathway && (CAREER_TRACKS as readonly string[]).includes(initialPathway) ? initialPathway : "All");
-  const [gSent, setGSent] = useState<string | null>(null);
-  const [gMode, setGMode] = useState<"audience" | "pick">("audience");
-  const [picked, setPicked] = useState<Set<string>>(() => new Set());
-  const [pickSearch, setPickSearch] = useState("");
-  const togglePick = (id: string) => setPicked((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
-  const byAudience = roster.filter((s) => (gGrade === "All" || String(s.grade) === gGrade) && (gStatus === "All" || s.status === gStatus) && (gPathway === "All" || s.careerTrack === gPathway));
-  const audience = gMode === "pick" ? students.filter((s) => picked.has(s.id)) : byAudience;
-  const audienceLabel = gMode === "pick" ? `${picked.size} picked` : [gGrade === "All" ? "All grades" : `Grade ${gGrade}`, gStatus === "All" ? null : gStatus, gPathway === "All" ? null : gPathway].filter(Boolean).join(" · ");
-  const pickList = students.filter((s) => !pickSearch.trim() || s.name.toLowerCase().includes(pickSearch.trim().toLowerCase()));
 
   const generateFor = (k: DocKind, st: CounselorStudent | undefined) => {
     setSavedTo(null);
@@ -263,11 +249,10 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
     setStudentId(st.id);
     generateFor(k, st);
   };
+  // Private messages live in Counselor Connect now (27 Sept 2026): the
+  // whole list opens there as a private message already addressed to them.
   const messageAll = (list: CounselorStudent[]) => {
-    setPicked(new Set(list.map((s) => s.id)));
-    setGMode("pick");
-    setGSent(null);
-    setMode("group-message");
+    router.push(`/counselor?view=connect&compose=1&ids=${list.map((s) => s.id).join(",")}`);
   };
   const docTitle = `${DOC_TITLES[kind]}${student ? `, ${student.name}` : ""}`;
   const print = () => printDocumentPage(pageRef.current, docTitle);
@@ -287,7 +272,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
           ariaLabel="Workspace"
           options={[
             { key: "documents", label: "Documents" },
-            { key: "group-message", label: "Group message" },
             { key: "attention", label: `Needs attention · ${attention.length}` },
           ]}
           value={mode}
@@ -410,56 +394,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
         </div>
       )}
 
-      {mode === "group-message" && (
-        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <SubTabs ariaLabel="Who receives it" options={[{ key: "audience", label: "By audience" }, { key: "pick", label: "Pick students" }]} value={gMode} onChange={(k) => setGMode(k)} />
-          {gMode === "pick" && (
-            <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[10px]" style={GLASS_INSET}>
-              <div className="flex flex-wrap items-center justify-between gap-[8px]">
-                <input value={pickSearch} onChange={(e) => setPickSearch(e.target.value)} placeholder="Search a name" aria-label="Search students" className="h-9 min-w-[200px] flex-1 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle} />
-                <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  {picked.size} picked
-                  {picked.size > 0 && <button type="button" onClick={() => setPicked(new Set())} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Clear</button>}
-                  {pickList.length > 0 && <button type="button" onClick={() => setPicked((prev) => { const next = new Set(prev); for (const s of pickList) next.add(s.id); return next; })} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Pick all {pickList.length}</button>}
-                </span>
-              </div>
-              <ul className="flex max-h-[260px] flex-col gap-[2px] overflow-y-auto pr-[4px]">
-                {pickList.map((s) => (
-                  <li key={s.id}>
-                    <label className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[5px]">
-                      <SelectBox checked={picked.has(s.id)} label={`Pick ${s.name}`} onChange={() => togglePick(s.id)} />
-                      <Avatar name={s.name} size={26} index={s.avatarIndex} />
-                      <span className="min-w-0 flex-1 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.name} <span style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
-                      <StatusChip status={s.status} />
-                    </label>
-                  </li>
-                ))}
-                {pickList.length === 0 && <li className="px-[6px] py-[5px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No student by that name.</li>}
-              </ul>
-            </div>
-          )}
-          <div className={`grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3 ${gMode === "pick" ? "hidden" : ""}`}>
-            <label className="flex min-w-0 flex-col gap-[4px]">
-              <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Grade</span>
-              <Listbox ariaLabel="Grade" value={gGrade} onChange={setGGrade} options={[{ value: "All", label: "All grades" }, ...["9", "10", "11", "12"].map((g) => ({ value: g, label: `Grade ${g}` }))]} className={FIELD} style={fieldStyle} />
-            </label>
-            <label className="flex min-w-0 flex-col gap-[4px]">
-              <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Status</span>
-              <Listbox ariaLabel="Status" value={gStatus} onChange={setGStatus} options={[{ value: "All", label: "All statuses" }, ...["On Track", "Needs Attention", "At Risk"].map((v) => ({ value: v, label: v }))]} className={FIELD} style={fieldStyle} />
-            </label>
-            <label className="flex min-w-0 flex-col gap-[4px]">
-              <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Pathway</span>
-              <Listbox ariaLabel="Pathway" value={gPathway} onChange={setGPathway} options={[{ value: "All", label: "All pathways" }, ...CAREER_TRACKS.map((t) => ({ value: t, label: t }))]} className={FIELD} style={fieldStyle} />
-            </label>
-          </div>
-          {gSent && <p className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Check className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{gSent}</p>}
-          {audience.length === 0 ? (
-            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{gMode === "pick" ? "Pick at least one student above." : "No students match that audience. Widen a filter."}</p>
-          ) : (
-            <BatchComposer students={audience} audience={audienceLabel} onDone={(summary) => { setGSent(summary); if (gMode === "pick") setPicked(new Set()); }} />
-          )}
-        </div>
-      )}
     </div>
   );
 }

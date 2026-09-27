@@ -12,8 +12,9 @@
 
 import { SubTabs } from "./SubTabs";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Plus, Send, Check, ChevronLeft } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { ArrowUpRight, Plus, Send, Check, ChevronLeft } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -21,8 +22,11 @@ import { CardLink, Go } from "../chips";
 import { RankBar } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "@/components/connect/viz";
-import { Avatar, DetailPane, STATUS_COLORS, StudentLink } from "../chips";
-import { getRoster } from "@/lib/counselorRoster";
+import { Avatar, DetailPane, SelectBox, STATUS_COLORS, StatusChip, StudentLink } from "../chips";
+import { BatchComposer } from "./Batch";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
+import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
+import { CAREER_TRACKS, getRoster } from "@/lib/counselorRoster";
 import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
 import { BLUE_3 } from "../palette";
 
@@ -159,8 +163,7 @@ function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) 
   const [body, setBody] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
-    <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-      <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>New announcement</h3>
+    <div className="flex flex-col gap-[var(--space-3)]">
       <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_200px]">
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" aria-label="Title" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
         <Listbox ariaLabel="Audience" value={audience} onChange={setAudience} options={AUDIENCES.map((a) => ({ value: a, label: a }))} className="flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={field} />
@@ -172,6 +175,107 @@ function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) 
           <Send className="h-[14px] w-[14px]" aria-hidden /> Send
         </button>
       </div>
+    </div>
+  );
+}
+
+const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
+const FIELD_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+
+// A private message to a chosen set of students, each receiving it in
+// their own inbox: moved here from the Productivity Suite's "Group
+// message" (27 Sept 2026, Maisha: "Group message - idk if this is
+// necessary because they can technically send group messages via the
+// counselor connect - is there a difference here?"). There is one: an
+// announcement is posted where a whole grade reads it, while this goes
+// privately to exactly the students picked, by status, pathway or name
+// (a note to the at-risk students cannot be a public post). Both are
+// outgoing messages, so both now start from Counselor Connect's one
+// "New message" button.
+function PrivateMessageComposer({ initialPathway, initialIds, onCancel }: { initialPathway: string | null; initialIds: string[]; onCancel: () => void }) {
+  const roster = useReviewedRoster();
+  const students = useMemo(() => [...roster].sort((a, b) => a.name.localeCompare(b.name)), [roster]);
+  const [gGrade, setGGrade] = useState("All");
+  const [gStatus, setGStatus] = useState("All");
+  const [gPathway, setGPathway] = useState(initialPathway && (CAREER_TRACKS as readonly string[]).includes(initialPathway) ? initialPathway : "All");
+  const [gMode, setGMode] = useState<"audience" | "pick">(initialIds.length ? "pick" : "audience");
+  const [picked, setPicked] = useState<Set<string>>(() => new Set(initialIds));
+  const [pickSearch, setPickSearch] = useState("");
+  const [sent, setSent] = useState<string | null>(null);
+  const togglePick = (id: string) => setPicked((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  const byAudience = roster.filter((s) => (gGrade === "All" || String(s.grade) === gGrade) && (gStatus === "All" || s.status === gStatus) && (gPathway === "All" || s.careerTrack === gPathway));
+  const audience = gMode === "pick" ? students.filter((s) => picked.has(s.id)) : byAudience;
+  const audienceLabel = gMode === "pick" ? `${picked.size} picked` : [gGrade === "All" ? "All grades" : `Grade ${gGrade}`, gStatus === "All" ? null : gStatus, gPathway === "All" ? null : gPathway].filter(Boolean).join(" · ");
+  const pickList = students.filter((s) => !pickSearch.trim() || s.name.toLowerCase().includes(pickSearch.trim().toLowerCase()));
+  const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <SubTabs ariaLabel="Who receives it" options={[{ key: "audience", label: "By audience" }, { key: "pick", label: "Pick students" }]} value={gMode} onChange={(k) => setGMode(k)} />
+      {gMode === "pick" ? (
+        <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[10px]" style={GLASS_INSET}>
+          <div className="flex flex-wrap items-center justify-between gap-[8px]">
+            <input value={pickSearch} onChange={(e) => setPickSearch(e.target.value)} placeholder="Search a name" aria-label="Search students" className="h-9 min-w-[200px] flex-1 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={FIELD_STYLE} />
+            <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              {picked.size} picked
+              {picked.size > 0 && <button type="button" onClick={() => setPicked(new Set())} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Clear</button>}
+              {pickList.length > 0 && <button type="button" onClick={() => setPicked((prev) => { const next = new Set(prev); for (const s of pickList) next.add(s.id); return next; })} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Pick all {pickList.length}</button>}
+            </span>
+          </div>
+          <ul className="flex max-h-[260px] flex-col gap-[2px] overflow-y-auto pr-[4px]">
+            {pickList.map((s) => (
+              <li key={s.id}>
+                <label className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[5px]">
+                  <SelectBox checked={picked.has(s.id)} label={`Pick ${s.name}`} onChange={() => togglePick(s.id)} />
+                  <Avatar name={s.name} size={26} index={s.avatarIndex} />
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.name} <span style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
+                  <StatusChip status={s.status} />
+                </label>
+              </li>
+            ))}
+            {pickList.length === 0 && <li className="px-[6px] py-[5px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No student by that name.</li>}
+          </ul>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+          <label className="flex min-w-0 flex-col gap-[4px]">
+            <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Grade</span>
+            <Listbox ariaLabel="Grade" value={gGrade} onChange={setGGrade} options={[{ value: "All", label: "All grades" }, ...["9", "10", "11", "12"].map((g) => ({ value: g, label: `Grade ${g}` }))]} className={FIELD} style={FIELD_STYLE} />
+          </label>
+          <label className="flex min-w-0 flex-col gap-[4px]">
+            <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Status</span>
+            <Listbox ariaLabel="Status" value={gStatus} onChange={setGStatus} options={[{ value: "All", label: "All statuses" }, ...["On Track", "Needs Attention", "At Risk"].map((v) => ({ value: v, label: v }))]} className={FIELD} style={FIELD_STYLE} />
+          </label>
+          <label className="flex min-w-0 flex-col gap-[4px]">
+            <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Pathway</span>
+            <Listbox ariaLabel="Pathway" value={gPathway} onChange={setGPathway} options={[{ value: "All", label: "All pathways" }, ...CAREER_TRACKS.map((t) => ({ value: t, label: t }))]} className={FIELD} style={FIELD_STYLE} />
+          </label>
+        </div>
+      )}
+      {sent && <p className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Check className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{sent}</p>}
+      {audience.length === 0 ? (
+        <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{gMode === "pick" ? "Pick at least one student above." : "No students match that audience. Widen a filter."}</p>
+      ) : (
+        <BatchComposer students={audience} audience={audienceLabel} onDone={(summary) => { setSent(summary); if (gMode === "pick") setPicked(new Set()); }} />
+      )}
+      <div className="flex justify-end">
+        <button type="button" onClick={onCancel} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{sent ? "Done" : "Cancel"}</button>
+      </div>
+    </div>
+  );
+}
+
+// One "New message" composer: an announcement a whole grade sees on the
+// board, or a private message to chosen students.
+function MessageComposer({ initialKind, initialPathway, initialIds, onSendAnnouncement, onCancel }: { initialKind: "announcement" | "private"; initialPathway: string | null; initialIds: string[]; onSendAnnouncement: (a: Announcement) => void; onCancel: () => void }) {
+  const [kind, setKind] = useState(initialKind);
+  return (
+    <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+      <div className="flex flex-col gap-[4px]">
+        <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>New message</h3>
+        <Segmented ariaLabel="Message type" value={kind} onChange={(k) => setKind(k)} options={[{ key: "announcement", label: "Announcement" }, { key: "private", label: "Private message" }]} />
+        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{kind === "announcement" ? "Posted to the board for everyone in the audience." : "Sent privately to each student you choose."}</span>
+      </div>
+      {kind === "announcement" ? <AnnouncementComposer onSend={onSendAnnouncement} onCancel={onCancel} /> : <PrivateMessageComposer initialPathway={initialPathway} initialIds={initialIds} onCancel={onCancel} />}
     </div>
   );
 }
@@ -192,12 +296,15 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   // now this list's own filter: the number and the list it counts are the
   // same control (was: a stat row, a tab badge and a pill on every card all
   // saying the same thing).
-  const GROUPS: { key: "reply" | "progress" | "answered"; label: string; statuses: QuestionStatus[] }[] = [
-    { key: "reply", label: "Need a reply", statuses: ["new", "follow-up"] },
-    { key: "progress", label: "In progress", statuses: ["viewed", "in-progress"] },
+  // "Needs reply" holds everything not yet answered: "In progress" was
+  // the same work under a second name (27 Sept 2026, Maisha: "whats the
+  // difference between 'need a reply' and 'in progress'. Seems like the
+  // same thing. Lets just keep 'needs reply'").
+  const GROUPS: { key: "reply" | "answered"; label: string; statuses: QuestionStatus[] }[] = [
+    { key: "reply", label: "Needs reply", statuses: ["new", "follow-up", "viewed", "in-progress"] },
     { key: "answered", label: "Answered", statuses: ["responded", "resolved"] },
   ];
-  const [group, setGroup] = useState<"reply" | "progress" | "answered">("reply");
+  const [group, setGroup] = useState<"reply" | "answered">("reply");
   const inGroup = (g: (typeof GROUPS)[number]) => QUESTIONS.filter((q) => g.statuses.includes(statusOf(q.id)));
   const current = GROUPS.find((g) => g.key === group)!;
   const ordered = inGroup(current).sort((a, b) => STATUS_STYLE[statusOf(a.id)].rank - STATUS_STYLE[statusOf(b.id)].rank || b.date.localeCompare(a.date));
@@ -342,9 +449,61 @@ function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
   );
 }
 
-// One card, one row per group, most active first; a row opens the group.
-// "New group" is an inline form (name and one line), and the group lands
-// at the top with no members yet.
+// Which of the Connect board photos a group wears, by what it is about, so
+// a counselor's groups look like the student Connect boards they mirror.
+function groupCover(name: string): string {
+  const n = name.toLowerCase();
+  if (/fafsa|scholarship|financial/.test(n)) return "business-money";
+  if (/technolog|trade|technical/.test(n)) return "tech-engineering";
+  if (/health/.test(n)) return "health-medicine";
+  if (/summer|arts|media/.test(n)) return "arts-media";
+  return "teaching-education";
+}
+
+// A group as a board tile, the way the student Connect boards look (27
+// Sept 2026, Maisha: "on the replit you will see I had them in boxes to
+// mirror how the connect boards look like because thats what I was
+// envisioning. It feels more enjoyable to follow and comprehend"). The 26
+// Sept version listed them as one-line rows in a single card, which read
+// as a list to scan rather than places to go. Same photo, blur, scrim and
+// stat tiles as Connect's CommunityCard; the accent is the dashboard's one
+// blue.
+function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
+  const cover = groupCover(group.name);
+  return (
+    <button type="button" onClick={onOpen} className="dm-tap group relative flex h-full min-h-[232px] w-full cursor-pointer flex-col overflow-hidden rounded-[var(--radius-lg)] text-left" style={{ background: "#0e0c20", border: "1px solid color-mix(in srgb, var(--primary) 40%, transparent)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}>
+      <span aria-hidden className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+        <Image src={PHOTO_COVER[cover]} alt="" fill sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 90vw" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[cover] }} />
+        <CardProgressiveBlur size="40%" />
+        <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.88) 38%, rgba(12,16,35,0.5) 62%, rgba(12,16,35,0.14) 82%, transparent 100%), ${cardTopScrim()}` }} />
+      </span>
+      <span className="relative z-10 flex h-full w-full flex-col gap-[6px] p-[var(--space-5)]">
+        <h3 className="text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{group.name}</h3>
+        <span className="mt-auto line-clamp-2 text-[12.5px] leading-[17px] font-medium" style={{ color: "rgba(255,255,255,0.78)" }}>{group.desc}</span>
+        <span className="mt-[8px] flex items-end justify-between gap-[10px]" style={{ textShadow: "none" }}>
+          <span className="grid grid-cols-2 gap-[6px]">
+            {[{ v: group.members, l: "Members" }, { v: group.posts, l: "Posts" }].map((t) => (
+              <span key={t.l} className="flex min-w-[64px] flex-col items-center rounded-[var(--radius-sm)] px-[8px] py-[6px]" style={{ background: "rgba(255,255,255,0.09)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)" }}>
+                <span className="text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ color: "#FFFFFF" }}>{t.v}</span>
+                <span className="text-[10.5px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{t.l}</span>
+              </span>
+            ))}
+          </span>
+          <span className="flex flex-col items-end gap-[4px]">
+            <span className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>Active {fmtDate(group.last)}</span>
+            <span className="flex items-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12.5px] font-bold transition-[filter] duration-200 group-hover:brightness-125" style={{ background: "color-mix(in srgb, var(--primary) 30%, rgba(12,16,35,0.78))", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 50%, rgba(255,255,255,0.18))", color: "#FFFFFF" }}>
+              Open <ArrowUpRight className="h-[13px] w-[13px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
+            </span>
+          </span>
+        </span>
+      </span>
+    </button>
+  );
+}
+
+// Groups as board tiles, most active first; a tile opens the group. "New
+// group" is an inline form (name and one line), and the group lands first
+// with no members yet.
 function DiscussionsPanel() {
   const [groups, setGroups] = useState<Group[]>(() => [...COMMUNITIES]);
   const [openName, setOpenName] = useState<string | null>(null);
@@ -356,7 +515,7 @@ function DiscussionsPanel() {
   if (open) return <GroupDetail key={open.name} group={open} onBack={() => setOpenName(null)} />;
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
-    <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+    <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between gap-[8px]">
         <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Groups <span className="ml-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>most active first</span></h2>
         {!creating && (
@@ -375,15 +534,8 @@ function DiscussionsPanel() {
           </div>
         </div>
       )}
-      <ul className="flex flex-col gap-[6px]">
-        {ordered.map((c) => (
-          <li key={c.name}>
-            <button type="button" onClick={() => setOpenName(c.name)} className="dm-quiet flex w-full cursor-pointer flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[2px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={GLASS_INSET}>
-              <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
-              <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{c.members} members · {c.posts} posts · active {fmtDate(c.last)}</span>
-            </button>
-          </li>
-        ))}
+      <ul className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 xl:grid-cols-3">
+        {ordered.map((c) => <li key={c.name}><GroupTile group={c} onOpen={() => setOpenName(c.name)} /></li>)}
       </ul>
     </div>
   );
@@ -392,10 +544,18 @@ function DiscussionsPanel() {
 export function CounselorConnect() {
   // Opens on the tab with work in it (standing rule: what needs attention
   // comes first). Statuses live here so the tab badge and the panel agree.
-  const [tab, setTab] = useState<"questions" | "announcements" | "discussions">("questions");
+  // `?compose=1` (from Career + College Insights' pathway invites, or the
+  // Productivity Suite's "Message all") opens straight into a private
+  // message addressed to that pathway (`&pathway=`) or those students
+  // (`&ids=`).
+  const params = useSearchParams();
+  const composeParam = params.get("compose") === "1";
+  const initialPathway = params.get("pathway");
+  const initialIds = (params.get("ids") ?? "").split(",").filter(Boolean);
+  const [tab, setTab] = useState<"questions" | "announcements" | "discussions">(composeParam ? "announcements" : "questions");
   const [statuses, setStatuses] = useState<Record<string, QuestionStatus>>({});
   const [announcements, setAnnouncements] = useState<Announcement[]>(() => [...ANNOUNCEMENTS]);
-  const [composing, setComposing] = useState(false);
+  const [composing, setComposing] = useState(composeParam);
   const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
   const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
   const open = QUESTIONS.filter((q) => OPEN.includes(statusOf(q.id)));
@@ -415,7 +575,7 @@ export function CounselorConnect() {
         />
         {tab === "announcements" && !composing && (
           <button type="button" onClick={() => setComposing(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-            <Plus className="h-[14px] w-[14px]" aria-hidden /> New announcement
+            <Plus className="h-[14px] w-[14px]" aria-hidden /> New message
           </button>
         )}
       </div>
@@ -423,7 +583,7 @@ export function CounselorConnect() {
       {tab === "questions" && <QuestionsPanel statuses={statuses} setStatus={(id, st) => setStatuses((s) => ({ ...s, [id]: st }))} />}
       {tab === "announcements" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {composing && <AnnouncementComposer onCancel={() => setComposing(false)} onSend={(a) => { setAnnouncements((list) => [a, ...list]); setComposing(false); setOpenAnnouncement(a.id); }} />}
+          {composing && <MessageComposer initialKind={composeParam ? "private" : "announcement"} initialPathway={initialPathway} initialIds={initialIds} onCancel={() => setComposing(false)} onSendAnnouncement={(a) => { setAnnouncements((list) => [a, ...list]); setComposing(false); setOpenAnnouncement(a.id); }} />}
           {announcements.map((a) => <AnnouncementCard key={a.id} a={a} open={openAnnouncement === a.id} onToggle={() => setOpenAnnouncement((o) => (o === a.id ? null : a.id))} />)}
         </div>
       )}
