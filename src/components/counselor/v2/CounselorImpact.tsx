@@ -23,13 +23,14 @@
 // reference roster, which is the Replit's own 120 students (79 with a
 // declared plan, as the Replit states).
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, CheckCircle2, Star, X, AlertTriangle } from "lucide-react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { attentionReason, getRoster, DEMO_SCHOOL, type CounselorStudent, type MilestoneKey, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { OverviewCard } from "./overviewShared";
-import { printDocumentPage } from "./DocumentDesk";
+import { BRAND, Crest, FullScreenDocument, PAGE_H, PAGE_W, SANS, SERIF, printDocumentPage } from "./DocumentDesk";
+import { PAPER_VARS } from "./DocumentPreview";
 import { DrillPanel, DrillTile, type Drill, type DrillStudent } from "./Drill";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 import { useRouter } from "next/navigation";
@@ -137,73 +138,199 @@ function MetChip({ met }: { met: boolean }) {
   );
 }
 
-/** The Replit's Principal / District Report, on screen: a summary header,
- *  six notable achievements and the compliance table, with Print. */
-function PrincipalReport({ who, role, school, onClose }: { who: string; role: string; school: string; onClose: () => void }) {
-  const docRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
-  }, [onClose]);
+/** The Dreamari mark and wordmark in ink, for the masthead: every line
+ *  flush right, so the block reads as one right-aligned unit opposite the
+ *  school's crest (direct feedback, 27 Sept 2026: "Dreamari should be right
+ *  aligned"). */
+function DreamariLockup() {
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-[var(--space-4)]" role="dialog" aria-modal="true" aria-label="Principal / District Report">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 58%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
-      <div className="relative flex max-h-[calc(100dvh-32px)] w-full max-w-[720px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--cd-panel-shadow)" }}>
-        <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="flex flex-col gap-[2px]">
-            <h2 className="flex items-center gap-[8px] text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><FileBarChart className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />Principal / District Report</h2>
-            <span className="text-[12.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>A presentable summary of counselor impact and compliance for administrative review. Review and export or copy before sharing.</span>
-          </span>
-          <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
-        </div>
-        <div className="overflow-y-auto p-[var(--space-5)]">
-          <div ref={docRef} className="flex flex-col gap-[var(--space-5)]" style={{ color: "var(--foreground)" }}>
-            <div className="flex flex-col gap-[4px] rounded-[var(--radius-md)] p-[var(--space-5)]" style={{ background: "linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 70%, #1b1f5e))", color: "#FFFFFF" }}>
-              <span className="text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "rgba(255,255,255,0.8)" }}>Counselor Impact Summary · {REPLIT.year}</span>
-              <span className="text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{who}, {role}</span>
-              <span className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{school} · Reporting Period: {REPLIT.shortPeriod}</span>
-            </div>
-            <section className="flex flex-col gap-[10px]">
-              <h3 className="flex items-center gap-[8px] text-[14px] font-bold"><Star className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />Notable Achievements</h3>
-              <ul className="flex flex-col gap-[8px]">
-                {REPLIT.reportAchievements.map((a) => (
-                  <li key={a} className="flex items-start gap-[8px] text-[13px] leading-[19px]"><CheckCircle2 className="mt-[2px] h-[14px] w-[14px] flex-none" aria-hidden style={{ color: MET }} />{a}</li>
-                ))}
-              </ul>
-            </section>
-            <section className="flex flex-col gap-[10px]">
-              <h3 className="flex items-center gap-[8px] text-[14px] font-bold"><CheckCircle2 className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />District Compliance Summary</h3>
-              <div className="overflow-x-auto rounded-[var(--radius-md)] border" style={{ borderColor: "var(--glass-border)" }}>
-                <table className="w-full min-w-[480px] border-collapse text-[13px]">
-                  <thead>
-                    <tr className="border-b" style={{ borderColor: "var(--glass-border)", background: "var(--inset-bg)" }}>
-                      {["Metric", "Result", "Target", "Status"].map((h) => <th key={h} className="px-[12px] py-[9px] text-left text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>{h}</th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {REPLIT.reportCompliance.map((r) => (
-                      <tr key={r.metric} className="border-b last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
-                        <td className="px-[12px] py-[9px] font-semibold">{r.metric}</td>
-                        <td className="px-[12px] py-[9px] font-extrabold tabular-nums">{r.result}</td>
-                        <td className="px-[12px] py-[9px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{r.target}</td>
-                        <td className="px-[12px] py-[9px]"><MetChip met={r.met} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-        </div>
-        <div className="flex justify-end gap-[8px] border-t px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-          <button type="button" onClick={() => printDocumentPage(docRef.current, `Principal report, ${who}`)} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Printer className="h-[14px] w-[14px]" aria-hidden /> Print report</button>
-          <button type="button" onClick={onClose} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold">Done</button>
-        </div>
-      </div>
+    <span className="flex flex-col items-end gap-[5px] text-right">
+      <span style={{ fontFamily: SANS, fontSize: 7.5, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--ink-faint)" }}>Data from</span>
+      <span className="flex items-center gap-[7px]">
+        <span aria-hidden className="h-[13px] w-[23px] flex-none" style={{ background: "var(--ink)", maskImage: "url(/images/app/logo-mark.svg)", WebkitMaskImage: "url(/images/app/logo-mark.svg)", maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "right center", WebkitMaskPosition: "right center" }} />
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 800, lineHeight: 1, letterSpacing: "0.02em", color: "var(--ink)" }}>DREAMARI</span>
+      </span>
+      <span style={{ fontFamily: SANS, fontSize: 8, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ink-faint)" }}>Career readiness platform</span>
+    </span>
+  );
+}
+
+/** The Replit's Principal / District Report as a printed document (27 Sept
+ *  2026, direct instruction: "make the principal report much more
+ *  editorially composed, designed, beautifully formatted, add a school x
+ *  Dreamari branding", and "Make sure the principal report has all the
+ *  content that was in the replit dont leave anything out, just present it
+ *  better"). Every line of the Replit's report is here except the modal's own
+ *  instruction to the counselor ("A presentable summary ... Review and
+ *  export or copy before sharing"), which the principal does not need
+ *  (direct feedback, 27 Sept 2026: "This is for the counselor to share
+ *  with the principal they know what it is"): the title, the summary header (the report's kicker, the counselor and
+ *  role, the school and reporting period), the six notable achievements
+ *  and the five-row District Compliance Summary with Result, Target and
+ *  Status. The Replit's Print Report and Done are the viewer's Print and
+ *  close. Presented as a US Letter page: a co-branded masthead (the
+ *  school's crest and name, a hairline cross, Dreamari's mark), a serif
+ *  headline, the four figures a principal reads first, numbered
+ *  achievements and a ruled table. */
+function PrincipalReportPage({ who, role, school, photo, pageRef }: { who: string; role: string; school: string; photo: string; pageRef: React.Ref<HTMLDivElement> }) {
+  const kicker = { fontFamily: SANS, fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase" as const };
+  const section = (n: string, title: string) => (
+    <div className="flex items-baseline gap-[12px] border-b pb-[8px]" style={{ borderColor: "var(--ink)" }}>
+      <span style={{ ...kicker, color: BRAND }}>{n}</span>
+      <h2 style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 600, letterSpacing: "-0.005em", color: "var(--ink)" }}>{title}</h2>
     </div>
+  );
+  const figures = [
+    { value: "86%", label: "On-track rate", note: "school average 71%" },
+    { value: "87%", label: "Senior plan compliance", note: "district target 80%" },
+    { value: "2.1", unit: "days", label: "Plan review turnaround", note: "district standard 5 days" },
+    { value: "73%", label: "Career report completion", note: "target 60%" },
+  ];
+  return (
+    <div ref={pageRef} data-doc-page className="flex flex-col" style={{ ...PAPER_VARS, width: PAGE_W, minHeight: PAGE_H, padding: "44px 72px 36px", background: "var(--paper)", color: "var(--ink)" }}>
+      {/* Masthead. The school owns this report, so its crest and office
+         lead; Dreamari sits on the right as where the figures come from,
+         which is what it actually is to a principal (direct feedback,
+         27 Sept 2026: "Dont just include a letterhead etc because i said.
+         Make sure it makes sense for a report to be shared with the
+         principal"). */}
+      <header className="flex items-center justify-between gap-[20px] border-b pb-[16px]" style={{ borderColor: "var(--rule)" }}>
+        <span className="flex items-center gap-[12px]">
+          <Crest size={40} />
+          <span className="flex flex-col gap-[3px]">
+            <span style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, lineHeight: 1.1, color: "var(--ink)" }}>{school}</span>
+            <span style={{ ...kicker, fontSize: 8, color: BRAND }}>Office of School Counseling</span>
+          </span>
+        </span>
+        <DreamariLockup />
+      </header>
+
+      {/* What this is, who it is for, who prepared it and for when: the
+         memo block a report handed to a principal opens with. The Replit's
+         summary header (kicker, counselor and role, school and period) is
+         all here. */}
+      <section className="mt-[24px] flex flex-col gap-[8px]">
+        <span className="flex items-center justify-between gap-[16px]">
+          <span style={{ ...kicker, color: BRAND }}>Principal / District Report</span>
+          <span style={{ ...kicker, color: "var(--ink-faint)" }}>Academic Year 2023–2024</span>
+        </span>
+        <h1 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 600, lineHeight: 1.05, letterSpacing: "-0.015em" }}>Counselor Impact Summary</h1>
+      </section>
+      <dl className="mt-[16px] grid grid-cols-[1.35fr_1fr_1fr_0.8fr] border-y" style={{ borderColor: "var(--rule)" }}>
+        <div className="flex items-center gap-[10px] py-[12px] pr-[14px]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photo} alt="" className="size-[40px] flex-none rounded-full object-cover" />
+          <span className="flex min-w-0 flex-col gap-[2px]">
+            <dt style={{ ...kicker, fontSize: 7.5, color: "var(--ink-faint)" }}>Prepared by</dt>
+            <dd style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, lineHeight: 1.2, color: "var(--ink)" }}>{who}, {role}</dd>
+          </span>
+        </div>
+        {[
+          ["Prepared for", `Principal, ${school}`],
+          ["Reporting period", "Aug 2023 – Jan 2024"],
+          // Issued just after the period it reports on closes, not today:
+          // a 2023-24 report dated this week reads as an error.
+          ["Issued", "Feb 2, 2024"],
+        ].map(([k, v]) => (
+          <div key={k} className="flex flex-col justify-center gap-[2px] py-[12px] pl-[14px]" style={{ borderLeft: "1px solid var(--rule)" }}>
+            <dt style={{ ...kicker, fontSize: 7.5, color: "var(--ink-faint)" }}>{k}</dt>
+            <dd style={{ fontFamily: SERIF, fontSize: 13.5, fontWeight: 600, lineHeight: 1.25, color: "var(--ink)" }}>{v}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {/* The figures a principal reads first, from the compliance table. */}
+      <section className="mt-[18px] grid grid-cols-4 border-b" style={{ borderColor: "var(--rule)" }}>
+        {figures.map((f, i) => (
+          <div key={f.label} className="flex flex-col gap-[3px] py-[12px]" style={{ paddingLeft: i === 0 ? 0 : 18, borderLeft: i === 0 ? undefined : "1px solid var(--rule)" }}>
+            <span className="flex items-baseline gap-[4px]">
+              <span style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--ink)" }}>{f.value}</span>
+              {f.unit && <span style={{ fontFamily: SERIF, fontSize: 15, color: "var(--ink-soft)" }}>{f.unit}</span>}
+            </span>
+            <span style={{ fontFamily: SANS, fontSize: 10.5, fontWeight: 700, color: "var(--ink)" }}>{f.label}</span>
+            <span style={{ fontFamily: SANS, fontSize: 9.5, color: "var(--ink-faint)" }}>{f.note}</span>
+          </div>
+        ))}
+      </section>
+
+      <section className="mt-[22px] flex flex-col gap-[12px]">
+        {section("01", "Notable Achievements")}
+        <ol className="grid grid-cols-2 gap-x-[32px] gap-y-[10px]">
+          {REPLIT.reportAchievements.map((a, i) => (
+            <li key={a} className="flex gap-[12px]">
+              <span style={{ fontFamily: SERIF, fontSize: 20, fontWeight: 600, lineHeight: 1, color: BRAND, minWidth: 26 }}>{String(i + 1).padStart(2, "0")}</span>
+              <span style={{ fontFamily: SERIF, fontSize: 13, lineHeight: 1.5, color: "var(--ink)" }}>{a}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mt-[22px] flex flex-col gap-[8px]">
+        {section("02", "District Compliance Summary")}
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              {["Metric", "Result", "Target", "Status"].map((h, i) => (
+                <th key={h} className="pt-[4px] pb-[8px]" style={{ ...kicker, fontSize: 8.5, color: "var(--ink-faint)", textAlign: i === 0 ? "left" : i === 3 ? "right" : "left" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {REPLIT.reportCompliance.map((r) => (
+              <tr key={r.metric} style={{ borderTop: "1px solid var(--rule)" }}>
+                <td className="py-[8px]" style={{ fontFamily: SERIF, fontSize: 14, color: "var(--ink)" }}>{r.metric}</td>
+                <td className="py-[8px]" style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{r.result}</td>
+                <td className="py-[8px]" style={{ fontFamily: SANS, fontSize: 11.5, color: "var(--ink-soft)" }}>{r.target}</td>
+                <td className="py-[8px] text-right">
+                  <span className="inline-flex items-center gap-[6px]" style={{ fontFamily: SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: r.met ? "#157A4A" : "#A35A00" }}>
+                    {r.met ? "✓ Met" : "⚠ In Progress"}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      {/* One line of small print: where the figures come from, and the
+         handling note (direct feedback, 27 Sept 2026: "The footer notes can
+         be better designed. Source doesnt have to be this big"). */}
+      <footer className="mt-auto flex items-center justify-between gap-[24px] border-t pt-[10px] whitespace-nowrap" style={{ borderColor: "var(--rule)", fontFamily: SANS, fontSize: 8.5, letterSpacing: "0.02em", color: "var(--ink-faint)" }}>
+        <span><b style={{ fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", marginRight: 6 }}>Source</b>{school} counseling records and student activity on Dreamari</span>
+        <span>Confidential · Page 1 of 1</span>
+      </footer>
+    </div>
+  );
+}
+
+/** Opens the report at print size in the dashboard's full-screen document
+ *  viewer, with zoom and Print. */
+function PrincipalReport({ who, role, school, onClose }: { who: string; role: string; school: string; onClose: () => void }) {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
+  // Share (27 Sept 2026, direct instruction: "lets add a share option in
+  // the principal report preview too"): an email to the principal with the
+  // report's headline figures and achievements in the body, or the same
+  // text copied. The PDF itself comes from Print or save PDF.
+  const subject = `Counselor Impact Summary: ${who}, ${school}, Aug 2023 – Jan 2024`;
+  const summary = [
+    `Counselor Impact Summary · Academic Year 2023–2024`,
+    `${who}, ${role} · ${school} · Reporting Period: Aug 2023 – Jan 2024`,
+    ``,
+    `Notable Achievements`,
+    ...REPLIT.reportAchievements.map((a, i) => `${i + 1}. ${a}`),
+    ``,
+    `District Compliance Summary`,
+    ...REPLIT.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In Progress"}`),
+  ].join("\n");
+  const share = [
+    { label: "Email to principal", icon: Mail, onClick: () => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summary)}`; } },
+    { label: copied ? "Summary copied" : "Copy summary", icon: Copy, onClick: () => { navigator.clipboard?.writeText(summary).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 2000); }).catch(() => {}); } },
+  ];
+  return (
+    <FullScreenDocument open title={`Principal / District Report · ${who}`} onClose={onClose} onPrint={() => printDocumentPage(pageRef.current, `Principal report, ${who}`)} share={share}>
+      <PrincipalReportPage who={who} role={role} school={school} photo={seededPick(who, COUNSELOR_HEADSHOTS)} pageRef={pageRef} />
+    </FullScreenDocument>
   );
 }
 
@@ -277,7 +404,8 @@ export function CounselorImpact() {
     turnaround: (): Drill => ({ title: "Review turnaround", subtitle: "2.1 days on average · standard 5 days", lead: ACHIEVEMENTS.turnaround, stats: [{ value: "15", label: "plans reviewed" }, { value: "10", label: "still pending" }], action: { label: "Open Review Queue", onClick: go("review-queue") } }),
     applying: (): Drill => ({ title: "Seniors applying", subtitle: `${applying.length} of ${seniors.length}`, lead: ACHIEVEMENTS.applying, students: seniors.filter((s) => !applying.includes(s)).map((s) => ds(s, `Applications ${s.milestones.Applications.toLowerCase()}`)), studentsLabel: "Not applying yet", action: { label: "Open Grade 12", onClick: go("students", () => setGradeFilter(12)) } }),
     flagged: (): Drill => ({ title: "Support flags", subtitle: `${flagged.length} students · 14% of caseload`, lead: ACHIEVEMENTS.flagged, students: flagged.map((s) => ds(s, s.supportFlagReason ?? "")), studentsLabel: "Flagged students", action: { label: "Open Students", onClick: go("students") } }),
-    activities: (): Drill => ({ title: "Student activity on Dreamari", subtitle: "This reporting period", lead: ACHIEVEMENTS.activities, items: [ACHIEVEMENTS.touchpoints], rowsLabel: "By activity", rows: REPLIT.engagement.map((e) => ({ label: e.label, value: e.value.toLocaleString("en-US"), pct: (e.value / REPLIT.engagement[0].value) * 100 })), action: { label: "Open Platform Engagement", onClick: go("engagement") } }),
+    activities: (): Drill => ({ title: "Student activity on Dreamari", subtitle: "This reporting period", lead: ACHIEVEMENTS.activities, rowsLabel: "By activity", rows: REPLIT.engagement.map((e) => ({ label: e.label, value: e.value.toLocaleString("en-US"), pct: (e.value / REPLIT.engagement[0].value) * 100 })), action: { label: "Open Platform Engagement", onClick: go("engagement") } }),
+    touchpoints: (): Drill => ({ title: "Engagement touchpoints", subtitle: "3,199 this semester", lead: ACHIEVEMENTS.touchpoints, rowsLabel: "Made up of", rows: REPLIT.engagement.slice(1, 4).map((e) => ({ label: e.label, value: e.value.toLocaleString("en-US"), pct: (e.value / 3199) * 100 })), action: { label: "Open Platform Engagement", onClick: go("engagement") } }),
     grade: (g: (typeof REPLIT.grades)[number]): Drill => ({ title: `Grade ${g.grade}`, subtitle: `${g.onTrack} of ${g.total} on track · ${g.avg}% average completion`, rowsLabel: "Checkpoints done", rows: curriculumForGrade(g.grade as 9 | 10 | 11 | 12).map((c) => ({ label: c.name, value: `${c.donePct}%`, pct: c.donePct })), students: roster.filter((s) => s.grade === g.grade && s.status !== "On Track").map((s) => ds(s, attentionReason(s))), studentsLabel: "Not on track", action: { label: `Open Grade ${g.grade} in the Milestone Tracker`, onClick: go("milestones", () => setGradeFilter(g.grade as 9 | 10 | 11 | 12)) } }),
     pathway: (label: PostsecondaryIntent): Drill => { const list = roster.filter((s) => s.postsecondaryIntent === label); return { title: label, subtitle: `${list.length} students`, students: list.map((s) => ds(s, s.careerTrack)), studentsLabel: "Students", action: label === "Undecided" ? { label: "Open undecided students", onClick: go("students", () => setPlanFilter("Undecided")) } : { label: "Open Students", onClick: go("students") } }; },
     milestone: (m: (typeof REPLIT.milestones)[number]): Drill => {
@@ -331,17 +459,18 @@ export function CounselorImpact() {
       {/* Notable achievements as wins: the number, what it is, and the
          comparison drawn, no sentence (27 Sept 2026: "How can we make the
          notable achievements read better and not so wordy?"). The Replit's
-         sentence opens in each drill. The two achievements that repeat a
-         number already on the page (33% answered, 3,199 touchpoints) live
-         in the drills of the tiles they belong to. */}
+         sentence opens in each drill. All eight of the Replit's
+         achievements are tiles here. */}
       <OverviewCard title="Notable achievements" unit="Fall semester">
-        <div className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-4">
           <WinTile value="87%" label="Senior plan rate" bar={{ pct: 87, tick: 80 }} delta="Target 80% met" onOpen={() => open(drills.senior())} />
           <WinTile value="86%" label="On track" bar={{ pct: 86, tick: 71 }} delta="+15 over school" onOpen={() => open(drills.onTrack())} />
           <WinTile value="2.1d" label="Turnaround" bar={{ pct: 42, tick: 100 }} delta="2.9 days faster" onOpen={() => open(drills.turnaround())} />
           <WinTile value="27/30" label="Seniors applying" bar={{ pct: 90 }} delta="90% of seniors" onOpen={() => open(drills.applying())} />
           <WinTile value="17" label="Flagged early" delta="14% of caseload" onOpen={() => open(drills.flagged())} />
+          <WinTile value="33%" label="Questions answered" bar={{ pct: 33 }} delta="5 of 15 replied" onOpen={() => open(drills.answered())} />
           <WinTile value="7,293" label="Career activities" delta="on Dreamari" onOpen={() => open(drills.activities())} />
+          <WinTile value="3,199" label="Engagement touchpoints" delta="sims, pathways, colleges" onOpen={() => open(drills.touchpoints())} />
         </div>
       </OverviewCard>
 

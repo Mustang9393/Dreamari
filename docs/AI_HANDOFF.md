@@ -38,6 +38,22 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-27 Principal report as a real document; all eight achievements on My Impact
+
+- **Why:** direct feedback: "make the principal report much more editorially composed ... add a school x Dreamari branding", "Make sure the principal report has all the content that was in the replit", "Make sure it makes sense for a report to be shared with the principal", "include the profile picture", "lets add a share option".
+- **Principal report** (`CounselorImpact.tsx` `PrincipalReportPage`): one US Letter page in the dashboard's full-screen document viewer (zoom, Print or save PDF, and now Share). Top to bottom:
+  - masthead: the school's crest and office, with Dreamari on the right as "Data from", all flush right
+  - title "Counselor Impact Summary" with the Replit's kicker
+  - a memo row: Prepared by (Sarah Chen's photo, name, role), Prepared for (Principal, school), Reporting period, Issued (Feb 2, 2024, not today, since the period is 2023-24)
+  - four headline figures
+  - the six numbered achievements
+  - the five-row compliance table with ✓ Met / ⚠ In Progress
+  - a one-line footer (source, confidential, page)
+
+  Every line of the Replit's report is kept except the modal's instruction to the counselor ("A presentable summary ..."), removed at Chandu's direction ("they know what it is"). It is measured to fit exactly one Letter page (1056px).
+- **Share** (`FullScreenDocument` gains an optional `share` menu): "Email to principal" (mailto with a subject and the report as text) and "Copy summary".
+- **Notable achievements card**: all eight of the Replit's achievements are win tiles now (33% questions answered and 3,199 touchpoints added; they had been reachable only inside other drills), in a 4 x 2 grid.
+
 ### 2026-09-27 Counselor Dashboard opens in light mode
 
 - **Why:** direct instruction: "lets default to the light mode for this one only since Maisha prefers this for demo."

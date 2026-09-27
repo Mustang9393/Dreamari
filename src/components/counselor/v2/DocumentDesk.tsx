@@ -20,7 +20,7 @@
 // the page alone on a Letter sheet, not the dashboard around it.
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Maximize2, Minus, Plus, Printer, X, Pencil } from "lucide-react";
+import { Maximize2, Minus, Plus, Printer, Share2, X, Pencil } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
 import { DEMO_SCHOOL, type CounselorStudent } from "@/lib/counselorRoster";
@@ -28,9 +28,9 @@ import { PAPER_VARS } from "./DocumentPreview";
 
 export const PAGE_W = 816;
 export const PAGE_H = 1056;
-const SERIF = "'Source Serif 4', Georgia, 'Times New Roman', serif";
-const SANS = "var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif";
-const BRAND = "#3F4DD6";
+export const SERIF = "'Source Serif 4', Georgia, 'Times New Roman', serif";
+export const SANS = "var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif";
+export const BRAND = "#3F4DD6";
 
 export type DocKind = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan";
 
@@ -50,7 +50,7 @@ function schoolInitials(name: string): string {
 }
 
 /** A shield monogram: reads as "school crest", not a company logo. */
-function Crest({ size = 46 }: { size?: number }) {
+export function Crest({ size = 46 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className="flex-none">
       <path d="M20 2 L36 8 V19 C36 29 29 35 20 38 C11 35 4 29 4 19 V8 Z" fill={BRAND} />
@@ -367,8 +367,9 @@ export function printDocumentPage(node: HTMLElement | null, title: string) {
 const ZOOMS = [0.5, 0.75, 1, 1.25];
 
 /** Full screen: the page as it prints, at a chosen zoom, still editable. */
-export function FullScreenDocument({ open, onClose, title, onPrint, children }: { open: boolean; onClose: () => void; title: string; onPrint: () => void; children: React.ReactNode }) {
+export function FullScreenDocument({ open, onClose, title, onPrint, share, children }: { open: boolean; onClose: () => void; title: string; onPrint: () => void; /** optional Share menu: each option closes the menu and runs */ share?: { label: string; icon: typeof Printer; onClick: () => void }[]; children: React.ReactNode }) {
   const [zoom, setZoom] = useState<number | "fit">("fit");
+  const [shareOpen, setShareOpen] = useState(false);
   const surface = useRef<HTMLDivElement>(null);
   const pageBox = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState(1);
@@ -412,6 +413,20 @@ export function FullScreenDocument({ open, onClose, title, onPrint, children }: 
             <IconTip label="Zoom in"><button type="button" onClick={() => stepZoom(1)} className={btn}><Plus className="h-[14px] w-[14px]" aria-hidden /></button></IconTip>
             <span className="mx-[6px] h-[18px] w-px" style={{ background: "rgba(255,255,255,0.15)" }} />
             <button type="button" onClick={onPrint} className={btn}><Printer className="h-[14px] w-[14px]" aria-hidden />Print or save PDF</button>
+            {share && share.length > 0 && (
+              <span className="relative">
+                <button type="button" onClick={() => setShareOpen((v) => !v)} aria-expanded={shareOpen} aria-haspopup="menu" className={btn}><Share2 className="h-[14px] w-[14px]" aria-hidden />Share</button>
+                {shareOpen && (
+                  <span role="menu" className="absolute top-[calc(100%+6px)] right-0 z-10 flex min-w-[200px] flex-col rounded-[8px] border p-[4px]" style={{ background: "#2f3035", borderColor: "rgba(255,255,255,0.12)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
+                    {share.map((o) => (
+                      <button key={o.label} type="button" role="menuitem" onClick={() => { setShareOpen(false); o.onClick(); }} className="dm-quiet flex cursor-pointer items-center gap-[8px] rounded-[6px] px-[10px] py-[8px] text-left text-[12.5px] font-semibold" style={{ color: "#fff" }}>
+                        <o.icon className="h-[14px] w-[14px]" aria-hidden />{o.label}
+                      </button>
+                    ))}
+                  </span>
+                )}
+              </span>
+            )}
             <IconTip label="Close"><button type="button" onClick={onClose} className={btn}><X className="h-[16px] w-[16px]" aria-hidden /></button></IconTip>
           </span>
         </div>
